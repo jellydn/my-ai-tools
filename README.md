@@ -345,15 +345,17 @@ ccs auth list
 
 ### Plannotator
 
-[**Plannotator**](https://plannotator.ai/) - Annotate plans outside the terminal for better collaboration.
+[**Plannotator**](https://plannotator.ai/) - Annotate plans outside the terminal for better collaboration. ([GitHub](https://github.com/backnotprop/plannotator))
 
 ### Claude-Mem
 
-[**Claude-Mem**](https://claude-mem.ai/) - Stop explaining context repeatedly. Build faster with persistent memory.
+[**Claude-Mem**](https://claude-mem.ai/) - Stop explaining context repeatedly. Build faster with persistent memory. ([GitHub](https://github.com/thedotmack/claude-mem))
+
+**Note:** Auto-compact is disabled in this setup to preserve full session history.
 
 ### Claude HUD
 
-Status line monitoring plugin for tracking usage and limits.
+[**Claude HUD**](https://github.com/jarrodwatts/claude-hud) - Status line monitoring plugin for tracking context usage, active tools, running agents, and todo progress.
 
 ```bash
 # Inside Claude Code, run:
@@ -361,6 +363,14 @@ Status line monitoring plugin for tracking usage and limits.
 ```
 
 The HUD appears immediately — no restart needed.
+
+### Try
+
+[**Try**](https://github.com/tobi/try) - Fresh directories for every vibe. Instantly navigate through experiment directories with fuzzy search, smart sorting, and auto-dating. ([Interactive Demo](https://asciinema.org/a/ve8AXBaPhkKz40YbqPTlVjqgs))
+
+### Claude Squad
+
+[**Claude Squad**](https://github.com/smtg-ai/claude-squad) - Terminal app to manage multiple AI agents (Claude Code, Aider, Codex, Gemini, etc.) in separate workspaces. Work on multiple tasks simultaneously with isolated git worktrees.
 
 ## 📚 Best Practices
 
@@ -371,7 +381,7 @@ Setup includes `best-practices.md` with comprehensive software development guide
 - Testing Trophy approach
 - Performance optimization patterns
 
-Copy `configs/best-practices.md` to your preferred location and reference it in your AI tools.
+Copy [`configs/best-practices.md`](configs/best-practices.md) to your preferred location and reference it in your AI tools.
 
 ## 📖 Resources
 
