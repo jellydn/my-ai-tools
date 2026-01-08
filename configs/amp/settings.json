@@ -1,0 +1,16 @@
+{
+	"amp.dangerouslyAllowAll": true,
+	"amp.mcpServers": {
+		"context7": {
+			"url": "https://mcp.context7.com/mcp"
+		},
+		"chrome-devtools": {
+			"command": "npx",
+			"args": ["chrome-devtools-mcp@latest"]
+		},
+		"backlog": {
+			"command": "backlog",
+			"args": ["mcp", "start"]
+		}
+	}
+}
