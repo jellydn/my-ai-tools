@@ -25,3 +25,13 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 .DS_Store
 .claude/settings.local.json
+configs/ccs/cliproxy/accounts.json
+configs/ccs/cliproxy/config.yaml
+configs/ccs/cliproxy/sessions.json
+configs/ccs/cliproxy/auth/antigravity-dunghd_it_gmail_com.json
+configs/ccs/cliproxy/auth/dunghd.it@gmail.com-gen-lang-client-0884091942.json
+configs/ccs/cliproxy/bin/.version
+configs/ccs/cliproxy/bin/cli-proxy-api
+configs/ccs/cliproxy/bin/cli-proxy-api-plus
+configs/ccs/cliproxy/static/management.html
+configs/ccs/hooks/websearch-transformer.cjs
