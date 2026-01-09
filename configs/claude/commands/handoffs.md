@@ -10,12 +10,12 @@ Do not continue before asking for the purpose as you will otherwise not understa
 
 ## Goal
 
-Your task is to create a detailed summary of the conversation so far, paying close attention to the user's explicit purpose for the next steps.
+Create a detailed summary of the conversation so far, paying close attention to the user's explicit purpose for the next steps.
 This handoff plan should be thorough in capturing technical details, code patterns, and architectural decisions that will be essential for continuing development work without losing context.
 
 ## Process
 
-Before providing your final plan, wrap your analysis in <analysis> tags to organize your thoughts and ensure you've covered all necessary points. In your analysis process:
+Before providing your final plan, wrap your analysis in <analysis> tags to organize your thoughts and ensure you've covered all necessary points:
 
 1. Chronologically analyze each message and section of the conversation. For each section thoroughly identify:
    - The user's explicit requests and intents
@@ -52,7 +52,7 @@ First, show your analysis to the user in `<analysis>` tags as part of your respo
 
 Then write the handoff file with this structure:
 
-````markdown
+```markdown
 # Session Handoff Plan
 
 ## 1. Primary Request and Intent
@@ -76,7 +76,6 @@ Then write the handoff file with this structure:
 ```language
 [Important Code Snippet]
 ```
-````
 
 ### [File Name 2]
 
@@ -105,7 +104,6 @@ Then write the handoff file with this structure:
 ## 7. Next Step
 
 [Next step to take, directly aligned with user's explicit handoff purpose. Only include if there is an actionable next step.]
-
 ```
 
 ## Final Step
@@ -115,4 +113,3 @@ After providing your analysis and summary:
 1. Ensure the `.claude/handoffs/` directory exists (create it if needed)
 2. Write the handoff summary to a markdown file at `.claude/handoffs/[timestamp]-[slug].md` where [timestamp] is the current date in format YYYY-MM-DD and the slug is what we defined before
 3. Tell the user about this file and that they can use `/pickup FILENAME` to continue
-```

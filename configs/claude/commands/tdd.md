@@ -152,7 +152,7 @@ Based on the action requested in $ARGUMENTS:
 
 ## Test Templates (Following JavaScript Testing Best Practices)
 
-### Basic Function Test Template:
+### Basic Function Test Template
 ```typescript
 import { describe, it, expect } from 'vitest'
 import { functionName } from './module'
@@ -172,19 +172,19 @@ describe('functionName', () => {
 })
 ```
 
-### Edge Cases Template:
+### Edge Cases Template
 ```typescript
 describe('functionName edge cases', () => {
   it('should return empty array when given empty input', () => {
     const result = functionName([])
     expect(result).toEqual([])
   })
-  
+
   it('should handle null input gracefully', () => {
     const result = functionName(null)
     expect(result).toBeNull()
   })
-  
+
   it('should process special characters correctly', () => {
     const specialInput = 'test@#$%^&*()'
     const result = functionName(specialInput)
@@ -193,20 +193,20 @@ describe('functionName edge cases', () => {
 })
 ```
 
-### Error Handling Test Template:
+### Error Handling Test Template
 ```typescript
 describe('error handling', () => {
   it('should throw validation error when given invalid input', () => {
     expect(() => functionName(null)).toThrow('Invalid input')
   })
-  
+
   it('should reject with specific error when process fails', async () => {
     await expect(asyncFunction()).rejects.toThrow('Process failed')
   })
 })
 ```
 
-### Async Function Test Template:
+### Async Function Test Template
 ```typescript
 it('should resolve with data when operation succeeds', async () => {
   // Arrange
@@ -222,12 +222,12 @@ it('should resolve with data when operation succeeds', async () => {
 
 ## File Management
 
-### Automatic File Creation:
+### Automatic File Creation
 - Source files: `src/[feature].ts`
 - Test files: `src/[feature].test.ts` or `src/[feature].spec.ts`
 - Follow existing project naming conventions
 
-### Test Organization (Following JavaScript Testing Best Practices):
+### Test Organization (Following JavaScript Testing Best Practices)
 - **Co-locate tests** with source files for easy navigation
 - **Descriptive test file names** that match source files
 - **Logical grouping** with nested `describe` blocks:
@@ -239,7 +239,7 @@ it('should resolve with data when operation succeeds', async () => {
 
 ## Integration with Existing Tools
 
-### Vitest Integration:
+### Vitest Integration
 - Use existing test runner configuration (v3.2.4)
 - Leverage watch mode for continuous feedback: `pnpm test --watch`
 - Utilize coverage reporting: `pnpm test --coverage`
@@ -247,7 +247,7 @@ it('should resolve with data when operation succeeds', async () => {
 - Run specific tests: `pnpm test [pattern]`
 - Follow project testing conventions (.spec.ts files)
 
-### VS Code Integration:
+### VS Code Integration
 - Open test and source files side-by-side
 - Use VS Code test explorer if available
 - Leverage debugging capabilities
@@ -263,7 +263,7 @@ it('should resolve with data when operation succeeds', async () => {
 
 ## Vitest & pnpm Command Reference
 
-### Essential Commands:
+### Essential Commands
 - `pnpm test` - Run all tests
 - `pnpm test --watch` - Run tests in watch mode
 - `pnpm test --ui` - Open Vitest UI in browser
@@ -271,13 +271,13 @@ it('should resolve with data when operation succeeds', async () => {
 - `pnpm test [pattern]` - Run specific test files
 - `pnpm test --reporter=verbose` - Detailed test output
 
-### TDD-Specific Usage:
+### TDD-Specific Usage
 - **Red Phase**: `pnpm test [test-file] --watch` to see failing test
 - **Green Phase**: `pnpm test [test-file] --watch` to see passing test
 - **Refactor Phase**: `pnpm test --watch` to ensure tests stay green
 - **Status Check**: `pnpm test --reporter=verbose --run` for full report
 
-### Advanced Features:
+### Advanced Features
 - **Parallel Testing**: Vitest runs tests in parallel by default
 - **Hot Module Replacement**: Instant test re-runs on file changes
 - **TypeScript Support**: Native TypeScript support without compilation
