@@ -6,13 +6,6 @@ Comprehensive development guidelines for Agent OS projects, based on Kent Beck's
 
 > "Software design is an exercise in human relationships" - Kent Beck
 
-<conditional-block context-check="core-principles">
-IF this Core Principles section already read in current context:
-  SKIP: Re-reading this section
-  NOTE: "Using Core Principles already in context"
-ELSE:
-  READ: The following principles
-
 ## Core Principles
 
 ### Tidy First Philosophy
@@ -32,17 +25,6 @@ ELSE:
 - **Build for the Next Developer**: Consider maintainability and understanding
 - **Options Over Things**: Create flexibility for uncertain future requirements
 - **Progressive Enhancement**: Start simple, add complexity when needed
-</conditional-block>
-
-<conditional-block context-check="dependencies" task-condition="choosing-external-library">
-IF current task involves choosing an external library:
-  IF Dependencies section already read in current context:
-    SKIP: Re-reading this section
-    NOTE: "Using Dependencies guidelines already in context"
-  ELSE:
-    READ: The following guidelines
-ELSE:
-  SKIP: Dependencies section not relevant to current task
 
 ## Dependencies
 
@@ -54,17 +36,6 @@ When adding third-party dependencies:
   - Active issue resolution
   - Number of stars/downloads
   - Clear documentation
-</conditional-block>
-
-<conditional-block context-check="tidying-practices" task-condition="refactoring-or-improving-code">
-IF current task involves refactoring or improving existing code:
-  IF Tidying Practices section already read in current context:
-    SKIP: Re-reading this section
-    NOTE: "Using Tidying Practices already in context"
-  ELSE:
-    READ: The following tidying practices
-ELSE:
-  SKIP: Tidying practices not relevant to current task
 
 ## Tidying Practices
 
@@ -95,7 +66,7 @@ function processUser(user) {
   if (!user) return;
   if (!user.isActive) return;
   if (!user.hasPermission) return;
-  
+
   // main logic
 }
 ```
@@ -110,33 +81,22 @@ Use consistent patterns throughout the codebase.
 Extract complex expressions into well-named variables:
 ```javascript
 // ❌ Complex expression
-if (user.subscription.plan.tier === 'premium' && 
-    user.subscription.status === 'active' && 
+if (user.subscription.plan.tier === 'premium' &&
+    user.subscription.status === 'active' &&
     user.subscription.expiresAt > new Date()) {
   // logic
 }
 
 // ✅ Helper variable
-const hasActivePremiumSubscription = 
-  user.subscription.plan.tier === 'premium' && 
-  user.subscription.status === 'active' && 
+const hasActivePremiumSubscription =
+  user.subscription.plan.tier === 'premium' &&
+  user.subscription.status === 'active' &&
   user.subscription.expiresAt > new Date();
 
 if (hasActivePremiumSubscription) {
   // logic
 }
 ```
-</conditional-block>
-
-<conditional-block context-check="testing-strategy" task-condition="writing-tests">
-IF current task involves writing or updating tests:
-  IF Testing Strategy section already read in current context:
-    SKIP: Re-reading this section
-    NOTE: "Using Testing Strategy already in context"
-  ELSE:
-    READ: The following testing guidelines
-ELSE:
-  SKIP: Testing strategy not relevant to current task
 
 ## Testing Strategy
 
@@ -146,7 +106,7 @@ Based on Kent C. Dodds' testing philosophy:
 ```
     🏆 End-to-End (E2E)
       ↑ High confidence, slow, expensive
-   🥉 Integration Tests  
+   🥉 Integration Tests
       ↑ Good confidence, moderate speed
   🥈 Unit Tests
       ↑ Low confidence, fast, cheap
@@ -182,17 +142,6 @@ test('should increment counter when button is clicked', () => {
 - Don't test internal state or private methods
 - Test the component's public interface
 - Mock at the network boundary, not internal functions
-</conditional-block>
-
-<conditional-block context-check="performance-practices" task-condition="performance-optimization">
-IF current task involves performance optimization:
-  IF Performance Practices section already read in current context:
-    SKIP: Re-reading this section
-    NOTE: "Using Performance Practices already in context"
-  ELSE:
-    READ: The following performance guidelines
-ELSE:
-  SKIP: Performance practices not relevant to current task
 
 ## Performance Practices
 
@@ -219,17 +168,6 @@ function App() {
   );
 }
 ```
-</conditional-block>
-
-<conditional-block context-check="collaboration-practices" task-condition="code-review-or-teamwork">
-IF current task involves code reviews or team collaboration:
-  IF Collaboration Practices section already read in current context:
-    SKIP: Re-reading this section
-    NOTE: "Using Collaboration Practices already in context"
-  ELSE:
-    READ: The following collaboration guidelines
-ELSE:
-  SKIP: Collaboration practices not relevant to current task
 
 ## Collaboration Practices
 
@@ -253,4 +191,3 @@ ELSE:
 - Reflect on decisions and learn from mistakes
 - Share knowledge through documentation and mentoring
 - Regularly refactor and clean up technical debt
-</conditional-block>
