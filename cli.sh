@@ -14,6 +14,15 @@ DRY_RUN=false
 BACKUP=false
 PROMPT_BACKUP=true
 
+# Detect OS (Windows vs Unix-like)
+IS_WINDOWS=false
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || -n "$MSYSTEM" ]]; then
+    IS_WINDOWS=true
+fi
+
+# Track whether Amp is installed (for backlog.md dependency)
+AMP_INSTALLED=false
+
 for arg in "$@"; do
 	case $arg in
 	--dry-run)
@@ -79,6 +88,56 @@ check_prerequisites() {
 		log_error "Neither Bun nor Node.js is installed. Please install one of them first."
 		exit 1
 	fi
+}
+
+install_global_tools() {
+	log_info "Checking global tools for hooks..."
+
+	# Check/install jq (required for JSON parsing in hooks)
+	if ! command -v jq &>/dev/null; then
+		log_warning "jq not found. Installing jq..."
+		if [ "$IS_WINDOWS" = true ]; then
+			# Windows: use choco or winget, or download binary
+			if command -v choco &>/dev/null; then
+				execute "choco install jq -y"
+			elif command -v winget &>/dev/null; then
+				execute "winget install jq"
+			else
+				log_warning "Please install jq manually: https://stedolan.github.io/jq/download/"
+			fi
+		else
+			# Mac/Linux: use brew or apt
+			if command -v brew &>/dev/null; then
+				execute "brew install jq"
+			elif command -v apt-get &>/dev/null; then
+				execute "sudo apt-get install -y jq"
+			else
+				log_warning "Please install jq manually: https://stedolan.github.io/jq/download/"
+			fi
+		fi
+	else
+		log_success "jq found"
+	fi
+
+	# Check/install biome (required for JS/TS formatting)
+	if ! command -v biome &>/dev/null; then
+		log_warning "biome not found. Installing biome globally..."
+		execute "npm install -g @biomejs/biome"
+	else
+		log_success "biome found"
+	fi
+
+	# Check/install backlog.md (only if Amp is installed)
+	if [ "$AMP_INSTALLED" = true ]; then
+		if ! command -v backlog &>/dev/null; then
+			log_info "Installing backlog.md for Amp integration..."
+			execute "npm install -g backlog.md"
+		else
+			log_success "backlog.md found"
+		fi
+	fi
+
+	log_success "Global tools check complete"
 }
 
 backup_configs() {
@@ -186,9 +245,11 @@ install_amp() {
 
 	if command -v amp &>/dev/null; then
 		log_warning "Amp is already installed"
+		AMP_INSTALLED=true
 	else
 		execute "curl -fsSL https://ampcode.com/install.sh | bash"
 		log_success "Amp installed"
+		AMP_INSTALLED=true
 	fi
 }
 
@@ -217,8 +278,20 @@ install_ccs() {
 copy_configurations() {
 	log_info "Copying configurations..."
 
+	# Create ~/.claude directory (needed on all platforms)
 	execute "mkdir -p $HOME/.claude"
-	execute "cp $SCRIPT_DIR/configs/claude/settings.json $HOME/.config/claude/settings.json"
+
+	# Copy settings.json to appropriate location based on OS
+	if [ "$IS_WINDOWS" = true ]; then
+		# Windows: Claude Code uses ~/.claude directly
+		execute "cp $SCRIPT_DIR/configs/claude/settings.json $HOME/.claude/settings.json"
+	else
+		# Mac/Linux: Use XDG path for settings.json
+		execute "mkdir -p $HOME/.config/claude"
+		execute "cp $SCRIPT_DIR/configs/claude/settings.json $HOME/.config/claude/settings.json"
+	fi
+
+	# Copy other configs to ~/.claude (all platforms)
 	execute "cp $SCRIPT_DIR/configs/claude/mcp-servers.json $HOME/.claude/mcp-servers.json"
 	execute "cp $SCRIPT_DIR/configs/claude/CLAUDE.md $HOME/.claude/CLAUDE.md"
 	execute "cp -r $SCRIPT_DIR/configs/claude/commands $HOME/.claude/"
@@ -259,19 +332,10 @@ copy_configurations() {
 	log_success "Best practices copied to ~/.ai-tools/"
 }
 
-install_mcp_servers() {
-	log_info "Installing MCP servers..."
-
-	execute "npx -y @upstash/context7-mcp@latest --version"
-	log_success "context7 MCP server ready"
-
-	execute "npx -y @modelcontextprotocol/server-sequential-thinking --version"
-	log_success "sequential-thinking MCP server ready"
-}
-
 enable_plugins() {
 	log_info "Claude Code plugins are configured in settings.json"
-	log_info "Run 'claude plugin list' to see available plugins"
+	log_info "Run 'claude plugin marketplace list' to see configured marketplaces"
+	log_info "Run 'claude plugin install <plugin>' to install plugins from marketplaces"
 	log_warning "You may need to manually install and enable some plugins"
 }
 
@@ -302,13 +366,13 @@ main() {
 	install_amp
 	echo
 
+	install_global_tools
+	echo
+
 	install_ccs
 	echo
 
 	copy_configurations
-	echo
-
-	install_mcp_servers
 	echo
 
 	enable_plugins
