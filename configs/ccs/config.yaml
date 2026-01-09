@@ -1,7 +1,18 @@
+# CCS Unified Configuration
+# Docs: https://github.com/kaitranntt/ccs
 version: 7
 
+# ----------------------------------------------------------------------------
+# Accounts: Isolated Claude instances (each with separate auth/sessions)
+# Manage with: ccs auth add <name>, ccs auth list, ccs auth remove <name>
+# ----------------------------------------------------------------------------
 accounts: {}
 
+# ----------------------------------------------------------------------------
+# Profiles: API-based providers (GLM, GLMT, Kimi, custom endpoints)
+# Each profile points to a *.settings.json file containing env vars.
+# Edit the settings file directly to customize (ANTHROPIC_MAX_TOKENS, etc.)
+# ----------------------------------------------------------------------------
 profiles:
   glm:
     type: api
@@ -22,6 +33,11 @@ profiles:
     type: api
     settings: ~/.ccs/openrouter.settings.json
 
+# ----------------------------------------------------------------------------
+# CLIProxy: OAuth-based providers (gemini, codex, agy, qwen, iflow)
+# Each variant can reference a *.settings.json file for custom env vars.
+# Edit the settings file directly to customize model or other settings.
+# ----------------------------------------------------------------------------
 cliproxy:
   oauth_accounts: {}
   providers:
@@ -37,6 +53,14 @@ cliproxy:
     enabled: false
     request_log: false
 
+# ----------------------------------------------------------------------------
+# CLIProxy Server: Remote proxy connection settings
+# Configure via Dashboard (`ccs config`) > Proxy tab.
+#
+# remote: Connect to a remote CLIProxyAPI instance
+# fallback: Use local proxy if remote is unreachable
+# local: Local proxy settings (port, auto-start)
+# ----------------------------------------------------------------------------
 cliproxy_server:
   remote:
     enabled: false
@@ -50,11 +74,31 @@ cliproxy_server:
     port: 8317
     auto_start: true
 
+# ----------------------------------------------------------------------------
+# Preferences: User settings
+# ----------------------------------------------------------------------------
 preferences:
   theme: system
   telemetry: false
   auto_update: true
 
+# ----------------------------------------------------------------------------
+# WebSearch: CLI-based web search for third-party profiles
+# Dashboard (`ccs config`) is the source of truth for provider selection.
+#
+# Third-party providers (gemini, codex, agy, etc.) do not have access to
+# Anthropic's WebSearch tool. These CLI tools provide fallback web search.
+#
+# Fallback chain: Gemini -> OpenCode -> Grok (tries in order until success)
+#
+# Gemini models: gemini-2.5-flash (default), gemini-2.5-pro, gemini-2.5-flash-lite
+# OpenCode models: opencode/grok-code (default), opencode/gpt-4o, opencode/claude-3.5-sonnet
+#
+# Install commands:
+#   gemini: npm i -g @google/gemini-cli (FREE - 1000 req/day)
+#   opencode: curl -fsSL https://opencode.ai/install | bash (FREE via Zen)
+#   grok: npm i -g @vibe-kit/grok-cli (requires GROK_API_KEY)
+# ----------------------------------------------------------------------------
 websearch:
   enabled: true
   providers:
@@ -70,6 +114,21 @@ websearch:
       enabled: false
       timeout: 55
 
+# ----------------------------------------------------------------------------
+# Copilot: GitHub Copilot API proxy (via copilot-api)
+# Uses your existing GitHub Copilot subscription with Claude Code.
+#
+# !! DISCLAIMER - USE AT YOUR OWN RISK !!
+# This uses an UNOFFICIAL reverse-engineered API.
+# Excessive usage may trigger GitHub account restrictions.
+# CCS provides NO WARRANTY and accepts NO RESPONSIBILITY for consequences.
+#
+# Setup: npx copilot-api auth (authenticate with GitHub)
+# Usage: ccs copilot (switch to copilot profile)
+#
+# Models: claude-sonnet-4.5, claude-opus-4.5, gpt-5.1, gemini-2.5-pro
+# Account types: individual, business, enterprise
+# ----------------------------------------------------------------------------
 copilot:
   enabled: false
   auto_start: false
@@ -79,6 +138,16 @@ copilot:
   wait_on_limit: true
   model: gpt-4.1
 
+# ----------------------------------------------------------------------------
+# Global Environment Variables: Injected into all non-Claude subscription profiles
+# These env vars disable telemetry/reporting for third-party providers.
+# Configure via Dashboard (`ccs config`) > Global Env tab.
+#
+# Default variables:
+#   DISABLE_BUG_COMMAND: Disables /bug command (not supported by proxy)
+#   DISABLE_ERROR_REPORTING: Disables error reporting to Anthropic
+#   DISABLE_TELEMETRY: Disables usage telemetry
+# ----------------------------------------------------------------------------
 global_env:
   enabled: true
   env:
