@@ -1,8 +1,9 @@
 - Follow my software development practice @~/configs/best-practices.md
+- Keep responses concise and actionable.
+- Always propose a plan before edits. Use phases to break down tasks into manageable steps.
 - Run typecheck, lint and biome on js/ts file changes after finish
 - Prefer to use Bun to run scripts if possible, otherwise use tsx to run ts files.
 - Never run destructive commands.
-- Always propose a plan before edits.
 - Use our conventions for file names, tests, and commands.
 - Keep your code clean and organized. Do not over-engineer solutions or overcomplicate things unnecessarily.
 - Write clear and concise code. Avoid unnecessary complexity and redundancy.
