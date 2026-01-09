@@ -161,6 +161,38 @@ Copy from `configs/claude/` directory:
 - `CLAUDE.md` - Global instructions
 - `commands/` - Custom command definitions
 
+## 🔄 Bidirectional Config Sync
+
+This repository supports two-way synchronization:
+
+### Forward: Install to Home (`cli.sh`)
+
+Copy configs from this repository to your home directory:
+
+```bash
+./cli.sh [--dry-run] [--backup] [--no-backup]
+```
+
+Options:
+- `--dry-run` - Preview changes without applying
+- `--backup` - Create backup before overwriting
+- `--no-backup` - Skip backup prompt
+
+### Reverse: Generate from Home (`generate.sh`)
+
+Copy your current configs FROM home TO this repository:
+
+```bash
+./generate.sh [--dry-run]
+```
+
+This is useful for:
+- Saving your current configuration to version control
+- Backing up working configs
+- Sharing your setup with others
+
+**Note:** Sensitive files (like `*.settings.json` containing API keys) are automatically excluded from CCS config sync.
+
 ## 🎨 OpenCode (Optional)
 
 Alternative AI coding assistant with custom agents and skills.
