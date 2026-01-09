@@ -87,6 +87,12 @@ generate_claude_configs() {
 			execute "cp -r '$HOME/.claude/commands'/* '$SCRIPT_DIR/configs/claude/commands'/ 2>/dev/null || true"
 			log_success "Copied commands directory"
 		fi
+
+		if [ -d "$HOME/.claude/agents" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/claude/agents"
+			execute "cp -r '$HOME/.claude/agents'/* '$SCRIPT_DIR/configs/claude/agents'/ 2>/dev/null || true"
+			log_success "Copied agents directory"
+		fi
 	fi
 
 	# Copy from ~/.config/claude/ → configs/claude/ (XDG config)

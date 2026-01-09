@@ -295,6 +295,10 @@ copy_configurations() {
 	execute "cp $SCRIPT_DIR/configs/claude/mcp-servers.json $HOME/.claude/mcp-servers.json"
 	execute "cp $SCRIPT_DIR/configs/claude/CLAUDE.md $HOME/.claude/CLAUDE.md"
 	execute "cp -r $SCRIPT_DIR/configs/claude/commands $HOME/.claude/"
+	if [ -d "$SCRIPT_DIR/configs/claude/agents" ]; then
+		execute "mkdir -p $HOME/.claude/agents"
+		execute "cp $SCRIPT_DIR/configs/claude/agents/* $HOME/.claude/agents/"
+	fi
 	log_success "Claude Code configs copied"
 
 	if [ -d "$HOME/.config/opencode" ] || command -v opencode &>/dev/null; then
