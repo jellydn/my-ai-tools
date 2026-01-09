@@ -276,11 +276,11 @@ Copy `configs/amp/settings.json` to `~/.config/amp/`:
 }
 ```
 
-**MCP Servers:**
+### MCP Servers
 
-- [`context7`](https://github.com/upstash/context7) - Remote documentation lookup
-- `chrome-devtools` - Browser automation & debugging
-- [`backlog`](https://github.com/MrLesk/Backlog.md) - Task management
+- [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
+- [`chrome-devtools-mcp`](https://github.com/ChromeDevTools/chrome-devtools-mcp) - Control and inspect live Chrome browser instances. Debug, analyze network requests, take screenshots, profile performance, and automate browser testing. ([npm](https://npmjs.org/package/chrome-devtools-mcp))
+- [`backlog`](https://github.com/MrLesk/Backlog.md) - Task management and backlog tracking
 
 ## 🔄 CCS - Claude Code Switch (Optional)
 
@@ -383,6 +383,14 @@ The HUD appears immediately — no restart needed.
 ### Claude Squad
 
 [**Claude Squad**](https://github.com/smtg-ai/claude-squad) - Terminal app to manage multiple AI agents (Claude Code, Aider, Codex, Gemini, etc.) in separate workspaces. Work on multiple tasks simultaneously with isolated git worktrees.
+
+### Spec Kit
+
+[**Spec Kit**](https://github.com/github/spec-kit) - Toolkit for Spec-Driven Development. Create specifications, implementation plans, and task lists for new features and greenfield projects with AI-native workflow. ([GitHub](https://github.com/github/spec-kit))
+
+### Backlog.md
+
+[**Backlog.md**](https://github.com/MrLesk/Backlog.md) - Markdown-native task manager and Kanban visualizer. Manage project backlogs entirely in Git with CLI, web interface, and AI integration. ([npm](https://www.npmjs.com/package/backlog.md))
 
 ## 📚 Best Practices
 
