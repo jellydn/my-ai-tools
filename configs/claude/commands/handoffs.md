@@ -11,6 +11,7 @@ Do not continue before asking for the purpose as you will otherwise not understa
 ## Goal
 
 Your task is to create a detailed summary of the conversation so far, paying close attention to the user's explicit purpose for the next steps.
+This handoff plan should be thorough in capturing technical details, code patterns, and architectural decisions that will be essential for continuing development work without losing context.
 
 ## Process
 
@@ -29,21 +30,21 @@ Your plan should include the following sections:
 2. **Key Technical Concepts**: List all important technical concepts, technologies, and frameworks discussed.
 3. **Files and Code Sections**: Enumerate specific files and code sections examined, modified, or created. Pay special attention to the most recent messages and include full code snippets where applicable and include a summary of why this file read or edit is important.
 4. **Problem Solving**: Document problems solved and any ongoing troubleshooting efforts.
-5. **Pending Tasks**: Outline any pending tasks that you have been explicitly asked to work on.
+5. **Pending Tasks**: Outline any pending tasks that you have explicitly been asked to work on.
 6. **Current Work**: Describe in detail precisely what was being worked on immediately before this handoff request, paying special attention to the most recent messages from both user and assistant. Include file names and code snippets where applicable.
-7. **Next Step**: List the next step that you will take that is related to the most recent work you were doing. IMPORTANT: ensure this step is DIRECTLY in line with the user's explicit requests, and the task you were working on immediately before this handoff request. If your last task was concluded, then only list next steps if they are explicitly in line with the users request. Do not start on tangential requests without confirming with the user first. Include this section only if there is an actionable next step.
+7. **Next Step**: List the next step that you will take that is related to the most recent work you were doing. IMPORTANT: ensure that this step is DIRECTLY in line with the user's explicit requests, and the task you were working on immediately before this handoff request. If your last task was concluded, then only list next steps if they are explicitly in line with the users request. Do not start on tangential requests without confirming with the user first. Include this section only if there is an actionable next step.
 
 Additionally create a "slug" for this handoff. The "slug" is how we will refer to it later in a few places. Examples:
 
-* current-user-api-handler
-* implement-auth
-* fix-issue-42
+- current-user-api-handler
+- implement-auth
+- fix-issue-42
 
 Together with the slug create a "Readable Summary". Examples:
 
-* Implement Current User API Handler
-* Implement Authentication
-* Fix Issue #42
+- Implement Current User API Handler
+- Implement Authentication
+- Fix Issue #42
 
 ## Output Structure
 
@@ -51,28 +52,36 @@ First, show your analysis to the user in `<analysis>` tags as part of your respo
 
 Then write the handoff file with this structure:
 
-```markdown
+````markdown
 # Session Handoff Plan
 
 ## 1. Primary Request and Intent
+
 [Detailed description of all user requests and intents]
 
 ## 2. Key Technical Concepts
+
 - [Concept 1]
 - [Concept 2]
 - [...]
 
 ## 3. Files and Code Sections
+
 ### [File Name 1]
+
 - **Why important**: [Summary of why this file is important]
 - **Changes made**: [Summary of the changes made to this file, if any]
 - **Code snippet**:
+
 ```language
 [Important Code Snippet]
 ```
+````
 
 ### [File Name 2]
+
 - **Code snippet**:
+
 ```language
 [Important Code Snippet]
 ```
@@ -80,18 +89,23 @@ Then write the handoff file with this structure:
 [...]
 
 ## 4. Problem Solving
+
 [Description of solved problems and ongoing troubleshooting]
 
 ## 5. Pending Tasks
+
 - [Task 1 that you have been explicitly asked to work on]
 - [Task 2 that you have been explicitly asked to work on]
 - [...]
 
 ## 6. Current Work
+
 [Detailed description of what was being worked on immediately before this handoff, including file names and code snippets]
 
 ## 7. Next Step
+
 [Next step to take, directly aligned with user's explicit handoff purpose. Only include if there is an actionable next step.]
+
 ```
 
 ## Final Step
@@ -101,3 +115,4 @@ After providing your analysis and summary:
 1. Ensure the `.claude/handoffs/` directory exists (create it if needed)
 2. Write the handoff summary to a markdown file at `.claude/handoffs/[timestamp]-[slug].md` where [timestamp] is the current date in format YYYY-MM-DD and the slug is what we defined before
 3. Tell the user about this file and that they can use `/pickup FILENAME` to continue
+```
