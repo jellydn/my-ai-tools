@@ -125,26 +125,6 @@ Configure in `~/.claude/settings.json`:
 }
 ```
 
-**UserPromptSubmit Hooks** - Check context threshold:
-
-```json
-{
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun run /Users/YOUR_USERNAME/.claude/hooks/context-threshold.ts",
-            "timeout": 5
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
 ### Custom Commands
 
 - `/handoffs` - Create handoff plans for continuing work in new sessions
