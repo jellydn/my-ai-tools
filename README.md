@@ -410,6 +410,7 @@ Copy [`configs/best-practices.md`](configs/best-practices.md) to your preferred 
 - [MCP Servers Directory](https://mcp.so)
 - [Context7 Documentation](https://context7.com/docs)
 - [CCS Documentation](https://github.com/kaitranntt/ccs)
+- [Claude Code Showcase](https://github.com/ChrisWiles/claude-code-showcase)
 
 ## 👤 Author
 
