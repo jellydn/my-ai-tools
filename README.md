@@ -346,8 +346,8 @@ websearch:
 # Switch to a profile
 ccs kimi
 
-# Add new account
-ccs auth add work
+# Create new account profile
+ccs auth create work
 
 # List available profiles
 ccs auth list
