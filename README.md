@@ -132,6 +132,16 @@ Configure in `~/.claude/settings.json`:
 
 Plus all commands from installed plugins.
 
+### 💡 Tips & Tricks
+
+- **OpusPlan Mode**: Use opusplan mode to plan with Opus and implement with Sonnet, then use Plannotator to review plans
+- **Session Management**: Turn off auto-compact and use claude-mem instead. Use `Ctrl+C` → to quit, or `/clear` to reset between coding sessions. Use `/handoffs` to create a plan and `/pickup` to resume when approaching 90% context limit on big tasks.
+- **Git Worktree**: Use git worktree with `try` CLI. For tmux users, use `claude-squash` to manage sessions efficiently
+- **Neovim Integration**: Check out [tiny-nvim](https://github.com/jellydn/tiny-nvim) for a complete setup with [sidekick.nvim](https://github.com/folke/sidekick.nvim) or [claudecode.nvim](https://github.com/coder/claudecode.nvim)
+- **Cost Optimization**: Use [CCS](https://ccs.kaitran.ca/) to switch between affordable providers:
+  - [GLM Coding Plan](https://z.ai/subscribe?ic=56OG3XE37T) - $3/month for Claude Code, Cline, and 10+ coding tools
+  - [MiniMax Coding Plan](https://platform.minimax.io/subscribe/coding-plan?code=CVeaL1h9wo&source=link) - $2/month with limited time.
+
 ### Configuration Files
 
 Copy from `configs/claude/` directory:
@@ -154,6 +164,7 @@ Copy configs from this repository to your home directory:
 ```
 
 Options:
+
 - `--dry-run` - Preview changes without applying
 - `--backup` - Create backup before overwriting
 - `--no-backup` - Skip backup prompt
@@ -167,6 +178,7 @@ Copy your current configs FROM home TO this repository:
 ```
 
 This is useful for:
+
 - Saving your current configuration to version control
 - Backing up working configs
 - Sharing your setup with others
