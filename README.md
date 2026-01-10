@@ -376,6 +376,7 @@ ccs auth list
 [**Claude-Mem**](https://claude-mem.ai/) - Stop explaining context repeatedly. Build faster with persistent memory. ([GitHub](https://github.com/thedotmack/claude-mem))
 
 **Note:** Auto-compact is disabled in this setup to preserve full session history.
+<img width="731" height="316" alt="image" src="https://github.com/user-attachments/assets/36bdab28-b02d-4bb3-a7ca-164265f291be" />
 
 ### Claude HUD
 
@@ -385,6 +386,7 @@ ccs auth list
 # Inside Claude Code, run:
 /claude-hud:setup
 ```
+<img width="1058" height="138" alt="image" src="https://github.com/user-attachments/assets/afab87bb-d78f-4cc8-9e1b-f3948a7e6fe6" />
 
 The HUD appears immediately — no restart needed.
 
