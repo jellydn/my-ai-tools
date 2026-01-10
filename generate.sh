@@ -11,6 +11,12 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DRY_RUN=false
 
+# Detect OS (Windows vs Unix-like)
+IS_WINDOWS=false
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || -n "$MSYSTEM" ]]; then
+    IS_WINDOWS=true
+fi
+
 for arg in "$@"; do
 	case $arg in
 	--dry-run)
@@ -95,9 +101,15 @@ generate_claude_configs() {
 		fi
 	fi
 
-	# Copy from ~/.config/claude/ → configs/claude/ (XDG config)
-	if [ -d "$HOME/.config/claude" ]; then
-		copy_single "$HOME/.config/claude/settings.json" "$SCRIPT_DIR/configs/claude/settings.json"
+	# Copy settings.json from appropriate location based on OS
+	if [ "$IS_WINDOWS" = true ]; then
+		# Windows: Claude Code uses ~/.claude directly
+		copy_single "$HOME/.claude/settings.json" "$SCRIPT_DIR/configs/claude/settings.json"
+	else
+		# Mac/Linux: Use XDG path for settings.json
+		if [ -d "$HOME/.config/claude" ]; then
+			copy_single "$HOME/.config/claude/settings.json" "$SCRIPT_DIR/configs/claude/settings.json"
+		fi
 	fi
 
 	log_success "Claude Code configs generated"
