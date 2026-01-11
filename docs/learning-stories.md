@@ -76,7 +76,7 @@ Not every tool fits every workflow. Here are tools I evaluated but chose not to 
 
 **Repository:** [eyaltoledano/claude-task-master](https://github.com/eyaltoledano/claude-task-master)
 
-An AI-powered task management system with 24k+ stars, designed for Cursor, Windsurf, and other editors.
+An AI-powered task management system designed for Cursor, Windsurf, and other editors.
 
 **Why I didn't keep it:**
 
@@ -119,7 +119,7 @@ These tools aren't for me daily, but are valuable references for understanding A
 
 ### Superpowers
 
-**Repository:** [obra/superpowers](https://github.com/obra/superpowers) (16k stars)
+**Repository:** [obra/superpowers](https://github.com/obra/superpowers)
 
 A complete software development workflow for coding agents with composable "skills".
 
