@@ -132,53 +132,6 @@ Configure in `~/.claude/settings.json`:
 
 Plus all commands from installed plugins.
 
-## 🧰 Things I Built
-
-Custom skills, commands, and agents included in this repository.
-
-### Claude Code Skills
-
-Auto-activated based on prompt analysis via `UserPromptSubmit` hook:
-
-| Skill                    | Description                                           |
-| ------------------------ | ----------------------------------------------------- |
-| `testing-patterns`       | Jest/Vitest testing patterns and TDD workflow         |
-| `systematic-debugging`   | Four-phase debugging with root cause analysis         |
-| `react-ui-patterns`      | React patterns for hooks, loading states, errors      |
-| `typescript-conventions` | TypeScript strict mode (no `any`, interfaces > types) |
-| `documentation`          | Documentation standards and best practices            |
-
-### Claude Code Commands
-
-| Command         | Description                                       |
-| --------------- | ------------------------------------------------- |
-| `/onboard`      | Deep task exploration before starting work        |
-| `/pr-review`    | Review PRs using code-reviewer agent standards    |
-| `/pr-summary`   | Generate PR summary (what/why/how format)         |
-| `/code-quality` | Run lint, typecheck, and manual review checklist  |
-| `/docs-sync`    | Check documentation alignment with recent changes |
-| `/slop`         | Remove AI-generated code patterns                 |
-| `/tdd`          | Test-driven development workflow                  |
-| `/adr`          | Create Architecture Decision Records              |
-| `/ultrathink`   | Extended thinking mode for complex problems       |
-| `/ccs`          | Claude Code Switch integration                    |
-
-### Claude Code Agents
-
-| Agent             | Description                                  |
-| ----------------- | -------------------------------------------- |
-| `code-reviewer`   | Proactive code review with full-stack checks |
-| `ai-slop-remover` | Clean AI-generated code patterns             |
-| `github-workflow` | GitHub Actions and workflow automation       |
-
-### Amp Skills
-
-| Skill | Description                             |
-| ----- | --------------------------------------- |
-| `prd` | Generate Product Requirements Documents |
-
-Located in `~/.config/amp/skills/`.
-
 ### 🎓 Projects Built with AI
 
 Real-world projects built using these AI tools:
