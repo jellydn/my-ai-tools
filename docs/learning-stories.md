@@ -57,14 +57,49 @@ Built autonomously using **Ralph** (AI agent system) with **Amp** as the coding 
 
 ---
 
+## Ralph
+
+**Autonomous AI agent loop for PRD-driven development.**
+
+- **Repository:** [jellydn/ralph](https://github.com/jellydn/ralph)
+- **Upstream:** [snarktank/ralph](https://github.com/snarktank/ralph)
+- **Status:** Temporary fork pending upstream PRs ([#6](https://github.com/snarktank/ralph/pull/6), [#21](https://github.com/snarktank/ralph/pull/21))
+- **Tech Stack:** TypeScript, Shell, JavaScript
+
+Minimal Ralph implementation: PRD → task decomposition → autonomous execution → loop until complete. Used in SealCode development. Will deprecate once upstream PRs land.
+
+---
+
+## AI CLI Switcher
+
+**Fast launcher for switching between AI coding assistants.**
+
+- **Repository:** [jellydn/ai-cli-switcher](https://github.com/jellydn/ai-cli-switcher)
+
+Fuzzy search interface for Claude Code, OpenCode, Amp, Cursor, Windsurf. Quick switching without managing multiple terminals.
+
+---
+
+## Tiny Coding Agent
+
+**Minimal coding agent focused on simplicity.**
+
+- **Repository:** [jellydn/tiny-coding-agent](https://github.com/jellydn/tiny-coding-agent)
+
+Lightweight agent with minimal dependencies. Response to heavy frameworks that waste tokens on orchestration overhead.
+
+---
+
 ## Key Takeaways
 
 | Tool Combination | Best For |
 | ---------------- | -------------------------------------------------------- |
 | **Claude + spec-kit** | Greenfield projects requiring structured planning |
 | **Amp + Ralph** | Autonomous development with PRD-to-implementation pipelines |
+| **AI CLI Switcher** | Developers working with multiple AI tools |
+| **Tiny Agent** | Cost-conscious development with minimal overhead |
 
-Both approaches demonstrate that AI coding tools can successfully ship production-ready applications when paired with appropriate development methodologies.
+Focused, single-purpose solutions > heavy, all-in-one frameworks.
 
 ---
 

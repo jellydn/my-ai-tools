@@ -132,6 +132,84 @@ Configure in `~/.claude/settings.json`:
 
 Plus all commands from installed plugins.
 
+## 🧰 Things I Built
+
+Custom skills, commands, and agents included in this repository.
+
+### Claude Code Skills
+
+Auto-activated based on prompt analysis via `UserPromptSubmit` hook:
+
+| Skill                    | Description                                           |
+| ------------------------ | ----------------------------------------------------- |
+| `testing-patterns`       | Jest/Vitest testing patterns and TDD workflow         |
+| `systematic-debugging`   | Four-phase debugging with root cause analysis         |
+| `react-ui-patterns`      | React patterns for hooks, loading states, errors      |
+| `typescript-conventions` | TypeScript strict mode (no `any`, interfaces > types) |
+| `documentation`          | Documentation standards and best practices            |
+
+### Claude Code Commands
+
+| Command         | Description                                       |
+| --------------- | ------------------------------------------------- |
+| `/onboard`      | Deep task exploration before starting work        |
+| `/pr-review`    | Review PRs using code-reviewer agent standards    |
+| `/pr-summary`   | Generate PR summary (what/why/how format)         |
+| `/code-quality` | Run lint, typecheck, and manual review checklist  |
+| `/docs-sync`    | Check documentation alignment with recent changes |
+| `/slop`         | Remove AI-generated code patterns                 |
+| `/tdd`          | Test-driven development workflow                  |
+| `/adr`          | Create Architecture Decision Records              |
+| `/ultrathink`   | Extended thinking mode for complex problems       |
+| `/ccs`          | Claude Code Switch integration                    |
+
+### Claude Code Agents
+
+| Agent             | Description                                  |
+| ----------------- | -------------------------------------------- |
+| `code-reviewer`   | Proactive code review with full-stack checks |
+| `ai-slop-remover` | Clean AI-generated code patterns             |
+| `github-workflow` | GitHub Actions and workflow automation       |
+
+### Amp Skills
+
+| Skill | Description                             |
+| ----- | --------------------------------------- |
+| `prd` | Generate Product Requirements Documents |
+
+Located in `~/.config/amp/skills/`.
+
+### 🎓 Projects Built with AI
+
+Real-world projects built using these AI tools:
+
+| Project | Description | Tools Used |
+| ------- | ----------- | ---------- |
+| [Keybinder](https://github.com/jellydn/keybinder) | macOS app for managing skhd keyboard shortcuts | Claude + spec-kit |
+| [SealCode](https://github.com/jellydn/vscode-seal-code) | VS Code extension for AI-powered code review | Amp + Ralph |
+| [Ralph](https://github.com/jellydn/ralph) | Autonomous AI agent loop for PRD-driven development | TypeScript |
+| [AI CLI Switcher](https://github.com/jellydn/ai-cli-switcher) | Fast launcher for switching between AI coding assistants | TypeScript |
+| [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity | TypeScript |
+
+📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
+
+### 🌟 Recommended Community Skills
+
+Official and community-maintained skill collections for specific frameworks:
+
+| Framework | Skills Repository | Description |
+| --------- | ----------------- | ----------- |
+| **Expo** | [expo/skills](https://github.com/expo/skills) | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows. |
+| **Next.js** | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows. |
+
+**Installation:**
+
+```bash
+# Clone skills to your local config directory
+git clone https://github.com/expo/skills.git ~/.claude/skills/expo
+git clone https://github.com/vercel-labs/agent-skills.git ~/.claude/skills/nextjs
+```
+
 ### 💡 Tips & Tricks
 
 - **OpusPlan Mode**: Use opusplan mode to plan with Opus and implement with Sonnet, then use Plannotator to review plans
@@ -386,6 +464,7 @@ ccs auth list
 # Inside Claude Code, run:
 /claude-hud:setup
 ```
+
 <img width="1058" height="138" alt="image" src="https://github.com/user-attachments/assets/afab87bb-d78f-4cc8-9e1b-f3948a7e6fe6" />
 
 The HUD appears immediately — no restart needed.
