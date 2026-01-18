@@ -76,7 +76,7 @@ Minimal Ralph implementation: PRD → task decomposition → autonomous executio
 
 - **Repository:** [jellydn/ai-cli-switcher](https://github.com/jellydn/ai-cli-switcher)
 
-Fuzzy search interface for Claude Code, OpenCode, Amp, Cursor, Windsurf. Quick switching without managing multiple terminals.
+Fuzzy search interface for Claude Code, OpenCode, Amp, etc. Quick switching without managing multiple terminals.
 
 ---
 
