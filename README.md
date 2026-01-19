@@ -60,7 +60,7 @@ Enable in Claude Code settings:
 
 | Plugin                  | Description                         | Link                                                 |
 | ----------------------- | ----------------------------------- | ---------------------------------------------------- |
-| `claude-mem`            | Context memory across sessions      | [GitHub](https://github.com/thedotmack/claude-mem)   |
+| ~~`claude-mem`~~        | ⚠️ **DEPRECATED** - Currently broken ([#609](https://github.com/thedotmack/claude-mem/issues/609)) | [GitHub](https://github.com/thedotmack/claude-mem)   |
 | `typescript-lsp`        | TypeScript language server          | Official                                             |
 | `pyright-lsp`           | Python language server              | Official                                             |
 | `context7`              | Documentation lookup                | [GitHub](https://github.com/upstash/context7)        |
@@ -166,7 +166,7 @@ git clone https://github.com/vercel-labs/agent-skills.git ~/.claude/skills/nextj
 ### 💡 Tips & Tricks
 
 - **OpusPlan Mode**: Use opusplan mode to plan with Opus and implement with Sonnet, then use Plannotator to review plans
-- **Session Management**: Turn off auto-compact and use claude-mem instead. Use `Ctrl+C` → to quit, or `/clear` to reset between coding sessions. Use `/handoffs` to create a plan and `/pickup` to resume when approaching 90% context limit on big tasks.
+- **Session Management**: Turn off auto-compact. Use `Ctrl+C` → to quit, or `/clear` to reset between coding sessions. Use `/handoffs` to create a plan and `/pickup` to resume when approaching 90% context limit on big tasks.
 - **Git Worktree**: Use git worktree with `try` CLI. For tmux users, use `claude-squash` to manage sessions efficiently
 - **Neovim Integration**: Check out [tiny-nvim](https://github.com/jellydn/tiny-nvim) for a complete setup with [sidekick.nvim](https://github.com/folke/sidekick.nvim) or [claudecode.nvim](https://github.com/coder/claudecode.nvim)
 - **Cost Optimization**: Use [CCS](https://ccs.kaitran.ca/) to switch between affordable providers:
@@ -404,10 +404,11 @@ ccs auth list
 
 ### Claude-Mem
 
-[**Claude-Mem**](https://claude-mem.ai/) - Stop explaining context repeatedly. Build faster with persistent memory. ([GitHub](https://github.com/thedotmack/claude-mem))
+⚠️ **DEPRECATED** - This plugin is currently broken and not recommended for use. See [issue #609](https://github.com/thedotmack/claude-mem/issues/609) for details.
 
-**Note:** Auto-compact is disabled in this setup to preserve full session history.
-<img width="731" height="316" alt="image" src="https://github.com/user-attachments/assets/36bdab28-b02d-4bb3-a7ca-164265f291be" />
+[**Claude-Mem**](https://claude-mem.ai/) - ~~Stop explaining context repeatedly. Build faster with persistent memory.~~ ([GitHub](https://github.com/thedotmack/claude-mem))
+
+**Status:** The plugin leaves CLAUDE.md files in directories causing repository pollution. Do not enable this plugin until the issue is resolved.
 
 ### Claude HUD
 
