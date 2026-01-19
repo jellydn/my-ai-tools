@@ -55,7 +55,7 @@
     "command": "bash -c 'node \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
   },
   "enabledPlugins": {
-    "claude-mem@thedotmack": true,
+    "claude-mem@thedotmack": false,
     "typescript-lsp@claude-plugins-official": true,
     "pyright-lsp@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
