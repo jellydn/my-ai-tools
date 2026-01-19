@@ -27,7 +27,7 @@ Primary AI coding assistant with extensive customization.
 ### Installation
 
 ```bash
-npm install -g @anthropic-ai/claude-code
+curl -fsSL https://claude.ai/install.sh | bash
 ```
 
 ### MCP Servers
