@@ -452,12 +452,13 @@ Copy [`configs/best-practices.md`](configs/best-practices.md) to your preferred 
 
 ## 📖 Resources
 
-- [Claude Code Documentation](https://claude.com/claude-code)
-- [OpenCode Documentation](https://opencode.ai/docs)
-- [MCP Servers Directory](https://mcp.so)
-- [Context7 Documentation](https://context7.com/docs)
-- [CCS Documentation](https://github.com/kaitranntt/ccs)
-- [Claude Code Showcase](https://github.com/ChrisWiles/claude-code-showcase)
+- [Claude Code Documentation](https://claude.com/claude-code) - Official documentation for Claude Code, the AI-powered coding assistant from Anthropic
+- [OpenCode Documentation](https://opencode.ai/docs) - Complete guide for OpenCode, an alternative AI coding tool with custom agents and skills
+- [MCP Servers Directory](https://mcp.so) - Official directory of Model Context Protocol servers for extending AI capabilities
+- [Context7 Documentation](https://context7.com/docs) - Documentation for Context7, a smart library documentation lookup tool for developers
+- [CCS Documentation](https://github.com/kaitranntt/ccs) - Guide to Claude Code Switch for seamlessly switching between multiple Claude accounts and API providers
+- [Claude Code Showcase](https://github.com/ChrisWiles/claude-code-showcase) - Community collection of Claude Code examples, tips, and real-world use cases
+- [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) - Production-ready collection of agents, skills, hooks, commands, and configs from an Anthropic hackathon winner. Includes advanced setup for TDD, security reviews, and performance optimization
 
 ## 👤 Author
 
