@@ -458,7 +458,7 @@ Copy [`configs/best-practices.md`](configs/best-practices.md) to your preferred 
 - [Context7 Documentation](https://context7.com/docs) - Documentation for Context7, a smart library documentation lookup tool for developers
 - [CCS Documentation](https://github.com/kaitranntt/ccs) - Guide to Claude Code Switch for seamlessly switching between multiple Claude accounts and API providers
 - [Claude Code Showcase](https://github.com/ChrisWiles/claude-code-showcase) - Community collection of Claude Code examples, tips, and real-world use cases
-- [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) - Production-ready collection of agents, skills, hooks, commands, and configs from an Anthropic hackathon winner. Includes advanced setup for TDD, security reviews, and performance optimization
+- [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) - Production-ready Claude Code configurations and examples from an Anthropic hackathon winner
 
 ## 👤 Author
 
