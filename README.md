@@ -452,12 +452,13 @@ Copy [`configs/best-practices.md`](configs/best-practices.md) to your preferred 
 
 ## 📖 Resources
 
-- [Claude Code Documentation](https://claude.com/claude-code)
-- [OpenCode Documentation](https://opencode.ai/docs)
-- [MCP Servers Directory](https://mcp.so)
-- [Context7 Documentation](https://context7.com/docs)
-- [CCS Documentation](https://github.com/kaitranntt/ccs)
-- [Claude Code Showcase](https://github.com/ChrisWiles/claude-code-showcase)
+- [Claude Code Documentation](https://claude.com/claude-code) - Official Claude Code docs
+- [OpenCode Documentation](https://opencode.ai/docs) - OpenCode guide with agents and skills
+- [MCP Servers Directory](https://mcp.so) - Model Context Protocol servers directory
+- [Context7 Documentation](https://context7.com/docs) - Library documentation lookup tool
+- [CCS Documentation](https://github.com/kaitranntt/ccs) - Claude Code Switch for multiple accounts
+- [Claude Code Showcase](https://github.com/ChrisWiles/claude-code-showcase) - Community examples and use cases
+- [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) - Production configs from hackathon winner
 
 ## 👤 Author
 
