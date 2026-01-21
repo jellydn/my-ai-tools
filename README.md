@@ -459,7 +459,7 @@ Copy [`configs/best-practices.md`](configs/best-practices.md) to your preferred 
 - [CCS Documentation](https://github.com/kaitranntt/ccs) - Claude Code Switch for multiple accounts
 - [Claude Code Showcase](https://github.com/ChrisWiles/claude-code-showcase) - Community examples and use cases
 - [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) - Production configs from hackathon winner
-- [Claude Code Setup Guide](https://blog.silennai.com/claude-code?utm_source=tldrnewsletter) - Comprehensive guide to Claude Code setup and AI assistants
+- [I was a top 0.01% Cursor user. Here's why I switched to Claude Code 2.0.](https://blog.silennai.com/claude-code)
 
 ## 👤 Author
 
