@@ -63,7 +63,6 @@
     "learning-output-style@claude-plugins-official": true,
     "swift-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true,
-    "beads@beads-marketplace": true,
     "plannotator@plannotator": true,
     "claude-hud@claude-hud": true
   }
