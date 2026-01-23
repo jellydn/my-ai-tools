@@ -68,7 +68,7 @@ Enable in Claude Code settings:
 | `learning-output-style` | Interactive learning mode           | Official                                             |
 | `swift-lsp`             | Swift language support              | Official                                             |
 | `lua-lsp`               | Lua language support                | Official                                             |
-| `beads`                 | Issue tracking & project management | [GitHub](https://github.com/steveyegge/beads)        |
+| ~~`beads`~~             | ⚠️ **DEPRECATED** - Use native task management (Claude Code 2.1.16+) | [GitHub](https://github.com/steveyegge/beads)        |
 | `plannotator`           | Plan annotation tool                | [GitHub](https://github.com/backnotprop/plannotator) |
 | `claude-hud`            | Status line with usage monitoring   | [GitHub](https://github.com/jarrodwatts/claude-hud)  |
 
