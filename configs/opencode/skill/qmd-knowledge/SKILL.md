@@ -154,6 +154,6 @@ The qmd MCP server allows Claude to:
 - **Portable**: Standard markdown files in `~/.ai-knowledges/`
 - **Project-scoped**: Each project has its own isolated knowledge base
 - **AI-searchable**: Powered by qmd's embedding-based search
-- **Self-documenting**: Follows skills.sh specification
+- **Self-documenting**: Follows skills.md specification
 - **No repository pollution**: Knowledge stored outside project directories
 - **Version controllable**: Can optionally track knowledge in separate git repos

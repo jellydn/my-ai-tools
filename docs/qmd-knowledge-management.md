@@ -321,7 +321,7 @@ This will update the semantic search index for all collections.
 ## Resources
 
 - **[qmd GitHub](https://github.com/tobi/qmd)** - Quick Markdown Search
-- **[Agent Skills](https://skills.sh/)** - Open format for AI agent capabilities
+- **[How to create custom Skills](https://support.claude.com/en/articles/12512198-how-to-create-custom-skills)** - Official documentation
 - **[Skills Specification](https://agentskills.io/what-are-skills)** - Technical details
 - **[MCP Documentation](https://mcp.so)** - Model Context Protocol
 
