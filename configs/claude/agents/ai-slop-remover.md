@@ -1,4 +1,5 @@
 ---
+name: ai-slop-remover
 description: Use this agent when you need to clean up AI-generated code that doesn't match the codebase's style and conventions. This includes removing unnecessary comments, excessive defensive checks, type casts to `any`, and other patterns that are inconsistent with how a human developer would write code in that file.
 mode: subagent
 temperature: 0.1

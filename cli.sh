@@ -182,6 +182,12 @@ backup_configs() {
 			log_success "Backed up CCS configs"
 		fi
 
+		if [ -f "$HOME/.config/ai-switcher/config.json" ]; then
+			execute "mkdir -p $BACKUP_DIR/ai-switcher"
+			execute "cp $HOME/.config/ai-switcher/config.json $BACKUP_DIR/ai-switcher/"
+			log_success "Backed up ai-switcher configs"
+		fi
+
 		log_success "Backup completed: $BACKUP_DIR"
 	fi
 }
@@ -275,6 +281,28 @@ install_ccs() {
 	fi
 }
 
+install_ai_switcher() {
+	if [ -t 1 ]; then
+		read -p "Do you want to install ai-switcher? (y/n) " -n 1 -r
+		echo
+		if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+			log_warning "Skipping ai-switcher installation"
+			return
+		fi
+	else
+		log_info "Installing ai-switcher (non-interactive mode)..."
+	fi
+
+	log_info "Installing ai-switcher..."
+
+	if command -v ai-switcher &>/dev/null; then
+		log_warning "ai-switcher is already installed"
+	else
+		execute "curl -fsSL https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/install.sh | sh"
+		log_success "ai-switcher installed"
+	fi
+}
+
 copy_configurations() {
 	log_info "Copying configurations..."
 
@@ -294,18 +322,69 @@ copy_configurations() {
 	# Copy other configs to ~/.claude (all platforms)
 	execute "cp $SCRIPT_DIR/configs/claude/mcp-servers.json $HOME/.claude/mcp-servers.json"
 	execute "cp $SCRIPT_DIR/configs/claude/CLAUDE.md $HOME/.claude/CLAUDE.md"
+	# Remove existing commands dir to avoid permission issues, then copy fresh
+	execute "rm -rf $HOME/.claude/commands"
 	execute "cp -r $SCRIPT_DIR/configs/claude/commands $HOME/.claude/"
 	if [ -d "$SCRIPT_DIR/configs/claude/agents" ]; then
 		execute "mkdir -p $HOME/.claude/agents"
 		execute "cp $SCRIPT_DIR/configs/claude/agents/* $HOME/.claude/agents/"
 	fi
+	# Remove existing skills to avoid conflicts with directory/file name collisions
+	if [ -d "$SCRIPT_DIR/configs/claude/skills" ]; then
+		execute "rm -rf $HOME/.claude/skills"
+		execute "cp -r $SCRIPT_DIR/configs/claude/skills $HOME/.claude/"
+	fi
+
+	# Add MCP servers using Claude Code CLI (globally, available in all projects)
+	if command -v claude &>/dev/null; then
+		log_info "Setting up Claude Code MCP servers (global scope)..."
+
+		# context7 MCP server
+		if [ -t 1 ]; then
+			read -p "Install context7 MCP server (documentation lookup)? (y/n) " -n 1 -r
+			echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest 2>/dev/null && log_success 'context7 MCP server added (global)' || log_warning 'context7 already installed or failed'"
+			fi
+		else
+			execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest 2>/dev/null || true"
+		fi
+
+		# sequential-thinking MCP server
+		if [ -t 1 ]; then
+			read -p "Install sequential-thinking MCP server (multi-step reasoning)? (y/n) " -n 1 -r
+			echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking 2>/dev/null && log_success 'sequential-thinking MCP server added (global)' || log_warning 'sequential-thinking already installed or failed'"
+			fi
+		else
+			execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking 2>/dev/null || true"
+		fi
+
+		# qmd MCP server
+		if [ -t 1 ]; then
+			read -p "Install qmd MCP server (knowledge management)? (y/n) " -n 1 -r
+			echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp 2>/dev/null && log_success 'qmd MCP server added (global)' || log_warning 'qmd already installed or failed'"
+			fi
+		else
+			execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp 2>/dev/null || true"
+		fi
+
+		log_success "MCP server setup complete (global scope)"
+	fi
+
 	log_success "Claude Code configs copied"
 
 	if [ -d "$HOME/.config/opencode" ] || command -v opencode &>/dev/null; then
 		execute "mkdir -p $HOME/.config/opencode/configs"
 		execute "cp $SCRIPT_DIR/configs/opencode/opencode.json $HOME/.config/opencode/"
+		execute "rm -rf $HOME/.config/opencode/agent"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/agent $HOME/.config/opencode/"
+		execute "rm -rf $HOME/.config/opencode/command"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/command $HOME/.config/opencode/"
+		execute "rm -rf $HOME/.config/opencode/skill"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/skill $HOME/.config/opencode/"
 		execute "cp $SCRIPT_DIR/configs/best-practices.md $HOME/.config/opencode/configs/"
 		log_success "OpenCode configs copied"
@@ -314,6 +393,10 @@ copy_configurations() {
 	if [ -d "$HOME/.config/amp" ] || command -v amp &>/dev/null; then
 		execute "mkdir -p $HOME/.config/amp"
 		execute "cp $SCRIPT_DIR/configs/amp/settings.json $HOME/.config/amp/"
+		if [ -d "$SCRIPT_DIR/configs/amp/skills" ]; then
+			execute "rm -rf $HOME/.config/amp/skills"
+			execute "cp -r $SCRIPT_DIR/configs/amp/skills $HOME/.config/amp/"
+		fi
 		log_success "Amp configs copied"
 	fi
 
@@ -331,6 +414,16 @@ copy_configurations() {
 		log_success "CCS configs copied"
 	fi
 
+	if [ -d "$HOME/.config/ai-switcher" ] || [ -f "$HOME/.config/ai-switcher/config.json" ]; then
+		execute "mkdir -p $HOME/.config/ai-switcher"
+		if [ -f "$SCRIPT_DIR/configs/ai-switcher/config.json" ]; then
+			execute "cp $SCRIPT_DIR/configs/ai-switcher/config.json $HOME/.config/ai-switcher/"
+			log_success "ai-switcher configs copied"
+		else
+			log_info "ai-switcher config not found in source, preserving existing"
+		fi
+	fi
+
 	execute "mkdir -p $HOME/.ai-tools"
 	execute "cp $SCRIPT_DIR/configs/best-practices.md $HOME/.ai-tools/"
 	log_success "Best practices copied to ~/.ai-tools/"
@@ -346,7 +439,7 @@ enable_plugins() {
 main() {
 	echo "╔══════════════════════════════════════════════════════════╗"
 	echo "║         AI Tools Setup                                   ║"
-	echo "║   Claude Code • OpenCode • Amp • CCS                     ║"
+	echo "║   Claude Code • OpenCode • Amp • CCS • ai-switcher       ║"
 	echo "╚══════════════════════════════════════════════════════════╝"
 	echo
 
@@ -374,6 +467,9 @@ main() {
 	echo
 
 	install_ccs
+	echo
+
+	install_ai_switcher
 	echo
 
 	copy_configurations

@@ -32,7 +32,25 @@ curl -fsSL https://claude.ai/install.sh | bash
 
 ### MCP Servers
 
-Add to `~/.claude/mcp-servers.json`:
+**Automatic Setup (Recommended):**
+
+Run the setup script to configure MCP servers for Claude Code:
+
+```bash
+./cli.sh
+```
+
+The script will **prompt you** to install each MCP server:
+
+- [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
+- [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
+- [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
+
+**Manual Setup:**
+
+If you prefer to configure manually or are using Claude Desktop:
+
+For **Claude Desktop**, add to `~/.claude/mcp-servers.json`:
 
 ```json
 {
@@ -44,15 +62,50 @@ Add to `~/.claude/mcp-servers.json`:
     "sequential-thinking": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "qmd": {
+      "command": "qmd",
+      "args": ["mcp"]
     }
   }
 }
 ```
 
-**Available MCP Servers:**
+For **Claude Code**, use the CLI (installed globally for all projects):
 
-- [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
-- [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
+```bash
+claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest
+claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
+claude mcp add --scope user --transport stdio qmd -- qmd mcp
+```
+
+> **Note:** The setup script handles both approaches automatically.
+>
+> **MCP Scopes:**
+> - `--scope user` (global): Available across all projects on your machine
+> - `--scope local` (default): Only available in the current project directory
+> - `--scope project`: Stored in `.mcp.json` for team sharing via git
+
+**Managing MCP Servers:**
+
+```bash
+# List all configured servers
+claude mcp list
+
+# Remove an MCP server (e.g., remove context7 if using the plugin version)
+claude mcp remove context7
+
+# Get details for a specific server
+claude mcp get qmd
+```
+
+**💡 Knowledge Management:**
+
+Replace deprecated `claude-mem` with the **qmd-based knowledge system**:
+- Project-specific knowledge bases in `~/.ai-knowledges/`
+- AI-powered search via qmd MCP server
+- No repository pollution
+- See [qmd Knowledge Management Guide](docs/qmd-knowledge-management.md) for setup and usage
 
 ### Plugins
 
@@ -129,8 +182,23 @@ Configure in `~/.claude/settings.json`:
 
 - `/handoffs` - Create handoff plans for continuing work in new sessions
 - `/pickup` - Resume work from previous handoff sessions
+- `/plannotator-review` - Open interactive code review for current changes
 
 Plus all commands from installed plugins.
+
+### Custom Agents
+
+| Agent             | Description                              | Mode     |
+| ----------------- | ---------------------------------------- | -------- |
+| `ai-slop-remover` | Cleans AI-generated code patterns        | subagent |
+
+### Skills
+
+- `prd` - Generate Product Requirements Documents for new features
+- `qmd-knowledge` - Project-specific knowledge management (alternative to claude-mem)
+- `ralph` - PRD-driven development automation
+- `ccs-delegation` - Auto-profile selection for CCS with context enhancement
+- `context-check` - Strategic context usage guidance
 
 ### 🎓 Projects Built with AI
 
@@ -281,6 +349,7 @@ Copy `configs/opencode/opencode.json` to `~/.config/opencode/`:
 ### Skills
 
 - `git-release` - Create consistent releases and changelogs
+- `qmd-knowledge` - Project-specific knowledge management (alternative to claude-mem)
 
 ## 🎯 Amp (Optional)
 
@@ -319,11 +388,18 @@ Copy `configs/amp/settings.json` to `~/.config/amp/`:
 }
 ```
 
+### Skills
+
+- `prd` - Generate Product Requirements Documents for new features
+- `qmd-knowledge` - Project-specific knowledge management (alternative to claude-mem)
+- `ralph` - PRD-driven development automation
+
 ### MCP Servers
 
 - [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
 - [`chrome-devtools-mcp`](https://github.com/ChromeDevTools/chrome-devtools-mcp) - Control and inspect live Chrome browser instances. Debug, analyze network requests, take screenshots, profile performance, and automate browser testing. ([npm](https://npmjs.org/package/chrome-devtools-mcp))
 - [`backlog`](https://github.com/MrLesk/Backlog.md) - Task management and backlog tracking
+- [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
 
 ## 🔄 CCS - Claude Code Switch (Optional)
 
@@ -396,6 +472,43 @@ ccs auth create work
 ccs auth list
 ```
 
+## 🔄 AI CLI Switcher (Optional)
+
+[**AI CLI Switcher**](https://github.com/jellydn/ai-cli-switcher) - Fast launcher for switching between AI coding assistants. Use aliases and templates to quickly switch between Claude, OpenCode, Amp, and more.
+
+### Installation
+
+The setup script will prompt to install ai-switcher:
+
+```bash
+./cli.sh
+```
+
+Or install manually:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/install.sh | sh
+```
+
+### Configuration
+
+Copy `configs/ai-switcher/config.json` to `~/.config/ai-switcher/` for pre-configured tools and templates:
+
+**Tools:**
+- `claude` / `c` - Anthropic Claude CLI
+- `opencode` / `o`, `oc` - OpenCode AI assistant
+- `amp` / `a` - AI coding assistant by Modular
+
+**Templates:**
+- `review` - Code review with OpenCode
+- `commit` / `commit-zen` - Generate commit message
+- `ac` / `commit-atomic` - Atomic commit message
+- `pr` / `draft-pr` - Create draft pull request
+- `types` - Enhance type safety
+- `test` - Generate tests
+- `docs` - Add documentation
+- `simplify` / `simplifier` - Simplify over-engineered code
+
 ## 🛠️ Companion Tools
 
 ### Plannotator
@@ -409,6 +522,40 @@ ccs auth list
 [**Claude-Mem**](https://claude-mem.ai/) - ~~Stop explaining context repeatedly. Build faster with persistent memory.~~ ([GitHub](https://github.com/thedotmack/claude-mem))
 
 **Status:** The plugin leaves CLAUDE.md files in directories causing repository pollution. Do not enable this plugin until the issue is resolved.
+
+**Alternative:** Use the [qmd Knowledge Management System](docs/qmd-knowledge-management.md) for project-specific knowledge capture without repository pollution.
+
+### 🔮 qmd Knowledge Skill (Experimental / WIP)
+
+**qmd Knowledge Skill** is an experimental memory/context management system for AI coding tools. It provides an alternative approach to persistent knowledge capture with the following goals:
+
+- **No Repository Pollution**: Knowledge stored externally, not in project directories
+- **AI-Powered Search**: Semantic search using qmd embeddings
+- **Multi-Project Support**: Isolated knowledge bases per project
+- **Simple & Reliable**: Minimal configuration, maximum utility
+
+```bash
+# Installation (WIP)
+# Currently available via skill system:
+# - OpenCode: ~/.config/opencode/skill/qmd-knowledge/
+# - Claude Code: ~/.claude/skills/qmd-knowledge/
+# - Amp: ~/.config/amp/skills/qmd-knowledge/
+```
+
+**Features:**
+- Record learnings with timestamped markdown files
+- Track issue resolutions with issue-specific notes
+- Query knowledge via natural language
+- Export/backup knowledge as standard markdown
+
+**Status:** 🧪 Experimental - API and features may change
+
+**Context:** See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for design discussion and progress.
+
+**Related:**
+- [qmd Knowledge Management Guide](docs/qmd-knowledge-management.md)
+- [qmd GitHub](https://github.com/tobi/qmd)
+- [Agent Skills Specification](https://support.claude.com/en/articles/33007817317)
 
 ### Claude HUD
 

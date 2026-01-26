@@ -99,6 +99,12 @@ generate_claude_configs() {
 			execute "cp -r '$HOME/.claude/agents'/* '$SCRIPT_DIR/configs/claude/agents'/ 2>/dev/null || true"
 			log_success "Copied agents directory"
 		fi
+
+		if [ -d "$HOME/.claude/skills" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/claude/skills"
+			execute "cp -r '$HOME/.claude/skills'/* '$SCRIPT_DIR/configs/claude/skills'/ 2>/dev/null || true"
+			log_success "Copied skills directory"
+		fi
 	fi
 
 	# Copy settings.json from appropriate location based on OS
@@ -140,6 +146,13 @@ generate_amp_configs() {
 	if [ -d "$HOME/.config/amp" ]; then
 		execute "mkdir -p $SCRIPT_DIR/configs/amp"
 		copy_single "$HOME/.config/amp/settings.json" "$SCRIPT_DIR/configs/amp/settings.json"
+
+		if [ -d "$HOME/.config/amp/skills" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/amp/skills"
+			execute "cp -r '$HOME/.config/amp/skills'/* '$SCRIPT_DIR/configs/amp/skills'/ 2>/dev/null || true"
+			log_success "Copied skills directory"
+		fi
+
 		log_success "Amp configs generated"
 	else
 		log_warning "Amp config directory not found: $HOME/.config/amp"
@@ -190,6 +203,43 @@ generate_best_practices() {
 	copy_single "$HOME/.ai-tools/best-practices.md" "$SCRIPT_DIR/configs/best-practices.md"
 }
 
+generate_ai_switcher_configs() {
+	log_info "Generating ai-switcher configs..."
+
+	if [ -f "$HOME/.config/ai-switcher/config.json" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/ai-switcher"
+		copy_single "$HOME/.config/ai-switcher/config.json" "$SCRIPT_DIR/configs/ai-switcher/config.json"
+		log_success "ai-switcher configs generated"
+	else
+		log_warning "ai-switcher config not found: $HOME/.config/ai-switcher/config.json"
+	fi
+}
+
+generate_qmd_knowledge_configs() {
+	log_info "Generating qmd-knowledge configs..."
+
+	# Export OpenCode skill
+	if [ -d "$HOME/.config/opencode/skill/qmd-knowledge" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/opencode/skill"
+		execute "cp -r '$HOME/.config/opencode/skill/qmd-knowledge' '$SCRIPT_DIR/configs/opencode/skill/'"
+		log_success "Exported qmd-knowledge skill for OpenCode"
+	fi
+
+	# Export Claude Code skill
+	if [ -d "$HOME/.claude/skills/qmd-knowledge" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/claude/skills"
+		execute "cp -r '$HOME/.claude/skills/qmd-knowledge' '$SCRIPT_DIR/configs/claude/skills/'"
+		log_success "Exported qmd-knowledge skill for Claude Code"
+	fi
+
+	# Export Amp skill
+	if [ -d "$HOME/.config/amp/skills/qmd-knowledge" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/amp/skills"
+		execute "cp -r '$HOME/.config/amp/skills/qmd-knowledge' '$SCRIPT_DIR/configs/amp/skills/'"
+		log_success "Exported qmd-knowledge skill for Amp"
+	fi
+}
+
 main() {
 	echo "╔══════════════════════════════════════════════════════════╗"
 	echo "║         Config Generator                                 ║"
@@ -218,6 +268,12 @@ main() {
 	echo
 
 	generate_best_practices
+	echo
+
+	generate_ai_switcher_configs
+	echo
+
+	generate_qmd_knowledge_configs
 	echo
 
 	log_success "Config generation complete!"
