@@ -1,6 +1,6 @@
 # CCS Unified Configuration
 # Docs: https://github.com/kaitranntt/ccs
-version: 7
+version: 8
 
 # ----------------------------------------------------------------------------
 # Accounts: Isolated Claude instances (each with separate auth/sessions)
@@ -17,21 +17,15 @@ profiles:
   glm:
     type: api
     settings: ~/.ccs/glm.settings.json
-  glmt:
-    type: api
-    settings: ~/.ccs/glmt.settings.json
-  kimi:
-    type: api
-    settings: ~/.ccs/kimi.settings.json
   mm:
     type: api
     settings: ~/.ccs/mm.settings.json
-  oc:
+  ollama-cloud:
     type: api
-    settings: ~/.ccs/oc.settings.json
-  openrouter:
+    settings: ~/.ccs/ollama-cloud.settings.json
+  ollama:
     type: api
-    settings: ~/.ccs/openrouter.settings.json
+    settings: ~/.ccs/ollama.settings.json
 
 # ----------------------------------------------------------------------------
 # CLIProxy: OAuth-based providers (gemini, codex, agy, qwen, iflow)
@@ -154,3 +148,20 @@ global_env:
     DISABLE_BUG_COMMAND: "1"
     DISABLE_ERROR_REPORTING: "1"
     DISABLE_TELEMETRY: "1"
+
+# ----------------------------------------------------------------------------
+# Thinking: Extended thinking/reasoning budget configuration
+# Controls reasoning depth for supported providers (agy, gemini, codex).
+#
+# Modes: auto (use tier_defaults), off (disable), manual (--thinking flag only)
+# Levels: minimal (512), low (1K), medium (8K), high (24K), xhigh (32K), auto
+# Override: Set global override value (number or level name)
+# Provider overrides: Per-provider tier defaults
+# ----------------------------------------------------------------------------
+thinking:
+  mode: auto
+  tier_defaults:
+    opus: high
+    sonnet: medium
+    haiku: low
+  show_warnings: true

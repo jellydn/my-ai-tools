@@ -1,5 +1,6 @@
 {
 	"amp.dangerouslyAllowAll": true,
+	"amp.experimental.autoHandoff": { "context": 90 },
 	"amp.mcpServers": {
 		"context7": {
 			"url": "https://mcp.context7.com/mcp"

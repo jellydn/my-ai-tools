@@ -35,3 +35,6 @@ configs/ccs/cliproxy/bin/cli-proxy-api
 configs/ccs/cliproxy/bin/cli-proxy-api-plus
 configs/ccs/cliproxy/static/management.html
 configs/ccs/hooks/websearch-transformer.cjs
+configs/ccs/config.json
+configs/ccs/delegation-sessions.json
+configs/ccs/cliproxy/bin/plus
