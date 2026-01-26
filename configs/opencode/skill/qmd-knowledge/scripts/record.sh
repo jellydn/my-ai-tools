@@ -40,10 +40,10 @@ slugify() {
 # Function to update qmd index
 update_index() {
     if command -v qmd &> /dev/null; then
-        echo -e "${GREEN}Updating qmd index...${NC}"
-        qmd update --collection "$PROJECT_NAME" 2>/dev/null || echo -e "${YELLOW}Note: qmd index update failed. Run: qmd init --collection $PROJECT_NAME --path $KNOWLEDGE_BASE${NC}"
+        echo -e "${GREEN}Updating qmd embeddings...${NC}"
+        qmd embed 2>/dev/null || echo -e "${YELLOW}Note: qmd embed failed. Ensure collection is added: qmd collection add $KNOWLEDGE_BASE --name $PROJECT_NAME${NC}"
     else
-        echo -e "${YELLOW}Warning: qmd not found. Install with: cargo install qmd${NC}"
+        echo -e "${YELLOW}Warning: qmd not found. Install with: bun install -g https://github.com/tobi/qmd${NC}"
     fi
 }
 

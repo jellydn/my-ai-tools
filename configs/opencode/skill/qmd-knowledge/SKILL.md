@@ -61,17 +61,30 @@ The `qmd` MCP server provides AI-powered search across all stored knowledge, all
 Use the qmd MCP server tools directly from Claude or OpenCode:
 
 ```bash
-# Search for MCP-related learnings
-qmd query --collection my-ai-tools "MCP servers"
+# Fast keyword search
+qmd search "MCP servers" -c my-ai-tools
 
-# List all collections
-qmd list
+# Semantic search with AI embeddings
+qmd vsearch "how to configure MCP"
+
+# Hybrid search with reranking (best quality)
+qmd query "MCP server configuration"
+
+# Get specific document
+qmd get "references/learnings/2024-01-26-qmd-integration.md"
+
+# Search with minimum score filter
+qmd search "API" --all --files --min-score 0.3 -c my-ai-tools
 ```
 
 ## Setup
 
-1. **Install qmd** (requires Rust):
+1. **Install qmd**:
    ```bash
+   # Install globally via bun
+   bun install -g https://github.com/tobi/qmd
+   
+   # Or via cargo (requires Rust)
    cargo install qmd
    ```
 
@@ -79,9 +92,16 @@ qmd list
 
 3. **Initialize project knowledge base**:
    ```bash
+   # Create and copy skill files
    mkdir -p ~/.ai-knowledges/my-ai-tools
    cp -r configs/opencode/skill/qmd-knowledge/* ~/.ai-knowledges/my-ai-tools/
-   qmd init --collection my-ai-tools --path ~/.ai-knowledges/my-ai-tools
+   
+   # Add collection and context for semantic search
+   qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
+   qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project: learnings, issue notes, and conventions"
+   
+   # Generate embeddings for AI-powered search
+   qmd embed
    ```
 
 ## Knowledge structure

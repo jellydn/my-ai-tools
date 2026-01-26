@@ -39,7 +39,13 @@ This system provides a lightweight, project-specific knowledge management soluti
 
 ### 1. Install qmd
 
-qmd requires Rust. Install from crates.io:
+Install qmd globally via bun (recommended):
+
+```bash
+bun install -g https://github.com/tobi/qmd
+```
+
+Or install from crates.io using Rust:
 
 ```bash
 cargo install qmd
@@ -92,9 +98,14 @@ mkdir -p ~/.ai-knowledges/my-ai-tools
 # Copy skill files
 cp -r configs/opencode/skill/qmd-knowledge/* ~/.ai-knowledges/my-ai-tools/
 
-# Initialize qmd collection
-cd ~/.ai-knowledges/my-ai-tools
-qmd init --collection my-ai-tools --path .
+# Add collection for this project
+qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
+
+# Add context to improve search results
+qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project: learnings, issue notes, and project conventions"
+
+# Generate embeddings for semantic search
+qmd embed
 ```
 
 ### 4. Install Configuration (Optional)
@@ -146,14 +157,29 @@ Claude will use the qmd MCP server tools to query the knowledge base.
 #### Manual Queries
 
 ```bash
-# Search for MCP-related learnings
-qmd query --collection my-ai-tools "MCP servers"
+# Fast keyword search within a collection
+qmd search "MCP servers" -c my-ai-tools
 
-# List all collections
-qmd list
+# Semantic search using AI embeddings
+qmd vsearch "how to configure MCP"
 
-# Update index after manual edits
-qmd update --collection my-ai-tools
+# Hybrid search with reranking (best quality)
+qmd query "quarterly planning process"
+
+# Get a specific document
+qmd get "references/learnings/2024-01-26-qmd-integration.md"
+
+# Get document by docid (shown in search results)
+qmd get "#abc123"
+
+# Get multiple documents by glob pattern
+qmd multi-get "references/learnings/2025-05*.md"
+
+# Search with minimum score filter
+qmd search "API" --all --files --min-score 0.3 -c my-ai-tools
+
+# Update embeddings after manual edits
+qmd embed
 ```
 
 ## Example Workflow
@@ -175,7 +201,12 @@ qmd update --collection my-ai-tools
 
 **Claude uses qmd MCP server:**
 ```
-qmd query --collection my-ai-tools "MCP servers"
+qmd query "MCP servers"
+```
+
+Or with collection filter:
+```
+qmd search "MCP servers" -c my-ai-tools
 ```
 
 **Claude responds with relevant learnings from the knowledge base.**
@@ -198,11 +229,16 @@ Each project gets its own knowledge base:
 # Initialize for a different project
 mkdir -p ~/.ai-knowledges/another-project
 cp -r configs/opencode/skill/qmd-knowledge/* ~/.ai-knowledges/another-project/
-cd ~/.ai-knowledges/another-project
-qmd init --collection another-project --path .
+
+# Add collection and context
+qmd collection add ~/.ai-knowledges/another-project --name another-project
+qmd context add qmd://another-project "Knowledge base for another-project"
+
+# Generate embeddings
+qmd embed
 ```
 
-Claude can filter queries by project using the `--collection` flag.
+Claude can filter queries by project using the `-c` collection flag.
 
 ## Benefits Over claude-mem
 
@@ -249,7 +285,11 @@ git push
 # On machine 2
 cd ~/.ai-knowledges
 git clone <your-backup-repo> my-ai-tools
-qmd init --collection my-ai-tools --path my-ai-tools
+
+# Add collection and generate embeddings
+qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
+qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project"
+qmd embed
 ```
 
 ## Troubleshooting
@@ -258,6 +298,10 @@ qmd init --collection my-ai-tools --path my-ai-tools
 
 Install qmd:
 ```bash
+# Via bun (recommended)
+bun install -g https://github.com/tobi/qmd
+
+# Or via cargo
 cargo install qmd
 ```
 
@@ -267,6 +311,9 @@ Initialize the knowledge base:
 ```bash
 mkdir -p ~/.ai-knowledges/my-ai-tools
 cp -r configs/opencode/skill/qmd-knowledge/* ~/.ai-knowledges/my-ai-tools/
+qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
+qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project"
+qmd embed
 ```
 
 ### MCP server not working
@@ -275,13 +322,14 @@ cp -r configs/opencode/skill/qmd-knowledge/* ~/.ai-knowledges/my-ai-tools/
 2. Verify MCP server config in `~/.claude/mcp-servers.json` or `~/.config/amp/settings.json`
 3. Restart Claude Code or Amp
 
-### Index not updating
+### Embeddings not updating
 
-Manually update the index:
+Manually regenerate embeddings:
 ```bash
-cd ~/.ai-knowledges/my-ai-tools
-qmd update --collection my-ai-tools
+qmd embed
 ```
+
+This will update the semantic search index for all collections.
 
 ## Resources
 
