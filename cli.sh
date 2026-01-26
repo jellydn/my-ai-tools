@@ -329,17 +329,62 @@ copy_configurations() {
 		execute "mkdir -p $HOME/.claude/agents"
 		execute "cp $SCRIPT_DIR/configs/claude/agents/* $HOME/.claude/agents/"
 	fi
+	# Remove existing skills to avoid conflicts with directory/file name collisions
 	if [ -d "$SCRIPT_DIR/configs/claude/skills" ]; then
-		execute "mkdir -p $HOME/.claude/skills"
-		execute "cp -r $SCRIPT_DIR/configs/claude/skills/* $HOME/.claude/skills/"
+		execute "rm -rf $HOME/.claude/skills"
+		execute "cp -r $SCRIPT_DIR/configs/claude/skills $HOME/.claude/"
 	fi
+
+	# Add MCP servers using Claude Code CLI
+	if command -v claude &>/dev/null; then
+		log_info "Setting up Claude Code MCP servers..."
+
+		# context7 MCP server
+		if [ -t 1 ]; then
+			read -p "Install context7 MCP server (documentation lookup)? (y/n) " -n 1 -r
+			echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				execute "claude mcp add --transport stdio context7 -- npx -y @upstash/context7-mcp@latest 2>/dev/null && log_success 'context7 MCP server added' || log_warning 'context7 already installed or failed'"
+			fi
+		else
+			execute "claude mcp add --transport stdio context7 -- npx -y @upstash/context7-mcp@latest 2>/dev/null || true"
+		fi
+
+		# sequential-thinking MCP server
+		if [ -t 1 ]; then
+			read -p "Install sequential-thinking MCP server (multi-step reasoning)? (y/n) " -n 1 -r
+			echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				execute "claude mcp add --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking 2>/dev/null && log_success 'sequential-thinking MCP server added' || log_warning 'sequential-thinking already installed or failed'"
+			fi
+		else
+			execute "claude mcp add --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking 2>/dev/null || true"
+		fi
+
+		# qmd MCP server
+		if [ -t 1 ]; then
+			read -p "Install qmd MCP server (knowledge management)? (y/n) " -n 1 -r
+			echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				execute "claude mcp add --transport stdio qmd -- qmd mcp 2>/dev/null && log_success 'qmd MCP server added' || log_warning 'qmd already installed or failed'"
+			fi
+		else
+			execute "claude mcp add --transport stdio qmd -- qmd mcp 2>/dev/null || true"
+		fi
+
+		log_success "MCP server setup complete"
+	fi
+
 	log_success "Claude Code configs copied"
 
 	if [ -d "$HOME/.config/opencode" ] || command -v opencode &>/dev/null; then
 		execute "mkdir -p $HOME/.config/opencode/configs"
 		execute "cp $SCRIPT_DIR/configs/opencode/opencode.json $HOME/.config/opencode/"
+		execute "rm -rf $HOME/.config/opencode/agent"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/agent $HOME/.config/opencode/"
+		execute "rm -rf $HOME/.config/opencode/command"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/command $HOME/.config/opencode/"
+		execute "rm -rf $HOME/.config/opencode/skill"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/skill $HOME/.config/opencode/"
 		execute "cp $SCRIPT_DIR/configs/best-practices.md $HOME/.config/opencode/configs/"
 		log_success "OpenCode configs copied"
@@ -348,6 +393,10 @@ copy_configurations() {
 	if [ -d "$HOME/.config/amp" ] || command -v amp &>/dev/null; then
 		execute "mkdir -p $HOME/.config/amp"
 		execute "cp $SCRIPT_DIR/configs/amp/settings.json $HOME/.config/amp/"
+		if [ -d "$SCRIPT_DIR/configs/amp/skills" ]; then
+			execute "rm -rf $HOME/.config/amp/skills"
+			execute "cp -r $SCRIPT_DIR/configs/amp/skills $HOME/.config/amp/"
+		fi
 		log_success "Amp configs copied"
 	fi
 
@@ -373,27 +422,6 @@ copy_configurations() {
 		else
 			log_info "ai-switcher config not found in source, preserving existing"
 		fi
-	fi
-
-	# Install qmd-knowledge skill for OpenCode
-	if [ -d "$SCRIPT_DIR/configs/opencode/skill/qmd-knowledge" ]; then
-		execute "mkdir -p $HOME/.config/opencode/skill"
-		execute "cp -r $SCRIPT_DIR/configs/opencode/skill/qmd-knowledge $HOME/.config/opencode/skill/"
-		log_success "qmd-knowledge skill installed for OpenCode"
-	fi
-
-	# Install qmd-knowledge skill for Claude Code
-	if [ -d "$SCRIPT_DIR/configs/opencode/skill/qmd-knowledge" ]; then
-		execute "mkdir -p $HOME/.claude/skills"
-		execute "cp -r $SCRIPT_DIR/configs/opencode/skill/qmd-knowledge $HOME/.claude/skills/"
-		log_success "qmd-knowledge skill installed for Claude Code"
-	fi
-
-	# Install qmd-knowledge skill for Amp
-	if [ -d "$SCRIPT_DIR/configs/opencode/skill/qmd-knowledge" ]; then
-		execute "mkdir -p $HOME/.config/amp/skills"
-		execute "cp -r $SCRIPT_DIR/configs/opencode/skill/qmd-knowledge $HOME/.config/amp/skills/"
-		log_success "qmd-knowledge skill installed for Amp"
 	fi
 
 	execute "mkdir -p $HOME/.ai-tools"

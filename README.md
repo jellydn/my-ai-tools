@@ -32,7 +32,25 @@ curl -fsSL https://claude.ai/install.sh | bash
 
 ### MCP Servers
 
-Add to `~/.claude/mcp-servers.json`:
+**Automatic Setup (Recommended):**
+
+Run the setup script to configure MCP servers for Claude Code:
+
+```bash
+./cli.sh
+```
+
+The script will **prompt you** to install each MCP server:
+
+- [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
+- [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
+- [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
+
+**Manual Setup:**
+
+If you prefer to configure manually or are using Claude Desktop:
+
+For **Claude Desktop**, add to `~/.claude/mcp-servers.json`:
 
 ```json
 {
@@ -44,16 +62,24 @@ Add to `~/.claude/mcp-servers.json`:
     "sequential-thinking": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "qmd": {
+      "command": "qmd",
+      "args": ["mcp"]
     }
   }
 }
 ```
 
-**Available MCP Servers:**
+For **Claude Code**, use the CLI:
 
-- [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
-- [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
-- [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
+```bash
+claude mcp add --transport stdio context7 -- npx -y @upstash/context7-mcp@latest
+claude mcp add --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
+claude mcp add --transport stdio qmd -- qmd mcp
+```
+
+> **Note:** The setup script handles both approaches automatically.
 
 **💡 Knowledge Management:**
 
