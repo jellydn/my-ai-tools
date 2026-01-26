@@ -329,6 +329,10 @@ copy_configurations() {
 		execute "mkdir -p $HOME/.claude/agents"
 		execute "cp $SCRIPT_DIR/configs/claude/agents/* $HOME/.claude/agents/"
 	fi
+	if [ -d "$SCRIPT_DIR/configs/claude/skills" ]; then
+		execute "mkdir -p $HOME/.claude/skills"
+		execute "cp -r $SCRIPT_DIR/configs/claude/skills/* $HOME/.claude/skills/"
+	fi
 	log_success "Claude Code configs copied"
 
 	if [ -d "$HOME/.config/opencode" ] || command -v opencode &>/dev/null; then
@@ -369,6 +373,27 @@ copy_configurations() {
 		else
 			log_info "ai-switcher config not found in source, preserving existing"
 		fi
+	fi
+
+	# Install qmd-knowledge skill for OpenCode
+	if [ -d "$SCRIPT_DIR/configs/opencode/skill/qmd-knowledge" ]; then
+		execute "mkdir -p $HOME/.config/opencode/skill"
+		execute "cp -r $SCRIPT_DIR/configs/opencode/skill/qmd-knowledge $HOME/.config/opencode/skill/"
+		log_success "qmd-knowledge skill installed for OpenCode"
+	fi
+
+	# Install qmd-knowledge skill for Claude Code
+	if [ -d "$SCRIPT_DIR/configs/opencode/skill/qmd-knowledge" ]; then
+		execute "mkdir -p $HOME/.claude/skills"
+		execute "cp -r $SCRIPT_DIR/configs/opencode/skill/qmd-knowledge $HOME/.claude/skills/"
+		log_success "qmd-knowledge skill installed for Claude Code"
+	fi
+
+	# Install qmd-knowledge skill for Amp
+	if [ -d "$SCRIPT_DIR/configs/opencode/skill/qmd-knowledge" ]; then
+		execute "mkdir -p $HOME/.config/amp/skills"
+		execute "cp -r $SCRIPT_DIR/configs/opencode/skill/qmd-knowledge $HOME/.config/amp/skills/"
+		log_success "qmd-knowledge skill installed for Amp"
 	fi
 
 	execute "mkdir -p $HOME/.ai-tools"

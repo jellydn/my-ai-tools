@@ -2,7 +2,7 @@
 name: qmd-knowledge
 description: Project-specific knowledge management system using qmd MCP server. Captures learnings, issue notes, and conventions in a searchable knowledge base.
 license: MIT
-compatibility: opencode, claude
+compatibility: opencode, claude, amp
 metadata:
   audience: all
   workflow: knowledge-management
@@ -29,8 +29,8 @@ Use this skill when you need to:
 This skill provides a unified knowledge management system. You install the skill once, and it manages knowledge across all your projects using qmd collections:
 
 ```
-# The qmd-knowledge skill (installed once)
-~/.config/opencode/skill/qmd-knowledge/
+# The qmd-knowledge skill (installed to your AI tool's skills directory)
+# Location varies by tool: ~/.config/opencode/skill/, ~/.claude/skills/, or ~/.config/amp/skills/
 ├── SKILL.md              # This file - the skill definition
 ├── scripts/              # Executable scripts
 │   └── record.sh         # Record learnings/issues/notes
@@ -46,7 +46,7 @@ This skill provides a unified knowledge management system. You install the skill
     └── issues/
 ```
 
-The `qmd` MCP server provides AI-powered search across all stored knowledge, allowing Claude to autonomously query and update the knowledge base.
+The `qmd` MCP server provides AI-powered search across all stored knowledge, allowing your AI assistant to autonomously query and update the knowledge base.
 
 ## Available scripts
 
@@ -54,13 +54,13 @@ The `qmd` MCP server provides AI-powered search across all stored knowledge, all
 
 ```bash
 # Record a learning (use the skill's script)
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "qmd MCP integration"
+$SKILL_PATH/scripts/record.sh learning "qmd MCP integration"
 
 # Add a note to an issue
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh issue 123 "Fixed by updating dependencies"
+$SKILL_PATH/scripts/record.sh issue 123 "Fixed by updating dependencies"
 
 # Record a general note
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh note "Consider using agent skills for extensibility"
+$SKILL_PATH/scripts/record.sh note "Consider using agent skills for extensibility"
 ```
 
 ### Querying knowledge
@@ -93,7 +93,10 @@ qmd search "API" --all --files --min-score 0.3 -c my-ai-tools
 
 2. **Install the skill** (via the my-ai-tools setup or manually):
    ```bash
-   # The skill is installed to ~/.config/opencode/skill/qmd-knowledge/
+   # The skill is installed to your AI tool's skills directory:
+   # - OpenCode: ~/.config/opencode/skill/qmd-knowledge/
+   # - Claude Code: ~/.claude/skills/qmd-knowledge/
+   # - Amp: ~/.config/amp/skills/qmd-knowledge/
    # This happens automatically when you run ./cli.sh
    ```
 
@@ -138,7 +141,7 @@ The qmd MCP server allows Claude to:
 
 2. **Claude recognizes the skill and executes**:
    ```bash
-   ~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "qmd MCP autonomous tool use"
+   $SKILL_PATH/scripts/record.sh learning "qmd MCP autonomous tool use"
    ```
 
 3. **Later, you ask**:
