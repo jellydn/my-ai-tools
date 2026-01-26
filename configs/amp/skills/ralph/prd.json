@@ -1,0 +1,129 @@
+{
+  "project": "vercel-tui",
+  "branchName": "ralph/vercel-project-manager",
+  "description": "Vercel Project Manager TUI - List and delete Vercel projects from terminal",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Initialize Go project with TUI dependencies",
+      "description": "As a developer, I need the project scaffolded with bubbletea and lipgloss so I can build the TUI.",
+      "acceptanceCriteria": [
+        "Go module initialized with go mod init vercel-tui",
+        "Add dependencies: github.com/charmbracelet/bubbletea, github.com/charmbracelet/lipgloss, github.com/charmbracelet/bubbles",
+        "Create main.go with minimal bubbletea program that displays 'Hello Vercel TUI' and quits on 'q'",
+        "go build succeeds"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Prompt for Bearer token on startup",
+      "description": "As a user, I want to enter my Vercel API token so the CLI can authenticate with Vercel.",
+      "acceptanceCriteria": [
+        "On startup, show input prompt for Bearer token using bubbles/textinput",
+        "Input is masked (shows * for each character)",
+        "Press Enter to submit token",
+        "Store token in model struct for session use",
+        "Show error message if token is empty after submit",
+        "go build succeeds"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Fetch projects from Vercel API",
+      "description": "As the system, I need to call Vercel API to get the list of projects.",
+      "acceptanceCriteria": [
+        "Create api/client.go with FetchProjects(token string) ([]Project, error) function",
+        "Project struct has ID and Name fields",
+        "Call GET https://api.vercel.com/v9/projects with Authorization: Bearer header",
+        "Parse JSON response and return slice of Project",
+        "Return error with message if status code is not 200",
+        "go build succeeds"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Display project list in TUI",
+      "description": "As a user, I want to see all my Vercel projects listed so I can decide which to delete.",
+      "acceptanceCriteria": [
+        "After token entry, show loading spinner/message while fetching",
+        "Display project names in scrollable list using bubbles/list",
+        "Show error message if API call fails",
+        "Arrow keys or j/k navigate the list",
+        "go build succeeds"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Delete single project",
+      "description": "As a user, I want to select a project and delete it.",
+      "acceptanceCriteria": [
+        "Add DeleteProject(token, projectID string) error function to api/client.go",
+        "Call DELETE https://api.vercel.com/v9/projects/{projectId}",
+        "Press Enter on selected project shows confirmation prompt 'Delete PROJECT_NAME? (y/n)'",
+        "Press 'y' calls DeleteProject and shows success message",
+        "Press 'n' or Escape cancels and returns to list",
+        "Refresh list after successful deletion",
+        "go build succeeds"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Batch select multiple projects",
+      "description": "As a user, I want to select multiple projects at once for batch deletion.",
+      "acceptanceCriteria": [
+        "Press Space toggles selection on current item",
+        "Selected items show [x] prefix, unselected show [ ]",
+        "Track selected project IDs in model",
+        "Show count of selected items in status bar (e.g. '3 selected')",
+        "go build succeeds"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Batch delete selected projects",
+      "description": "As a user, I want to delete all selected projects at once.",
+      "acceptanceCriteria": [
+        "Press 'd' when items are selected shows confirmation 'Delete N projects? (y/n)'",
+        "Press 'y' deletes projects sequentially with progress indicator",
+        "Show summary after completion: 'Deleted X projects, Y failed'",
+        "Refresh list after batch deletion",
+        "go build succeeds"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Add keyboard help and quit functionality",
+      "description": "As a user, I want intuitive keyboard controls and help text.",
+      "acceptanceCriteria": [
+        "Press 'q' or Ctrl+C quits the application",
+        "Show help text at bottom: 'j/k: navigate | space: select | enter: delete | d: delete selected | q: quit'",
+        "Help text styled with lipgloss (subtle color)",
+        "go build succeeds"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

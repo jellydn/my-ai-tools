@@ -1,8 +1,6 @@
 {
 	"$schema": "https://opencode.ai/config.json",
-	"instructions": [
-		"~/Projects/dotfiles/common/.agent-os/standards/best-practices.md"
-	],
+	"instructions": ["~/.config/opencode/config/best-practices.md"],
 	"theme": "kanagawa",
 	"default_agent": "plan",
 	"mcp": {
