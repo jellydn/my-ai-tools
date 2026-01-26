@@ -281,6 +281,28 @@ install_ccs() {
 	fi
 }
 
+install_ai_switcher() {
+	if [ -t 1 ]; then
+		read -p "Do you want to install ai-switcher? (y/n) " -n 1 -r
+		echo
+		if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+			log_warning "Skipping ai-switcher installation"
+			return
+		fi
+	else
+		log_info "Installing ai-switcher (non-interactive mode)..."
+	fi
+
+	log_info "Installing ai-switcher..."
+
+	if command -v ai-switcher &>/dev/null; then
+		log_warning "ai-switcher is already installed"
+	else
+		execute "curl -fsSL https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/install.sh | sh"
+		log_success "ai-switcher installed"
+	fi
+}
+
 copy_configurations() {
 	log_info "Copying configurations..."
 
@@ -364,7 +386,7 @@ enable_plugins() {
 main() {
 	echo "╔══════════════════════════════════════════════════════════╗"
 	echo "║         AI Tools Setup                                   ║"
-	echo "║   Claude Code • OpenCode • Amp • CCS                     ║"
+	echo "║   Claude Code • OpenCode • Amp • CCS • ai-switcher       ║"
 	echo "╚══════════════════════════════════════════════════════════╝"
 	echo
 
@@ -392,6 +414,9 @@ main() {
 	echo
 
 	install_ccs
+	echo
+
+	install_ai_switcher
 	echo
 
 	copy_configurations
