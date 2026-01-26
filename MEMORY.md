@@ -101,6 +101,34 @@ Instead, use the `qmd-knowledge` skill:
 
 ---
 
+## Best Practices
+
+### Session Wrap-up
+
+At the end of a work session, consider prompting the user about key learnings:
+
+> "What were the main discoveries or decisions from this session? Would you like me to record any learnings?"
+
+### Pattern Detection
+
+Be attentive to phrases that indicate valuable knowledge capture opportunities:
+
+- "I discovered that..."
+- "I learned that..."
+- "The solution was..."
+- "The key insight is..."
+- "Don't forget to..."
+- "Make sure to..."
+
+When you detect these patterns, suggest recording:
+> "That sounds like a useful learning. Would you like me to record it?"
+
+### Auto-Index Updates
+
+The record script automatically runs `qmd embed` after each write, ensuring the knowledge base is searchable immediately. No manual re-indexing required.
+
+---
+
 ## Quick Reference
 
 | Task             | Tool/Command           |
