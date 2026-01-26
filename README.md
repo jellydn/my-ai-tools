@@ -422,6 +422,38 @@ ccs auth list
 
 **Alternative:** Use the [qmd Knowledge Management System](docs/qmd-knowledge-management.md) for project-specific knowledge capture without repository pollution.
 
+### 🔮 qmd Knowledge Skill (Experimental / WIP)
+
+**qmd Knowledge Skill** is an experimental memory/context management system for AI coding tools. It provides an alternative approach to persistent knowledge capture with the following goals:
+
+- **No Repository Pollution**: Knowledge stored externally, not in project directories
+- **AI-Powered Search**: Semantic search using qmd embeddings
+- **Multi-Project Support**: Isolated knowledge bases per project
+- **Simple & Reliable**: Minimal configuration, maximum utility
+
+```bash
+# Installation (WIP)
+# Currently available via skill system:
+# - OpenCode: ~/.config/opencode/skill/qmd-knowledge/
+# - Claude Code: ~/.claude/skills/qmd-knowledge/
+# - Amp: ~/.config/amp/skills/qmd-knowledge/
+```
+
+**Features:**
+- Record learnings with timestamped markdown files
+- Track issue resolutions with issue-specific notes
+- Query knowledge via natural language
+- Export/backup knowledge as standard markdown
+
+**Status:** 🧪 Experimental - API and features may change
+
+**Context:** See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for design discussion and progress.
+
+**Related:**
+- [qmd Knowledge Management Guide](docs/qmd-knowledge-management.md)
+- [qmd GitHub](https://github.com/tobi/qmd)
+- [Agent Skills Specification](https://support.claude.com/en/articles/33007817317)
+
 ### Claude HUD
 
 [**Claude HUD**](https://github.com/jarrodwatts/claude-hud) - Status line monitoring plugin for tracking context usage, active tools, running agents, and todo progress.
