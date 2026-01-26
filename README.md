@@ -81,6 +81,19 @@ claude mcp add --transport stdio qmd -- qmd mcp
 
 > **Note:** The setup script handles both approaches automatically.
 
+**Managing MCP Servers:**
+
+```bash
+# List all configured servers
+claude mcp list
+
+# Remove an MCP server (e.g., remove context7 if using the plugin version)
+claude mcp remove context7
+
+# Get details for a specific server
+claude mcp get qmd
+```
+
 **💡 Knowledge Management:**
 
 Replace deprecated `claude-mem` with the **qmd-based knowledge system**:
