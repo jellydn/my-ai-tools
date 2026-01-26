@@ -454,6 +454,43 @@ ccs auth create work
 ccs auth list
 ```
 
+## 🔄 AI CLI Switcher (Optional)
+
+[**AI CLI Switcher**](https://github.com/jellydn/ai-cli-switcher) - Fast launcher for switching between AI coding assistants. Use aliases and templates to quickly switch between Claude, OpenCode, Amp, and more.
+
+### Installation
+
+The setup script will prompt to install ai-switcher:
+
+```bash
+./cli.sh
+```
+
+Or install manually:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/install.sh | sh
+```
+
+### Configuration
+
+Copy `configs/ai-switcher/config.json` to `~/.config/ai-switcher/` for pre-configured tools and templates:
+
+**Tools:**
+- `claude` / `c` - Anthropic Claude CLI
+- `opencode` / `o`, `oc` - OpenCode AI assistant
+- `amp` / `a` - AI coding assistant by Modular
+
+**Templates:**
+- `review` - Code review with OpenCode
+- `commit` / `commit-zen` - Generate commit message
+- `ac` / `commit-atomic` - Atomic commit message
+- `pr` / `draft-pr` - Create draft pull request
+- `types` - Enhance type safety
+- `test` - Generate tests
+- `docs` - Add documentation
+- `simplify` / `simplifier` - Simplify over-engineered code
+
 ## 🛠️ Companion Tools
 
 ### Plannotator
