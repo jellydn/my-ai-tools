@@ -190,6 +190,18 @@ generate_best_practices() {
 	copy_single "$HOME/.ai-tools/best-practices.md" "$SCRIPT_DIR/configs/best-practices.md"
 }
 
+generate_ai_switcher_configs() {
+	log_info "Generating ai-switcher configs..."
+
+	if [ -f "$HOME/.config/ai-switcher/config.json" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/ai-switcher"
+		copy_single "$HOME/.config/ai-switcher/config.json" "$SCRIPT_DIR/configs/ai-switcher/config.json"
+		log_success "ai-switcher configs generated"
+	else
+		log_warning "ai-switcher config not found: $HOME/.config/ai-switcher/config.json"
+	fi
+}
+
 main() {
 	echo "╔══════════════════════════════════════════════════════════╗"
 	echo "║         Config Generator                                 ║"
@@ -218,6 +230,9 @@ main() {
 	echo
 
 	generate_best_practices
+	echo
+
+	generate_ai_switcher_configs
 	echo
 
 	log_success "Config generation complete!"

@@ -182,6 +182,12 @@ backup_configs() {
 			log_success "Backed up CCS configs"
 		fi
 
+		if [ -f "$HOME/.config/ai-switcher/config.json" ]; then
+			execute "mkdir -p $BACKUP_DIR/ai-switcher"
+			execute "cp $HOME/.config/ai-switcher/config.json $BACKUP_DIR/ai-switcher/"
+			log_success "Backed up ai-switcher configs"
+		fi
+
 		log_success "Backup completed: $BACKUP_DIR"
 	fi
 }
@@ -294,6 +300,8 @@ copy_configurations() {
 	# Copy other configs to ~/.claude (all platforms)
 	execute "cp $SCRIPT_DIR/configs/claude/mcp-servers.json $HOME/.claude/mcp-servers.json"
 	execute "cp $SCRIPT_DIR/configs/claude/CLAUDE.md $HOME/.claude/CLAUDE.md"
+	# Remove existing commands dir to avoid permission issues, then copy fresh
+	execute "rm -rf $HOME/.claude/commands"
 	execute "cp -r $SCRIPT_DIR/configs/claude/commands $HOME/.claude/"
 	if [ -d "$SCRIPT_DIR/configs/claude/agents" ]; then
 		execute "mkdir -p $HOME/.claude/agents"
@@ -329,6 +337,16 @@ copy_configurations() {
 			execute "cp -r $SCRIPT_DIR/configs/ccs/hooks $HOME/.ccs/"
 		fi
 		log_success "CCS configs copied"
+	fi
+
+	if [ -d "$HOME/.config/ai-switcher" ] || [ -f "$HOME/.config/ai-switcher/config.json" ]; then
+		execute "mkdir -p $HOME/.config/ai-switcher"
+		if [ -f "$SCRIPT_DIR/configs/ai-switcher/config.json" ]; then
+			execute "cp $SCRIPT_DIR/configs/ai-switcher/config.json $HOME/.config/ai-switcher/"
+			log_success "ai-switcher configs copied"
+		else
+			log_info "ai-switcher config not found in source, preserving existing"
+		fi
 	fi
 
 	execute "mkdir -p $HOME/.ai-tools"
