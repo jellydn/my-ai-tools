@@ -26,17 +26,24 @@ Use this skill when you need to:
 
 ## How it works
 
-This skill uses a standardized directory structure within `~/.ai-knowledges/` to store project-specific knowledge:
+This skill provides a unified knowledge management system. You install the skill once, and it manages knowledge across all your projects using qmd collections:
 
 ```
+# The qmd-knowledge skill (installed once)
+~/.config/opencode/skill/qmd-knowledge/
+├── SKILL.md              # This file - the skill definition
+├── scripts/              # Executable scripts
+│   └── record.sh         # Record learnings/issues/notes
+└── references/           # Example structure and READMEs
+
+# Project knowledge storage (managed by the skill)
 ~/.ai-knowledges/
-└── my-ai-tools/              # Project root
-    ├── SKILL.md              # This file (symlinked from config)
-    ├── scripts/              # Executable scripts
-    │   └── record.sh         # Record learnings/issues/notes
-    └── references/           # Knowledge base
-        ├── learnings/        # Project learnings
-        └── issues/           # Issue-specific notes
+├── my-ai-tools/          # Collection for my-ai-tools project
+│   ├── learnings/
+│   └── issues/
+└── another-project/      # Collection for another-project
+    ├── learnings/
+    └── issues/
 ```
 
 The `qmd` MCP server provides AI-powered search across all stored knowledge, allowing Claude to autonomously query and update the knowledge base.
@@ -46,14 +53,14 @@ The `qmd` MCP server provides AI-powered search across all stored knowledge, all
 ### Recording knowledge
 
 ```bash
-# Record a learning
-~/.ai-knowledges/my-ai-tools/scripts/record.sh learning "qmd MCP integration"
+# Record a learning (use the skill's script)
+~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "qmd MCP integration"
 
 # Add a note to an issue
-~/.ai-knowledges/my-ai-tools/scripts/record.sh issue 123 "Fixed by updating dependencies"
+~/.config/opencode/skill/qmd-knowledge/scripts/record.sh issue 123 "Fixed by updating dependencies"
 
 # Record a general note
-~/.ai-knowledges/my-ai-tools/scripts/record.sh note "Consider using agent skills for extensibility"
+~/.config/opencode/skill/qmd-knowledge/scripts/record.sh note "Consider using agent skills for extensibility"
 ```
 
 ### Querying knowledge
@@ -84,15 +91,21 @@ qmd search "API" --all --files --min-score 0.3 -c my-ai-tools
    bun install -g https://github.com/tobi/qmd
    ```
 
-2. **Configure MCP server** (see installation docs for Claude/OpenCode/Amp)
-
-3. **Initialize project knowledge base**:
+2. **Install the skill** (via the my-ai-tools setup or manually):
    ```bash
-   # Create and copy skill files
-   mkdir -p ~/.ai-knowledges/my-ai-tools
-   cp -r configs/opencode/skill/qmd-knowledge/* ~/.ai-knowledges/my-ai-tools/
+   # The skill is installed to ~/.config/opencode/skill/qmd-knowledge/
+   # This happens automatically when you run ./cli.sh
+   ```
+
+3. **Configure MCP server** (see installation docs for Claude/OpenCode/Amp)
+
+4. **Create a knowledge collection for your project**:
+   ```bash
+   # Create storage directory for your project
+   mkdir -p ~/.ai-knowledges/my-ai-tools/learnings
+   mkdir -p ~/.ai-knowledges/my-ai-tools/issues
    
-   # Add collection and context for semantic search
+   # Add qmd collection
    qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
    qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project: learnings, issue notes, and conventions"
    
@@ -125,7 +138,7 @@ The qmd MCP server allows Claude to:
 
 2. **Claude recognizes the skill and executes**:
    ```bash
-   ~/.ai-knowledges/my-ai-tools/scripts/record.sh learning "qmd MCP autonomous tool use"
+   ~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "qmd MCP autonomous tool use"
    ```
 
 3. **Later, you ask**:

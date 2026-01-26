@@ -14,26 +14,35 @@ This system provides a lightweight, project-specific knowledge management soluti
 
 ## Architecture
 
+The qmd-knowledge skill follows the Agent Skills specification:
+
 ```
+# The skill (one SKILL.md defines the capability)
+~/.config/opencode/skill/qmd-knowledge/
+├── SKILL.md              # Skill definition
+├── scripts/              # Executable scripts
+│   └── record.sh         # Record learnings/issues/notes
+└── references/           # Documentation and examples
+    ├── learnings/
+    │   └── README.md
+    └── issues/
+        └── README.md
+
+# Knowledge storage (qmd collections per project)
 ~/.ai-knowledges/
-├── my-ai-tools/              # Project root = Skill folder
-│   ├── SKILL.md              # Required: Metadata + instructions
-│   ├── scripts/              # Executable scripts
-│   │   └── record.sh         # Script to record learnings/issues
-│   └── references/           # Knowledge base (learnings, issues)
-│       ├── learnings/
-│       │   ├── README.md
-│       │   ├── 2024-01-26-qmd-integration.md
-│       │   └── 2024-01-27-mcp-servers.md
-│       └── issues/
-│           ├── README.md
-│           ├── 123.md
-│           └── 456.md
-└── another-project/
-    ├── SKILL.md
-    ├── scripts/
-    └── references/
+├── my-ai-tools/          # Collection for my-ai-tools project
+│   ├── learnings/
+│   │   ├── 2024-01-26-qmd-integration.md
+│   │   └── 2024-01-27-mcp-servers.md
+│   └── issues/
+│       ├── 123.md
+│       └── 456.md
+└── another-project/      # Collection for another-project
+    ├── learnings/
+    └── issues/
 ```
+
+**Key concept**: One skill (`qmd-knowledge`) manages knowledge for multiple projects. Each project is a qmd collection, not a separate skill.
 
 ## Installation
 
@@ -73,16 +82,24 @@ The MCP server configuration is already included in this repository.
 }
 ```
 
-### 3. Initialize Project Knowledge Base
+### 3. Install the Skill
+
+The skill is installed when you run the setup script:
 
 ```bash
-# Create knowledge base directory
-mkdir -p ~/.ai-knowledges/my-ai-tools
+./cli.sh
+```
 
-# Copy skill files
-cp -r configs/opencode/skill/qmd-knowledge/* ~/.ai-knowledges/my-ai-tools/
+This copies the qmd-knowledge skill to `~/.config/opencode/skill/qmd-knowledge/`.
 
-# Add collection for this project
+### 4. Create a Knowledge Collection for Your Project
+
+```bash
+# Create storage directory for your project
+mkdir -p ~/.ai-knowledges/my-ai-tools/learnings
+mkdir -p ~/.ai-knowledges/my-ai-tools/issues
+
+# Add qmd collection for this project
 qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
 
 # Add context to improve search results
@@ -91,6 +108,8 @@ qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project: learn
 # Generate embeddings for semantic search
 qmd embed
 ```
+
+**Note**: The skill is installed once. Each project gets its own qmd collection for storing knowledge.
 
 ### 4. Install Configuration (Optional)
 
@@ -109,7 +128,7 @@ This will copy the qmd skill to `~/.config/opencode/skill/qmd-knowledge/`.
 #### Record a Learning
 
 ```bash
-~/.ai-knowledges/my-ai-tools/scripts/record.sh learning "qmd MCP integration"
+~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "qmd MCP integration"
 ```
 
 This creates a timestamped file: `references/learnings/YYYY-MM-DD-qmd-mcp-integration.md`
@@ -117,7 +136,7 @@ This creates a timestamped file: `references/learnings/YYYY-MM-DD-qmd-mcp-integr
 #### Add Issue Note
 
 ```bash
-~/.ai-knowledges/my-ai-tools/scripts/record.sh issue 123 "Fixed by updating dependencies"
+~/.config/opencode/skill/qmd-knowledge/scripts/record.sh issue 123 "Fixed by updating dependencies"
 ```
 
 This appends to `references/issues/123.md` (creating it if it doesn't exist).
@@ -125,7 +144,7 @@ This appends to `references/issues/123.md` (creating it if it doesn't exist).
 #### Record General Note
 
 ```bash
-~/.ai-knowledges/my-ai-tools/scripts/record.sh note "Consider using agent skills for extensibility"
+~/.config/opencode/skill/qmd-knowledge/scripts/record.sh note "Consider using agent skills for extensibility"
 ```
 
 ### Querying Knowledge
@@ -175,7 +194,7 @@ qmd embed
 
 **Claude recognizes the skill and executes:**
 ```bash
-~/.ai-knowledges/my-ai-tools/scripts/record.sh learning "qmd MCP autonomous tool use"
+~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "qmd MCP autonomous tool use"
 ```
 
 ### 2. Query Knowledge Later
@@ -202,17 +221,17 @@ qmd search "MCP servers" -c my-ai-tools
 
 **Claude executes:**
 ```bash
-~/.ai-knowledges/my-ai-tools/scripts/record.sh issue 123 "Fixed by updating qmd dependency to latest version"
+~/.config/opencode/skill/qmd-knowledge/scripts/record.sh issue 123 "Fixed by updating qmd dependency to latest version"
 ```
 
 ## Multiple Projects
 
-Each project gets its own knowledge base:
+The qmd-knowledge skill manages knowledge for multiple projects. Each project gets its own qmd collection:
 
 ```bash
-# Initialize for a different project
-mkdir -p ~/.ai-knowledges/another-project
-cp -r configs/opencode/skill/qmd-knowledge/* ~/.ai-knowledges/another-project/
+# Create storage for a different project
+mkdir -p ~/.ai-knowledges/another-project/learnings
+mkdir -p ~/.ai-knowledges/another-project/issues
 
 # Add collection and context
 qmd collection add ~/.ai-knowledges/another-project --name another-project
@@ -222,7 +241,7 @@ qmd context add qmd://another-project "Knowledge base for another-project"
 qmd embed
 ```
 
-Claude can filter queries by project using the `-c` collection flag.
+Use the same skill script for all projects - it will use the `QMD_PROJECT` environment variable or detect the project automatically.
 
 ## Advanced Usage
 
@@ -232,7 +251,7 @@ Set the `QMD_PROJECT` environment variable to override project detection:
 
 ```bash
 export QMD_PROJECT="another-project"
-~/.ai-knowledges/my-ai-tools/scripts/record.sh learning "This goes to another-project"
+~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "This goes to another-project"
 ```
 
 ### Backup Knowledge Base
@@ -273,12 +292,12 @@ Install qmd:
 bun install -g https://github.com/tobi/qmd
 ```
 
-### Knowledge base not found
+### Knowledge collection not found
 
-Initialize the knowledge base:
+Create the collection for your project:
 ```bash
-mkdir -p ~/.ai-knowledges/my-ai-tools
-cp -r configs/opencode/skill/qmd-knowledge/* ~/.ai-knowledges/my-ai-tools/
+mkdir -p ~/.ai-knowledges/my-ai-tools/learnings
+mkdir -p ~/.ai-knowledges/my-ai-tools/issues
 qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
 qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project"
 qmd embed
