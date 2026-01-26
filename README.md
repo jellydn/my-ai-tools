@@ -164,8 +164,23 @@ Configure in `~/.claude/settings.json`:
 
 - `/handoffs` - Create handoff plans for continuing work in new sessions
 - `/pickup` - Resume work from previous handoff sessions
+- `/plannotator-review` - Open interactive code review for current changes
 
 Plus all commands from installed plugins.
+
+### Custom Agents
+
+| Agent             | Description                              | Mode     |
+| ----------------- | ---------------------------------------- | -------- |
+| `ai-slop-remover` | Cleans AI-generated code patterns        | subagent |
+
+### Skills
+
+- `prd` - Generate Product Requirements Documents for new features
+- `qmd-knowledge` - Project-specific knowledge management (alternative to claude-mem)
+- `ralph` - PRD-driven development automation
+- `ccs-delegation` - Auto-profile selection for CCS with context enhancement
+- `context-check` - Strategic context usage guidance
 
 ### 🎓 Projects Built with AI
 
@@ -355,11 +370,18 @@ Copy `configs/amp/settings.json` to `~/.config/amp/`:
 }
 ```
 
+### Skills
+
+- `prd` - Generate Product Requirements Documents for new features
+- `qmd-knowledge` - Project-specific knowledge management (alternative to claude-mem)
+- `ralph` - PRD-driven development automation
+
 ### MCP Servers
 
 - [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
 - [`chrome-devtools-mcp`](https://github.com/ChromeDevTools/chrome-devtools-mcp) - Control and inspect live Chrome browser instances. Debug, analyze network requests, take screenshots, profile performance, and automate browser testing. ([npm](https://npmjs.org/package/chrome-devtools-mcp))
 - [`backlog`](https://github.com/MrLesk/Backlog.md) - Task management and backlog tracking
+- [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
 
 ## 🔄 CCS - Claude Code Switch (Optional)
 
