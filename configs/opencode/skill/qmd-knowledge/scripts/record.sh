@@ -21,20 +21,27 @@ NC='\033[0m'
 # Ensure knowledge base exists
 if [ ! -d "$KNOWLEDGE_BASE" ]; then
     echo -e "${RED}Error: Knowledge base not found at $KNOWLEDGE_BASE${NC}"
-    echo "Run: mkdir -p $KNOWLEDGE_BASE && cp -r configs/opencode/skill/qmd-knowledge/* $KNOWLEDGE_BASE/"
+    echo "Create it by running:"
+    echo "  mkdir -p $KNOWLEDGE_BASE"
+    echo "  # Copy skill files from your my-ai-tools config location"
     exit 1
 fi
 
 # Function to slugify text
 slugify() {
-    echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-\|-$//g'
+    local slug=$(echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-\|-$//g')
+    # Fallback to timestamp if slug is empty
+    if [ -z "$slug" ]; then
+        slug="note-$(date +%H%M%S)"
+    fi
+    echo "$slug"
 }
 
 # Function to update qmd index
 update_index() {
     if command -v qmd &> /dev/null; then
         echo -e "${GREEN}Updating qmd index...${NC}"
-        qmd update --collection "$PROJECT_NAME" 2>/dev/null || echo -e "${YELLOW}Note: qmd index update failed. Run 'qmd init' first.${NC}"
+        qmd update --collection "$PROJECT_NAME" 2>/dev/null || echo -e "${YELLOW}Note: qmd index update failed. Run: qmd init --collection $PROJECT_NAME --path $KNOWLEDGE_BASE${NC}"
     else
         echo -e "${YELLOW}Warning: qmd not found. Install with: cargo install qmd${NC}"
     fi
@@ -130,8 +137,12 @@ EOF
             exit 1
         fi
         
-        # Create a general note with timestamp
-        FILENAME="references/learnings/$(date +%Y-%m-%d-%H%M%S)-note.md"
+        # Create a general note with timestamp and topic slug
+        TOPIC="note"
+        SLUG=$(slugify "$TEXT")
+        # Limit slug length to avoid overly long filenames
+        SLUG=$(echo "$SLUG" | cut -c1-50)
+        FILENAME="references/learnings/$(date +%Y-%m-%d)-${SLUG}.md"
         FILEPATH="$KNOWLEDGE_BASE/$FILENAME"
         
         # Create learnings directory if it doesn't exist

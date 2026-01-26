@@ -39,13 +39,21 @@ This system provides a lightweight, project-specific knowledge management soluti
 
 ### 1. Install qmd
 
-qmd requires Rust. Install from source:
+qmd requires Rust. Install from crates.io:
 
 ```bash
 cargo install qmd
 ```
 
-Or follow the [official installation guide](https://github.com/tobi/qmd).
+Or build from source:
+
+```bash
+git clone https://github.com/tobi/qmd.git
+cd qmd
+cargo install --path .
+```
+
+For more installation options, see the [official installation guide](https://github.com/tobi/qmd).
 
 ### 2. Configure MCP Server
 
