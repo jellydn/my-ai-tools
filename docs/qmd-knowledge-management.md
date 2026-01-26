@@ -9,7 +9,7 @@ This system provides a lightweight, project-specific knowledge management soluti
 - ✅ Keeps knowledge **outside project directories** (no repository pollution)
 - ✅ Uses **standard markdown files** (portable and version-controllable)
 - ✅ Provides **AI-powered search** via qmd MCP server
-- ✅ Follows **skills.sh specification** (self-documenting)
+- ✅ Follows **skills.md specification** (self-documenting)
 - ✅ Supports **multiple projects** with isolated knowledge bases
 
 ## Architecture
@@ -39,27 +39,11 @@ This system provides a lightweight, project-specific knowledge management soluti
 
 ### 1. Install qmd
 
-Install qmd globally via bun (recommended):
+Install qmd globally via bun:
 
 ```bash
 bun install -g https://github.com/tobi/qmd
 ```
-
-Or install from crates.io using Rust:
-
-```bash
-cargo install qmd
-```
-
-Or build from source:
-
-```bash
-git clone https://github.com/tobi/qmd.git
-cd qmd
-cargo install --path .
-```
-
-For more installation options, see the [official installation guide](https://github.com/tobi/qmd).
 
 ### 2. Configure MCP Server
 
@@ -240,18 +224,6 @@ qmd embed
 
 Claude can filter queries by project using the `-c` collection flag.
 
-## Benefits Over claude-mem
-
-| Feature | claude-mem | qmd-knowledge |
-|---------|-----------|---------------|
-| **Repository Pollution** | ❌ Creates CLAUDE.md files in project dirs | ✅ Stores knowledge in `~/.ai-knowledges/` |
-| **Search Quality** | Basic text search | ✅ AI-powered embedding search |
-| **Project Scoping** | Global or per-repo | ✅ Isolated collections per project |
-| **Portability** | Tied to Claude Code | ✅ Works with Claude, OpenCode, Amp |
-| **Format** | Proprietary | ✅ Standard markdown files |
-| **Version Control** | Hard to track | ✅ Can version knowledge separately |
-| **Status** | ⚠️ Deprecated/Broken | ✅ Active development |
-
 ## Advanced Usage
 
 ### Custom Project Detection
@@ -298,11 +270,7 @@ qmd embed
 
 Install qmd:
 ```bash
-# Via bun (recommended)
 bun install -g https://github.com/tobi/qmd
-
-# Or via cargo
-cargo install qmd
 ```
 
 ### Knowledge base not found

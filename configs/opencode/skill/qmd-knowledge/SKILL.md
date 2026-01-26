@@ -81,11 +81,7 @@ qmd search "API" --all --files --min-score 0.3 -c my-ai-tools
 
 1. **Install qmd**:
    ```bash
-   # Install globally via bun
    bun install -g https://github.com/tobi/qmd
-   
-   # Or via cargo (requires Rust)
-   cargo install qmd
    ```
 
 2. **Configure MCP server** (see installation docs for Claude/OpenCode/Amp)
