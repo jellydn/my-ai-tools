@@ -16,14 +16,14 @@ command -v qmd || echo "qmd not found - install with: bun install -g https://git
 mcp__qmd__status
 
 # Check if project collection exists
-qmd collection list | grep "$(basename $(git rev-parse --show-toplevel 2>/dev/null || echo $PWD))"
+qmd collection list
 ```
 
 **If NOT set up for this project, automatically set it up:**
 
 ```bash
-# Detect project name from git repo or current directory
-PROJECT_NAME=$(basename $(git rev-parse --show-toplevel 2>/dev/null || echo $PWD))
+# Auto-detect project name from git remote (reliable), fallback to folder name
+PROJECT_NAME=$(git remote get-url origin 2>/dev/null | xargs basename -s .git || basename $(git rev-parse --show-toplevel 2>/dev/null || echo $PWD))
 
 # 1. Create project directory structure
 mkdir -p ~/.ai-knowledges/$PROJECT_NAME/learnings
