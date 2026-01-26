@@ -4,6 +4,47 @@
 
 ---
 
+## Pre-flight Check: Is Knowledge Base Ready?
+
+Before using qmd knowledge features, check if the project's knowledge base is set up:
+
+```bash
+# Check if qmd is installed
+command -v qmd || echo "qmd not found - install with: bun install -g https://github.com/tobi/qmd"
+
+# Check if MCP server is configured (should return qmd server info)
+mcp__qmd__status
+
+# Check if project collection exists
+qmd collection list | grep "$(basename $(git rev-parse --show-toplevel 2>/dev/null || echo $PWD))"
+```
+
+**If NOT set up for this project, automatically set it up:**
+
+```bash
+# Detect project name from git repo or current directory
+PROJECT_NAME=$(basename $(git rev-parse --show-toplevel 2>/dev/null || echo $PWD))
+
+# 1. Create project directory structure
+mkdir -p ~/.ai-knowledges/$PROJECT_NAME/learnings
+mkdir -p ~/.ai-knowledges/$PROJECT_NAME/issues
+
+# 2. Add to qmd (skip if already exists)
+qmd collection add ~/.ai-knowledges/$PROJECT_NAME --name $PROJECT_NAME 2>/dev/null || true
+
+# 3. Add context (skip if already exists)
+qmd context add qmd://$PROJECT_NAME "Knowledge base for $PROJECT_NAME project" 2>/dev/null || true
+
+# 4. Generate embeddings for search
+qmd embed
+
+# Inform user
+echo "✓ Knowledge base initialized for: $PROJECT_NAME"
+echo "  Storage: ~/.ai-knowledges/$PROJECT_NAME"
+```
+
+---
+
 ## When to Use qmd Knowledge
 
 **DO use qmd for:**
