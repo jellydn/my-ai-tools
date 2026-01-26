@@ -71,15 +71,20 @@ For **Claude Desktop**, add to `~/.claude/mcp-servers.json`:
 }
 ```
 
-For **Claude Code**, use the CLI:
+For **Claude Code**, use the CLI (installed globally for all projects):
 
 ```bash
-claude mcp add --transport stdio context7 -- npx -y @upstash/context7-mcp@latest
-claude mcp add --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
-claude mcp add --transport stdio qmd -- qmd mcp
+claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest
+claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
+claude mcp add --scope user --transport stdio qmd -- qmd mcp
 ```
 
 > **Note:** The setup script handles both approaches automatically.
+>
+> **MCP Scopes:**
+> - `--scope user` (global): Available across all projects on your machine
+> - `--scope local` (default): Only available in the current project directory
+> - `--scope project`: Stored in `.mcp.json` for team sharing via git
 
 **Managing MCP Servers:**
 

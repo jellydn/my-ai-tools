@@ -335,19 +335,19 @@ copy_configurations() {
 		execute "cp -r $SCRIPT_DIR/configs/claude/skills $HOME/.claude/"
 	fi
 
-	# Add MCP servers using Claude Code CLI
+	# Add MCP servers using Claude Code CLI (globally, available in all projects)
 	if command -v claude &>/dev/null; then
-		log_info "Setting up Claude Code MCP servers..."
+		log_info "Setting up Claude Code MCP servers (global scope)..."
 
 		# context7 MCP server
 		if [ -t 1 ]; then
 			read -p "Install context7 MCP server (documentation lookup)? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				execute "claude mcp add --transport stdio context7 -- npx -y @upstash/context7-mcp@latest 2>/dev/null && log_success 'context7 MCP server added' || log_warning 'context7 already installed or failed'"
+				execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest 2>/dev/null && log_success 'context7 MCP server added (global)' || log_warning 'context7 already installed or failed'"
 			fi
 		else
-			execute "claude mcp add --transport stdio context7 -- npx -y @upstash/context7-mcp@latest 2>/dev/null || true"
+			execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest 2>/dev/null || true"
 		fi
 
 		# sequential-thinking MCP server
@@ -355,10 +355,10 @@ copy_configurations() {
 			read -p "Install sequential-thinking MCP server (multi-step reasoning)? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				execute "claude mcp add --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking 2>/dev/null && log_success 'sequential-thinking MCP server added' || log_warning 'sequential-thinking already installed or failed'"
+				execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking 2>/dev/null && log_success 'sequential-thinking MCP server added (global)' || log_warning 'sequential-thinking already installed or failed'"
 			fi
 		else
-			execute "claude mcp add --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking 2>/dev/null || true"
+			execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking 2>/dev/null || true"
 		fi
 
 		# qmd MCP server
@@ -366,13 +366,13 @@ copy_configurations() {
 			read -p "Install qmd MCP server (knowledge management)? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				execute "claude mcp add --transport stdio qmd -- qmd mcp 2>/dev/null && log_success 'qmd MCP server added' || log_warning 'qmd already installed or failed'"
+				execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp 2>/dev/null && log_success 'qmd MCP server added (global)' || log_warning 'qmd already installed or failed'"
 			fi
 		else
-			execute "claude mcp add --transport stdio qmd -- qmd mcp 2>/dev/null || true"
+			execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp 2>/dev/null || true"
 		fi
 
-		log_success "MCP server setup complete"
+		log_success "MCP server setup complete (global scope)"
 	fi
 
 	log_success "Claude Code configs copied"
