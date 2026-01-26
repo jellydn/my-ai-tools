@@ -7,6 +7,10 @@
 		"sequential-thinking": {
 			"command": "npx",
 			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
 		}
 	}
 }

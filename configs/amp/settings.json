@@ -11,6 +11,10 @@
 		"backlog": {
 			"command": "backlog",
 			"args": ["mcp", "start"]
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
 		}
 	}
 }

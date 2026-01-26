@@ -53,6 +53,15 @@ Add to `~/.claude/mcp-servers.json`:
 
 - [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
 - [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
+- [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
+
+**💡 Knowledge Management:**
+
+Replace deprecated `claude-mem` with the **qmd-based knowledge system**:
+- Project-specific knowledge bases in `~/.ai-knowledges/`
+- AI-powered search via qmd MCP server
+- No repository pollution
+- See [qmd Knowledge Management Guide](docs/qmd-knowledge-management.md) for setup and usage
 
 ### Plugins
 
@@ -281,6 +290,7 @@ Copy `configs/opencode/opencode.json` to `~/.config/opencode/`:
 ### Skills
 
 - `git-release` - Create consistent releases and changelogs
+- `qmd-knowledge` - Project-specific knowledge management (alternative to claude-mem)
 
 ## 🎯 Amp (Optional)
 
@@ -409,6 +419,8 @@ ccs auth list
 [**Claude-Mem**](https://claude-mem.ai/) - ~~Stop explaining context repeatedly. Build faster with persistent memory.~~ ([GitHub](https://github.com/thedotmack/claude-mem))
 
 **Status:** The plugin leaves CLAUDE.md files in directories causing repository pollution. Do not enable this plugin until the issue is resolved.
+
+**Alternative:** Use the [qmd Knowledge Management System](docs/qmd-knowledge-management.md) for project-specific knowledge capture without repository pollution.
 
 ### Claude HUD
 
