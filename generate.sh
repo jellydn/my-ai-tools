@@ -147,6 +147,14 @@ generate_amp_configs() {
 		execute "mkdir -p $SCRIPT_DIR/configs/amp"
 		copy_single "$HOME/.config/amp/settings.json" "$SCRIPT_DIR/configs/amp/settings.json"
 
+		# Copy AGENTS.md from amp config directory (preferred)
+		if [ -f "$HOME/.config/amp/AGENTS.md" ]; then
+			copy_single "$HOME/.config/amp/AGENTS.md" "$SCRIPT_DIR/configs/amp/AGENTS.md"
+		# Fallback to global AGENTS.md if amp-specific doesn't exist
+		elif [ -f "$HOME/.config/AGENTS.md" ]; then
+			copy_single "$HOME/.config/AGENTS.md" "$SCRIPT_DIR/configs/amp/AGENTS.md"
+		fi
+
 		if [ -d "$HOME/.config/amp/skills" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/amp/skills"
 			execute "cp -r '$HOME/.config/amp/skills'/* '$SCRIPT_DIR/configs/amp/skills'/ 2>/dev/null || true"
@@ -201,6 +209,19 @@ generate_best_practices() {
 	log_info "Generating best-practices.md..."
 
 	copy_single "$HOME/.ai-tools/best-practices.md" "$SCRIPT_DIR/configs/best-practices.md"
+}
+
+generate_memory_md() {
+	log_info "Generating MEMORY.md..."
+
+	# Copy from ~/.ai-tools/MEMORY.md if it exists, otherwise from current directory
+	if [ -f "$HOME/.ai-tools/MEMORY.md" ]; then
+		copy_single "$HOME/.ai-tools/MEMORY.md" "$SCRIPT_DIR/MEMORY.md"
+	elif [ -f "$SCRIPT_DIR/MEMORY.md" ]; then
+		log_success "MEMORY.md already exists in repository (skipping)"
+	else
+		log_warning "MEMORY.md not found in ~/.ai-tools/ or repository root"
+	fi
 }
 
 generate_ai_switcher_configs() {
@@ -268,6 +289,9 @@ main() {
 	echo
 
 	generate_best_practices
+	echo
+
+	generate_memory_md
 	echo
 
 	generate_ai_switcher_configs

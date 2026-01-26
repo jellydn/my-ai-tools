@@ -378,7 +378,6 @@ copy_configurations() {
 	log_success "Claude Code configs copied"
 
 	if [ -d "$HOME/.config/opencode" ] || command -v opencode &>/dev/null; then
-		execute "mkdir -p $HOME/.config/opencode/configs"
 		execute "cp $SCRIPT_DIR/configs/opencode/opencode.json $HOME/.config/opencode/"
 		execute "rm -rf $HOME/.config/opencode/agent"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/agent $HOME/.config/opencode/"
@@ -386,16 +385,22 @@ copy_configurations() {
 		execute "cp -r $SCRIPT_DIR/configs/opencode/command $HOME/.config/opencode/"
 		execute "rm -rf $HOME/.config/opencode/skill"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/skill $HOME/.config/opencode/"
-		execute "cp $SCRIPT_DIR/configs/best-practices.md $HOME/.config/opencode/configs/"
 		log_success "OpenCode configs copied"
 	fi
 
 	if [ -d "$HOME/.config/amp" ] || command -v amp &>/dev/null; then
 		execute "mkdir -p $HOME/.config/amp"
 		execute "cp $SCRIPT_DIR/configs/amp/settings.json $HOME/.config/amp/"
+		if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
+			execute "cp $SCRIPT_DIR/configs/amp/AGENTS.md $HOME/.config/amp/"
+		fi
 		if [ -d "$SCRIPT_DIR/configs/amp/skills" ]; then
 			execute "rm -rf $HOME/.config/amp/skills"
 			execute "cp -r $SCRIPT_DIR/configs/amp/skills $HOME/.config/amp/"
+		fi
+		# Also copy AGENTS.md to global config location
+		if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
+			execute "cp $SCRIPT_DIR/configs/amp/AGENTS.md $HOME/.config/AGENTS.md"
 		fi
 		log_success "Amp configs copied"
 	fi
@@ -427,6 +432,12 @@ copy_configurations() {
 	execute "mkdir -p $HOME/.ai-tools"
 	execute "cp $SCRIPT_DIR/configs/best-practices.md $HOME/.ai-tools/"
 	log_success "Best practices copied to ~/.ai-tools/"
+
+	# Copy MEMORY.md to project root and .ai-tools for reference
+	if [ -f "$SCRIPT_DIR/MEMORY.md" ]; then
+		execute "cp $SCRIPT_DIR/MEMORY.md $HOME/.ai-tools/"
+		log_success "MEMORY.md copied to ~/.ai-tools/ (reference copy)"
+	fi
 }
 
 enable_plugins() {

@@ -430,26 +430,56 @@ Copy all files from `configs/ccs/` to `~/.ccs/`:
 - `hooks/` - Web search hooks
 
 ```yaml
-version: 7
+version: 8
+
+accounts: {}
 
 profiles:
   glm:
     type: api
     settings: ~/.ccs/glm.settings.json
-  kimi:
-    type: api
-    settings: ~/.ccs/kimi.settings.json
   mm:
     type: api
     settings: ~/.ccs/mm.settings.json
+  ollama-cloud:
+    type: api
+    settings: ~/.ccs/ollama-cloud.settings.json
+  ollama:
+    type: api
+    settings: ~/.ccs/ollama.settings.json
 
 cliproxy:
+  oauth_accounts: {}
   providers:
     - gemini
     - codex
     - agy
     - qwen
     - iflow
+    - kiro
+    - ghcp
+  variants: {}
+  logging:
+    enabled: false
+    request_log: false
+
+cliproxy_server:
+  remote:
+    enabled: false
+    host: ""
+    protocol: http
+    auth_token: ""
+  fallback:
+    enabled: true
+    auto_start: false
+  local:
+    port: 8317
+    auto_start: true
+
+preferences:
+  theme: system
+  telemetry: false
+  auto_update: true
 
 websearch:
   enabled: true
@@ -457,6 +487,38 @@ websearch:
     gemini:
       enabled: true
       model: gemini-2.5-flash
+      timeout: 55
+    opencode:
+      enabled: true
+      model: opencode/grok-code
+      timeout: 90
+    grok:
+      enabled: false
+      timeout: 55
+
+copilot:
+  enabled: false
+  auto_start: false
+  port: 4141
+  account_type: individual
+  rate_limit: null
+  wait_on_limit: true
+  model: gpt-4.1
+
+global_env:
+  enabled: true
+  env:
+    DISABLE_BUG_COMMAND: "1"
+    DISABLE_ERROR_REPORTING: "1"
+    DISABLE_TELEMETRY: "1"
+
+thinking:
+  mode: auto
+  tier_defaults:
+    opus: high
+    sonnet: medium
+    haiku: low
+  show_warnings: true
 ```
 
 ### Usage
