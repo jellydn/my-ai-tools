@@ -505,6 +505,7 @@ enable_plugins() {
 		"lua-lsp@claude-plugins-official"
 		"code-simplifier@claude-plugins-official"
 		"rust-analyzer-lsp@claude-plugins-official"
+		"claude-md-management@claude-plugins-official"
 	)
 
 	# Community plugins (name, plugin_spec, marketplace_repo)

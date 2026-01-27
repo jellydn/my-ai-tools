@@ -122,6 +122,7 @@
     "claude-hud@claude-hud": true,
     "code-simplifier@claude-plugins-official": true,
     "worktrunk@worktrunk": true,
-    "rust-analyzer-lsp@claude-plugins-official": true
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true
   }
 }

@@ -82,6 +82,7 @@ claude mcp add --scope user --transport stdio qmd -- qmd mcp
 > **Note:** The setup script handles both approaches automatically.
 >
 > **MCP Scopes:**
+>
 > - `--scope user` (global): Available across all projects on your machine
 > - `--scope local` (default): Only available in the current project directory
 > - `--scope project`: Stored in `.mcp.json` for team sharing via git
@@ -102,6 +103,7 @@ claude mcp get qmd
 **💡 Knowledge Management:**
 
 Replace deprecated `claude-mem` with the **qmd-based knowledge system**:
+
 - Project-specific knowledge bases in `~/.ai-knowledges/`
 - AI-powered search via qmd MCP server
 - No repository pollution
@@ -122,6 +124,7 @@ claude plugin install swift-lsp@claude-plugins-official
 claude plugin install lua-lsp@claude-plugins-official
 claude plugin install code-simplifier@claude-plugins-official
 claude plugin install rust-analyzer-lsp@claude-plugins-official
+claude plugin install claude-md-management@claude-plugins-official
 
 # Community plugins
 claude plugin install plannotator@backnotprop
@@ -129,22 +132,23 @@ claude plugin install claude-hud@claude-hud
 claude plugin install worktrunk@worktrunk
 ```
 
-| Plugin                  | Description                         | Source          |
-| ----------------------- | ----------------------------------- | --------------- |
-| `typescript-lsp`        | TypeScript language server          | Official        |
-| `pyright-lsp`           | Python language server              | Official        |
-| `context7`              | Documentation lookup                | Official        |
-| `frontend-design`       | UI/UX design assistance             | Official        |
-| `learning-output-style` | Interactive learning mode           | Official        |
-| `swift-lsp`             | Swift language support              | Official        |
-| `lua-lsp`               | Lua language support                | Official        |
-| `code-simplifier`       | Code simplification                 | Official        |
-| `rust-analyzer-lsp`     | Rust language support               | Official        |
-| `plannotator`           | Plan annotation tool                | Community       |
-| `claude-hud`            | Status line with usage monitoring   | Community       |
-| `worktrunk`             | Work management                     | Community       |
-| ~~`claude-mem`~~        | ⚠️ **DEPRECATED** - Use qmd instead | [GitHub](https://github.com/thedotmack/claude-mem)   |
-| ~~`beads`~~             | ⚠️ **DEPRECATED** - Native tasks    | [GitHub](https://github.com/steveyegge/beads)        |
+| Plugin                  | Description                                                                                   | Source                                             |
+| ----------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `typescript-lsp`        | TypeScript language server                                                                    | Official                                           |
+| `pyright-lsp`           | Python language server                                                                        | Official                                           |
+| `context7`              | Documentation lookup                                                                          | Official                                           |
+| `frontend-design`       | UI/UX design assistance                                                                       | Official                                           |
+| `learning-output-style` | Interactive learning mode                                                                     | Official                                           |
+| `swift-lsp`             | Swift language support                                                                        | Official                                           |
+| `lua-lsp`               | Lua language support                                                                          | Official                                           |
+| `code-simplifier`       | Code simplification                                                                           | Official                                           |
+| `rust-analyzer-lsp`     | Rust language support                                                                         | Official                                           |
+| `claude-md-management`  | Markdown management                                                                           | Official                                           |
+| `plannotator`           | Plan annotation tool                                                                          | Community                                          |
+| `claude-hud`            | Status line with usage monitoring                                                             | Community                                          |
+| `worktrunk`             | Work management                                                                               | Community                                          |
+| ~~`claude-mem`~~        | ⚠️ **DEPRECATED** - Use qmd instead or using [my fork](https://github.com/jellydn/claude-mem) | [GitHub](https://github.com/thedotmack/claude-mem) |
+| ~~`beads`~~             | ⚠️ **DEPRECATED** - Native tasks                                                              | [GitHub](https://github.com/steveyegge/beads)      |
 
 ### Hooks
 
@@ -222,9 +226,9 @@ Plus all commands from installed plugins.
 
 ### Custom Agents
 
-| Agent             | Description                              | Mode     |
-| ----------------- | ---------------------------------------- | -------- |
-| `ai-slop-remover` | Cleans AI-generated code patterns        | subagent |
+| Agent             | Description                       | Mode     |
+| ----------------- | --------------------------------- | -------- |
+| `ai-slop-remover` | Cleans AI-generated code patterns | subagent |
 
 ### Skills
 
@@ -238,13 +242,13 @@ Plus all commands from installed plugins.
 
 Real-world projects built using these AI tools:
 
-| Project | Description | Tools Used |
-| ------- | ----------- | ---------- |
-| [Keybinder](https://github.com/jellydn/keybinder) | macOS app for managing skhd keyboard shortcuts | Claude + spec-kit |
-| [SealCode](https://github.com/jellydn/vscode-seal-code) | VS Code extension for AI-powered code review | Amp + Ralph |
-| [Ralph](https://github.com/jellydn/ralph) | Autonomous AI agent loop for PRD-driven development | TypeScript |
-| [AI CLI Switcher](https://github.com/jellydn/ai-cli-switcher) | Fast launcher for switching between AI coding assistants | TypeScript |
-| [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity | TypeScript |
+| Project                                                           | Description                                              | Tools Used        |
+| ----------------------------------------------------------------- | -------------------------------------------------------- | ----------------- |
+| [Keybinder](https://github.com/jellydn/keybinder)                 | macOS app for managing skhd keyboard shortcuts           | Claude + spec-kit |
+| [SealCode](https://github.com/jellydn/vscode-seal-code)           | VS Code extension for AI-powered code review             | Amp + Ralph       |
+| [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development      | TypeScript        |
+| [AI CLI Switcher](https://github.com/jellydn/ai-cli-switcher)     | Fast launcher for switching between AI coding assistants | TypeScript        |
+| [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity               | TypeScript        |
 
 📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
 
@@ -252,10 +256,10 @@ Real-world projects built using these AI tools:
 
 Official and community-maintained skill collections for specific frameworks:
 
-| Framework | Skills Repository | Description |
-| --------- | ----------------- | ----------- |
-| **Expo** | [expo/skills](https://github.com/expo/skills) | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows. |
-| **Next.js** | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows. |
+| Framework   | Skills Repository                                                       | Description                                                                                                                                  |
+| ----------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Expo**    | [expo/skills](https://github.com/expo/skills)                           | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows. |
+| **Next.js** | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.          |
 
 **Installation:**
 
@@ -279,14 +283,14 @@ git clone https://github.com/vercel-labs/agent-skills.git ~/.claude/skills/nextj
 
 All Claude Code configs are stored in `~/.claude/` (canonical location):
 
-| File/Directory      | Description                          |
-| ------------------- | ------------------------------------ |
-| `settings.json`     | Main settings with hooks, permissions, plugins |
-| `mcp-servers.json`  | MCP server definitions               |
-| `CLAUDE.md`         | Global instructions                  |
-| `commands/`         | Custom command definitions           |
-| `agents/`           | Custom agent definitions             |
-| `skills/`           | Custom skill definitions             |
+| File/Directory     | Description                                    |
+| ------------------ | ---------------------------------------------- |
+| `settings.json`    | Main settings with hooks, permissions, plugins |
+| `mcp-servers.json` | MCP server definitions                         |
+| `CLAUDE.md`        | Global instructions                            |
+| `commands/`        | Custom command definitions                     |
+| `agents/`          | Custom agent definitions                       |
+| `skills/`          | Custom skill definitions                       |
 
 > **Note:** On Mac/Linux, `~/.config/claude/` was previously used but `~/.claude/` is now the canonical location. The setup script handles this automatically.
 
@@ -324,12 +328,12 @@ This is useful for:
 
 **Config Locations:**
 
-| Tool       | macOS/Linux                          | Windows                      |
-| ---------- | ------------------------------------ | ---------------------------- |
-| Claude Code | `~/.claude/` (all configs)          | `~/.claude/`                 |
-| OpenCode   | `~/.config/opencode/`                | `%APPDATA%\OpenCode\`        |
-| Amp        | `~/.config/amp/`                     | `%APPDATA%\Amp\`             |
-| CCS        | `~/.ccs/`                            | `%APPDATA%\CCS\`             |
+| Tool        | macOS/Linux                | Windows               |
+| ----------- | -------------------------- | --------------------- |
+| Claude Code | `~/.claude/` (all configs) | `~/.claude/`          |
+| OpenCode    | `~/.config/opencode/`      | `%APPDATA%\OpenCode\` |
+| Amp         | `~/.config/amp/`           | `%APPDATA%\Amp\`      |
+| CCS         | `~/.ccs/`                  | `%APPDATA%\CCS\`      |
 
 > **Note:** On older Linux installs, Claude Code may use `~/.config/claude/`. The setup script handles both locations automatically.
 
@@ -608,11 +612,13 @@ curl -fsSL https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/instal
 Copy `configs/ai-switcher/config.json` to `~/.config/ai-switcher/` for pre-configured tools and templates:
 
 **Tools:**
+
 - `claude` / `c` - Anthropic Claude CLI
 - `opencode` / `o`, `oc` - OpenCode AI assistant
 - `amp` / `a` - AI coding assistant by Modular
 
 **Templates:**
+
 - `review` - Code review with OpenCode
 - `commit` / `commit-zen` - Generate commit message
 - `ac` / `commit-atomic` - Atomic commit message
@@ -656,6 +662,7 @@ Copy `configs/ai-switcher/config.json` to `~/.config/ai-switcher/` for pre-confi
 ```
 
 **Features:**
+
 - Record learnings with timestamped markdown files
 - Track issue resolutions with issue-specific notes
 - Query knowledge via natural language
@@ -666,6 +673,7 @@ Copy `configs/ai-switcher/config.json` to `~/.config/ai-switcher/` for pre-confi
 **Context:** See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for design discussion and progress.
 
 **Related:**
+
 - [qmd Knowledge Management Guide](docs/qmd-knowledge-management.md)
 - [qmd GitHub](https://github.com/tobi/qmd)
 - [Agent Skills Specification](https://support.claude.com/en/articles/33007817317)
