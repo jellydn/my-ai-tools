@@ -102,8 +102,11 @@ generate_claude_configs() {
 
 		if [ -d "$HOME/.claude/skills" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/claude/skills"
-			execute "cp -r '$HOME/.claude/skills'/* '$SCRIPT_DIR/configs/claude/skills'/ 2>/dev/null || true"
-			log_success "Copied skills directory"
+			if ! execute "cp -r '$HOME/.claude/skills'/* '$SCRIPT_DIR/configs/claude/skills'/ 2>&1"; then
+				log_warning "Failed to copy Claude skills directory"
+			else
+				log_success "Copied skills directory"
+			fi
 		fi
 	fi
 
@@ -157,8 +160,11 @@ generate_amp_configs() {
 
 		if [ -d "$HOME/.config/amp/skills" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/amp/skills"
-			execute "cp -r '$HOME/.config/amp/skills'/* '$SCRIPT_DIR/configs/amp/skills'/ 2>/dev/null || true"
-			log_success "Copied skills directory"
+			if ! execute "cp -r '$HOME/.config/amp/skills'/* '$SCRIPT_DIR/configs/amp/skills'/ 2>&1"; then
+				log_warning "Failed to copy Amp skills directory"
+			else
+				log_success "Copied skills directory"
+			fi
 		fi
 
 		log_success "Amp configs generated"

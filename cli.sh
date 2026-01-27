@@ -81,9 +81,12 @@ check_prerequisites() {
 	log_success "Git found"
 
 	if command -v bun &>/dev/null; then
-		log_success "Bun found ($(bun --version))"
+		BUN_VERSION=$(bun --version)
+		log_success "Bun found ($BUN_VERSION)"
 	elif command -v node &>/dev/null; then
-		log_success "Node.js found ($(node --version))"
+		NODE_VERSION=$(node --version)
+		log_success "Node.js found ($NODE_VERSION)"
+		log_warning "Some scripts (e.g., context-check) prefer Bun. Install with: brew install oven-sh/bun/bun"
 	else
 		log_error "Neither Bun nor Node.js is installed. Please install one of them first."
 		exit 1
@@ -344,10 +347,10 @@ copy_configurations() {
 			read -p "Install context7 MCP server (documentation lookup)? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest 2>/dev/null && log_success 'context7 MCP server added (global)' || log_warning 'context7 already installed or failed'"
+				execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest && log_success 'context7 MCP server added (global)' || log_warning 'context7 already installed or failed'"
 			fi
 		else
-			execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest 2>/dev/null || true"
+			execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest || true"
 		fi
 
 		# sequential-thinking MCP server
@@ -355,10 +358,10 @@ copy_configurations() {
 			read -p "Install sequential-thinking MCP server (multi-step reasoning)? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking 2>/dev/null && log_success 'sequential-thinking MCP server added (global)' || log_warning 'sequential-thinking already installed or failed'"
+				execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking && log_success 'sequential-thinking MCP server added (global)' || log_warning 'sequential-thinking already installed or failed'"
 			fi
 		else
-			execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking 2>/dev/null || true"
+			execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking || true"
 		fi
 
 		# qmd MCP server
@@ -366,10 +369,16 @@ copy_configurations() {
 			read -p "Install qmd MCP server (knowledge management)? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp 2>/dev/null && log_success 'qmd MCP server added (global)' || log_warning 'qmd already installed or failed'"
+				if command -v qmd &>/dev/null; then
+					execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp && log_success 'qmd MCP server added (global)' || log_warning 'qmd already installed or failed'"
+				else
+					log_warning "qmd not found. Install with: bun install -g https://github.com/tobi/qmd"
+				fi
 			fi
 		else
-			execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp 2>/dev/null || true"
+			if command -v qmd &>/dev/null; then
+				execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp || true"
+			fi
 		fi
 
 		log_success "MCP server setup complete (global scope)"
