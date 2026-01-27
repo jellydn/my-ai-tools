@@ -25,6 +25,7 @@ if [ ! -d "$KNOWLEDGE_BASE" ]; then
     echo "To set up the knowledge base, run:"
     echo "  mkdir -p $KNOWLEDGE_BASE/{references/learnings,references/issues}"
     echo "  qmd collection add $KNOWLEDGE_BASE --name $PROJECT_NAME"
+    echo "  qmd context add qmd://$PROJECT_NAME \"Knowledge base for $PROJECT_NAME project: learnings, issue notes, and conventions\""
     echo "  qmd embed"
     echo ""
     echo "Or see docs/qmd-knowledge-management.md for detailed setup instructions."
