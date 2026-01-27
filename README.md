@@ -237,6 +237,7 @@ Plus all commands from installed plugins.
 - `ralph` - PRD-driven development automation
 - `ccs-delegation` - Auto-profile selection for CCS with context enhancement
 - `context-check` - Strategic context usage guidance
+- `map-codebase` - Orchestrate parallel codebase analysis to produce 7 structured documents
 
 ### 🎓 Projects Built with AI
 
@@ -405,6 +406,7 @@ Copy `configs/opencode/opencode.json` to `~/.config/opencode/`:
 
 - `git-release` - Create consistent releases and changelogs
 - `qmd-knowledge` - Project-specific knowledge management (alternative to claude-mem)
+- `map-codebase` - Orchestrate parallel codebase analysis to produce 7 structured documents
 
 ## 🎯 Amp (Optional)
 
@@ -448,6 +450,7 @@ Copy `configs/amp/settings.json` to `~/.config/amp/`:
 - `prd` - Generate Product Requirements Documents for new features
 - `qmd-knowledge` - Project-specific knowledge management (alternative to claude-mem)
 - `ralph` - PRD-driven development automation
+- `map-codebase` - Orchestrate parallel codebase analysis to produce 7 structured documents
 
 ### MCP Servers
 
