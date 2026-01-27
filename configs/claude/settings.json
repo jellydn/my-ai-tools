@@ -3,6 +3,24 @@
   "env": {
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1"
   },
+  "permissions": {
+    "allow": [
+      "mcp__sequential-thinking__sequentialthinking",
+      "WebSearch",
+      "Bash(bash:*)",
+      "WebFetch(domain:github.com)",
+      "mcp__qmd__query",
+      "mcp__qmd__get",
+      "mcp__qmd__search",
+      "mcp__qmd__vsearch",
+      "mcp__qmd__multi_get",
+      "mcp__qmd__status",
+      "Bash($HOME/.config/opencode/skill/qmd-knowledge/scripts/record.sh:*)",
+      "Bash($HOME/.claude/skills/qmd-knowledge/scripts/record.sh:*)",
+      "Bash(qmd:*)"
+    ],
+    "defaultMode": "plan"
+  },
   "model": "opusplan",
   "hooks": {
     "Notification": [],
