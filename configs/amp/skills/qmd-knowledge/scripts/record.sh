@@ -35,7 +35,8 @@ fi
 
 # Function to slugify text
 slugify() {
-    local slug=$(echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-\|-$//g')
+    local slug
+    slug=$(echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-\|-$//g')
     # Fallback to timestamp if slug is empty
     if [ -z "$slug" ]; then
         slug="note-$(date +%H%M%S)"

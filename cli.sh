@@ -378,6 +378,8 @@ copy_configurations() {
 		else
 			if command -v qmd &>/dev/null; then
 				execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp || true"
+			else
+				log_warning "qmd not found. MCP setup skipped. Install with: bun install -g https://github.com/tobi/qmd"
 			fi
 		fi
 
@@ -387,6 +389,7 @@ copy_configurations() {
 	log_success "Claude Code configs copied"
 
 	if [ -d "$HOME/.config/opencode" ] || command -v opencode &>/dev/null; then
+		execute "mkdir -p $HOME/.config/opencode"
 		execute "cp $SCRIPT_DIR/configs/opencode/opencode.json $HOME/.config/opencode/"
 		execute "rm -rf $HOME/.config/opencode/agent"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/agent $HOME/.config/opencode/"

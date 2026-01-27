@@ -22,8 +22,11 @@ qmd collection list
 **If NOT set up for this project, automatically set it up:**
 
 ```bash
-# Auto-detect project name from git remote (reliable), fallback to folder name
-PROJECT_NAME=$(git remote get-url origin 2>/dev/null | xargs basename -s .git || basename $(git rev-parse --show-toplevel 2>/dev/null || echo $PWD))
+# Auto-detect project name: try git remote, fallback to repo folder name, then current folder
+PROJECT_NAME=$(
+  git remote get-url origin 2>/dev/null | xargs basename -s .git ||
+  basename $(git rev-parse --show-toplevel 2>/dev/null || echo $PWD)
+)
 
 # 1. Create project directory structure
 mkdir -p ~/.ai-knowledges/$PROJECT_NAME/learnings
