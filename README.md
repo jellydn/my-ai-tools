@@ -232,11 +232,27 @@ Plus all commands from installed plugins.
 
 ### Skills
 
-- `prd` - Generate Product Requirements Documents for new features
-- `qmd-knowledge` - Project-specific knowledge management (alternative to claude-mem)
-- `ralph` - PRD-driven development automation
-- `ccs-delegation` - Auto-profile selection for CCS with context enhancement
-- `context-check` - Strategic context usage guidance
+The repository uses a **central skills directory** (`skills/`) to eliminate duplication across tools:
+
+| Skill | Tools | Description |
+|-------|-------|-------------|
+| `prd` | Claude, Amp | Generate Product Requirements Documents for new features |
+| `qmd-knowledge` | Claude, Amp, OpenCode | Project-specific knowledge management (alternative to claude-mem) |
+| `ralph` | Claude, Amp | PRD-driven development automation |
+
+**Tool-Specific Skills:**
+
+- `ccs-delegation` (Claude only) - Auto-profile selection for CCS with context enhancement
+- `context-check` (Claude only) - Strategic context usage guidance
+
+**How It Works:**
+
+Skills in `skills/` are automatically symlinked to each tool during installation (`./cli.sh`). This approach:
+- ✅ Eliminates duplication (single source of truth)
+- ✅ Simplifies maintenance (update once, applies everywhere)
+- ✅ Ensures consistency across all tools
+
+See [`skills/README.md`](skills/README.md) for details on the central skills architecture.
 
 ### 🎓 Projects Built with AI
 
@@ -403,8 +419,15 @@ Copy `configs/opencode/opencode.json` to `~/.config/opencode/`:
 
 ### Skills
 
-- `git-release` - Create consistent releases and changelogs
+**Shared Skills** (via central `skills/` directory):
+
 - `qmd-knowledge` - Project-specific knowledge management (alternative to claude-mem)
+
+**Tool-Specific Skills:**
+
+- `git-release` - Create consistent releases and changelogs
+
+See [`skills/README.md`](skills/README.md) for details on shared vs. tool-specific skills.
 
 ## 🎯 Amp (Optional)
 
@@ -445,9 +468,13 @@ Copy `configs/amp/settings.json` to `~/.config/amp/`:
 
 ### Skills
 
+**Shared Skills** (via central `skills/` directory):
+
 - `prd` - Generate Product Requirements Documents for new features
 - `qmd-knowledge` - Project-specific knowledge management (alternative to claude-mem)
 - `ralph` - PRD-driven development automation
+
+See [`skills/README.md`](skills/README.md) for details on the central skills architecture.
 
 ### MCP Servers
 
