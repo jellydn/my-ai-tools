@@ -96,14 +96,29 @@ generate_claude_configs() {
 
 		if [ -d "$HOME/.claude/agents" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/claude/agents"
-			execute "cp -r '$HOME/.claude/agents'/* '$SCRIPT_DIR/configs/claude/agents'/ 2>/dev/null || true"
-			log_success "Copied agents directory"
+			if [ "$(ls -A "$HOME/.claude/agents" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.claude/agents'/* '$SCRIPT_DIR/configs/claude/agents'/ 2>/dev/null"; then
+					log_success "Copied agents directory"
+				else
+					log_warning "Failed to copy agents directory"
+				fi
+			else
+				log_warning "Claude agents directory is empty"
+			fi
 		fi
 
 		if [ -d "$HOME/.claude/skills" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/claude/skills"
-			execute "cp -r '$HOME/.claude/skills'/* '$SCRIPT_DIR/configs/claude/skills'/ 2>/dev/null || true"
-			log_success "Copied skills directory"
+			# Check if skills directory has content
+			if [ "$(ls -A "$HOME/.claude/skills" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.claude/skills'/* '$SCRIPT_DIR/configs/claude/skills'/ 2>/dev/null"; then
+					log_success "Copied skills directory"
+				else
+					log_warning "Failed to copy Claude skills directory"
+				fi
+			else
+				log_warning "Claude skills directory is empty"
+			fi
 		fi
 	fi
 
@@ -112,8 +127,11 @@ generate_claude_configs() {
 		# Windows: Claude Code uses ~/.claude directly
 		copy_single "$HOME/.claude/settings.json" "$SCRIPT_DIR/configs/claude/settings.json"
 	else
-		# Mac/Linux: Use XDG path for settings.json
-		if [ -d "$HOME/.config/claude" ]; then
+		# Mac/Linux: Use ~/.claude/settings.json (canonical location)
+		if [ -f "$HOME/.claude/settings.json" ]; then
+			copy_single "$HOME/.claude/settings.json" "$SCRIPT_DIR/configs/claude/settings.json"
+		# Fallback to XDG path for older configurations
+		elif [ -d "$HOME/.config/claude" ]; then
 			copy_single "$HOME/.config/claude/settings.json" "$SCRIPT_DIR/configs/claude/settings.json"
 		fi
 	fi
@@ -131,7 +149,13 @@ generate_opencode_configs() {
 		for subdir in agent command skill configs; do
 			if [ -d "$HOME/.config/opencode/$subdir" ]; then
 				execute "mkdir -p $SCRIPT_DIR/configs/opencode/$subdir"
-				execute "cp -r '$HOME/.config/opencode/$subdir'/* '$SCRIPT_DIR/configs/opencode/$subdir'/ 2>/dev/null || true"
+				if [ "$(ls -A "$HOME/.config/opencode/$subdir" 2>/dev/null)" ]; then
+					if execute "cp -r '$HOME/.config/opencode/$subdir'/* '$SCRIPT_DIR/configs/opencode/$subdir'/ 2>/dev/null"; then
+						log_success "Copied $subdir directory"
+					else
+						log_warning "Failed to copy $subdir directory"
+					fi
+				fi
 			fi
 		done
 		log_success "OpenCode configs generated"
@@ -147,10 +171,26 @@ generate_amp_configs() {
 		execute "mkdir -p $SCRIPT_DIR/configs/amp"
 		copy_single "$HOME/.config/amp/settings.json" "$SCRIPT_DIR/configs/amp/settings.json"
 
+		# Copy AGENTS.md from amp config directory (preferred)
+		if [ -f "$HOME/.config/amp/AGENTS.md" ]; then
+			copy_single "$HOME/.config/amp/AGENTS.md" "$SCRIPT_DIR/configs/amp/AGENTS.md"
+		# Fallback to global AGENTS.md if amp-specific doesn't exist
+		elif [ -f "$HOME/.config/AGENTS.md" ]; then
+			copy_single "$HOME/.config/AGENTS.md" "$SCRIPT_DIR/configs/amp/AGENTS.md"
+		fi
+
 		if [ -d "$HOME/.config/amp/skills" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/amp/skills"
-			execute "cp -r '$HOME/.config/amp/skills'/* '$SCRIPT_DIR/configs/amp/skills'/ 2>/dev/null || true"
-			log_success "Copied skills directory"
+			# Check if skills directory has content
+			if [ "$(ls -A "$HOME/.config/amp/skills" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.config/amp/skills'/* '$SCRIPT_DIR/configs/amp/skills'/ 2>/dev/null"; then
+					log_success "Copied skills directory"
+				else
+					log_warning "Failed to copy Amp skills directory"
+				fi
+			else
+				log_warning "Amp skills directory is empty"
+			fi
 		fi
 
 		log_success "Amp configs generated"
@@ -182,13 +222,25 @@ generate_ccs_configs() {
 		# Copy cliproxy directory
 		if [ -d "$HOME/.ccs/cliproxy" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/ccs/cliproxy"
-			execute "cp -r '$HOME/.ccs/cliproxy'/* '$SCRIPT_DIR/configs/ccs/cliproxy'/ 2>/dev/null || true"
+			if [ "$(ls -A "$HOME/.ccs/cliproxy" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.ccs/cliproxy'/* '$SCRIPT_DIR/configs/ccs/cliproxy'/ 2>/dev/null"; then
+					log_success "Copied cliproxy directory"
+				else
+					log_warning "Failed to copy cliproxy directory"
+				fi
+			fi
 		fi
 
 		# Copy hooks directory
 		if [ -d "$HOME/.ccs/hooks" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/ccs/hooks"
-			execute "cp -r '$HOME/.ccs/hooks'/* '$SCRIPT_DIR/configs/ccs/hooks'/ 2>/dev/null || true"
+			if [ "$(ls -A "$HOME/.ccs/hooks" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.ccs/hooks'/* '$SCRIPT_DIR/configs/ccs/hooks'/ 2>/dev/null"; then
+					log_success "Copied hooks directory"
+				else
+					log_warning "Failed to copy hooks directory"
+				fi
+			fi
 		fi
 
 		log_success "CCS configs generated (excluding sensitive settings files)"
@@ -201,6 +253,19 @@ generate_best_practices() {
 	log_info "Generating best-practices.md..."
 
 	copy_single "$HOME/.ai-tools/best-practices.md" "$SCRIPT_DIR/configs/best-practices.md"
+}
+
+generate_memory_md() {
+	log_info "Generating MEMORY.md..."
+
+	# Copy from ~/.ai-tools/MEMORY.md if it exists, otherwise from current directory
+	if [ -f "$HOME/.ai-tools/MEMORY.md" ]; then
+		copy_single "$HOME/.ai-tools/MEMORY.md" "$SCRIPT_DIR/MEMORY.md"
+	elif [ -f "$SCRIPT_DIR/MEMORY.md" ]; then
+		log_success "MEMORY.md already exists in repository (skipping)"
+	else
+		log_warning "MEMORY.md not found in ~/.ai-tools/ or repository root"
+	fi
 }
 
 generate_ai_switcher_configs() {
@@ -268,6 +333,9 @@ main() {
 	echo
 
 	generate_best_practices
+	echo
+
+	generate_memory_md
 	echo
 
 	generate_ai_switcher_configs

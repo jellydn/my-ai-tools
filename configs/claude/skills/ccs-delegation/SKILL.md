@@ -148,7 +148,8 @@ else if (activeProfile):
   selected = activeProfile
   log("Using active profile: {selected}")
 else:
-  throw Error("No active profile in config.yaml")
+  echo "Error: No active profile in config.yaml" >&2
+  exit 1
 ```
 
 **Override Logic**:

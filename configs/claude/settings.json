@@ -3,6 +3,71 @@
   "env": {
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1"
   },
+  "permissions": {
+    "allow": [
+      "mcp__sequential-thinking__sequentialthinking",
+      "mcp__qmd__query",
+      "mcp__qmd__get",
+      "mcp__qmd__search",
+      "mcp__qmd__vsearch",
+      "mcp__qmd__multi_get",
+      "mcp__qmd__status",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_snapshot",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(git log:*)",
+      "Bash(git pull:*)",
+      "Bash(git rebase:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr edit:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr comment:*)",
+      "Bash(gh api:*)",
+      "Bash(claude:*)",
+      "Bash(ccs:*)",
+      "Bash(ccs version:*)",
+      "Bash(kubectl get:*)",
+      "Bash(kubectl logs:*)",
+      "Bash(kubectl rollout status:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(npm update:*)",
+      "Bash(npm install:*)",
+      "Bash(npm show:*)",
+      "Bash(npx biome:*)",
+      "Bash(jq:*)",
+      "Bash(shellcheck:*)",
+      "Bash(qmd:*)",
+      "Bash(qmd embed:*)",
+      "Bash(~/.config/opencode/skill/qmd-knowledge/scripts/record.sh:*)",
+      "Bash(~/.claude/skills/qmd-knowledge/scripts/record.sh:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(tree:*)",
+      "Bash(chmod:*)",
+      "Bash(mkdir:*)",
+      "Bash(test:*)",
+      "Bash(wait:*)",
+      "Bash(.gitignore:*)",
+      "Bash(command -v:*)",
+      "Bash(timeout:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill -9:*)",
+      "Bash(tee:*)",
+      "Bash(sh:*)",
+      "Bash(source:*)",
+      "Bash(get_config:*)"
+    ],
+    "defaultMode": "plan"
+  },
   "model": "opusplan",
   "hooks": {
     "Notification": [],
@@ -26,25 +91,15 @@
         ]
       }
     ],
+    "UserPromptSubmit": [],
     "PreToolUse": [
       {
         "matcher": "WebSearch",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$HOME/.ccs/hooks/websearch-transformer.cjs\"",
+            "command": "node \"~/.ccs/hooks/websearch-transformer.cjs\"",
             "timeout": 120
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun run $HOME/.claude/hooks/context-threshold.ts",
-            "timeout": 5
           }
         ]
       }
@@ -64,6 +119,10 @@
     "swift-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true,
     "plannotator@plannotator": true,
-    "claude-hud@claude-hud": true
+    "claude-hud@claude-hud": true,
+    "code-simplifier@claude-plugins-official": true,
+    "worktrunk@worktrunk": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true
   }
 }

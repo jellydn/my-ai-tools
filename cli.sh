@@ -71,6 +71,31 @@ execute() {
 	fi
 }
 
+# Install MCP server with better error handling
+install_mcp_server() {
+	local server_name="$1"
+	local install_cmd="$2"
+
+	# Capture stderr to temp file for error analysis
+	local err_file="/tmp/claude-mcp-${server_name}.err"
+
+	if execute "$install_cmd" 2>"$err_file"; then
+		log_success "${server_name} MCP server added (global)"
+		rm -f "$err_file"
+		return 0
+	else
+		# Check if it's an "already exists" error (expected)
+		if grep -qi "already" "$err_file" 2>/dev/null; then
+			log_info "${server_name} already installed"
+		else
+			# Actual error - provide details for debugging
+			log_warning "${server_name} installation failed - check $err_file for details"
+		fi
+		rm -f "$err_file"
+		return 1
+	fi
+}
+
 check_prerequisites() {
 	log_info "Checking prerequisites..."
 
@@ -81,9 +106,12 @@ check_prerequisites() {
 	log_success "Git found"
 
 	if command -v bun &>/dev/null; then
-		log_success "Bun found ($(bun --version))"
+		BUN_VERSION=$(bun --version)
+		log_success "Bun found ($BUN_VERSION)"
 	elif command -v node &>/dev/null; then
-		log_success "Node.js found ($(node --version))"
+		NODE_VERSION=$(node --version)
+		log_success "Node.js found ($NODE_VERSION)"
+		log_warning "Some scripts (e.g., context-check) prefer Bun. Install with: brew install oven-sh/bun/bun"
 	else
 		log_error "Neither Bun nor Node.js is installed. Please install one of them first."
 		exit 1
@@ -314,9 +342,8 @@ copy_configurations() {
 		# Windows: Claude Code uses ~/.claude directly
 		execute "cp $SCRIPT_DIR/configs/claude/settings.json $HOME/.claude/settings.json"
 	else
-		# Mac/Linux: Use XDG path for settings.json
-		execute "mkdir -p $HOME/.config/claude"
-		execute "cp $SCRIPT_DIR/configs/claude/settings.json $HOME/.config/claude/settings.json"
+		# Mac/Linux: Use ~/.claude/settings.json (canonical location)
+		execute "cp $SCRIPT_DIR/configs/claude/settings.json $HOME/.claude/settings.json"
 	fi
 
 	# Copy other configs to ~/.claude (all platforms)
@@ -344,10 +371,14 @@ copy_configurations() {
 			read -p "Install context7 MCP server (documentation lookup)? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest 2>/dev/null && log_success 'context7 MCP server added (global)' || log_warning 'context7 already installed or failed'"
+				if execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest"; then
+					log_success "context7 MCP server added (global)"
+				else
+					log_warning "context7 already installed or failed"
+				fi
 			fi
 		else
-			execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest 2>/dev/null || true"
+			install_mcp_server "context7" "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest"
 		fi
 
 		# sequential-thinking MCP server
@@ -355,10 +386,14 @@ copy_configurations() {
 			read -p "Install sequential-thinking MCP server (multi-step reasoning)? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking 2>/dev/null && log_success 'sequential-thinking MCP server added (global)' || log_warning 'sequential-thinking already installed or failed'"
+				if execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking"; then
+					log_success "sequential-thinking MCP server added (global)"
+				else
+					log_warning "sequential-thinking already installed or failed"
+				fi
 			fi
 		else
-			execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking 2>/dev/null || true"
+			install_mcp_server "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking"
 		fi
 
 		# qmd MCP server
@@ -366,10 +401,22 @@ copy_configurations() {
 			read -p "Install qmd MCP server (knowledge management)? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp 2>/dev/null && log_success 'qmd MCP server added (global)' || log_warning 'qmd already installed or failed'"
+				if command -v qmd &>/dev/null; then
+					if execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp"; then
+						log_success "qmd MCP server added (global)"
+					else
+						log_warning "qmd already installed or failed"
+					fi
+				else
+					log_warning "qmd not found. Install with: bun install -g https://github.com/tobi/qmd"
+				fi
 			fi
 		else
-			execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp 2>/dev/null || true"
+			if command -v qmd &>/dev/null; then
+				install_mcp_server "qmd" "claude mcp add --scope user --transport stdio qmd -- qmd mcp"
+			else
+				log_warning "qmd not found. MCP setup skipped. Install with: bun install -g https://github.com/tobi/qmd"
+			fi
 		fi
 
 		log_success "MCP server setup complete (global scope)"
@@ -378,7 +425,7 @@ copy_configurations() {
 	log_success "Claude Code configs copied"
 
 	if [ -d "$HOME/.config/opencode" ] || command -v opencode &>/dev/null; then
-		execute "mkdir -p $HOME/.config/opencode/configs"
+		execute "mkdir -p $HOME/.config/opencode"
 		execute "cp $SCRIPT_DIR/configs/opencode/opencode.json $HOME/.config/opencode/"
 		execute "rm -rf $HOME/.config/opencode/agent"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/agent $HOME/.config/opencode/"
@@ -386,16 +433,26 @@ copy_configurations() {
 		execute "cp -r $SCRIPT_DIR/configs/opencode/command $HOME/.config/opencode/"
 		execute "rm -rf $HOME/.config/opencode/skill"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/skill $HOME/.config/opencode/"
-		execute "cp $SCRIPT_DIR/configs/best-practices.md $HOME/.config/opencode/configs/"
 		log_success "OpenCode configs copied"
 	fi
 
 	if [ -d "$HOME/.config/amp" ] || command -v amp &>/dev/null; then
 		execute "mkdir -p $HOME/.config/amp"
 		execute "cp $SCRIPT_DIR/configs/amp/settings.json $HOME/.config/amp/"
+		if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
+			execute "cp $SCRIPT_DIR/configs/amp/AGENTS.md $HOME/.config/amp/"
+		fi
 		if [ -d "$SCRIPT_DIR/configs/amp/skills" ]; then
 			execute "rm -rf $HOME/.config/amp/skills"
 			execute "cp -r $SCRIPT_DIR/configs/amp/skills $HOME/.config/amp/"
+		fi
+		# Also copy AGENTS.md to global config location
+		if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
+			if [ -f "$HOME/.config/AGENTS.md" ]; then
+				cp "$HOME/.config/AGENTS.md" "$HOME/.config/AGENTS.md.bak"
+				log_warning "Backed up existing AGENTS.md to .bak"
+			fi
+			execute "cp $SCRIPT_DIR/configs/amp/AGENTS.md $HOME/.config/AGENTS.md"
 		fi
 		log_success "Amp configs copied"
 	fi
@@ -427,13 +484,99 @@ copy_configurations() {
 	execute "mkdir -p $HOME/.ai-tools"
 	execute "cp $SCRIPT_DIR/configs/best-practices.md $HOME/.ai-tools/"
 	log_success "Best practices copied to ~/.ai-tools/"
+
+	# Copy MEMORY.md to .ai-tools for reference
+	if [ -f "$SCRIPT_DIR/MEMORY.md" ]; then
+		execute "cp $SCRIPT_DIR/MEMORY.md $HOME/.ai-tools/"
+		log_success "MEMORY.md copied to ~/.ai-tools/ (reference copy)"
+	fi
 }
 
 enable_plugins() {
-	log_info "Claude Code plugins are configured in settings.json"
-	log_info "Run 'claude plugin marketplace list' to see configured marketplaces"
-	log_info "Run 'claude plugin install <plugin>' to install plugins from marketplaces"
-	log_warning "You may need to manually install and enable some plugins"
+	log_info "Installing Claude Code plugins..."
+
+	official_plugins=(
+		"typescript-lsp@claude-plugins-official"
+		"pyright-lsp@claude-plugins-official"
+		"context7@claude-plugins-official"
+		"frontend-design@claude-plugins-official"
+		"learning-output-style@claude-plugins-official"
+		"swift-lsp@claude-plugins-official"
+		"lua-lsp@claude-plugins-official"
+		"code-simplifier@claude-plugins-official"
+		"rust-analyzer-lsp@claude-plugins-official"
+		"claude-md-management@claude-plugins-official"
+	)
+
+	# Community plugins (name, plugin_spec, marketplace_repo)
+	# Format: "name|plugin_spec|marketplace_repo"
+	community_plugins=(
+		"plannotator|plannotator@plannotator|backnotprop/plannotator"
+		"claude-hud|claude-hud@claude-hud|claude-hud/claude-hud"
+		"worktrunk|worktrunk@worktrunk|worktrunk/worktrunk"
+	)
+
+	install_plugin() {
+		local plugin="$1"
+		if [ -t 1 ]; then
+			read -p "Install $plugin? (y/n) " -n 1 -r
+			echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				execute "claude plugin install '$plugin' && log_success '$plugin installed' || log_warning '$plugin install failed (may already be installed)'"
+			fi
+		else
+			execute "claude plugin install '$plugin' 2>/dev/null || true"
+		fi
+	}
+
+	install_community_plugin() {
+		local name="$1"
+		local plugin_spec="$2"
+		local marketplace_repo="$3"
+
+		if [ -t 1 ]; then
+			read -p "Install $name? (y/n) " -n 1 -r
+			echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				# Add marketplace first
+				if ! execute "claude plugin marketplace add '$marketplace_repo' 2>/dev/null"; then
+					log_info "Marketplace $marketplace_repo may already be added"
+				fi
+				# Install plugin
+				if execute "claude plugin install '$plugin_spec'"; then
+					log_success "$name installed"
+				else
+					log_warning "$name install failed (may already be installed)"
+				fi
+			fi
+		else
+			# Non-interactive mode
+			execute "claude plugin marketplace add '$marketplace_repo' 2>/dev/null || true"
+			execute "claude plugin install '$plugin_spec' 2>/dev/null || true"
+		fi
+	}
+
+	if command -v claude &>/dev/null; then
+		log_info "Installing official plugins..."
+		for plugin in "${official_plugins[@]}"; do
+			install_plugin "$plugin"
+		done
+
+		log_info "Installing community plugins..."
+		for plugin_entry in "${community_plugins[@]}"; do
+			# Parse the pipe-separated entry
+			local name="${plugin_entry%%|*}"
+			local rest="${plugin_entry#*|}"
+			local plugin_spec="${rest%%|*}"
+			local marketplace_repo="${rest##*|}"
+			install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
+		done
+
+		log_success "Claude Code plugins installation complete"
+		log_info "⚠️  IMPORTANT: Restart Claude Code for plugins to take effect"
+	else
+		log_warning "Claude Code not installed - skipping plugin installation"
+	fi
 }
 
 main() {

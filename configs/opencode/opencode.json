@@ -1,28 +1,42 @@
 {
-	"$schema": "https://opencode.ai/config.json",
-	"instructions": ["~/.config/opencode/config/best-practices.md"],
-	"theme": "kanagawa",
-	"default_agent": "plan",
-	"mcp": {
-		"context7": {
-			"type": "remote",
-			"url": "https://mcp.context7.com/mcp",
-			"enabled": true
-		},
-		"qmd": {
-			"type": "local",
-			"command": ["qmd", "mcp"],
-			"enabled": true
-		}
-	},
-	"agent": {
-		"build": {
-			"permission": {
-				"bash": {
-					"git push": "ask"
-				}
-			}
-		}
-	},
-	"plugin": ["@plannotator/opencode@latest"]
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "~/.ai-tools/best-practices.md",
+    "~/.ai-tools/MEMORY.md"
+  ],
+  "theme": "kanagawa",
+  "default_agent": "plan",
+  "mcp": {
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true
+    },
+    "qmd": {
+      "type": "local",
+      "command": [
+        "qmd",
+        "mcp"
+      ],
+      "enabled": true
+    }
+  },
+  "agent": {
+    "build": {
+      "permission": {
+        "bash": {
+          "git push": "ask",
+          "qmd": "allow",
+          "qmd query": "allow",
+          "qmd get": "allow",
+          "qmd search": "allow",
+          "$HOME/.config/opencode/skill/qmd-knowledge/scripts/record.sh": "allow",
+          "$HOME/.claude/skills/qmd-knowledge/scripts/record.sh": "allow"
+        }
+      }
+    }
+  },
+  "plugin": [
+    "@plannotator/opencode@latest"
+  ]
 }

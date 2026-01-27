@@ -21,15 +21,20 @@ NC='\033[0m'
 # Ensure knowledge base exists
 if [ ! -d "$KNOWLEDGE_BASE" ]; then
     echo -e "${RED}Error: Knowledge base not found at $KNOWLEDGE_BASE${NC}"
-    echo "Create it by running:"
-    echo "  mkdir -p $KNOWLEDGE_BASE"
-    echo "  # Copy skill files from your my-ai-tools config location"
+    echo ""
+    echo "To set up the knowledge base, run:"
+    echo "  mkdir -p $KNOWLEDGE_BASE/{references/learnings,references/issues}"
+    echo "  qmd collection add $KNOWLEDGE_BASE --name $PROJECT_NAME"
+    echo "  qmd embed"
+    echo ""
+    echo "Or see docs/qmd-knowledge-management.md for detailed setup instructions."
     exit 1
 fi
 
 # Function to slugify text
 slugify() {
-    local slug=$(echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-\|-$//g')
+    local slug
+    slug=$(echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-\|-$//g')
     # Fallback to timestamp if slug is empty
     if [ -z "$slug" ]; then
         slug="note-$(date +%H%M%S)"
@@ -41,7 +46,9 @@ slugify() {
 update_index() {
     if command -v qmd &> /dev/null; then
         echo -e "${GREEN}Updating qmd embeddings...${NC}"
-        qmd embed 2>/dev/null || echo -e "${YELLOW}Note: qmd embed failed. Ensure collection is added: qmd collection add $KNOWLEDGE_BASE --name $PROJECT_NAME${NC}"
+        if ! qmd embed; then
+            echo -e "${YELLOW}Note: qmd embed failed. Ensure collection is added: qmd collection add $KNOWLEDGE_BASE --name $PROJECT_NAME${NC}"
+        fi
     else
         echo -e "${YELLOW}Warning: qmd not found. Install with: bun install -g https://github.com/tobi/qmd${NC}"
     fi
@@ -99,8 +106,15 @@ EOF
             echo "Usage: $0 issue <id> \"note text\""
             exit 1
         fi
-        
-        FILENAME="references/issues/$ID.md"
+
+        # Sanitize ID to prevent path traversal attacks
+        SAFE_ID=$(slugify "$ID")
+        if [ -z "$SAFE_ID" ]; then
+            echo -e "${RED}Error: Invalid issue ID '${ID}'${NC}"
+            exit 1
+        fi
+
+        FILENAME="references/issues/$SAFE_ID.md"
         FILEPATH="$KNOWLEDGE_BASE/$FILENAME"
         
         # Create issues directory if it doesn't exist
@@ -109,13 +123,13 @@ EOF
         # Create or append to issue file
         if [ ! -f "$FILEPATH" ]; then
             cat > "$FILEPATH" <<EOF
-# Issue #$ID
+# Issue #$SAFE_ID
 
 ## Notes
 
 EOF
         fi
-        
+
         # Append the note
         cat >> "$FILEPATH" <<EOF
 
@@ -124,8 +138,8 @@ EOF
 ${NOTE:-<!-- Add note here -->}
 
 EOF
-        
-        echo -e "${GREEN}✓ Added note to issue #$ID: $FILEPATH${NC}"
+
+        echo -e "${GREEN}✓ Added note to issue #$SAFE_ID: $FILEPATH${NC}"
         update_index
         ;;
         

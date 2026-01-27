@@ -82,6 +82,7 @@ claude mcp add --scope user --transport stdio qmd -- qmd mcp
 > **Note:** The setup script handles both approaches automatically.
 >
 > **MCP Scopes:**
+>
 > - `--scope user` (global): Available across all projects on your machine
 > - `--scope local` (default): Only available in the current project directory
 > - `--scope project`: Stored in `.mcp.json` for team sharing via git
@@ -102,6 +103,7 @@ claude mcp get qmd
 **💡 Knowledge Management:**
 
 Replace deprecated `claude-mem` with the **qmd-based knowledge system**:
+
 - Project-specific knowledge bases in `~/.ai-knowledges/`
 - AI-powered search via qmd MCP server
 - No repository pollution
@@ -109,21 +111,44 @@ Replace deprecated `claude-mem` with the **qmd-based knowledge system**:
 
 ### Plugins
 
-Enable in Claude Code settings:
+Install via setup script (`./cli.sh`) or manually:
 
-| Plugin                  | Description                         | Link                                                 |
-| ----------------------- | ----------------------------------- | ---------------------------------------------------- |
-| ~~`claude-mem`~~        | ⚠️ **DEPRECATED** - Currently broken ([#609](https://github.com/thedotmack/claude-mem/issues/609)) | [GitHub](https://github.com/thedotmack/claude-mem)   |
-| `typescript-lsp`        | TypeScript language server          | Official                                             |
-| `pyright-lsp`           | Python language server              | Official                                             |
-| `context7`              | Documentation lookup                | [GitHub](https://github.com/upstash/context7)        |
-| `frontend-design`       | UI/UX design assistance             | Official                                             |
-| `learning-output-style` | Interactive learning mode           | Official                                             |
-| `swift-lsp`             | Swift language support              | Official                                             |
-| `lua-lsp`               | Lua language support                | Official                                             |
-| ~~`beads`~~             | ⚠️ **DEPRECATED** - Use native task management (Claude Code 2.1.16+) | [GitHub](https://github.com/steveyegge/beads)        |
-| `plannotator`           | Plan annotation tool                | [GitHub](https://github.com/backnotprop/plannotator) |
-| `claude-hud`            | Status line with usage monitoring   | [GitHub](https://github.com/jarrodwatts/claude-hud)  |
+```bash
+# Official plugins
+claude plugin install typescript-lsp@claude-plugins-official
+claude plugin install pyright-lsp@claude-plugins-official
+claude plugin install context7@claude-plugins-official
+claude plugin install frontend-design@claude-plugins-official
+claude plugin install learning-output-style@claude-plugins-official
+claude plugin install swift-lsp@claude-plugins-official
+claude plugin install lua-lsp@claude-plugins-official
+claude plugin install code-simplifier@claude-plugins-official
+claude plugin install rust-analyzer-lsp@claude-plugins-official
+claude plugin install claude-md-management@claude-plugins-official
+
+# Community plugins
+claude plugin install plannotator@backnotprop
+claude plugin install claude-hud@claude-hud
+claude plugin install worktrunk@worktrunk
+```
+
+| Plugin                  | Description                                                                                   | Source                                             |
+| ----------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `typescript-lsp`        | TypeScript language server                                                                    | Official                                           |
+| `pyright-lsp`           | Python language server                                                                        | Official                                           |
+| `context7`              | Documentation lookup                                                                          | Official                                           |
+| `frontend-design`       | UI/UX design assistance                                                                       | Official                                           |
+| `learning-output-style` | Interactive learning mode                                                                     | Official                                           |
+| `swift-lsp`             | Swift language support                                                                        | Official                                           |
+| `lua-lsp`               | Lua language support                                                                          | Official                                           |
+| `code-simplifier`       | Code simplification                                                                           | Official                                           |
+| `rust-analyzer-lsp`     | Rust language support                                                                         | Official                                           |
+| `claude-md-management`  | Markdown management                                                                           | Official                                           |
+| `plannotator`           | Plan annotation tool                                                                          | Community                                          |
+| `claude-hud`            | Status line with usage monitoring                                                             | Community                                          |
+| `worktrunk`             | Work management                                                                               | Community                                          |
+| ~~`claude-mem`~~        | ⚠️ **DEPRECATED** - Use qmd instead or using [my fork](https://github.com/jellydn/claude-mem) | [GitHub](https://github.com/thedotmack/claude-mem) |
+| ~~`beads`~~             | ⚠️ **DEPRECATED** - Native tasks                                                              | [GitHub](https://github.com/steveyegge/beads)      |
 
 ### Hooks
 
@@ -168,7 +193,7 @@ Configure in `~/.claude/settings.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/Users/YOUR_USERNAME/.ccs/hooks/websearch-transformer.cjs\"",
+            "command": "node \"~/.ccs/hooks/websearch-transformer.cjs\"",
             "timeout": 120
           }
         ]
@@ -177,6 +202,19 @@ Configure in `~/.claude/settings.json`:
   }
 }
 ```
+
+**Status Line** - Using claude-hud plugin (auto-compact disabled):
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bash -c 'node \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
+  }
+}
+```
+
+> **Tip:** Auto-compact is disabled. Use `claude-hud` to monitor context usage instead of the deprecated context-threshold hook.
 
 ### Custom Commands
 
@@ -188,9 +226,9 @@ Plus all commands from installed plugins.
 
 ### Custom Agents
 
-| Agent             | Description                              | Mode     |
-| ----------------- | ---------------------------------------- | -------- |
-| `ai-slop-remover` | Cleans AI-generated code patterns        | subagent |
+| Agent             | Description                       | Mode     |
+| ----------------- | --------------------------------- | -------- |
+| `ai-slop-remover` | Cleans AI-generated code patterns | subagent |
 
 ### Skills
 
@@ -204,13 +242,13 @@ Plus all commands from installed plugins.
 
 Real-world projects built using these AI tools:
 
-| Project | Description | Tools Used |
-| ------- | ----------- | ---------- |
-| [Keybinder](https://github.com/jellydn/keybinder) | macOS app for managing skhd keyboard shortcuts | Claude + spec-kit |
-| [SealCode](https://github.com/jellydn/vscode-seal-code) | VS Code extension for AI-powered code review | Amp + Ralph |
-| [Ralph](https://github.com/jellydn/ralph) | Autonomous AI agent loop for PRD-driven development | TypeScript |
-| [AI CLI Switcher](https://github.com/jellydn/ai-cli-switcher) | Fast launcher for switching between AI coding assistants | TypeScript |
-| [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity | TypeScript |
+| Project                                                           | Description                                              | Tools Used        |
+| ----------------------------------------------------------------- | -------------------------------------------------------- | ----------------- |
+| [Keybinder](https://github.com/jellydn/keybinder)                 | macOS app for managing skhd keyboard shortcuts           | Claude + spec-kit |
+| [SealCode](https://github.com/jellydn/vscode-seal-code)           | VS Code extension for AI-powered code review             | Amp + Ralph       |
+| [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development      | TypeScript        |
+| [AI CLI Switcher](https://github.com/jellydn/ai-cli-switcher)     | Fast launcher for switching between AI coding assistants | TypeScript        |
+| [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity               | TypeScript        |
 
 📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
 
@@ -218,10 +256,10 @@ Real-world projects built using these AI tools:
 
 Official and community-maintained skill collections for specific frameworks:
 
-| Framework | Skills Repository | Description |
-| --------- | ----------------- | ----------- |
-| **Expo** | [expo/skills](https://github.com/expo/skills) | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows. |
-| **Next.js** | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows. |
+| Framework   | Skills Repository                                                       | Description                                                                                                                                  |
+| ----------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Expo**    | [expo/skills](https://github.com/expo/skills)                           | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows. |
+| **Next.js** | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.          |
 
 **Installation:**
 
@@ -234,7 +272,7 @@ git clone https://github.com/vercel-labs/agent-skills.git ~/.claude/skills/nextj
 ### 💡 Tips & Tricks
 
 - **OpusPlan Mode**: Use opusplan mode to plan with Opus and implement with Sonnet, then use Plannotator to review plans
-- **Session Management**: Turn off auto-compact. Use `Ctrl+C` → to quit, or `/clear` to reset between coding sessions. Use `/handoffs` to create a plan and `/pickup` to resume when approaching 90% context limit on big tasks.
+- **Session Management**: Disable auto-compact in settings. Monitor context usage with `claude-hud`. Press `Ctrl+C` to quit or `/clear` to reset between coding sessions. Create a plan with `/handoffs` and resume with `/pickup` when approaching 90% context limit on big tasks.
 - **Git Worktree**: Use git worktree with `try` CLI. For tmux users, use `claude-squash` to manage sessions efficiently
 - **Neovim Integration**: Check out [tiny-nvim](https://github.com/jellydn/tiny-nvim) for a complete setup with [sidekick.nvim](https://github.com/folke/sidekick.nvim) or [claudecode.nvim](https://github.com/coder/claudecode.nvim)
 - **Cost Optimization**: Use [CCS](https://ccs.kaitran.ca/) to switch between affordable providers:
@@ -243,12 +281,18 @@ git clone https://github.com/vercel-labs/agent-skills.git ~/.claude/skills/nextj
 
 ### Configuration Files
 
-Copy from `configs/claude/` directory:
+All Claude Code configs are stored in `~/.claude/` (canonical location):
 
-- `settings.json` - Main settings with hooks and permissions
-- `mcp-servers.json` - MCP server definitions
-- `CLAUDE.md` - Global instructions
-- `commands/` - Custom command definitions
+| File/Directory     | Description                                    |
+| ------------------ | ---------------------------------------------- |
+| `settings.json`    | Main settings with hooks, permissions, plugins |
+| `mcp-servers.json` | MCP server definitions                         |
+| `CLAUDE.md`        | Global instructions                            |
+| `commands/`        | Custom command definitions                     |
+| `agents/`          | Custom agent definitions                       |
+| `skills/`          | Custom skill definitions                       |
+
+> **Note:** On Mac/Linux, `~/.config/claude/` was previously used but `~/.claude/` is now the canonical location. The setup script handles this automatically.
 
 ## 🔄 Bidirectional Config Sync
 
@@ -281,6 +325,17 @@ This is useful for:
 - Saving your current configuration to version control
 - Backing up working configs
 - Sharing your setup with others
+
+**Config Locations:**
+
+| Tool        | macOS/Linux                | Windows               |
+| ----------- | -------------------------- | --------------------- |
+| Claude Code | `~/.claude/` (all configs) | `~/.claude/`          |
+| OpenCode    | `~/.config/opencode/`      | `%APPDATA%\OpenCode\` |
+| Amp         | `~/.config/amp/`           | `%APPDATA%\Amp\`      |
+| CCS         | `~/.ccs/`                  | `%APPDATA%\CCS\`      |
+
+> **Note:** On older Linux installs, Claude Code may use `~/.config/claude/`. The setup script handles both locations automatically.
 
 **Note:** Sensitive files (like `*.settings.json` containing API keys) are automatically excluded from CCS config sync.
 
@@ -430,26 +485,56 @@ Copy all files from `configs/ccs/` to `~/.ccs/`:
 - `hooks/` - Web search hooks
 
 ```yaml
-version: 7
+version: 8
+
+accounts: {}
 
 profiles:
   glm:
     type: api
     settings: ~/.ccs/glm.settings.json
-  kimi:
-    type: api
-    settings: ~/.ccs/kimi.settings.json
   mm:
     type: api
     settings: ~/.ccs/mm.settings.json
+  ollama-cloud:
+    type: api
+    settings: ~/.ccs/ollama-cloud.settings.json
+  ollama:
+    type: api
+    settings: ~/.ccs/ollama.settings.json
 
 cliproxy:
+  oauth_accounts: {}
   providers:
     - gemini
     - codex
     - agy
     - qwen
     - iflow
+    - kiro
+    - ghcp
+  variants: {}
+  logging:
+    enabled: false
+    request_log: false
+
+cliproxy_server:
+  remote:
+    enabled: false
+    host: ""
+    protocol: http
+    auth_token: ""
+  fallback:
+    enabled: true
+    auto_start: false
+  local:
+    port: 8317
+    auto_start: true
+
+preferences:
+  theme: system
+  telemetry: false
+  auto_update: true
 
 websearch:
   enabled: true
@@ -457,6 +542,38 @@ websearch:
     gemini:
       enabled: true
       model: gemini-2.5-flash
+      timeout: 55
+    opencode:
+      enabled: true
+      model: opencode/grok-code
+      timeout: 90
+    grok:
+      enabled: false
+      timeout: 55
+
+copilot:
+  enabled: false
+  auto_start: false
+  port: 4141
+  account_type: individual
+  rate_limit: null
+  wait_on_limit: true
+  model: gpt-4.1
+
+global_env:
+  enabled: true
+  env:
+    DISABLE_BUG_COMMAND: "1"
+    DISABLE_ERROR_REPORTING: "1"
+    DISABLE_TELEMETRY: "1"
+
+thinking:
+  mode: auto
+  tier_defaults:
+    opus: high
+    sonnet: medium
+    haiku: low
+  show_warnings: true
 ```
 
 ### Usage
@@ -495,11 +612,13 @@ curl -fsSL https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/instal
 Copy `configs/ai-switcher/config.json` to `~/.config/ai-switcher/` for pre-configured tools and templates:
 
 **Tools:**
+
 - `claude` / `c` - Anthropic Claude CLI
 - `opencode` / `o`, `oc` - OpenCode AI assistant
 - `amp` / `a` - AI coding assistant by Modular
 
 **Templates:**
+
 - `review` - Code review with OpenCode
 - `commit` / `commit-zen` - Generate commit message
 - `ac` / `commit-atomic` - Atomic commit message
@@ -543,6 +662,7 @@ Copy `configs/ai-switcher/config.json` to `~/.config/ai-switcher/` for pre-confi
 ```
 
 **Features:**
+
 - Record learnings with timestamped markdown files
 - Track issue resolutions with issue-specific notes
 - Query knowledge via natural language
@@ -553,6 +673,7 @@ Copy `configs/ai-switcher/config.json` to `~/.config/ai-switcher/` for pre-confi
 **Context:** See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for design discussion and progress.
 
 **Related:**
+
 - [qmd Knowledge Management Guide](docs/qmd-knowledge-management.md)
 - [qmd GitHub](https://github.com/tobi/qmd)
 - [Agent Skills Specification](https://support.claude.com/en/articles/33007817317)
