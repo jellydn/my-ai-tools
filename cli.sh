@@ -512,8 +512,8 @@ enable_plugins() {
 	# Format: "name|plugin_spec|marketplace_repo"
 	community_plugins=(
 		"plannotator|plannotator@plannotator|backnotprop/plannotator"
-		"claude-hud|claude-hud@claude-hud|claude-hud/claude-hud"
-		"worktrunk|worktrunk@worktrunk|worktrunk/worktrunk"
+		"claude-hud|claude-hud@claude-hud|jarrodwatts/claude-hudg"
+		"worktrunk|worktrunk@worktrunk|max-sixty/worktrunk"
 	)
 
 	install_plugin() {
