@@ -462,9 +462,14 @@ enable_plugins() {
 		"learning-output-style@claude-plugins-official"
 		"swift-lsp@claude-plugins-official"
 		"lua-lsp@claude-plugins-official"
-		"plannotator@claude-plugins-official"
 		"code-simplifier@claude-plugins-official"
 		"rust-analyzer-lsp@claude-plugins-official"
+	)
+
+	community_plugins=(
+		"plannotator@backnotprop"
+		"claude-hud@claude-hud"
+		"worktrunk@worktrunk"
 	)
 
 	community_plugins=(

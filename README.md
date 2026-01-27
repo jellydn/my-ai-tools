@@ -120,29 +120,29 @@ claude plugin install frontend-design@claude-plugins-official
 claude plugin install learning-output-style@claude-plugins-official
 claude plugin install swift-lsp@claude-plugins-official
 claude plugin install lua-lsp@claude-plugins-official
-claude plugin install plannotator@claude-plugins-official
 claude plugin install code-simplifier@claude-plugins-official
 claude plugin install rust-analyzer-lsp@claude-plugins-official
 
 # Community plugins
+claude plugin install plannotator@backnotprop
 claude plugin install claude-hud@claude-hud
 claude plugin install worktrunk@worktrunk
 ```
 
-| Plugin                  | Description                         | Source      |
-| ----------------------- | ----------------------------------- | ----------- |
-| `typescript-lsp`        | TypeScript language server          | Official    |
-| `pyright-lsp`           | Python language server              | Official    |
-| `context7`              | Documentation lookup                | Official    |
-| `frontend-design`       | UI/UX design assistance             | Official    |
-| `learning-output-style` | Interactive learning mode           | Official    |
-| `swift-lsp`             | Swift language support              | Official    |
-| `lua-lsp`               | Lua language support                | Official    |
-| `plannotator`           | Plan annotation tool                | Official    |
-| `code-simplifier`       | Code simplification                 | Official    |
-| `rust-analyzer-lsp`     | Rust language support               | Official    |
-| `claude-hud`            | Status line with usage monitoring   | Community   |
-| `worktrunk`             | Work management                     | Community   |
+| Plugin                  | Description                         | Source          |
+| ----------------------- | ----------------------------------- | --------------- |
+| `typescript-lsp`        | TypeScript language server          | Official        |
+| `pyright-lsp`           | Python language server              | Official        |
+| `context7`              | Documentation lookup                | Official        |
+| `frontend-design`       | UI/UX design assistance             | Official        |
+| `learning-output-style` | Interactive learning mode           | Official        |
+| `swift-lsp`             | Swift language support              | Official        |
+| `lua-lsp`               | Lua language support                | Official        |
+| `code-simplifier`       | Code simplification                 | Official        |
+| `rust-analyzer-lsp`     | Rust language support               | Official        |
+| `plannotator`           | Plan annotation tool                | Community       |
+| `claude-hud`            | Status line with usage monitoring   | Community       |
+| `worktrunk`             | Work management                     | Community       |
 | ~~`claude-mem`~~        | ⚠️ **DEPRECATED** - Use qmd instead | [GitHub](https://github.com/thedotmack/claude-mem)   |
 | ~~`beads`~~             | ⚠️ **DEPRECATED** - Native tasks    | [GitHub](https://github.com/steveyegge/beads)        |
 
