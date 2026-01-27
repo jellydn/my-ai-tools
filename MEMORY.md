@@ -24,8 +24,9 @@ qmd collection list
 ```bash
 # Auto-detect project name: try git remote, fallback to repo folder name, then current folder
 PROJECT_NAME=$(
-  git remote get-url origin 2>/dev/null | xargs basename -s .git ||
-  basename $(git rev-parse --show-toplevel 2>/dev/null || echo $PWD)
+  { git remote get-url origin 2>/dev/null | xargs basename -s .git; } ||
+  { git rev-parse --show-toplevel 2>/dev/null | xargs basename; } ||
+  basename "$PWD"
 )
 
 # 1. Create project directory structure

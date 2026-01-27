@@ -24,12 +24,10 @@ if [ ! -d "$KNOWLEDGE_BASE" ]; then
     echo ""
     echo "To set up the knowledge base, run:"
     echo "  mkdir -p $KNOWLEDGE_BASE/{references/learnings,references/issues}"
-    echo ""
-    echo "Then initialize qmd collection:"
     echo "  qmd collection add $KNOWLEDGE_BASE --name $PROJECT_NAME"
     echo "  qmd embed"
     echo ""
-    echo "See docs/qmd-knowledge-management.md for detailed setup instructions."
+    echo "Or see docs/qmd-knowledge-management.md for detailed setup instructions."
     exit 1
 fi
 

@@ -1,3 +1,5 @@
+# 🤖 Claude Code Agent Guidelines
+
 - Follow my software development practice @~/.ai-tools/best-practices.md
 - Read @~/.ai-tools/MEMORY.md first - Understand when and how to use qmd for knowledge management
 - Keep responses concise and actionable.

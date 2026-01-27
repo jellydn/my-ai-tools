@@ -96,16 +96,28 @@ generate_claude_configs() {
 
 		if [ -d "$HOME/.claude/agents" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/claude/agents"
-			execute "cp -r '$HOME/.claude/agents'/* '$SCRIPT_DIR/configs/claude/agents'/ 2>/dev/null || true"
-			log_success "Copied agents directory"
+			if [ "$(ls -A "$HOME/.claude/agents" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.claude/agents'/* '$SCRIPT_DIR/configs/claude/agents'/ 2>/dev/null"; then
+					log_success "Copied agents directory"
+				else
+					log_warning "Failed to copy agents directory"
+				fi
+			else
+				log_warning "Claude agents directory is empty"
+			fi
 		fi
 
 		if [ -d "$HOME/.claude/skills" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/claude/skills"
-			if ! execute "cp -r '$HOME/.claude/skills'/* '$SCRIPT_DIR/configs/claude/skills'/ 2>&1"; then
-				log_warning "Failed to copy Claude skills directory"
+			# Check if skills directory has content
+			if [ "$(ls -A "$HOME/.claude/skills" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.claude/skills'/* '$SCRIPT_DIR/configs/claude/skills'/ 2>/dev/null"; then
+					log_success "Copied skills directory"
+				else
+					log_warning "Failed to copy Claude skills directory"
+				fi
 			else
-				log_success "Copied skills directory"
+				log_warning "Claude skills directory is empty"
 			fi
 		fi
 	fi
@@ -137,7 +149,13 @@ generate_opencode_configs() {
 		for subdir in agent command skill configs; do
 			if [ -d "$HOME/.config/opencode/$subdir" ]; then
 				execute "mkdir -p $SCRIPT_DIR/configs/opencode/$subdir"
-				execute "cp -r '$HOME/.config/opencode/$subdir'/* '$SCRIPT_DIR/configs/opencode/$subdir'/ 2>/dev/null || true"
+				if [ "$(ls -A "$HOME/.config/opencode/$subdir" 2>/dev/null)" ]; then
+					if execute "cp -r '$HOME/.config/opencode/$subdir'/* '$SCRIPT_DIR/configs/opencode/$subdir'/ 2>/dev/null"; then
+						log_success "Copied $subdir directory"
+					else
+						log_warning "Failed to copy $subdir directory"
+					fi
+				fi
 			fi
 		done
 		log_success "OpenCode configs generated"
@@ -163,10 +181,15 @@ generate_amp_configs() {
 
 		if [ -d "$HOME/.config/amp/skills" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/amp/skills"
-			if ! execute "cp -r '$HOME/.config/amp/skills'/* '$SCRIPT_DIR/configs/amp/skills'/ 2>&1"; then
-				log_warning "Failed to copy Amp skills directory"
+			# Check if skills directory has content
+			if [ "$(ls -A "$HOME/.config/amp/skills" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.config/amp/skills'/* '$SCRIPT_DIR/configs/amp/skills'/ 2>/dev/null"; then
+					log_success "Copied skills directory"
+				else
+					log_warning "Failed to copy Amp skills directory"
+				fi
 			else
-				log_success "Copied skills directory"
+				log_warning "Amp skills directory is empty"
 			fi
 		fi
 
@@ -199,13 +222,25 @@ generate_ccs_configs() {
 		# Copy cliproxy directory
 		if [ -d "$HOME/.ccs/cliproxy" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/ccs/cliproxy"
-			execute "cp -r '$HOME/.ccs/cliproxy'/* '$SCRIPT_DIR/configs/ccs/cliproxy'/ 2>/dev/null || true"
+			if [ "$(ls -A "$HOME/.ccs/cliproxy" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.ccs/cliproxy'/* '$SCRIPT_DIR/configs/ccs/cliproxy'/ 2>/dev/null"; then
+					log_success "Copied cliproxy directory"
+				else
+					log_warning "Failed to copy cliproxy directory"
+				fi
+			fi
 		fi
 
 		# Copy hooks directory
 		if [ -d "$HOME/.ccs/hooks" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/ccs/hooks"
-			execute "cp -r '$HOME/.ccs/hooks'/* '$SCRIPT_DIR/configs/ccs/hooks'/ 2>/dev/null || true"
+			if [ "$(ls -A "$HOME/.ccs/hooks" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.ccs/hooks'/* '$SCRIPT_DIR/configs/ccs/hooks'/ 2>/dev/null"; then
+					log_success "Copied hooks directory"
+				else
+					log_warning "Failed to copy hooks directory"
+				fi
+			fi
 		fi
 
 		log_success "CCS configs generated (excluding sensitive settings files)"

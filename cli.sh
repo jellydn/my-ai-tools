@@ -71,6 +71,31 @@ execute() {
 	fi
 }
 
+# Install MCP server with better error handling
+install_mcp_server() {
+	local server_name="$1"
+	local install_cmd="$2"
+
+	# Capture stderr to temp file for error analysis
+	local err_file="/tmp/claude-mcp-${server_name}.err"
+
+	if execute "$install_cmd" 2>"$err_file"; then
+		log_success "${server_name} MCP server added (global)"
+		rm -f "$err_file"
+		return 0
+	else
+		# Check if it's an "already exists" error (expected)
+		if grep -qi "already" "$err_file" 2>/dev/null; then
+			log_info "${server_name} already installed"
+		else
+			# Actual error - provide details for debugging
+			log_warning "${server_name} installation failed - check $err_file for details"
+		fi
+		rm -f "$err_file"
+		return 1
+	fi
+}
+
 check_prerequisites() {
 	log_info "Checking prerequisites..."
 
@@ -353,7 +378,7 @@ copy_configurations() {
 				fi
 			fi
 		else
-			execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest || true"
+			install_mcp_server "context7" "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest"
 		fi
 
 		# sequential-thinking MCP server
@@ -368,7 +393,7 @@ copy_configurations() {
 				fi
 			fi
 		else
-			execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking || true"
+			install_mcp_server "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking"
 		fi
 
 		# qmd MCP server
@@ -388,7 +413,7 @@ copy_configurations() {
 			fi
 		else
 			if command -v qmd &>/dev/null; then
-				execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp || true"
+				install_mcp_server "qmd" "claude mcp add --scope user --transport stdio qmd -- qmd mcp"
 			else
 				log_warning "qmd not found. MCP setup skipped. Install with: bun install -g https://github.com/tobi/qmd"
 			fi
@@ -482,10 +507,12 @@ enable_plugins() {
 		"rust-analyzer-lsp@claude-plugins-official"
 	)
 
+	# Community plugins (name, plugin_spec, marketplace_repo)
+	# Format: "name|plugin_spec|marketplace_repo"
 	community_plugins=(
-		"plannotator@backnotprop"
-		"claude-hud@claude-hud"
-		"worktrunk@worktrunk"
+		"plannotator|plannotator@plannotator|backnotprop/plannotator"
+		"claude-hud|claude-hud@claude-hud|claude-hud/claude-hud"
+		"worktrunk|worktrunk@worktrunk|worktrunk/worktrunk"
 	)
 
 	install_plugin() {
@@ -501,6 +528,33 @@ enable_plugins() {
 		fi
 	}
 
+	install_community_plugin() {
+		local name="$1"
+		local plugin_spec="$2"
+		local marketplace_repo="$3"
+
+		if [ -t 1 ]; then
+			read -p "Install $name? (y/n) " -n 1 -r
+			echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				# Add marketplace first
+				if ! execute "claude plugin marketplace add '$marketplace_repo' 2>/dev/null"; then
+					log_info "Marketplace $marketplace_repo may already be added"
+				fi
+				# Install plugin
+				if execute "claude plugin install '$plugin_spec'"; then
+					log_success "$name installed"
+				else
+					log_warning "$name install failed (may already be installed)"
+				fi
+			fi
+		else
+			# Non-interactive mode
+			execute "claude plugin marketplace add '$marketplace_repo' 2>/dev/null || true"
+			execute "claude plugin install '$plugin_spec' 2>/dev/null || true"
+		fi
+	}
+
 	if command -v claude &>/dev/null; then
 		log_info "Installing official plugins..."
 		for plugin in "${official_plugins[@]}"; do
@@ -508,11 +562,17 @@ enable_plugins() {
 		done
 
 		log_info "Installing community plugins..."
-		for plugin in "${community_plugins[@]}"; do
-			install_plugin "$plugin"
+		for plugin_entry in "${community_plugins[@]}"; do
+			# Parse the pipe-separated entry
+			local name="${plugin_entry%%|*}"
+			local rest="${plugin_entry#*|}"
+			local plugin_spec="${rest%%|*}"
+			local marketplace_repo="${rest##*|}"
+			install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
 		done
 
 		log_success "Claude Code plugins installation complete"
+		log_info "⚠️  IMPORTANT: Restart Claude Code for plugins to take effect"
 	else
 		log_warning "Claude Code not installed - skipping plugin installation"
 	fi
