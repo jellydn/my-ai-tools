@@ -357,9 +357,27 @@ copy_configurations() {
 		execute "cp $SCRIPT_DIR/configs/claude/agents/* $HOME/.claude/agents/"
 	fi
 	# Remove existing skills to avoid conflicts with directory/file name collisions
-	if [ -d "$SCRIPT_DIR/configs/claude/skills" ]; then
+	if [ -d "$SCRIPT_DIR/configs/claude/skills" ] || [ -d "$SCRIPT_DIR/skills" ]; then
 		execute "rm -rf $HOME/.claude/skills"
-		execute "cp -r $SCRIPT_DIR/configs/claude/skills $HOME/.claude/"
+		execute "mkdir -p $HOME/.claude/skills"
+		
+		# Copy tool-specific skills if they exist
+		if [ -d "$SCRIPT_DIR/configs/claude/skills" ]; then
+			execute "cp -r $SCRIPT_DIR/configs/claude/skills/* $HOME/.claude/skills/ 2>/dev/null || true"
+		fi
+		
+		# Create symlinks for central shared skills
+		if [ -d "$SCRIPT_DIR/skills" ]; then
+			for skill in "$SCRIPT_DIR/skills"/*; do
+				if [ -d "$skill" ]; then
+					skill_name=$(basename "$skill")
+					# Only create symlink if skill doesn't already exist (tool-specific takes precedence)
+					if [ ! -e "$HOME/.claude/skills/$skill_name" ]; then
+						execute "ln -s '$skill' '$HOME/.claude/skills/$skill_name'"
+					fi
+				fi
+			done
+		fi
 	fi
 
 	# Add MCP servers using Claude Code CLI (globally, available in all projects)
@@ -431,8 +449,31 @@ copy_configurations() {
 		execute "cp -r $SCRIPT_DIR/configs/opencode/agent $HOME/.config/opencode/"
 		execute "rm -rf $HOME/.config/opencode/command"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/command $HOME/.config/opencode/"
-		execute "rm -rf $HOME/.config/opencode/skill"
-		execute "cp -r $SCRIPT_DIR/configs/opencode/skill $HOME/.config/opencode/"
+		
+		# Handle skills with symlinks for central shared skills
+		if [ -d "$SCRIPT_DIR/configs/opencode/skill" ] || [ -d "$SCRIPT_DIR/skills" ]; then
+			execute "rm -rf $HOME/.config/opencode/skill"
+			execute "mkdir -p $HOME/.config/opencode/skill"
+			
+			# Copy tool-specific skills if they exist
+			if [ -d "$SCRIPT_DIR/configs/opencode/skill" ]; then
+				execute "cp -r $SCRIPT_DIR/configs/opencode/skill/* $HOME/.config/opencode/skill/ 2>/dev/null || true"
+			fi
+			
+			# Create symlinks for central shared skills
+			if [ -d "$SCRIPT_DIR/skills" ]; then
+				for skill in "$SCRIPT_DIR/skills"/*; do
+					if [ -d "$skill" ]; then
+						skill_name=$(basename "$skill")
+						# Only create symlink if skill doesn't already exist (tool-specific takes precedence)
+						if [ ! -e "$HOME/.config/opencode/skill/$skill_name" ]; then
+							execute "ln -s '$skill' '$HOME/.config/opencode/skill/$skill_name'"
+						fi
+					fi
+				done
+			fi
+		fi
+		
 		log_success "OpenCode configs copied"
 	fi
 
@@ -442,9 +483,27 @@ copy_configurations() {
 		if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
 			execute "cp $SCRIPT_DIR/configs/amp/AGENTS.md $HOME/.config/amp/"
 		fi
-		if [ -d "$SCRIPT_DIR/configs/amp/skills" ]; then
+		if [ -d "$SCRIPT_DIR/configs/amp/skills" ] || [ -d "$SCRIPT_DIR/skills" ]; then
 			execute "rm -rf $HOME/.config/amp/skills"
-			execute "cp -r $SCRIPT_DIR/configs/amp/skills $HOME/.config/amp/"
+			execute "mkdir -p $HOME/.config/amp/skills"
+			
+			# Copy tool-specific skills if they exist
+			if [ -d "$SCRIPT_DIR/configs/amp/skills" ]; then
+				execute "cp -r $SCRIPT_DIR/configs/amp/skills/* $HOME/.config/amp/skills/ 2>/dev/null || true"
+			fi
+			
+			# Create symlinks for central shared skills
+			if [ -d "$SCRIPT_DIR/skills" ]; then
+				for skill in "$SCRIPT_DIR/skills"/*; do
+					if [ -d "$skill" ]; then
+						skill_name=$(basename "$skill")
+						# Only create symlink if skill doesn't already exist (tool-specific takes precedence)
+						if [ ! -e "$HOME/.config/amp/skills/$skill_name" ]; then
+							execute "ln -s '$skill' '$HOME/.config/amp/skills/$skill_name'"
+						fi
+					fi
+				done
+			fi
 		fi
 		# Also copy AGENTS.md to global config location
 		if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then

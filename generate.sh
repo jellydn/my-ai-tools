@@ -109,13 +109,32 @@ generate_claude_configs() {
 
 		if [ -d "$HOME/.claude/skills" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/claude/skills"
+			execute "mkdir -p $SCRIPT_DIR/skills"
+			
 			# Check if skills directory has content
 			if [ "$(ls -A "$HOME/.claude/skills" 2>/dev/null)" ]; then
-				if execute "cp -r '$HOME/.claude/skills'/* '$SCRIPT_DIR/configs/claude/skills'/ 2>/dev/null"; then
-					log_success "Copied skills directory"
-				else
-					log_warning "Failed to copy Claude skills directory"
-				fi
+				for skill_path in "$HOME/.claude/skills"/*; do
+					if [ -d "$skill_path" ] || [ -L "$skill_path" ]; then
+						skill_name=$(basename "$skill_path")
+						
+						# Check if it's a symlink (shared skill) or regular directory (tool-specific)
+						if [ -L "$skill_path" ]; then
+							# It's a symlink - copy to central skills directory
+							if execute "cp -rL '$skill_path' '$SCRIPT_DIR/skills/$skill_name' 2>/dev/null"; then
+								log_success "Copied shared skill to central: $skill_name"
+							else
+								log_warning "Failed to copy shared skill: $skill_name"
+							fi
+						else
+							# It's a regular directory - copy to tool-specific directory
+							if execute "cp -r '$skill_path' '$SCRIPT_DIR/configs/claude/skills/$skill_name' 2>/dev/null"; then
+								log_success "Copied tool-specific skill: $skill_name"
+							else
+								log_warning "Failed to copy tool-specific skill: $skill_name"
+							fi
+						fi
+					fi
+				done
 			else
 				log_warning "Claude skills directory is empty"
 			fi
@@ -149,11 +168,40 @@ generate_opencode_configs() {
 		for subdir in agent command skill configs; do
 			if [ -d "$HOME/.config/opencode/$subdir" ]; then
 				execute "mkdir -p $SCRIPT_DIR/configs/opencode/$subdir"
+				execute "mkdir -p $SCRIPT_DIR/skills"
+				
 				if [ "$(ls -A "$HOME/.config/opencode/$subdir" 2>/dev/null)" ]; then
-					if execute "cp -r '$HOME/.config/opencode/$subdir'/* '$SCRIPT_DIR/configs/opencode/$subdir'/ 2>/dev/null"; then
-						log_success "Copied $subdir directory"
+					# Special handling for skills directory to detect symlinks
+					if [ "$subdir" = "skill" ]; then
+						for skill_path in "$HOME/.config/opencode/$subdir"/*; do
+							if [ -d "$skill_path" ] || [ -L "$skill_path" ]; then
+								skill_name=$(basename "$skill_path")
+								
+								# Check if it's a symlink (shared skill) or regular directory (tool-specific)
+								if [ -L "$skill_path" ]; then
+									# It's a symlink - copy to central skills directory
+									if execute "cp -rL '$skill_path' '$SCRIPT_DIR/skills/$skill_name' 2>/dev/null"; then
+										log_success "Copied shared $subdir to central: $skill_name"
+									else
+										log_warning "Failed to copy shared $subdir: $skill_name"
+									fi
+								else
+									# It's a regular directory - copy to tool-specific directory
+									if execute "cp -r '$skill_path' '$SCRIPT_DIR/configs/opencode/$subdir/$skill_name' 2>/dev/null"; then
+										log_success "Copied tool-specific $subdir: $skill_name"
+									else
+										log_warning "Failed to copy tool-specific $subdir: $skill_name"
+									fi
+								fi
+							fi
+						done
 					else
-						log_warning "Failed to copy $subdir directory"
+						# For other subdirectories, copy normally
+						if execute "cp -r '$HOME/.config/opencode/$subdir'/* '$SCRIPT_DIR/configs/opencode/$subdir'/ 2>/dev/null"; then
+							log_success "Copied $subdir directory"
+						else
+							log_warning "Failed to copy $subdir directory"
+						fi
 					fi
 				fi
 			fi
@@ -181,13 +229,32 @@ generate_amp_configs() {
 
 		if [ -d "$HOME/.config/amp/skills" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/amp/skills"
+			execute "mkdir -p $SCRIPT_DIR/skills"
+			
 			# Check if skills directory has content
 			if [ "$(ls -A "$HOME/.config/amp/skills" 2>/dev/null)" ]; then
-				if execute "cp -r '$HOME/.config/amp/skills'/* '$SCRIPT_DIR/configs/amp/skills'/ 2>/dev/null"; then
-					log_success "Copied skills directory"
-				else
-					log_warning "Failed to copy Amp skills directory"
-				fi
+				for skill_path in "$HOME/.config/amp/skills"/*; do
+					if [ -d "$skill_path" ] || [ -L "$skill_path" ]; then
+						skill_name=$(basename "$skill_path")
+						
+						# Check if it's a symlink (shared skill) or regular directory (tool-specific)
+						if [ -L "$skill_path" ]; then
+							# It's a symlink - copy to central skills directory
+							if execute "cp -rL '$skill_path' '$SCRIPT_DIR/skills/$skill_name' 2>/dev/null"; then
+								log_success "Copied shared skill to central: $skill_name"
+							else
+								log_warning "Failed to copy shared skill: $skill_name"
+							fi
+						else
+							# It's a regular directory - copy to tool-specific directory
+							if execute "cp -r '$skill_path' '$SCRIPT_DIR/configs/amp/skills/$skill_name' 2>/dev/null"; then
+								log_success "Copied tool-specific skill: $skill_name"
+							else
+								log_warning "Failed to copy tool-specific skill: $skill_name"
+							fi
+						fi
+					fi
+				done
 			else
 				log_warning "Amp skills directory is empty"
 			fi
@@ -280,31 +347,6 @@ generate_ai_switcher_configs() {
 	fi
 }
 
-generate_qmd_knowledge_configs() {
-	log_info "Generating qmd-knowledge configs..."
-
-	# Export OpenCode skill
-	if [ -d "$HOME/.config/opencode/skill/qmd-knowledge" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/opencode/skill"
-		execute "cp -r '$HOME/.config/opencode/skill/qmd-knowledge' '$SCRIPT_DIR/configs/opencode/skill/'"
-		log_success "Exported qmd-knowledge skill for OpenCode"
-	fi
-
-	# Export Claude Code skill
-	if [ -d "$HOME/.claude/skills/qmd-knowledge" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/claude/skills"
-		execute "cp -r '$HOME/.claude/skills/qmd-knowledge' '$SCRIPT_DIR/configs/claude/skills/'"
-		log_success "Exported qmd-knowledge skill for Claude Code"
-	fi
-
-	# Export Amp skill
-	if [ -d "$HOME/.config/amp/skills/qmd-knowledge" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/amp/skills"
-		execute "cp -r '$HOME/.config/amp/skills/qmd-knowledge' '$SCRIPT_DIR/configs/amp/skills/'"
-		log_success "Exported qmd-knowledge skill for Amp"
-	fi
-}
-
 main() {
 	echo "╔══════════════════════════════════════════════════════════╗"
 	echo "║         Config Generator                                 ║"
@@ -339,9 +381,6 @@ main() {
 	echo
 
 	generate_ai_switcher_configs
-	echo
-
-	generate_qmd_knowledge_configs
 	echo
 
 	log_success "Config generation complete!"
