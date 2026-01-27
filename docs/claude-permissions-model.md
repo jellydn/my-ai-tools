@@ -174,7 +174,7 @@ Settings are reloaded on restart.
 
 ### Scenario 1: Knowledge Management Works Freely
 
-```
+```text
 User: Record what we learned about MCP servers
 
 Claude: I'll record that learning.
@@ -185,7 +185,7 @@ Claude: I'll record that learning.
 
 ### Scenario 2: New MCP Server Needs Approval
 
-```
+```text
 User: Use the new weather MCP server
 
 Claude: I need to use the weather MCP server.
@@ -201,7 +201,7 @@ Claude: [Proceeds with the plan]
 
 ### Scenario 3: File Write Outside Project
 
-```
+```text
 User: Write a config file to ~/.config/myapp/
 
 Claude: I need to write to ~/.config/myapp/config.json

@@ -1,4 +1,4 @@
-- Follow my software development practice @~/configs/best-practices.md
+- Follow my software development practice @~/.ai-tools/best-practices.md
 - Read @~/.ai-tools/MEMORY.md first - Understand when and how to use qmd for knowledge management
 - Keep responses concise and actionable.
 - Always propose a plan before edits. Use phases to break down tasks into manageable steps.

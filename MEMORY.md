@@ -1,10 +1,10 @@
-# MEMORY.md - AI Agent Knowledge Management
+# 🚀 MEMORY.md - AI Agent Knowledge Management
 
 **Purpose**: Tell agents when and how to use qmd for persistent knowledge capture.
 
 ---
 
-## Pre-flight Check: Is Knowledge Base Ready?
+## 📋 Pre-flight Check: Is Knowledge Base Ready?
 
 Before using qmd knowledge features, check if the project's knowledge base is set up:
 
@@ -48,7 +48,7 @@ echo "  Storage: ~/.ai-knowledges/$PROJECT_NAME"
 
 ---
 
-## When to Use qmd Knowledge
+## 📚 When to Use qmd Knowledge
 
 **DO use qmd for:**
 
@@ -66,13 +66,13 @@ echo "  Storage: ~/.ai-knowledges/$PROJECT_NAME"
 
 ---
 
-## How to Use qmd (via MCP Server)
+## 🛠️ How to Use qmd (via MCP Server)
 
 When qmd MCP server is configured, you can autonomously:
 
 ### Search Knowledge
 
-```
+```text
 mcp__qmd__query - for best quality (hybrid search with reranking)
 mcp__qmd__search - for fast keyword search
 mcp__qmd__vsearch - for semantic similarity search
@@ -80,22 +80,22 @@ mcp__qmd__vsearch - for semantic similarity search
 
 ### Read Documents
 
-```
+```text
 mcp__qmd__get - get single document by path or docid
 mcp__qmd__multi_get - get multiple by glob pattern
 ```
 
 ### Check Status
 
-```
+```text
 mcp__qmd__status - see collections and health
 ```
 
 ---
 
-## What About Recording?
+## 📝 What About Recording?
 
-**DO NOT directly write to ~/.ai-knowledges/**
+### 🚫 Do not directly write to ~/.ai-knowledges/
 
 Instead, use the `qmd-knowledge` skill:
 
@@ -104,15 +104,15 @@ Instead, use the `qmd-knowledge` skill:
 
 ---
 
-## Best Practices
+## 📋 Best Practices
 
-### Session Wrap-up
+### 🎨 Session Wrap-up
 
 At the end of a work session, consider prompting the user about key learnings:
 
 > "What were the main discoveries or decisions from this session? Would you like me to record any learnings?"
 
-### Pattern Detection
+### 🎨 Pattern Detection
 
 Be attentive to phrases that indicate valuable knowledge capture opportunities:
 
@@ -126,13 +126,13 @@ Be attentive to phrases that indicate valuable knowledge capture opportunities:
 When you detect these patterns, suggest recording:
 > "That sounds like a useful learning. Would you like me to record it?"
 
-### Auto-Index Updates
+### 🎨 Auto-Index Updates
 
 The record script automatically runs `qmd embed` after each write, ensuring the knowledge base is searchable immediately. No manual re-indexing required.
 
 ---
 
-## Quick Reference
+## 📖 Quick Reference
 
 | Task             | Tool/Command           |
 | ---------------- | ---------------------- |
@@ -143,7 +143,7 @@ The record script automatically runs `qmd embed` after each write, ensuring the 
 
 ---
 
-## Project Detection
+## 🔍 Project Detection
 
 The `qmd-knowledge` skill auto-detects project from:
 
@@ -155,6 +155,6 @@ Knowledge is stored in `~/.ai-knowledges/{project-name}/`
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [qmd GitHub](https://github.com/tobi/qmd) - qmd tool documentation

@@ -346,7 +346,11 @@ copy_configurations() {
 			read -p "Install context7 MCP server (documentation lookup)? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest && log_success 'context7 MCP server added (global)' || log_warning 'context7 already installed or failed'"
+				if execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest"; then
+					log_success "context7 MCP server added (global)"
+				else
+					log_warning "context7 already installed or failed"
+				fi
 			fi
 		else
 			execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest || true"
@@ -357,7 +361,11 @@ copy_configurations() {
 			read -p "Install sequential-thinking MCP server (multi-step reasoning)? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking && log_success 'sequential-thinking MCP server added (global)' || log_warning 'sequential-thinking already installed or failed'"
+				if execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking"; then
+					log_success "sequential-thinking MCP server added (global)"
+				else
+					log_warning "sequential-thinking already installed or failed"
+				fi
 			fi
 		else
 			execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking || true"
@@ -369,7 +377,11 @@ copy_configurations() {
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
 				if command -v qmd &>/dev/null; then
-					execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp && log_success 'qmd MCP server added (global)' || log_warning 'qmd already installed or failed'"
+					if execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp"; then
+						log_success "qmd MCP server added (global)"
+					else
+						log_warning "qmd already installed or failed"
+					fi
 				else
 					log_warning "qmd not found. Install with: bun install -g https://github.com/tobi/qmd"
 				fi
@@ -411,6 +423,10 @@ copy_configurations() {
 		fi
 		# Also copy AGENTS.md to global config location
 		if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
+			if [ -f "$HOME/.config/AGENTS.md" ]; then
+				cp "$HOME/.config/AGENTS.md" "$HOME/.config/AGENTS.md.bak"
+				log_warning "Backed up existing AGENTS.md to .bak"
+			fi
 			execute "cp $SCRIPT_DIR/configs/amp/AGENTS.md $HOME/.config/AGENTS.md"
 		fi
 		log_success "Amp configs copied"
@@ -444,7 +460,7 @@ copy_configurations() {
 	execute "cp $SCRIPT_DIR/configs/best-practices.md $HOME/.ai-tools/"
 	log_success "Best practices copied to ~/.ai-tools/"
 
-	# Copy MEMORY.md to project root and .ai-tools for reference
+	# Copy MEMORY.md to .ai-tools for reference
 	if [ -f "$SCRIPT_DIR/MEMORY.md" ]; then
 		execute "cp $SCRIPT_DIR/MEMORY.md $HOME/.ai-tools/"
 		log_success "MEMORY.md copied to ~/.ai-tools/ (reference copy)"
@@ -468,11 +484,6 @@ enable_plugins() {
 
 	community_plugins=(
 		"plannotator@backnotprop"
-		"claude-hud@claude-hud"
-		"worktrunk@worktrunk"
-	)
-
-	community_plugins=(
 		"claude-hud@claude-hud"
 		"worktrunk@worktrunk"
 	)

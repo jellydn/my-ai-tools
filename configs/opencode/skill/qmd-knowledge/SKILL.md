@@ -161,15 +161,15 @@ The qmd MCP server allows Claude to:
 - **No repository pollution**: Knowledge stored outside project directories
 - **Version controllable**: Can optionally track knowledge in separate git repos
 
-## Best Practices
+## 📋 Best Practices
 
-### Session Wrap-up
+### 🎨 Session Wrap-up
 
 At the end of a work session, consider prompting the user about key learnings:
 
 > "What were the main discoveries or decisions from this session? Would you like me to record any learnings?"
 
-### Pattern Detection
+### 🎨 Pattern Detection
 
 Be attentive to phrases that indicate valuable knowledge capture opportunities:
 
@@ -183,6 +183,6 @@ Be attentive to phrases that indicate valuable knowledge capture opportunities:
 When you detect these patterns, suggest recording:
 > "That sounds like a useful learning. Would you like me to record it?"
 
-### Auto-Index Updates
+### 🎨 Auto-Index Updates
 
 The record script automatically runs `qmd embed` after each write, ensuring the knowledge base is searchable immediately. No manual re-indexing required.
