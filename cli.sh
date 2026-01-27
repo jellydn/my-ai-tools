@@ -317,9 +317,8 @@ copy_configurations() {
 		# Windows: Claude Code uses ~/.claude directly
 		execute "cp $SCRIPT_DIR/configs/claude/settings.json $HOME/.claude/settings.json"
 	else
-		# Mac/Linux: Use XDG path for settings.json
-		execute "mkdir -p $HOME/.config/claude"
-		execute "cp $SCRIPT_DIR/configs/claude/settings.json $HOME/.config/claude/settings.json"
+		# Mac/Linux: Use ~/.claude/settings.json (canonical location)
+		execute "cp $SCRIPT_DIR/configs/claude/settings.json $HOME/.claude/settings.json"
 	fi
 
 	# Copy other configs to ~/.claude (all platforms)
@@ -453,10 +452,54 @@ copy_configurations() {
 }
 
 enable_plugins() {
-	log_info "Claude Code plugins are configured in settings.json"
-	log_info "Run 'claude plugin marketplace list' to see configured marketplaces"
-	log_info "Run 'claude plugin install <plugin>' to install plugins from marketplaces"
-	log_warning "You may need to manually install and enable some plugins"
+	log_info "Installing Claude Code plugins..."
+
+	official_plugins=(
+		"typescript-lsp@claude-plugins-official"
+		"pyright-lsp@claude-plugins-official"
+		"context7@claude-plugins-official"
+		"frontend-design@claude-plugins-official"
+		"learning-output-style@claude-plugins-official"
+		"swift-lsp@claude-plugins-official"
+		"lua-lsp@claude-plugins-official"
+		"plannotator@claude-plugins-official"
+		"code-simplifier@claude-plugins-official"
+		"rust-analyzer-lsp@claude-plugins-official"
+	)
+
+	community_plugins=(
+		"claude-hud@claude-hud"
+		"worktrunk@worktrunk"
+	)
+
+	install_plugin() {
+		local plugin="$1"
+		if [ -t 1 ]; then
+			read -p "Install $plugin? (y/n) " -n 1 -r
+			echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				execute "claude plugin install '$plugin' && log_success '$plugin installed' || log_warning '$plugin install failed (may already be installed)'"
+			fi
+		else
+			execute "claude plugin install '$plugin' 2>/dev/null || true"
+		fi
+	}
+
+	if command -v claude &>/dev/null; then
+		log_info "Installing official plugins..."
+		for plugin in "${official_plugins[@]}"; do
+			install_plugin "$plugin"
+		done
+
+		log_info "Installing community plugins..."
+		for plugin in "${community_plugins[@]}"; do
+			install_plugin "$plugin"
+		done
+
+		log_success "Claude Code plugins installation complete"
+	else
+		log_warning "Claude Code not installed - skipping plugin installation"
+	fi
 }
 
 main() {

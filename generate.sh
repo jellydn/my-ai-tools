@@ -115,8 +115,11 @@ generate_claude_configs() {
 		# Windows: Claude Code uses ~/.claude directly
 		copy_single "$HOME/.claude/settings.json" "$SCRIPT_DIR/configs/claude/settings.json"
 	else
-		# Mac/Linux: Use XDG path for settings.json
-		if [ -d "$HOME/.config/claude" ]; then
+		# Mac/Linux: Use ~/.claude/settings.json (canonical location)
+		if [ -f "$HOME/.claude/settings.json" ]; then
+			copy_single "$HOME/.claude/settings.json" "$SCRIPT_DIR/configs/claude/settings.json"
+		# Fallback to XDG path for older configurations
+		elif [ -d "$HOME/.config/claude" ]; then
 			copy_single "$HOME/.config/claude/settings.json" "$SCRIPT_DIR/configs/claude/settings.json"
 		fi
 	fi
