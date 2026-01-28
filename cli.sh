@@ -754,14 +754,9 @@ enable_plugins() {
 			return
 		fi
 
-		# Extract description from SKILL.md (first line after frontmatter or first paragraph)
-		local description=""
-		description=$(sed -n '/^---$/,/^---$/p' "$skill_md" 2>/dev/null | grep -E '^description:' | head -1 | sed 's/^description:[" ]*//' | sed 's/[" ]*$//')
-		if [ -z "$description" ]; then
-			# Fallback: use first non-empty, non-header line
-			description=$(sed -n '/^---$/,/^---$/d;/^#/d;/^$/d;p' "$skill_md" 2>/dev/null | head -1)
-		fi
-		[ -z "$description" ] && description="Skill: $skill_name"
+		# Description for command - simple and consistent
+		local description="Trigger $skill_name skill"
+
 
 		# Extract content after frontmatter for objective
 		local objective_content=""
