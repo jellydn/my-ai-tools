@@ -456,7 +456,7 @@ copy_configurations() {
 		execute "rm -rf $HOME/.config/opencode/skill"
 		# Only copy if directory has content (not empty after excluding marketplace plugins)
 		if [ -d "$SCRIPT_DIR/configs/opencode/skill" ] && [ "$(ls -A "$SCRIPT_DIR/configs/opencode/skill" 2>/dev/null)" ]; then
-			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, map-codebase)
+			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, codemap)
 			for skill_dir in "$SCRIPT_DIR/configs/opencode/skill"/*; do
 				skill_name="$(basename "$skill_dir")"
 				case "$skill_name" in
