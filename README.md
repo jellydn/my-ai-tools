@@ -180,10 +180,10 @@ claude plugin install worktrunk@worktrunk
 | `rust-analyzer-lsp`     | Rust language support                                                                         | Official                                           |
 | `claude-md-management`  | Markdown management                                                                           | Official                                           |
 | `plannotator`           | Plan annotation tool                                                                          | Community                                          |
-| `prd`                   | Product Requirements Document generation                                                      | Local Marketplace                                   |
-| `ralph`                 | PRD to JSON converter for autonomous agent system                                             | Local Marketplace                                   |
-| `qmd-knowledge`         | Project knowledge management via qmd                                                          | Local Marketplace                                   |
-| `map-codebase`          | Parallel codebase analysis producing 7 structured documents                                   | Local Marketplace                                   |
+| `prd`                   | Product Requirements Document generation                                                      | Local Marketplace                                  |
+| `ralph`                 | PRD to JSON converter for autonomous agent system                                             | Local Marketplace                                  |
+| `qmd-knowledge`         | Project knowledge management via qmd                                                          | Local Marketplace                                  |
+| `map-codebase`          | Parallel codebase analysis producing 7 structured documents                                   | Local Marketplace                                  |
 | `claude-hud`            | Status line with usage monitoring                                                             | Community                                          |
 | `worktrunk`             | Work management                                                                               | Community                                          |
 | ~~`claude-mem`~~        | ⚠️ **DEPRECATED** - Use qmd instead or using [my fork](https://github.com/jellydn/claude-mem) | [GitHub](https://github.com/thedotmack/claude-mem) |
@@ -199,7 +199,7 @@ claude plugin install worktrunk@worktrunk
   - `CONVENTIONS.md` - Code style, patterns, error handling
   - `TESTING.md` - Framework, structure, mocking, coverage
   - `CONCERNS.md` - Tech debt, bugs, security, performance issues
-  
+
   Use for onboarding, planning features, understanding patterns, and identifying technical debt. Inspired by [glittercowboy/get-shit-done](https://github.com/glittercowboy/get-shit-done).
 
 - **`prd`** - Generate Product Requirements Documents for new features
@@ -351,7 +351,7 @@ All Claude Code configs are stored in `~/.claude/` (canonical location):
 
 **Latest `settings.json` configuration:**
 
-```json
+````json
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "env": {
@@ -461,7 +461,7 @@ Copy configs from this repository to your home directory:
 
 ```bash
 ./cli.sh [--dry-run] [--backup] [--no-backup]
-```
+````
 
 Options:
 
@@ -524,10 +524,7 @@ Copy `configs/opencode/opencode.json` to `~/.config/opencode/`:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": [
-    "~/.ai-tools/best-practices.md",
-    "~/.ai-tools/MEMORY.md"
-  ],
+  "instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
   "theme": "kanagawa",
   "default_agent": "plan",
   "mcp": {
@@ -768,7 +765,7 @@ ccs auth list
 
 ## 🤖 OpenAI Codex CLI (Optional)
 
-[**OpenAI Codex CLI**](https://developers.openai.com/codex/cli) - OpenAI's command-line coding assistant powered by GPT-4 and other models.
+[**OpenAI Codex CLI**](https://developers.openai.com/codex/cli) - OpenAI's command-line coding assistant powered by GPT-5.2 and other models.
 
 ### Installation
 
@@ -803,47 +800,12 @@ The `instructions.md` file contains agent guidelines similar to `CLAUDE.md` and 
 - Always propose a plan before edits
 ```
 
-**Using with Z.ai GLM-4 Model:**
-
-The default `config.json` is configured for Z.ai's GLM-4 model:
-
-```json
-{
-  "model": "glm-4-flash",
-  "temperature": 0.7,
-  "maxTokens": 8192,
-  "baseURL": "https://api.z.ai/v1",
-  "apiKey": ""
-}
-```
-
-To use Z.ai GLM-4:
-1. Get your API key from [Z.ai](https://z.ai/)
-2. Add your API key to `~/.codex/config.json`
-3. Run `codex` to start using GLM-4 model
-
-For more details, see the [Z.ai GLM-4.7 documentation](https://docs.z.ai/guides/llm/glm-4.7).
-
-For OpenAI models, update the config to:
-```json
-{
-  "model": "gpt-4o",
-  "temperature": 0.7,
-  "maxTokens": 4096
-}
-```
-
 **Using with Ollama (Local Models):**
 
 To use Codex with local Ollama models, use the `--oss` flag:
 
 ```bash
-# Install Ollama first
-curl -fsSL https://ollama.com/install.sh | sh
-
-# Pull a model (e.g., qwen2.5-coder)
-ollama pull qwen2.5-coder:7b
-
+# Install Ollama: https://ollama.com/ first
 # Run Codex with Ollama
 codex --oss
 
@@ -854,6 +816,7 @@ codex --oss --model qwen2.5-coder:7b
 The `--oss` flag configures Codex to use Ollama's local API endpoint (`http://localhost:11434`). No API key or external configuration needed.
 
 Popular Ollama models for coding:
+
 - `qwen2.5-coder:7b` - Fast and efficient coding model
 - `deepseek-coder-v2:16b` - Advanced code generation
 - `codellama:13b` - Meta's code-focused model
@@ -864,9 +827,6 @@ Popular Ollama models for coding:
 ```bash
 # Start Codex CLI
 codex
-
-# Run with specific model
-codex --model gpt-4o
 
 # Use with Ollama (local models)
 codex --oss
