@@ -885,6 +885,22 @@ The HUD appears immediately — no restart needed.
 
 [**Backlog.md**](https://github.com/MrLesk/Backlog.md) - Markdown-native task manager and Kanban visualizer. Manage project backlogs entirely in Git with CLI, web interface, and AI integration. ([npm](https://www.npmjs.com/package/backlog.md))
 
+## 🎯 Recommended Skills
+
+AI Coding Assistants
+
+### Agent Browser
+
+[**agent-browser**](https://github.com/vercel-labs/agent-browser) - Headless browser automation CLI for AI agents.
+
+Add the skill to your AI coding assistant for richer context:
+
+```bash
+npx skills add vercel-labs/agent-browser
+```
+
+This works with Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, Goose, OpenCode, and Windsurf.
+
 ## 📚 Best Practices
 
 Setup includes `best-practices.md` with comprehensive software development guidelines based on:
