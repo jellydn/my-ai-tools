@@ -2,13 +2,8 @@
 
 set -e
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/common.sh"
 BACKUP_DIR="$HOME/ai-tools-backup-$(date +%Y%m%d-%H%M%S)"
 DRY_RUN=false
 BACKUP=false
@@ -39,37 +34,18 @@ for arg in "$@"; do
 		PROMPT_BACKUP=false
 		shift
 		;;
+	--rollback)
+		log_info "Rolling back last transaction..."
+		rollback_transaction
+		exit $?
+		;;
 	*)
 		echo "Unknown option: $arg"
-		echo "Usage: $0 [--dry-run] [--backup] [--no-backup]"
+		echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--rollback]"
 		exit 1
 		;;
 	esac
 done
-
-log_info() {
-	echo -e "${BLUE}ℹ ${NC}$1"
-}
-
-log_success() {
-	echo -e "${GREEN}✓${NC} $1"
-}
-
-log_warning() {
-	echo -e "${YELLOW}⚠${NC} $1"
-}
-
-log_error() {
-	echo -e "${RED}✗${NC} $1"
-}
-
-execute() {
-	if [ "$DRY_RUN" = true ]; then
-		log_info "[DRY RUN] $1"
-	else
-		eval "$1"
-	fi
-}
 
 # Preflight check for required tools
 preflight_check() {
@@ -201,6 +177,9 @@ install_global_tools() {
 }
 
 backup_configs() {
+	# Clean up old backups first (keep last 5)
+	cleanup_old_backups 5
+
 	if [ "$PROMPT_BACKUP" = true ]; then
 		if [ -t 1 ]; then
 			read -p "Do you want to backup existing configurations? (y/n) " -n 1 -r
@@ -290,7 +269,7 @@ install_opencode() {
 	if command -v opencode &>/dev/null; then
 		log_warning "OpenCode is already installed"
 	else
-		execute "curl -fsSL https://opencode.ai/install | bash"
+		execute_installer "https://opencode.ai/install" "" "OpenCode"
 		log_success "OpenCode installed"
 	fi
 }
@@ -313,7 +292,7 @@ install_amp() {
 		log_warning "Amp is already installed"
 		AMP_INSTALLED=true
 	else
-		execute "curl -fsSL https://ampcode.com/install.sh | bash"
+		execute_installer "https://ampcode.com/install.sh" "" "Amp"
 		log_success "Amp installed"
 		AMP_INSTALLED=true
 	fi
@@ -358,7 +337,7 @@ install_ai_switcher() {
 	if command -v ai-switcher &>/dev/null; then
 		log_warning "ai-switcher is already installed"
 	else
-		execute "curl -fsSL https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/install.sh | sh"
+		execute_installer "https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/install.sh" "" "ai-switcher"
 		log_success "ai-switcher installed"
 	fi
 }
@@ -601,7 +580,9 @@ enable_plugins() {
 			fi
 		else
 			setup_tmpdir
-			execute "claude plugin install '$plugin' 2>/dev/null || true"
+			if ! execute "claude plugin install '$plugin' 2>/dev/null"; then
+				log_warning "$plugin install failed (may already be installed)"
+			fi
 		fi
 	}
 
@@ -619,7 +600,7 @@ enable_plugins() {
 					plannotator)
 						if ! command -v plannotator &>/dev/null; then
 							log_info "Installing Plannator CLI (this may take a moment)..."
-							if curl -fL https://plannotator.ai/install.sh | bash 2>&1; then
+							if execute_installer "https://plannotator.ai/install.sh" "" "Plannator CLI"; then
 								log_success "Plannator CLI installed"
 							else
 								log_warning "Plannator installation failed or was cancelled"
@@ -682,7 +663,7 @@ enable_plugins() {
 				plannotator)
 					if ! command -v plannotator &>/dev/null; then
 						log_info "Installing Plannator CLI..."
-						curl -fL https://plannotator.ai/install.sh | bash 2>&1 || log_warning "Plannator installation failed"
+						execute_installer "https://plannotator.ai/install.sh" "" "Plannator CLI" || log_warning "Plannator installation failed"
 					fi
 					;;
 				qmd-knowledge)
@@ -703,7 +684,9 @@ enable_plugins() {
 			execute "claude plugin marketplace add '$marketplace_repo' 2>/dev/null || true"
 			# Clear any stale plugin cache that might cause cross-device link errors
 			execute "rm -rf '$HOME/.claude/plugins/cache/$name' 2>/dev/null || true"
-			execute "claude plugin install '$plugin_spec' 2>/dev/null || true"
+			if ! execute "claude plugin install '$plugin_spec' 2>/dev/null"; then
+				log_warning "$name plugin install failed (may already be installed)"
+			fi
 		fi
 	}
 
@@ -833,9 +816,33 @@ EOF
 		fi
 
 		log_info "Installing official plugins..."
-		for plugin in "${official_plugins[@]}"; do
-			install_plugin "$plugin"
-		done
+		if [ -t 1 ]; then
+			# Interactive mode: install sequentially with prompts
+			for plugin in "${official_plugins[@]}"; do
+				install_plugin "$plugin"
+			done
+		else
+			# Non-interactive mode: install in parallel for faster execution
+			log_info "Installing plugins in parallel..."
+			local pids=()
+			for plugin in "${official_plugins[@]}"; do
+				(
+					setup_tmpdir
+					if claude plugin install "$plugin" 2>/dev/null; then
+						log_success "$plugin installed"
+					else
+						log_warning "$plugin may already be installed"
+					fi
+				) &
+				pids+=($!)
+			done
+
+			# Wait for all installations to complete
+			for pid in "${pids[@]}"; do
+				wait "$pid" 2>/dev/null || true
+			done
+			log_success "Official plugins installation complete"
+		fi
 
 		if [ "$SKILL_INSTALL_SOURCE" = "local" ]; then
 			log_info "Installing community skills from local .claude-plugin folder..."
@@ -868,7 +875,7 @@ EOF
 		fi
 
 		log_success "Claude Code plugins installation complete"
-		log_info "⚠️  IMPORTANT: Restart Claude Code for plugins to take effect"
+		log_info "IMPORTANT: Restart Claude Code for plugins to take effect"
 	else
 		log_warning "Claude Code not installed - skipping plugin installation"
 	fi

@@ -2,13 +2,8 @@
 
 set -e
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/common.sh"
 DRY_RUN=false
 
 # Detect OS (Windows vs Unix-like)
@@ -31,30 +26,6 @@ for arg in "$@"; do
 	esac
 done
 
-log_info() {
-	echo -e "${BLUE}ℹ ${NC}$1"
-}
-
-log_success() {
-	echo -e "${GREEN}✓${NC} $1"
-}
-
-log_warning() {
-	echo -e "${YELLOW}⚠${NC} $1"
-}
-
-log_error() {
-	echo -e "${RED}✗${NC} $1"
-}
-
-execute() {
-	if [ "$DRY_RUN" = true ]; then
-		log_info "[DRY RUN] $1"
-	else
-		eval "$1"
-	fi
-}
-
 skill_exists_in_plugins() {
 	local skill_name="$1"
 	if [ -d "$SCRIPT_DIR/.claude-plugin/plugins/$skill_name" ]; then
@@ -67,8 +38,8 @@ copy_single() {
 	local src="$1"
 	local dest="$2"
 	if [ -f "$src" ]; then
-		execute "mkdir -p $(dirname '$dest')"
-		execute "cp '$src' '$dest'"
+		execute "mkdir -p $(dirname "$dest")"
+		execute "cp \"$src\" \"$dest\""
 		log_success "Copied: $src → $dest"
 	else
 		log_warning "Skipped (not found): $src"
@@ -147,12 +118,20 @@ generate_claude_configs() {
 		# Windows: Claude Code uses ~/.claude directly
 		copy_single "$HOME/.claude/settings.json" "$SCRIPT_DIR/configs/claude/settings.json"
 	else
-		# Mac/Linux: Use ~/.claude/settings.json (canonical location)
+		# Mac/Linux: Check for settings.json in canonical location first
+		local settings_source=""
 		if [ -f "$HOME/.claude/settings.json" ]; then
-			copy_single "$HOME/.claude/settings.json" "$SCRIPT_DIR/configs/claude/settings.json"
-		# Fallback to XDG path for older configurations
-		elif [ -d "$HOME/.config/claude" ]; then
-			copy_single "$HOME/.config/claude/settings.json" "$SCRIPT_DIR/configs/claude/settings.json"
+			settings_source="$HOME/.claude/settings.json"
+		elif [ -f "$HOME/.config/claude/settings.json" ]; then
+			# Fallback to XDG path for older configurations
+			settings_source="$HOME/.config/claude/settings.json"
+			log_warning "Using XDG config path (older configuration detected)"
+		else
+			log_warning "settings.json not found in ~/.claude/ or ~/.config/claude/"
+		fi
+
+		if [ -n "$settings_source" ]; then
+			copy_single "$settings_source" "$SCRIPT_DIR/configs/claude/settings.json"
 		fi
 	fi
 
