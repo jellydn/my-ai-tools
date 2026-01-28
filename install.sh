@@ -2,32 +2,25 @@
 
 set -e
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-log_info() {
-	echo -e "${BLUE}ℹ ${NC}$1"
-}
-
-log_success() {
-	echo -e "${GREEN}✓${NC} $1"
-}
-
-log_warning() {
-	echo -e "${YELLOW}⚠${NC} $1"
-}
-
-log_error() {
-	echo -e "${RED}✗${NC} $1"
-}
+# Source shared library
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/common.sh"
 
 # Check prerequisites
 check_prerequisites() {
+	local missing_tools=()
+
 	if ! command -v git &>/dev/null; then
-		log_error "Git is not installed. Please install Git first."
+		missing_tools+=("git")
+	fi
+
+	if ! command -v bash &>/dev/null; then
+		missing_tools+=("bash")
+	fi
+
+	if [ ${#missing_tools[@]} -gt 0 ]; then
+		log_error "Missing required tools: ${missing_tools[*]}"
+		log_info "Please install the missing tools and try again"
 		exit 1
 	fi
 }
@@ -42,8 +35,10 @@ main() {
 	trap 'rm -rf "$TEMP_DIR"' EXIT INT TERM
 
 	log_info "Cloning repository to temporary directory..."
-	if ! git clone --depth 1 https://github.com/jellydn/my-ai-tools.git "$TEMP_DIR" &>/dev/null; then
+	if ! git clone --depth 1 https://github.com/jellydn/my-ai-tools.git "$TEMP_DIR"; then
 		log_error "Failed to clone repository"
+		log_info "Please check your internet connection and try again"
+		log_info "If the problem persists, the repository URL may have changed"
 		exit 1
 	fi
 
