@@ -309,6 +309,7 @@ generate_codex_configs() {
 		execute "mkdir -p $SCRIPT_DIR/configs/codex"
 		copy_single "$HOME/.codex/instructions.md" "$SCRIPT_DIR/configs/codex/instructions.md"
 		copy_single "$HOME/.codex/config.json" "$SCRIPT_DIR/configs/codex/config.json"
+		copy_single "$HOME/.codex/config.toml" "$SCRIPT_DIR/configs/codex/config.toml"
 
 		if [ -d "$HOME/.codex/skills" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/codex/skills"
