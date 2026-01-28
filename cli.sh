@@ -71,6 +71,30 @@ execute() {
 	fi
 }
 
+# Preflight check for required tools
+preflight_check() {
+	local missing_tools=()
+
+	log_info "Running preflight checks..."
+
+	# Core utilities required by the script
+	local required_tools=("jq" "awk" "sed" "basename" "cat" "head" "tail" "grep" "date")
+
+	for tool in "${required_tools[@]}"; do
+		if ! command -v "$tool" &>/dev/null; then
+			missing_tools+=("$tool")
+		fi
+	done
+
+	if [ ${#missing_tools[@]} -gt 0 ]; then
+		log_error "Missing required tools: ${missing_tools[*]}"
+		log_info "Please install the missing tools and try again."
+		exit 1
+	fi
+
+	log_success "All required tools available"
+}
+
 # Install MCP server with better error handling
 install_mcp_server() {
 	local server_name="$1"
@@ -760,7 +784,7 @@ enable_plugins() {
 
 		# Extract content after frontmatter for objective
 		local objective_content=""
-		objective_content=$(sed '1,/^---$/d' "$skill_md" 2>/dev/null | head -50)
+		objective_content=$(awk 'BEGIN{p=0} /^---$/{p++;next} p>=2' "$skill_md" 2>/dev/null | head -50)
 
 		# Create command file
 		local command_file="$command_dir/$skill_name.md"
@@ -772,6 +796,11 @@ enable_plugins() {
 
 **Allowed paths:**
 - Write: .planning/codebase/"
+		fi
+
+		if [ "$DRY_RUN" = true ]; then
+			log_info "[DRY RUN] Would generate command: $command_file"
+			return
 		fi
 
 		cat > "$command_file" << EOF
@@ -856,6 +885,9 @@ main() {
 		log_warning "DRY RUN MODE - No changes will be made"
 		echo
 	fi
+
+	preflight_check
+	echo
 
 	check_prerequisites
 	echo
