@@ -852,44 +852,19 @@ The HUD appears immediately — no restart needed.
 
 ## 🎯 Recommended Skills
 
-Skills and tools that enhance AI agent capabilities for specific tasks.
+AI Coding Assistants
 
 ### Agent Browser
 
-[**agent-browser**](https://github.com/vercel-labs/agent-browser) - Headless browser automation CLI for AI agents. Fast Rust CLI with Node.js fallback for web testing and automation.
+[**agent-browser**](https://github.com/vercel-labs/agent-browser) - Headless browser automation CLI for AI agents.
 
-**Installation:**
-
-```bash
-npm install -g agent-browser
-agent-browser install  # Download Chromium
-```
-
-**Key Features:**
-
-- **AI-Optimized**: Accessibility tree snapshots with element references (@e1, @e2)
-- **Fast**: Rust-based CLI with Node.js fallback
-- **Agent-Friendly**: Simple commands designed for AI workflows
-- **Semantic Locators**: Find elements by role, text, label, and more
-
-**Quick Example:**
+Add the skill to your AI coding assistant for richer context:
 
 ```bash
-agent-browser open example.com
-agent-browser snapshot                    # Get accessibility tree with refs
-agent-browser click @e2                   # Click by ref from snapshot
-agent-browser fill @e3 "test@example.com" # Fill by ref
-agent-browser screenshot page.png
-agent-browser close
+npx skills add vercel-labs/agent-browser
 ```
 
-**Use Cases:**
-
-- Web testing and validation
-- UI automation workflows
-- Form filling and data entry
-- Screenshot generation
-- End-to-end testing
+This works with Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, Goose, OpenCode, and Windsurf.
 
 ## 📚 Best Practices
 
