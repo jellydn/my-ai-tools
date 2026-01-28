@@ -156,7 +156,7 @@ claude plugin install worktrunk@worktrunk
 
 **Key Marketplace Plugins:**
 
-- **`map-codebase`** - Orchestrates parallel codebase analysis to produce 7 structured documents in `.planning/codebase/`:
+- **`codemap`** - Orchestrates parallel codebase analysis to produce 7 structured documents in `.planning/codebase/`:
   - `STACK.md` - Technologies, dependencies, configuration
   - `INTEGRATIONS.md` - 3rd party providers, APIs, databases, auth
   - `ARCHITECTURE.md` - System patterns, layers, data flow
