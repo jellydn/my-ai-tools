@@ -10,8 +10,35 @@ Comprehensive guide to replicate my AI coding tools setup with custom configurat
 
 ## 🚀 Quick Start
 
+### One-Line Installer (Recommended)
+
+Install directly without cloning the repository:
+
 ```bash
-sh cli.sh
+curl -fsSL https://ai-tools.itman.fyi/install.sh | bash
+```
+
+**With options:**
+
+```bash
+# Preview changes without making them
+curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --dry-run
+
+# Backup existing configs before installing
+curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --backup
+
+# Skip backup prompt
+curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --no-backup
+```
+
+### Manual Installation
+
+Clone the repository and run the installer:
+
+```bash
+git clone https://github.com/jellydn/my-ai-tools.git
+cd my-ai-tools
+./cli.sh
 ```
 
 **Options:**
