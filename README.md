@@ -831,6 +831,32 @@ For OpenAI models, update the config to:
 }
 ```
 
+**Using with Ollama (Local Models):**
+
+To use Codex with local Ollama models, use the `--oss` flag:
+
+```bash
+# Install Ollama first
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Pull a model (e.g., qwen2.5-coder)
+ollama pull qwen2.5-coder:7b
+
+# Run Codex with Ollama
+codex --oss
+
+# Specify a specific Ollama model
+codex --oss --model qwen2.5-coder:7b
+```
+
+The `--oss` flag configures Codex to use Ollama's local API endpoint (`http://localhost:11434`). No API key or external configuration needed.
+
+Popular Ollama models for coding:
+- `qwen2.5-coder:7b` - Fast and efficient coding model
+- `deepseek-coder-v2:16b` - Advanced code generation
+- `codellama:13b` - Meta's code-focused model
+- `starcoder2:15b` - State-of-the-art code model
+
 ### Usage
 
 ```bash
@@ -839,6 +865,9 @@ codex
 
 # Run with specific model
 codex --model gpt-4o
+
+# Use with Ollama (local models)
+codex --oss
 
 # Use with a specific task
 codex "Explain this code"
