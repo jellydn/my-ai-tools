@@ -154,7 +154,7 @@ claude plugin install worktrunk@worktrunk
 | ~~`claude-mem`~~        | ⚠️ **DEPRECATED** - Use qmd instead or using [my fork](https://github.com/jellydn/claude-mem) | [GitHub](https://github.com/thedotmack/claude-mem) |
 | ~~`beads`~~             | ⚠️ **DEPRECATED** - Native tasks                                                              | [GitHub](https://github.com/steveyegge/beads)      |
 
-**Key Local Marketplace Plugins:**
+**Key Marketplace Plugins:**
 
 - **`map-codebase`** - Orchestrates parallel codebase analysis to produce 7 structured documents in `.planning/codebase/`:
   - `STACK.md` - Technologies, dependencies, configuration
