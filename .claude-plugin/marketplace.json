@@ -15,7 +15,7 @@
 				"name": "my-ai-tools",
 				"email": "dung@productsway.com"
 			},
-			"source": "./plugins/prd",
+			"source": "./.claude-plugin/plugins/prd",
 			"category": "productivity"
 		},
 		{
@@ -26,7 +26,7 @@
 				"name": "my-ai-tools",
 				"email": "dung@productsway.com"
 			},
-			"source": "./plugins/ralph",
+			"source": "./.claude-plugin/plugins/ralph",
 			"category": "productivity"
 		},
 		{
@@ -37,7 +37,7 @@
 				"name": "my-ai-tools",
 				"email": "dung@productsway.com"
 			},
-			"source": "./plugins/qmd-knowledge",
+			"source": "./.claude-plugin/plugins/qmd-knowledge",
 			"category": "productivity",
 			"homepage": "https://github.com/jellydn/my-ai-tools"
 		},
@@ -49,9 +49,9 @@
 				"name": "my-ai-tools",
 				"email": "dung@productsway.com"
 			},
-			"source": "./plugins/map-codebase",
+			"source": "./.claude-plugin/plugins/map-codebase",
 			"category": "productivity",
-			"homepage": "https://github.com/jellydn/my-ai-tools/pull/18"
+			"homepage": "https://github.com/jellydn/my-ai-tools"
 		}
 	]
 }

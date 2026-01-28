@@ -562,10 +562,10 @@ enable_plugins() {
 	# Format: "name|plugin_spec|marketplace_repo"
 	community_plugins=(
 		"plannotator|plannotator@plannotator|backnotprop/plannotator"
-		"prd|prd@my-ai-tools|$SCRIPT_DIR/.claude-plugin"
-		"ralph|ralph@my-ai-tools|$SCRIPT_DIR/.claude-plugin"
-		"qmd-knowledge|qmd-knowledge@my-ai-tools|$SCRIPT_DIR/.claude-plugin"
-		"map-codebase|map-codebase@my-ai-tools|$SCRIPT_DIR/.claude-plugin"
+		"prd|prd@my-ai-tools|$SCRIPT_DIR"
+		"ralph|ralph@my-ai-tools|$SCRIPT_DIR"
+		"qmd-knowledge|qmd-knowledge@my-ai-tools|$SCRIPT_DIR"
+		"map-codebase|map-codebase@my-ai-tools|$SCRIPT_DIR"
 		"claude-hud|claude-hud@claude-hud|jarrodwatts/claude-hud"
 		"worktrunk|worktrunk@worktrunk|max-sixty/worktrunk"
 	)
