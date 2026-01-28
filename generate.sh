@@ -55,6 +55,14 @@ execute() {
 	fi
 }
 
+skill_exists_in_plugins() {
+	local skill_name="$1"
+	if [ -d "$SCRIPT_DIR/.claude-plugin/plugins/$skill_name" ]; then
+		return 0  # exists
+	fi
+	return 1  # doesn't exist
+}
+
 copy_single() {
 	local src="$1"
 	local dest="$2"
@@ -119,7 +127,10 @@ generate_claude_configs() {
 							# Skip marketplace plugins - managed separately
 							;;
 						*)
-							if execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/claude/skills'/ 2>/dev/null"; then
+							# Check if skill already exists in .claude-plugin/plugins
+							if skill_exists_in_plugins "$skill_name"; then
+								log_info "Skipping $skill_name (exists in .claude-plugin/plugins)"
+							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/claude/skills'/ 2>/dev/null"; then
 								log_success "Copied skill: $skill_name"
 							fi
 							;;
@@ -155,7 +166,31 @@ generate_opencode_configs() {
 		execute "mkdir -p $SCRIPT_DIR/configs/opencode"
 		copy_single "$HOME/.config/opencode/opencode.json" "$SCRIPT_DIR/configs/opencode/opencode.json"
 
-		for subdir in agent command skill configs; do
+		# Handle skill directory with plugin filtering
+		if [ -d "$HOME/.config/opencode/skill" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/opencode/skill"
+			if [ "$(ls -A "$HOME/.config/opencode/skill" 2>/dev/null)" ]; then
+				for skill_dir in "$HOME/.config/opencode/skill"/*; do
+					skill_name="$(basename "$skill_dir")"
+					case "$skill_name" in
+						prd|ralph|qmd-knowledge|codemap)
+							# Skip marketplace plugins - managed separately
+							;;
+						*)
+							# Check if skill already exists in .claude-plugin/plugins
+							if skill_exists_in_plugins "$skill_name"; then
+								log_info "Skipping $skill_name (exists in .claude-plugin/plugins)"
+							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/opencode/skill'/ 2>/dev/null"; then
+								log_success "Copied skill: $skill_name"
+							fi
+							;;
+					esac
+				done
+			fi
+		fi
+
+		# Copy other subdirectories (agent, command, configs)
+		for subdir in agent command configs; do
 			if [ -d "$HOME/.config/opencode/$subdir" ]; then
 				execute "mkdir -p $SCRIPT_DIR/configs/opencode/$subdir"
 				if [ "$(ls -A "$HOME/.config/opencode/$subdir" 2>/dev/null)" ]; then
@@ -200,7 +235,10 @@ generate_amp_configs() {
 							# Skip marketplace plugins - managed separately
 							;;
 						*)
-							if execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/amp/skills'/ 2>/dev/null"; then
+							# Check if skill already exists in .claude-plugin/plugins
+							if skill_exists_in_plugins "$skill_name"; then
+								log_info "Skipping $skill_name (exists in .claude-plugin/plugins)"
+							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/amp/skills'/ 2>/dev/null"; then
 								log_success "Copied skill: $skill_name"
 							fi
 							;;
