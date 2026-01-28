@@ -1,7 +1,7 @@
 {
 	"$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
 	"name": "my-ai-tools",
-	"descriptionmLocal marketplace for my-ai-tools community plugins",
+	"description": "Marketplace for my-ai-tools plugins",
 	"owner": {
 		"name": "my-ai-tools",
 		"email": "dung@productsway.com"
