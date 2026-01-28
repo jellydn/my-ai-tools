@@ -18,6 +18,14 @@ Install directly without cloning the repository:
 curl -fsSL https://ai-tools.itman.fyi/install.sh | bash
 ```
 
+> **Security Note:** For security-conscious users, you can download and inspect the script before running it:
+>
+> ```bash
+> curl -fsSL https://ai-tools.itman.fyi/install.sh -o install.sh
+> cat install.sh  # Review the script
+> bash install.sh
+> ```
+
 **With options:**
 
 ```bash

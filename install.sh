@@ -9,11 +9,11 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 log_info() {
-	echo -e "${BLUE}ℹ${NC} $1"
+	echo -e "${BLUE}ℹ ${NC}$1"
 }
 
 log_success() {
-	echo -e "${GREEN}✔${NC} $1"
+	echo -e "${GREEN}✓${NC} $1"
 }
 
 log_warning() {
@@ -21,7 +21,7 @@ log_warning() {
 }
 
 log_error() {
-	echo -e "${RED}✖${NC} $1"
+	echo -e "${RED}✗${NC} $1"
 }
 
 # Check prerequisites
@@ -39,7 +39,7 @@ main() {
 
 	# Create temporary directory
 	TEMP_DIR=$(mktemp -d)
-	trap 'rm -rf "$TEMP_DIR"' EXIT
+	trap 'rm -rf "$TEMP_DIR"' EXIT INT TERM
 
 	log_info "Cloning repository to temporary directory..."
 	if ! git clone --depth 1 https://github.com/jellydn/my-ai-tools.git "$TEMP_DIR" &>/dev/null; then
@@ -55,7 +55,6 @@ main() {
 	bash cli.sh "$@"
 
 	log_success "Installation complete!"
-	log_info "Temporary files have been cleaned up"
 }
 
 main "$@"
