@@ -71,6 +71,30 @@ execute() {
 	fi
 }
 
+# Preflight check for required tools
+preflight_check() {
+	local missing_tools=()
+
+	log_info "Running preflight checks..."
+
+	# Core utilities required by the script
+	local required_tools=("jq" "awk" "sed" "basename" "cat" "head" "tail" "grep" "date")
+
+	for tool in "${required_tools[@]}"; do
+		if ! command -v "$tool" &>/dev/null; then
+			missing_tools+=("$tool")
+		fi
+	done
+
+	if [ ${#missing_tools[@]} -gt 0 ]; then
+		log_error "Missing required tools: ${missing_tools[*]}"
+		log_info "Please install the missing tools and try again."
+		exit 1
+	fi
+
+	log_success "All required tools available"
+}
+
 # Install MCP server with better error handling
 install_mcp_server() {
 	local server_name="$1"
@@ -694,6 +718,7 @@ enable_plugins() {
 		# Define target directories
 		CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
 		OPENCODE_SKILL_DIR="$HOME/.config/opencode/skill"
+		OPENCODE_COMMAND_DIR="$HOME/.config/opencode/command/ai"
 		AMP_SKILLS_DIR="$HOME/.config/amp/skills"
 
 		# Copy to Claude Code (~/.claude/skills/)
@@ -713,6 +738,9 @@ enable_plugins() {
 		fi
 		mkdir -p "$OPENCODE_SKILL_DIR"
 
+		# Create OpenCode commands directory
+		mkdir -p "$OPENCODE_COMMAND_DIR"
+
 		# Copy to Amp (~/.config/amp/skills/)
 		if [ -d "$AMP_SKILLS_DIR" ]; then
 			for existing_skill in "$AMP_SKILLS_DIR"/*; do
@@ -731,8 +759,70 @@ enable_plugins() {
 				log_success "Copied $skill_name to OpenCode"
 				cp -r "$skill_dir" "$AMP_SKILLS_DIR/"
 				log_success "Copied $skill_name to Amp"
+
+				# Generate OpenCode command from skill
+				generate_opencode_command "$skill_dir" "$OPENCODE_COMMAND_DIR"
 			fi
 		done
+	}
+
+	# Generate OpenCode command file from skill SKILL.md
+	generate_opencode_command() {
+		local skill_dir="$1"
+		local command_dir="$2"
+		local skill_name=$(basename "$skill_dir")
+		local skill_md="$skill_dir/SKILL.md"
+
+		if [ ! -f "$skill_md" ]; then
+			log_warning "No SKILL.md found for $skill_name, skipping command generation"
+			return
+		fi
+
+		# Description for command - simple and consistent
+		local description="Trigger $skill_name skill"
+
+
+		# Extract content after frontmatter for objective
+		local objective_content=""
+		objective_content=$(awk 'BEGIN{p=0} /^---$/{p++;next} p>=2' "$skill_md" 2>/dev/null | head -50)
+
+		# Create command file
+		local command_file="$command_dir/$skill_name.md"
+
+		# Add path allowances for codemap (writes to .planning/codebase/)
+		local path_allowance=""
+		if [ "$skill_name" = "codemap" ]; then
+			path_allowance="
+
+**Allowed paths:**
+- Write: .planning/codebase/"
+		fi
+
+		if [ "$DRY_RUN" = true ]; then
+			log_info "[DRY RUN] Would generate command: $command_file"
+			return
+		fi
+
+		cat > "$command_file" << EOF
+---
+name: ai:$skill_name
+description: "$description"
+argument-hint: "[optional: arguments for $skill_name]"
+allowed-tools:
+  - Read
+  - Bash
+  - Glob
+  - Grep
+  - Write
+  - Task
+---
+
+<objective>
+$objective_content$path_allowance
+</objective>
+EOF
+
+		log_success "Generated command: $command_file"
 	}
 
 	if command -v claude &>/dev/null; then
@@ -795,6 +885,9 @@ main() {
 		log_warning "DRY RUN MODE - No changes will be made"
 		echo
 	fi
+
+	preflight_check
+	echo
 
 	check_prerequisites
 	echo

@@ -314,7 +314,107 @@ All Claude Code configs are stored in `~/.claude/` (canonical location):
 | `agents/`          | Custom agent definitions                       |
 | `skills/`          | Custom skill definitions                       |
 
-> **Note:** On Mac/Linux, `~/.config/claude/` was previously used but `~/.claude/` is now the canonical location. The setup script handles this automatically.
+**Latest `settings.json` configuration:**
+
+```json
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1"
+  },
+  "permissions": {
+    "allow": [
+      "mcp__sequential-thinking__sequentialthinking",
+      "mcp__qmd__query",
+      "mcp__qmd__get",
+      "mcp__qmd__search",
+      "mcp__qmd__vsearch",
+      "mcp__qmd__multi_get",
+      "mcp__qmd__status",
+      "mcp__playwright__*",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(git log:*)",
+      "Bash(git pull:*)",
+      "Bash(git rebase:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh api:*)",
+      "Bash(claude:*)",
+      "Bash(ccs:*)",
+      "Bash(kubectl get:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(npm update:*)",
+      "Bash(npm install:*)",
+      "Bash(npx biome:*)",
+      "Bash(jq:*)",
+      "Bash(shellcheck:*)",
+      "Bash(qmd:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(tree:*)"
+    ],
+    "defaultMode": "plan"
+  },
+  "model": "opusplan",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(ts|tsx|js|jsx)$'; then biome check --write \"$file_path\"; fi; }"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.go$ ]]; then gofmt -w \"$( jq -r .tool_input.file_path )\"; fi"
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(md|mdx)$'; then npx prettier --write \"$file_path\"; fi; }"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "WebSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"~/.ccs/hooks/websearch-transformer.cjs\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash -c 'node \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
+  },
+  "enabledPlugins": {
+    "claude-mem@thedotmack": false,
+    "typescript-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "learning-output-style@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
+    "lua-lsp@claude-plugins-official": true,
+    "plannotator@plannotator": true,
+    "claude-hud@claude-hud": true,
+    "code-simplifier@claude-plugins-official": true,
+    "worktrunk@worktrunk": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true
+  }
+}
+
 
 ## 🔄 Bidirectional Config Sync
 
@@ -388,20 +488,34 @@ Copy `configs/opencode/opencode.json` to `~/.config/opencode/`:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": ["./configs/best-practices.md"],
+  "instructions": [
+    "~/.ai-tools/best-practices.md",
+    "~/.ai-tools/MEMORY.md"
+  ],
   "theme": "kanagawa",
   "default_agent": "plan",
   "mcp": {
     "context7": {
       "type": "remote",
-      "url": "https://mcp.context7.com/mcp"
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true
+    },
+    "qmd": {
+      "type": "local",
+      "command": ["qmd", "mcp"],
+      "enabled": true
     }
   },
   "agent": {
     "build": {
       "permission": {
         "bash": {
-          "git push": "ask"
+          "git push": "ask",
+          "qmd": "allow",
+          "qmd query": "allow",
+          "qmd get": "allow",
+          "qmd search": "allow",
+          "$HOME/.config/opencode/skill/qmd-knowledge/scripts/record.sh": "allow"
         }
       }
     }
@@ -449,6 +563,7 @@ Copy `configs/amp/settings.json` to `~/.config/amp/`:
 ```json
 {
   "amp.dangerouslyAllowAll": true,
+  "amp.experimental.autoHandoff": { "context": 90 },
   "amp.mcpServers": {
     "context7": {
       "url": "https://mcp.context7.com/mcp"
@@ -460,6 +575,10 @@ Copy `configs/amp/settings.json` to `~/.config/amp/`:
     "backlog": {
       "command": "backlog",
       "args": ["mcp", "start"]
+    },
+    "qmd": {
+      "command": "qmd",
+      "args": ["mcp"]
     }
   }
 }
