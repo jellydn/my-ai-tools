@@ -369,11 +369,11 @@ copy_configurations() {
 		# Only copy if directory has content (not empty after excluding marketplace plugins)
 		if [ "$(ls -A "$SCRIPT_DIR/configs/claude/skills" 2>/dev/null)" ]; then
 			execute "rm -rf $HOME/.claude/skills"
-			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge)
+			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, codemap)
 			for skill_dir in "$SCRIPT_DIR/configs/claude/skills"/*; do
 				skill_name="$(basename "$skill_dir")"
 				case "$skill_name" in
-					prd|ralph|qmd-knowledge)
+					prd|ralph|qmd-knowledge|codemap)
 						# Skip marketplace plugins - installed via cli.sh marketplace
 						;;
 					*)
@@ -456,11 +456,11 @@ copy_configurations() {
 		execute "rm -rf $HOME/.config/opencode/skill"
 		# Only copy if directory has content (not empty after excluding marketplace plugins)
 		if [ -d "$SCRIPT_DIR/configs/opencode/skill" ] && [ "$(ls -A "$SCRIPT_DIR/configs/opencode/skill" 2>/dev/null)" ]; then
-			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge)
+			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, codemap)
 			for skill_dir in "$SCRIPT_DIR/configs/opencode/skill"/*; do
 				skill_name="$(basename "$skill_dir")"
 				case "$skill_name" in
-					prd|ralph|qmd-knowledge)
+					prd|ralph|qmd-knowledge|codemap)
 						# Skip marketplace plugins - installed via cli.sh marketplace
 						;;
 					*)
@@ -482,11 +482,11 @@ copy_configurations() {
 			# Only copy if directory has content (not empty after excluding marketplace plugins)
 			if [ "$(ls -A "$SCRIPT_DIR/configs/amp/skills" 2>/dev/null)" ]; then
 				execute "rm -rf $HOME/.config/amp/skills"
-				# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge)
+				# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, codemap)
 				for skill_dir in "$SCRIPT_DIR/configs/amp/skills"/*; do
 					skill_name="$(basename "$skill_dir")"
 					case "$skill_name" in
-						prd|ralph|qmd-knowledge)
+						prd|ralph|qmd-knowledge|codemap)
 							# Skip marketplace plugins - installed via cli.sh marketplace
 							;;
 						*)
@@ -565,7 +565,7 @@ enable_plugins() {
 		"prd|prd@my-ai-tools|$SCRIPT_DIR"
 		"ralph|ralph@my-ai-tools|$SCRIPT_DIR"
 		"qmd-knowledge|qmd-knowledge@my-ai-tools|$SCRIPT_DIR"
-		"map-codebase|map-codebase@my-ai-tools|$SCRIPT_DIR"
+		"codemap|codemap@my-ai-tools|$SCRIPT_DIR"
 		"claude-hud|claude-hud@claude-hud|jarrodwatts/claude-hud"
 		"worktrunk|worktrunk@worktrunk|max-sixty/worktrunk"
 	)
