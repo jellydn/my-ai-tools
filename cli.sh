@@ -369,11 +369,11 @@ copy_configurations() {
 		# Only copy if directory has content (not empty after excluding marketplace plugins)
 		if [ "$(ls -A "$SCRIPT_DIR/configs/claude/skills" 2>/dev/null)" ]; then
 			execute "rm -rf $HOME/.claude/skills"
-			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge)
+			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, map-codebase)
 			for skill_dir in "$SCRIPT_DIR/configs/claude/skills"/*; do
 				skill_name="$(basename "$skill_dir")"
 				case "$skill_name" in
-					prd|ralph|qmd-knowledge)
+					prd|ralph|qmd-knowledge|map-codebase)
 						# Skip marketplace plugins - installed via cli.sh marketplace
 						;;
 					*)
@@ -456,11 +456,11 @@ copy_configurations() {
 		execute "rm -rf $HOME/.config/opencode/skill"
 		# Only copy if directory has content (not empty after excluding marketplace plugins)
 		if [ -d "$SCRIPT_DIR/configs/opencode/skill" ] && [ "$(ls -A "$SCRIPT_DIR/configs/opencode/skill" 2>/dev/null)" ]; then
-			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge)
+			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, map-codebase)
 			for skill_dir in "$SCRIPT_DIR/configs/opencode/skill"/*; do
 				skill_name="$(basename "$skill_dir")"
 				case "$skill_name" in
-					prd|ralph|qmd-knowledge)
+					prd|ralph|qmd-knowledge|map-codebase)
 						# Skip marketplace plugins - installed via cli.sh marketplace
 						;;
 					*)
@@ -482,11 +482,11 @@ copy_configurations() {
 			# Only copy if directory has content (not empty after excluding marketplace plugins)
 			if [ "$(ls -A "$SCRIPT_DIR/configs/amp/skills" 2>/dev/null)" ]; then
 				execute "rm -rf $HOME/.config/amp/skills"
-				# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge)
+				# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, map-codebase)
 				for skill_dir in "$SCRIPT_DIR/configs/amp/skills"/*; do
 					skill_name="$(basename "$skill_dir")"
 					case "$skill_name" in
-						prd|ralph|qmd-knowledge)
+						prd|ralph|qmd-knowledge|map-codebase)
 							# Skip marketplace plugins - installed via cli.sh marketplace
 							;;
 						*)
