@@ -317,6 +317,7 @@ Official and community-maintained skill collections for specific frameworks:
 | ----------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Expo**    | [expo/skills](https://github.com/expo/skills)                           | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows. |
 | **Next.js** | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.          |
+| **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`. |
 
 **Installation:**
 
