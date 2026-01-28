@@ -154,6 +154,25 @@ claude plugin install worktrunk@worktrunk
 | ~~`claude-mem`~~        | ⚠️ **DEPRECATED** - Use qmd instead or using [my fork](https://github.com/jellydn/claude-mem) | [GitHub](https://github.com/thedotmack/claude-mem) |
 | ~~`beads`~~             | ⚠️ **DEPRECATED** - Native tasks                                                              | [GitHub](https://github.com/steveyegge/beads)      |
 
+**Key Local Marketplace Plugins:**
+
+- **`map-codebase`** - Orchestrates parallel codebase analysis to produce 7 structured documents in `.planning/codebase/`:
+  - `STACK.md` - Technologies, dependencies, configuration
+  - `INTEGRATIONS.md` - 3rd party providers, APIs, databases, auth
+  - `ARCHITECTURE.md` - System patterns, layers, data flow
+  - `STRUCTURE.md` - Directory layout, key locations, naming conventions
+  - `CONVENTIONS.md` - Code style, patterns, error handling
+  - `TESTING.md` - Framework, structure, mocking, coverage
+  - `CONCERNS.md` - Tech debt, bugs, security, performance issues
+  
+  Use for onboarding, planning features, understanding patterns, and identifying technical debt. Inspired by [glittercowboy/get-shit-done](https://github.com/glittercowboy/get-shit-done).
+
+- **`prd`** - Generate Product Requirements Documents for new features
+
+- **`ralph`** - Convert PRDs to JSON format for autonomous agent execution
+
+- **`qmd-knowledge`** - Project-specific knowledge management using qmd MCP server (see [guide](docs/qmd-knowledge-management.md))
+
 ### Hooks
 
 Configure in `~/.claude/settings.json`:
@@ -236,7 +255,7 @@ Plus all commands from installed plugins.
 
 ### Skills
 
-**Note:** `prd`, `ralph`, and `qmd-knowledge` are now available via the local marketplace and installed automatically by `cli.sh`.
+**Note:** `prd`, `ralph`, `qmd-knowledge`, and `map-codebase` are now available via the local marketplace and installed automatically by `cli.sh`.
 
 - `ccs-delegation` - Auto-profile selection for CCS with context enhancement
 - `context-check` - Strategic context usage guidance
