@@ -803,6 +803,34 @@ The `instructions.md` file contains agent guidelines similar to `CLAUDE.md` and 
 - Always propose a plan before edits
 ```
 
+**Using with Z.ai GLM-4 Model:**
+
+The default `config.json` is configured for Z.ai's GLM-4 model:
+
+```json
+{
+  "model": "glm-4-flash",
+  "temperature": 0.7,
+  "maxTokens": 4096,
+  "baseURL": "https://open.bigmodel.cn/api/paas/v4",
+  "apiKey": ""
+}
+```
+
+To use Z.ai GLM-4:
+1. Get your API key from [Z.ai](https://open.bigmodel.cn/)
+2. Add your API key to `~/.codex/config.json`
+3. Run `codex` to start using GLM-4 model
+
+For OpenAI models, update the config to:
+```json
+{
+  "model": "gpt-4o",
+  "temperature": 0.7,
+  "maxTokens": 4096
+}
+```
+
 ### Usage
 
 ```bash
