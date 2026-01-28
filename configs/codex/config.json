@@ -1,7 +1,7 @@
 {
   "model": "glm-4-flash",
   "temperature": 0.7,
-  "maxTokens": 4096,
+  "maxTokens": 8192,
   "baseURL": "https://api.z.ai/v1",
   "apiKey": ""
 }

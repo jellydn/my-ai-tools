@@ -811,7 +811,7 @@ The default `config.json` is configured for Z.ai's GLM-4 model:
 {
   "model": "glm-4-flash",
   "temperature": 0.7,
-  "maxTokens": 4096,
+  "maxTokens": 8192,
   "baseURL": "https://api.z.ai/v1",
   "apiKey": ""
 }
@@ -821,6 +821,8 @@ To use Z.ai GLM-4:
 1. Get your API key from [Z.ai](https://z.ai/)
 2. Add your API key to `~/.codex/config.json`
 3. Run `codex` to start using GLM-4 model
+
+For more details, see the [Z.ai GLM-4.7 documentation](https://docs.z.ai/guides/llm/glm-4.7).
 
 For OpenAI models, update the config to:
 ```json
