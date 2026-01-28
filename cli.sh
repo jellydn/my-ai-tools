@@ -941,7 +941,7 @@ EOF
 main() {
 	echo "╔══════════════════════════════════════════════════════════╗"
 	echo "║         AI Tools Setup                                   ║"
-	echo "║   Claude • OpenCode • Amp • CCS • Codex • ai-switcher    ║"
+	echo "║   Claude • OpenCode • Amp • CCS • Codex • AI Switcher    ║"
 	echo "╚══════════════════════════════════════════════════════════╝"
 	echo
 
