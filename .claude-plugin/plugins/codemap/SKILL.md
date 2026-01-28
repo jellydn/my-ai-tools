@@ -4,8 +4,8 @@ description: Orchestrate parallel codebase analysis to produce 7 structured docu
 license: MIT
 compatibility: opencode, claude, amp
 metadata:
-	audience: all
-	workflow: codebase-mapping
+  audience: all
+  workflow: codebase-mapping
 ---
 
 ## What I do

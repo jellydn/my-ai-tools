@@ -364,25 +364,7 @@ copy_configurations() {
 		execute "mkdir -p $HOME/.claude/agents"
 		execute "cp $SCRIPT_DIR/configs/claude/agents/* $HOME/.claude/agents/"
 	fi
-	# Remove existing skills to avoid conflicts with directory/file name collisions
-	if [ -d "$SCRIPT_DIR/configs/claude/skills" ]; then
-		# Only copy if directory has content (not empty after excluding marketplace plugins)
-		if [ "$(ls -A "$SCRIPT_DIR/configs/claude/skills" 2>/dev/null)" ]; then
-			execute "rm -rf $HOME/.claude/skills"
-			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, codemap)
-			for skill_dir in "$SCRIPT_DIR/configs/claude/skills"/*; do
-				skill_name="$(basename "$skill_dir")"
-				case "$skill_name" in
-					prd|ralph|qmd-knowledge|codemap)
-						# Skip marketplace plugins - installed via cli.sh marketplace
-						;;
-					*)
-						execute "cp -r \"$skill_dir\" \"$HOME/.claude/skills/\""
-						;;
-				esac
-			done
-		fi
-	fi
+	# Note: Skills are now installed via enable_plugins() from .claude-plugin folder
 
 	# Add MCP servers using Claude Code CLI (globally, available in all projects)
 	if command -v claude &>/dev/null; then
@@ -545,6 +527,20 @@ copy_configurations() {
 enable_plugins() {
 	log_info "Installing Claude Code plugins..."
 
+	# Ask for skill installation source
+	if [ -t 1 ]; then
+		log_info "How would you like to install community skills?"
+		read -p "1) Remote (from jellydn/my-ai-tools marketplace) 2) Local (from .claude-plugin folder) [1/2]: " -n 1 -r
+		echo
+		if [[ $REPLY =~ ^[2]$ ]]; then
+			SKILL_INSTALL_SOURCE="local"
+		else
+			SKILL_INSTALL_SOURCE="remote"
+		fi
+	else
+		SKILL_INSTALL_SOURCE="remote"
+	fi
+
 	official_plugins=(
 		"typescript-lsp@claude-plugins-official"
 		"pyright-lsp@claude-plugins-official"
@@ -687,6 +683,50 @@ enable_plugins() {
 		fi
 	}
 
+	install_local_skills() {
+		if [ ! -d "$SCRIPT_DIR/.claude-plugin/plugins" ]; then
+			log_info ".claude-plugin/plugins folder not found, skipping local skills"
+			return
+		fi
+
+		log_info "Installing skills from local .claude-plugin/plugins folder..."
+
+		# Copy to Claude Code (~/.claude/skills/)
+		execute "mkdir -p $HOME/.claude/skills"
+		execute "rm -rf $HOME/.claude/skills/*"
+		for skill_dir in "$SCRIPT_DIR/.claude-plugin/plugins"/*; do
+			if [ -d "$skill_dir" ]; then
+				skill_name=$(basename "$skill_dir")
+				execute "cp -r \"$skill_dir\" \"$HOME/.claude/skills/\""
+				log_success "Copied $skill_name to Claude Code"
+			fi
+		done
+
+		# Copy to OpenCode (~/.config/opencode/skill/)
+		if [ -d "$HOME/.config/opencode" ]; then
+			execute "mkdir -p $HOME/.config/opencode/skill"
+			for skill_dir in "$SCRIPT_DIR/.claude-plugin/plugins"/*; do
+				if [ -d "$skill_dir" ]; then
+					skill_name=$(basename "$skill_dir")
+					execute "cp -r \"$skill_dir\" \"$HOME/.config/opencode/skill/\""
+					log_success "Copied $skill_name to OpenCode"
+				fi
+			done
+		fi
+
+		# Copy to Amp (~/.config/amp/skills/)
+		if [ -d "$HOME/.config/amp" ]; then
+			execute "mkdir -p $HOME/.config/amp/skills"
+			for skill_dir in "$SCRIPT_DIR/.claude-plugin/plugins"/*; do
+				if [ -d "$skill_dir" ]; then
+					skill_name=$(basename "$skill_dir")
+					execute "cp -r \"$skill_dir\" \"$HOME/.config/amp/skills/\""
+					log_success "Copied $skill_name to Amp"
+				fi
+			done
+		fi
+	}
+
 	if command -v claude &>/dev/null; then
 		# Add official plugins marketplace first
 		log_info "Adding official plugins marketplace..."
@@ -699,15 +739,32 @@ enable_plugins() {
 			install_plugin "$plugin"
 		done
 
-		log_info "Installing community plugins..."
-		for plugin_entry in "${community_plugins[@]}"; do
-			# Parse the pipe-separated entry
-			local name="${plugin_entry%%|*}"
-			local rest="${plugin_entry#*|}"
-			local plugin_spec="${rest%%|*}"
-			local marketplace_repo="${rest##*|}"
-			install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
-		done
+		if [ "$SKILL_INSTALL_SOURCE" = "local" ]; then
+			log_info "Installing community skills from local .claude-plugin folder..."
+			install_local_skills
+			# Only install CLI-based plugins (plannotator, claude-hud, worktrunk)
+			for plugin_entry in "${community_plugins[@]}"; do
+				local name="${plugin_entry%%|*}"
+				case "$name" in
+					prd|ralph|qmd-knowledge|codemap)
+						# Skip marketplace plugins - will be installed from local .claude-plugin
+						;;
+					*)
+						install_community_plugin "$name" "${plugin_entry#*|}" "${plugin_entry##*|}"
+						;;
+				esac
+			done
+		else
+			log_info "Installing community plugins from marketplace..."
+			for plugin_entry in "${community_plugins[@]}"; do
+				# Parse the pipe-separated entry
+				local name="${plugin_entry%%|*}"
+				local rest="${plugin_entry#*|}"
+				local plugin_spec="${rest%%|*}"
+				local marketplace_repo="${rest##*|}"
+				install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
+			done
+		fi
 
 		log_success "Claude Code plugins installation complete"
 		log_info "⚠️  IMPORTANT: Restart Claude Code for plugins to take effect"
