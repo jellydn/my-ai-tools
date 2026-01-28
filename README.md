@@ -786,11 +786,36 @@ npm install -g @openai/codex-cli
 
 Copy all files from `configs/codex/` to `~/.codex/`:
 
-- `instructions.md` - Agent guidelines and best practices
+- `AGENTS.md` - Agent guidelines and best practices (replaces deprecated `instructions.md`)
 - `config.json` - Model configuration and settings
+- `config.toml` - Advanced configuration including MCP servers
 - `skills/` - Custom skills directory
 
-The `instructions.md` file contains agent guidelines similar to `CLAUDE.md` and `AGENTS.md` for other tools:
+### MCP Servers
+
+Codex CLI supports MCP servers via `config.toml`:
+
+```toml
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+
+[mcp_servers.sequential-thinking]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+
+[mcp_servers.qmd]
+command = "qmd"
+args = ["mcp"]
+```
+
+| Server | Purpose |
+|--------|---------|
+| `context7` | Documentation lookup for any library |
+| `sequential-thinking` | Multi-step reasoning for complex analysis |
+| `qmd` | Knowledge management via qmd MCP |
+
+The `AGENTS.md` file contains agent guidelines similar to `CLAUDE.md` and `AGENTS.md` for other tools:
 
 ```markdown
 # 🤖 Codex CLI Agent Guidelines

@@ -1,6 +1,10 @@
 [features]
 unified_exec = true
 shell_snapshot = true
+web_search_request = true
+
+[sandbox_workspace_write]
+network_access = true
 
 [model_providers.ollama]
 name = "Ollama"
@@ -11,3 +15,14 @@ env_key = "OLLAMA_API_KEY"
 model = "glm-4.7:cloud"
 model_provider = "ollama"
 
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+
+[mcp_servers.sequential-thinking]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+
+[mcp_servers.qmd]
+command = "qmd"
+args = ["mcp"]
