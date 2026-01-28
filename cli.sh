@@ -369,7 +369,7 @@ copy_configurations() {
 		# Only copy if directory has content (not empty after excluding marketplace plugins)
 		if [ "$(ls -A "$SCRIPT_DIR/configs/claude/skills" 2>/dev/null)" ]; then
 			execute "rm -rf $HOME/.claude/skills"
-			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, map-codebase)
+			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, codemap)
 			for skill_dir in "$SCRIPT_DIR/configs/claude/skills"/*; do
 				skill_name="$(basename "$skill_dir")"
 				case "$skill_name" in
