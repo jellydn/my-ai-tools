@@ -555,6 +555,7 @@ copy_configurations() {
 			# Only copy if directory has content (not empty after excluding marketplace plugins)
 			if [ "$(ls -A "$SCRIPT_DIR/configs/codex/skills" 2>/dev/null)" ]; then
 				execute "rm -rf $HOME/.codex/skills"
+				execute "mkdir -p $HOME/.codex/skills"
 				# Copy all skills except marketplace plugins
 				for skill_dir in "$SCRIPT_DIR/configs/codex/skills"/*; do
 					skill_name="$(basename "$skill_dir")"
