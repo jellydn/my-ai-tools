@@ -694,6 +694,7 @@ enable_plugins() {
 		# Define target directories
 		CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
 		OPENCODE_SKILL_DIR="$HOME/.config/opencode/skill"
+		OPENCODE_COMMAND_DIR="$HOME/.config/opencode/command/ai"
 		AMP_SKILLS_DIR="$HOME/.config/amp/skills"
 
 		# Copy to Claude Code (~/.claude/skills/)
@@ -713,6 +714,9 @@ enable_plugins() {
 		fi
 		mkdir -p "$OPENCODE_SKILL_DIR"
 
+		# Create OpenCode commands directory
+		mkdir -p "$OPENCODE_COMMAND_DIR"
+
 		# Copy to Amp (~/.config/amp/skills/)
 		if [ -d "$AMP_SKILLS_DIR" ]; then
 			for existing_skill in "$AMP_SKILLS_DIR"/*; do
@@ -731,8 +735,70 @@ enable_plugins() {
 				log_success "Copied $skill_name to OpenCode"
 				cp -r "$skill_dir" "$AMP_SKILLS_DIR/"
 				log_success "Copied $skill_name to Amp"
+
+				# Generate OpenCode command from skill
+				generate_opencode_command "$skill_dir" "$OPENCODE_COMMAND_DIR"
 			fi
 		done
+	}
+
+	# Generate OpenCode command file from skill SKILL.md
+	generate_opencode_command() {
+		local skill_dir="$1"
+		local command_dir="$2"
+		local skill_name=$(basename "$skill_dir")
+		local skill_md="$skill_dir/SKILL.md"
+
+		if [ ! -f "$skill_md" ]; then
+			log_warning "No SKILL.md found for $skill_name, skipping command generation"
+			return
+		fi
+
+		# Extract description from SKILL.md (first line after frontmatter or first paragraph)
+		local description=""
+		description=$(sed -n '/^---$/,/^---$/p' "$skill_md" 2>/dev/null | grep -E '^description:' | head -1 | sed 's/^description:[" ]*//' | sed 's/[" ]*$//')
+		if [ -z "$description" ]; then
+			# Fallback: use first non-empty, non-header line
+			description=$(sed -n '/^---$/,/^---$/d;/^#/d;/^$/d;p' "$skill_md" 2>/dev/null | head -1)
+		fi
+		[ -z "$description" ] && description="Skill: $skill_name"
+
+		# Extract content after frontmatter for objective
+		local objective_content=""
+		objective_content=$(sed '1,/^---$/d' "$skill_md" 2>/dev/null | head -50)
+
+		# Create command file
+		local command_file="$command_dir/$skill_name.md"
+
+		# Add path allowances for codemap (writes to .planning/codebase/)
+		local path_allowance=""
+		if [ "$skill_name" = "codemap" ]; then
+			path_allowance="
+
+**Allowed paths:**
+- Write: .planning/codebase/"
+		fi
+
+		cat > "$command_file" << EOF
+---
+name: ai:$skill_name
+description: "$description"
+argument-hint: "[optional: arguments for $skill_name]"
+allowed-tools:
+  - Read
+  - Bash
+  - Glob
+  - Grep
+  - Write
+  - Task
+---
+
+<objective>
+$objective_content$path_allowance
+</objective>
+EOF
+
+		log_success "Generated command: $command_file"
 	}
 
 	if command -v claude &>/dev/null; then

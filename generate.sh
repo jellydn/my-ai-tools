@@ -189,8 +189,8 @@ generate_opencode_configs() {
 			fi
 		fi
 
-		# Copy other subdirectories (agent, command, configs)
-		for subdir in agent command configs; do
+		# Copy other subdirectories (agent, configs) - skip command/ai (generated locally)
+		for subdir in agent configs; do
 			if [ -d "$HOME/.config/opencode/$subdir" ]; then
 				execute "mkdir -p $SCRIPT_DIR/configs/opencode/$subdir"
 				if [ "$(ls -A "$HOME/.config/opencode/$subdir" 2>/dev/null)" ]; then
@@ -202,6 +202,24 @@ generate_opencode_configs() {
 				fi
 			fi
 		done
+
+		# Handle command directory - skip ai/ subfolder (generated from local skills)
+		if [ -d "$HOME/.config/opencode/command" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/opencode/command"
+			if [ "$(ls -A "$HOME/.config/opencode/command" 2>/dev/null)" ]; then
+				# Copy everything except ai/ folder
+				for item in "$HOME/.config/opencode/command"/*; do
+					item_name=$(basename "$item")
+					if [ "$item_name" != "ai" ]; then
+						if execute "cp -r '$item' '$SCRIPT_DIR/configs/opencode/command'/ 2>/dev/null"; then
+							log_success "Copied command: $item_name"
+						fi
+					else
+						log_info "Skipping ai/ command folder (generated from local skills)"
+					fi
+				done
+			fi
+		fi
 		log_success "OpenCode configs generated"
 	else
 		log_warning "OpenCode config directory not found: $HOME/.config/opencode"
