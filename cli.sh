@@ -750,7 +750,10 @@ enable_plugins() {
 						# Skip marketplace plugins - will be installed from local .claude-plugin
 						;;
 					*)
-						install_community_plugin "$name" "${plugin_entry#*|}" "${plugin_entry##*|}"
+						local rest="${plugin_entry#*|}"
+						local plugin_spec="${rest%%|*}"
+						local marketplace_repo="${rest##*|}"
+						install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
 						;;
 				esac
 			done
