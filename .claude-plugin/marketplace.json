@@ -1,7 +1,7 @@
 {
 	"$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
 	"name": "my-ai-tools",
-	"description": "Local marketplace for my-ai-tools community plugins",
+	"descriptionmLocal marketplace for my-ai-tools community plugins",
 	"owner": {
 		"name": "my-ai-tools",
 		"email": "dung@productsway.com"
@@ -42,14 +42,14 @@
 			"homepage": "https://github.com/jellydn/my-ai-tools"
 		},
 		{
-			"name": "map-codebase",
+			"name": "codemap",
 			"description": "Orchestrate parallel codebase analysis to produce 7 structured documents (STACK, INTEGRATIONS, ARCHITECTURE, STRUCTURE, CONVENTIONS, TESTING, CONCERNS) in .planning/codebase/.",
 			"version": "1.0.0",
 			"author": {
 				"name": "my-ai-tools",
 				"email": "dung@productsway.com"
 			},
-			"source": "./.claude-plugin/plugins/map-codebase",
+			"source": "./.claude-plugin/plugins/codemap",
 			"category": "productivity",
 			"homepage": "https://github.com/jellydn/my-ai-tools"
 		}

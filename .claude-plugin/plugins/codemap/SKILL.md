@@ -1,5 +1,5 @@
 ---
-name: map-codebase
+name: codemap
 description: Orchestrate parallel codebase analysis to produce 7 structured documents about the codebase in .planning/codebase/
 license: MIT
 compatibility: opencode, claude, amp
