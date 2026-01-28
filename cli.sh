@@ -528,6 +528,12 @@ copy_configurations() {
 			fi
 		fi
 		copy_non_marketplace_skills "$SCRIPT_DIR/configs/codex/skills" "$HOME/.codex/skills"
+		# Copy Codex slash commands (prompts)
+		if [ -d "$SCRIPT_DIR/configs/codex/prompts" ]; then
+			execute "mkdir -p $HOME/.codex/prompts"
+			execute "cp -r $SCRIPT_DIR/configs/codex/prompts/* $HOME/.codex/prompts/"
+			log_success "Copied Codex prompts (slash commands)"
+		fi
 		log_success "Codex CLI configs copied"
 	fi
 

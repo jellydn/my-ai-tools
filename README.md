@@ -789,7 +789,8 @@ Copy all files from `configs/codex/` to `~/.codex/`:
 - `AGENTS.md` - Agent guidelines and best practices (replaces deprecated `instructions.md`)
 - `config.json` - Model configuration and settings
 - `config.toml` - Advanced configuration including MCP servers
-- `skills/` - Custom skills directory
+- `prompts/` - Custom slash commands (e.g., `/handoffs`, `/tdd`, `/pr-review`)
+- `skills/` - Custom skills directory for extended capabilities
 
 ### MCP Servers
 
@@ -815,7 +816,50 @@ args = ["mcp"]
 | `sequential-thinking` | Multi-step reasoning for complex analysis |
 | `qmd` | Knowledge management via qmd MCP |
 
-The `AGENTS.md` file contains agent guidelines similar to `CLAUDE.md` and `AGENTS.md` for other tools:
+### Slash Commands
+
+Codex CLI supports custom slash commands via `~/.codex/prompts/` directory. Commands are defined as Markdown files where the filename becomes the command name.
+
+**Location:** `~/.codex/prompts/` (copied from `configs/codex/prompts/`)
+
+**Available Commands:**
+
+| Command | Description | Usage |
+|---------|-------------|-------|
+| `/handoffs` | Create session handoff plans | `/handoffs purpose-of-work` |
+| `/pickup` | Resume from handoff | `/pickup 2024-01-29-feature-x.md` |
+| `/tdd` | Test-Driven Development | `/tdd start feature-name` |
+| `/pr-review` | Fix PR review comments | `/pr-review 123` |
+| `/adr` | Architecture Decision Records | `/adr new "Decision title"` |
+| `/slop` | Remove AI code slop | `/slop main` |
+
+**Argument Variables:**
+
+- `$1`, `$2`, ... `$9` - Individual positional arguments
+- `$ARGUMENTS` - Entire argument string
+- `$$` - Literal dollar sign
+
+**Example:**
+```markdown
+# Create handoff plan
+
+<purpose>$ARGUMENTS</purpose>
+
+Create a detailed handoff plan for...
+```
+
+**Usage:**
+```
+/handoffs implement-auth-feature
+```
+
+### Agent Guidelines (AGENTS.md)
+
+Codex CLI follows the `AGENTS.md` convention, similar to `CLAUDE.md` for Claude Code and `~/.config/AGENTS.md` for Amp. The `AGENTS.md` file in `~/.codex/` provides persistent, global guidelines for Codex's behavior.
+
+### Skills
+
+Codex CLI supports [agent skills](https://developers.openai.com/codex/skills) in `~/.codex/skills/` directory. Skills are modular packages that extend Codex's capabilities with specialized knowledge, workflows, and tools - similar to Claude Code skills.
 
 ```markdown
 # 🤖 Codex CLI Agent Guidelines

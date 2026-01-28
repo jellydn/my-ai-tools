@@ -337,6 +337,23 @@ generate_codex_configs() {
 			fi
 		fi
 
+		# Copy Codex prompts (slash commands)
+		if [ -d "$HOME/.codex/prompts" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/codex/prompts"
+			if [ "$(ls -A "$HOME/.codex/prompts" 2>/dev/null)" ]; then
+				for prompt_file in "$HOME/.codex/prompts"/*.md; do
+					if [ -f "$prompt_file" ]; then
+						prompt_name=$(basename "$prompt_file")
+						if execute "cp '$prompt_file' '$SCRIPT_DIR/configs/codex/prompts/' 2>/dev/null"; then
+							log_success "Copied prompt: $prompt_name"
+						fi
+					fi
+				done
+			else
+				log_warning "Codex prompts directory is empty"
+			fi
+		fi
+
 		log_success "Codex CLI configs generated"
 	else
 		log_warning "Codex CLI config directory not found: $HOME/.codex"
