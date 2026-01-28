@@ -30,8 +30,14 @@ main() {
 
 	check_prerequisites
 
+	# Set up TMPDIR to avoid cross-device link errors
+	# Use a location within $HOME to ensure same filesystem
+	local tmp_dir="$HOME/.claude/tmp"
+	mkdir -p "$tmp_dir" 2>/dev/null || true
+	export TMPDIR="$tmp_dir"
+
 	# Create temporary directory
-	TEMP_DIR=$(mktemp -d)
+	TEMP_DIR=$(mktemp -d -p "$tmp_dir")
 	trap 'rm -rf "$TEMP_DIR"' EXIT INT TERM
 
 	log_info "Cloning repository to temporary directory..."

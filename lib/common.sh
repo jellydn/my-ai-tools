@@ -26,14 +26,13 @@ log_error() {
 	echo -e "${RED}✗${NC} $1"
 }
 
-# Execute function (for dry-run support) - safer version without eval
+# Execute function (for dry-run support)
+# Note: Uses eval to properly handle quoted arguments and shell operators
 execute() {
-	local cmd_array
-	read -ra cmd_array <<< "$1"
 	if [ "$DRY_RUN" = true ]; then
 		log_info "[DRY RUN] $1"
 	else
-		"${cmd_array[@]}"
+		eval "$1"
 	fi
 }
 
