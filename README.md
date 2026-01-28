@@ -255,7 +255,7 @@ Plus all commands from installed plugins.
 
 ### Skills
 
-**Note:** `prd`, `ralph`, `qmd-knowledge`, and `codemap` are now available via the marketplace and installed automatically by `cli.sh`.
+**Note:** `prd`, `ralph`, `qmd-knowledge`, and `codemap` are installed by `cli.sh` (marketplace by default, or local `.claude-plugin/` when selected).
 
 - `ccs-delegation` - Auto-profile selection for CCS with context enhancement
 - `context-check` - Strategic context usage guidance
