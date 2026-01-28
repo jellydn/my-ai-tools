@@ -530,15 +530,15 @@ enable_plugins() {
 	# Ask for skill installation source
 	if [ -t 1 ]; then
 		log_info "How would you like to install community skills?"
-		read -p "1) Remote (from jellydn/my-ai-tools marketplace) 2) Local (from .claude-plugin folder) [1/2]: " -n 1 -r
+		printf "1) Local (from .claude-plugin folder) 2) Remote (from jellydn/my-ai-tools marketplace) [1/2]: "
+		read REPLY
 		echo
-		if [[ $REPLY =~ ^[2]$ ]]; then
-			SKILL_INSTALL_SOURCE="local"
-		else
-			SKILL_INSTALL_SOURCE="remote"
-		fi
+		case "$REPLY" in
+			2) SKILL_INSTALL_SOURCE="remote" ;;
+			*) SKILL_INSTALL_SOURCE="local" ;;
+		esac
 	else
-		SKILL_INSTALL_SOURCE="remote"
+		SKILL_INSTALL_SOURCE="local"
 	fi
 
 	official_plugins=(
@@ -691,40 +691,48 @@ enable_plugins() {
 
 		log_info "Installing skills from local .claude-plugin/plugins folder..."
 
+		# Define target directories
+		CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
+		OPENCODE_SKILL_DIR="$HOME/.config/opencode/skill"
+		AMP_SKILLS_DIR="$HOME/.config/amp/skills"
+
 		# Copy to Claude Code (~/.claude/skills/)
-		execute "mkdir -p $HOME/.claude/skills"
-		execute "rm -rf $HOME/.claude/skills/*"
+		if [ -d "$CLAUDE_SKILLS_DIR" ]; then
+			# Remove existing skills safely using rm with quoted path
+			for existing_skill in "$CLAUDE_SKILLS_DIR"/*; do
+				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
+			done
+		fi
+		mkdir -p "$CLAUDE_SKILLS_DIR"
+
+		# Copy to OpenCode (~/.config/opencode/skill/)
+		if [ -d "$OPENCODE_SKILL_DIR" ]; then
+			for existing_skill in "$OPENCODE_SKILL_DIR"/*; do
+				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
+			done
+		fi
+		mkdir -p "$OPENCODE_SKILL_DIR"
+
+		# Copy to Amp (~/.config/amp/skills/)
+		if [ -d "$AMP_SKILLS_DIR" ]; then
+			for existing_skill in "$AMP_SKILLS_DIR"/*; do
+				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
+			done
+		fi
+		mkdir -p "$AMP_SKILLS_DIR"
+
+		# Copy all skills from plugins folder to targets
 		for skill_dir in "$SCRIPT_DIR/.claude-plugin/plugins"/*; do
 			if [ -d "$skill_dir" ]; then
 				skill_name=$(basename "$skill_dir")
-				execute "cp -r \"$skill_dir\" \"$HOME/.claude/skills/\""
+				cp -r "$skill_dir" "$CLAUDE_SKILLS_DIR/"
 				log_success "Copied $skill_name to Claude Code"
+				cp -r "$skill_dir" "$OPENCODE_SKILL_DIR/"
+				log_success "Copied $skill_name to OpenCode"
+				cp -r "$skill_dir" "$AMP_SKILLS_DIR/"
+				log_success "Copied $skill_name to Amp"
 			fi
 		done
-
-		# Copy to OpenCode (~/.config/opencode/skill/)
-		if [ -d "$HOME/.config/opencode" ]; then
-			execute "mkdir -p $HOME/.config/opencode/skill"
-			for skill_dir in "$SCRIPT_DIR/.claude-plugin/plugins"/*; do
-				if [ -d "$skill_dir" ]; then
-					skill_name=$(basename "$skill_dir")
-					execute "cp -r \"$skill_dir\" \"$HOME/.config/opencode/skill/\""
-					log_success "Copied $skill_name to OpenCode"
-				fi
-			done
-		fi
-
-		# Copy to Amp (~/.config/amp/skills/)
-		if [ -d "$HOME/.config/amp" ]; then
-			execute "mkdir -p $HOME/.config/amp/skills"
-			for skill_dir in "$SCRIPT_DIR/.claude-plugin/plugins"/*; do
-				if [ -d "$skill_dir" ]; then
-					skill_name=$(basename "$skill_dir")
-					execute "cp -r \"$skill_dir\" \"$HOME/.config/amp/skills/\""
-					log_success "Copied $skill_name to Amp"
-				fi
-			done
-		fi
 	}
 
 	if command -v claude &>/dev/null; then
