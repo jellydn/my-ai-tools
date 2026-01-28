@@ -491,6 +491,7 @@ This is useful for:
 | OpenCode    | `~/.config/opencode/`      | `%APPDATA%\OpenCode\` |
 | Amp         | `~/.config/amp/`           | `%APPDATA%\Amp\`      |
 | CCS         | `~/.ccs/`                  | `%APPDATA%\CCS\`      |
+| Codex CLI   | `~/.codex/`                | `~/.codex/`           |
 
 > **Note:** On older Linux installs, Claude Code may use `~/.config/claude/`. The setup script handles both locations automatically.
 
@@ -763,6 +764,56 @@ ccs auth create work
 
 # List available profiles
 ccs auth list
+```
+
+## 🤖 OpenAI Codex CLI (Optional)
+
+[**OpenAI Codex CLI**](https://developers.openai.com/codex/cli) - OpenAI's command-line coding assistant powered by GPT-4 and other models.
+
+### Installation
+
+The setup script will prompt to install Codex CLI:
+
+```bash
+./cli.sh
+```
+
+Or install manually:
+
+```bash
+npm install -g @openai/codex-cli
+```
+
+### Configuration
+
+Copy all files from `configs/codex/` to `~/.codex/`:
+
+- `instructions.md` - Agent guidelines and best practices
+- `config.json` - Model configuration and settings
+- `skills/` - Custom skills directory
+
+The `instructions.md` file contains agent guidelines similar to `CLAUDE.md` and `AGENTS.md` for other tools:
+
+```markdown
+# 🤖 Codex CLI Agent Guidelines
+
+- Follow my software development practice @~/.ai-tools/best-practices.md
+- Read @~/.ai-tools/MEMORY.md first
+- Keep responses concise and actionable
+- Always propose a plan before edits
+```
+
+### Usage
+
+```bash
+# Start Codex CLI
+codex
+
+# Run with specific model
+codex --model gpt-4o
+
+# Use with a specific task
+codex "Explain this code"
 ```
 
 ## 🔄 AI CLI Switcher (Optional)

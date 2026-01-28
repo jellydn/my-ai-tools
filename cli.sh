@@ -227,6 +227,11 @@ backup_configs() {
 			log_success "Backed up ai-switcher configs"
 		fi
 
+		if [ -d "$HOME/.codex" ]; then
+			execute "cp -r $HOME/.codex $BACKUP_DIR/codex"
+			log_success "Backed up Codex CLI configs"
+		fi
+
 		log_success "Backup completed: $BACKUP_DIR"
 	fi
 }
@@ -339,6 +344,28 @@ install_ai_switcher() {
 	else
 		execute_installer "https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/install.sh" "" "ai-switcher"
 		log_success "ai-switcher installed"
+	fi
+}
+
+install_codex() {
+	if [ -t 1 ]; then
+		read -p "Do you want to install OpenAI Codex CLI? (y/n) " -n 1 -r
+		echo
+		if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+			log_warning "Skipping Codex CLI installation"
+			return
+		fi
+	else
+		log_info "Installing Codex CLI (non-interactive mode)..."
+	fi
+
+	log_info "Installing Codex CLI..."
+
+	if command -v codex &>/dev/null; then
+		log_warning "Codex CLI is already installed"
+	else
+		execute "npm install -g @openai/codex-cli"
+		log_success "Codex CLI installed"
 	fi
 }
 
@@ -514,6 +541,35 @@ copy_configurations() {
 		else
 			log_info "ai-switcher config not found in source, preserving existing"
 		fi
+	fi
+
+	if [ -d "$HOME/.codex" ] || command -v codex &>/dev/null; then
+		execute "mkdir -p $HOME/.codex"
+		if [ -f "$SCRIPT_DIR/configs/codex/instructions.md" ]; then
+			execute "cp $SCRIPT_DIR/configs/codex/instructions.md $HOME/.codex/"
+		fi
+		if [ -f "$SCRIPT_DIR/configs/codex/config.json" ]; then
+			execute "cp $SCRIPT_DIR/configs/codex/config.json $HOME/.codex/"
+		fi
+		if [ -d "$SCRIPT_DIR/configs/codex/skills" ]; then
+			# Only copy if directory has content (not empty after excluding marketplace plugins)
+			if [ "$(ls -A "$SCRIPT_DIR/configs/codex/skills" 2>/dev/null)" ]; then
+				execute "rm -rf $HOME/.codex/skills"
+				# Copy all skills except marketplace plugins
+				for skill_dir in "$SCRIPT_DIR/configs/codex/skills"/*; do
+					skill_name="$(basename "$skill_dir")"
+					case "$skill_name" in
+						prd|ralph|qmd-knowledge|codemap)
+							# Skip marketplace plugins
+							;;
+						*)
+							execute "cp -r \"$skill_dir\" \"$HOME/.codex/skills/\""
+							;;
+					esac
+				done
+			fi
+		fi
+		log_success "Codex CLI configs copied"
 	fi
 
 	execute "mkdir -p $HOME/.ai-tools"
@@ -884,7 +940,7 @@ EOF
 main() {
 	echo "╔══════════════════════════════════════════════════════════╗"
 	echo "║         AI Tools Setup                                   ║"
-	echo "║   Claude Code • OpenCode • Amp • CCS • ai-switcher       ║"
+	echo "║   Claude • OpenCode • Amp • CCS • Codex • ai-switcher    ║"
 	echo "╚══════════════════════════════════════════════════════════╝"
 	echo
 
@@ -918,6 +974,9 @@ main() {
 	echo
 
 	install_ai_switcher
+	echo
+
+	install_codex
 	echo
 
 	copy_configurations

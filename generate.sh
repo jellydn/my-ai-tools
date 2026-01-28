@@ -302,6 +302,46 @@ generate_ccs_configs() {
 	fi
 }
 
+generate_codex_configs() {
+	log_info "Generating Codex CLI configs..."
+
+	if [ -d "$HOME/.codex" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/codex"
+		copy_single "$HOME/.codex/instructions.md" "$SCRIPT_DIR/configs/codex/instructions.md"
+		copy_single "$HOME/.codex/config.json" "$SCRIPT_DIR/configs/codex/config.json"
+
+		if [ -d "$HOME/.codex/skills" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/codex/skills"
+			# Check if skills directory has content
+			if [ "$(ls -A "$HOME/.codex/skills" 2>/dev/null)" ]; then
+				# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, codemap)
+				for skill_dir in "$HOME/.codex/skills"/*; do
+					skill_name="$(basename "$skill_dir")"
+					case "$skill_name" in
+						prd|ralph|qmd-knowledge|codemap)
+							# Skip marketplace plugins - managed separately
+							;;
+						*)
+							# Check if skill already exists in .claude-plugin/plugins
+							if skill_exists_in_plugins "$skill_name"; then
+								log_info "Skipping $skill_name (exists in .claude-plugin/plugins)"
+							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/codex/skills'/ 2>/dev/null"; then
+								log_success "Copied skill: $skill_name"
+							fi
+							;;
+					esac
+				done
+			else
+				log_warning "Codex skills directory is empty"
+			fi
+		fi
+
+		log_success "Codex CLI configs generated"
+	else
+		log_warning "Codex CLI config directory not found: $HOME/.codex"
+	fi
+}
+
 generate_best_practices() {
 	log_info "Generating best-practices.md..."
 
@@ -358,6 +398,9 @@ main() {
 	echo
 
 	generate_ccs_configs
+	echo
+
+	generate_codex_configs
 	echo
 
 	generate_best_practices
