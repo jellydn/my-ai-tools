@@ -111,11 +111,20 @@ generate_claude_configs() {
 			execute "mkdir -p $SCRIPT_DIR/configs/claude/skills"
 			# Check if skills directory has content
 			if [ "$(ls -A "$HOME/.claude/skills" 2>/dev/null)" ]; then
-				if execute "cp -r '$HOME/.claude/skills'/* '$SCRIPT_DIR/configs/claude/skills'/ 2>/dev/null"; then
-					log_success "Copied skills directory"
-				else
-					log_warning "Failed to copy Claude skills directory"
-				fi
+				# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge)
+				for skill_dir in "$HOME/.claude/skills"/*; do
+					skill_name="$(basename "$skill_dir")"
+					case "$skill_name" in
+						prd|ralph|qmd-knowledge)
+							# Skip marketplace plugins - managed separately
+							;;
+						*)
+							if execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/claude/skills'/ 2>/dev/null"; then
+								log_success "Copied skill: $skill_name"
+							fi
+							;;
+					esac
+				done
 			else
 				log_warning "Claude skills directory is empty"
 			fi
@@ -183,11 +192,20 @@ generate_amp_configs() {
 			execute "mkdir -p $SCRIPT_DIR/configs/amp/skills"
 			# Check if skills directory has content
 			if [ "$(ls -A "$HOME/.config/amp/skills" 2>/dev/null)" ]; then
-				if execute "cp -r '$HOME/.config/amp/skills'/* '$SCRIPT_DIR/configs/amp/skills'/ 2>/dev/null"; then
-					log_success "Copied skills directory"
-				else
-					log_warning "Failed to copy Amp skills directory"
-				fi
+				# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge)
+				for skill_dir in "$HOME/.config/amp/skills"/*; do
+					skill_name="$(basename "$skill_dir")"
+					case "$skill_name" in
+						prd|ralph|qmd-knowledge)
+							# Skip marketplace plugins - managed separately
+							;;
+						*)
+							if execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/amp/skills'/ 2>/dev/null"; then
+								log_success "Copied skill: $skill_name"
+							fi
+							;;
+					esac
+				done
 			else
 				log_warning "Amp skills directory is empty"
 			fi
@@ -280,31 +298,6 @@ generate_ai_switcher_configs() {
 	fi
 }
 
-generate_qmd_knowledge_configs() {
-	log_info "Generating qmd-knowledge configs..."
-
-	# Export OpenCode skill
-	if [ -d "$HOME/.config/opencode/skill/qmd-knowledge" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/opencode/skill"
-		execute "cp -r '$HOME/.config/opencode/skill/qmd-knowledge' '$SCRIPT_DIR/configs/opencode/skill/'"
-		log_success "Exported qmd-knowledge skill for OpenCode"
-	fi
-
-	# Export Claude Code skill
-	if [ -d "$HOME/.claude/skills/qmd-knowledge" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/claude/skills"
-		execute "cp -r '$HOME/.claude/skills/qmd-knowledge' '$SCRIPT_DIR/configs/claude/skills/'"
-		log_success "Exported qmd-knowledge skill for Claude Code"
-	fi
-
-	# Export Amp skill
-	if [ -d "$HOME/.config/amp/skills/qmd-knowledge" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/amp/skills"
-		execute "cp -r '$HOME/.config/amp/skills/qmd-knowledge' '$SCRIPT_DIR/configs/amp/skills/'"
-		log_success "Exported qmd-knowledge skill for Amp"
-	fi
-}
-
 main() {
 	echo "╔══════════════════════════════════════════════════════════╗"
 	echo "║         Config Generator                                 ║"
@@ -339,9 +332,6 @@ main() {
 	echo
 
 	generate_ai_switcher_configs
-	echo
-
-	generate_qmd_knowledge_configs
 	echo
 
 	log_success "Config generation complete!"

@@ -145,6 +145,10 @@ claude plugin install worktrunk@worktrunk
 | `rust-analyzer-lsp`     | Rust language support                                                                         | Official                                           |
 | `claude-md-management`  | Markdown management                                                                           | Official                                           |
 | `plannotator`           | Plan annotation tool                                                                          | Community                                          |
+| `prd`                   | Product Requirements Document generation                                                      | Local Marketplace                                   |
+| `ralph`                 | PRD to JSON converter for autonomous agent system                                             | Local Marketplace                                   |
+| `qmd-knowledge`         | Project knowledge management via qmd                                                          | Local Marketplace                                   |
+| `map-codebase`          | Parallel codebase analysis producing 7 structured documents                                   | Local Marketplace                                   |
 | `claude-hud`            | Status line with usage monitoring                                                             | Community                                          |
 | `worktrunk`             | Work management                                                                               | Community                                          |
 | ~~`claude-mem`~~        | ⚠️ **DEPRECATED** - Use qmd instead or using [my fork](https://github.com/jellydn/claude-mem) | [GitHub](https://github.com/thedotmack/claude-mem) |
@@ -232,9 +236,8 @@ Plus all commands from installed plugins.
 
 ### Skills
 
-- `prd` - Generate Product Requirements Documents for new features
-- `qmd-knowledge` - Project-specific knowledge management (alternative to claude-mem)
-- `ralph` - PRD-driven development automation
+**Note:** `prd`, `ralph`, and `qmd-knowledge` are now available via the local marketplace and installed automatically by `cli.sh`.
+
 - `ccs-delegation` - Auto-profile selection for CCS with context enhancement
 - `context-check` - Strategic context usage guidance
 
@@ -654,11 +657,13 @@ Copy `configs/ai-switcher/config.json` to `~/.config/ai-switcher/` for pre-confi
 - **Simple & Reliable**: Minimal configuration, maximum utility
 
 ```bash
-# Installation (WIP)
-# Currently available via skill system:
-# - OpenCode: ~/.config/opencode/skill/qmd-knowledge/
-# - Claude Code: ~/.claude/skills/qmd-knowledge/
-# - Amp: ~/.config/amp/skills/qmd-knowledge/
+# Installation
+# The qmd-knowledge skill is installed via the local marketplace:
+./cli.sh
+# Select "y" for qmd-knowledge when prompted
+
+# Or install manually:
+claude plugin install qmd-knowledge@my-ai-tools
 ```
 
 **Features:**

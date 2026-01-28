@@ -1,0 +1,57 @@
+{
+	"$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+	"name": "my-ai-tools",
+	"description": "Local marketplace for my-ai-tools community plugins",
+	"owner": {
+		"name": "my-ai-tools",
+		"email": "dung@productsway.com"
+	},
+	"plugins": [
+		{
+			"name": "prd",
+			"description": "Generate Product Requirements Documents (PRD) for new features. Use when planning features, starting projects, or creating specifications.",
+			"version": "1.0.0",
+			"author": {
+				"name": "my-ai-tools",
+				"email": "dung@productsway.com"
+			},
+			"source": "./plugins/prd",
+			"category": "productivity"
+		},
+		{
+			"name": "ralph",
+			"description": "Convert PRDs to prd.json format for the Ralph autonomous agent system. Converts markdown PRDs to Ralph's JSON format.",
+			"version": "1.0.0",
+			"author": {
+				"name": "my-ai-tools",
+				"email": "dung@productsway.com"
+			},
+			"source": "./plugins/ralph",
+			"category": "productivity"
+		},
+		{
+			"name": "qmd-knowledge",
+			"description": "Project-specific knowledge management system using qmd MCP server. Captures learnings, issue notes, and conventions in a searchable knowledge base.",
+			"version": "1.0.0",
+			"author": {
+				"name": "my-ai-tools",
+				"email": "dung@productsway.com"
+			},
+			"source": "./plugins/qmd-knowledge",
+			"category": "productivity",
+			"homepage": "https://github.com/jellydn/my-ai-tools"
+		},
+		{
+			"name": "map-codebase",
+			"description": "Orchestrate parallel codebase analysis to produce 7 structured documents (STACK, INTEGRATIONS, ARCHITECTURE, STRUCTURE, CONVENTIONS, TESTING, CONCERNS) in .planning/codebase/.",
+			"version": "1.0.0",
+			"author": {
+				"name": "my-ai-tools",
+				"email": "dung@productsway.com"
+			},
+			"source": "./plugins/map-codebase",
+			"category": "productivity",
+			"homepage": "https://github.com/jellydn/my-ai-tools/pull/18"
+		}
+	]
+}

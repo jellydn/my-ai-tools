@@ -96,6 +96,14 @@ install_mcp_server() {
 	fi
 }
 
+# Set up TMPDIR to avoid cross-device link errors
+# Uses a temp directory within $HOME to ensure same filesystem
+setup_tmpdir() {
+	local tmp_dir="$HOME/.claude/tmp"
+	mkdir -p "$tmp_dir" 2>/dev/null || true
+	export TMPDIR="$tmp_dir"
+}
+
 check_prerequisites() {
 	log_info "Checking prerequisites..."
 
@@ -358,8 +366,22 @@ copy_configurations() {
 	fi
 	# Remove existing skills to avoid conflicts with directory/file name collisions
 	if [ -d "$SCRIPT_DIR/configs/claude/skills" ]; then
-		execute "rm -rf $HOME/.claude/skills"
-		execute "cp -r $SCRIPT_DIR/configs/claude/skills $HOME/.claude/"
+		# Only copy if directory has content (not empty after excluding marketplace plugins)
+		if [ "$(ls -A "$SCRIPT_DIR/configs/claude/skills" 2>/dev/null)" ]; then
+			execute "rm -rf $HOME/.claude/skills"
+			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge)
+			for skill_dir in "$SCRIPT_DIR/configs/claude/skills"/*; do
+				skill_name="$(basename "$skill_dir")"
+				case "$skill_name" in
+					prd|ralph|qmd-knowledge)
+						# Skip marketplace plugins - installed via cli.sh marketplace
+						;;
+					*)
+						execute "cp -r \"$skill_dir\" \"$HOME/.claude/skills/\""
+						;;
+				esac
+			done
+		fi
 	fi
 
 	# Add MCP servers using Claude Code CLI (globally, available in all projects)
@@ -432,7 +454,21 @@ copy_configurations() {
 		execute "rm -rf $HOME/.config/opencode/command"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/command $HOME/.config/opencode/"
 		execute "rm -rf $HOME/.config/opencode/skill"
-		execute "cp -r $SCRIPT_DIR/configs/opencode/skill $HOME/.config/opencode/"
+		# Only copy if directory has content (not empty after excluding marketplace plugins)
+		if [ -d "$SCRIPT_DIR/configs/opencode/skill" ] && [ "$(ls -A "$SCRIPT_DIR/configs/opencode/skill" 2>/dev/null)" ]; then
+			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge)
+			for skill_dir in "$SCRIPT_DIR/configs/opencode/skill"/*; do
+				skill_name="$(basename "$skill_dir")"
+				case "$skill_name" in
+					prd|ralph|qmd-knowledge)
+						# Skip marketplace plugins - installed via cli.sh marketplace
+						;;
+					*)
+						execute "cp -r \"$skill_dir\" \"$HOME/.config/opencode/skill/\""
+						;;
+				esac
+			done
+		fi
 		log_success "OpenCode configs copied"
 	fi
 
@@ -443,8 +479,22 @@ copy_configurations() {
 			execute "cp $SCRIPT_DIR/configs/amp/AGENTS.md $HOME/.config/amp/"
 		fi
 		if [ -d "$SCRIPT_DIR/configs/amp/skills" ]; then
-			execute "rm -rf $HOME/.config/amp/skills"
-			execute "cp -r $SCRIPT_DIR/configs/amp/skills $HOME/.config/amp/"
+			# Only copy if directory has content (not empty after excluding marketplace plugins)
+			if [ "$(ls -A "$SCRIPT_DIR/configs/amp/skills" 2>/dev/null)" ]; then
+				execute "rm -rf $HOME/.config/amp/skills"
+				# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge)
+				for skill_dir in "$SCRIPT_DIR/configs/amp/skills"/*; do
+					skill_name="$(basename "$skill_dir")"
+					case "$skill_name" in
+						prd|ralph|qmd-knowledge)
+							# Skip marketplace plugins - installed via cli.sh marketplace
+							;;
+						*)
+							execute "cp -r \"$skill_dir\" \"$HOME/.config/amp/skills/\""
+							;;
+					esac
+				done
+			fi
 		fi
 		# Also copy AGENTS.md to global config location
 		if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
@@ -512,6 +562,10 @@ enable_plugins() {
 	# Format: "name|plugin_spec|marketplace_repo"
 	community_plugins=(
 		"plannotator|plannotator@plannotator|backnotprop/plannotator"
+		"prd|prd@my-ai-tools|$SCRIPT_DIR/.claude-plugin"
+		"ralph|ralph@my-ai-tools|$SCRIPT_DIR/.claude-plugin"
+		"qmd-knowledge|qmd-knowledge@my-ai-tools|$SCRIPT_DIR/.claude-plugin"
+		"map-codebase|map-codebase@my-ai-tools|$SCRIPT_DIR/.claude-plugin"
 		"claude-hud|claude-hud@claude-hud|jarrodwatts/claude-hud"
 		"worktrunk|worktrunk@worktrunk|max-sixty/worktrunk"
 	)
@@ -522,9 +576,11 @@ enable_plugins() {
 			read -p "Install $plugin? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				setup_tmpdir
 				execute "claude plugin install '$plugin' && log_success '$plugin installed' || log_warning '$plugin install failed (may already be installed)'"
 			fi
 		else
+			setup_tmpdir
 			execute "claude plugin install '$plugin' 2>/dev/null || true"
 		fi
 	}
@@ -538,10 +594,61 @@ enable_plugins() {
 			read -p "Install $name? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				# Install CLI tool if needed
+				case "$name" in
+					plannotator)
+						if ! command -v plannotator &>/dev/null; then
+							log_info "Installing Plannator CLI (this may take a moment)..."
+							if curl -fL https://plannotator.ai/install.sh | bash 2>&1; then
+								log_success "Plannator CLI installed"
+							else
+								log_warning "Plannator installation failed or was cancelled"
+							fi
+						else
+							log_info "Plannator CLI already installed"
+						fi
+						;;
+					qmd-knowledge)
+						if ! command -v qmd &>/dev/null; then
+							if command -v bun &>/dev/null; then
+								log_info "Installing qmd CLI via bun..."
+								if bun install -g https://github.com/tobi/qmd 2>&1; then
+									log_success "qmd CLI installed"
+								else
+									log_warning "qmd installation failed"
+								fi
+							else
+								log_warning "bun is required for qmd. Install from https://bun.sh"
+							fi
+						else
+							log_info "qmd CLI already installed"
+						fi
+						;;
+					worktrunk)
+						if ! command -v wt &>/dev/null; then
+							if command -v brew &>/dev/null; then
+								log_info "Installing Worktrunk CLI via Homebrew (this may take a moment)..."
+								if brew install worktrunk 2>&1 && wt config shell install 2>&1; then
+									log_success "Worktrunk CLI installed"
+								else
+									log_warning "Worktrunk installation failed"
+								fi
+							else
+								log_warning "Homebrew is required for worktrunk. Install from https://brew.sh"
+							fi
+						else
+							log_info "Worktrunk CLI already installed"
+						fi
+						;;
+				esac
+
 				# Add marketplace first
+				setup_tmpdir
 				if ! execute "claude plugin marketplace add '$marketplace_repo' 2>/dev/null"; then
 					log_info "Marketplace $marketplace_repo may already be added"
 				fi
+				# Clear any stale plugin cache that might cause cross-device link errors
+				execute "rm -rf '$HOME/.claude/plugins/cache/$name' 2>/dev/null || true"
 				# Install plugin
 				if execute "claude plugin install '$plugin_spec'"; then
 					log_success "$name installed"
@@ -550,13 +657,43 @@ enable_plugins() {
 				fi
 			fi
 		else
-			# Non-interactive mode
+			# Non-interactive mode - install CLI tools if needed
+			case "$name" in
+				plannotator)
+					if ! command -v plannotator &>/dev/null; then
+						log_info "Installing Plannator CLI..."
+						curl -fL https://plannotator.ai/install.sh | bash 2>&1 || log_warning "Plannator installation failed"
+					fi
+					;;
+				qmd-knowledge)
+					if ! command -v qmd &>/dev/null && command -v bun &>/dev/null; then
+						log_info "Installing qmd CLI via bun..."
+						bun install -g https://github.com/tobi/qmd 2>&1 || log_warning "qmd installation failed"
+					fi
+					;;
+				worktrunk)
+					if ! command -v wt &>/dev/null && command -v brew &>/dev/null; then
+						log_info "Installing Worktrunk CLI via Homebrew..."
+						brew install worktrunk 2>&1 && wt config shell install 2>&1 || log_warning "Worktrunk installation failed"
+					fi
+					;;
+			esac
+			# Add marketplace and install plugin
+			setup_tmpdir
 			execute "claude plugin marketplace add '$marketplace_repo' 2>/dev/null || true"
+			# Clear any stale plugin cache that might cause cross-device link errors
+			execute "rm -rf '$HOME/.claude/plugins/cache/$name' 2>/dev/null || true"
 			execute "claude plugin install '$plugin_spec' 2>/dev/null || true"
 		fi
 	}
 
 	if command -v claude &>/dev/null; then
+		# Add official plugins marketplace first
+		log_info "Adding official plugins marketplace..."
+		if ! execute "claude plugin marketplace add 'anthropics/claude-plugins-official' 2>/dev/null"; then
+			log_info "Official plugins marketplace may already be added"
+		fi
+
 		log_info "Installing official plugins..."
 		for plugin in "${official_plugins[@]}"; do
 			install_plugin "$plugin"
