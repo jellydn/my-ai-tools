@@ -1,179 +1,126 @@
 {
-  "tools": [
-    {
-      "name": "claude",
-      "command": "claude",
-      "description": "Anthropic Claude CLI",
-      "aliases": [
-        "c"
-      ]
-    },
-    {
-      "name": "opencode",
-      "command": "opencode",
-      "description": "OpenCode AI assistant",
-      "aliases": [
-        "o",
-        "oc"
-      ]
-    },
-    {
-      "name": "amp",
-      "command": "amp",
-      "description": "AI coding assistant by Modular",
-      "aliases": [
-        "a"
-      ]
-    }
-  ],
-  "templates": [
-    {
-      "name": "review",
-      "command": "opencode run --model opencode/big-pickle --agent plan 'Review the following changes and provide feedback: $@'",
-      "description": "Code review with OpenCode",
-      "aliases": [
-        "rev",
-        "code-review"
-      ]
-    },
-    {
-      "name": "commit-zen",
-      "command": "opencode run --model opencode/big-pickle --agent plan 'Review the following changes and generate a concise git commit message: $@'",
-      "description": "Generate commit message with OpenCode",
-      "aliases": [
-        "commit",
-        "commit-message"
-      ]
-    },
-    {
-      "name": "commit-atomic",
-      "command": "opencode run --model opencode/big-pickle --agent build 'Run git diff --staged then do atomic commit message for the change with commitizen convention. Write clear, informative commit messages that explain the what and why behind changes, not just the how.'",
-      "description": "Atomic commit message with OpenCode",
-      "aliases": [
-        "ac",
-        "auto-commit"
-      ]
-    },
-    {
-      "name": "architecture-explanation",
-      "command": "ccs gemini 'Explain this codebase architecture'",
-      "description": "Explain architecture with Gemini",
-      "aliases": [
-        "arch",
-        "arch-explanation"
-      ]
-    },
-    {
-      "name": "draft-pull-request",
-      "command": "ccs glm -p 'Create draft pr with what why how by gh cli'",
-      "description": "Create draft pull request with GLM",
-      "aliases": [
-        "pr",
-        "draft-pr"
-      ]
-    },
-    {
-      "name": "types",
-      "command": "ccs mm -p 'Improve TypeScript types: Remove any, add proper type guards, ensure strict mode compliance for: $@'",
-      "description": "Enhance type safety",
-      "aliases": [
-        "typescript"
-      ]
-    },
-    {
-      "name": "test",
-      "command": "ccs mm -p 'Write tests using Arrange-Act-Assert pattern. Focus on behavior, not implementation details for: $@'",
-      "description": "Generate tests",
-      "aliases": [
-        "spec",
-        "tests"
-      ]
-    },
-    {
-      "name": "docs",
-      "command": "ccs mm -p 'Add JSDoc comments with @param and @returns. Include usage examples for: $@'",
-      "description": "Add documentation",
-      "aliases": [
-        "document"
-      ]
-    },
-    {
-      "name": "explain",
-      "command": "ccs mm -p 'Explain this code in detail: 1) What it does 2) How it works 3) Design decisions: $@'",
-      "description": "Code explanation",
-      "aliases": [
-        "wtf",
-        "explain-code"
-      ]
-    },
-    {
-      "name": "review-security",
-      "command": "claude -p 'Security review: Check for injection vulnerabilities, input validation, auth issues, and sensitive data handling in: $@'",
-      "description": "Security-focused review",
-      "aliases": [
-        "sec",
-        "security"
-      ]
-    },
-    {
-      "name": "review-refactor",
-      "command": "ccs glm -p 'Refactor suggestion: Improve readability, eliminate complexity, and apply clean code principles to: $@'",
-      "description": "Refactoring recommendations",
-      "aliases": [
-        "refactor"
-      ]
-    },
-    {
-      "name": "review-performance",
-      "command": "ccs glm -p 'Analyze performance: Identify bottlenecks, suggest optimizations with measurable impact for: $@'",
-      "description": "Performance review",
-      "aliases": [
-        "perf",
-        "optimize"
-      ]
-    },
-    {
-      "name": "remove-ai-slop",
-      "command": "ccs glm -p \"You're reviewing code cleanup. Remove: 1) Excessive comments that break existing documentation style 2) Defensive checks that don't match the codebase's trust model 3) Type escape hatches (any casts, assertions) 4) Generic patterns that feel imported rather than native. Match the file's existing voice and conventions. Report what you removed in 1-3 sentences: $@\"",
-      "description": "Remove AI-generated code patterns",
-      "aliases": [
-        "slop",
-        "clean-ai"
-      ]
-    },
-    {
-      "name": "tidy-first",
-      "command": "ccs mm -p 'Apply Tidy First principles: 1) Use guard clauses 2) Extract helper variables for complex expressions 3) Remove dead code 4) Normalize symmetries. Focus on making the code easier to understand: $@'",
-      "description": "Tidy code before making changes",
-      "aliases": [
-        "tidy"
-      ]
-    },
-    {
-      "name": "simplify",
-      "command": "ccs mm -p \"Simplify this code: Remove unnecessary complexity, eliminate over-engineering, reduce coupling. Keep solutions simple and focused on what's actually needed: $@\"",
-      "description": "Simplify over-engineered code",
-      "aliases": [
-        "simple"
-      ]
-    },
-    {
-      "name": "simplifier",
-      "command": "ccs mm -p \"@code-simplifier:code-simplifier",
-      "description": "Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise.",
-      "aliases": [
-        "simplify-code",
-        "simplify"
-      ]
-    },
-    {
-      "name": "stack-pr",
-      "command": "ccs glm 'Analyze the staged changes and create a stacked PR plan: 1) Group changes into logical, independent commits 2) Order them by dependency (low-level to high-level) 3) Suggest git commands to create separate branches for each change 4) Generate PR descriptions for each stacked PR. Changes for: $@'",
-      "description": "Split large PR into logical stacked PRs",
-      "aliases": [
-        "stack-prs",
-        "split-pr"
-      ]
-    }
-  ]
+	"tools": [
+		{
+			"name": "claude",
+			"command": "claude",
+			"description": "Anthropic Claude CLI",
+			"aliases": ["c"]
+		},
+		{
+			"name": "opencode",
+			"command": "opencode",
+			"description": "OpenCode AI assistant",
+			"aliases": ["o", "oc"]
+		},
+		{
+			"name": "amp",
+			"command": "amp",
+			"description": "AI coding assistant by Modular",
+			"aliases": ["a"]
+		}
+	],
+	"templates": [
+		{
+			"name": "review",
+			"command": "opencode run --model opencode/big-pickle --agent plan 'Review the following changes and provide feedback: $@'",
+			"description": "Code review with OpenCode",
+			"aliases": ["rev", "code-review"]
+		},
+		{
+			"name": "commit-zen",
+			"command": "opencode run --model opencode/big-pickle --agent plan 'Review the following changes and generate a concise git commit message: $@'",
+			"description": "Generate commit message with OpenCode",
+			"aliases": ["commit", "commit-message"]
+		},
+		{
+			"name": "commit-atomic",
+			"command": "opencode run --model opencode/big-pickle --agent build 'Run git diff --staged then do atomic commit message for the change with commitizen convention. Write clear, informative commit messages that explain the what and why behind changes, not just the how.'",
+			"description": "Atomic commit message with OpenCode",
+			"aliases": ["ac", "auto-commit"]
+		},
+		{
+			"name": "architecture-explanation",
+			"command": "ccs gemini 'Explain this codebase architecture'",
+			"description": "Explain architecture with Gemini",
+			"aliases": ["arch", "arch-explanation"]
+		},
+		{
+			"name": "draft-pull-request",
+			"command": "ccs glm -p 'Create draft pr with what why how by gh cli'",
+			"description": "Create draft pull request with GLM",
+			"aliases": ["pr", "draft-pr"]
+		},
+		{
+			"name": "types",
+			"command": "ccs mm -p 'Improve TypeScript types: Remove any, add proper type guards, ensure strict mode compliance for: $@'",
+			"description": "Enhance type safety",
+			"aliases": ["typescript"]
+		},
+		{
+			"name": "test",
+			"command": "ccs mm -p 'Write tests using Arrange-Act-Assert pattern. Focus on behavior, not implementation details for: $@'",
+			"description": "Generate tests",
+			"aliases": ["spec", "tests"]
+		},
+		{
+			"name": "docs",
+			"command": "ccs mm -p 'Add JSDoc comments with @param and @returns. Include usage examples for: $@'",
+			"description": "Add documentation",
+			"aliases": ["document"]
+		},
+		{
+			"name": "explain",
+			"command": "ccs mm -p 'Explain this code in detail: 1) What it does 2) How it works 3) Design decisions: $@'",
+			"description": "Code explanation",
+			"aliases": ["wtf", "explain-code"]
+		},
+		{
+			"name": "review-security",
+			"command": "claude -p 'Security review: Check for injection vulnerabilities, input validation, auth issues, and sensitive data handling in: $@'",
+			"description": "Security-focused review",
+			"aliases": ["sec", "security"]
+		},
+		{
+			"name": "review-refactor",
+			"command": "ccs glm -p 'Refactor suggestion: Improve readability, eliminate complexity, and apply clean code principles to: $@'",
+			"description": "Refactoring recommendations",
+			"aliases": ["refactor"]
+		},
+		{
+			"name": "review-performance",
+			"command": "ccs glm -p 'Analyze performance: Identify bottlenecks, suggest optimizations with measurable impact for: $@'",
+			"description": "Performance review",
+			"aliases": ["perf", "optimize"]
+		},
+		{
+			"name": "remove-ai-slop",
+			"command": "ccs glm -p \"You're reviewing code cleanup. Remove: 1) Excessive comments that break existing documentation style 2) Defensive checks that don't match the codebase's trust model 3) Type escape hatches (any casts, assertions) 4) Generic patterns that feel imported rather than native. Match the file's existing voice and conventions. Report what you removed in 1-3 sentences: $@\"",
+			"description": "Remove AI-generated code patterns",
+			"aliases": ["slop", "clean-ai"]
+		},
+		{
+			"name": "tidy-first",
+			"command": "ccs mm -p 'Apply Tidy First principles: 1) Use guard clauses 2) Extract helper variables for complex expressions 3) Remove dead code 4) Normalize symmetries. Focus on making the code easier to understand: $@'",
+			"description": "Tidy code before making changes",
+			"aliases": ["tidy"]
+		},
+		{
+			"name": "simplify",
+			"command": "ccs mm -p \"Simplify this code: Remove unnecessary complexity, eliminate over-engineering, reduce coupling. Keep solutions simple and focused on what's actually needed: $@\"",
+			"description": "Simplify over-engineered code",
+			"aliases": ["simple"]
+		},
+		{
+			"name": "simplifier",
+			"command": "ccs mm -p \"@code-simplifier:code-simplifier",
+			"description": "Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise.",
+			"aliases": ["simplify-code", "simplify"]
+		},
+		{
+			"name": "draft-pull-request",
+			"command": "ccs glm 'Analyze the git changes and create a draft PR, plan: 1) Group changes into logical, independent commits 2) Order them by dependency (low-level to high-level) 3) Run commit commit for each change group 4) Write PR description with what why how.'",
+			"description": "Create a draft pull request for the git changes with logical grouping",
+			"aliases": ["split-pr"]
+		}
+	]
 }

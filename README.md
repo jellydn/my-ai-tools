@@ -180,10 +180,10 @@ claude plugin install worktrunk@worktrunk
 | `rust-analyzer-lsp`     | Rust language support                                                                         | Official                                           |
 | `claude-md-management`  | Markdown management                                                                           | Official                                           |
 | `plannotator`           | Plan annotation tool                                                                          | Community                                          |
-| `prd`                   | Product Requirements Document generation                                                      | Local Marketplace                                   |
-| `ralph`                 | PRD to JSON converter for autonomous agent system                                             | Local Marketplace                                   |
-| `qmd-knowledge`         | Project knowledge management via qmd                                                          | Local Marketplace                                   |
-| `map-codebase`          | Parallel codebase analysis producing 7 structured documents                                   | Local Marketplace                                   |
+| `prd`                   | Product Requirements Document generation                                                      | Local Marketplace                                  |
+| `ralph`                 | PRD to JSON converter for autonomous agent system                                             | Local Marketplace                                  |
+| `qmd-knowledge`         | Project knowledge management via qmd                                                          | Local Marketplace                                  |
+| `map-codebase`          | Parallel codebase analysis producing 7 structured documents                                   | Local Marketplace                                  |
 | `claude-hud`            | Status line with usage monitoring                                                             | Community                                          |
 | `worktrunk`             | Work management                                                                               | Community                                          |
 | ~~`claude-mem`~~        | ⚠️ **DEPRECATED** - Use qmd instead or using [my fork](https://github.com/jellydn/claude-mem) | [GitHub](https://github.com/thedotmack/claude-mem) |
@@ -199,7 +199,7 @@ claude plugin install worktrunk@worktrunk
   - `CONVENTIONS.md` - Code style, patterns, error handling
   - `TESTING.md` - Framework, structure, mocking, coverage
   - `CONCERNS.md` - Tech debt, bugs, security, performance issues
-  
+
   Use for onboarding, planning features, understanding patterns, and identifying technical debt. Inspired by [glittercowboy/get-shit-done](https://github.com/glittercowboy/get-shit-done).
 
 - **`prd`** - Generate Product Requirements Documents for new features
@@ -317,6 +317,7 @@ Official and community-maintained skill collections for specific frameworks:
 | ----------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Expo**    | [expo/skills](https://github.com/expo/skills)                           | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows. |
 | **Next.js** | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.          |
+| **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`. |
 
 **Installation:**
 
@@ -351,7 +352,7 @@ All Claude Code configs are stored in `~/.claude/` (canonical location):
 
 **Latest `settings.json` configuration:**
 
-```json
+````json
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "env": {
@@ -461,7 +462,7 @@ Copy configs from this repository to your home directory:
 
 ```bash
 ./cli.sh [--dry-run] [--backup] [--no-backup]
-```
+````
 
 Options:
 
@@ -491,6 +492,7 @@ This is useful for:
 | OpenCode    | `~/.config/opencode/`      | `%APPDATA%\OpenCode\` |
 | Amp         | `~/.config/amp/`           | `%APPDATA%\Amp\`      |
 | CCS         | `~/.ccs/`                  | `%APPDATA%\CCS\`      |
+| Codex CLI   | `~/.codex/`                | `~/.codex/`           |
 
 > **Note:** On older Linux installs, Claude Code may use `~/.config/claude/`. The setup script handles both locations automatically.
 
@@ -523,10 +525,7 @@ Copy `configs/opencode/opencode.json` to `~/.config/opencode/`:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": [
-    "~/.ai-tools/best-practices.md",
-    "~/.ai-tools/MEMORY.md"
-  ],
+  "instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
   "theme": "kanagawa",
   "default_agent": "plan",
   "mcp": {
@@ -763,6 +762,147 @@ ccs auth create work
 
 # List available profiles
 ccs auth list
+```
+
+## 🤖 OpenAI Codex CLI (Optional)
+
+[**OpenAI Codex CLI**](https://developers.openai.com/codex/cli) - OpenAI's command-line coding assistant powered by GPT-5.2 and other models.
+
+### Installation
+
+The setup script will prompt to install Codex CLI:
+
+```bash
+./cli.sh
+```
+
+Or install manually:
+
+```bash
+npm install -g @openai/codex-cli
+```
+
+### Configuration
+
+Copy all files from `configs/codex/` to `~/.codex/`:
+
+- `AGENTS.md` - Agent guidelines and best practices (replaces deprecated `instructions.md`)
+- `config.json` - Model configuration and settings
+- `config.toml` - Advanced configuration including MCP servers
+- `prompts/` - Custom slash commands (e.g., `/handoffs`, `/tdd`, `/pr-review`)
+- `skills/` - Custom skills directory for extended capabilities
+
+### MCP Servers
+
+Codex CLI supports MCP servers via `config.toml`:
+
+```toml
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+
+[mcp_servers.sequential-thinking]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+
+[mcp_servers.qmd]
+command = "qmd"
+args = ["mcp"]
+```
+
+| Server | Purpose |
+|--------|---------|
+| `context7` | Documentation lookup for any library |
+| `sequential-thinking` | Multi-step reasoning for complex analysis |
+| `qmd` | Knowledge management via qmd MCP |
+
+### Slash Commands
+
+Codex CLI supports custom slash commands via `~/.codex/prompts/` directory. Commands are defined as Markdown files where the filename becomes the command name.
+
+**Location:** `~/.codex/prompts/` (copied from `configs/codex/prompts/`)
+
+**Available Commands:**
+
+| Command | Description | Usage |
+|---------|-------------|-------|
+| `/handoffs` | Create session handoff plans | `/handoffs purpose-of-work` |
+| `/pickup` | Resume from handoff | `/pickup 2024-01-29-feature-x.md` |
+| `/tdd` | Test-Driven Development | `/tdd start feature-name` |
+| `/pr-review` | Fix PR review comments | `/pr-review 123` |
+| `/adr` | Architecture Decision Records | `/adr new "Decision title"` |
+| `/slop` | Remove AI code slop | `/slop main` |
+
+**Argument Variables:**
+
+- `$1`, `$2`, ... `$9` - Individual positional arguments
+- `$ARGUMENTS` - Entire argument string
+- `$$` - Literal dollar sign
+
+**Example:**
+```markdown
+# Create handoff plan
+
+<purpose>$ARGUMENTS</purpose>
+
+Create a detailed handoff plan for...
+```
+
+**Usage:**
+```
+/handoffs implement-auth-feature
+```
+
+### Agent Guidelines (AGENTS.md)
+
+Codex CLI follows the `AGENTS.md` convention, similar to `CLAUDE.md` for Claude Code and `~/.config/AGENTS.md` for Amp. The `AGENTS.md` file in `~/.codex/` provides persistent, global guidelines for Codex's behavior.
+
+### Skills
+
+Codex CLI supports [agent skills](https://developers.openai.com/codex/skills) in `~/.codex/skills/` directory. Skills are modular packages that extend Codex's capabilities with specialized knowledge, workflows, and tools - similar to Claude Code skills.
+
+```markdown
+# 🤖 Codex CLI Agent Guidelines
+
+- Follow my software development practice @~/.ai-tools/best-practices.md
+- Read @~/.ai-tools/MEMORY.md first
+- Keep responses concise and actionable
+- Always propose a plan before edits
+```
+
+**Using with Ollama (Local Models):**
+
+To use Codex with local Ollama models, use the `--oss` flag:
+
+```bash
+# Install Ollama: https://ollama.com/ first
+# Run Codex with Ollama
+codex --oss
+
+# Specify a specific Ollama model
+codex --oss --model qwen2.5-coder:7b
+```
+
+The `--oss` flag configures Codex to use Ollama's local API endpoint (`http://localhost:11434`). No API key or external configuration needed.
+
+Popular Ollama models for coding:
+
+- `qwen2.5-coder:7b` - Fast and efficient coding model
+- `deepseek-coder-v2:16b` - Advanced code generation
+- `codellama:13b` - Meta's code-focused model
+- `starcoder2:15b` - State-of-the-art code model
+
+### Usage
+
+```bash
+# Start Codex CLI
+codex
+
+# Use with Ollama (local models)
+codex --oss
+
+# Use with a specific task
+codex "Explain this code"
 ```
 
 ## 🔄 AI CLI Switcher (Optional)

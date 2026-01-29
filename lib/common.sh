@@ -120,56 +120,54 @@ cleanup_old_backups() {
 	fi
 }
 
-# Validate JSON file syntax
-# Usage: validate_json "filepath"
+# Helper: Validate file exists and run validator command
+# Usage: _validate_with_tool "filepath" "tool_check_cmd" "validator_cmd" "error_type"
 # Returns: 0 if valid, 1 if invalid
-validate_json() {
+_validate_with_tool() {
 	local filepath="$1"
+	local tool_check_cmd="$2"
+	local validator_cmd="$3"
+	local error_type="$4"
 
 	if [ ! -f "$filepath" ]; then
 		log_error "File not found: $filepath"
 		return 1
 	fi
 
-	if command -v jq &>/dev/null; then
-		if jq empty "$filepath" 2>/dev/null; then
+	if eval "$tool_check_cmd" &>/dev/null; then
+		if eval "$validator_cmd" 2>/dev/null; then
 			return 0
 		else
-			log_error "Invalid JSON in: $filepath"
+			log_error "Invalid $error_type in: $filepath"
 			return 1
 		fi
 	else
-		log_warning "jq not installed, skipping JSON validation for: $filepath"
+		log_warning "Validator not available, skipping $error_type validation for: $filepath"
 		return 0
 	fi
+}
+
+# Validate JSON file syntax
+# Usage: validate_json "filepath"
+# Returns: 0 if valid, 1 if invalid
+validate_json() {
+	_validate_with_tool "$1" "command -v jq" "jq empty '$filepath'" "JSON"
 }
 
 # Validate YAML file syntax
 # Usage: validate_yaml "filepath"
 # Returns: 0 if valid, 1 if invalid
 validate_yaml() {
-	local filepath="$1"
-
-	if [ ! -f "$filepath" ]; then
-		log_error "File not found: $filepath"
-		return 1
-	fi
-
 	if command -v python3 &>/dev/null; then
-		if python3 -c "import yaml; yaml.safe_load(open('$filepath'))" 2>/dev/null; then
-			return 0
-		else
-			log_error "Invalid YAML in: $filepath"
-			return 1
-		fi
+		_validate_with_tool "$1" "command -v python3" "python3 -c \"import yaml; yaml.safe_load(open('$filepath'))\"" "YAML"
 	elif command -v ruby &>/dev/null; then
-		if ruby -ryaml -e "Yaml.safe_load(File.read('$filepath'))" 2>/dev/null; then
-			return 0
-		else
-			log_error "Invalid YAML in: $filepath"
+		_validate_with_tool "$1" "command -v ruby" "ruby -ryaml -e \"Yaml.safe_load(File.read('$filepath'))\"" "YAML"
+	else
+		local filepath="$1"
+		if [ ! -f "$filepath" ]; then
+			log_error "File not found: $filepath"
 			return 1
 		fi
-	else
 		log_warning "No YAML validator available (python3/ruby), skipping YAML validation for: $filepath"
 		return 0
 	fi

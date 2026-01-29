@@ -302,6 +302,24 @@ generate_ccs_configs() {
 	fi
 }
 
+generate_codex_configs() {
+	log_info "Generating Codex CLI configs..."
+
+	if [ -d "$HOME/.codex" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/codex"
+		copy_single "$HOME/.codex/AGENTS.md" "$SCRIPT_DIR/configs/codex/AGENTS.md"
+		copy_single "$HOME/.codex/config.json" "$SCRIPT_DIR/configs/codex/config.json"
+		copy_single "$HOME/.codex/config.toml" "$SCRIPT_DIR/configs/codex/config.toml"
+
+		# Note: Codex CLI reads skills directly from .claude-plugin/plugins/ and invokes them via $
+		# No need to copy skills or prompts
+
+		log_success "Codex CLI configs generated"
+	else
+		log_warning "Codex CLI config directory not found: $HOME/.codex"
+	fi
+}
+
 generate_best_practices() {
 	log_info "Generating best-practices.md..."
 
@@ -358,6 +376,9 @@ main() {
 	echo
 
 	generate_ccs_configs
+	echo
+
+	generate_codex_configs
 	echo
 
 	generate_best_practices

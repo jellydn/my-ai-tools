@@ -176,6 +176,57 @@ install_global_tools() {
 	log_success "Global tools check complete"
 }
 
+# Helper: Copy a config directory if it exists in source and destination
+# Usage: copy_config_dir "source_dir" "dest_parent" "dest_name"
+copy_config_dir() {
+	local source_dir="$1"
+	local dest_parent="$2"
+	local dest_name="$3"
+
+	if [ -d "$source_dir" ]; then
+		execute "mkdir -p $dest_parent"
+		execute "cp -r $source_dir $dest_parent/$dest_name"
+		log_success "Backed up $dest_name configs"
+	fi
+}
+
+# Helper: Copy a config file if it exists in source
+# Usage: copy_config_file "source_file" "dest_dir"
+copy_config_file() {
+	local source_file="$1"
+	local dest_dir="$2"
+
+	if [ -f "$source_file" ]; then
+		execute "mkdir -p $dest_dir"
+		execute "cp $source_file $dest_dir/"
+		return 0
+	fi
+	return 1
+}
+
+# Helper: Ensure a CLI tool is installed, prompting if interactive
+# Usage: ensure_cli_tool "tool_name" "install_check_cmd" "install_cmd" "version_cmd"
+ensure_cli_tool() {
+	local name="$1"
+	local check_cmd="$2"
+	local install_cmd="$3"
+	local version_cmd="$4"
+
+	if command -v "$name" &>/dev/null; then
+		if [ -n "$version_cmd" ]; then
+			local version
+			version=$($version_cmd 2>/dev/null)
+			log_success "$name found ($version)"
+		else
+			log_success "$name found"
+		fi
+		return 0
+	fi
+
+	log_warning "$name not found. Installing..."
+	$install_cmd
+}
+
 backup_configs() {
 	# Clean up old backups first (keep last 5)
 	cleanup_old_backups 5
@@ -196,36 +247,13 @@ backup_configs() {
 		log_info "Creating backup at $BACKUP_DIR..."
 		execute "mkdir -p $BACKUP_DIR"
 
-		if [ -d "$HOME/.claude" ]; then
-			execute "cp -r $HOME/.claude $BACKUP_DIR/claude"
-			log_success "Backed up Claude Code configs"
-		fi
-
-		if [ -d "$HOME/.config/claude" ]; then
-			execute "cp -r $HOME/.config/claude $BACKUP_DIR/config-claude"
-			log_success "Backed up Claude Code XDG configs"
-		fi
-
-		if [ -d "$HOME/.config/opencode" ]; then
-			execute "cp -r $HOME/.config/opencode $BACKUP_DIR/opencode"
-			log_success "Backed up OpenCode configs"
-		fi
-
-		if [ -d "$HOME/.config/amp" ]; then
-			execute "cp -r $HOME/.config/amp $BACKUP_DIR/amp"
-			log_success "Backed up Amp configs"
-		fi
-
-		if [ -d "$HOME/.ccs" ]; then
-			execute "cp -r $HOME/.ccs $BACKUP_DIR/ccs"
-			log_success "Backed up CCS configs"
-		fi
-
-		if [ -f "$HOME/.config/ai-switcher/config.json" ]; then
-			execute "mkdir -p $BACKUP_DIR/ai-switcher"
-			execute "cp $HOME/.config/ai-switcher/config.json $BACKUP_DIR/ai-switcher/"
-			log_success "Backed up ai-switcher configs"
-		fi
+		copy_config_dir "$HOME/.claude" "$BACKUP_DIR" "claude"
+		copy_config_dir "$HOME/.config/claude" "$BACKUP_DIR" "config-claude"
+		copy_config_dir "$HOME/.config/opencode" "$BACKUP_DIR" "opencode"
+		copy_config_dir "$HOME/.config/amp" "$BACKUP_DIR" "amp"
+		copy_config_dir "$HOME/.ccs" "$BACKUP_DIR" "ccs"
+		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
+		copy_config_file "$HOME/.config/ai-switcher/config.json" "$BACKUP_DIR/ai-switcher"
 
 		log_success "Backup completed: $BACKUP_DIR"
 	fi
@@ -253,184 +281,191 @@ install_claude_code() {
 }
 
 install_opencode() {
+	prompt_and_install() {
+		log_info "Installing OpenCode..."
+		if command -v opencode &>/dev/null; then
+			log_warning "OpenCode is already installed"
+		else
+			execute_installer "https://opencode.ai/install" "" "OpenCode"
+			log_success "OpenCode installed"
+		fi
+	}
+
 	if [ -t 1 ]; then
 		read -p "Do you want to install OpenCode? (y/n) " -n 1 -r
 		echo
-		if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-			log_warning "Skipping OpenCode installation"
-			return
-		fi
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping OpenCode installation"
 	else
 		log_info "Installing OpenCode (non-interactive mode)..."
-	fi
-
-	log_info "Installing OpenCode..."
-
-	if command -v opencode &>/dev/null; then
-		log_warning "OpenCode is already installed"
-	else
-		execute_installer "https://opencode.ai/install" "" "OpenCode"
-		log_success "OpenCode installed"
+		prompt_and_install
 	fi
 }
 
 install_amp() {
+	prompt_and_install() {
+		log_info "Installing Amp..."
+		if command -v amp &>/dev/null; then
+			log_warning "Amp is already installed"
+		else
+			execute_installer "https://ampcode.com/install.sh" "" "Amp"
+		fi
+		AMP_INSTALLED=true
+		log_success "Amp installed"
+	}
+
 	if [ -t 1 ]; then
 		read -p "Do you want to install Amp? (y/n) " -n 1 -r
 		echo
-		if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-			log_warning "Skipping Amp installation"
-			return
-		fi
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Amp installation"
 	else
 		log_info "Installing Amp (non-interactive mode)..."
-	fi
-
-	log_info "Installing Amp..."
-
-	if command -v amp &>/dev/null; then
-		log_warning "Amp is already installed"
-		AMP_INSTALLED=true
-	else
-		execute_installer "https://ampcode.com/install.sh" "" "Amp"
-		log_success "Amp installed"
-		AMP_INSTALLED=true
+		prompt_and_install
 	fi
 }
 
 install_ccs() {
+	prompt_and_install() {
+		log_info "Installing CCS..."
+		if command -v ccs &>/dev/null; then
+			log_warning "CCS is already installed ($(ccs --version))"
+		else
+			execute "npm install -g @kaitranntt/ccs"
+			log_success "CCS installed"
+		fi
+	}
+
 	if [ -t 1 ]; then
 		read -p "Do you want to install CCS (Claude Code Switch)? (y/n) " -n 1 -r
 		echo
-		if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-			log_warning "Skipping CCS installation"
-			return
-		fi
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping CCS installation"
 	else
 		log_info "Installing CCS (non-interactive mode)..."
-	fi
-
-	log_info "Installing CCS..."
-
-	if command -v ccs &>/dev/null; then
-		log_warning "CCS is already installed ($(ccs --version))"
-	else
-		execute "npm install -g @kaitranntt/ccs"
-		log_success "CCS installed"
+		prompt_and_install
 	fi
 }
 
 install_ai_switcher() {
+	prompt_and_install() {
+		log_info "Installing ai-switcher..."
+		if command -v ai-switcher &>/dev/null; then
+			log_warning "ai-switcher is already installed"
+		else
+			execute_installer "https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/install.sh" "" "ai-switcher"
+			log_success "ai-switcher installed"
+		fi
+	}
+
 	if [ -t 1 ]; then
 		read -p "Do you want to install ai-switcher? (y/n) " -n 1 -r
 		echo
-		if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-			log_warning "Skipping ai-switcher installation"
-			return
-		fi
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping ai-switcher installation"
 	else
 		log_info "Installing ai-switcher (non-interactive mode)..."
+		prompt_and_install
 	fi
+}
 
-	log_info "Installing ai-switcher..."
+install_codex() {
+	prompt_and_install() {
+		log_info "Installing Codex CLI..."
+		if command -v codex &>/dev/null; then
+			log_warning "Codex CLI is already installed"
+		else
+			execute "npm install -g @openai/codex-cli"
+			log_success "Codex CLI installed"
+		fi
+	}
 
-	if command -v ai-switcher &>/dev/null; then
-		log_warning "ai-switcher is already installed"
+	if [ -t 1 ]; then
+		read -p "Do you want to install OpenAI Codex CLI? (y/n) " -n 1 -r
+		echo
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Codex CLI installation"
 	else
-		execute_installer "https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/install.sh" "" "ai-switcher"
-		log_success "ai-switcher installed"
+		log_info "Installing Codex CLI (non-interactive mode)..."
+		prompt_and_install
+	fi
+}
+
+# Helper: Copy non-marketplace skills from source to destination
+# Usage: copy_non_marketplace_skills "source_dir" "dest_dir"
+copy_non_marketplace_skills() {
+	local source_dir="$1"
+	local dest_dir="$2"
+
+	if [ -d "$source_dir" ] && [ "$(ls -A "$source_dir" 2>/dev/null)" ]; then
+		execute "rm -rf $dest_dir"
+		execute "mkdir -p $dest_dir"
+		for skill_dir in "$source_dir"/*; do
+			if [ -d "$skill_dir" ]; then
+				skill_name="$(basename "$skill_dir")"
+				case "$skill_name" in
+					prd|ralph|qmd-knowledge|codemap)
+						# Skip marketplace plugins
+						;;
+					*)
+						execute "cp -r \"$skill_dir\" \"$dest_dir/\""
+						;;
+				esac
+			fi
+		done
+	fi
+}
+
+# Helper: Install MCP server with interactive prompts
+# Usage: install_mcp_interactive "name" "install_cmd" "description"
+install_mcp_interactive() {
+	local name="$1"
+	local install_cmd="$2"
+	local description="$3"
+
+	if [ -t 1 ]; then
+		read -p "Install $name MCP server ($description)? (y/n) " -n 1 -r
+		echo
+		if [[ $REPLY =~ ^[Yy]$ ]]; then
+			if execute "$install_cmd"; then
+				log_success "$name MCP server added (global)"
+			else
+				log_warning "$name already installed or failed"
+			fi
+		fi
+	else
+		install_mcp_server "$name" "$install_cmd"
 	fi
 }
 
 copy_configurations() {
 	log_info "Copying configurations..."
 
-	# Create ~/.claude directory (needed on all platforms)
+	# Create ~/.claude directory
 	execute "mkdir -p $HOME/.claude"
 
-	# Copy settings.json to appropriate location based on OS
-	if [ "$IS_WINDOWS" = true ]; then
-		# Windows: Claude Code uses ~/.claude directly
-		execute "cp $SCRIPT_DIR/configs/claude/settings.json $HOME/.claude/settings.json"
-	else
-		# Mac/Linux: Use ~/.claude/settings.json (canonical location)
-		execute "cp $SCRIPT_DIR/configs/claude/settings.json $HOME/.claude/settings.json"
-	fi
-
-	# Copy other configs to ~/.claude (all platforms)
+	# Copy Claude Code configs
+	execute "cp $SCRIPT_DIR/configs/claude/settings.json $HOME/.claude/settings.json"
 	execute "cp $SCRIPT_DIR/configs/claude/mcp-servers.json $HOME/.claude/mcp-servers.json"
 	execute "cp $SCRIPT_DIR/configs/claude/CLAUDE.md $HOME/.claude/CLAUDE.md"
-	# Remove existing commands dir to avoid permission issues, then copy fresh
 	execute "rm -rf $HOME/.claude/commands"
 	execute "cp -r $SCRIPT_DIR/configs/claude/commands $HOME/.claude/"
 	if [ -d "$SCRIPT_DIR/configs/claude/agents" ]; then
 		execute "mkdir -p $HOME/.claude/agents"
 		execute "cp $SCRIPT_DIR/configs/claude/agents/* $HOME/.claude/agents/"
 	fi
-	# Note: Skills are now installed via enable_plugins() from .claude-plugin folder
 
 	# Add MCP servers using Claude Code CLI (globally, available in all projects)
 	if command -v claude &>/dev/null; then
 		log_info "Setting up Claude Code MCP servers (global scope)..."
-
-		# context7 MCP server
-		if [ -t 1 ]; then
-			read -p "Install context7 MCP server (documentation lookup)? (y/n) " -n 1 -r
-			echo
-			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				if execute "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest"; then
-					log_success "context7 MCP server added (global)"
-				else
-					log_warning "context7 already installed or failed"
-				fi
-			fi
+		install_mcp_interactive "context7" "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest" "documentation lookup"
+		install_mcp_interactive "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking" "multi-step reasoning"
+		if command -v qmd &>/dev/null; then
+			install_mcp_interactive "qmd" "claude mcp add --scope user --transport stdio qmd -- qmd mcp" "knowledge management"
 		else
-			install_mcp_server "context7" "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest"
+			log_warning "qmd not found. MCP setup skipped. Install with: bun install -g https://github.com/tobi/qmd"
 		fi
-
-		# sequential-thinking MCP server
-		if [ -t 1 ]; then
-			read -p "Install sequential-thinking MCP server (multi-step reasoning)? (y/n) " -n 1 -r
-			echo
-			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				if execute "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking"; then
-					log_success "sequential-thinking MCP server added (global)"
-				else
-					log_warning "sequential-thinking already installed or failed"
-				fi
-			fi
-		else
-			install_mcp_server "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking"
-		fi
-
-		# qmd MCP server
-		if [ -t 1 ]; then
-			read -p "Install qmd MCP server (knowledge management)? (y/n) " -n 1 -r
-			echo
-			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				if command -v qmd &>/dev/null; then
-					if execute "claude mcp add --scope user --transport stdio qmd -- qmd mcp"; then
-						log_success "qmd MCP server added (global)"
-					else
-						log_warning "qmd already installed or failed"
-					fi
-				else
-					log_warning "qmd not found. Install with: bun install -g https://github.com/tobi/qmd"
-				fi
-			fi
-		else
-			if command -v qmd &>/dev/null; then
-				install_mcp_server "qmd" "claude mcp add --scope user --transport stdio qmd -- qmd mcp"
-			else
-				log_warning "qmd not found. MCP setup skipped. Install with: bun install -g https://github.com/tobi/qmd"
-			fi
-		fi
-
 		log_success "MCP server setup complete (global scope)"
 	fi
 
 	log_success "Claude Code configs copied"
 
+	# Copy OpenCode configs
 	if [ -d "$HOME/.config/opencode" ] || command -v opencode &>/dev/null; then
 		execute "mkdir -p $HOME/.config/opencode"
 		execute "cp $SCRIPT_DIR/configs/opencode/opencode.json $HOME/.config/opencode/"
@@ -439,50 +474,17 @@ copy_configurations() {
 		execute "rm -rf $HOME/.config/opencode/command"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/command $HOME/.config/opencode/"
 		execute "rm -rf $HOME/.config/opencode/skill"
-		# Only copy if directory has content (not empty after excluding marketplace plugins)
-		if [ -d "$SCRIPT_DIR/configs/opencode/skill" ] && [ "$(ls -A "$SCRIPT_DIR/configs/opencode/skill" 2>/dev/null)" ]; then
-			# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, codemap)
-			for skill_dir in "$SCRIPT_DIR/configs/opencode/skill"/*; do
-				skill_name="$(basename "$skill_dir")"
-				case "$skill_name" in
-					prd|ralph|qmd-knowledge|codemap)
-						# Skip marketplace plugins - installed via cli.sh marketplace
-						;;
-					*)
-						execute "cp -r \"$skill_dir\" \"$HOME/.config/opencode/skill/\""
-						;;
-				esac
-			done
-		fi
+		copy_non_marketplace_skills "$SCRIPT_DIR/configs/opencode/skill" "$HOME/.config/opencode/skill"
 		log_success "OpenCode configs copied"
 	fi
 
+	# Copy Amp configs
 	if [ -d "$HOME/.config/amp" ] || command -v amp &>/dev/null; then
 		execute "mkdir -p $HOME/.config/amp"
 		execute "cp $SCRIPT_DIR/configs/amp/settings.json $HOME/.config/amp/"
+		copy_non_marketplace_skills "$SCRIPT_DIR/configs/amp/skills" "$HOME/.config/amp/skills"
 		if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
 			execute "cp $SCRIPT_DIR/configs/amp/AGENTS.md $HOME/.config/amp/"
-		fi
-		if [ -d "$SCRIPT_DIR/configs/amp/skills" ]; then
-			# Only copy if directory has content (not empty after excluding marketplace plugins)
-			if [ "$(ls -A "$SCRIPT_DIR/configs/amp/skills" 2>/dev/null)" ]; then
-				execute "rm -rf $HOME/.config/amp/skills"
-				# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, codemap)
-				for skill_dir in "$SCRIPT_DIR/configs/amp/skills"/*; do
-					skill_name="$(basename "$skill_dir")"
-					case "$skill_name" in
-						prd|ralph|qmd-knowledge|codemap)
-							# Skip marketplace plugins - installed via cli.sh marketplace
-							;;
-						*)
-							execute "cp -r \"$skill_dir\" \"$HOME/.config/amp/skills/\""
-							;;
-					esac
-				done
-			fi
-		fi
-		# Also copy AGENTS.md to global config location
-		if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
 			if [ -f "$HOME/.config/AGENTS.md" ]; then
 				cp "$HOME/.config/AGENTS.md" "$HOME/.config/AGENTS.md.bak"
 				log_warning "Backed up existing AGENTS.md to .bak"
@@ -492,39 +494,49 @@ copy_configurations() {
 		log_success "Amp configs copied"
 	fi
 
+	# Copy CCS configs
 	if [ -d "$HOME/.ccs" ] || command -v ccs &>/dev/null; then
 		execute "mkdir -p $HOME/.ccs"
 		execute "cp $SCRIPT_DIR/configs/ccs/*.yaml $HOME/.ccs/ 2>/dev/null || true"
 		execute "cp $SCRIPT_DIR/configs/ccs/*.json $HOME/.ccs/ 2>/dev/null || true"
 		execute "cp $SCRIPT_DIR/configs/ccs/*.settings.json $HOME/.ccs/ 2>/dev/null || true"
-		if [ -d "$SCRIPT_DIR/configs/ccs/cliproxy" ]; then
-			execute "cp -r $SCRIPT_DIR/configs/ccs/cliproxy $HOME/.ccs/"
-		fi
-		if [ -d "$SCRIPT_DIR/configs/ccs/hooks" ]; then
-			execute "cp -r $SCRIPT_DIR/configs/ccs/hooks $HOME/.ccs/"
-		fi
+		[ -d "$SCRIPT_DIR/configs/ccs/cliproxy" ] && execute "cp -r $SCRIPT_DIR/configs/ccs/cliproxy $HOME/.ccs/"
+		[ -d "$SCRIPT_DIR/configs/ccs/hooks" ] && execute "cp -r $SCRIPT_DIR/configs/ccs/hooks $HOME/.ccs/"
 		log_success "CCS configs copied"
 	fi
 
+	# Copy ai-switcher configs
 	if [ -d "$HOME/.config/ai-switcher" ] || [ -f "$HOME/.config/ai-switcher/config.json" ]; then
-		execute "mkdir -p $HOME/.config/ai-switcher"
-		if [ -f "$SCRIPT_DIR/configs/ai-switcher/config.json" ]; then
-			execute "cp $SCRIPT_DIR/configs/ai-switcher/config.json $HOME/.config/ai-switcher/"
+		if copy_config_file "$SCRIPT_DIR/configs/ai-switcher/config.json" "$HOME/.config/ai-switcher"; then
 			log_success "ai-switcher configs copied"
 		else
 			log_info "ai-switcher config not found in source, preserving existing"
 		fi
 	fi
 
+	# Copy Codex CLI configs
+	if [ -d "$HOME/.codex" ] || command -v codex &>/dev/null; then
+		execute "mkdir -p $HOME/.codex"
+		copy_config_file "$SCRIPT_DIR/configs/codex/AGENTS.md" "$HOME/.codex/"
+		copy_config_file "$SCRIPT_DIR/configs/codex/config.json" "$HOME/.codex/"
+		if [ -f "$SCRIPT_DIR/configs/codex/config.toml" ]; then
+			if [ -f "$HOME/.codex/config.toml" ]; then
+				# Backup existing config before overwriting
+				execute "cp $HOME/.codex/config.toml $HOME/.codex/config.toml.bak"
+				log_success "Backed up existing config.toml to config.toml.bak"
+			fi
+			# Copy new config (whether or not there was an old one)
+			execute "cp $SCRIPT_DIR/configs/codex/config.toml $HOME/.codex/"
+			log_success "Copied Codex config.toml"
+		fi
+		log_success "Codex CLI configs copied (skills invoked via \$, prompts no longer needed)"
+	fi
+
+	# Copy best practices and MEMORY.md
 	execute "mkdir -p $HOME/.ai-tools"
 	execute "cp $SCRIPT_DIR/configs/best-practices.md $HOME/.ai-tools/"
 	log_success "Best practices copied to ~/.ai-tools/"
-
-	# Copy MEMORY.md to .ai-tools for reference
-	if [ -f "$SCRIPT_DIR/MEMORY.md" ]; then
-		execute "cp $SCRIPT_DIR/MEMORY.md $HOME/.ai-tools/"
-		log_success "MEMORY.md copied to ~/.ai-tools/ (reference copy)"
-	fi
+	[ -f "$SCRIPT_DIR/MEMORY.md" ] && execute "cp $SCRIPT_DIR/MEMORY.md $HOME/.ai-tools/" && log_success "MEMORY.md copied to ~/.ai-tools/ (reference copy)"
 }
 
 enable_plugins() {
@@ -690,6 +702,35 @@ enable_plugins() {
 		fi
 	}
 
+	# Extract compatibility field from SKILL.md
+	# Returns 0 (true) if skill is compatible with platform, 1 (false) otherwise
+	skill_is_compatible_with() {
+		local skill_dir="$1"
+		local platform="$2"
+		local skill_md="$skill_dir/SKILL.md"
+
+		if [ ! -f "$skill_md" ]; then
+			# No SKILL.md means assume compatible with all
+			return 0
+		fi
+
+		# Extract compatibility line from frontmatter
+		local compat_line=$(awk '/^compatibility:/ {print; exit}' "$skill_md" 2>/dev/null)
+
+		if [ -z "$compat_line" ]; then
+			# No compatibility field means assume compatible with all
+			return 0
+		fi
+
+		# Check if platform is in the compatibility list
+		# Compatibility format: "compatibility: claude, opencode, amp, codex"
+		if echo "$compat_line" | grep -qi "\\b$platform\\b"; then
+			return 0
+		else
+			return 1
+		fi
+	}
+
 	install_local_skills() {
 		if [ ! -d "$SCRIPT_DIR/.claude-plugin/plugins" ]; then
 			log_info ".claude-plugin/plugins folder not found, skipping local skills"
@@ -703,6 +744,7 @@ enable_plugins() {
 		OPENCODE_SKILL_DIR="$HOME/.config/opencode/skill"
 		OPENCODE_COMMAND_DIR="$HOME/.config/opencode/command/ai"
 		AMP_SKILLS_DIR="$HOME/.config/amp/skills"
+		CODEX_SKILLS_DIR="$HOME/.codex/skills"
 
 		# Copy to Claude Code (~/.claude/skills/)
 		if [ -d "$CLAUDE_SKILLS_DIR" ]; then
@@ -732,19 +774,52 @@ enable_plugins() {
 		fi
 		mkdir -p "$AMP_SKILLS_DIR"
 
+		# Copy to Codex CLI (~/.codex/skills/)
+		if [ -d "$CODEX_SKILLS_DIR" ]; then
+			for existing_skill in "$CODEX_SKILLS_DIR"/*; do
+				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
+			done
+		fi
+		mkdir -p "$CODEX_SKILLS_DIR"
+
 		# Copy all skills from plugins folder to targets
 		for skill_dir in "$SCRIPT_DIR/.claude-plugin/plugins"/*; do
 			if [ -d "$skill_dir" ]; then
 				skill_name=$(basename "$skill_dir")
-				cp -r "$skill_dir" "$CLAUDE_SKILLS_DIR/"
-				log_success "Copied $skill_name to Claude Code"
-				cp -r "$skill_dir" "$OPENCODE_SKILL_DIR/"
-				log_success "Copied $skill_name to OpenCode"
-				cp -r "$skill_dir" "$AMP_SKILLS_DIR/"
-				log_success "Copied $skill_name to Amp"
 
-				# Generate OpenCode command from skill
-				generate_opencode_command "$skill_dir" "$OPENCODE_COMMAND_DIR"
+				# Check compatibility and copy to each platform
+				if skill_is_compatible_with "$skill_dir" "claude"; then
+					cp -r "$skill_dir" "$CLAUDE_SKILLS_DIR/"
+					log_success "Copied $skill_name to Claude Code"
+				else
+					log_info "Skipped $skill_name for Claude Code (not compatible)"
+				fi
+
+				if skill_is_compatible_with "$skill_dir" "opencode"; then
+					cp -r "$skill_dir" "$OPENCODE_SKILL_DIR/"
+					log_success "Copied $skill_name to OpenCode"
+				else
+					log_info "Skipped $skill_name for OpenCode (not compatible)"
+				fi
+
+				if skill_is_compatible_with "$skill_dir" "amp"; then
+					cp -r "$skill_dir" "$AMP_SKILLS_DIR/"
+					log_success "Copied $skill_name to Amp"
+				else
+					log_info "Skipped $skill_name for Amp (not compatible)"
+				fi
+
+				if skill_is_compatible_with "$skill_dir" "codex"; then
+					cp -r "$skill_dir" "$CODEX_SKILLS_DIR/"
+					log_success "Copied $skill_name to Codex CLI"
+				else
+					log_info "Skipped $skill_name for Codex CLI (not compatible)"
+				fi
+
+				# Generate OpenCode command from skill (only if compatible)
+				if skill_is_compatible_with "$skill_dir" "opencode"; then
+					generate_opencode_command "$skill_dir" "$OPENCODE_COMMAND_DIR"
+				fi
 			fi
 		done
 	}
@@ -884,7 +959,7 @@ EOF
 main() {
 	echo "╔══════════════════════════════════════════════════════════╗"
 	echo "║         AI Tools Setup                                   ║"
-	echo "║   Claude Code • OpenCode • Amp • CCS • ai-switcher       ║"
+	echo "║   Claude • OpenCode • Amp • CCS • Codex • AI Switcher    ║"
 	echo "╚══════════════════════════════════════════════════════════╝"
 	echo
 
@@ -918,6 +993,9 @@ main() {
 	echo
 
 	install_ai_switcher
+	echo
+
+	install_codex
 	echo
 
 	copy_configurations
