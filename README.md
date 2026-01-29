@@ -412,7 +412,7 @@ Local marketplace plugins are in [`.claude-plugin/plugins/`](.claude-plugin/plug
 
 ## 🎨 OpenCode (Optional)
 
-OpenAI-powered AI coding assistant.
+OpenAI-powered AI coding assistant. [Homepage](https://opencode.ai)
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
@@ -420,13 +420,7 @@ OpenAI-powered AI coding assistant.
 ### Installation
 
 ```bash
-npm install -g @opencode/cli
-```
-
-Or using Homebrew:
-
-```bash
-brew install opencode
+curl -fsSL https://opencode.ai/install | bash
 ```
 
 ### Configuration
@@ -471,7 +465,7 @@ Located in [`configs/opencode/command/`](configs/opencode/command/):
 
 ## 🎯 Amp (Optional)
 
-Modular's AI coding assistant focused on speed.
+AI coding assistant by Modular. [Homepage](https://ampcode.com)
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
@@ -479,11 +473,7 @@ Modular's AI coding assistant focused on speed.
 ### Installation
 
 ```bash
-# macOS/Linux
-curl -sSf https://get.amp.ai | sh
-
-# Or using Homebrew
-brew install amp
+curl -fsSL https://ampcode.com/install.sh | bash
 ```
 
 ### Configuration
@@ -510,7 +500,7 @@ Amp uses the same MCP server configuration as Claude Code. MCP servers are typic
 
 ## 🔄 CCS - Claude Code Switch (Optional)
 
-Switch between multiple Claude Code accounts.
+Switch between multiple Claude Code accounts. [Homepage](https://github.com/kaitranntt/ccs)
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
@@ -553,7 +543,7 @@ ccs current
 
 ## 🤖 OpenAI Codex CLI (Optional)
 
-OpenAI's command-line coding assistant.
+OpenAI's command-line coding assistant. [Homepage](https://developers.openai.com/codex/cli)
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
@@ -591,7 +581,7 @@ codex "Explain this code"
 
 ## 🔄 AI CLI Switcher (Optional)
 
-Fast launcher for switching between AI coding assistants.
+Fast launcher for switching between AI coding assistants. [Homepage](https://github.com/jellydn/ai-cli-switcher)
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
