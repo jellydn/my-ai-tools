@@ -10,20 +10,21 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Logging functions
+# Output to stderr to avoid interfering with command substitution
 log_info() {
-	echo -e "${BLUE}ℹ ${NC}$1"
+	echo -e "${BLUE}ℹ ${NC}$1" >&2
 }
 
 log_success() {
-	echo -e "${GREEN}✓${NC} $1"
+	echo -e "${GREEN}✓${NC} $1" >&2
 }
 
 log_warning() {
-	echo -e "${YELLOW}⚠${NC} $1"
+	echo -e "${YELLOW}⚠${NC} $1" >&2
 }
 
 log_error() {
-	echo -e "${RED}✗${NC} $1"
+	echo -e "${RED}✗${NC} $1" >&2
 }
 
 # Execute function (for dry-run support)
@@ -42,7 +43,10 @@ download_and_verify_script() {
 	local url="$1"
 	local expected_sha256="$2"
 	local description="$3"
-	local temp_script="/tmp/install-$(date +%s)-$$"
+	
+	# Use TMPDIR if set, otherwise use /tmp
+	local tmpdir="${TMPDIR:-/tmp}"
+	local temp_script="${tmpdir}/install-$(date +%s)-$$"
 
 	log_info "Downloading $description..."
 	if ! curl -fsSL "$url" -o "$temp_script" 2>/dev/null; then
@@ -82,6 +86,14 @@ execute_installer() {
 		log_info "[DRY RUN] Would execute installer from: $url"
 		return 0
 	fi
+
+	# Ensure TMPDIR is set to avoid cross-device link errors
+	local tmp_dir="${HOME}/.claude/tmp"
+	if ! mkdir -p "$tmp_dir" 2>/dev/null; then
+		log_warning "Could not create TMPDIR ($tmp_dir), falling back to /tmp"
+		tmp_dir="/tmp"
+	fi
+	export TMPDIR="$tmp_dir"
 
 	local temp_script
 	temp_script=$(download_and_verify_script "$url" "$expected_sha256" "$description")

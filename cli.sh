@@ -8,6 +8,8 @@ BACKUP_DIR="$HOME/ai-tools-backup-$(date +%Y%m%d-%H%M%S)"
 DRY_RUN=false
 BACKUP=false
 PROMPT_BACKUP=true
+YES_TO_ALL=false
+VERBOSE=false
 
 # Detect OS (Windows vs Unix-like)
 IS_WINDOWS=false
@@ -34,6 +36,14 @@ for arg in "$@"; do
 		PROMPT_BACKUP=false
 		shift
 		;;
+	--yes|-y)
+		YES_TO_ALL=true
+		shift
+		;;
+	-v|--verbose)
+		VERBOSE=true
+		shift
+		;;
 	--rollback)
 		log_info "Rolling back last transaction..."
 		rollback_transaction
@@ -41,7 +51,7 @@ for arg in "$@"; do
 		;;
 	*)
 		echo "Unknown option: $arg"
-		echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--rollback]"
+		echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--rollback]"
 		exit 1
 		;;
 	esac
@@ -176,6 +186,58 @@ install_global_tools() {
 	log_success "Global tools check complete"
 }
 
+# Helper: Safely copy a directory, handling "Text file busy" errors
+# Usage: safe_copy_dir "source_dir" "dest_dir"
+safe_copy_dir() {
+	local source_dir="$1"
+	local dest_dir="$2"
+	local skipped=0
+	local errors=0
+
+	if [ "$DRY_RUN" = true ]; then
+		log_info "[DRY RUN] Would copy $source_dir to $dest_dir"
+		return 0
+	fi
+
+	# Ensure destination parent exists
+	if ! mkdir -p "$(dirname "$dest_dir")" 2>/dev/null; then
+		log_warning "Failed to create destination directory: $(dirname "$dest_dir")"
+		return 1
+	fi
+
+	# Try regular copy first
+	if cp -r "$source_dir" "$dest_dir" 2>/dev/null; then
+		return 0
+	fi
+
+	# If copy failed, try with rsync to handle busy files
+	if command -v rsync &>/dev/null; then
+		# Use rsync to copy, matching cp -r behavior
+		if rsync -a --ignore-errors "$source_dir" "$(dirname "$dest_dir")/" 2>/dev/null; then
+			return 0
+		fi
+	fi
+
+	# Fallback: copy non-binary files, skip busy binaries
+	mkdir -p "$dest_dir"
+	while IFS= read -r file; do
+		rel_path="${file#$source_dir/}"
+		dest_file="$dest_dir/$rel_path"
+		mkdir -p "$(dirname "$dest_file")"
+		if cp "$file" "$dest_file" 2>/dev/null; then
+			((errors++))
+		else
+			((skipped++))
+			[ "$VERBOSE" = true ] && log_warning "Skipped busy file: $rel_path"
+		fi
+	done < <(find "$source_dir" -type f 2>/dev/null)
+
+	# Log summary in verbose mode
+	[ "$VERBOSE" = true ] && [ $skipped -gt 0 ] && log_info "Skipped $skipped busy file(s)"
+
+	return 0
+}
+
 # Helper: Copy a config directory if it exists in source and destination
 # Usage: copy_config_dir "source_dir" "dest_parent" "dest_name"
 copy_config_dir() {
@@ -232,7 +294,10 @@ backup_configs() {
 	cleanup_old_backups 5
 
 	if [ "$PROMPT_BACKUP" = true ]; then
-		if [ -t 0 ]; then
+		if [ "$YES_TO_ALL" = true ]; then
+			log_info "Auto-accepting backup (--yes flag)"
+			BACKUP=true
+		elif [ -t 0 ]; then
 			read -p "Do you want to backup existing configurations? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -264,7 +329,10 @@ install_claude_code() {
 
 	if command -v claude &>/dev/null; then
 		log_warning "Claude Code is already installed ($(claude --version))"
-		if [ -t 0 ]; then
+		if [ "$YES_TO_ALL" = true ]; then
+			log_info "Auto-skipping reinstall (--yes flag)"
+			return
+		elif [ -t 0 ]; then
 			read -p "Do you want to reinstall? (y/n) " -n 1 -r
 			echo
 			if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -291,7 +359,10 @@ install_opencode() {
 		fi
 	}
 
-	if [ -t 0 ]; then
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting OpenCode installation (--yes flag)"
+		prompt_and_install
+	elif [ -t 0 ]; then
 		read -p "Do you want to install OpenCode? (y/n) " -n 1 -r
 		echo
 		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping OpenCode installation"
@@ -313,7 +384,10 @@ install_amp() {
 		log_success "Amp installed"
 	}
 
-	if [ -t 0 ]; then
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting Amp installation (--yes flag)"
+		prompt_and_install
+	elif [ -t 0 ]; then
 		read -p "Do you want to install Amp? (y/n) " -n 1 -r
 		echo
 		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Amp installation"
@@ -334,7 +408,10 @@ install_ccs() {
 		fi
 	}
 
-	if [ -t 0 ]; then
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting CCS installation (--yes flag)"
+		prompt_and_install
+	elif [ -t 0 ]; then
 		read -p "Do you want to install CCS (Claude Code Switch)? (y/n) " -n 1 -r
 		echo
 		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping CCS installation"
@@ -355,7 +432,10 @@ install_ai_switcher() {
 		fi
 	}
 
-	if [ -t 0 ]; then
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting ai-switcher installation (--yes flag)"
+		prompt_and_install
+	elif [ -t 0 ]; then
 		read -p "Do you want to install ai-switcher? (y/n) " -n 1 -r
 		echo
 		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping ai-switcher installation"
@@ -371,12 +451,15 @@ install_codex() {
 		if command -v codex &>/dev/null; then
 			log_warning "Codex CLI is already installed"
 		else
-			execute "npm install -g @openai/codex-cli"
+			execute "npm install -g @openai/codex"
 			log_success "Codex CLI installed"
 		fi
 	}
 
-	if [ -t 0 ]; then
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting Codex installation (--yes flag)"
+		prompt_and_install
+	elif [ -t 0 ]; then
 		read -p "Do you want to install OpenAI Codex CLI? (y/n) " -n 1 -r
 		echo
 		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Codex CLI installation"
@@ -418,7 +501,14 @@ install_mcp_interactive() {
 	local install_cmd="$2"
 	local description="$3"
 
-	if [ -t 0 ]; then
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting MCP server installation (--yes flag)"
+		if execute "$install_cmd"; then
+			log_success "$name MCP server added (global)"
+		else
+			log_warning "$name already installed or failed"
+		fi
+	elif [ -t 0 ]; then
 		read -p "Install $name MCP server ($description)? (y/n) " -n 1 -r
 		echo
 		if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -500,7 +590,12 @@ copy_configurations() {
 		execute "cp $SCRIPT_DIR/configs/ccs/*.yaml $HOME/.ccs/ 2>/dev/null || true"
 		execute "cp $SCRIPT_DIR/configs/ccs/*.json $HOME/.ccs/ 2>/dev/null || true"
 		execute "cp $SCRIPT_DIR/configs/ccs/*.settings.json $HOME/.ccs/ 2>/dev/null || true"
-		[ -d "$SCRIPT_DIR/configs/ccs/cliproxy" ] && execute "cp -r $SCRIPT_DIR/configs/ccs/cliproxy $HOME/.ccs/"
+		
+		# Safely copy cliproxy (may contain running binaries)
+		if [ -d "$SCRIPT_DIR/configs/ccs/cliproxy" ]; then
+			safe_copy_dir "$SCRIPT_DIR/configs/ccs/cliproxy" "$HOME/.ccs/cliproxy"
+		fi
+		
 		[ -d "$SCRIPT_DIR/configs/ccs/hooks" ] && execute "cp -r $SCRIPT_DIR/configs/ccs/hooks $HOME/.ccs/"
 		log_success "CCS configs copied"
 	fi
@@ -583,7 +678,12 @@ enable_plugins() {
 
 	install_plugin() {
 		local plugin="$1"
-		if [ -t 0 ]; then
+		if [ "$YES_TO_ALL" = true ]; then
+			setup_tmpdir
+			if ! execute "claude plugin install '$plugin' 2>/dev/null"; then
+				log_warning "$plugin install failed (may already be installed)"
+			fi
+		elif [ -t 0 ]; then
 			read -p "Install $plugin? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -603,7 +703,37 @@ enable_plugins() {
 		local plugin_spec="$2"
 		local marketplace_repo="$3"
 
-		if [ -t 0 ]; then
+		if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
+			# Non-interactive or auto-install mode - install CLI tools if needed
+			case "$name" in
+				plannotator)
+					if ! command -v plannotator &>/dev/null; then
+						log_info "Installing Plannator CLI..."
+						execute_installer "https://plannotator.ai/install.sh" "" "Plannator CLI" || log_warning "Plannator installation failed"
+					fi
+					;;
+				qmd-knowledge)
+					if ! command -v qmd &>/dev/null && command -v bun &>/dev/null; then
+						log_info "Installing qmd CLI via bun..."
+						bun install -g https://github.com/tobi/qmd 2>&1 || log_warning "qmd installation failed"
+					fi
+					;;
+				worktrunk)
+					if ! command -v wt &>/dev/null && command -v brew &>/dev/null; then
+						log_info "Installing Worktrunk CLI via Homebrew..."
+						brew install worktrunk 2>&1 && wt config shell install 2>&1 || log_warning "Worktrunk installation failed"
+					fi
+					;;
+			esac
+			# Add marketplace and install plugin
+			setup_tmpdir
+			execute "claude plugin marketplace add '$marketplace_repo' 2>/dev/null || true"
+			# Clear any stale plugin cache that might cause cross-device link errors
+			execute "rm -rf '$HOME/.claude/plugins/cache/$name' 2>/dev/null || true"
+			if ! execute "claude plugin install '$plugin_spec' 2>/dev/null"; then
+				log_warning "$name plugin install failed (may already be installed)"
+			fi
+		elif [ -t 0 ]; then
 			read -p "Install $name? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -668,36 +798,6 @@ enable_plugins() {
 				else
 					log_warning "$name install failed (may already be installed)"
 				fi
-			fi
-		else
-			# Non-interactive mode - install CLI tools if needed
-			case "$name" in
-				plannotator)
-					if ! command -v plannotator &>/dev/null; then
-						log_info "Installing Plannator CLI..."
-						execute_installer "https://plannotator.ai/install.sh" "" "Plannator CLI" || log_warning "Plannator installation failed"
-					fi
-					;;
-				qmd-knowledge)
-					if ! command -v qmd &>/dev/null && command -v bun &>/dev/null; then
-						log_info "Installing qmd CLI via bun..."
-						bun install -g https://github.com/tobi/qmd 2>&1 || log_warning "qmd installation failed"
-					fi
-					;;
-				worktrunk)
-					if ! command -v wt &>/dev/null && command -v brew &>/dev/null; then
-						log_info "Installing Worktrunk CLI via Homebrew..."
-						brew install worktrunk 2>&1 && wt config shell install 2>&1 || log_warning "Worktrunk installation failed"
-					fi
-					;;
-			esac
-			# Add marketplace and install plugin
-			setup_tmpdir
-			execute "claude plugin marketplace add '$marketplace_repo' 2>/dev/null || true"
-			# Clear any stale plugin cache that might cause cross-device link errors
-			execute "rm -rf '$HOME/.claude/plugins/cache/$name' 2>/dev/null || true"
-			if ! execute "claude plugin install '$plugin_spec' 2>/dev/null"; then
-				log_warning "$name plugin install failed (may already be installed)"
 			fi
 		fi
 	}
