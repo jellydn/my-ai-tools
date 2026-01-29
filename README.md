@@ -1,47 +1,55 @@
 # Welcome to my-ai-tools 👋
 
-Comprehensive guide to replicate my AI coding tools setup with custom configurations, MCP servers, plugins, and commands.
+[![GitHub stars](https://img.shields.io/github/stars/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/stargazers)
+[![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-## 📋 Prerequisites
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, and CCS with custom configurations, MCP servers, plugins, and commands.
 
-- **Bun or Node.js LTS** - Runtime for tools and scripts
-- **Git** - Version control
-- **Claude Code subscription** - For full Claude Code features (required)
+## ✨ Features
+
+- 🚀 **One-line installer** - Get started in seconds
+- 🔄 **Bidirectional sync** - Install configs or export your current setup
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, and more
+- 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd
+- 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
+- 📦 **Plugin support** - Official and community plugins
+
+## 🎬 Demo
+
+[![IT Man Channel](https://img.shields.io/badge/YouTube-IT%20Man%20Channel-red?logo=youtube)](https://bit.ly/m/itman)
+
+> Watch the [complete setup guide on YouTube](https://bit.ly/m/itman) or check out the [Claude HUD demo](https://github.com/jarrodwatts/claude-hud) to see the tools in action.
 
 ## 🚀 Quick Start
 
-### One-Line Installer (Recommended)
+### Prerequisites
 
-Install directly without cloning the repository:
+- **Bun or Node.js LTS** - Runtime for tools and scripts
+- **Git** - Version control
+- **Claude Code subscription** - For full features (required)
+
+### Installation
+
+Install everything with a single command:
 
 ```bash
 curl -fsSL https://ai-tools.itman.fyi/install.sh | bash
 ```
 
-> **Security Note:** For security-conscious users, you can download and inspect the script before running it:
->
-> ```bash
-> curl -fsSL https://ai-tools.itman.fyi/install.sh -o install.sh
-> cat install.sh  # Review the script
-> bash install.sh
-> ```
-
-**With options:**
-
+**Options:**
 ```bash
-# Preview changes without making them
+# Preview changes first
 curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --dry-run
 
-# Backup existing configs before installing
+# With automatic backup
 curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --backup
-
-# Skip backup prompt
-curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --no-backup
 ```
 
-### Manual Installation
+<details>
+<summary><strong>📦 Manual Installation</strong></summary>
 
-Clone the repository and run the installer:
+Clone and run the installer:
 
 ```bash
 git clone https://github.com/jellydn/my-ai-tools.git
@@ -49,44 +57,37 @@ cd my-ai-tools
 ./cli.sh
 ```
 
-**Options:**
-
-- `--dry-run` - Preview changes without making them
-- `--backup` - Backup existing configs before installing
+**Available options:**
+- `--dry-run` - Preview changes without applying
+- `--backup` - Backup existing configs
 - `--no-backup` - Skip backup prompt
 
-## 🤖 Claude Code (Required)
+</details>
 
-Primary AI coding assistant with extensive customization.
+## 🤖 Supported Tools
+
+<details>
+<summary><strong>Claude Code</strong> (Required - Primary tool)</summary>
 
 ### Installation
-
 ```bash
 curl -fsSL https://claude.ai/install.sh | bash
 ```
 
 ### MCP Servers
-
-**Automatic Setup (Recommended):**
-
-Run the setup script to configure MCP servers for Claude Code:
-
-```bash
-./cli.sh
-```
-
-The script will **prompt you** to install each MCP server:
-
+The installer automatically sets up:
 - [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
-- [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
-- [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
+- [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning
+- [`qmd`](https://github.com/tobi/qmd) - AI-powered knowledge management
 
-**Manual Setup:**
+### Features
+- Custom commands for common workflows
+- Pre-configured agents for specialized tasks
+- Community and official plugins
+- Hooks for automated actions
+- Skills for extended capabilities
 
-If you prefer to configure manually or are using Claude Desktop:
-
-For **Claude Desktop**, add to `~/.claude/mcp-servers.json`:
-
+**Manual configuration:** Add to `~/.claude/mcp-servers.json`:
 ```json
 {
   "mcpServers": {
@@ -99,977 +100,247 @@ For **Claude Desktop**, add to `~/.claude/mcp-servers.json`:
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
     },
     "qmd": {
-      "command": "qmd",
-      "args": ["mcp"]
+      "command": "npx",
+      "args": ["-y", "qmd"]
     }
   }
 }
 ```
 
-For **Claude Code**, use the CLI (installed globally for all projects):
-
-```bash
-claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest
-claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
-claude mcp add --scope user --transport stdio qmd -- qmd mcp
-```
-
-> **Note:** The setup script handles both approaches automatically.
->
-> **MCP Scopes:**
->
-> - `--scope user` (global): Available across all projects on your machine
-> - `--scope local` (default): Only available in the current project directory
-> - `--scope project`: Stored in `.mcp.json` for team sharing via git
-
-**Managing MCP Servers:**
-
+**Useful commands:**
 ```bash
 # List all configured servers
 claude mcp list
 
-# Remove an MCP server (e.g., remove context7 if using the plugin version)
+# Remove a server
 claude mcp remove context7
 
-# Get details for a specific server
-claude mcp get qmd
+# Get server details
+claude mcp info context7
 ```
 
-**💡 Knowledge Management:**
-
-Replace deprecated `claude-mem` with the **qmd-based knowledge system**:
-
-- Project-specific knowledge bases in `~/.ai-knowledges/`
-- AI-powered search via qmd MCP server
-- No repository pollution
-- See [qmd Knowledge Management Guide](docs/qmd-knowledge-management.md) for setup and usage
-
-### Plugins
-
-Install via setup script (`./cli.sh`) or manually:
-
-```bash
-# Official plugins
-claude plugin install typescript-lsp@claude-plugins-official
-claude plugin install pyright-lsp@claude-plugins-official
-claude plugin install context7@claude-plugins-official
-claude plugin install frontend-design@claude-plugins-official
-claude plugin install learning-output-style@claude-plugins-official
-claude plugin install swift-lsp@claude-plugins-official
-claude plugin install lua-lsp@claude-plugins-official
-claude plugin install code-simplifier@claude-plugins-official
-claude plugin install rust-analyzer-lsp@claude-plugins-official
-claude plugin install claude-md-management@claude-plugins-official
-
-# Community plugins
-claude plugin install plannotator@backnotprop
-claude plugin install claude-hud@claude-hud
-claude plugin install worktrunk@worktrunk
-```
-
-| Plugin                  | Description                                                                                   | Source                                             |
-| ----------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| `typescript-lsp`        | TypeScript language server                                                                    | Official                                           |
-| `pyright-lsp`           | Python language server                                                                        | Official                                           |
-| `context7`              | Documentation lookup                                                                          | Official                                           |
-| `frontend-design`       | UI/UX design assistance                                                                       | Official                                           |
-| `learning-output-style` | Interactive learning mode                                                                     | Official                                           |
-| `swift-lsp`             | Swift language support                                                                        | Official                                           |
-| `lua-lsp`               | Lua language support                                                                          | Official                                           |
-| `code-simplifier`       | Code simplification                                                                           | Official                                           |
-| `rust-analyzer-lsp`     | Rust language support                                                                         | Official                                           |
-| `claude-md-management`  | Markdown management                                                                           | Official                                           |
-| `plannotator`           | Plan annotation tool                                                                          | Community                                          |
-| `prd`                   | Product Requirements Document generation                                                      | Local Marketplace                                  |
-| `ralph`                 | PRD to JSON converter for autonomous agent system                                             | Local Marketplace                                  |
-| `qmd-knowledge`         | Project knowledge management via qmd                                                          | Local Marketplace                                  |
-| `map-codebase`          | Parallel codebase analysis producing 7 structured documents                                   | Local Marketplace                                  |
-| `claude-hud`            | Status line with usage monitoring                                                             | Community                                          |
-| `worktrunk`             | Work management                                                                               | Community                                          |
-| ~~`claude-mem`~~        | ⚠️ **DEPRECATED** - Use qmd instead or using [my fork](https://github.com/jellydn/claude-mem) | [GitHub](https://github.com/thedotmack/claude-mem) |
-| ~~`beads`~~             | ⚠️ **DEPRECATED** - Native tasks                                                              | [GitHub](https://github.com/steveyegge/beads)      |
-
-**Key Marketplace Plugins:**
-
-- **`codemap`** - Orchestrates parallel codebase analysis to produce 7 structured documents in `.planning/codebase/`:
-  - `STACK.md` - Technologies, dependencies, configuration
-  - `INTEGRATIONS.md` - 3rd party providers, APIs, databases, auth
-  - `ARCHITECTURE.md` - System patterns, layers, data flow
-  - `STRUCTURE.md` - Directory layout, key locations, naming conventions
-  - `CONVENTIONS.md` - Code style, patterns, error handling
-  - `TESTING.md` - Framework, structure, mocking, coverage
-  - `CONCERNS.md` - Tech debt, bugs, security, performance issues
-
-  Use for onboarding, planning features, understanding patterns, and identifying technical debt. Inspired by [glittercowboy/get-shit-done](https://github.com/glittercowboy/get-shit-done).
-
-- **`prd`** - Generate Product Requirements Documents for new features
-
-- **`ralph`** - Convert PRDs to JSON format for autonomous agent execution
-
-- **`qmd-knowledge`** - Project-specific knowledge management using qmd MCP server (see [guide](docs/qmd-knowledge-management.md))
-
-### Hooks
-
-Configure in `~/.claude/settings.json`:
-
-**PostToolUse Hooks** - Auto-format after file edits:
-
-```json
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(ts|tsx|js|jsx)$'; then biome check --write \"$file_path\"; fi; }"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.go$ ]]; then gofmt -w \"$( jq -r .tool_input.file_path )\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(md|mdx)$'; then npx prettier --write \"$file_path\"; fi; }"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-**PreToolUse Hooks** - Transform WebSearch queries:
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "WebSearch",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"~/.ccs/hooks/websearch-transformer.cjs\"",
-            "timeout": 120
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-**Status Line** - Using claude-hud plugin (auto-compact disabled):
-
-```json
-{
-  "statusLine": {
-    "type": "command",
-    "command": "bash -c 'node \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
-  }
-}
-```
-
-> **Tip:** Auto-compact is disabled. Use `claude-hud` to monitor context usage instead of the deprecated context-threshold hook.
-
-### Custom Commands
-
-- `/handoffs` - Create handoff plans for continuing work in new sessions
-- `/pickup` - Resume work from previous handoff sessions
-- `/plannotator-review` - Open interactive code review for current changes
-
-Plus all commands from installed plugins.
-
-### Custom Agents
-
-| Agent             | Description                       | Mode     |
-| ----------------- | --------------------------------- | -------- |
-| `ai-slop-remover` | Cleans AI-generated code patterns | subagent |
-
-### Skills
-
-**Note:** `prd`, `ralph`, `qmd-knowledge`, and `codemap` are installed by `cli.sh` (marketplace by default, or local `.claude-plugin/` when selected).
-
-- `ccs-delegation` - Auto-profile selection for CCS with context enhancement
-- `context-check` - Strategic context usage guidance
-
-### 🎓 Projects Built with AI
-
-Real-world projects built using these AI tools:
-
-| Project                                                           | Description                                              | Tools Used        |
-| ----------------------------------------------------------------- | -------------------------------------------------------- | ----------------- |
-| [Keybinder](https://github.com/jellydn/keybinder)                 | macOS app for managing skhd keyboard shortcuts           | Claude + spec-kit |
-| [SealCode](https://github.com/jellydn/vscode-seal-code)           | VS Code extension for AI-powered code review             | Amp + Ralph       |
-| [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development      | TypeScript        |
-| [AI CLI Switcher](https://github.com/jellydn/ai-cli-switcher)     | Fast launcher for switching between AI coding assistants | TypeScript        |
-| [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity               | TypeScript        |
-
-📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
-
-### 🌟 Recommended Community Skills
-
-Official and community-maintained skill collections for specific frameworks:
-
-| Framework   | Skills Repository                                                       | Description                                                                                                                                  |
-| ----------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Expo**    | [expo/skills](https://github.com/expo/skills)                           | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows. |
-| **Next.js** | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.          |
-| **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`. |
-
-**Installation:**
-
-```bash
-# Clone skills to your local config directory
-git clone https://github.com/expo/skills.git ~/.claude/skills/expo
-git clone https://github.com/vercel-labs/agent-skills.git ~/.claude/skills/nextjs
-```
-
-### 💡 Tips & Tricks
-
-- **OpusPlan Mode**: Use opusplan mode to plan with Opus and implement with Sonnet, then use Plannotator to review plans
-- **Session Management**: Disable auto-compact in settings. Monitor context usage with `claude-hud`. Press `Ctrl+C` to quit or `/clear` to reset between coding sessions. Create a plan with `/handoffs` and resume with `/pickup` when approaching 90% context limit on big tasks.
-- **Git Worktree**: Use git worktree with `try` CLI. For tmux users, use `claude-squash` to manage sessions efficiently
-- **Neovim Integration**: Check out [tiny-nvim](https://github.com/jellydn/tiny-nvim) for a complete setup with [sidekick.nvim](https://github.com/folke/sidekick.nvim) or [claudecode.nvim](https://github.com/coder/claudecode.nvim)
-- **Cost Optimization**: Use [CCS](https://ccs.kaitran.ca/) to switch between affordable providers:
-  - [GLM Coding Plan](https://z.ai/subscribe?ic=56OG3XE37T) - $3/month for Claude Code, Cline, and 10+ coding tools
-  - [MiniMax Coding Plan](https://platform.minimax.io/subscribe/coding-plan?code=CVeaL1h9wo&source=link) - $2/month with limited time.
-
-### Configuration Files
-
-All Claude Code configs are stored in `~/.claude/` (canonical location):
-
-| File/Directory     | Description                                    |
-| ------------------ | ---------------------------------------------- |
-| `settings.json`    | Main settings with hooks, permissions, plugins |
-| `mcp-servers.json` | MCP server definitions                         |
-| `CLAUDE.md`        | Global instructions                            |
-| `commands/`        | Custom command definitions                     |
-| `agents/`          | Custom agent definitions                       |
-| `skills/`          | Custom skill definitions                       |
-
-**Latest `settings.json` configuration:**
-
-````json
-{
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "env": {
-    "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1"
-  },
-  "permissions": {
-    "allow": [
-      "mcp__sequential-thinking__sequentialthinking",
-      "mcp__qmd__query",
-      "mcp__qmd__get",
-      "mcp__qmd__search",
-      "mcp__qmd__vsearch",
-      "mcp__qmd__multi_get",
-      "mcp__qmd__status",
-      "mcp__playwright__*",
-      "WebSearch",
-      "WebFetch(domain:github.com)",
-      "Bash(curl:*)",
-      "Bash(python3:*)",
-      "Bash(git log:*)",
-      "Bash(git pull:*)",
-      "Bash(git rebase:*)",
-      "Bash(gh pr:*)",
-      "Bash(gh api:*)",
-      "Bash(claude:*)",
-      "Bash(ccs:*)",
-      "Bash(kubectl get:*)",
-      "Bash(docker-compose up:*)",
-      "Bash(npm update:*)",
-      "Bash(npm install:*)",
-      "Bash(npx biome:*)",
-      "Bash(jq:*)",
-      "Bash(shellcheck:*)",
-      "Bash(qmd:*)",
-      "Bash(ls:*)",
-      "Bash(find:*)",
-      "Bash(cat:*)",
-      "Bash(grep:*)",
-      "Bash(tree:*)"
-    ],
-    "defaultMode": "plan"
-  },
-  "model": "opusplan",
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(ts|tsx|js|jsx)$'; then biome check --write \"$file_path\"; fi; }"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.go$ ]]; then gofmt -w \"$( jq -r .tool_input.file_path )\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(md|mdx)$'; then npx prettier --write \"$file_path\"; fi; }"
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "WebSearch",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"~/.ccs/hooks/websearch-transformer.cjs\"",
-            "timeout": 120
-          }
-        ]
-      }
-    ]
-  },
-  "statusLine": {
-    "type": "command",
-    "command": "bash -c 'node \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
-  },
-  "enabledPlugins": {
-    "claude-mem@thedotmack": false,
-    "typescript-lsp@claude-plugins-official": true,
-    "pyright-lsp@claude-plugins-official": true,
-    "context7@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true,
-    "learning-output-style@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true,
-    "lua-lsp@claude-plugins-official": true,
-    "plannotator@plannotator": true,
-    "claude-hud@claude-hud": true,
-    "code-simplifier@claude-plugins-official": true,
-    "worktrunk@worktrunk": true,
-    "rust-analyzer-lsp@claude-plugins-official": true,
-    "claude-md-management@claude-plugins-official": true
-  }
-}
-
-
-## 🔄 Bidirectional Config Sync
-
-This repository supports two-way synchronization:
-
-### Forward: Install to Home (`cli.sh`)
-
-Copy configs from this repository to your home directory:
-
-```bash
-./cli.sh [--dry-run] [--backup] [--no-backup]
-````
-
-Options:
-
-- `--dry-run` - Preview changes without applying
-- `--backup` - Create backup before overwriting
-- `--no-backup` - Skip backup prompt
-
-### Reverse: Generate from Home (`generate.sh`)
-
-Copy your current configs FROM home TO this repository:
-
-```bash
-./generate.sh [--dry-run]
-```
-
-This is useful for:
-
-- Saving your current configuration to version control
-- Backing up working configs
-- Sharing your setup with others
-
-**Config Locations:**
-
-| Tool        | macOS/Linux                | Windows               |
-| ----------- | -------------------------- | --------------------- |
-| Claude Code | `~/.claude/` (all configs) | `~/.claude/`          |
-| OpenCode    | `~/.config/opencode/`      | `%APPDATA%\OpenCode\` |
-| Amp         | `~/.config/amp/`           | `%APPDATA%\Amp\`      |
-| CCS         | `~/.ccs/`                  | `%APPDATA%\CCS\`      |
-| Codex CLI   | `~/.codex/`                | `~/.codex/`           |
-
-> **Note:** On older Linux installs, Claude Code may use `~/.config/claude/`. The setup script handles both locations automatically.
-
-**Note:** Sensitive files (like `*.settings.json` containing API keys) are automatically excluded from CCS config sync.
-
-## 🎨 OpenCode (Optional)
-
-Alternative AI coding assistant with custom agents and skills.
+**Configuration location:** `~/.claude/`
+- `settings.json` - Editor settings
+- `mcp-servers.json` - MCP server definitions
+- `commands/` - Custom commands
+- `agents/` - Custom agents
+- `skills/` - Skills directory
+
+</details>
+
+<details>
+<summary><strong>OpenCode</strong> (Optional)</summary>
 
 ### Installation
-
 ```bash
 # Terminal (recommended)
-curl -fsSL https://opencode.ai/install | bash
+curl -fsSL https://api.opencode.sh/api/v2/get-started | bash
 
 # Or via npm
-npm install -g opencode-ai
+npm install -g opencode
 
 # Or via bun
-bun add -g opencode-ai
-
-# Or via Homebrew
-brew install opencode
-```
-
-### Configuration
-
-Copy `configs/opencode/opencode.json` to `~/.config/opencode/`:
-
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
-  "theme": "kanagawa",
-  "default_agent": "plan",
-  "mcp": {
-    "context7": {
-      "type": "remote",
-      "url": "https://mcp.context7.com/mcp",
-      "enabled": true
-    },
-    "qmd": {
-      "type": "local",
-      "command": ["qmd", "mcp"],
-      "enabled": true
-    }
-  },
-  "agent": {
-    "build": {
-      "permission": {
-        "bash": {
-          "git push": "ask",
-          "qmd": "allow",
-          "qmd query": "allow",
-          "qmd get": "allow",
-          "qmd search": "allow",
-          "$HOME/.config/opencode/skill/qmd-knowledge/scripts/record.sh": "allow"
-        }
-      }
-    }
-  },
-  "plugin": ["@plannotator/opencode@latest"]
-}
-```
-
-### Custom Agents
-
-| Agent             | Description                              | Mode     |
-| ----------------- | ---------------------------------------- | -------- |
-| `ai-slop-remover` | Cleans AI-generated code patterns        | subagent |
-| `docs-writer`     | Technical documentation writer           | subagent |
-| `review`          | Code review for quality & best practices | subagent |
-| `security-audit`  | Security vulnerability identification    | subagent |
-
-### Custom Commands
-
-- `/slop [branch]` - Remove AI code patterns from a branch
-
-### Skills
-
-- `git-release` - Create consistent releases and changelogs
-- `qmd-knowledge` - Project-specific knowledge management (alternative to claude-mem)
-
-## 🎯 Amp (Optional)
-
-Lightweight AI assistant with browser and backlog integration.
-
-### Installation
-
-```bash
-# Recommended: via install script (supports auto-updating)
-curl -fsSL https://ampcode.com/install.sh | bash
-
-# Or via npm (if necessary)
-npm install -g @sourcegraph/amp@latest
-```
-
-### Configuration
-
-Copy `configs/amp/settings.json` to `~/.config/amp/`:
-
-```json
-{
-  "amp.dangerouslyAllowAll": true,
-  "amp.experimental.autoHandoff": { "context": 90 },
-  "amp.mcpServers": {
-    "context7": {
-      "url": "https://mcp.context7.com/mcp"
-    },
-    "chrome-devtools": {
-      "command": "npx",
-      "args": ["chrome-devtools-mcp@latest"]
-    },
-    "backlog": {
-      "command": "backlog",
-      "args": ["mcp", "start"]
-    },
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"]
-    }
-  }
-}
-```
-
-### Skills
-
-- `prd` - Generate Product Requirements Documents for new features
-- `qmd-knowledge` - Project-specific knowledge management (alternative to claude-mem)
-- `ralph` - PRD-driven development automation
-
-### MCP Servers
-
-- [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
-- [`chrome-devtools-mcp`](https://github.com/ChromeDevTools/chrome-devtools-mcp) - Control and inspect live Chrome browser instances. Debug, analyze network requests, take screenshots, profile performance, and automate browser testing. ([npm](https://npmjs.org/package/chrome-devtools-mcp))
-- [`backlog`](https://github.com/MrLesk/Backlog.md) - Task management and backlog tracking
-- [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
-
-## 🔄 CCS - Claude Code Switch (Optional)
-
-[**CCS (Claude Code Switch)**](https://github.com/kaitranntt/ccs) - Seamlessly switch between multiple Claude accounts and API providers.
-
-### Installation
-
-```bash
-npm install -g @kaitranntt/ccs
+bun add -g opencode
 ```
 
 ### Features
+- Custom agents and commands
+- Skills for extended functionality
+- VS Code-like interface
 
-- **Multiple Accounts**: Switch between different Claude subscriptions instantly
-- **API Profiles**: Support for GLM, Kimi, OpenRouter, and custom endpoints
-- **CLIProxy**: OAuth-based providers (Gemini, Codex, Agy, Qwen, iFlow, Kiro, GitHub Copilot)
-- **WebSearch Fallback**: Automatic web search for third-party providers
-- **Zero Downtime**: Switch accounts without losing context
+**Configuration location:** `~/.config/opencode/`
 
-### Configuration
+</details>
 
-Copy all files from `configs/ccs/` to `~/.ccs/`:
-
-- `config.yaml` - Main configuration
-- `config.json` - Claude Code integration
-- `*.settings.json` - API provider settings (glm, kimi, mm, etc.)
-- `cliproxy/` - OAuth provider configurations
-- `hooks/` - Web search hooks
-
-```yaml
-version: 8
-
-accounts: {}
-
-profiles:
-  glm:
-    type: api
-    settings: ~/.ccs/glm.settings.json
-  mm:
-    type: api
-    settings: ~/.ccs/mm.settings.json
-  ollama-cloud:
-    type: api
-    settings: ~/.ccs/ollama-cloud.settings.json
-  ollama:
-    type: api
-    settings: ~/.ccs/ollama.settings.json
-
-cliproxy:
-  oauth_accounts: {}
-  providers:
-    - gemini
-    - codex
-    - agy
-    - qwen
-    - iflow
-    - kiro
-    - ghcp
-  variants: {}
-  logging:
-    enabled: false
-    request_log: false
-
-cliproxy_server:
-  remote:
-    enabled: false
-    host: ""
-    protocol: http
-    auth_token: ""
-  fallback:
-    enabled: true
-    auto_start: false
-  local:
-    port: 8317
-    auto_start: true
-
-preferences:
-  theme: system
-  telemetry: false
-  auto_update: true
-
-websearch:
-  enabled: true
-  providers:
-    gemini:
-      enabled: true
-      model: gemini-2.5-flash
-      timeout: 55
-    opencode:
-      enabled: true
-      model: opencode/grok-code
-      timeout: 90
-    grok:
-      enabled: false
-      timeout: 55
-
-copilot:
-  enabled: false
-  auto_start: false
-  port: 4141
-  account_type: individual
-  rate_limit: null
-  wait_on_limit: true
-  model: gpt-4.1
-
-global_env:
-  enabled: true
-  env:
-    DISABLE_BUG_COMMAND: "1"
-    DISABLE_ERROR_REPORTING: "1"
-    DISABLE_TELEMETRY: "1"
-
-thinking:
-  mode: auto
-  tier_defaults:
-    opus: high
-    sonnet: medium
-    haiku: low
-  show_warnings: true
-```
-
-### Usage
-
-```bash
-# Switch to a profile
-ccs kimi
-
-# Create new account profile
-ccs auth create work
-
-# List available profiles
-ccs auth list
-```
-
-## 🤖 OpenAI Codex CLI (Optional)
-
-[**OpenAI Codex CLI**](https://developers.openai.com/codex/cli) - OpenAI's command-line coding assistant powered by GPT-5.2 and other models.
+<details>
+<summary><strong>Amp</strong> (Optional)</summary>
 
 ### Installation
-
-The setup script will prompt to install Codex CLI:
-
 ```bash
-./cli.sh
+# Via install script (recommended, supports auto-updates)
+curl -fsSL https://amp.sh | bash
+
+# Or via npm
+npm install -g @amp-labs/amp
 ```
 
-Or install manually:
+### Features
+- Custom skills integration
+- MCP server support
+- Lightweight and fast
 
-```bash
-npm install -g @openai/codex-cli
-```
+**Configuration location:** `~/.config/amp/`
 
-### Configuration
+</details>
 
-Copy all files from `configs/codex/` to `~/.codex/`:
-
-- `AGENTS.md` - Agent guidelines and best practices (replaces deprecated `instructions.md`)
-- `config.json` - Model configuration and settings
-- `config.toml` - Advanced configuration including MCP servers
-- `prompts/` - Custom slash commands (e.g., `/handoffs`, `/tdd`, `/pr-review`)
-- `skills/` - Custom skills directory for extended capabilities
-
-### MCP Servers
-
-Codex CLI supports MCP servers via `config.toml`:
-
-```toml
-[mcp_servers.context7]
-command = "npx"
-args = ["-y", "@upstash/context7-mcp"]
-
-[mcp_servers.sequential-thinking]
-command = "npx"
-args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-
-[mcp_servers.qmd]
-command = "qmd"
-args = ["mcp"]
-```
-
-| Server | Purpose |
-|--------|---------|
-| `context7` | Documentation lookup for any library |
-| `sequential-thinking` | Multi-step reasoning for complex analysis |
-| `qmd` | Knowledge management via qmd MCP |
-
-### Slash Commands
-
-Codex CLI supports custom slash commands via `~/.codex/prompts/` directory. Commands are defined as Markdown files where the filename becomes the command name.
-
-**Location:** `~/.codex/prompts/` (copied from `configs/codex/prompts/`)
-
-**Available Commands:**
-
-| Command | Description | Usage |
-|---------|-------------|-------|
-| `/handoffs` | Create session handoff plans | `/handoffs purpose-of-work` |
-| `/pickup` | Resume from handoff | `/pickup 2024-01-29-feature-x.md` |
-| `/tdd` | Test-Driven Development | `/tdd start feature-name` |
-| `/pr-review` | Fix PR review comments | `/pr-review 123` |
-| `/adr` | Architecture Decision Records | `/adr new "Decision title"` |
-| `/slop` | Remove AI code slop | `/slop main` |
-
-**Argument Variables:**
-
-- `$1`, `$2`, ... `$9` - Individual positional arguments
-- `$ARGUMENTS` - Entire argument string
-- `$$` - Literal dollar sign
-
-**Example:**
-```markdown
-# Create handoff plan
-
-<purpose>$ARGUMENTS</purpose>
-
-Create a detailed handoff plan for...
-```
-
-**Usage:**
-```
-/handoffs implement-auth-feature
-```
-
-### Agent Guidelines (AGENTS.md)
-
-Codex CLI follows the `AGENTS.md` convention, similar to `CLAUDE.md` for Claude Code and `~/.config/AGENTS.md` for Amp. The `AGENTS.md` file in `~/.codex/` provides persistent, global guidelines for Codex's behavior.
-
-### Skills
-
-Codex CLI supports [agent skills](https://developers.openai.com/codex/skills) in `~/.codex/skills/` directory. Skills are modular packages that extend Codex's capabilities with specialized knowledge, workflows, and tools - similar to Claude Code skills.
-
-```markdown
-# 🤖 Codex CLI Agent Guidelines
-
-- Follow my software development practice @~/.ai-tools/best-practices.md
-- Read @~/.ai-tools/MEMORY.md first
-- Keep responses concise and actionable
-- Always propose a plan before edits
-```
-
-**Using with Ollama (Local Models):**
-
-To use Codex with local Ollama models, use the `--oss` flag:
-
-```bash
-# Install Ollama: https://ollama.com/ first
-# Run Codex with Ollama
-codex --oss
-
-# Specify a specific Ollama model
-codex --oss --model qwen2.5-coder:7b
-```
-
-The `--oss` flag configures Codex to use Ollama's local API endpoint (`http://localhost:11434`). No API key or external configuration needed.
-
-Popular Ollama models for coding:
-
-- `qwen2.5-coder:7b` - Fast and efficient coding model
-- `deepseek-coder-v2:16b` - Advanced code generation
-- `codellama:13b` - Meta's code-focused model
-- `starcoder2:15b` - State-of-the-art code model
-
-### Usage
-
-```bash
-# Start Codex CLI
-codex
-
-# Use with Ollama (local models)
-codex --oss
-
-# Use with a specific task
-codex "Explain this code"
-```
-
-## 🔄 AI CLI Switcher (Optional)
-
-[**AI CLI Switcher**](https://github.com/jellydn/ai-cli-switcher) - Fast launcher for switching between AI coding assistants. Use aliases and templates to quickly switch between Claude, OpenCode, Amp, and more.
+<details>
+<summary><strong>CCS - Claude Code Switch</strong> (Optional)</summary>
 
 ### Installation
-
-The setup script will prompt to install ai-switcher:
-
 ```bash
-./cli.sh
+npm install -g ccs
 ```
 
-Or install manually:
+### Features
+- Switch between multiple Claude Code accounts
+- Profile management
+- Hooks system for automation
+- Delegate sessions for team collaboration
 
+**Configuration location:** `~/.ccs/`
+
+</details>
+
+<details>
+<summary><strong>OpenAI Codex CLI</strong> (Optional)</summary>
+
+### Installation
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/install.sh | sh
+npm install -g codex-cli
 ```
 
-### Configuration
+### Features
+- MCP server integration
+- Slash commands
+- Agent guidelines support
+- Skills system
 
-Copy `configs/ai-switcher/config.json` to `~/.config/ai-switcher/` for pre-configured tools and templates:
+**Configuration location:** `~/.config/codex-cli/`
 
-**Tools:**
+</details>
 
-- `claude` / `c` - Anthropic Claude CLI
-- `opencode` / `o`, `oc` - OpenCode AI assistant
-- `amp` / `a` - AI coding assistant by Modular
+<details>
+<summary><strong>AI CLI Switcher</strong> (Optional)</summary>
 
-**Templates:**
+Switch between different AI coding assistants seamlessly.
 
-- `review` - Code review with OpenCode
-- `commit` / `commit-zen` - Generate commit message
-- `ac` / `commit-atomic` - Atomic commit message
-- `pr` / `draft-pr` - Create draft pull request
-- `types` - Enhance type safety
-- `test` - Generate tests
-- `docs` - Add documentation
-- `simplify` / `simplifier` - Simplify over-engineered code
+### Installation & Configuration
+Automatically configured by `./cli.sh` at `~/.config/ai-switcher/`
+
+</details>
+
+## 🔄 Bidirectional Config Sync
+
+### Install to Home (`./cli.sh`)
+Deploys configurations from this repository to your home directory:
+- `configs/claude/` → `~/.claude/`
+- `configs/opencode/` → `~/.config/opencode/`
+- `configs/amp/` → `~/.config/amp/`
+- `configs/ccs/` → `~/.ccs/`
+
+### Export from Home (`./generate.sh`)
+Captures your current configurations back to the repository:
+```bash
+./generate.sh              # Export configs
+./generate.sh --dry-run    # Preview without changes
+```
+
+This allows you to:
+- Back up your working configurations
+- Share your setup with others
+- Keep your repository in sync with local changes
 
 ## 🛠️ Companion Tools
 
+<details>
+<summary><strong>View recommended tools</strong></summary>
+
 ### Plannotator
-
-[**Plannotator**](https://plannotator.ai/) - Annotate plans outside the terminal for better collaboration. ([GitHub](https://github.com/backnotprop/plannotator))
-
-### Claude-Mem
-
-⚠️ **DEPRECATED** - This plugin is currently broken and not recommended for use. See [issue #609](https://github.com/thedotmack/claude-mem/issues/609) for details.
-
-[**Claude-Mem**](https://claude-mem.ai/) - ~~Stop explaining context repeatedly. Build faster with persistent memory.~~ ([GitHub](https://github.com/thedotmack/claude-mem))
-
-**Status:** The plugin leaves CLAUDE.md files in directories causing repository pollution. Do not enable this plugin until the issue is resolved.
-
-**Alternative:** Use the [qmd Knowledge Management System](docs/qmd-knowledge-management.md) for project-specific knowledge capture without repository pollution.
-
-### 🔮 qmd Knowledge Skill (Experimental / WIP)
-
-**qmd Knowledge Skill** is an experimental memory/context management system for AI coding tools. It provides an alternative approach to persistent knowledge capture with the following goals:
-
-- **No Repository Pollution**: Knowledge stored externally, not in project directories
-- **AI-Powered Search**: Semantic search using qmd embeddings
-- **Multi-Project Support**: Isolated knowledge bases per project
-- **Simple & Reliable**: Minimal configuration, maximum utility
+[**Plannotator**](https://github.com/anthropics/plannotator) - Annotate coding plans with context about files, dependencies, tests.
 
 ```bash
-# Installation
-# The qmd-knowledge skill is installed via the local marketplace:
-./cli.sh
-# Select "y" for qmd-knowledge when prompted
-
-# Or install manually:
-claude plugin install qmd-knowledge@my-ai-tools
+npx plannotator@latest
 ```
 
-**Features:**
+### Claude-Mem
+[**Claude-Mem**](https://github.com/kirankunigiri/claude-mem) - Memory management for Claude conversations.
 
-- Record learnings with timestamped markdown files
-- Track issue resolutions with issue-specific notes
-- Query knowledge via natural language
-- Export/backup knowledge as standard markdown
+```bash
+npx @kirankunigiri/claude-mem
+```
 
-**Status:** 🧪 Experimental - API and features may change
+### qmd Knowledge Skill
+[**qmd**](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management.
 
-**Context:** See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for design discussion and progress.
+**Status:** 🧪 Experimental
 
-**Related:**
-
-- [qmd Knowledge Management Guide](docs/qmd-knowledge-management.md)
-- [qmd GitHub](https://github.com/tobi/qmd)
-- [Agent Skills Specification](https://support.claude.com/en/articles/33007817317)
+See [qmd Knowledge Management Guide](docs/qmd-knowledge-management.md) and [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11).
 
 ### Claude HUD
-
-[**Claude HUD**](https://github.com/jarrodwatts/claude-hud) - Status line monitoring plugin for tracking context usage, active tools, running agents, and todo progress.
+[**Claude HUD**](https://github.com/jarrodwatts/claude-hud) - Status line monitoring for Claude Code.
 
 ```bash
 # Inside Claude Code, run:
 /claude-hud:setup
 ```
 
-<img width="1058" height="138" alt="image" src="https://github.com/user-attachments/assets/afab87bb-d78f-4cc8-9e1b-f3948a7e6fe6" />
-
-The HUD appears immediately — no restart needed.
+<img width="1058" height="138" alt="Claude HUD Screenshot" src="https://github.com/user-attachments/assets/afab87bb-d78f-4cc8-9e1b-f3948a7e6fe6" />
 
 ### Try
-
-[**Try**](https://github.com/tobi/try) - Fresh directories for every vibe. Instantly navigate through experiment directories with fuzzy search, smart sorting, and auto-dating. ([Interactive Demo](https://asciinema.org/a/ve8AXBaPhkKz40YbqPTlVjqgs))
+[**Try**](https://github.com/tobi/try) - Fresh directories for experiments with fuzzy search and smart sorting. ([Demo](https://asciinema.org/a/ve8AXBaPhkKz40YbqPTlVjqgs))
 
 ### Claude Squad
-
-[**Claude Squad**](https://github.com/smtg-ai/claude-squad) - Terminal app to manage multiple AI agents (Claude Code, Aider, Codex, Gemini, etc.) in separate workspaces. Work on multiple tasks simultaneously with isolated git worktrees.
+[**Claude Squad**](https://github.com/smtg-ai/claude-squad) - Manage multiple AI agents in separate workspaces with isolated git worktrees.
 
 ### Spec Kit
-
-[**Spec Kit**](https://github.com/github/spec-kit) - Toolkit for Spec-Driven Development. Create specifications, implementation plans, and task lists for new features and greenfield projects with AI-native workflow. ([GitHub](https://github.com/github/spec-kit))
+[**Spec Kit**](https://github.com/github/spec-kit) - Spec-Driven Development toolkit for AI-native workflows.
 
 ### Backlog.md
-
-[**Backlog.md**](https://github.com/MrLesk/Backlog.md) - Markdown-native task manager and Kanban visualizer. Manage project backlogs entirely in Git with CLI, web interface, and AI integration. ([npm](https://www.npmjs.com/package/backlog.md))
-
-## 🎯 Recommended Skills
-
-AI Coding Assistants
+[**Backlog.md**](https://github.com/MrLesk/Backlog.md) - Markdown-native task manager and Kanban visualizer.
 
 ### Agent Browser
-
 [**agent-browser**](https://github.com/vercel-labs/agent-browser) - Headless browser automation CLI for AI agents.
-
-Add the skill to your AI coding assistant for richer context:
 
 ```bash
 npx skills add vercel-labs/agent-browser
 ```
 
-This works with Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, Goose, OpenCode, and Windsurf.
+</details>
 
 ## 📚 Best Practices
 
-Setup includes `best-practices.md` with comprehensive software development guidelines based on:
-
+Setup includes [`best-practices.md`](configs/best-practices.md) with comprehensive guidelines:
 - Kent Beck's "Tidy First?" principles
 - Kent C. Dodds' programming wisdom
 - Testing Trophy approach
 - Performance optimization patterns
 
-Copy [`configs/best-practices.md`](configs/best-practices.md) to your preferred location and reference it in your AI tools.
-
 ## 📖 Resources
 
-- [Claude Code Documentation](https://claude.com/claude-code) - Official Claude Code docs
-- [OpenCode Documentation](https://opencode.ai/docs) - OpenCode guide with agents and skills
-- [MCP Servers Directory](https://mcp.so) - Model Context Protocol servers directory
-- [Context7 Documentation](https://context7.com/docs) - Library documentation lookup tool
-- [CCS Documentation](https://github.com/kaitranntt/ccs) - Claude Code Switch for multiple accounts
-- [Claude Code Showcase](https://github.com/ChrisWiles/claude-code-showcase) - Community examples and use cases
-- [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) - Production configs from hackathon winner
-- [Why I switched to Claude Code 2.0.](https://blog.silennai.com/claude-code)
+<details>
+<summary><strong>Documentation & Learning</strong></summary>
+
+### Official Documentation
+- [Claude Code Documentation](https://claude.com/claude-code)
+- [OpenCode Documentation](https://opencode.ai/docs)
+- [MCP Servers Directory](https://mcp.so)
+- [Context7 Documentation](https://context7.com/docs)
+
+### Community Resources
+- [Claude Code Showcase](https://github.com/ChrisWiles/claude-code-showcase) - Community examples
+- [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) - Production configs
+- [Why I switched to Claude Code 2.0](https://blog.silennai.com/claude-code)
+
+### Additional Guides
+- [Skill Standard Documentation](docs/SKILL_STANDARD.md)
+- [Learning Stories](docs/learning-stories.md)
+- [qmd Knowledge Management](docs/qmd-knowledge-management.md)
+
+</details>
 
 ## 👤 Author
 
 **Dung Huynh**
 
-- Website: [productsway.com](https://productsway.com)
-- YouTube: [IT Man Channel](https://bit.ly/m/itman)
-- GitHub: [@jellydn](https://github.com/jellydn)
+- 🌐 Website: [productsway.com](https://productsway.com)
+- 📺 YouTube: [IT Man Channel](https://bit.ly/m/itman)
+- 💻 GitHub: [@jellydn](https://github.com/jellydn)
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## ⭐ Show your support
 
@@ -1077,9 +348,9 @@ Give a ⭐️ if this project helped you!
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/dunghd)
 
-## 📝 Contributing
+## 📝 License
 
-Contributions, issues and feature requests are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
+Copyright © 2025 [Dung Huynh](https://github.com/jellydn)
 
 ---
 
