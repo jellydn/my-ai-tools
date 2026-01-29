@@ -13,8 +13,13 @@ shift
 if [ -n "$QMD_PROJECT" ]; then
     PROJECT_NAME="$QMD_PROJECT"
 elif git rev-parse --is-inside-work-tree &>/dev/null; then
-    # Get git repository name
-    PROJECT_NAME=$(basename "$(git rev-parse --show-toplevel)")
+    # Get git repository name with validation
+    GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+    if [ -n "$GIT_ROOT" ]; then
+        PROJECT_NAME=$(basename "$GIT_ROOT")
+    else
+        PROJECT_NAME=$(basename "$(pwd)")
+    fi
 else
     # Fall back to current directory name
     PROJECT_NAME=$(basename "$(pwd)")

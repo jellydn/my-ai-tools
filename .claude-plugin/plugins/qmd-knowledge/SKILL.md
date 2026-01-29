@@ -104,8 +104,9 @@ qmd search "API" --all --files --min-score 0.3 -c <project-name>
 
 4. **Create a knowledge collection for your project**:
    ```bash
-   # Set your project name (the skill will auto-detect from git repo or directory name)
-   # Optional: export QMD_PROJECT=<project-name> to override detection
+   # The skill's record.sh script will auto-detect the project name when executed.
+   # For manual setup, use your desired project name consistently in the commands below.
+   # Optional: export QMD_PROJECT=<project-name> to override auto-detection
    
    # Create storage directory for your project (replace <project-name> with your project)
    mkdir -p ~/.ai-knowledges/<project-name>/learnings
