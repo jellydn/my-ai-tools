@@ -16,8 +16,9 @@ elif git rev-parse --is-inside-work-tree &>/dev/null; then
     # Try to get project name from git remote URL (most reliable)
     PROJECT_NAME=$(git remote get-url origin 2>/dev/null | xargs basename -s .git 2>/dev/null)
     
-    # Fall back to git repo folder name if remote URL fails
-    if [ -z "$PROJECT_NAME" ] || [ "$PROJECT_NAME" = "origin" ]; then
+    # Fall back to git repo folder name if remote URL fails or returns invalid values
+    # Invalid: empty, "origin", or strings that look like URLs/paths
+    if [ -z "$PROJECT_NAME" ] || [ "$PROJECT_NAME" = "origin" ] || [[ "$PROJECT_NAME" =~ ^[./:] ]]; then
         GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
         if [ -n "$GIT_ROOT" ]; then
             PROJECT_NAME=$(basename "$GIT_ROOT")
@@ -50,16 +51,27 @@ setup_knowledge_base() {
     mkdir -p "$KNOWLEDGE_BASE/references/issues"
     
     # Add collection (suppress error if already exists)
-    qmd collection add "$KNOWLEDGE_BASE" --name "$PROJECT_NAME" 2>/dev/null || {
+    local err_file="/tmp/qmd-collection-add-$$-err.txt"
+    if qmd collection add "$KNOWLEDGE_BASE" --name "$PROJECT_NAME" 2>"$err_file"; then
+        echo -e "${GREEN}✓ Collection '$PROJECT_NAME' added${NC}"
+        rm -f "$err_file"
+    else
         # Check if the error is because collection already exists
-        if qmd collection list 2>/dev/null | grep -q "$PROJECT_NAME"; then
+        if grep -qi "already exists" "$err_file" 2>/dev/null; then
             echo -e "${GREEN}✓ Collection '$PROJECT_NAME' already exists${NC}"
+            rm -f "$err_file"
+        elif qmd collection list 2>/dev/null | grep -q "^$PROJECT_NAME$"; then
+            echo -e "${GREEN}✓ Collection '$PROJECT_NAME' already exists${NC}"
+            rm -f "$err_file"
         else
-            echo -e "${YELLOW}Note: Could not add collection. You may need to add it manually:${NC}"
+            echo -e "${YELLOW}Note: Could not add collection. Error:${NC}"
+            cat "$err_file" 2>/dev/null || echo "(Error details unavailable)"
+            rm -f "$err_file"
+            echo -e "${YELLOW}You may need to add it manually:${NC}"
             echo -e "${YELLOW}  qmd collection add $KNOWLEDGE_BASE --name $PROJECT_NAME${NC}"
             return 1
         fi
-    }
+    fi
     
     # Add context (suppress error if already exists)
     qmd context add "qmd://$PROJECT_NAME" "Knowledge base for $PROJECT_NAME project: learnings, issue notes, and conventions" 2>/dev/null || true

@@ -29,28 +29,39 @@ PROJECT_NAME=$(
   basename "$PWD"
 )
 
-# Filter out empty or invalid values (like "origin")
-if [ -z "$PROJECT_NAME" ] || [ "$PROJECT_NAME" = "origin" ]; then
-  PROJECT_NAME=$(basename "$PWD")
+# Filter out empty or invalid values (like "origin" or URL-like strings)
+if [ -z "$PROJECT_NAME" ] || [ "$PROJECT_NAME" = "origin" ] || [[ "$PROJECT_NAME" =~ ^[./:] ]]; then
+  PROJECT_NAME=$(
+    { git rev-parse --show-toplevel 2>/dev/null | xargs basename; } ||
+    basename "$PWD"
+  )
 fi
 
 # 1. Create project directory structure
 mkdir -p ~/.ai-knowledges/$PROJECT_NAME/learnings
 mkdir -p ~/.ai-knowledges/$PROJECT_NAME/issues
 
-# 2. Add to qmd (skip if already exists - suppress errors)
-qmd collection add ~/.ai-knowledges/$PROJECT_NAME --name $PROJECT_NAME 2>/dev/null || {
-  # Verify collection exists
-  if qmd collection list 2>/dev/null | grep -q "$PROJECT_NAME"; then
-    echo "✓ Collection '$PROJECT_NAME' already exists"
-  fi
-}
+# 2. Add to qmd (check for existing collection more robustly)
+ERR_FILE="/tmp/qmd-collection-add-$$.err"
+if qmd collection add ~/.ai-knowledges/$PROJECT_NAME --name $PROJECT_NAME 2>"$ERR_FILE"; then
+  echo "✓ Collection '$PROJECT_NAME' added"
+  rm -f "$ERR_FILE"
+elif grep -qi "already exists" "$ERR_FILE" 2>/dev/null; then
+  echo "✓ Collection '$PROJECT_NAME' already exists"
+  rm -f "$ERR_FILE"
+elif qmd collection list 2>/dev/null | grep -q "^$PROJECT_NAME$"; then
+  echo "✓ Collection '$PROJECT_NAME' already exists"
+  rm -f "$ERR_FILE"
+else
+  echo "⚠ Warning: Could not verify collection setup"
+  rm -f "$ERR_FILE"
+fi
 
 # 3. Add context (skip if already exists)
 qmd context add qmd://$PROJECT_NAME "Knowledge base for $PROJECT_NAME project" 2>/dev/null || true
 
 # 4. Generate embeddings for search
-qmd embed
+qmd embed 2>/dev/null || true
 
 # Inform user
 echo "✓ Knowledge base initialized for: $PROJECT_NAME"

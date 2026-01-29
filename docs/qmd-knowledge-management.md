@@ -94,6 +94,25 @@ This copies the qmd-knowledge skill to `~/.config/opencode/skill/qmd-knowledge/`
 
 ### 4. Create a Knowledge Collection for Your Project
 
+**Option 1: Automatic Setup (Recommended)**
+
+The `qmd-knowledge` skill now automatically sets up the knowledge base when you first use it. Simply run:
+
+```bash
+~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "First learning"
+```
+
+The script will:
+- Auto-detect your project name from git remote URL (most reliable)
+- Create necessary directories
+- Add qmd collection (or verify if already exists - no errors!)
+- Add context for better search
+- Generate embeddings
+
+**Option 2: Manual Setup**
+
+If you prefer manual setup or need to create collections for multiple projects:
+
 ```bash
 # Create storage directory for your project
 mkdir -p ~/.ai-knowledges/my-ai-tools/learnings
@@ -103,34 +122,16 @@ mkdir -p ~/.ai-knowledges/my-ai-tools/issues
 qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
 
 # Add context to improve search results
-qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project: learnings, issue notes, and project conventions"
+qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project: learnings, issue notes, and conventions"
 
 # Generate embeddings for semantic search
 qmd embed
 ```
 
-**Note**: The skill is installed once. Each project gets its own qmd collection for storing knowledge.
-
-### 5. Install Configuration (Optional)
-
-Run the setup script to install all configurations:
-
-```bash
-./cli.sh
-```
-
-This will copy the qmd skill to `~/.config/opencode/skill/qmd-knowledge/`.
-
-**Automatic Setup Feature**: 
-
-Starting from the latest version, the `qmd-knowledge` skill includes automatic setup. When you first run a record command, the script will:
-- Auto-detect your project name from git remote URL (most reliable)
-- Create necessary directories
-- Add qmd collection (or verify if already exists - no errors!)
-- Add context for better search
-- Generate embeddings
-
-This means you can start using the skill immediately without manual collection setup.
+**Note**: 
+- The skill is installed once and manages knowledge for all your projects
+- Each project gets its own qmd collection for storing knowledge
+- The script handles existing collections gracefully (no errors if collection already exists)
 
 ## Usage
 
