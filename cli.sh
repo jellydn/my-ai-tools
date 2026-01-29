@@ -737,11 +737,12 @@ enable_plugins() {
 
 		log_info "Installing skills from local .claude-plugin/plugins folder..."
 
-		# Define target directories (Codex CLI reads skills directly from .claude-plugin/plugins/)
+		# Define target directories
 		CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
 		OPENCODE_SKILL_DIR="$HOME/.config/opencode/skill"
 		OPENCODE_COMMAND_DIR="$HOME/.config/opencode/command/ai"
 		AMP_SKILLS_DIR="$HOME/.config/amp/skills"
+		CODEX_SKILLS_DIR="$HOME/.codex/skills"
 
 		# Copy to Claude Code (~/.claude/skills/)
 		if [ -d "$CLAUDE_SKILLS_DIR" ]; then
@@ -771,6 +772,14 @@ enable_plugins() {
 		fi
 		mkdir -p "$AMP_SKILLS_DIR"
 
+		# Copy to Codex CLI (~/.codex/skills/)
+		if [ -d "$CODEX_SKILLS_DIR" ]; then
+			for existing_skill in "$CODEX_SKILLS_DIR"/*; do
+				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
+			done
+		fi
+		mkdir -p "$CODEX_SKILLS_DIR"
+
 		# Copy all skills from plugins folder to targets
 		for skill_dir in "$SCRIPT_DIR/.claude-plugin/plugins"/*; do
 			if [ -d "$skill_dir" ]; then
@@ -798,11 +807,11 @@ enable_plugins() {
 					log_info "Skipped $skill_name for Amp (not compatible)"
 				fi
 
-				# Codex CLI reads skills directly from .claude-plugin/plugins/
 				if skill_is_compatible_with "$skill_dir" "codex"; then
-					log_info "Codex CLI can invoke $skill_name via \$$skill_name"
+					cp -r "$skill_dir" "$CODEX_SKILLS_DIR/"
+					log_success "Copied $skill_name to Codex CLI"
 				else
-					log_info "Codex CLI: $skill_name not compatible"
+					log_info "Skipped $skill_name for Codex CLI (not compatible)"
 				fi
 
 				# Generate OpenCode command from skill (only if compatible)
