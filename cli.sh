@@ -323,6 +323,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/amp" "$BACKUP_DIR" "amp"
 		copy_config_dir "$HOME/.ccs" "$BACKUP_DIR" "ccs"
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
+		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
 		copy_config_file "$HOME/.config/ai-switcher/config.json" "$BACKUP_DIR/ai-switcher"
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -470,6 +471,30 @@ install_codex() {
 		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Codex CLI installation"
 	else
 		log_info "Installing Codex CLI (non-interactive mode)..."
+		prompt_and_install
+	fi
+}
+
+install_gemini() {
+	prompt_and_install() {
+		log_info "Installing Gemini CLI..."
+		if command -v gemini &>/dev/null; then
+			log_warning "Gemini CLI is already installed"
+		else
+			execute "npm install -g @google/gemini-cli"
+			log_success "Gemini CLI installed"
+		fi
+	}
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting Gemini CLI installation (--yes flag)"
+		prompt_and_install
+	elif [ -t 0 ]; then
+		read -p "Do you want to install Google Gemini CLI? (y/n) " -n 1 -r
+		echo
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Gemini CLI installation"
+	else
+		log_info "Installing Gemini CLI (non-interactive mode)..."
 		prompt_and_install
 	fi
 }
@@ -630,6 +655,21 @@ copy_configurations() {
 			log_success "Copied Codex config.toml"
 		fi
 		log_success "Codex CLI configs copied (skills invoked via \$, prompts no longer needed)"
+	fi
+
+	# Copy Gemini CLI configs
+	if [ -d "$HOME/.gemini" ] || command -v gemini &>/dev/null; then
+		execute "mkdir -p $HOME/.gemini"
+		copy_config_file "$SCRIPT_DIR/configs/gemini/AGENTS.md" "$HOME/.gemini/"
+		copy_config_file "$SCRIPT_DIR/configs/gemini/GEMINI.md" "$HOME/.gemini/"
+		copy_config_file "$SCRIPT_DIR/configs/gemini/settings.json" "$HOME/.gemini/"
+		execute "rm -rf $HOME/.gemini/agents"
+		execute "cp -r $SCRIPT_DIR/configs/gemini/agents $HOME/.gemini/"
+		execute "rm -rf $HOME/.gemini/commands"
+		execute "cp -r $SCRIPT_DIR/configs/gemini/commands $HOME/.gemini/"
+		execute "rm -rf $HOME/.gemini/skills"
+		copy_non_marketplace_skills "$SCRIPT_DIR/configs/gemini/skills" "$HOME/.gemini/skills"
+		log_success "Gemini CLI configs copied"
 	fi
 
 	# Copy best practices and MEMORY.md
@@ -850,6 +890,7 @@ enable_plugins() {
 		OPENCODE_COMMAND_DIR="$HOME/.config/opencode/command/ai"
 		AMP_SKILLS_DIR="$HOME/.config/amp/skills"
 		CODEX_SKILLS_DIR="$HOME/.codex/skills"
+		GEMINI_SKILLS_DIR="$HOME/.gemini/skills"
 
 		# Copy to Claude Code (~/.claude/skills/)
 		if [ -d "$CLAUDE_SKILLS_DIR" ]; then
@@ -887,6 +928,14 @@ enable_plugins() {
 		fi
 		mkdir -p "$CODEX_SKILLS_DIR"
 
+		# Copy to Gemini CLI (~/.gemini/skills/)
+		if [ -d "$GEMINI_SKILLS_DIR" ]; then
+			for existing_skill in "$GEMINI_SKILLS_DIR"/*; do
+				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
+			done
+		fi
+		mkdir -p "$GEMINI_SKILLS_DIR"
+
 		# Copy all skills from plugins folder to targets
 		for skill_dir in "$SCRIPT_DIR/.claude-plugin/plugins"/*; do
 			if [ -d "$skill_dir" ]; then
@@ -919,6 +968,13 @@ enable_plugins() {
 					log_success "Copied $skill_name to Codex CLI"
 				else
 					log_info "Skipped $skill_name for Codex CLI (not compatible)"
+				fi
+
+				if skill_is_compatible_with "$skill_dir" "gemini"; then
+					cp -r "$skill_dir" "$GEMINI_SKILLS_DIR/"
+					log_success "Copied $skill_name to Gemini CLI"
+				else
+					log_info "Skipped $skill_name for Gemini CLI (not compatible)"
 				fi
 
 				# Generate OpenCode command from skill (only if compatible)
@@ -1062,10 +1118,10 @@ EOF
 }
 
 main() {
-	echo "╔══════════════════════════════════════════════════════════╗"
-	echo "║         AI Tools Setup                                   ║"
-	echo "║   Claude • OpenCode • Amp • CCS • Codex • AI Switcher    ║"
-	echo "╚══════════════════════════════════════════════════════════╝"
+	echo "╔════════════════════════════════════════════════════════════════════╗"
+	echo "║           AI Tools Setup                                           ║"
+	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • AI Switcher     ║"
+	echo "╚════════════════════════════════════════════════════════════════════╝"
 	echo
 
 	if [ "$DRY_RUN" = true ]; then
@@ -1101,6 +1157,9 @@ main() {
 	echo
 
 	install_codex
+	echo
+
+	install_gemini
 	echo
 
 	copy_configurations

@@ -2,7 +2,7 @@
 name: slop
 description: Removes AI-generated code slop from git diffs to maintain code quality
 license: MIT
-compatibility: claude, opencode, amp, codex
+compatibility: claude, opencode, amp, codex, gemini
 hint: Use when cleaning up AI-generated code slop in git diffs
 metadata:
   audience: all

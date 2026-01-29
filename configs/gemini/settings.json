@@ -1,0 +1,58 @@
+{
+	"$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
+	"mcpServers": {
+		"context7": {
+			"url": "https://mcp.context7.com/mcp"
+		},
+		"sequential-thinking": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
+		}
+	},
+	"security": {
+		"auth": {
+			"selectedType": "oauth-personal"
+		},
+		"enablePermanentToolApproval": true,
+		"folderTrust": {
+			"enabled": true
+		},
+		"environmentVariableRedaction": {
+			"enabled": true
+		}
+	},
+	"ui": {
+		"theme": "Dracula",
+		"showStatusInTitle": true,
+		"hideBanner": true,
+		"footer": {
+			"hideContextPercentage": false
+		},
+		"showMemoryUsage": false,
+		"showCitations": true,
+		"showModelInfoInChat": true
+	},
+	"general": {
+		"previewFeatures": true
+	},
+	"context": {
+		"loadMemoryFromIncludeDirectories": true,
+		"fileName": ["CLAUDE.md", "GEMINI.md", "AGENTS.md"]
+	},
+	"tools": {
+		"shell": {
+			"showColor": true
+		}
+	},
+	"ide": {
+		"enabled": true
+	},
+	"experimental": {
+		"enableAgents": true,
+		"plan": true
+	}
+}

@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Codex and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Codex, Gemini CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 ## ✨ Features
 
@@ -621,6 +621,122 @@ codex --oss
 # Use with a specific task
 codex "Explain this code"
 ```
+
+</details>
+
+---
+
+## 🔷 Google Gemini CLI (Optional)
+
+Google's AI agent that brings the power of Gemini directly into your terminal. [Homepage](https://github.com/google-gemini/gemini-cli)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Installation
+
+```bash
+npm install -g @google/gemini-cli
+```
+
+Or using Homebrew (macOS/Linux):
+
+```bash
+brew install gemini-cli
+```
+
+### Authentication
+
+Gemini CLI supports multiple authentication methods:
+
+**Option 1: Login with Google (OAuth)**
+```bash
+gemini
+# Follow the browser authentication flow
+```
+
+**Option 2: Gemini API Key**
+```bash
+export GEMINI_API_KEY="YOUR_API_KEY"
+gemini
+```
+
+Get your API key from [Google AI Studio](https://aistudio.google.com/apikey).
+
+### Configuration
+
+Located in [`configs/gemini/`](configs/gemini/):
+
+- [`settings.json`](configs/gemini/settings.json) - Main configuration with MCP servers and experimental features
+- [`GEMINI.md`](configs/gemini/GEMINI.md) - Agent guidelines
+- [`AGENTS.md`](configs/gemini/AGENTS.md) - Additional agent guidelines
+- [`agents/`](configs/gemini/agents/) - Custom agent definitions (`.md` format with YAML frontmatter)
+  - `ai-slop-remover.md` - Clean up AI-generated code patterns
+  - `docs-writer.md` - Generate comprehensive documentation
+  - `review.md` - Code review with best practices
+  - `security-audit.md` - Security vulnerability assessment
+- [`commands/`](configs/gemini/commands/) - Custom slash commands (`.toml` format)
+  - `ultrathink.toml` - Deep thinking mode
+
+### Key Features
+
+- 🆓 **Free tier**: 60 requests/min and 1,000 requests/day with personal Google account
+- 🧠 **Powerful models**: Access to Gemini 2.5 Flash and Pro with 1M token context window
+- 🔧 **Built-in tools**: Google Search grounding, file operations, shell commands
+- 🔌 **MCP support**: Extensible via Model Context Protocol
+- 💻 **Terminal-first**: Designed for command-line developers
+
+### Usage
+
+```bash
+# Start Gemini CLI
+gemini
+
+# Include multiple directories
+gemini --include-directories ../lib,../docs
+
+# Use specific model
+gemini -m gemini-2.5-flash
+
+# Non-interactive mode for scripts
+gemini -p "Explain the architecture of this codebase"
+```
+
+### Custom Commands
+
+Custom commands are stored in `~/.gemini/commands/` as TOML files. Example:
+
+```bash
+# Run the ultrathink command
+/ultrathink What is the best approach to optimize this database query?
+```
+
+### MCP Servers
+
+Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "qmd": {
+      "command": "qmd",
+      "args": ["mcp"]
+    }
+  },
+  "experimental": {
+    "enableAgents": true
+  }
+}
+```
+
+> **Note:** Custom agents in `~/.gemini/agents/` are automatically discovered when `experimental.enableAgents` is set to `true`.
 
 </details>
 
