@@ -340,30 +340,30 @@ Using claude-hud plugin:
 
 Located in [`configs/claude/commands/`](configs/claude/commands/):
 
-- `/handoffs` - Create handoff plans for continuing work
-- `/pickup` - Resume work from previous handoff sessions
+- `/ccs` - CCS delegation and profile management
 - `/plannotator-review` - Interactive code review
+- `/ultrathink` - Deep thinking mode
 
 ### Custom Agents
 
 Located in [`configs/claude/agents/`](configs/claude/agents/):
 
-- `code-review` - Comprehensive code review with security focus
-- `test-generator` - Generate comprehensive test suites
-- `documentation` - Generate clear, maintainable documentation
+- `ai-slop-remover` - Remove AI-generated boilerplate and improve code quality
 
 ### Skills
 
-**Note:** Skills like `prd`, `ralph`, `qmd-knowledge`, and `codemap` are installed by `cli.sh` (from marketplace or local [`.claude-plugin/plugins/`](.claude-plugin/plugins/)):
+**Local Marketplace Plugins** - Installed by `cli.sh` from [`.claude-plugin/plugins/`](.claude-plugin/plugins/):
 
-- `ccs-delegation` - Auto-profile selection for CCS with context enhancement
-- `context-check` - Strategic context usage guidance
-- `handoffs` - Create handoff plans for continuing work
-- `pickup` - Resume work from previous handoff sessions
+- `adr` - Architecture Decision Records
+- `codemap` - Parallel codebase analysis producing structured documentation
+- `handoffs` - Create handoff plans for continuing work (provides `/handoffs` command)
+- `pickup` - Resume work from previous handoff sessions (provides `/pickup` command)
+- `pr-review` - Pull request review workflows
 - `prd` - Generate Product Requirements Documents
-- `ralph` - Convert PRDs to JSON for autonomous agent execution
 - `qmd-knowledge` - Project knowledge management
-- `codemap` - Parallel codebase analysis
+- `ralph` - Convert PRDs to JSON for autonomous agent execution
+- `slop` - AI slop detection and removal
+- `tdd` - Test-Driven Development workflows
 
 ### Projects Built with AI
 
