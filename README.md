@@ -100,8 +100,8 @@ The installer automatically sets up:
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
     },
     "qmd": {
-      "command": "npx",
-      "args": ["-y", "qmd"]
+      "command": "qmd",
+      "args": ["mcp"]
     }
   }
 }
@@ -116,7 +116,7 @@ claude mcp list
 claude mcp remove context7
 
 # Get server details
-claude mcp info context7
+claude mcp get context7
 ```
 
 **Configuration location:** `~/.claude/`
@@ -246,18 +246,17 @@ This allows you to:
 <summary><strong>View recommended tools</strong></summary>
 
 ### Plannotator
-[**Plannotator**](https://github.com/anthropics/plannotator) - Annotate coding plans with context about files, dependencies, tests.
+[**Plannotator**](https://plannotator.ai/) - Annotate plans outside the terminal for better collaboration. ([GitHub](https://github.com/backnotprop/plannotator))
 
 ```bash
 npx plannotator@latest
 ```
 
 ### Claude-Mem
-[**Claude-Mem**](https://github.com/kirankunigiri/claude-mem) - Memory management for Claude conversations.
 
-```bash
-npx @kirankunigiri/claude-mem
-```
+⚠️ **DEPRECATED** - The original claude-mem is currently broken and not recommended. See [issue #609](https://github.com/thedotmack/claude-mem/issues/609).
+
+**Alternative:** Use the [qmd Knowledge Management System](docs/qmd-knowledge-management.md) for project-specific knowledge capture.
 
 ### qmd Knowledge Skill
 [**qmd**](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management.
