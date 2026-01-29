@@ -20,6 +20,11 @@ fi
 # Track whether Amp is installed (for backlog.md dependency)
 AMP_INSTALLED=false
 
+# Auto-detect non-interactive mode (stdin is piped)
+if [ ! -t 0 ]; then
+	YES_TO_ALL=true
+fi
+
 for arg in "$@"; do
 	case $arg in
 	--dry-run)
