@@ -89,7 +89,10 @@ execute_installer() {
 
 	# Ensure TMPDIR is set to avoid cross-device link errors
 	local tmp_dir="${HOME}/.claude/tmp"
-	mkdir -p "$tmp_dir" 2>/dev/null || true
+	if ! mkdir -p "$tmp_dir" 2>/dev/null; then
+		log_warning "Could not create TMPDIR ($tmp_dir), falling back to /tmp"
+		tmp_dir="/tmp"
+	fi
 	export TMPDIR="$tmp_dir"
 
 	local temp_script

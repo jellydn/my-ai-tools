@@ -9,6 +9,7 @@ DRY_RUN=false
 BACKUP=false
 PROMPT_BACKUP=true
 YES_TO_ALL=false
+VERBOSE=false
 
 # Detect OS (Windows vs Unix-like)
 IS_WINDOWS=false
@@ -39,6 +40,10 @@ for arg in "$@"; do
 		YES_TO_ALL=true
 		shift
 		;;
+	-v|--verbose)
+		VERBOSE=true
+		shift
+		;;
 	--rollback)
 		log_info "Rolling back last transaction..."
 		rollback_transaction
@@ -46,7 +51,7 @@ for arg in "$@"; do
 		;;
 	*)
 		echo "Unknown option: $arg"
-		echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [--rollback]"
+		echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--rollback]"
 		exit 1
 		;;
 	esac
@@ -186,34 +191,51 @@ install_global_tools() {
 safe_copy_dir() {
 	local source_dir="$1"
 	local dest_dir="$2"
-	
+	local skipped=0
+	local errors=0
+
 	if [ "$DRY_RUN" = true ]; then
 		log_info "[DRY RUN] Would copy $source_dir to $dest_dir"
 		return 0
 	fi
-	
+
 	# Ensure destination parent exists
-	mkdir -p "$(dirname "$dest_dir")" 2>/dev/null || true
-	
+	if ! mkdir -p "$(dirname "$dest_dir")" 2>/dev/null; then
+		log_warning "Failed to create destination directory: $(dirname "$dest_dir")"
+		return 1
+	fi
+
 	# Try regular copy first
 	if cp -r "$source_dir" "$dest_dir" 2>/dev/null; then
 		return 0
 	fi
-	
+
 	# If copy failed, try with rsync to handle busy files
 	if command -v rsync &>/dev/null; then
 		# Use rsync to copy, matching cp -r behavior
-		rsync -a --ignore-errors "$source_dir" "$(dirname "$dest_dir")/" 2>/dev/null || true
-	else
-		# Fallback: copy non-binary files, skip busy binaries
-		mkdir -p "$dest_dir"
-		find "$source_dir" -type f 2>/dev/null | while read -r file; do
-			rel_path="${file#$source_dir/}"
-			dest_file="$dest_dir/$rel_path"
-			mkdir -p "$(dirname "$dest_file")"
-			cp "$file" "$dest_file" 2>/dev/null || log_warning "Skipped busy file: $rel_path"
-		done
+		if rsync -a --ignore-errors "$source_dir" "$(dirname "$dest_dir")/" 2>/dev/null; then
+			return 0
+		fi
 	fi
+
+	# Fallback: copy non-binary files, skip busy binaries
+	mkdir -p "$dest_dir"
+	while IFS= read -r file; do
+		rel_path="${file#$source_dir/}"
+		dest_file="$dest_dir/$rel_path"
+		mkdir -p "$(dirname "$dest_file")"
+		if cp "$file" "$dest_file" 2>/dev/null; then
+			((errors++))
+		else
+			((skipped++))
+			[ "$VERBOSE" = true ] && log_warning "Skipped busy file: $rel_path"
+		fi
+	done < <(find "$source_dir" -type f 2>/dev/null)
+
+	# Log summary in verbose mode
+	[ "$VERBOSE" = true ] && [ $skipped -gt 0 ] && log_info "Skipped $skipped busy file(s)"
+
+	return 0
 }
 
 # Helper: Copy a config directory if it exists in source and destination
