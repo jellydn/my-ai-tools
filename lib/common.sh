@@ -42,11 +42,7 @@ download_and_verify_script() {
 	local url="$1"
 	local expected_sha256="$2"
 	local description="$3"
-	# Use TMPDIR if set, otherwise fall back to /tmp
-	local tmp_dir="${TMPDIR:-/tmp}"
-	# Ensure temp directory exists
-	mkdir -p "$tmp_dir" 2>/dev/null || true
-	local temp_script="$tmp_dir/install-$(date +%s)-$$"
+	local temp_script="/tmp/install-$(date +%s)-$$"
 
 	log_info "Downloading $description..."
 	if ! curl -fsSL "$url" -o "$temp_script" 2>/dev/null; then
@@ -111,22 +107,8 @@ cleanup_old_backups() {
 	fi
 
 	# Find all backup directories and sort by modification time (newest first)
-	# Use different methods for GNU find (Linux) vs BSD find (macOS)
 	local old_backups
-	# Test for GNU find by checking if it has --version flag (GNU-specific)
-	if find --version &>/dev/null; then
-		# GNU find (Linux) - supports -printf
-		old_backups=$(find "$HOME" -maxdepth 1 -type d -name "ai-tools-backup-*" -printf "%T@ %p\n" 2>/dev/null | sort -rn | tail -n +$((max_backups + 1)) | cut -d' ' -f2-) || true
-	else
-		# BSD find (macOS) - use stat instead
-		old_backups=$(find "$HOME" -maxdepth 1 -type d -name "ai-tools-backup-*" 2>/dev/null | while read -r dir; do
-			# Get modification time, skip if stat fails
-			mtime=$(stat -f "%m" "$dir" 2>/dev/null)
-			if [ -n "$mtime" ]; then
-				echo "$mtime $dir"
-			fi
-		done | sort -rn | tail -n +$((max_backups + 1)) | cut -d' ' -f2-) || true
-	fi
+	old_backups=$(find "$HOME" -maxdepth 1 -type d -name "ai-tools-backup-*" -printf "%T@ %p\n" 2>/dev/null | sort -rn | tail -n +$((max_backups + 1)) | cut -d' ' -f2-)
 
 	if [ -n "$old_backups" ]; then
 		for backup_dir in $old_backups; do
