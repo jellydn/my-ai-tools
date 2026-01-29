@@ -520,12 +520,14 @@ copy_configurations() {
 		copy_config_file "$SCRIPT_DIR/configs/codex/AGENTS.md" "$HOME/.codex/"
 		copy_config_file "$SCRIPT_DIR/configs/codex/config.json" "$HOME/.codex/"
 		if [ -f "$SCRIPT_DIR/configs/codex/config.toml" ]; then
-			if [ ! -f "$HOME/.codex/config.toml" ]; then
-				execute "cp $SCRIPT_DIR/configs/codex/config.toml $HOME/.codex/"
-				log_success "Copied Codex config.toml"
-			else
-				log_info "Codex config.toml already exists, preserving user config"
+			if [ -f "$HOME/.codex/config.toml" ]; then
+				# Backup existing config before overwriting
+				execute "cp $HOME/.codex/config.toml $HOME/.codex/config.toml.bak"
+				log_success "Backed up existing config.toml to config.toml.bak"
 			fi
+			# Copy new config (whether or not there was an old one)
+			execute "cp $SCRIPT_DIR/configs/codex/config.toml $HOME/.codex/"
+			log_success "Copied Codex config.toml"
 		fi
 		log_success "Codex CLI configs copied (skills invoked via \$, prompts no longer needed)"
 	fi
