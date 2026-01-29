@@ -367,19 +367,34 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 
 ### Projects Built with AI
 
-- [**CopilotKit Next OpenAI Template**](https://github.com/jellydn/copilotkit-next-openai-template)
-- [**Screenshot To Code AI**](https://github.com/jellydn/screenshot-to-code-ai)
-- [**Code Review Action**](https://github.com/jellydn/code-review-action)
+Real-world projects built using these AI tools:
+
+| Project                                                           | Description                                              | Tools Used        |
+| ----------------------------------------------------------------- | -------------------------------------------------------- | ----------------- |
+| [Keybinder](https://github.com/jellydn/keybinder)                 | macOS app for managing skhd keyboard shortcuts           | Claude + spec-kit |
+| [SealCode](https://github.com/jellydn/vscode-seal-code)           | VS Code extension for AI-powered code review             | Amp + Ralph       |
+| [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development      | TypeScript        |
+| [AI CLI Switcher](https://github.com/jellydn/ai-cli-switcher)     | Fast launcher for switching between AI coding assistants | TypeScript        |
+| [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity               | TypeScript        |
+
+📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
 
 ### Recommended Community Skills
 
-- [**AI-optimized prompt format (MCP Protocol)**](https://github.com/modelcontextprotocol/docs/issues/104) - Best practices for prompting AI tools
+Official and community-maintained skill collections for specific frameworks:
 
-Install community skills:
+| Framework            | Skills Repository                                                                                             | Description                                                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Expo**             | [expo/skills](https://github.com/expo/skills)                                                                 | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows. |
+| **Next.js**          | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)                                       | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.          |
+| **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.          |
+
+**Installation:**
 
 ```bash
 # Clone skills to your local config directory
-npx skills add vercel-labs/agent-browser
+git clone https://github.com/expo/skills.git ~/.claude/skills/expo
+git clone https://github.com/vercel-labs/agent-skills.git ~/.claude/skills/nextjs
 ```
 
 </details>
