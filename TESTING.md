@@ -7,6 +7,7 @@ This document explains how to test the fixes for the one-line installer issues.
 1. **File not found error during installation** - Temp files were created in `/tmp/` which might be on a different filesystem
 2. **"Text file busy" error** - Copying running binary files failed  
 3. **Non-interactive mode stopping** - Script would hang when piped via curl
+4. **Log messages interfering with command substitution** - Log functions output to stdout caused captured output to contain log messages instead of return values
 
 ## Testing the Fixes
 
@@ -61,6 +62,24 @@ mkdir -p "$TMPDIR"
 # Should use rsync or fallback method
 ```
 
+### Test 6: Log Functions Output to stderr
+```bash
+# Test that log messages don't interfere with command substitution
+source lib/common.sh
+
+test_func() {
+    log_info "Test message"
+    echo "return_value"
+}
+
+# This should capture only "return_value", not the log message
+result=$(test_func)
+echo "Captured: $result"
+
+# Expected: result="return_value"
+# Log message should appear on screen but not in $result
+```
+
 ## Expected Behavior
 
 ### Interactive Mode (Normal Terminal)
@@ -98,3 +117,4 @@ If issues occur, check:
 2. Permissions on `$HOME/.claude/tmp`
 3. Whether files in `.ccs/cliproxy/bin` are running
 4. stdin availability with `[ -t 0 ]` test
+5. Log messages appearing in captured variables (should output to stderr only)
