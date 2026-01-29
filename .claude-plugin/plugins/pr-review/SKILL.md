@@ -29,10 +29,11 @@ The command accepts the PR identifier from `$ARGUMENTS`:
 2. **PR Number**: Just the PR number (e.g., `123`)
 3. **No Arguments**: Auto-detect the PR associated with the current Git branch
 
-If `$ARGUMENTS` is provided, use it as the PR identifier. Otherwise, detect the PR using:
+If `$ARGUMENTS` is provided, use it as the PR identifier. Otherwise, auto-detect the current branch's PR using:
 ```bash
 gh pr view --json number,url -q '.number'
 ```
+This extracts the PR number from the current branch's open PR for use in subsequent commands.
 
 If no open PR is found for the current branch, show this error:
 ```
