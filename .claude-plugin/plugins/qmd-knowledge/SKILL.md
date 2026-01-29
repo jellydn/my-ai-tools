@@ -39,10 +39,10 @@ This skill provides a unified knowledge management system. You install the skill
 
 # Project knowledge storage (managed by the skill)
 ~/.ai-knowledges/
-├── my-ai-tools/          # Collection for my-ai-tools project
+├── <project-name>/       # Collection for your project
 │   ├── learnings/
 │   └── issues/
-└── another-project/      # Collection for another-project
+└── another-project/      # Collection for another project
     ├── learnings/
     └── issues/
 ```
@@ -70,7 +70,7 @@ Use the qmd MCP server tools directly from Claude or OpenCode:
 
 ```bash
 # Fast keyword search
-qmd search "MCP servers" -c my-ai-tools
+qmd search "MCP servers" -c <project-name>
 
 # Semantic search with AI embeddings
 qmd vsearch "how to configure MCP"
@@ -82,7 +82,7 @@ qmd query "MCP server configuration"
 qmd get "references/learnings/2024-01-26-qmd-integration.md"
 
 # Search with minimum score filter
-qmd search "API" --all --files --min-score 0.3 -c my-ai-tools
+qmd search "API" --all --files --min-score 0.3 -c <project-name>
 ```
 
 ## Setup
@@ -92,26 +92,28 @@ qmd search "API" --all --files --min-score 0.3 -c my-ai-tools
    bun install -g https://github.com/tobi/qmd
    ```
 
-2. **Install the skill** (via the my-ai-tools setup or manually):
+2. **Install the skill**:
    ```bash
    # The skill is installed to your AI tool's skills directory:
    # - OpenCode: ~/.config/opencode/skill/qmd-knowledge/
    # - Claude Code: ~/.claude/skills/qmd-knowledge/
    # - Amp: ~/.config/amp/skills/qmd-knowledge/
-   # This happens automatically when you run ./cli.sh
    ```
 
 3. **Configure MCP server** (see installation docs for Claude/OpenCode/Amp)
 
 4. **Create a knowledge collection for your project**:
    ```bash
-   # Create storage directory for your project
-   mkdir -p ~/.ai-knowledges/my-ai-tools/learnings
-   mkdir -p ~/.ai-knowledges/my-ai-tools/issues
+   # Set your project name (the skill will auto-detect from git repo or directory name)
+   # Optional: export QMD_PROJECT=<project-name> to override detection
+   
+   # Create storage directory for your project (replace <project-name> with your project)
+   mkdir -p ~/.ai-knowledges/<project-name>/learnings
+   mkdir -p ~/.ai-knowledges/<project-name>/issues
    
    # Add qmd collection
-   qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
-   qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project: learnings, issue notes, and conventions"
+   qmd collection add ~/.ai-knowledges/<project-name> --name <project-name>
+   qmd context add qmd://<project-name> "Knowledge base for <project-name> project: learnings, issue notes, and conventions"
    
    # Generate embeddings for AI-powered search
    qmd embed
@@ -150,7 +152,7 @@ The qmd MCP server allows Claude to:
 
 4. **Claude queries the knowledge base** using qmd MCP tools:
    ```bash
-   qmd query --collection my-ai-tools "MCP servers"
+   qmd query --collection <project-name> "MCP servers"
    ```
 
 ## Benefits over claude-mem
@@ -161,6 +163,25 @@ The qmd MCP server allows Claude to:
 - **Self-documenting**: Follows skills.md specification
 - **No repository pollution**: Knowledge stored outside project directories
 - **Version controllable**: Can optionally track knowledge in separate git repos
+
+## Project detection
+
+The skill automatically detects your project name using the following priority:
+
+1. **QMD_PROJECT environment variable** (highest priority)
+   ```bash
+   export QMD_PROJECT=my-project-name
+   ```
+
+2. **Git repository name** (auto-detected)
+   - Uses the name of the git repository root directory
+   - Works when you're anywhere inside a git repository
+
+3. **Current directory name** (fallback)
+   - Uses the name of your current working directory
+   - Used when not in a git repository
+
+This means you can use the skill in any project without hardcoding project names. The knowledge base will be stored at `~/.ai-knowledges/<detected-project-name>/`.
 
 ## 📋 Best Practices
 
