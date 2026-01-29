@@ -429,18 +429,38 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
 
 ```json
 {
-  "model": "o1-preview",
-  "provider": "openai",
-  "skills": [
-    {
-      "name": "atomic-commits",
-      "path": "~/.config/opencode/skills/atomic-commits"
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
+  "theme": "kanagawa",
+  "default_agent": "plan",
+  "mcp": {
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true
     },
-    {
-      "name": "zen-commit",
-      "path": "~/.config/opencode/skills/zen-commit"
+    "qmd": {
+      "type": "local",
+      "command": ["qmd", "mcp"],
+      "enabled": true
     }
-  ]
+  },
+  "agent": {
+    "build": {
+      "permission": {
+        "bash": {
+          "git push": "ask",
+          "qmd": "allow",
+          "qmd query": "allow",
+          "qmd get": "allow",
+          "qmd search": "allow",
+          "$HOME/.config/opencode/skill/qmd-knowledge/scripts/record.sh": "allow",
+          "$HOME/.claude/skills/qmd-knowledge/scripts/record.sh": "allow"
+        }
+      }
+    }
+  },
+  "plugin": ["@plannotator/opencode@latest"]
 }
 ```
 
@@ -482,17 +502,29 @@ Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/
 
 ```json
 {
-  "model": "claude-3.5-sonnet",
-  "provider": "anthropic",
-  "skills": []
+  "amp.dangerouslyAllowAll": true,
+  "amp.experimental.autoHandoff": { "context": 90 },
+  "amp.mcpServers": {
+    "context7": {
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["chrome-devtools-mcp@latest"]
+    },
+    "backlog": {
+      "command": "backlog",
+      "args": ["mcp", "start"]
+    },
+    "qmd": {
+      "command": "qmd",
+      "args": ["mcp"]
+    }
+  }
 }
 ```
 
 See [`configs/amp/AGENTS.md`](configs/amp/AGENTS.md) for agent guidelines.
-
-### MCP Servers
-
-Amp uses the same MCP server configuration as Claude Code. MCP servers are typically configured globally.
 
 </details>
 
@@ -513,16 +545,60 @@ npm install -g @kaitranntt/ccs
 
 ### Features
 
-- Switch between multiple Claude Code accounts
-- Share MCP servers across accounts
-- Custom hooks per account
-- CLI proxy for seamless switching
+- **Multiple Accounts**: Switch between different Claude subscriptions instantly
+- **API Profiles**: Support for GLM, Kimi, OpenRouter, and custom endpoints
+- **CLIProxy**: OAuth-based providers (Gemini, Codex, Agy, Qwen, iFlow, Kiro, GitHub Copilot)
+- **WebSearch Fallback**: Automatic web search for third-party providers
+- **Zero Downtime**: Switch accounts without losing context
 
 ### Configuration
 
-Located in [`configs/ccs/`](configs/ccs/):
+Copy all files from [`configs/ccs/`](configs/ccs/) to `~/.ccs/`:
 
-- [`config.yaml`](configs/ccs/config.yaml) - Main CCS configuration with account profiles
+- [`config.yaml`](configs/ccs/config.yaml) - Main configuration
+
+Key configuration sections from `config.yaml`:
+
+```yaml
+version: 8
+
+accounts: {}
+
+profiles:
+  glm:
+    type: api
+    settings: ~/.ccs/glm.settings.json
+  mm:
+    type: api
+    settings: ~/.ccs/mm.settings.json
+  ollama-cloud:
+    type: api
+    settings: ~/.ccs/ollama-cloud.settings.json
+  ollama:
+    type: api
+    settings: ~/.ccs/ollama.settings.json
+
+cliproxy:
+  oauth_accounts: {}
+  providers:
+    - gemini
+    - codex
+    - agy
+    - qwen
+    - iflow
+    - kiro
+    - ghcp
+
+websearch:
+  enabled: true
+  providers:
+    gemini:
+      enabled: true
+      model: gemini-2.5-flash
+    opencode:
+      enabled: true
+      model: opencode/grok-code
+```
 
 ### Usage
 
