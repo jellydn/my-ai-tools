@@ -429,7 +429,7 @@ install_codex() {
 		if command -v codex &>/dev/null; then
 			log_warning "Codex CLI is already installed"
 		else
-			execute "npm install -g @openai/codex-cli"
+			execute "npm install -g @openai/codex"
 			log_success "Codex CLI installed"
 		fi
 	}
