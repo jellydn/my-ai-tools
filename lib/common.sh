@@ -9,21 +9,21 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Logging functions
+# Logging functions (output to stderr to avoid capturing in command substitution)
 log_info() {
-	echo -e "${BLUE}ℹ ${NC}$1"
+	echo -e "${BLUE}ℹ ${NC}$1" >&2
 }
 
 log_success() {
-	echo -e "${GREEN}✓${NC} $1"
+	echo -e "${GREEN}✓${NC} $1" >&2
 }
 
 log_warning() {
-	echo -e "${YELLOW}⚠${NC} $1"
+	echo -e "${YELLOW}⚠${NC} $1" >&2
 }
 
 log_error() {
-	echo -e "${RED}✗${NC} $1"
+	echo -e "${RED}✗${NC} $1" >&2
 }
 
 # Execute function (for dry-run support)
@@ -42,7 +42,18 @@ download_and_verify_script() {
 	local url="$1"
 	local expected_sha256="$2"
 	local description="$3"
-	local temp_script="/tmp/install-$(date +%s)-$$"
+	local tmpdir
+	local temp_script
+
+	# Use TMPDIR if set and writable, otherwise use $HOME-based directory
+	if [ -n "$TMPDIR" ] && [ -d "$TMPDIR" ] && [ -w "$TMPDIR" ]; then
+		tmpdir="$TMPDIR"
+	else
+		tmpdir="$HOME/.claude/tmp"
+		mkdir -p "$tmpdir" 2>/dev/null || tmpdir="/tmp"
+	fi
+
+	temp_script="$tmpdir/install-$(date +%s)-$$"
 
 	log_info "Downloading $description..."
 	if ! curl -fsSL "$url" -o "$temp_script" 2>/dev/null; then

@@ -18,6 +18,12 @@ fi
 # Track whether Amp is installed (for backlog.md dependency)
 AMP_INSTALLED=false
 
+# Auto-detect non-interactive mode (stdin is piped)
+YES_TO_ALL=false
+if [ ! -t 0 ]; then
+	YES_TO_ALL=true
+fi
+
 for arg in "$@"; do
 	case $arg in
 	--dry-run)
@@ -34,14 +40,18 @@ for arg in "$@"; do
 		PROMPT_BACKUP=false
 		shift
 		;;
+	--yes|-y)
+		YES_TO_ALL=true
+		shift
+		;;
 	--rollback)
 		log_info "Rolling back last transaction..."
 		rollback_transaction
 		exit $?
 		;;
 	*)
-		echo "Unknown option: $arg"
-		echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--rollback]"
+		log_error "Unknown option: $arg"
+		log_info "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [--rollback]"
 		exit 1
 		;;
 	esac
@@ -174,6 +184,39 @@ install_global_tools() {
 	fi
 
 	log_success "Global tools check complete"
+}
+
+# Helper: Safely copy a directory, avoiding "Text file busy" errors
+# Uses rsync fallback when cp fails for in-use files
+# Usage: safe_copy_dir "source_dir" "dest_dir"
+safe_copy_dir() {
+	local source_dir="$1"
+	local dest_dir="$2"
+
+	# Guard clause: check source exists and is a directory
+	if [ ! -d "$source_dir" ]; then
+		log_warning "Source directory does not exist: $source_dir"
+		return 1
+	fi
+
+	if [ "$DRY_RUN" = true ]; then
+		log_info "[DRY RUN] Would copy directory: $source_dir -> $dest_dir"
+		return 0
+	fi
+
+	mkdir -p "$dest_dir" || return 1
+
+	# Try cp first, with rsync fallback for busy files
+	if ! cp -r "$source_dir"/ "$dest_dir"/ 2>/dev/null; then
+		log_info "cp failed, trying rsync (may indicate busy files)..."
+		if ! rsync -a --ignore-errors "$source_dir"/ "$dest_dir"/ 2>/dev/null; then
+			log_error "Failed to copy $source_dir to $dest_dir"
+			return 1
+		fi
+	fi
+
+	log_success "Copied $source_dir to $dest_dir"
+	return 0
 }
 
 # Helper: Copy a config directory if it exists in source and destination
@@ -500,7 +543,10 @@ copy_configurations() {
 		execute "cp $SCRIPT_DIR/configs/ccs/*.yaml $HOME/.ccs/ 2>/dev/null || true"
 		execute "cp $SCRIPT_DIR/configs/ccs/*.json $HOME/.ccs/ 2>/dev/null || true"
 		execute "cp $SCRIPT_DIR/configs/ccs/*.settings.json $HOME/.ccs/ 2>/dev/null || true"
-		[ -d "$SCRIPT_DIR/configs/ccs/cliproxy" ] && execute "cp -r $SCRIPT_DIR/configs/ccs/cliproxy $HOME/.ccs/"
+		# Use safe_copy_dir for cliproxy to handle "Text file busy" errors
+		if [ -d "$SCRIPT_DIR/configs/ccs/cliproxy" ]; then
+			safe_copy_dir "$SCRIPT_DIR/configs/ccs/cliproxy" "$HOME/.ccs/cliproxy"
+		fi
 		[ -d "$SCRIPT_DIR/configs/ccs/hooks" ] && execute "cp -r $SCRIPT_DIR/configs/ccs/hooks $HOME/.ccs/"
 		log_success "CCS configs copied"
 	fi
@@ -681,13 +727,13 @@ enable_plugins() {
 				qmd-knowledge)
 					if ! command -v qmd &>/dev/null && command -v bun &>/dev/null; then
 						log_info "Installing qmd CLI via bun..."
-						bun install -g https://github.com/tobi/qmd 2>&1 || log_warning "qmd installation failed"
+						execute "bun install -g https://github.com/tobi/qmd" 2>&1 || log_warning "qmd installation failed"
 					fi
 					;;
 				worktrunk)
 					if ! command -v wt &>/dev/null && command -v brew &>/dev/null; then
 						log_info "Installing Worktrunk CLI via Homebrew..."
-						brew install worktrunk 2>&1 && wt config shell install 2>&1 || log_warning "Worktrunk installation failed"
+						execute "brew install worktrunk" 2>&1 && execute "wt config shell install" 2>&1 || log_warning "Worktrunk installation failed"
 					fi
 					;;
 			esac
