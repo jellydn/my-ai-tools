@@ -598,7 +598,7 @@ OpenAI's command-line coding assistant. [Homepage](https://developers.openai.com
 ### Installation
 
 ```bash
-npm install -g @openai/codex-cli
+npm install -g @openai/codex
 ```
 
 ### Configuration
