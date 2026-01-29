@@ -1,6 +1,25 @@
 # Welcome to my-ai-tools 👋
 
-Comprehensive guide to replicate my AI coding tools setup with custom configurations, MCP servers, plugins, and commands.
+[![GitHub stars](https://img.shields.io/github/stars/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/stargazers)
+[![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
+
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Codex and CCS with custom configurations, MCP servers, plugins, and commands.
+
+## ✨ Features
+
+- 🚀 **One-line installer** - Get started in seconds
+- 🔄 **Bidirectional sync** - Install configs or export your current setup
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, and more
+- 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd
+- 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
+- 📦 **Plugin support** - Official and community plugins
+
+## 🎬 Demo
+
+[![IT Man Channel](https://img.shields.io/badge/YouTube-IT%20Man%20Channel-red?logo=youtube)](https://github.com/jellydn/itman-channel)
+
+[![IT Man - My AI Setup in 2026](https://i.ytimg.com/vi/ESudSFAyuuw/mqdefault.jpg)](https://www.youtube.com/watch?v=ESudSFAyuuw)
 
 ## 📋 Prerequisites
 
@@ -313,11 +332,11 @@ Real-world projects built using these AI tools:
 
 Official and community-maintained skill collections for specific frameworks:
 
-| Framework   | Skills Repository                                                       | Description                                                                                                                                  |
-| ----------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Expo**    | [expo/skills](https://github.com/expo/skills)                           | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows. |
-| **Next.js** | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.          |
-| **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`. |
+| Framework            | Skills Repository                                                                                             | Description                                                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Expo**             | [expo/skills](https://github.com/expo/skills)                                                                 | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows. |
+| **Next.js**          | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)                                       | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.          |
+| **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.          |
 
 **Installation:**
 
@@ -352,7 +371,7 @@ All Claude Code configs are stored in `~/.claude/` (canonical location):
 
 **Latest `settings.json` configuration:**
 
-````json
+```json
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "env": {
@@ -450,7 +469,7 @@ All Claude Code configs are stored in `~/.claude/` (canonical location):
     "claude-md-management@claude-plugins-official": true
   }
 }
-
+```
 
 ## 🔄 Bidirectional Config Sync
 
@@ -462,7 +481,7 @@ Copy configs from this repository to your home directory:
 
 ```bash
 ./cli.sh [--dry-run] [--backup] [--no-backup]
-````
+```
 
 Options:
 
@@ -810,11 +829,11 @@ command = "qmd"
 args = ["mcp"]
 ```
 
-| Server | Purpose |
-|--------|---------|
-| `context7` | Documentation lookup for any library |
+| Server                | Purpose                                   |
+| --------------------- | ----------------------------------------- |
+| `context7`            | Documentation lookup for any library      |
 | `sequential-thinking` | Multi-step reasoning for complex analysis |
-| `qmd` | Knowledge management via qmd MCP |
+| `qmd`                 | Knowledge management via qmd MCP          |
 
 ### Slash Commands
 
@@ -824,14 +843,14 @@ Codex CLI supports custom slash commands via `~/.codex/prompts/` directory. Comm
 
 **Available Commands:**
 
-| Command | Description | Usage |
-|---------|-------------|-------|
-| `/handoffs` | Create session handoff plans | `/handoffs purpose-of-work` |
-| `/pickup` | Resume from handoff | `/pickup 2024-01-29-feature-x.md` |
-| `/tdd` | Test-Driven Development | `/tdd start feature-name` |
-| `/pr-review` | Fix PR review comments | `/pr-review 123` |
-| `/adr` | Architecture Decision Records | `/adr new "Decision title"` |
-| `/slop` | Remove AI code slop | `/slop main` |
+| Command      | Description                   | Usage                             |
+| ------------ | ----------------------------- | --------------------------------- |
+| `/handoffs`  | Create session handoff plans  | `/handoffs purpose-of-work`       |
+| `/pickup`    | Resume from handoff           | `/pickup 2024-01-29-feature-x.md` |
+| `/tdd`       | Test-Driven Development       | `/tdd start feature-name`         |
+| `/pr-review` | Fix PR review comments        | `/pr-review 123`                  |
+| `/adr`       | Architecture Decision Records | `/adr new "Decision title"`       |
+| `/slop`      | Remove AI code slop           | `/slop main`                      |
 
 **Argument Variables:**
 
@@ -840,6 +859,7 @@ Codex CLI supports custom slash commands via `~/.codex/prompts/` directory. Comm
 - `$$` - Literal dollar sign
 
 **Example:**
+
 ```markdown
 # Create handoff plan
 
@@ -849,6 +869,7 @@ Create a detailed handoff plan for...
 ```
 
 **Usage:**
+
 ```
 /handoffs implement-auth-feature
 ```
@@ -1068,7 +1089,7 @@ Copy [`configs/best-practices.md`](configs/best-practices.md) to your preferred 
 **Dung Huynh**
 
 - Website: [productsway.com](https://productsway.com)
-- YouTube: [IT Man Channel](https://bit.ly/m/itman)
+- YouTube: [IT Man Channel](https://www.youtube.com/@it-man)
 - GitHub: [@jellydn](https://github.com/jellydn)
 
 ## ⭐ Show your support
