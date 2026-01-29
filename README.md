@@ -667,15 +667,16 @@ Get your API key from [Google AI Studio](https://aistudio.google.com/apikey).
 
 Located in [`configs/gemini/`](configs/gemini/):
 
-- [`settings.json`](configs/gemini/settings.json) - Main configuration with MCP servers
-- [`AGENTS.md`](configs/gemini/AGENTS.md) - Agent guidelines
-- [`agent/`](configs/gemini/agent/) - Custom agent definitions
+- [`settings.json`](configs/gemini/settings.json) - Main configuration with MCP servers and experimental features
+- [`GEMINI.md`](configs/gemini/GEMINI.md) - Agent guidelines
+- [`AGENTS.md`](configs/gemini/AGENTS.md) - Additional agent guidelines
+- [`agents/`](configs/gemini/agents/) - Custom agent definitions (`.md` format with YAML frontmatter)
   - `ai-slop-remover.md` - Clean up AI-generated code patterns
   - `docs-writer.md` - Generate comprehensive documentation
   - `review.md` - Code review with best practices
   - `security-audit.md` - Security vulnerability assessment
-- [`command/`](configs/gemini/command/) - Custom slash commands
-  - `ultrathink.md` - Deep thinking mode
+- [`commands/`](configs/gemini/commands/) - Custom slash commands (`.toml` format)
+  - `ultrathink.toml` - Deep thinking mode
 
 ### Key Features
 
@@ -703,7 +704,7 @@ gemini -p "Explain the architecture of this codebase"
 
 ### Custom Commands
 
-Custom commands are stored in `~/.gemini/command/` as markdown files. Example:
+Custom commands are stored in `~/.gemini/commands/` as TOML files. Example:
 
 ```bash
 # Run the ultrathink command
@@ -720,13 +721,22 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
     "context7": {
       "url": "https://mcp.context7.com/mcp"
     },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
     "qmd": {
       "command": "qmd",
       "args": ["mcp"]
     }
+  },
+  "experimental": {
+    "enableAgents": true
   }
 }
 ```
+
+> **Note:** Custom agents in `~/.gemini/agents/` are automatically discovered when `experimental.enableAgents` is set to `true`.
 
 </details>
 

@@ -1,8 +1,7 @@
----
-description: Deep thinking mode for complex problem solving with extended reasoning
----
+description = "Deep thinking mode for complex problem solving with extended reasoning"
 
-Engage deep thinking mode for complex analysis and problem-solving. 
+prompt = """
+Engage deep thinking mode for complex analysis and problem-solving.
 
 Take your time to:
 1. Break down the problem into smaller components
@@ -12,3 +11,4 @@ Take your time to:
 5. Synthesize a comprehensive solution
 
 Provide detailed reasoning for your conclusions and recommendations.
+"""

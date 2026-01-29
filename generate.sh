@@ -327,20 +327,60 @@ generate_gemini_configs() {
 		execute "mkdir -p $SCRIPT_DIR/configs/gemini"
 		copy_single "$HOME/.gemini/AGENTS.md" "$SCRIPT_DIR/configs/gemini/AGENTS.md"
 		copy_single "$HOME/.gemini/settings.json" "$SCRIPT_DIR/configs/gemini/settings.json"
+		copy_single "$HOME/.gemini/GEMINI.md" "$SCRIPT_DIR/configs/gemini/GEMINI.md"
 
-		# Copy agent and command directories if they exist
-		for subdir in agent command; do
-			if [ -d "$HOME/.gemini/$subdir" ]; then
-				execute "mkdir -p $SCRIPT_DIR/configs/gemini/$subdir"
-				if [ "$(ls -A "$HOME/.gemini/$subdir" 2>/dev/null)" ]; then
-					if execute "cp -r '$HOME/.gemini/$subdir'/* '$SCRIPT_DIR/configs/gemini/$subdir'/ 2>/dev/null"; then
-						log_success "Gemini $subdir copied"
+		# Copy agents directory (check both 'agents' and 'agent' for backward compat)
+		for src_dir in agents agent; do
+			if [ -d "$HOME/.gemini/$src_dir" ]; then
+				execute "mkdir -p $SCRIPT_DIR/configs/gemini/agents"
+				if [ "$(ls -A "$HOME/.gemini/$src_dir" 2>/dev/null)" ]; then
+					if execute "cp -r '$HOME/.gemini/$src_dir'/* '$SCRIPT_DIR/configs/gemini/agents'/ 2>/dev/null"; then
+						log_success "Gemini agents copied"
 					else
-						log_warning "Failed to copy some Gemini $subdir files"
+						log_warning "Failed to copy some Gemini agents files"
 					fi
 				fi
+				break
 			fi
 		done
+
+		# Copy commands directory (check both 'commands' and 'command' for backward compat)
+		for src_dir in commands command; do
+			if [ -d "$HOME/.gemini/$src_dir" ]; then
+				execute "mkdir -p $SCRIPT_DIR/configs/gemini/commands"
+				if [ "$(ls -A "$HOME/.gemini/$src_dir" 2>/dev/null)" ]; then
+					if execute "cp -r '$HOME/.gemini/$src_dir'/* '$SCRIPT_DIR/configs/gemini/commands'/ 2>/dev/null"; then
+						log_success "Gemini commands copied"
+					else
+						log_warning "Failed to copy some Gemini commands files"
+					fi
+				fi
+				break
+			fi
+		done
+
+		# Copy skills from ~/.claude/skills if it exists
+		if [ -d "$HOME/.claude/skills" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/gemini/skills"
+			if [ "$(ls -A "$HOME/.claude/skills" 2>/dev/null)" ]; then
+				for skill_dir in "$HOME/.claude/skills"/*; do
+					skill_name="$(basename "$skill_dir")"
+					case "$skill_name" in
+						prd|ralph|qmd-knowledge|codemap)
+							# Skip marketplace plugins - managed separately
+							;;
+						*)
+							# Check if skill already exists in .claude-plugin/plugins
+							if skill_exists_in_plugins "$skill_name"; then
+								log_info "Skipping $skill_name (exists in .claude-plugin/plugins)"
+							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/gemini/skills'/ 2>/dev/null"; then
+								log_success "Copied skill: $skill_name"
+							fi
+							;;
+					esac
+				done
+			fi
+		fi
 
 		log_success "Gemini CLI configs generated"
 	else
