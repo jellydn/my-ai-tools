@@ -311,25 +311,8 @@ generate_codex_configs() {
 		copy_single "$HOME/.codex/config.json" "$SCRIPT_DIR/configs/codex/config.json"
 		copy_single "$HOME/.codex/config.toml" "$SCRIPT_DIR/configs/codex/config.toml"
 
-		# Note: Codex CLI skills are read directly from .claude-plugin/plugins/
-		# No need to copy skills from ~/.codex/skills
-
-		# Copy Codex prompts (slash commands)
-		if [ -d "$HOME/.codex/prompts" ]; then
-			execute "mkdir -p $SCRIPT_DIR/configs/codex/prompts"
-			if [ "$(ls -A "$HOME/.codex/prompts" 2>/dev/null)" ]; then
-				for prompt_file in "$HOME/.codex/prompts"/*.md; do
-					if [ -f "$prompt_file" ]; then
-						prompt_name=$(basename "$prompt_file")
-						if execute "cp '$prompt_file' '$SCRIPT_DIR/configs/codex/prompts/' 2>/dev/null"; then
-							log_success "Copied prompt: $prompt_name"
-						fi
-					fi
-				done
-			else
-				log_warning "Codex prompts directory is empty"
-			fi
-		fi
+		# Note: Codex CLI reads skills directly from .claude-plugin/plugins/ and invokes them via $
+		# No need to copy skills or prompts
 
 		log_success "Codex CLI configs generated"
 	else

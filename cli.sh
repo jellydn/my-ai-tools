@@ -527,13 +527,7 @@ copy_configurations() {
 				log_info "Codex config.toml already exists, preserving user config"
 			fi
 		fi
-		# Copy Codex slash commands (prompts) - skills are loaded directly from .claude-plugin/plugins/
-		if [ -d "$SCRIPT_DIR/configs/codex/prompts" ]; then
-			execute "mkdir -p $HOME/.codex/prompts"
-			execute "cp -r $SCRIPT_DIR/configs/codex/prompts/* $HOME/.codex/prompts/"
-			log_success "Copied Codex prompts (slash commands)"
-		fi
-		log_success "Codex CLI configs copied"
+		log_success "Codex CLI configs copied (skills invoked via \$, prompts no longer needed)"
 	fi
 
 	# Copy best practices and MEMORY.md
@@ -706,6 +700,35 @@ enable_plugins() {
 		fi
 	}
 
+	# Extract compatibility field from SKILL.md
+	# Returns 0 (true) if skill is compatible with platform, 1 (false) otherwise
+	skill_is_compatible_with() {
+		local skill_dir="$1"
+		local platform="$2"
+		local skill_md="$skill_dir/SKILL.md"
+
+		if [ ! -f "$skill_md" ]; then
+			# No SKILL.md means assume compatible with all
+			return 0
+		fi
+
+		# Extract compatibility line from frontmatter
+		local compat_line=$(awk '/^compatibility:/ {print; exit}' "$skill_md" 2>/dev/null)
+
+		if [ -z "$compat_line" ]; then
+			# No compatibility field means assume compatible with all
+			return 0
+		fi
+
+		# Check if platform is in the compatibility list
+		# Compatibility format: "compatibility: claude, opencode, amp, codex"
+		if echo "$compat_line" | grep -qi "\\b$platform\\b"; then
+			return 0
+		else
+			return 1
+		fi
+	}
+
 	install_local_skills() {
 		if [ ! -d "$SCRIPT_DIR/.claude-plugin/plugins" ]; then
 			log_info ".claude-plugin/plugins folder not found, skipping local skills"
@@ -752,16 +775,40 @@ enable_plugins() {
 		for skill_dir in "$SCRIPT_DIR/.claude-plugin/plugins"/*; do
 			if [ -d "$skill_dir" ]; then
 				skill_name=$(basename "$skill_dir")
-				cp -r "$skill_dir" "$CLAUDE_SKILLS_DIR/"
-				log_success "Copied $skill_name to Claude Code"
-				cp -r "$skill_dir" "$OPENCODE_SKILL_DIR/"
-				log_success "Copied $skill_name to OpenCode"
-				cp -r "$skill_dir" "$AMP_SKILLS_DIR/"
-				log_success "Copied $skill_name to Amp"
-				log_info "Codex CLI reads skills directly from .claude-plugin/plugins/"
 
-				# Generate OpenCode command from skill
-				generate_opencode_command "$skill_dir" "$OPENCODE_COMMAND_DIR"
+				# Check compatibility and copy to each platform
+				if skill_is_compatible_with "$skill_dir" "claude"; then
+					cp -r "$skill_dir" "$CLAUDE_SKILLS_DIR/"
+					log_success "Copied $skill_name to Claude Code"
+				else
+					log_info "Skipped $skill_name for Claude Code (not compatible)"
+				fi
+
+				if skill_is_compatible_with "$skill_dir" "opencode"; then
+					cp -r "$skill_dir" "$OPENCODE_SKILL_DIR/"
+					log_success "Copied $skill_name to OpenCode"
+				else
+					log_info "Skipped $skill_name for OpenCode (not compatible)"
+				fi
+
+				if skill_is_compatible_with "$skill_dir" "amp"; then
+					cp -r "$skill_dir" "$AMP_SKILLS_DIR/"
+					log_success "Copied $skill_name to Amp"
+				else
+					log_info "Skipped $skill_name for Amp (not compatible)"
+				fi
+
+				# Codex CLI reads skills directly from .claude-plugin/plugins/
+				if skill_is_compatible_with "$skill_dir" "codex"; then
+					log_info "Codex CLI can invoke $skill_name via \$$skill_name"
+				else
+					log_info "Codex CLI: $skill_name not compatible"
+				fi
+
+				# Generate OpenCode command from skill (only if compatible)
+				if skill_is_compatible_with "$skill_dir" "opencode"; then
+					generate_opencode_command "$skill_dir" "$OPENCODE_COMMAND_DIR"
+				fi
 			fi
 		done
 	}

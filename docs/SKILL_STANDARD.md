@@ -23,7 +23,7 @@ Every SKILL.md must include YAML frontmatter with the following fields:
 name: skill-name
 description: One-sentence description of what the skill does
 license: MIT
-compatibility: claude, opencode, amp
+compatibility: claude, opencode, amp, codex
 hint: Use when [context for using this skill]
 metadata:
   audience: all
@@ -87,7 +87,7 @@ To add a new skill:
    name: my-skill
    description: Brief description of what the skill does
    license: MIT
-   compatibility: claude, opencode, amp
+   compatibility: claude, opencode, amp, codex
    hint: Use when [context for using this skill]
    metadata:
      audience: all
@@ -115,12 +115,12 @@ To add a new skill:
 
 Skills are automatically installed to multiple platforms:
 
-| Platform | Installation Path |
-|----------|-------------------|
-| Claude Code | `~/.claude/skills/` |
-| OpenCode | `~/.config/opencode/skill/` |
-| Amp | `~/.config/amp/skills/` |
-| Codex CLI | Reads directly from `.claude-plugin/plugins/` |
+| Platform | Installation Path | Usage |
+|----------|-------------------|-------|
+| Claude Code | `~/.claude/skills/` | Skill invocation |
+| OpenCode | `~/.config/opencode/skill/` | Command files + skills |
+| Amp | `~/.config/amp/skills/` | Skill invocation |
+| Codex CLI | Reads from `.claude-plugin/plugins/` | Invoke via `$skill-name` |
 
 ## Examples
 
@@ -131,7 +131,7 @@ Skills are automatically installed to multiple platforms:
 name: slop
 description: Removes AI-generated code slop from git diffs
 license: MIT
-compatibility: claude, opencode, amp
+compatibility: claude, opencode, amp, codex
 hint: Use when cleaning up AI-generated code slop in git diffs
 metadata:
   audience: all
@@ -150,7 +150,7 @@ metadata:
 name: adr
 description: Manages Architecture Decision Records
 license: MIT
-compatibility: claude, opencode, amp
+compatibility: claude, opencode, amp, codex
 hint: Use when managing architecture decisions, creating ADRs, or tracking architectural choices
 metadata:
   audience: all
@@ -169,7 +169,7 @@ The template is available at `$SKILL_PATH/templates/adr-template.md`.
 name: qmd-knowledge
 description: Project-specific knowledge management system
 license: MIT
-compatibility: claude, opencode, amp
+compatibility: claude, opencode, amp, codex
 metadata:
   audience: all
   workflow: knowledge-management
