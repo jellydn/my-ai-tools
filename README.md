@@ -532,7 +532,7 @@ See [`configs/amp/AGENTS.md`](configs/amp/AGENTS.md) for agent guidelines.
 
 ## 🔄 CCS - Claude Code Switch (Optional)
 
-Switch between multiple Claude Code accounts. [Homepage](https://github.com/kaitranntt/ccs)
+Universal AI profile manager for Claude Code. [Homepage](https://ccs.kaitran.ca) | [Documentation](https://docs.ccs.kaitran.ca)
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
@@ -543,75 +543,46 @@ Switch between multiple Claude Code accounts. [Homepage](https://github.com/kait
 npm install -g @kaitranntt/ccs
 ```
 
-### Features
+### What It Does
 
-- **Multiple Accounts**: Switch between different Claude subscriptions instantly
-- **API Profiles**: Support for GLM, Kimi, OpenRouter, and custom endpoints
-- **CLIProxy**: OAuth-based providers (Gemini, Codex, Agy, Qwen, iFlow, Kiro, GitHub Copilot)
-- **WebSearch Fallback**: Automatic web search for third-party providers
-- **Zero Downtime**: Switch accounts without losing context
+CCS lets you run Claude, Gemini, GLM, and any Anthropic-compatible API - concurrently, without conflicts.
+
+**Three Main Capabilities:**
+
+1. **Multiple Claude Accounts** - Run work + personal Claude subscriptions simultaneously
+2. **OAuth Providers** - Gemini, Codex, Antigravity, GitHub Copilot (zero API keys needed)
+3. **API Profiles** - GLM, Kimi, OpenRouter, or any Anthropic-compatible API
+
+### Quick Start
+
+1. **Open Dashboard**:
+   ```bash
+   ccs config
+   # Opens http://localhost:3000
+   ```
+
+2. **Configure Your Accounts** via the visual dashboard:
+   - Claude Accounts (work, personal, client)
+   - OAuth Providers (one-click auth)
+   - API Profiles (configure with your keys)
+   - Health Monitor (real-time status)
+
+3. **Start Using**:
+   ```bash
+   ccs           # Default Claude session
+   ccs gemini    # Gemini (OAuth)
+   ccs codex     # OpenAI Codex (OAuth)
+   ccs glm       # GLM (API key)
+   ccs ollama    # Local Ollama
+   ```
 
 ### Configuration
 
-Copy all files from [`configs/ccs/`](configs/ccs/) to `~/.ccs/`:
+CCS auto-creates config on install. Dashboard is the recommended way to manage settings.
 
-- [`config.yaml`](configs/ccs/config.yaml) - Main configuration
+**Config location**: [`~/.ccs/config.yaml`](configs/ccs/config.yaml)
 
-Key configuration sections from `config.yaml`:
-
-```yaml
-version: 8
-
-accounts: {}
-
-profiles:
-  glm:
-    type: api
-    settings: ~/.ccs/glm.settings.json
-  mm:
-    type: api
-    settings: ~/.ccs/mm.settings.json
-  ollama-cloud:
-    type: api
-    settings: ~/.ccs/ollama-cloud.settings.json
-  ollama:
-    type: api
-    settings: ~/.ccs/ollama.settings.json
-
-cliproxy:
-  oauth_accounts: {}
-  providers:
-    - gemini
-    - codex
-    - agy
-    - qwen
-    - iflow
-    - kiro
-    - ghcp
-
-websearch:
-  enabled: true
-  providers:
-    gemini:
-      enabled: true
-      model: gemini-2.5-flash
-    opencode:
-      enabled: true
-      model: opencode/grok-code
-```
-
-### Usage
-
-```bash
-# List accounts
-ccs list
-
-# Switch account
-ccs switch <account-name>
-
-# Get current account
-ccs current
-```
+See [`configs/ccs/config.yaml`](configs/ccs/config.yaml) for example configuration.
 
 </details>
 
