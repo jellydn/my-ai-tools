@@ -8,8 +8,23 @@ set -e
 TYPE="$1"
 shift
 
-# Detect project name from current directory or use default
-PROJECT_NAME="${QMD_PROJECT:-my-ai-tools}"
+# Detect project name from environment, git repo, or current directory
+# Priority: QMD_PROJECT env var > git repo name > current directory name
+if [ -n "$QMD_PROJECT" ]; then
+    PROJECT_NAME="$QMD_PROJECT"
+elif git rev-parse --is-inside-work-tree &>/dev/null; then
+    # Get git repository name with validation
+    GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+    if [ -n "$GIT_ROOT" ]; then
+        PROJECT_NAME=$(basename "$GIT_ROOT")
+    else
+        PROJECT_NAME=$(basename "$(pwd)")
+    fi
+else
+    # Fall back to current directory name
+    PROJECT_NAME=$(basename "$(pwd)")
+fi
+
 KNOWLEDGE_BASE="$HOME/.ai-knowledges/$PROJECT_NAME"
 
 # Colors for output
