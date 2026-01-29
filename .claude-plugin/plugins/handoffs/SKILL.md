@@ -1,3 +1,16 @@
+---
+name: handoffs
+description: Creates detailed handoff plans of conversations for continuing work in new sessions
+license: MIT
+compatibility: claude, opencode, codex
+hint: Use when ending a session and want to continue work later with full context
+metadata:
+  audience: all
+  workflow: workflow
+---
+
+# Session Handoff Plan
+
 Creates a detailed handoff plan of the conversation for continuing the work in a new session.
 
 The user specified purpose:
@@ -73,17 +86,17 @@ Then write the handoff file with this structure:
 - **Changes made**: [Summary of the changes made to this file, if any]
 - **Code snippet**:
 
-```language
+\`\`\`language
 [Important Code Snippet]
-```
+\`\`\`
 
 ### [File Name 2]
 
 - **Code snippet**:
 
-```language
+\`\`\`language
 [Important Code Snippet]
-```
+\`\`\`
 
 [...]
 
@@ -112,4 +125,4 @@ After providing your analysis and summary:
 
 1. Ensure the `.claude/handoffs/` directory exists (create it if needed)
 2. Write the handoff summary to a markdown file at `.claude/handoffs/[timestamp]-[slug].md` where [timestamp] is the current date in format YYYY-MM-DD and the slug is what we defined before
-3. Tell the user about this file and that they can use `/pickup FILENAME` to continue
+3. Tell the user about this file and that they can use `/pickup $1` to continue where $1 is the filename

@@ -108,6 +108,28 @@ update_index() {
     fi
 }
 
+# Helper: Create a knowledge file with validation and directory setup
+# Usage: create_knowledge_file "subdir" "filename" "content"
+# Returns: 0 on success, 1 on validation failure
+create_knowledge_file() {
+    local subdir="$1"
+    local filename="$2"
+    local content="$3"
+
+    # Validate path stays within knowledge base
+    if ! validate_safe_path "$subdir" "$filename"; then
+        return 1
+    fi
+
+    # Create directory if needed
+    mkdir -p "$KNOWLEDGE_BASE/$subdir"
+
+    # Write file
+    echo "$content" > "$KNOWLEDGE_BASE/$subdir/$filename"
+    echo -e "${GREEN}✓ Created: $KNOWLEDGE_BASE/$subdir/$filename${NC}"
+    update_index
+}
+
 case "$TYPE" in
     learning)
         TOPIC="$1"
@@ -116,22 +138,11 @@ case "$TYPE" in
             echo "Usage: $0 learning \"topic description\""
             exit 1
         fi
-        
+
         SLUG=$(slugify "$TOPIC")
-        FILENAME="references/learnings/$(date +%Y-%m-%d)-${SLUG}.md"
-        FILEPATH="$KNOWLEDGE_BASE/$FILENAME"
+        FILENAME="$(date +%Y-%m-%d)-${SLUG}.md"
 
-        # Validate path stays within knowledge base
-        if ! validate_safe_path "references/learnings" "$(date +%Y-%m-%d)-${SLUG}.md"; then
-            exit 1
-        fi
-
-        # Create learnings directory if it doesn't exist
-        mkdir -p "$KNOWLEDGE_BASE/references/learnings"
-        
-        # Create the learning file
-        cat > "$FILEPATH" <<EOF
-# Learning: $TOPIC
+        CONTENT="# Learning: $TOPIC
 
 **Date:** $(date +"%Y-%m-%d %H:%M:%S")
 
@@ -149,14 +160,12 @@ case "$TYPE" in
 
 ---
 
-*Recorded by qmd-knowledge skill*
-EOF
-        
-        echo -e "${GREEN}✓ Created learning: $FILEPATH${NC}"
+*Recorded by qmd-knowledge skill*"
+
+        create_knowledge_file "references/learnings" "$FILENAME" "$CONTENT"
         echo "Edit this file to add details."
-        update_index
         ;;
-        
+
     issue)
         ID="$1"
         NOTE="$2"
@@ -166,47 +175,43 @@ EOF
             exit 1
         fi
 
-        # Sanitize ID to prevent path traversal attacks
         SAFE_ID=$(slugify "$ID")
         if [ -z "$SAFE_ID" ]; then
             echo -e "${RED}Error: Invalid issue ID '${ID}'${NC}"
             exit 1
         fi
 
-        FILENAME="references/issues/$SAFE_ID.md"
-        FILEPATH="$KNOWLEDGE_BASE/$FILENAME"
+        FILENAME="${SAFE_ID}.md"
+        FILEPATH="$KNOWLEDGE_BASE/references/issues/$FILENAME"
 
-        # Validate path stays within knowledge base
-        if ! validate_safe_path "references/issues" "$SAFE_ID.md"; then
+        # Validate and create directory
+        if ! validate_safe_path "references/issues" "$FILENAME"; then
             exit 1
         fi
-
-        # Create issues directory if it doesn't exist
         mkdir -p "$KNOWLEDGE_BASE/references/issues"
-        
+
         # Create or append to issue file
         if [ ! -f "$FILEPATH" ]; then
-            cat > "$FILEPATH" <<EOF
-# Issue #$SAFE_ID
+            echo "# Issue #$SAFE_ID
 
 ## Notes
 
-EOF
+" > "$FILEPATH"
         fi
 
         # Append the note
-        cat >> "$FILEPATH" <<EOF
+        echo "
 
 ### $(date +"%Y-%m-%d %H:%M:%S")
 
 ${NOTE:-<!-- Add note here -->}
 
-EOF
+" >> "$FILEPATH"
 
         echo -e "${GREEN}✓ Added note to issue #$SAFE_ID: $FILEPATH${NC}"
         update_index
         ;;
-        
+
     note)
         TEXT="$1"
         if [ -z "$TEXT" ]; then
@@ -214,24 +219,11 @@ EOF
             echo "Usage: $0 note \"note text\""
             exit 1
         fi
-        
-        TOPIC="note"
-        SLUG=$(slugify "$TEXT")
-        # Limit slug length to avoid overly long filenames
-        SLUG=$(echo "$SLUG" | cut -c1-50)
-        FILENAME="references/learnings/$(date +%Y-%m-%d)-${SLUG}.md"
-        FILEPATH="$KNOWLEDGE_BASE/$FILENAME"
 
-        # Validate path stays within knowledge base
-        if ! validate_safe_path "references/learnings" "$(date +%Y-%m-%d)-${SLUG}.md"; then
-            exit 1
-        fi
+        SLUG=$(slugify "$TEXT" | cut -c1-50)
+        FILENAME="$(date +%Y-%m-%d)-${SLUG}.md"
 
-        # Create learnings directory if it doesn't exist
-        mkdir -p "$KNOWLEDGE_BASE/references/learnings"
-        
-        cat > "$FILEPATH" <<EOF
-# Note
+        CONTENT="# Note
 
 **Date:** $(date +"%Y-%m-%d %H:%M:%S")
 
@@ -239,13 +231,11 @@ $TEXT
 
 ---
 
-*Recorded by qmd-knowledge skill*
-EOF
-        
-        echo -e "${GREEN}✓ Created note: $FILEPATH${NC}"
-        update_index
+*Recorded by qmd-knowledge skill*"
+
+        create_knowledge_file "references/learnings" "$FILENAME" "$CONTENT"
         ;;
-        
+
     *)
         echo -e "${RED}Error: Unknown type '$TYPE'${NC}"
         echo ""

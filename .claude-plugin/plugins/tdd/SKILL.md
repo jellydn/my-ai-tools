@@ -1,3 +1,14 @@
+---
+name: tdd
+description: Guides through the complete TDD workflow with Red-Green-Refactor cycle
+license: MIT
+compatibility: claude, opencode, amp, codex
+hint: Use when doing test-driven development with Red-Green-Refactor cycle
+metadata:
+  audience: all
+  workflow: testing
+---
+
 # Test-Driven Development (TDD)
 
 Guides you through the complete TDD workflow with Red-Green-Refactor cycle.
@@ -66,6 +77,8 @@ Guides you through the complete TDD workflow with Red-Green-Refactor cycle.
 4. Make one refactoring change at a time
 
 ## Test Template
+
+A test template is available at `$SKILL_PATH/templates/test-template.md`:
 
 ```typescript
 import { describe, it, expect } from 'vitest'

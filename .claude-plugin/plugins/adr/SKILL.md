@@ -1,3 +1,14 @@
+---
+name: adr
+description: Manages Architecture Decision Records (ADR) for tracking important architectural decisions
+license: MIT
+compatibility: claude, opencode, amp, codex
+hint: Use when managing architecture decisions, creating ADRs, or tracking architectural choices
+metadata:
+  audience: all
+  workflow: documentation
+---
+
 # Architecture Decision Records (ADR)
 
 Provides a unified interface for managing Architecture Decision Records.
@@ -35,6 +46,8 @@ Each ADR typically contains:
 - **Consequences**: Positive and negative outcomes
 
 ## ADR Template
+
+A template is available at `$SKILL_PATH/templates/adr-template.md`:
 
 ```markdown
 # [NUMBER]. [TITLE]
