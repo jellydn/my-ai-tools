@@ -42,7 +42,9 @@ download_and_verify_script() {
 	local url="$1"
 	local expected_sha256="$2"
 	local description="$3"
-	local temp_script="/tmp/install-$(date +%s)-$$"
+	# Use TMPDIR if set, otherwise fall back to /tmp
+	local tmp_dir="${TMPDIR:-/tmp}"
+	local temp_script="$tmp_dir/install-$(date +%s)-$$"
 
 	log_info "Downloading $description..."
 	if ! curl -fsSL "$url" -o "$temp_script" 2>/dev/null; then
@@ -107,8 +109,17 @@ cleanup_old_backups() {
 	fi
 
 	# Find all backup directories and sort by modification time (newest first)
+	# Use different methods for GNU find (Linux) vs BSD find (macOS)
 	local old_backups
-	old_backups=$(find "$HOME" -maxdepth 1 -type d -name "ai-tools-backup-*" -printf "%T@ %p\n" 2>/dev/null | sort -rn | tail -n +$((max_backups + 1)) | cut -d' ' -f2-)
+	if find "$HOME" -maxdepth 0 -printf "%T@\n" &>/dev/null 2>&1; then
+		# GNU find (Linux) - supports -printf
+		old_backups=$(find "$HOME" -maxdepth 1 -type d -name "ai-tools-backup-*" -printf "%T@ %p\n" 2>/dev/null | sort -rn | tail -n +$((max_backups + 1)) | cut -d' ' -f2-) || true
+	else
+		# BSD find (macOS) - use stat instead
+		old_backups=$(find "$HOME" -maxdepth 1 -type d -name "ai-tools-backup-*" 2>/dev/null | while read -r dir; do
+			echo "$(stat -f "%m" "$dir" 2>/dev/null || echo "0") $dir"
+		done | sort -rn | tail -n +$((max_backups + 1)) | cut -d' ' -f2-) || true
+	fi
 
 	if [ -n "$old_backups" ]; then
 		for backup_dir in $old_backups; do
