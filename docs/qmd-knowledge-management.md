@@ -94,6 +94,25 @@ This copies the qmd-knowledge skill to `~/.config/opencode/skill/qmd-knowledge/`
 
 ### 4. Create a Knowledge Collection for Your Project
 
+**Option 1: Automatic Setup (Recommended)**
+
+The `qmd-knowledge` skill now automatically sets up the knowledge base when you first use it. Simply run:
+
+```bash
+~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "First learning"
+```
+
+The script will:
+- Auto-detect your project name from git remote URL (most reliable)
+- Create necessary directories
+- Add qmd collection (or verify if already exists - no errors!)
+- Add context for better search
+- Generate embeddings
+
+**Option 2: Manual Setup**
+
+If you prefer manual setup or need to create collections for multiple projects:
+
 ```bash
 # Create storage directory for your project
 mkdir -p ~/.ai-knowledges/my-ai-tools/learnings
@@ -103,23 +122,16 @@ mkdir -p ~/.ai-knowledges/my-ai-tools/issues
 qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
 
 # Add context to improve search results
-qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project: learnings, issue notes, and project conventions"
+qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project: learnings, issue notes, and conventions"
 
 # Generate embeddings for semantic search
 qmd embed
 ```
 
-**Note**: The skill is installed once. Each project gets its own qmd collection for storing knowledge.
-
-### 4. Install Configuration (Optional)
-
-Run the setup script to install all configurations:
-
-```bash
-./cli.sh
-```
-
-This will copy the qmd skill to `~/.config/opencode/skill/qmd-knowledge/`.
+**Note**: 
+- The skill is installed once and manages knowledge for all your projects
+- Each project gets its own qmd collection for storing knowledge
+- The script handles existing collections gracefully (no errors if collection already exists)
 
 ## Usage
 
@@ -245,14 +257,35 @@ Use the same skill script for all projects - it will use the `QMD_PROJECT` envir
 
 ## Advanced Usage
 
+### Project Name Detection
+
+The skill automatically detects your project name using the following priority:
+
+1. **QMD_PROJECT environment variable** (highest priority)
+2. **Git remote URL** (most reliable - extracts repo name from origin)
+3. **Git repository folder name** (fallback if remote URL unavailable)
+4. **Current directory name** (last resort)
+
+This ensures consistent project naming even if your local folder has a non-standard name (e.g., `2026-01-08-my-ai-tools.qmd-skill` will still be detected as `my-ai-tools`).
+
 ### Custom Project Detection
 
-Set the `QMD_PROJECT` environment variable to override project detection:
+Set the `QMD_PROJECT` environment variable to override automatic detection:
 
 ```bash
 export QMD_PROJECT="another-project"
 ~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "This goes to another-project"
 ```
+
+### Handling Existing Collections
+
+The skill now automatically handles existing collections gracefully. If a collection already exists:
+
+- The script will verify its presence and continue without error
+- No manual intervention is needed
+- The knowledge base will be ready to use immediately
+
+This prevents the "Collection already exists" error that previously occurred.
 
 ### Backup Knowledge Base
 

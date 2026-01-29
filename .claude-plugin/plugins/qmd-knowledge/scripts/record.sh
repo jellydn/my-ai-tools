@@ -9,16 +9,22 @@ TYPE="$1"
 shift
 
 # Detect project name from environment, git repo, or current directory
-# Priority: QMD_PROJECT env var > git repo name > current directory name
+# Priority: QMD_PROJECT env var > git remote URL > git repo folder name > current directory name
 if [ -n "$QMD_PROJECT" ]; then
     PROJECT_NAME="$QMD_PROJECT"
 elif git rev-parse --is-inside-work-tree &>/dev/null; then
-    # Get git repository name with validation
-    GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-    if [ -n "$GIT_ROOT" ]; then
-        PROJECT_NAME=$(basename "$GIT_ROOT")
-    else
-        PROJECT_NAME=$(basename "$(pwd)")
+    # Try to get project name from git remote URL (most reliable)
+    PROJECT_NAME=$(git remote get-url origin 2>/dev/null | xargs basename -s .git 2>/dev/null)
+    
+    # Fall back to git repo folder name if remote URL fails or returns invalid values
+    # Invalid: empty, "origin", or strings that look like URLs/paths
+    if [ -z "$PROJECT_NAME" ] || [ "$PROJECT_NAME" = "origin" ] || [[ "$PROJECT_NAME" =~ ^[./:] ]]; then
+        GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+        if [ -n "$GIT_ROOT" ]; then
+            PROJECT_NAME=$(basename "$GIT_ROOT")
+        else
+            PROJECT_NAME=$(basename "$(pwd)")
+        fi
     fi
 else
     # Fall back to current directory name
@@ -33,19 +39,65 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
+# Auto-setup knowledge base if needed
+setup_knowledge_base() {
+    if ! command -v qmd &> /dev/null; then
+        echo -e "${YELLOW}Warning: qmd not found. Install with: bun install -g https://github.com/tobi/qmd${NC}"
+        return 1
+    fi
+    
+    # Create directory structure
+    mkdir -p "$KNOWLEDGE_BASE/references/learnings"
+    mkdir -p "$KNOWLEDGE_BASE/references/issues"
+    
+    # Add collection (suppress error if already exists)
+    local err_file="/tmp/qmd-collection-add-$$-err.txt"
+    if qmd collection add "$KNOWLEDGE_BASE" --name "$PROJECT_NAME" 2>"$err_file"; then
+        echo -e "${GREEN}✓ Collection '$PROJECT_NAME' added${NC}"
+        rm -f "$err_file"
+    else
+        # Check if the error is because collection already exists
+        if grep -qi "already exists" "$err_file" 2>/dev/null; then
+            echo -e "${GREEN}✓ Collection '$PROJECT_NAME' already exists${NC}"
+            rm -f "$err_file"
+        elif qmd collection list 2>/dev/null | grep -q "^$PROJECT_NAME$"; then
+            echo -e "${GREEN}✓ Collection '$PROJECT_NAME' already exists${NC}"
+            rm -f "$err_file"
+        else
+            echo -e "${YELLOW}Note: Could not add collection. Error:${NC}"
+            cat "$err_file" 2>/dev/null || echo "(Error details unavailable)"
+            rm -f "$err_file"
+            echo -e "${YELLOW}You may need to add it manually:${NC}"
+            echo -e "${YELLOW}  qmd collection add $KNOWLEDGE_BASE --name $PROJECT_NAME${NC}"
+            return 1
+        fi
+    fi
+    
+    # Add context (suppress error if already exists)
+    qmd context add "qmd://$PROJECT_NAME" "Knowledge base for $PROJECT_NAME project: learnings, issue notes, and conventions" 2>/dev/null || true
+    
+    # Generate embeddings
+    qmd embed 2>/dev/null || true
+    
+    echo -e "${GREEN}✓ Knowledge base ready: $KNOWLEDGE_BASE${NC}"
+    return 0
+}
+
 # Ensure knowledge base exists
 if [ ! -d "$KNOWLEDGE_BASE" ]; then
-    echo -e "${RED}Error: Knowledge base not found at $KNOWLEDGE_BASE${NC}"
-    echo ""
-    echo "To set up the knowledge base, run:"
-    echo "  mkdir -p $KNOWLEDGE_BASE/{references/learnings,references/issues}"
-    echo ""
-    echo "Then initialize qmd collection:"
-    echo "  qmd collection add $KNOWLEDGE_BASE --name $PROJECT_NAME"
-    echo "  qmd embed"
-    echo ""
-    echo "See docs/qmd-knowledge-management.md for detailed setup instructions."
-    exit 1
+    echo -e "${YELLOW}Knowledge base not found. Setting up automatically...${NC}"
+    if ! setup_knowledge_base; then
+        echo -e "${RED}Error: Failed to set up knowledge base at $KNOWLEDGE_BASE${NC}"
+        echo ""
+        echo "To set up manually, run:"
+        echo "  mkdir -p $KNOWLEDGE_BASE/{references/learnings,references/issues}"
+        echo "  qmd collection add $KNOWLEDGE_BASE --name $PROJECT_NAME"
+        echo "  qmd context add qmd://$PROJECT_NAME \"Knowledge base for $PROJECT_NAME project\""
+        echo "  qmd embed"
+        echo ""
+        echo "See docs/qmd-knowledge-management.md for detailed setup instructions."
+        exit 1
+    fi
 fi
 
 # Function to slugify text

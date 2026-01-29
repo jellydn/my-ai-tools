@@ -174,15 +174,22 @@ The skill automatically detects your project name using the following priority:
    export QMD_PROJECT=my-project-name
    ```
 
-2. **Git repository name** (auto-detected)
+2. **Git remote URL** (most reliable - extracts repo name from origin URL)
+   - Example: `https://github.com/user/my-project.git` → `my-project`
+   - Works even if the local folder has a different name
+
+3. **Git repository folder name** (fallback)
    - Uses the name of the git repository root directory
    - Works when you're anywhere inside a git repository
+   - Note: May not match the actual repo name if the folder was renamed
 
-3. **Current directory name** (fallback)
+4. **Current directory name** (last resort)
    - Uses the name of your current working directory
    - Used when not in a git repository
 
 This means you can use the skill in any project without hardcoding project names. The knowledge base will be stored at `~/.ai-knowledges/<detected-project-name>/`.
+
+**Important**: The script prioritizes the git remote URL to ensure consistent project naming even if local folders are renamed or in non-standard locations (e.g., dated folders like `2026-01-08-my-ai-tools.qmd-skill`).
 
 ## 📋 Best Practices
 
