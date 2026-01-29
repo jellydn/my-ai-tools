@@ -70,9 +70,16 @@ main() {
 	log_success "Repository cloned successfully"
 
 	# Run the installation script with all arguments passed to this script
+	# Add --yes flag if running in non-interactive mode (piped input)
 	log_info "Running installation script..."
 	cd "$TEMP_DIR"
-	bash cli.sh "$@"
+	if [ -t 0 ]; then
+		# Interactive mode
+		bash cli.sh "$@"
+	else
+		# Non-interactive mode (piped) - auto-accept all prompts
+		bash cli.sh --yes "$@"
+	fi
 
 	log_success "Installation complete!"
 }

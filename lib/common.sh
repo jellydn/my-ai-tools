@@ -42,7 +42,10 @@ download_and_verify_script() {
 	local url="$1"
 	local expected_sha256="$2"
 	local description="$3"
-	local temp_script="/tmp/install-$(date +%s)-$$"
+	
+	# Use TMPDIR if set, otherwise use /tmp
+	local tmpdir="${TMPDIR:-/tmp}"
+	local temp_script="${tmpdir}/install-$(date +%s)-$$"
 
 	log_info "Downloading $description..."
 	if ! curl -fsSL "$url" -o "$temp_script" 2>/dev/null; then
@@ -82,6 +85,11 @@ execute_installer() {
 		log_info "[DRY RUN] Would execute installer from: $url"
 		return 0
 	fi
+
+	# Ensure TMPDIR is set to avoid cross-device link errors
+	local tmp_dir="${HOME}/.claude/tmp"
+	mkdir -p "$tmp_dir" 2>/dev/null || true
+	export TMPDIR="$tmp_dir"
 
 	local temp_script
 	temp_script=$(download_and_verify_script "$url" "$expected_sha256" "$description")
