@@ -527,8 +527,7 @@ copy_configurations() {
 				log_info "Codex config.toml already exists, preserving user config"
 			fi
 		fi
-		copy_non_marketplace_skills "$SCRIPT_DIR/configs/codex/skills" "$HOME/.codex/skills"
-		# Copy Codex slash commands (prompts)
+		# Copy Codex slash commands (prompts) - skills are loaded directly from .claude-plugin/plugins/
 		if [ -d "$SCRIPT_DIR/configs/codex/prompts" ]; then
 			execute "mkdir -p $HOME/.codex/prompts"
 			execute "cp -r $SCRIPT_DIR/configs/codex/prompts/* $HOME/.codex/prompts/"
@@ -715,12 +714,11 @@ enable_plugins() {
 
 		log_info "Installing skills from local .claude-plugin/plugins folder..."
 
-		# Define target directories
+		# Define target directories (Codex CLI reads skills directly from .claude-plugin/plugins/)
 		CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
 		OPENCODE_SKILL_DIR="$HOME/.config/opencode/skill"
 		OPENCODE_COMMAND_DIR="$HOME/.config/opencode/command/ai"
 		AMP_SKILLS_DIR="$HOME/.config/amp/skills"
-		CODEX_SKILLS_DIR="$HOME/.codex/skills"
 
 		# Copy to Claude Code (~/.claude/skills/)
 		if [ -d "$CLAUDE_SKILLS_DIR" ]; then
@@ -750,14 +748,6 @@ enable_plugins() {
 		fi
 		mkdir -p "$AMP_SKILLS_DIR"
 
-		# Copy to Codex CLI (~/.codex/skills/)
-		if [ -d "$CODEX_SKILLS_DIR" ]; then
-			for existing_skill in "$CODEX_SKILLS_DIR"/*; do
-				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
-			done
-		fi
-		mkdir -p "$CODEX_SKILLS_DIR"
-
 		# Copy all skills from plugins folder to targets
 		for skill_dir in "$SCRIPT_DIR/.claude-plugin/plugins"/*; do
 			if [ -d "$skill_dir" ]; then
@@ -768,8 +758,7 @@ enable_plugins() {
 				log_success "Copied $skill_name to OpenCode"
 				cp -r "$skill_dir" "$AMP_SKILLS_DIR/"
 				log_success "Copied $skill_name to Amp"
-				cp -r "$skill_dir" "$CODEX_SKILLS_DIR/"
-				log_success "Copied $skill_name to Codex CLI"
+				log_info "Codex CLI reads skills directly from .claude-plugin/plugins/"
 
 				# Generate OpenCode command from skill
 				generate_opencode_command "$skill_dir" "$OPENCODE_COMMAND_DIR"

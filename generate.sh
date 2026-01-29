@@ -311,31 +311,8 @@ generate_codex_configs() {
 		copy_single "$HOME/.codex/config.json" "$SCRIPT_DIR/configs/codex/config.json"
 		copy_single "$HOME/.codex/config.toml" "$SCRIPT_DIR/configs/codex/config.toml"
 
-		if [ -d "$HOME/.codex/skills" ]; then
-			execute "mkdir -p $SCRIPT_DIR/configs/codex/skills"
-			# Check if skills directory has content
-			if [ "$(ls -A "$HOME/.codex/skills" 2>/dev/null)" ]; then
-				# Copy all skills except marketplace plugins (prd, ralph, qmd-knowledge, codemap)
-				for skill_dir in "$HOME/.codex/skills"/*; do
-					skill_name="$(basename "$skill_dir")"
-					case "$skill_name" in
-						prd|ralph|qmd-knowledge|codemap)
-							# Skip marketplace plugins - managed separately
-							;;
-						*)
-							# Check if skill already exists in .claude-plugin/plugins
-							if skill_exists_in_plugins "$skill_name"; then
-								log_info "Skipping $skill_name (exists in .claude-plugin/plugins)"
-							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/codex/skills'/ 2>/dev/null"; then
-								log_success "Copied skill: $skill_name"
-							fi
-							;;
-					esac
-				done
-			else
-				log_warning "Codex skills directory is empty"
-			fi
-		fi
+		# Note: Codex CLI skills are read directly from .claude-plugin/plugins/
+		# No need to copy skills from ~/.codex/skills
 
 		# Copy Codex prompts (slash commands)
 		if [ -d "$HOME/.codex/prompts" ]; then

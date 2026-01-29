@@ -120,7 +120,7 @@ Skills are automatically installed to multiple platforms:
 | Claude Code | `~/.claude/skills/` |
 | OpenCode | `~/.config/opencode/skill/` |
 | Amp | `~/.config/amp/skills/` |
-| Codex CLI | `~/.codex/skills/` |
+| Codex CLI | Reads directly from `.claude-plugin/plugins/` |
 
 ## Examples
 
