@@ -398,11 +398,13 @@ Local marketplace plugins are in [`.claude-plugin/plugins/`](.claude-plugin/plug
 
 ### Tips & Tricks
 
-- Use `claude mcp add --scope user` for global MCP servers
-- Enable hooks for auto-formatting on save
-- Install language server plugins for better code navigation
-- Use qmd for persistent knowledge management
-- Create custom commands for frequent workflows
+- **OpusPlan Mode**: Use opusplan mode to plan with Opus and implement with Sonnet, then use Plannotator to review plans
+- **Session Management**: Disable auto-compact in settings. Monitor context usage with `claude-hud`. Press `Ctrl+C` to quit or `/clear` to reset between coding sessions. Create a plan with `/handoffs` and resume with `/pickup` when approaching 90% context limit on big tasks.
+- **Git Worktree**: Use git worktree with `try` CLI. For tmux users, use `claude-squash` to manage sessions efficiently
+- **Neovim Integration**: Check out [tiny-nvim](https://github.com/jellydn/tiny-nvim) for a complete setup with [sidekick.nvim](https://github.com/folke/sidekick.nvim) or [claudecode.nvim](https://github.com/coder/claudecode.nvim)
+- **Cost Optimization**: Use [CCS](https://ccs.kaitran.ca/) to switch between affordable providers:
+  - [GLM Coding Plan](https://z.ai/subscribe?ic=56OG3XE37T) - $3/month for Claude Code, Cline, and 10+ coding tools
+  - [MiniMax Coding Plan](https://platform.minimax.io/subscribe/coding-plan?code=CVeaL1h9wo&source=link) - $2/month with limited time.
 
 </details>
 
