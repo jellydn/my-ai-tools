@@ -111,13 +111,19 @@ cleanup_old_backups() {
 	# Find all backup directories and sort by modification time (newest first)
 	# Use different methods for GNU find (Linux) vs BSD find (macOS)
 	local old_backups
-	if find "$HOME" -maxdepth 0 -printf "%T@\n" &>/dev/null 2>&1; then
+	# Test for GNU find by checking if it has --version flag (GNU-specific)
+	if find --version &>/dev/null; then
 		# GNU find (Linux) - supports -printf
 		old_backups=$(find "$HOME" -maxdepth 1 -type d -name "ai-tools-backup-*" -printf "%T@ %p\n" 2>/dev/null | sort -rn | tail -n +$((max_backups + 1)) | cut -d' ' -f2-) || true
 	else
 		# BSD find (macOS) - use stat instead
 		old_backups=$(find "$HOME" -maxdepth 1 -type d -name "ai-tools-backup-*" 2>/dev/null | while read -r dir; do
-			echo "$(stat -f "%m" "$dir" 2>/dev/null || echo "0") $dir"
+			# Get modification time, skip if stat fails
+			local mtime
+			mtime=$(stat -f "%m" "$dir" 2>/dev/null)
+			if [ -n "$mtime" ] && [ "$mtime" != "0" ]; then
+				echo "$mtime $dir"
+			fi
 		done | sort -rn | tail -n +$((max_backups + 1)) | cut -d' ' -f2-) || true
 	fi
 
