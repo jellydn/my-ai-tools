@@ -494,7 +494,8 @@ install_gemini() {
 		echo
 		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Gemini CLI installation"
 	else
-		log_info "Non-interactive mode: Skipping Gemini CLI installation"
+		log_info "Installing Gemini CLI (non-interactive mode)..."
+		prompt_and_install
 	fi
 }
 
@@ -1098,10 +1099,10 @@ EOF
 }
 
 main() {
-	echo "╔══════════════════════════════════════════════════════════╗"
-	echo "║         AI Tools Setup                                   ║"
+	echo "╔════════════════════════════════════════════════════════════════════╗"
+	echo "║           AI Tools Setup                                           ║"
 	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • AI Switcher    ║"
-	echo "╚══════════════════════════════════════════════════════════╝"
+	echo "╚════════════════════════════════════════════════════════════════════╝"
 	echo
 
 	if [ "$DRY_RUN" = true ]; then
