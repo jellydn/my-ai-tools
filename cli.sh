@@ -21,7 +21,6 @@ fi
 AMP_INSTALLED=false
 
 # Auto-detect non-interactive mode (stdin is piped)
-YES_TO_ALL=false
 if [ ! -t 0 ]; then
 	YES_TO_ALL=true
 fi

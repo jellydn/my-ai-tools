@@ -21,7 +21,7 @@ Fix PR review comments by implementing the requested changes.
 /pr-review               # Auto-detect PR from current branch
 ```
 
-### Argument Handling
+### 📋 Argument Handling
 
 The command accepts the PR identifier from `$ARGUMENTS`:
 
@@ -36,7 +36,7 @@ gh pr view --json number,url -q '.number'
 This extracts the PR number from the current branch's open PR for use in subsequent commands.
 
 If no open PR is found for the current branch, show this error:
-```
+```text
 Error: No open pull request found for the current branch.
 
 To review a specific PR:
