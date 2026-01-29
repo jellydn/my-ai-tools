@@ -2,20 +2,20 @@
 
 ## 📋 Quickstart
 
-Run tests locally to verify changes:
+Run shell script syntax check to verify changes:
 
 ```bash
-bun test
+bash -n cli.sh
 ```
 
 ## 🔁 CI/Non-Interactive Mode
 
-For automated testing, run with fail-fast to catch issues quickly:
+For automated validation, check all scripts with syntax validation:
 
 ```bash
-bun test --fail-fast
+bash -n cli.sh generate.sh && echo "All scripts valid"
 ```
 
 Expected exit codes:
-- `0` - All tests passed
-- `1` - Tests failed (CI should fail on this)
+- `0` - Syntax is valid
+- `1` - Syntax error found (CI should fail on this)
