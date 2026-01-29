@@ -192,6 +192,9 @@ safe_copy_dir() {
 		return 0
 	fi
 	
+	# Ensure destination parent exists
+	mkdir -p "$(dirname "$dest_dir")" 2>/dev/null || true
+	
 	# Try regular copy first
 	if cp -r "$source_dir" "$dest_dir" 2>/dev/null; then
 		return 0
@@ -199,11 +202,12 @@ safe_copy_dir() {
 	
 	# If copy failed, try with rsync to handle busy files
 	if command -v rsync &>/dev/null; then
-		rsync -a --ignore-errors "$source_dir/" "$dest_dir/" 2>/dev/null || true
+		# Use rsync to copy, matching cp -r behavior
+		rsync -a --ignore-errors "$source_dir" "$(dirname "$dest_dir")/" 2>/dev/null || true
 	else
 		# Fallback: copy non-binary files, skip busy binaries
 		mkdir -p "$dest_dir"
-		find "$source_dir" -type f | while read -r file; do
+		find "$source_dir" -type f 2>/dev/null | while read -r file; do
 			rel_path="${file#$source_dir/}"
 			dest_file="$dest_dir/$rel_path"
 			mkdir -p "$(dirname "$dest_file")"

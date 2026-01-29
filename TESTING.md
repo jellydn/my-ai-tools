@@ -73,9 +73,9 @@ mkdir -p "$TMPDIR"
 - Completes fully without user interaction
 
 ### TMPDIR Usage
-- All temp files created in `$HOME/.claude/tmp`
-- Falls back to `/tmp/` if TMPDIR not set
-- Avoids cross-device link errors
+- External installers use `$HOME/.claude/tmp` via `execute_installer`
+- Direct downloads fall back to `/tmp/` if TMPDIR not set
+- `execute_installer` always sets TMPDIR to avoid cross-device link errors
 
 ### Busy File Handling
 - Cliproxy binaries copied using `safe_copy_dir`
