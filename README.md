@@ -479,13 +479,13 @@ Copy your current configs FROM home TO this repository:
 ### Installation
 ```bash
 # Terminal (recommended)
-curl -fsSL https://api.opencode.sh/api/v2/get-started | bash
+curl -fsSL https://opencode.ai/install | bash
 
 # Or via npm
-npm install -g opencode
+npm install -g opencode-ai
 
 # Or via bun
-bun add -g opencode
+bun add -g opencode-ai
 ```
 
 ### Features
@@ -503,10 +503,10 @@ bun add -g opencode
 ### Installation
 ```bash
 # Via install script (recommended, supports auto-updates)
-curl -fsSL https://amp.sh | bash
+curl -fsSL https://ampcode.com/install.sh | bash
 
-# Or via npm
-npm install -g @amp-labs/amp
+# Or via npm (if necessary)
+npm install -g amp-cli
 ```
 
 ### Features
@@ -523,7 +523,7 @@ npm install -g @amp-labs/amp
 
 ### Installation
 ```bash
-npm install -g ccs
+npm install -g @kaitranntt/ccs
 ```
 
 ### Features
@@ -550,7 +550,7 @@ The setup script will prompt to install Codex CLI:
 Or install manually:
 
 ```bash
-npm install -g @openai/codex
+npm install -g @openai/codex-cli
 ```
 
 ### Configuration
