@@ -228,7 +228,7 @@ claude plugin install worktrunk@worktrunk
 | `prd`                   | Product Requirements Documents    | Local Marketplace |
 | `ralph`                 | PRD to JSON converter             | Local Marketplace |
 | `qmd-knowledge`         | Project knowledge management      | Local Marketplace |
-| `map-codebase`          | Parallel codebase analysis        | Local Marketplace |
+| `codemap`               | Parallel codebase analysis        | Local Marketplace |
 | `claude-hud`            | Status line with usage monitoring | Community         |
 | `worktrunk`             | Work management                   | Community         |
 
