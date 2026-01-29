@@ -106,10 +106,9 @@ Primary AI coding assistant with extensive customization.
 curl -fsSL https://claude.ai/install.sh | bash
 ```
 
-<details>
-<summary><strong>📦 MCP Servers Setup</strong></summary>
+### MCP Servers Setup
 
-### Automatic Setup (Recommended)
+#### Automatic Setup (Recommended)
 
 Run the setup script to configure MCP servers:
 
@@ -123,9 +122,9 @@ The script will prompt you to install each MCP server:
 - [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
 - [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
 
-### Manual Setup
+#### Manual Setup
 
-#### For Claude Desktop
+##### For Claude Desktop
 
 Add to [`~/.claude/mcp-servers.json`](configs/claude/mcp-servers.json):
 
@@ -148,7 +147,7 @@ Add to [`~/.claude/mcp-servers.json`](configs/claude/mcp-servers.json):
 }
 ```
 
-#### For Claude Code
+##### For Claude Code
 
 Use the CLI (installed globally for all projects):
 
@@ -164,7 +163,7 @@ claude mcp add --scope user --transport stdio qmd -- qmd mcp
 > - `--scope local` (default): Only in current project directory
 > - `--scope project`: Stored in `.mcp.json` for team sharing
 
-### Managing MCP Servers
+#### Managing MCP Servers
 
 ```bash
 # List all configured servers
@@ -177,7 +176,7 @@ claude mcp remove context7
 claude mcp get qmd
 ```
 
-### Knowledge Management
+#### Knowledge Management
 
 Replace deprecated `claude-mem` with **qmd-based knowledge system**:
 
@@ -186,12 +185,9 @@ Replace deprecated `claude-mem` with **qmd-based knowledge system**:
 - No repository pollution
 - See [qmd Knowledge Management Guide](docs/qmd-knowledge-management.md)
 
-</details>
+### Plugins
 
-<details>
-<summary><strong>🔌 Plugins</strong></summary>
-
-### Installation
+#### Installation
 
 Install via setup script or manually:
 
@@ -214,7 +210,7 @@ claude plugin install claude-hud@claude-hud
 claude plugin install worktrunk@worktrunk
 ```
 
-### Plugin List
+#### Plugin List
 
 | Plugin                  | Description                       | Source            |
 | ----------------------- | --------------------------------- | ----------------- |
@@ -236,7 +232,7 @@ claude plugin install worktrunk@worktrunk
 | `claude-hud`            | Status line with usage monitoring | Community         |
 | `worktrunk`             | Work management                   | Community         |
 
-### Key Marketplace Plugins
+#### Key Marketplace Plugins
 
 **`codemap`** - Orchestrates parallel codebase analysis producing 7 structured documents in `.planning/codebase/`:
 
@@ -254,14 +250,11 @@ claude plugin install worktrunk@worktrunk
 
 **`qmd-knowledge`** - Project-specific knowledge management ([guide](docs/qmd-knowledge-management.md))
 
-</details>
-
-<details>
-<summary><strong>⚙️ Hooks & Status Line</strong></summary>
+### Hooks & Status Line
 
 Configure in [`~/.claude/settings.json`](configs/claude/settings.json):
 
-### PostToolUse Hooks
+#### PostToolUse Hooks
 
 Auto-format after file edits:
 
@@ -291,7 +284,7 @@ Auto-format after file edits:
 }
 ```
 
-### PreToolUse Hooks
+#### PreToolUse Hooks
 
 Transform WebSearch queries:
 
@@ -314,7 +307,7 @@ Transform WebSearch queries:
 }
 ```
 
-### Status Line
+#### Status Line
 
 Using claude-hud plugin:
 
@@ -331,12 +324,9 @@ Using claude-hud plugin:
 
 > **Tip:** Auto-compact is disabled. Use `claude-hud` to monitor context usage.
 
-</details>
+### Custom Commands, Agents & Skills
 
-<details>
-<summary><strong>🎯 Custom Commands, Agents & Skills</strong></summary>
-
-### Custom Commands
+#### Custom Commands
 
 Located in [`configs/claude/commands/`](configs/claude/commands/):
 
@@ -344,13 +334,13 @@ Located in [`configs/claude/commands/`](configs/claude/commands/):
 - `/plannotator-review` - Interactive code review
 - `/ultrathink` - Deep thinking mode
 
-### Custom Agents
+#### Custom Agents
 
 Located in [`configs/claude/agents/`](configs/claude/agents/):
 
 - `ai-slop-remover` - Remove AI-generated boilerplate and improve code quality
 
-### Skills
+#### Skills
 
 **Local Marketplace Plugins** - Installed by `cli.sh` from [`.claude-plugin/plugins/`](.claude-plugin/plugins/):
 
@@ -365,7 +355,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `slop` - AI slop detection and removal
 - `tdd` - Test-Driven Development workflows
 
-### Projects Built with AI
+#### Projects Built with AI
 
 Real-world projects built using these AI tools:
 
@@ -379,7 +369,7 @@ Real-world projects built using these AI tools:
 
 📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
 
-### Recommended Community Skills
+#### Recommended Community Skills
 
 Official and community-maintained skill collections for specific frameworks:
 
@@ -397,10 +387,7 @@ git clone https://github.com/expo/skills.git ~/.claude/skills/expo
 git clone https://github.com/vercel-labs/agent-skills.git ~/.claude/skills/nextjs
 ```
 
-</details>
-
-<details>
-<summary><strong>📝 Configuration Files</strong></summary>
+### Configuration Files
 
 All configuration files are located in the [`configs/claude/`](configs/claude/) directory:
 
@@ -411,7 +398,7 @@ All configuration files are located in the [`configs/claude/`](configs/claude/) 
 
 Local marketplace plugins are in [`.claude-plugin/plugins/`](.claude-plugin/plugins/).
 
-### Tips & Tricks
+#### Tips & Tricks
 
 - **OpusPlan Mode**: Use opusplan mode to plan with Opus and implement with Sonnet, then use Plannotator to review plans
 - **Session Management**: Disable auto-compact in settings. Monitor context usage with `claude-hud`. Press `Ctrl+C` to quit or `/clear` to reset between coding sessions. Create a plan with `/handoffs` and resume with `/pickup` when approaching 90% context limit on big tasks.
@@ -420,8 +407,6 @@ Local marketplace plugins are in [`.claude-plugin/plugins/`](.claude-plugin/plug
 - **Cost Optimization**: Use [CCS](https://ccs.kaitran.ca/) to switch between affordable providers:
   - [GLM Coding Plan](https://z.ai/subscribe?ic=56OG3XE37T) - $3/month for Claude Code, Cline, and 10+ coding tools
   - [MiniMax Coding Plan](https://platform.minimax.io/subscribe/coding-plan?code=CVeaL1h9wo&source=link) - $2/month with limited time.
-
-</details>
 
 ---
 
