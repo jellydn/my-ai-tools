@@ -24,17 +24,27 @@ qmd collection list
 ```bash
 # Auto-detect project name: try git remote, fallback to repo folder name, then current folder
 PROJECT_NAME=$(
-  { git remote get-url origin 2>/dev/null | xargs basename -s .git; } ||
+  { git remote get-url origin 2>/dev/null | xargs basename -s .git 2>/dev/null; } ||
   { git rev-parse --show-toplevel 2>/dev/null | xargs basename; } ||
   basename "$PWD"
 )
+
+# Filter out empty or invalid values (like "origin")
+if [ -z "$PROJECT_NAME" ] || [ "$PROJECT_NAME" = "origin" ]; then
+  PROJECT_NAME=$(basename "$PWD")
+fi
 
 # 1. Create project directory structure
 mkdir -p ~/.ai-knowledges/$PROJECT_NAME/learnings
 mkdir -p ~/.ai-knowledges/$PROJECT_NAME/issues
 
-# 2. Add to qmd (skip if already exists)
-qmd collection add ~/.ai-knowledges/$PROJECT_NAME --name $PROJECT_NAME 2>/dev/null || true
+# 2. Add to qmd (skip if already exists - suppress errors)
+qmd collection add ~/.ai-knowledges/$PROJECT_NAME --name $PROJECT_NAME 2>/dev/null || {
+  # Verify collection exists
+  if qmd collection list 2>/dev/null | grep -q "$PROJECT_NAME"; then
+    echo "✓ Collection '$PROJECT_NAME' already exists"
+  fi
+}
 
 # 3. Add context (skip if already exists)
 qmd context add qmd://$PROJECT_NAME "Knowledge base for $PROJECT_NAME project" 2>/dev/null || true
