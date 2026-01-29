@@ -16,9 +16,9 @@ Fix PR review comments by implementing the requested changes.
 ## Usage
 
 ```bash
-/pr-review <PR_URL>      # Review PR by URL (required: full URL)
-/pr-review <PR_NUMBER>   # Review PR by number (required: e.g., 123)
-/pr-review               # Auto-detect PR from current branch (no argument)
+/pr-review <PR_URL>      # Review PR by URL (expects full GitHub URL)
+/pr-review <PR_NUMBER>   # Review PR by number (expects number, e.g., 123)
+/pr-review               # Auto-detect PR from current branch
 ```
 
 ### Argument Handling
