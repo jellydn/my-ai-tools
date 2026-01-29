@@ -232,7 +232,7 @@ backup_configs() {
 	cleanup_old_backups 5
 
 	if [ "$PROMPT_BACKUP" = true ]; then
-		if [ -t 1 ]; then
+		if [ -t 0 ]; then
 			read -p "Do you want to backup existing configurations? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -264,7 +264,7 @@ install_claude_code() {
 
 	if command -v claude &>/dev/null; then
 		log_warning "Claude Code is already installed ($(claude --version))"
-		if [ -t 1 ]; then
+		if [ -t 0 ]; then
 			read -p "Do you want to reinstall? (y/n) " -n 1 -r
 			echo
 			if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -291,7 +291,7 @@ install_opencode() {
 		fi
 	}
 
-	if [ -t 1 ]; then
+	if [ -t 0 ]; then
 		read -p "Do you want to install OpenCode? (y/n) " -n 1 -r
 		echo
 		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping OpenCode installation"
@@ -313,7 +313,7 @@ install_amp() {
 		log_success "Amp installed"
 	}
 
-	if [ -t 1 ]; then
+	if [ -t 0 ]; then
 		read -p "Do you want to install Amp? (y/n) " -n 1 -r
 		echo
 		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Amp installation"
@@ -334,7 +334,7 @@ install_ccs() {
 		fi
 	}
 
-	if [ -t 1 ]; then
+	if [ -t 0 ]; then
 		read -p "Do you want to install CCS (Claude Code Switch)? (y/n) " -n 1 -r
 		echo
 		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping CCS installation"
@@ -355,7 +355,7 @@ install_ai_switcher() {
 		fi
 	}
 
-	if [ -t 1 ]; then
+	if [ -t 0 ]; then
 		read -p "Do you want to install ai-switcher? (y/n) " -n 1 -r
 		echo
 		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping ai-switcher installation"
@@ -376,7 +376,7 @@ install_codex() {
 		fi
 	}
 
-	if [ -t 1 ]; then
+	if [ -t 0 ]; then
 		read -p "Do you want to install OpenAI Codex CLI? (y/n) " -n 1 -r
 		echo
 		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Codex CLI installation"
@@ -418,7 +418,7 @@ install_mcp_interactive() {
 	local install_cmd="$2"
 	local description="$3"
 
-	if [ -t 1 ]; then
+	if [ -t 0 ]; then
 		read -p "Install $name MCP server ($description)? (y/n) " -n 1 -r
 		echo
 		if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -543,7 +543,7 @@ enable_plugins() {
 	log_info "Installing Claude Code plugins..."
 
 	# Ask for skill installation source
-	if [ -t 1 ]; then
+	if [ -t 0 ]; then
 		log_info "How would you like to install community skills?"
 		printf "1) Local (from .claude-plugin folder) 2) Remote (from jellydn/my-ai-tools marketplace) [1/2]: "
 		read REPLY
@@ -583,7 +583,7 @@ enable_plugins() {
 
 	install_plugin() {
 		local plugin="$1"
-		if [ -t 1 ]; then
+		if [ -t 0 ]; then
 			read -p "Install $plugin? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -603,7 +603,7 @@ enable_plugins() {
 		local plugin_spec="$2"
 		local marketplace_repo="$3"
 
-		if [ -t 1 ]; then
+		if [ -t 0 ]; then
 			read -p "Install $name? (y/n) " -n 1 -r
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -891,7 +891,7 @@ EOF
 		fi
 
 		log_info "Installing official plugins..."
-		if [ -t 1 ]; then
+		if [ -t 0 ]; then
 			# Interactive mode: install sequentially with prompts
 			for plugin in "${official_plugins[@]}"; do
 				install_plugin "$plugin"
