@@ -320,6 +320,34 @@ generate_codex_configs() {
 	fi
 }
 
+generate_gemini_configs() {
+	log_info "Generating Gemini CLI configs..."
+
+	if [ -d "$HOME/.gemini" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/gemini"
+		copy_single "$HOME/.gemini/AGENTS.md" "$SCRIPT_DIR/configs/gemini/AGENTS.md"
+		copy_single "$HOME/.gemini/settings.json" "$SCRIPT_DIR/configs/gemini/settings.json"
+
+		# Copy agent and command directories if they exist
+		for subdir in agent command; do
+			if [ -d "$HOME/.gemini/$subdir" ]; then
+				execute "mkdir -p $SCRIPT_DIR/configs/gemini/$subdir"
+				if [ "$(ls -A "$HOME/.gemini/$subdir" 2>/dev/null)" ]; then
+					if execute "cp -r '$HOME/.gemini/$subdir'/* '$SCRIPT_DIR/configs/gemini/$subdir'/ 2>/dev/null"; then
+						log_success "Gemini $subdir copied"
+					else
+						log_warning "Failed to copy some Gemini $subdir files"
+					fi
+				fi
+			fi
+		done
+
+		log_success "Gemini CLI configs generated"
+	else
+		log_warning "Gemini CLI config directory not found: $HOME/.gemini"
+	fi
+}
+
 generate_best_practices() {
 	log_info "Generating best-practices.md..."
 
@@ -379,6 +407,9 @@ main() {
 	echo
 
 	generate_codex_configs
+	echo
+
+	generate_gemini_configs
 	echo
 
 	generate_best_practices
