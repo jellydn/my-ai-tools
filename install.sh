@@ -3,6 +3,7 @@
 set -e
 
 # Inline logging functions (needed before repo is cloned)
+# Output to stderr to avoid interfering with command substitution
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -10,19 +11,19 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 log_info() {
-	echo -e "${BLUE}ℹ ${NC}$1"
+	echo -e "${BLUE}ℹ ${NC}$1" >&2
 }
 
 log_success() {
-	echo -e "${GREEN}✓${NC} $1"
+	echo -e "${GREEN}✓${NC} $1" >&2
 }
 
 log_warning() {
-	echo -e "${YELLOW}⚠${NC} $1"
+	echo -e "${YELLOW}⚠${NC} $1" >&2
 }
 
 log_error() {
-	echo -e "${RED}✗${NC} $1"
+	echo -e "${RED}✗${NC} $1" >&2
 }
 
 # Check prerequisites
@@ -70,9 +71,16 @@ main() {
 	log_success "Repository cloned successfully"
 
 	# Run the installation script with all arguments passed to this script
+	# Add --yes flag if running in non-interactive mode (piped input)
 	log_info "Running installation script..."
 	cd "$TEMP_DIR"
-	bash cli.sh "$@"
+	if [ -t 0 ]; then
+		# Interactive mode
+		bash cli.sh "$@"
+	else
+		# Non-interactive mode (piped) - auto-accept all prompts
+		bash cli.sh --yes "$@"
+	fi
 
 	log_success "Installation complete!"
 }
