@@ -44,6 +44,8 @@ download_and_verify_script() {
 	local description="$3"
 	# Use TMPDIR if set, otherwise fall back to /tmp
 	local tmp_dir="${TMPDIR:-/tmp}"
+	# Ensure temp directory exists
+	mkdir -p "$tmp_dir" 2>/dev/null || true
 	local temp_script="$tmp_dir/install-$(date +%s)-$$"
 
 	log_info "Downloading $description..."
@@ -119,9 +121,8 @@ cleanup_old_backups() {
 		# BSD find (macOS) - use stat instead
 		old_backups=$(find "$HOME" -maxdepth 1 -type d -name "ai-tools-backup-*" 2>/dev/null | while read -r dir; do
 			# Get modification time, skip if stat fails
-			local mtime
 			mtime=$(stat -f "%m" "$dir" 2>/dev/null)
-			if [ -n "$mtime" ] && [ "$mtime" != "0" ]; then
+			if [ -n "$mtime" ]; then
 				echo "$mtime $dir"
 			fi
 		done | sort -rn | tail -n +$((max_backups + 1)) | cut -d' ' -f2-) || true
