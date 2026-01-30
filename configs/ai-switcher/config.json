@@ -28,9 +28,9 @@
 		},
 		{
 			"name": "commit-zen",
-			"command": "opencode run --model opencode/big-pickle --agent plan 'Review the following changes and generate a concise git commit message: $@'",
+			"command": "opencode run --model opencode/big-pickle --agent plan 'Review the following changes on git and generate a concise git commit message, group by logical changes with commitizen convention, do atomic commit message'",
 			"description": "Generate commit message with OpenCode",
-			"aliases": ["commit", "commit-message"]
+			"aliases": ["zen", "logical-commit"]
 		},
 		{
 			"name": "commit-atomic",
