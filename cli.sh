@@ -505,10 +505,9 @@ install_cursor() {
 		if command -v agent &>/dev/null; then
 			log_warning "Cursor Agent CLI is already installed"
 		else
-			log_info "Cursor Agent CLI is typically installed with the Cursor desktop application."
-			log_info "Download from https://cursor.com and install the desktop app."
-			log_info "The 'agent' command will be available in your PATH after installation."
-			log_info "Visit https://cursor.com/docs/cli/using for CLI documentation."
+			log_info "Installing Cursor Agent CLI via official installer..."
+			execute "curl https://cursor.com/install -fsS | bash"
+			log_success "Cursor Agent CLI installed"
 		fi
 	}
 

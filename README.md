@@ -751,7 +751,13 @@ AI-powered code editor with integrated CLI and agent capabilities. [Homepage](ht
 
 ### Installation
 
-Cursor provides both a desktop application and CLI tool:
+Cursor Agent CLI can be installed via the official installer:
+
+```bash
+curl https://cursor.com/install -fsS | bash
+```
+
+Alternatively, install the Cursor desktop application which includes the CLI:
 
 **macOS:**
 ```bash
@@ -761,25 +767,37 @@ brew install --cask cursor
 **Windows/Linux:**
 Download from [cursor.com](https://cursor.com)
 
-The `agent` CLI command becomes available after installing the desktop application.
+The `agent` CLI command will be available in your PATH after installation.
 
 ### CLI Usage
 
 ```bash
-# Start Cursor Agent CLI in current directory
+# Start the agent with a prompt
+agent "Explain this codebase"
+
+# Start in interactive mode
 agent
 
-# Chat with the agent
-agent chat "Explain this codebase"
+# Start in plan mode (read-only, analyze and propose)
+agent --plan "Review the authentication flow"
 
-# Run specific tasks
-agent run "Add tests for the user service"
+# Start in ask mode (Q&A for explanations)
+agent --mode ask "How does the user service work?"
 
-# Review code changes
-agent review
+# Print responses for scripting (non-interactive)
+agent --print "Generate unit tests for utils.js"
+
+# Resume a previous chat session
+agent --resume
+
+# List available models
+agent --list-models
+
+# View authentication status
+agent status
 ```
 
-For more CLI options, see [Cursor CLI Documentation](https://cursor.com/docs/cli/using).
+For more CLI options and commands, see [Cursor CLI Documentation](https://cursor.com/docs/cli/using) or run `agent --help`.
 
 ### Configuration
 
