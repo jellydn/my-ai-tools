@@ -1,0 +1,27 @@
+{
+  "$schema": "https://cursor.com/settings.schema.json",
+  "instructions": [
+    "~/.ai-tools/best-practices.md",
+    "~/.ai-tools/MEMORY.md"
+  ],
+  "mcpServers": {
+    "context7": {
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "qmd": {
+      "command": "qmd",
+      "args": ["mcp"]
+    }
+  },
+  "agent": {
+    "autoRun": false,
+    "defaultModel": "claude-sonnet-4"
+  },
+  "security": {
+    "enableToolApproval": true
+  }
+}

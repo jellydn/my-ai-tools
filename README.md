@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Codex, Gemini CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Codex, Gemini CLI, Cursor, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 ## ✨ Features
 
@@ -737,6 +737,102 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
 ```
 
 > **Note:** Custom agents in `~/.gemini/agents/` are automatically discovered when `experimental.enableAgents` is set to `true`.
+
+</details>
+
+---
+
+## 🎯 Cursor Agent CLI (Optional)
+
+AI-powered code editor with integrated agent capabilities. [Homepage](https://cursor.com)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Installation
+
+Cursor is distributed as a desktop application:
+
+**macOS:**
+```bash
+brew install --cask cursor
+```
+
+**Windows/Linux:**
+Download from [cursor.com](https://cursor.com)
+
+### Configuration
+
+Located in [`configs/cursor/`](configs/cursor/):
+
+- [`settings.json`](configs/cursor/settings.json) - Main configuration with MCP servers
+- [`AGENTS.md`](configs/cursor/AGENTS.md) - Agent guidelines and best practices
+- [`agents/`](configs/cursor/agents/) - Custom agent definitions
+  - `ai-slop-remover.md` - Clean up AI-generated code patterns
+  - `docs-writer.md` - Generate comprehensive documentation
+  - `review.md` - Code review with best practices
+  - `security-audit.md` - Security vulnerability assessment
+- [`commands/`](configs/cursor/commands/) - Custom commands
+  - `ultrathink.md` - Deep thinking mode for complex problems
+  - `plannotator-review.md` - Interactive code review
+
+### Key Features
+
+- 🤖 **AI-first editor**: Built-in AI capabilities with context awareness
+- 💬 **Agent mode**: Autonomous coding agent that can make changes
+- 🔌 **MCP support**: Extensible via Model Context Protocol
+- 📝 **Custom commands**: Define reusable AI instructions
+- 🎯 **Custom agents**: Specialized AI assistants for specific tasks
+- 🔍 **Codebase understanding**: AI that understands your entire project
+
+### MCP Servers
+
+Configure MCP servers in `~/.cursor/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "qmd": {
+      "command": "qmd",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+### Custom Agents
+
+Custom agents are stored in `~/.cursor/agents/` as Markdown files with YAML frontmatter:
+
+```markdown
+---
+name: my-agent
+description: Description of what this agent does
+---
+
+Agent instructions here...
+```
+
+Use agents by invoking them in the Cursor UI or via commands.
+
+### Custom Commands
+
+Custom commands are stored in `~/.cursor/commands/` as Markdown files. They provide reusable AI instructions for common tasks.
+
+### Usage Tips
+
+- **Agent Mode**: Use `Cmd/Ctrl + K` to open the agent panel
+- **Inline Chat**: Use `Cmd/Ctrl + L` for inline AI chat
+- **Custom Agents**: Invoke specialized agents for focused tasks
+- **MCP Integration**: Leverage MCP servers for additional capabilities
+- **Best Practices**: Reference `AGENTS.md` for coding guidelines
 
 </details>
 

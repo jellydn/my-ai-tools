@@ -388,6 +388,50 @@ generate_gemini_configs() {
 	fi
 }
 
+generate_cursor_configs() {
+	log_info "Generating Cursor configs..."
+
+	# Cursor may use ~/.cursor or ~/.config/cursor depending on platform
+	local cursor_config_dir="$HOME/.cursor"
+	if [ ! -d "$cursor_config_dir" ] && [ -d "$HOME/.config/cursor" ]; then
+		cursor_config_dir="$HOME/.config/cursor"
+	fi
+
+	if [ -d "$cursor_config_dir" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/cursor"
+		copy_single "$cursor_config_dir/AGENTS.md" "$SCRIPT_DIR/configs/cursor/AGENTS.md"
+		copy_single "$cursor_config_dir/settings.json" "$SCRIPT_DIR/configs/cursor/settings.json"
+
+		# Copy agents directory
+		if [ -d "$cursor_config_dir/agents" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/cursor/agents"
+			if [ "$(ls -A "$cursor_config_dir/agents" 2>/dev/null)" ]; then
+				if execute "cp -r '$cursor_config_dir/agents'/* '$SCRIPT_DIR/configs/cursor/agents'/ 2>/dev/null"; then
+					log_success "Cursor agents copied"
+				else
+					log_warning "Failed to copy some Cursor agents files"
+				fi
+			fi
+		fi
+
+		# Copy commands directory
+		if [ -d "$cursor_config_dir/commands" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/cursor/commands"
+			if [ "$(ls -A "$cursor_config_dir/commands" 2>/dev/null)" ]; then
+				if execute "cp -r '$cursor_config_dir/commands'/* '$SCRIPT_DIR/configs/cursor/commands'/ 2>/dev/null"; then
+					log_success "Cursor commands copied"
+				else
+					log_warning "Failed to copy some Cursor commands files"
+				fi
+			fi
+		fi
+
+		log_success "Cursor configs generated"
+	else
+		log_warning "Cursor config directory not found: $cursor_config_dir"
+	fi
+}
+
 generate_best_practices() {
 	log_info "Generating best-practices.md..."
 
@@ -450,6 +494,9 @@ main() {
 	echo
 
 	generate_gemini_configs
+	echo
+
+	generate_cursor_configs
 	echo
 
 	generate_best_practices

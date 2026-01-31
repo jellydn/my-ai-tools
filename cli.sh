@@ -499,6 +499,13 @@ install_gemini() {
 	fi
 }
 
+install_cursor() {
+	log_info "Cursor Agent CLI installation..."
+	log_info "Cursor is typically installed as a desktop application."
+	log_info "Visit https://cursor.com for installation instructions."
+	log_info "Configs will be copied if Cursor is detected."
+}
+
 # Helper: Copy non-marketplace skills from source to destination
 # Usage: copy_non_marketplace_skills "source_dir" "dest_dir"
 copy_non_marketplace_skills() {
@@ -670,6 +677,24 @@ copy_configurations() {
 		execute "rm -rf $HOME/.gemini/skills"
 		copy_non_marketplace_skills "$SCRIPT_DIR/configs/gemini/skills" "$HOME/.gemini/skills"
 		log_success "Gemini CLI configs copied"
+	fi
+
+	# Copy Cursor configs
+	if [ -d "$HOME/.cursor" ] || [ -d "$HOME/.config/cursor" ]; then
+		# Cursor may use ~/.cursor or ~/.config/cursor depending on platform
+		local cursor_config_dir="$HOME/.cursor"
+		if [ ! -d "$cursor_config_dir" ] && [ -d "$HOME/.config/cursor" ]; then
+			cursor_config_dir="$HOME/.config/cursor"
+		fi
+		
+		execute "mkdir -p $cursor_config_dir"
+		copy_config_file "$SCRIPT_DIR/configs/cursor/AGENTS.md" "$cursor_config_dir/"
+		copy_config_file "$SCRIPT_DIR/configs/cursor/settings.json" "$cursor_config_dir/"
+		execute "rm -rf $cursor_config_dir/agents"
+		execute "cp -r $SCRIPT_DIR/configs/cursor/agents $cursor_config_dir/"
+		execute "rm -rf $cursor_config_dir/commands"
+		execute "cp -r $SCRIPT_DIR/configs/cursor/commands $cursor_config_dir/"
+		log_success "Cursor configs copied"
 	fi
 
 	# Copy best practices and MEMORY.md
@@ -1120,7 +1145,7 @@ EOF
 main() {
 	echo "╔════════════════════════════════════════════════════════════════════╗"
 	echo "║           AI Tools Setup                                           ║"
-	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • AI Switcher     ║"
+	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • Cursor • AI Switcher     ║"
 	echo "╚════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -1160,6 +1185,9 @@ main() {
 	echo
 
 	install_gemini
+	echo
+
+	install_cursor
 	echo
 
 	copy_configurations
