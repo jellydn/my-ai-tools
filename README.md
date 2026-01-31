@@ -6,6 +6,8 @@
 
 > **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Codex, Gemini CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
+📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
+
 ## ✨ Features
 
 - 🚀 **One-line installer** - Get started in seconds
