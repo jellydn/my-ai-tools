@@ -698,7 +698,7 @@ copy_configurations() {
 	fi
 
 	# Copy Cursor configs
-	if [ -d "$HOME/.cursor" ] || [ -d "$HOME/.config/cursor" ]; then
+	if [ -d "$HOME/.cursor" ] || [ -d "$HOME/.config/cursor" ] || command -v agent &>/dev/null; then
 		# Cursor may use ~/.cursor or ~/.config/cursor depending on platform
 		local cursor_config_dir="$HOME/.cursor"
 		if [ ! -d "$cursor_config_dir" ] && [ -d "$HOME/.config/cursor" ]; then
@@ -708,8 +708,13 @@ copy_configurations() {
 		execute "mkdir -p $cursor_config_dir"
 		copy_config_file "$SCRIPT_DIR/configs/cursor/AGENTS.md" "$cursor_config_dir/"
 		copy_config_file "$SCRIPT_DIR/configs/cursor/settings.json" "$cursor_config_dir/"
-		execute "rm -rf $cursor_config_dir/agents"
-		execute "cp -r $SCRIPT_DIR/configs/cursor/agents $cursor_config_dir/"
+		
+		# Copy agents to global location (~/.config/agents/)
+		execute "mkdir -p $HOME/.config/agents"
+		execute "rm -rf $HOME/.config/agents/*"
+		execute "cp -r $SCRIPT_DIR/configs/cursor/agents/* $HOME/.config/agents/"
+		
+		# Copy commands to cursor config directory
 		execute "rm -rf $cursor_config_dir/commands"
 		execute "cp -r $SCRIPT_DIR/configs/cursor/commands $cursor_config_dir/"
 		log_success "Cursor configs copied"

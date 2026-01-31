@@ -803,14 +803,14 @@ For more CLI options and commands, see [Cursor CLI Documentation](https://cursor
 
 Located in [`configs/cursor/`](configs/cursor/):
 
-- [`settings.json`](configs/cursor/settings.json) - Main configuration with MCP servers
-- [`AGENTS.md`](configs/cursor/AGENTS.md) - Agent guidelines and best practices
-- [`agents/`](configs/cursor/agents/) - Custom agent definitions
+- [`settings.json`](configs/cursor/settings.json) - Main configuration with MCP servers (installed to `~/.cursor/settings.json`)
+- [`AGENTS.md`](configs/cursor/AGENTS.md) - Agent guidelines and best practices (installed to `~/.cursor/AGENTS.md`)
+- [`agents/`](configs/cursor/agents/) - Custom agent definitions (installed to `~/.config/agents/`)
   - `ai-slop-remover.md` - Clean up AI-generated code patterns
   - `docs-writer.md` - Generate comprehensive documentation
   - `review.md` - Code review with best practices
   - `security-audit.md` - Security vulnerability assessment
-- [`commands/`](configs/cursor/commands/) - Custom commands
+- [`commands/`](configs/cursor/commands/) - Custom commands (installed to `~/.cursor/commands/`)
   - `ultrathink.md` - Deep thinking mode for complex problems
   - `plannotator-review.md` - Interactive code review
 
@@ -848,7 +848,7 @@ Configure MCP servers in `~/.cursor/settings.json`:
 
 ### Custom Agents
 
-Custom agents are stored in `~/.cursor/agents/` as Markdown files with YAML frontmatter:
+Custom agents are stored in `~/.config/agents/` as Markdown files with YAML frontmatter:
 
 ```markdown
 ---

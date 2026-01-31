@@ -397,17 +397,17 @@ generate_cursor_configs() {
 		cursor_config_dir="$HOME/.config/cursor"
 	fi
 
-	if [ -d "$cursor_config_dir" ]; then
+	if [ -d "$cursor_config_dir" ] || [ -d "$HOME/.config/agents" ]; then
 		execute "mkdir -p $SCRIPT_DIR/configs/cursor"
 		copy_single "$cursor_config_dir/AGENTS.md" "$SCRIPT_DIR/configs/cursor/AGENTS.md"
 		copy_single "$cursor_config_dir/settings.json" "$SCRIPT_DIR/configs/cursor/settings.json"
 
-		# Copy agents directory
-		if [ -d "$cursor_config_dir/agents" ]; then
+		# Copy agents from global location (~/.config/agents/)
+		if [ -d "$HOME/.config/agents" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/cursor/agents"
-			if [ "$(ls -A "$cursor_config_dir/agents" 2>/dev/null)" ]; then
-				if execute "cp -r '$cursor_config_dir/agents'/* '$SCRIPT_DIR/configs/cursor/agents'/ 2>/dev/null"; then
-					log_success "Cursor agents copied"
+			if [ "$(ls -A "$HOME/.config/agents" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.config/agents'/* '$SCRIPT_DIR/configs/cursor/agents'/ 2>/dev/null"; then
+					log_success "Cursor agents copied from ~/.config/agents/"
 				else
 					log_warning "Failed to copy some Cursor agents files"
 				fi
