@@ -804,6 +804,11 @@ agent --list-models
 
 # View authentication status
 agent status
+
+# Manage MCP servers
+agent mcp list              # List configured MCP servers and their status
+agent mcp add <name>        # Add a new MCP server
+agent mcp remove <name>     # Remove an MCP server
 ```
 
 For more CLI options and commands, see [Cursor CLI Documentation](https://cursor.com/docs/cli/using) or run `agent --help`.
@@ -821,6 +826,27 @@ Switch modes using slash commands or press `Shift+Tab` to rotate between modes.
 ### MCP Support
 
 Agent automatically detects and respects your `mcp.json` configuration file, enabling the same MCP servers and tools configured for the editor. See [MCP Directory](https://cursor.com/docs/context/mcp/directory) for available integrations.
+
+**Managing MCP Servers:**
+
+Use `agent mcp` commands to manage your MCP server configurations:
+
+```bash
+# List all configured MCP servers and their status
+agent mcp list
+
+# Add a new MCP server
+agent mcp add <server-name>
+
+# Remove an MCP server
+agent mcp remove <server-name>
+```
+
+Example output from `agent mcp list`:
+```
+context7: ready
+chrome-devtools: ready
+```
 
 ### Rules
 
