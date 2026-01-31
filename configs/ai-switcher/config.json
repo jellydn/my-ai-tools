@@ -4,19 +4,24 @@
 			"name": "claude",
 			"command": "claude",
 			"description": "Anthropic Claude CLI",
-			"aliases": ["c"]
+			"aliases": ["c"],
+			"promptCommand": "claude --permission-mode plan -p"
 		},
 		{
 			"name": "opencode",
 			"command": "opencode",
 			"description": "OpenCode AI assistant",
-			"aliases": ["o", "oc"]
+			"aliases": ["o", "oc"],
+			"promptCommand": "opencode run --model opencode/big-pickle",
+			"promptUseStdin": true
 		},
 		{
 			"name": "amp",
 			"command": "amp",
 			"description": "AI coding assistant by Modular",
-			"aliases": ["a"]
+			"aliases": ["a"],
+			"promptCommand": "amp -x",
+			"promptUseStdin": true
 		}
 	],
 	"templates": [
@@ -46,79 +51,85 @@
 		},
 		{
 			"name": "draft-pull-request",
-			"command": "ccs glm -p 'Create draft pr with what why how by gh cli'",
+			"command": "ccs glm --permission-mode acceptEdits -p 'Create draft pr with what why how by gh cli'",
 			"description": "Create draft pull request with GLM",
 			"aliases": ["pr", "draft-pr"]
 		},
 		{
 			"name": "types",
-			"command": "ccs mm -p 'Improve TypeScript types: Remove any, add proper type guards, ensure strict mode compliance for: $@'",
+			"command": "ccs mm --permission-mode acceptEdits -p 'Improve TypeScript types: Remove any, add proper type guards, ensure strict mode compliance for: $@'",
 			"description": "Enhance type safety",
 			"aliases": ["typescript"]
 		},
 		{
 			"name": "test",
-			"command": "ccs mm -p 'Write tests using Arrange-Act-Assert pattern. Focus on behavior, not implementation details for: $@'",
+			"command": "ccs mm --permission-mode acceptEdits -p 'Write tests using Arrange-Act-Assert pattern. Focus on behavior, not implementation details for: $@'",
 			"description": "Generate tests",
 			"aliases": ["spec", "tests"]
 		},
 		{
 			"name": "docs",
-			"command": "ccs mm -p 'Add JSDoc comments with @param and @returns. Include usage examples for: $@'",
+			"command": "ccs mm --permission-mode acceptEdits -p 'Add JSDoc comments with @param and @returns. Include usage examples for: $@'",
 			"description": "Add documentation",
 			"aliases": ["document"]
 		},
 		{
 			"name": "explain",
-			"command": "ccs mm -p 'Explain this code in detail: 1) What it does 2) How it works 3) Design decisions: $@'",
+			"command": "ccs mm --permission-mode plan -p 'Explain this code in detail: 1) What it does 2) How it works 3) Design decisions: $@'",
 			"description": "Code explanation",
 			"aliases": ["wtf", "explain-code"]
 		},
 		{
 			"name": "review-security",
-			"command": "claude -p 'Security review: Check for injection vulnerabilities, input validation, auth issues, and sensitive data handling in: $@'",
+			"command": "ccs mm --permission-mode plan -p 'Security review: Check for injection vulnerabilities, input validation, auth issues, and sensitive data handling in: $@'",
 			"description": "Security-focused review",
 			"aliases": ["sec", "security"]
 		},
 		{
 			"name": "review-refactor",
-			"command": "ccs glm -p 'Refactor suggestion: Improve readability, eliminate complexity, and apply clean code principles to: $@'",
+			"command": "ccs glm --permission-mode plan -p 'Refactor suggestion: Improve readability, eliminate complexity, and apply clean code principles to: $@'",
 			"description": "Refactoring recommendations",
 			"aliases": ["refactor"]
 		},
 		{
 			"name": "review-performance",
-			"command": "ccs glm -p 'Analyze performance: Identify bottlenecks, suggest optimizations with measurable impact for: $@'",
+			"command": "ccs glm --permission-mode plan -p 'Analyze performance: Identify bottlenecks, suggest optimizations with measurable impact for: $@'",
 			"description": "Performance review",
 			"aliases": ["perf", "optimize"]
 		},
 		{
+			"name": "remove-verbal",
+			"command": "ccs mm --permission-mode acceptEdits -p 'Analyze code: Identify verbal comment and remove it, and ensure consistency in style for: $@'",
+			"description": "Clean verbal comments that explain 'what' the code is doing rather than 'why'",
+			"aliases": ["verbal", "comments"]
+		},
+		{
 			"name": "remove-ai-slop",
-			"command": "ccs glm -p \"You're reviewing code cleanup. Remove: 1) Excessive comments that break existing documentation style 2) Defensive checks that don't match the codebase's trust model 3) Type escape hatches (any casts, assertions) 4) Generic patterns that feel imported rather than native. Match the file's existing voice and conventions. Report what you removed in 1-3 sentences: $@\"",
+			"command": "ccs glm --permission-mode acceptEdits -p \"You're reviewing code cleanup. Remove: 1) Excessive comments that break existing documentation style 2) Defensive checks that don't match the codebase's trust model 3) Type escape hatches (any casts, assertions) 4) Generic patterns that feel imported rather than native. Match the file's existing voice and conventions. Report what you removed in 1-3 sentences: $@\"",
 			"description": "Remove AI-generated code patterns",
 			"aliases": ["slop", "clean-ai"]
 		},
 		{
 			"name": "tidy-first",
-			"command": "ccs mm -p 'Apply Tidy First principles: 1) Use guard clauses 2) Extract helper variables for complex expressions 3) Remove dead code 4) Normalize symmetries. Focus on making the code easier to understand: $@'",
+			"command": "ccs mm --permission-mode acceptEdits -p 'Apply Tidy First principles: 1) Use guard clauses 2) Extract helper variables for complex expressions 3) Remove dead code 4) Normalize symmetries. Focus on making the code easier to understand: $@'",
 			"description": "Tidy code before making changes",
 			"aliases": ["tidy"]
 		},
 		{
 			"name": "simplify",
-			"command": "ccs mm -p \"Simplify this code: Remove unnecessary complexity, eliminate over-engineering, reduce coupling. Keep solutions simple and focused on what's actually needed: $@\"",
+			"command": "ccs mm --permission-mode acceptEdits -p \"Simplify this code: Remove unnecessary complexity, eliminate over-engineering, reduce coupling. Keep solutions simple and focused on what's actually needed: $@\"",
 			"description": "Simplify over-engineered code",
 			"aliases": ["simple"]
 		},
 		{
 			"name": "simplifier",
-			"command": "ccs mm -p \"@code-simplifier:code-simplifier",
+			"command": "ccs mm --permission-mode acceptEdits -p \"@code-simplifier:code-simplifier",
 			"description": "Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise.",
 			"aliases": ["simplify-code", "simplify"]
 		},
 		{
-			"name": "draft-pull-request",
-			"command": "ccs glm 'Analyze the git changes and create a draft PR, plan: 1) Group changes into logical, independent commits 2) Order them by dependency (low-level to high-level) 3) Run commit commit for each change group 4) Write PR description with what why how.'",
+			"name": "logical-grouping-pull-request",
+			"command": "ccs glm --permission-mode acceptEdits -p 'Analyze the git changes and create a draft PR, plan: 1) Group changes into logical, independent commits 2) Order them by dependency (low-level to high-level) 3) Run commit commit for each change group 4) Write PR description with what why how.'",
 			"description": "Create a draft pull request for the git changes with logical grouping",
 			"aliases": ["split-pr"]
 		}
