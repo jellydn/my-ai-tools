@@ -865,6 +865,8 @@ Before running terminal commands, the CLI will ask you to approve (`y`) or rejec
 
 ### Configuration
 
+**Repository Configuration:**
+
 Located in [`configs/cursor/`](configs/cursor/):
 
 - [`agents/`](configs/cursor/agents/) - Custom agent definitions (installed to `~/.config/agents/`)
@@ -872,6 +874,18 @@ Located in [`configs/cursor/`](configs/cursor/):
   - `docs-writer.md` - Generate comprehensive documentation
   - `review.md` - Code review with best practices
   - `security-audit.md` - Security vulnerability assessment
+
+**CLI Configuration File:**
+
+The Agent CLI can be configured using `cli-config.json` at these locations:
+
+| Type | Platform | Path |
+|------|----------|------|
+| Global | macOS/Linux | `~/.cursor/cli-config.json` |
+| Global | Windows | `$env:USERPROFILE\.cursor\cli-config.json` |
+| Project | All | `<project>/.cursor/cli.json` |
+
+Project-level configurations override global settings. See [CLI Configuration Reference](https://cursor.com/docs/cli/reference/configuration) for available options.
 
 ### Key Features
 
