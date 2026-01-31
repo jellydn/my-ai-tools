@@ -787,8 +787,17 @@ agent --mode ask "How does the user service work?"
 # Print responses for scripting (non-interactive)
 agent --print "Generate unit tests for utils.js"
 
-# Resume a previous chat session
-agent --resume
+# Non-interactive with JSON output for scripts
+agent --print --output-format json "Analyze the project structure"
+
+# Resume the latest chat session
+agent resume
+
+# Resume a specific chat session
+agent --resume [chatId]
+
+# List previous conversations
+agent ls
 
 # List available models
 agent --list-models
@@ -798,6 +807,61 @@ agent status
 ```
 
 For more CLI options and commands, see [Cursor CLI Documentation](https://cursor.com/docs/cli/using) or run `agent --help`.
+
+### Modes
+
+The CLI supports multiple execution modes:
+
+- **Agent mode** (default): Full agent with file editing capabilities
+- **Plan mode**: Read-only planning and analysis mode. Use `/plan` or `--mode=plan` flag
+- **Ask mode**: Q&A style for code exploration without changes. Use `/ask` or `--mode=ask` flag
+
+Switch modes using slash commands or press `Shift+Tab` to rotate between modes.
+
+### MCP Support
+
+Agent automatically detects and respects your `mcp.json` configuration file, enabling the same MCP servers and tools configured for the editor. See [MCP Directory](https://cursor.com/docs/context/mcp/directory) for available integrations.
+
+### Rules
+
+The CLI agent supports the [rules system](https://cursor.com/docs/context/rules) for providing context and guidance:
+
+- Create rules in `.cursor/rules` directory for project-specific behavior
+- Place `AGENTS.md` or `CLAUDE.md` at project root for additional rules
+- Rules are automatically loaded and applied based on configuration
+
+### Interactive Features
+
+**Navigation:**
+- `ArrowUp`/`ArrowDown` - Cycle through previous messages and scroll
+- `ArrowLeft`/`ArrowRight` - Switch between files in review mode
+
+**Input Shortcuts:**
+- `Shift+Tab` - Rotate between modes (Agent, Plan, Ask)
+- `Shift+Enter` - Insert newline instead of submitting (multi-line prompts)
+- `Ctrl+J` or `⌘+Enter` - Universal alternatives for newlines
+- `Ctrl+D` - Exit the CLI (double-press to exit)
+
+**Review Changes:**
+- `Ctrl+R` - Review changes made by the agent
+- Press `i` to add follow-up instructions during review
+
+**Context Selection:**
+- Use `@` to select files and folders to include in context
+- Run `/compress` to free up space in the context window
+
+**Cloud Agent Handoff:**
+- Prepend `&` to any message to send to Cloud Agent
+- Continue on web or mobile at [cursor.com/agents](https://cursor.com/agents)
+
+```bash
+# Send a task to Cloud Agent
+& refactor the auth module and add comprehensive tests
+```
+
+### Command Approval
+
+Before running terminal commands, the CLI will ask you to approve (`y`) or reject (`n`) execution for safety.
 
 ### Configuration
 
@@ -835,10 +899,15 @@ Use agents via the Cursor UI, CLI commands, or keyboard shortcuts.
 
 ### Usage Tips
 
-- **CLI Mode**: Use `agent` command for terminal-based workflows
-- **Agent Mode**: Use `Cmd/Ctrl + K` in the editor to open the agent panel
-- **Inline Chat**: Use `Cmd/Ctrl + L` for inline AI chat in the editor
-- **Custom Agents**: Invoke specialized agents for focused tasks
+- **Modes**: Use `Shift+Tab` to rotate between Agent, Plan, and Ask modes
+- **Multi-line prompts**: Use `Shift+Enter` to insert newlines in your prompts
+- **History**: Press `ArrowUp` to cycle through previous messages
+- **Review**: Use `Ctrl+R` to review changes before applying
+- **Context**: Use `@` to explicitly select files and folders for context
+- **Cloud handoff**: Prepend `&` to messages to run them on Cloud Agent
+- **Non-interactive**: Use `--print` flag for scripting and CI/CD pipelines
+- **Custom agents**: Place agent definitions in `~/.config/agents/`
+- **Rules**: Add project rules in `.cursor/rules` or `AGENTS.md` at root
 
 </details>
 
