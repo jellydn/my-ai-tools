@@ -501,26 +501,26 @@ install_gemini() {
 
 install_cursor() {
 	prompt_and_install() {
-		log_info "Installing Cursor CLI..."
-		if command -v cursor &>/dev/null; then
-			log_warning "Cursor CLI is already installed"
+		log_info "Installing Cursor Agent CLI..."
+		if command -v agent &>/dev/null; then
+			log_warning "Cursor Agent CLI is already installed"
 		else
-			log_info "Cursor CLI is typically installed with the Cursor desktop application."
+			log_info "Cursor Agent CLI is typically installed with the Cursor desktop application."
 			log_info "Download from https://cursor.com and install the desktop app."
-			log_info "The 'cursor' command will be available in your PATH after installation."
+			log_info "The 'agent' command will be available in your PATH after installation."
 			log_info "Visit https://cursor.com/docs/cli/using for CLI documentation."
 		fi
 	}
 
 	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-accepting Cursor CLI installation (--yes flag)"
+		log_info "Auto-accepting Cursor Agent CLI installation (--yes flag)"
 		prompt_and_install
 	elif [ -t 0 ]; then
-		read -p "Do you want to install Cursor CLI? (y/n) " -n 1 -r
+		read -p "Do you want to install Cursor Agent CLI? (y/n) " -n 1 -r
 		echo
-		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Cursor CLI installation"
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Cursor Agent CLI installation"
 	else
-		log_info "Installing Cursor CLI (non-interactive mode)..."
+		log_info "Installing Cursor Agent CLI (non-interactive mode)..."
 		prompt_and_install
 	fi
 }

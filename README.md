@@ -761,22 +761,22 @@ brew install --cask cursor
 **Windows/Linux:**
 Download from [cursor.com](https://cursor.com)
 
-The `cursor` CLI command becomes available after installing the desktop application.
+The `agent` CLI command becomes available after installing the desktop application.
 
 ### CLI Usage
 
 ```bash
-# Start Cursor CLI in current directory
-cursor
+# Start Cursor Agent CLI in current directory
+agent
 
-# Open specific file or directory
-cursor path/to/file
+# Chat with the agent
+agent chat "Explain this codebase"
 
-# Use chat mode
-cursor chat "Explain this codebase"
+# Run specific tasks
+agent run "Add tests for the user service"
 
-# Run with specific agent
-cursor --agent review "Review these changes"
+# Review code changes
+agent review
 ```
 
 For more CLI options, see [Cursor CLI Documentation](https://cursor.com/docs/cli/using).
@@ -849,8 +849,8 @@ Custom commands are stored in `~/.cursor/commands/` as Markdown files. They prov
 
 ### Usage Tips
 
-- **CLI Mode**: Use `cursor` command for terminal-based workflows
-- **Agent Mode**: Use `Cmd/Ctrl + K` in the editor or `cursor --agent` in CLI
+- **CLI Mode**: Use `agent` command for terminal-based workflows
+- **Agent Mode**: Use `Cmd/Ctrl + K` in the editor to open the agent panel
 - **Inline Chat**: Use `Cmd/Ctrl + L` for inline AI chat in the editor
 - **Custom Agents**: Invoke specialized agents for focused tasks
 - **MCP Integration**: Leverage MCP servers for additional capabilities
