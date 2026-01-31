@@ -25,7 +25,7 @@
 
 - **Bun or Node.js LTS** - Runtime for tools and scripts
 - **Git** - Version control
-- **Claude Code subscription** - For full Claude Code features (required)
+- **Claude Code subscription** or use [CCS](#-ccs---claude-code-switch-optional) with affordable providers (GLM, MiniMax)
 
 ## 🚀 Quick Start
 
@@ -96,7 +96,7 @@ Export your current configurations back to this repository for version control:
 
 ---
 
-## 🤖 Claude Code (Required)
+## 🤖 Claude Code
 
 Primary AI coding assistant with extensive customization.
 
