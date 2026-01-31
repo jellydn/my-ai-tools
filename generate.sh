@@ -391,6 +391,8 @@ generate_gemini_configs() {
 generate_cursor_configs() {
 	log_info "Generating Cursor Agent configs..."
 
+	execute "mkdir -p $SCRIPT_DIR/configs/cursor"
+
 	# Export agents from global location (~/.config/agents/)
 	if [ -d "$HOME/.config/agents" ]; then
 		execute "mkdir -p $SCRIPT_DIR/configs/cursor/agents"
@@ -401,10 +403,17 @@ generate_cursor_configs() {
 				log_warning "Failed to copy some Cursor agents files"
 			fi
 		fi
-		log_success "Cursor Agent configs generated"
-	else
-		log_warning "Cursor agents directory not found: ~/.config/agents/"
 	fi
+
+	# Export CLI config file
+	if [ -f "$HOME/.cursor/cli-config.json" ]; then
+		copy_single "$HOME/.cursor/cli-config.json" "$SCRIPT_DIR/configs/cursor/cli-config.json"
+		log_success "Cursor CLI config exported from ~/.cursor/cli-config.json"
+	else
+		log_info "Cursor CLI config not found at ~/.cursor/cli-config.json"
+	fi
+
+	log_success "Cursor Agent configs generated"
 }
 
 generate_best_practices() {

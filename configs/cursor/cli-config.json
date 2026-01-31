@@ -1,0 +1,4 @@
+{
+  "$schema": "https://cursor.com/cli-config.schema.json",
+  "description": "Cursor Agent CLI configuration"
+}

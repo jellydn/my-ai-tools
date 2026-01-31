@@ -706,6 +706,13 @@ copy_configurations() {
 			execute "cp -r $SCRIPT_DIR/configs/cursor/agents/* $HOME/.config/agents/"
 			log_success "Cursor Agent configs copied to ~/.config/agents/"
 		fi
+		
+		# Copy CLI config file
+		execute "mkdir -p $HOME/.cursor"
+		if [ -f "$SCRIPT_DIR/configs/cursor/cli-config.json" ]; then
+			copy_config_file "$SCRIPT_DIR/configs/cursor/cli-config.json" "$HOME/.cursor/"
+			log_success "Cursor CLI config copied to ~/.cursor/cli-config.json"
+		fi
 	fi
 
 	# Copy best practices and MEMORY.md

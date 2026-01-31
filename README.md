@@ -874,6 +874,7 @@ Located in [`configs/cursor/`](configs/cursor/):
   - `docs-writer.md` - Generate comprehensive documentation
   - `review.md` - Code review with best practices
   - `security-audit.md` - Security vulnerability assessment
+- [`cli-config.json`](configs/cursor/cli-config.json) - CLI configuration template (installed to `~/.cursor/cli-config.json`)
 
 **CLI Configuration File:**
 
