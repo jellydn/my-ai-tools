@@ -744,14 +744,14 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
 
 ## 🎯 Cursor Agent CLI (Optional)
 
-AI-powered code editor with integrated agent capabilities. [Homepage](https://cursor.com)
+AI-powered code editor with integrated CLI and agent capabilities. [Homepage](https://cursor.com) | [CLI Docs](https://cursor.com/docs/cli/using)
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
 
 ### Installation
 
-Cursor is distributed as a desktop application:
+Cursor provides both a desktop application and CLI tool:
 
 **macOS:**
 ```bash
@@ -760,6 +760,26 @@ brew install --cask cursor
 
 **Windows/Linux:**
 Download from [cursor.com](https://cursor.com)
+
+The `cursor` CLI command becomes available after installing the desktop application.
+
+### CLI Usage
+
+```bash
+# Start Cursor CLI in current directory
+cursor
+
+# Open specific file or directory
+cursor path/to/file
+
+# Use chat mode
+cursor chat "Explain this codebase"
+
+# Run with specific agent
+cursor --agent review "Review these changes"
+```
+
+For more CLI options, see [Cursor CLI Documentation](https://cursor.com/docs/cli/using).
 
 ### Configuration
 
@@ -779,6 +799,7 @@ Located in [`configs/cursor/`](configs/cursor/):
 ### Key Features
 
 - 🤖 **AI-first editor**: Built-in AI capabilities with context awareness
+- 💻 **CLI tool**: Command-line interface for terminal workflows
 - 💬 **Agent mode**: Autonomous coding agent that can make changes
 - 🔌 **MCP support**: Extensible via Model Context Protocol
 - 📝 **Custom commands**: Define reusable AI instructions
@@ -820,7 +841,7 @@ description: Description of what this agent does
 Agent instructions here...
 ```
 
-Use agents by invoking them in the Cursor UI or via commands.
+Use agents via the Cursor UI, CLI commands, or keyboard shortcuts.
 
 ### Custom Commands
 
@@ -828,8 +849,9 @@ Custom commands are stored in `~/.cursor/commands/` as Markdown files. They prov
 
 ### Usage Tips
 
-- **Agent Mode**: Use `Cmd/Ctrl + K` to open the agent panel
-- **Inline Chat**: Use `Cmd/Ctrl + L` for inline AI chat
+- **CLI Mode**: Use `cursor` command for terminal-based workflows
+- **Agent Mode**: Use `Cmd/Ctrl + K` in the editor or `cursor --agent` in CLI
+- **Inline Chat**: Use `Cmd/Ctrl + L` for inline AI chat in the editor
 - **Custom Agents**: Invoke specialized agents for focused tasks
 - **MCP Integration**: Leverage MCP servers for additional capabilities
 - **Best Practices**: Reference `AGENTS.md` for coding guidelines
