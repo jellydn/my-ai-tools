@@ -389,46 +389,21 @@ generate_gemini_configs() {
 }
 
 generate_cursor_configs() {
-	log_info "Generating Cursor configs..."
+	log_info "Generating Cursor Agent configs..."
 
-	# Cursor may use ~/.cursor or ~/.config/cursor depending on platform
-	local cursor_config_dir="$HOME/.cursor"
-	if [ ! -d "$cursor_config_dir" ] && [ -d "$HOME/.config/cursor" ]; then
-		cursor_config_dir="$HOME/.config/cursor"
-	fi
-
-	if [ -d "$cursor_config_dir" ] || [ -d "$HOME/.config/agents" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/cursor"
-		copy_single "$cursor_config_dir/AGENTS.md" "$SCRIPT_DIR/configs/cursor/AGENTS.md"
-		copy_single "$cursor_config_dir/settings.json" "$SCRIPT_DIR/configs/cursor/settings.json"
-
-		# Copy agents from global location (~/.config/agents/)
-		if [ -d "$HOME/.config/agents" ]; then
-			execute "mkdir -p $SCRIPT_DIR/configs/cursor/agents"
-			if [ "$(ls -A "$HOME/.config/agents" 2>/dev/null)" ]; then
-				if execute "cp -r '$HOME/.config/agents'/* '$SCRIPT_DIR/configs/cursor/agents'/ 2>/dev/null"; then
-					log_success "Cursor agents copied from ~/.config/agents/"
-				else
-					log_warning "Failed to copy some Cursor agents files"
-				fi
+	# Export agents from global location (~/.config/agents/)
+	if [ -d "$HOME/.config/agents" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/cursor/agents"
+		if [ "$(ls -A "$HOME/.config/agents" 2>/dev/null)" ]; then
+			if execute "cp -r '$HOME/.config/agents'/* '$SCRIPT_DIR/configs/cursor/agents'/ 2>/dev/null"; then
+				log_success "Cursor agents exported from ~/.config/agents/"
+			else
+				log_warning "Failed to copy some Cursor agents files"
 			fi
 		fi
-
-		# Copy commands directory
-		if [ -d "$cursor_config_dir/commands" ]; then
-			execute "mkdir -p $SCRIPT_DIR/configs/cursor/commands"
-			if [ "$(ls -A "$cursor_config_dir/commands" 2>/dev/null)" ]; then
-				if execute "cp -r '$cursor_config_dir/commands'/* '$SCRIPT_DIR/configs/cursor/commands'/ 2>/dev/null"; then
-					log_success "Cursor commands copied"
-				else
-					log_warning "Failed to copy some Cursor commands files"
-				fi
-			fi
-		fi
-
-		log_success "Cursor configs generated"
+		log_success "Cursor Agent configs generated"
 	else
-		log_warning "Cursor config directory not found: $cursor_config_dir"
+		log_warning "Cursor agents directory not found: ~/.config/agents/"
 	fi
 }
 

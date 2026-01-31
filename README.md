@@ -803,16 +803,11 @@ For more CLI options and commands, see [Cursor CLI Documentation](https://cursor
 
 Located in [`configs/cursor/`](configs/cursor/):
 
-- [`settings.json`](configs/cursor/settings.json) - Main configuration with MCP servers (installed to `~/.cursor/settings.json`)
-- [`AGENTS.md`](configs/cursor/AGENTS.md) - Agent guidelines and best practices (installed to `~/.cursor/AGENTS.md`)
 - [`agents/`](configs/cursor/agents/) - Custom agent definitions (installed to `~/.config/agents/`)
   - `ai-slop-remover.md` - Clean up AI-generated code patterns
   - `docs-writer.md` - Generate comprehensive documentation
   - `review.md` - Code review with best practices
   - `security-audit.md` - Security vulnerability assessment
-- [`commands/`](configs/cursor/commands/) - Custom commands (installed to `~/.cursor/commands/`)
-  - `ultrathink.md` - Deep thinking mode for complex problems
-  - `plannotator-review.md` - Interactive code review
 
 ### Key Features
 
@@ -820,31 +815,8 @@ Located in [`configs/cursor/`](configs/cursor/):
 - 💻 **CLI tool**: Command-line interface for terminal workflows
 - 💬 **Agent mode**: Autonomous coding agent that can make changes
 - 🔌 **MCP support**: Extensible via Model Context Protocol
-- 📝 **Custom commands**: Define reusable AI instructions
 - 🎯 **Custom agents**: Specialized AI assistants for specific tasks
 - 🔍 **Codebase understanding**: AI that understands your entire project
-
-### MCP Servers
-
-Configure MCP servers in `~/.cursor/settings.json`:
-
-```json
-{
-  "mcpServers": {
-    "context7": {
-      "url": "https://mcp.context7.com/mcp"
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"]
-    }
-  }
-}
-```
 
 ### Custom Agents
 
@@ -861,18 +833,12 @@ Agent instructions here...
 
 Use agents via the Cursor UI, CLI commands, or keyboard shortcuts.
 
-### Custom Commands
-
-Custom commands are stored in `~/.cursor/commands/` as Markdown files. They provide reusable AI instructions for common tasks.
-
 ### Usage Tips
 
 - **CLI Mode**: Use `agent` command for terminal-based workflows
 - **Agent Mode**: Use `Cmd/Ctrl + K` in the editor to open the agent panel
 - **Inline Chat**: Use `Cmd/Ctrl + L` for inline AI chat in the editor
 - **Custom Agents**: Invoke specialized agents for focused tasks
-- **MCP Integration**: Leverage MCP servers for additional capabilities
-- **Best Practices**: Reference `AGENTS.md` for coding guidelines
 
 </details>
 
