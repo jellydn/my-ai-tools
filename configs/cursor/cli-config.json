@@ -1,4 +1,52 @@
 {
-  "$schema": "https://cursor.com/cli-config.schema.json",
-  "description": "Cursor Agent CLI configuration"
+  "permissions": {
+    "allow": [
+      "Shell(ls)",
+      "Shell(gh)",
+      "Shell(git)",
+      "Shell(make)",
+      "Shell(echo)",
+      "Shell(grep)",
+      "Shell(curl)",
+      "Shell(head)",
+      "Shell(cut)",
+      "Shell(base64)",
+      "Shell(jq)",
+      "Shell(backlog)",
+      "Shell(xargs)",
+      "Shell(cd)",
+      "Shell(bun test)",
+      "Shell(cargo test)",
+      "Shell(cargo update)",
+      "Shell(task)",
+      "Shell(.specify/scripts/bash/check-prerequisites.sh)"
+    ],
+    "deny": []
+  },
+  "version": 1,
+  "editor": {
+    "vimMode": true
+  },
+  "display": {
+    "showLineNumbers": true
+  },
+  "model": {
+    "modelId": "composer-1",
+    "displayModelId": "composer-1",
+    "displayName": "Composer 1",
+    "displayNameShort": "Composer 1",
+    "aliases": [],
+    "maxMode": false
+  },
+  "hasChangedDefaultModel": true,
+  "privacyCache": {
+    "ghostMode": true,
+    "privacyMode": 1,
+    "updatedAt": 1769863880415
+  },
+  "network": {
+    "useHttp1ForAgent": false
+  },
+  "statsigBootstrap": {
+  }
 }
