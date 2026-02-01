@@ -324,7 +324,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.ccs" "$BACKUP_DIR" "ccs"
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
-		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher"
+		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
 	fi
@@ -642,8 +642,8 @@ copy_configurations() {
 	# Copy Codex CLI configs
 	if [ -d "$HOME/.codex" ] || command -v codex &>/dev/null; then
 		execute "mkdir -p $HOME/.codex"
-		copy_config_file "$SCRIPT_DIR/configs/codex/AGENTS.md" "$HOME/.codex/"
-		copy_config_file "$SCRIPT_DIR/configs/codex/config.json" "$HOME/.codex/"
+		copy_config_file "$SCRIPT_DIR/configs/codex/AGENTS.md" "$HOME/.codex/" || true
+		copy_config_file "$SCRIPT_DIR/configs/codex/config.json" "$HOME/.codex/" || true
 		if [ -f "$SCRIPT_DIR/configs/codex/config.toml" ]; then
 			if [ -f "$HOME/.codex/config.toml" ]; then
 				# Backup existing config before overwriting
@@ -660,9 +660,9 @@ copy_configurations() {
 	# Copy Gemini CLI configs
 	if [ -d "$HOME/.gemini" ] || command -v gemini &>/dev/null; then
 		execute "mkdir -p $HOME/.gemini"
-		copy_config_file "$SCRIPT_DIR/configs/gemini/AGENTS.md" "$HOME/.gemini/"
-		copy_config_file "$SCRIPT_DIR/configs/gemini/GEMINI.md" "$HOME/.gemini/"
-		copy_config_file "$SCRIPT_DIR/configs/gemini/settings.json" "$HOME/.gemini/"
+		copy_config_file "$SCRIPT_DIR/configs/gemini/AGENTS.md" "$HOME/.gemini/" || true
+		copy_config_file "$SCRIPT_DIR/configs/gemini/GEMINI.md" "$HOME/.gemini/" || true
+		copy_config_file "$SCRIPT_DIR/configs/gemini/settings.json" "$HOME/.gemini/" || true
 		execute "rm -rf $HOME/.gemini/agents"
 		execute "cp -r $SCRIPT_DIR/configs/gemini/agents $HOME/.gemini/"
 		execute "rm -rf $HOME/.gemini/commands"
@@ -683,7 +683,10 @@ enable_plugins() {
 	log_info "Installing Claude Code plugins..."
 
 	# Ask for skill installation source
-	if [ -t 0 ]; then
+	if [ "$YES_TO_ALL" = true ]; then
+		# In non-interactive mode, default to local
+		SKILL_INSTALL_SOURCE="local"
+	elif [ -t 0 ]; then
 		log_info "How would you like to install community skills?"
 		printf "1) Local (from .claude-plugin folder) 2) Remote (from jellydn/my-ai-tools marketplace) [1/2]: "
 		read REPLY
