@@ -1,7 +1,9 @@
 [features]
 unified_exec = true
 shell_snapshot = true
-web_search_request = true
+apps = true
+steer = true
+personality = true
 
 [sandbox_workspace_write]
 network_access = true
@@ -26,3 +28,4 @@ args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 [mcp_servers.qmd]
 command = "qmd"
 args = ["mcp"]
+

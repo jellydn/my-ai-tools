@@ -8,6 +8,13 @@
 			"promptCommand": "claude --permission-mode plan -p"
 		},
 		{
+			"name": "codex",
+			"command": "codex",
+			"description": "OpenAI Codex CLI",
+			"aliases": ["co"],
+			"promptCommand": "codex exec"
+		},
+		{
 			"name": "opencode",
 			"command": "opencode",
 			"description": "OpenCode AI assistant",
