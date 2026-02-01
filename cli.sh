@@ -433,7 +433,7 @@ install_ai_switcher() {
 		if command -v ai-switcher &>/dev/null; then
 			log_warning "ai-switcher is already installed"
 		else
-			execute_installer "https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/install.sh" "" "ai-switcher"
+			execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "ai-switcher"
 			log_success "ai-switcher installed"
 		fi
 	}

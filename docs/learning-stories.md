@@ -70,11 +70,11 @@ Minimal Ralph implementation: PRD → task decomposition → autonomous executio
 
 ---
 
-## AI CLI Switcher
+## AI Launcher
 
 **Fast launcher for switching between AI coding assistants.**
 
-- **Repository:** [jellydn/ai-cli-switcher](https://github.com/jellydn/ai-cli-switcher)
+- **Repository:** [jellydn/ai-launcher](https://github.com/jellydn/ai-launcher)
 
 Fuzzy search interface for Claude Code, OpenCode, Amp, etc. Quick switching without managing multiple terminals.
 
