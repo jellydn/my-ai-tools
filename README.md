@@ -760,7 +760,7 @@ curl -fsSL https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh
 
 ### Configuration
 
-Copy [`configs/ai-switcher/config.json`](configs/ai-switcher/config.json) to `~/.config/ai-switcher/`:
+Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/.config/ai-launcher/`:
 
 **Tools:**
 
