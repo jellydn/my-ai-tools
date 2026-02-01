@@ -79,7 +79,8 @@ main() {
 		bash cli.sh "$@"
 	else
 		# Non-interactive mode (piped) - auto-accept all prompts
-		bash cli.sh --yes "$@"
+		# Redirect stdin from /dev/null to avoid issues with exhausted pipes
+		bash cli.sh --yes "$@" </dev/null
 	fi
 
 	log_success "Installation complete!"
