@@ -366,7 +366,7 @@ Real-world projects built using these AI tools:
 | [Keybinder](https://github.com/jellydn/keybinder)                 | macOS app for managing skhd keyboard shortcuts           | Claude + spec-kit |
 | [SealCode](https://github.com/jellydn/vscode-seal-code)           | VS Code extension for AI-powered code review             | Amp + Ralph       |
 | [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development      | TypeScript        |
-| [AI CLI Switcher](https://github.com/jellydn/ai-cli-switcher)     | Fast launcher for switching between AI coding assistants | TypeScript        |
+| [AI Launcher](https://github.com/jellydn/ai-launcher)     | Fast launcher for switching between AI coding assistants | TypeScript        |
 | [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity               | TypeScript        |
 
 📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
@@ -745,9 +745,9 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
 
 ---
 
-## 🔄 AI CLI Switcher (Optional)
+## 🔄 AI Launcher (Optional)
 
-Fast launcher for switching between AI coding assistants. [Homepage](https://github.com/jellydn/ai-cli-switcher)
+Fast launcher for switching between AI coding assistants. [Homepage](https://github.com/jellydn/ai-launcher)
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
@@ -755,12 +755,12 @@ Fast launcher for switching between AI coding assistants. [Homepage](https://git
 ### Installation
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh | sh
 ```
 
 ### Configuration
 
-Copy [`configs/ai-switcher/config.json`](configs/ai-switcher/config.json) to `~/.config/ai-switcher/`:
+Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/.config/ai-launcher/`:
 
 **Tools:**
 

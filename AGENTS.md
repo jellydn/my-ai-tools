@@ -109,7 +109,7 @@ configs/<tool>/              # Source configurations
   opencode/                  # OpenCode agents, commands, skills
   amp/                       # Amp settings, skills
   ccs/                       # CCS configuration, hooks, cliproxy
-  ai-switcher/               # AI switcher config
+  ai-launcher/               # AI Launcher config
 .claude-plugin/plugins/      # Local skills for distribution
 ```
 

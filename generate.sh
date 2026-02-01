@@ -407,15 +407,15 @@ generate_memory_md() {
 	fi
 }
 
-generate_ai_switcher_configs() {
-	log_info "Generating ai-switcher configs..."
+generate_ai_launcher_configs() {
+	log_info "Generating ai-launcher configs..."
 
-	if [ -f "$HOME/.config/ai-switcher/config.json" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/ai-switcher"
-		copy_single "$HOME/.config/ai-switcher/config.json" "$SCRIPT_DIR/configs/ai-switcher/config.json"
-		log_success "ai-switcher configs generated"
+	if [ -f "$HOME/.config/ai-launcher/config.json" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/ai-launcher"
+		copy_single "$HOME/.config/ai-launcher/config.json" "$SCRIPT_DIR/configs/ai-launcher/config.json"
+		log_success "ai-launcher configs generated"
 	else
-		log_warning "ai-switcher config not found: $HOME/.config/ai-switcher/config.json"
+		log_warning "ai-launcher config not found: $HOME/.config/ai-launcher/config.json"
 	fi
 }
 
@@ -458,7 +458,7 @@ main() {
 	generate_memory_md
 	echo
 
-	generate_ai_switcher_configs
+	generate_ai_launcher_configs
 	echo
 
 	log_success "Config generation complete!"

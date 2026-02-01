@@ -324,7 +324,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.ccs" "$BACKUP_DIR" "ccs"
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
-		copy_config_file "$HOME/.config/ai-switcher/config.json" "$BACKUP_DIR/ai-switcher"
+		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher"
 
 		log_success "Backup completed: $BACKUP_DIR"
 	fi
@@ -433,7 +433,7 @@ install_ai_switcher() {
 		if command -v ai-switcher &>/dev/null; then
 			log_warning "ai-switcher is already installed"
 		else
-			execute_installer "https://raw.githubusercontent.com/jellydn/ai-cli-switcher/main/install.sh" "" "ai-switcher"
+			execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "ai-switcher"
 			log_success "ai-switcher installed"
 		fi
 	}
@@ -630,12 +630,12 @@ copy_configurations() {
 		log_success "CCS configs copied"
 	fi
 
-	# Copy ai-switcher configs
-	if [ -d "$HOME/.config/ai-switcher" ] || [ -f "$HOME/.config/ai-switcher/config.json" ]; then
-		if copy_config_file "$SCRIPT_DIR/configs/ai-switcher/config.json" "$HOME/.config/ai-switcher"; then
-			log_success "ai-switcher configs copied"
+	# Copy ai-launcher configs
+	if [ -d "$HOME/.config/ai-launcher" ] || [ -f "$HOME/.config/ai-launcher/config.json" ]; then
+		if copy_config_file "$SCRIPT_DIR/configs/ai-launcher/config.json" "$HOME/.config/ai-launcher"; then
+			log_success "ai-launcher configs copied"
 		else
-			log_info "ai-switcher config not found in source, preserving existing"
+			log_info "ai-launcher config not found in source, preserving existing"
 		fi
 	fi
 
