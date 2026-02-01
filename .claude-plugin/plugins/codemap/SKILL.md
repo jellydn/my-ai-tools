@@ -48,7 +48,7 @@ Each agent:
 
 The orchestrator:
 - Creates `.planning/codebase/` directory
-- Spawns 4 parallel agents with `run_in_background=true`
+- Spawns 4 parallel general-purpose agents (not explore agents, since they need write access)
 - Collects confirmations
 - Verifies all documents created
 - Commits the codebase map (if configured)
@@ -74,11 +74,11 @@ mkdir -p .planning/codebase
 
 ### Step 3: Spawn Parallel Agents
 
-Use the `Task` tool with `agent_type="explore"` and `run_in_background=true` for parallel execution.
+Use the `Task` tool with `agent_type="general-purpose"` for parallel execution. Note: We use general-purpose agents (not explore agents) because these agents need write access to create the documentation files.
 
 **Tech Agent:**
 ```
-agent_type: explore
+agent_type: general-purpose
 description: Map codebase tech stack
 prompt: |
 	Focus: tech
@@ -95,7 +95,7 @@ prompt: |
 
 **Architecture Agent:**
 ```
-agent_type: explore
+agent_type: general-purpose
 description: Map codebase architecture
 prompt: |
 	Focus: arch
@@ -112,7 +112,7 @@ prompt: |
 
 **Quality Agent:**
 ```
-agent_type: explore
+agent_type: general-purpose
 description: Map codebase conventions
 prompt: |
 	Focus: quality
@@ -129,7 +129,7 @@ prompt: |
 
 **Concerns Agent:**
 ```
-agent_type: explore
+agent_type: general-purpose
 description: Map codebase concerns
 prompt: |
 	Focus: concerns
