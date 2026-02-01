@@ -324,6 +324,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.ccs" "$BACKUP_DIR" "ccs"
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
+		copy_config_dir "$HOME/.copilot" "$BACKUP_DIR" "copilot"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher"
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -499,6 +500,30 @@ install_gemini() {
 	fi
 }
 
+install_copilot_cli() {
+	prompt_and_install() {
+		log_info "Installing GitHub Copilot CLI..."
+		if command -v copilot &>/dev/null; then
+			log_warning "GitHub Copilot CLI is already installed"
+		else
+			execute "npm install -g @github/copilot"
+			log_success "GitHub Copilot CLI installed"
+		fi
+	}
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting GitHub Copilot CLI installation (--yes flag)"
+		prompt_and_install
+	elif [ -t 0 ]; then
+		read -p "Do you want to install GitHub Copilot CLI? (y/n) " -n 1 -r
+		echo
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping GitHub Copilot CLI installation"
+	else
+		log_info "Installing GitHub Copilot CLI (non-interactive mode)..."
+		prompt_and_install
+	fi
+}
+
 # Helper: Copy non-marketplace skills from source to destination
 # Usage: copy_non_marketplace_skills "source_dir" "dest_dir"
 copy_non_marketplace_skills() {
@@ -670,6 +695,18 @@ copy_configurations() {
 		execute "rm -rf $HOME/.gemini/skills"
 		copy_non_marketplace_skills "$SCRIPT_DIR/configs/gemini/skills" "$HOME/.gemini/skills"
 		log_success "Gemini CLI configs copied"
+	fi
+
+	# Copy GitHub Copilot CLI configs
+	if [ -d "$HOME/.copilot" ] || command -v copilot &>/dev/null; then
+		execute "mkdir -p $HOME/.copilot"
+		copy_config_file "$SCRIPT_DIR/configs/copilot-cli/AGENTS.md" "$HOME/.copilot/"
+		copy_config_file "$SCRIPT_DIR/configs/copilot-cli/settings.json" "$HOME/.copilot/"
+		execute "rm -rf $HOME/.copilot/agents"
+		execute "cp -r $SCRIPT_DIR/configs/copilot-cli/agents $HOME/.copilot/"
+		execute "rm -rf $HOME/.copilot/commands"
+		execute "cp -r $SCRIPT_DIR/configs/copilot-cli/commands $HOME/.copilot/"
+		log_success "GitHub Copilot CLI configs copied"
 	fi
 
 	# Copy best practices and MEMORY.md
@@ -1120,7 +1157,7 @@ EOF
 main() {
 	echo "╔════════════════════════════════════════════════════════════════════╗"
 	echo "║           AI Tools Setup                                           ║"
-	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • AI Switcher     ║"
+	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • Copilot        ║"
 	echo "╚════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -1160,6 +1197,9 @@ main() {
 	echo
 
 	install_gemini
+	echo
+
+	install_copilot_cli
 	echo
 
 	copy_configurations

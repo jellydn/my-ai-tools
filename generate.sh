@@ -388,6 +388,44 @@ generate_gemini_configs() {
 	fi
 }
 
+generate_copilot_cli_configs() {
+	log_info "Generating GitHub Copilot CLI configs..."
+
+	if [ -d "$HOME/.copilot" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/copilot-cli"
+		copy_single "$HOME/.copilot/AGENTS.md" "$SCRIPT_DIR/configs/copilot-cli/AGENTS.md"
+		copy_single "$HOME/.copilot/settings.json" "$SCRIPT_DIR/configs/copilot-cli/settings.json"
+
+		# Copy agents directory
+		if [ -d "$HOME/.copilot/agents" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/copilot-cli/agents"
+			if [ "$(ls -A "$HOME/.copilot/agents" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.copilot/agents'/* '$SCRIPT_DIR/configs/copilot-cli/agents'/ 2>/dev/null"; then
+					log_success "GitHub Copilot CLI agents copied"
+				else
+					log_warning "Failed to copy some GitHub Copilot CLI agents files"
+				fi
+			fi
+		fi
+
+		# Copy commands directory
+		if [ -d "$HOME/.copilot/commands" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/copilot-cli/commands"
+			if [ "$(ls -A "$HOME/.copilot/commands" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.copilot/commands'/* '$SCRIPT_DIR/configs/copilot-cli/commands'/ 2>/dev/null"; then
+					log_success "GitHub Copilot CLI commands copied"
+				else
+					log_warning "Failed to copy some GitHub Copilot CLI commands files"
+				fi
+			fi
+		fi
+
+		log_success "GitHub Copilot CLI configs generated"
+	else
+		log_warning "GitHub Copilot CLI config directory not found: $HOME/.copilot"
+	fi
+}
+
 generate_best_practices() {
 	log_info "Generating best-practices.md..."
 
@@ -450,6 +488,9 @@ main() {
 	echo
 
 	generate_gemini_configs
+	echo
+
+	generate_copilot_cli_configs
 	echo
 
 	generate_best_practices

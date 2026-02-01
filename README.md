@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Codex, Gemini CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Codex, Gemini CLI, GitHub Copilot CLI, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -740,6 +740,135 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
 ```
 
 > **Note:** Custom agents in `~/.gemini/agents/` are automatically discovered when `experimental.enableAgents` is set to `true`.
+
+</details>
+
+---
+
+## 🚁 GitHub Copilot CLI (Optional)
+
+GitHub's AI agent that brings the power of Copilot coding agent directly into your terminal. [Homepage](https://github.com/github/copilot-cli)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Installation
+
+Install with npm (cross-platform):
+
+```bash
+npm install -g @github/copilot
+```
+
+Or using Homebrew (macOS/Linux):
+
+```bash
+brew install copilot-cli
+```
+
+Or using WinGet (Windows):
+
+```bash
+winget install GitHub.Copilot
+```
+
+Or using the install script (macOS/Linux):
+
+```bash
+curl -fsSL https://gh.io/copilot-install | bash
+```
+
+### Prerequisites
+
+- An **active Copilot subscription** (Individual, Business, or Enterprise)
+- **PowerShell v6+** (Windows only)
+
+### Authentication
+
+On first launch, you'll be prompted to authenticate:
+
+```bash
+copilot
+# Use /login command and follow the on-screen instructions
+```
+
+**Alternative: Personal Access Token (PAT)**
+
+1. Create a fine-grained PAT at [GitHub Settings](https://github.com/settings/personal-access-tokens/new)
+2. Enable "Copilot Requests" permission
+3. Set the token in your environment:
+   ```bash
+   export GH_TOKEN="your_token_here"
+   # or
+   export GITHUB_TOKEN="your_token_here"
+   ```
+
+### Configuration
+
+Located in [`configs/copilot-cli/`](configs/copilot-cli/):
+
+- [`settings.json`](configs/copilot-cli/settings.json) - Main configuration with MCP servers
+- [`AGENTS.md`](configs/copilot-cli/AGENTS.md) - Agent guidelines
+- [`agents/`](configs/copilot-cli/agents/) - Custom agent definitions (`.md` format with YAML frontmatter)
+  - `ai-slop-remover.md` - Clean up AI-generated code patterns
+  - `docs-writer.md` - Generate comprehensive documentation
+  - `review.md` - Code review with best practices
+  - `security-audit.md` - Security vulnerability assessment
+- [`commands/`](configs/copilot-cli/commands/) - Custom slash commands (`.toml` format)
+  - `ultrathink.toml` - Deep thinking mode
+
+### Key Features
+
+- 🤖 **Agentic capabilities**: Build, edit, debug, and refactor code with AI that can plan and execute complex tasks
+- 🔌 **MCP extensibility**: Ships with GitHub's MCP server and supports custom MCP servers
+- 🔐 **GitHub integration**: Native access to repositories, issues, and pull requests with automatic authentication
+- 🎯 **Full control**: Preview every action before execution
+- 🧠 **Premium models**: Claude Sonnet 4.5 by default, with Claude Sonnet 4 and GPT-5 available
+
+### Usage
+
+```bash
+# Start GitHub Copilot CLI
+copilot
+
+# Change model
+/model
+
+# Submit feedback
+/feedback
+
+# Show banner again
+copilot --banner
+```
+
+### MCP Servers
+
+Configure MCP servers in `~/.copilot/settings.json` to extend functionality:
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "qmd": {
+      "command": "qmd",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+> **Note:** GitHub Copilot CLI uses premium requests from your Copilot subscription. See [About premium requests](https://docs.github.com/copilot/managing-copilot/monitoring-usage-and-entitlements/about-premium-requests) for details.
+
+### Resources
+
+- [Official Documentation](https://docs.github.com/copilot/concepts/agents/about-copilot-cli)
+- [GitHub Repository](https://github.com/github/copilot-cli)
 
 </details>
 
