@@ -142,7 +142,7 @@ check_prerequisites() {
 }
 
 install_global_tools() {
-	log_info "Checking global tools for hooks..."
+	log_info "Checking global tools for PostToolUse hooks..."
 
 	# Check/install jq (required for JSON parsing in hooks)
 	if ! command -v jq &>/dev/null; then
@@ -178,6 +178,30 @@ install_global_tools() {
 		log_success "biome found"
 	fi
 
+	# Check gofmt (comes with Go, required for Go formatting in PostToolUse hooks)
+	if ! command -v gofmt &>/dev/null; then
+		log_warning "gofmt not found. Go is not installed."
+		if [ "$IS_WINDOWS" = true ]; then
+			if command -v choco &>/dev/null; then
+				log_info "Install Go with: choco install golang -y"
+			elif command -v winget &>/dev/null; then
+				log_info "Install Go with: winget install GoLang.Go"
+			else
+				log_info "Please install Go manually: https://golang.org/dl/"
+			fi
+		else
+			if command -v brew &>/dev/null; then
+				log_info "Install Go with: brew install go"
+			elif command -v apt-get &>/dev/null; then
+				log_info "Install Go with: sudo apt-get install -y golang"
+			else
+				log_info "Please install Go manually: https://golang.org/dl/"
+			fi
+		fi
+	else
+		log_success "gofmt found"
+	fi
+
 	# Check/install backlog.md (only if Amp is installed)
 	if [ "$AMP_INSTALLED" = true ]; then
 		if ! command -v backlog &>/dev/null; then
@@ -187,6 +211,9 @@ install_global_tools() {
 			log_success "backlog.md found"
 		fi
 	fi
+
+	# Note: prettier is used via 'npx' in PostToolUse hooks, so no explicit installation needed
+	# It will be automatically downloaded and cached by npm when first used
 
 	log_success "Global tools check complete"
 }
