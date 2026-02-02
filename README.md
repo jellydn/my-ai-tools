@@ -286,6 +286,12 @@ Auto-format after file edits:
 }
 ```
 
+**Required Tools:** The setup script (`./cli.sh`) automatically checks and installs these tools:
+- `jq` - JSON parsing
+- `biome` - JavaScript/TypeScript formatting
+- `gofmt` - Go formatting (requires Go installation)
+- `prettier` - Markdown formatting (used via `npx`)
+
 #### PreToolUse Hooks
 
 Transform WebSearch queries:
