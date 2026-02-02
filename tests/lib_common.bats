@@ -86,3 +86,21 @@ setup() {
     [ "$status" -eq 0 ]
     [[ "$output" == "✗"* ]]
 }
+
+@test "install_ai_launcher_direct respects DRY_RUN" {
+    export DRY_RUN=true
+    run install_ai_launcher_direct
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"[DRY RUN]"* ]]
+}
+
+@test "install_ai_launcher_direct detects OS and architecture" {
+    export DRY_RUN=true
+    run install_ai_launcher_direct
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Detected:"* ]]
+}
+
+@test "install_ai_launcher_direct function exists in lib/common.sh" {
+    grep -q "^install_ai_launcher_direct()" "$BATS_TEST_DIRNAME/../lib/common.sh"
+}

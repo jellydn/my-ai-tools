@@ -81,3 +81,18 @@ setup() {
 
     [ "$status" -eq 0 ]
 }
+
+@test "install_ai_switcher function exists" {
+    # Test that the function exists
+    grep -q "^install_ai_switcher()" "$BATS_TEST_DIRNAME/../cli.sh"
+}
+
+@test "install_ai_switcher uses direct installation" {
+    # Verify it uses install_ai_launcher_direct instead of execute_installer
+    grep -q "install_ai_launcher_direct" "$BATS_TEST_DIRNAME/../cli.sh"
+}
+
+@test "install_ai_switcher checks for both ai and ai-switcher commands" {
+    # Verify it checks for both binary names
+    grep "install_ai_switcher" -A 10 "$BATS_TEST_DIRNAME/../cli.sh" | grep -q "command -v ai"
+}
