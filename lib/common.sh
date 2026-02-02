@@ -107,6 +107,142 @@ execute_installer() {
 	return $result
 }
 
+# Install ai-launcher (ai-switcher) directly without using GitHub API
+# This avoids rate limiting issues with the standard install script
+# Usage: install_ai_launcher_direct
+install_ai_launcher_direct() {
+	local REPO="jellydn/ai-launcher"
+	local BINARY_NAME="ai"
+	local INSTALL_DIR="${AI_INSTALL_DIR:-$HOME/.local/bin}"
+	local VERSION="${1:-latest}"  # Allow specifying version, default to latest
+
+	if [ "$DRY_RUN" = true ]; then
+		log_info "[DRY RUN] Would install ai-launcher to $INSTALL_DIR"
+		return 0
+	fi
+
+	# Detect OS
+	local OS
+	OS="$(uname -s)"
+	case "$OS" in
+		Linux*)  OS="linux" ;;
+		Darwin*) OS="darwin" ;;
+		*)       
+			log_error "Unsupported OS: $OS"
+			return 1
+			;;
+	esac
+
+	# Detect architecture
+	local ARCH
+	ARCH="$(uname -m)"
+	case "$ARCH" in
+		x86_64)  ARCH="x64" ;;
+		aarch64) ARCH="arm64" ;;
+		arm64)   ARCH="arm64" ;;
+		*)       
+			log_error "Unsupported architecture: $ARCH"
+			return 1
+			;;
+	esac
+
+	local ARTIFACT="ai-${OS}-${ARCH}"
+	log_info "Detected: $OS-$ARCH"
+
+	# If version is "latest", we need to determine the latest version
+	# Try using GitHub API with rate limit handling
+	if [ "$VERSION" = "latest" ]; then
+		log_info "Determining latest version..."
+		local GITHUB_TOKEN="${GITHUB_TOKEN:-}"
+		local AUTH_HEADER=""
+		
+		if [ -n "$GITHUB_TOKEN" ]; then
+			AUTH_HEADER="-H \"Authorization: Bearer $GITHUB_TOKEN\""
+		fi
+		
+		# Try to get the latest release tag, with fallback
+		local LATEST_TAG
+		if [ -n "$AUTH_HEADER" ]; then
+			LATEST_TAG=$(curl -fsSL $AUTH_HEADER "https://api.github.com/repos/${REPO}/releases/latest" 2>/dev/null | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4 || echo "")
+		else
+			LATEST_TAG=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" 2>/dev/null | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4 || echo "")
+		fi
+		
+		# If API call failed (rate limit or other), use a known version as fallback
+		if [ -z "$LATEST_TAG" ]; then
+			log_warning "Could not determine latest version from GitHub API (possible rate limit)"
+			log_info "Using fallback version: v0.2.4"
+			VERSION="v0.2.4"
+		else
+			VERSION="$LATEST_TAG"
+			log_info "Latest version: $VERSION"
+		fi
+	fi
+
+	# Construct direct download URL (doesn't require API authentication)
+	local DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${VERSION}/${ARTIFACT}"
+	local CHECKSUM_URL="https://github.com/${REPO}/releases/download/${VERSION}/checksums.txt"
+
+	log_info "Downloading from: $DOWNLOAD_URL"
+
+	# Create install directory
+	mkdir -p "$INSTALL_DIR"
+
+	# Download binary
+	if ! curl -fsSL "$DOWNLOAD_URL" -o "${INSTALL_DIR}/${BINARY_NAME}"; then
+		log_error "Failed to download ai-launcher binary"
+		log_error "URL: $DOWNLOAD_URL"
+		log_info "This may be a temporary issue with GitHub. Please try again later."
+		return 1
+	fi
+
+	# Verify checksum if available
+	log_info "Verifying checksum..."
+	local CHECKSUMS
+	CHECKSUMS=$(curl -fsSL "$CHECKSUM_URL" 2>/dev/null || echo "")
+	
+	if [ -n "$CHECKSUMS" ]; then
+		local EXPECTED
+		EXPECTED=$(echo "$CHECKSUMS" | grep "$ARTIFACT" | awk '{print $1}')
+		
+		if [ -n "$EXPECTED" ]; then
+			local ACTUAL
+			if command -v sha256sum >/dev/null 2>&1; then
+				ACTUAL=$(sha256sum "${INSTALL_DIR}/${BINARY_NAME}" | awk '{print $1}')
+			elif command -v shasum >/dev/null 2>&1; then
+				ACTUAL=$(shasum -a 256 "${INSTALL_DIR}/${BINARY_NAME}" | awk '{print $1}')
+			else
+				log_warning "No sha256sum or shasum found, skipping verification"
+				ACTUAL="$EXPECTED"
+			fi
+			
+			if [ "$EXPECTED" != "$ACTUAL" ]; then
+				log_error "Checksum verification failed!"
+				log_error "Expected: $EXPECTED"
+				log_error "Actual:   $ACTUAL"
+				rm -f "${INSTALL_DIR}/${BINARY_NAME}"
+				return 1
+			fi
+			log_success "Checksum verified ✓"
+		fi
+	else
+		log_warning "Could not download checksums, skipping verification"
+	fi
+
+	chmod +x "${INSTALL_DIR}/${BINARY_NAME}"
+
+	log_success "Installed ai-launcher to ${INSTALL_DIR}/${BINARY_NAME}"
+
+	# Check if in PATH
+	if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
+		log_warning "Note: $INSTALL_DIR is not in your PATH"
+		log_info "Add to your PATH by adding this to your shell config:"
+		log_info "  export PATH=\"\$PATH:$INSTALL_DIR\""
+	fi
+
+	return 0
+}
+
 # Clean up old backup directories, keeping only the most recent N backups
 # Usage: cleanup_old_backups [max_backups]
 cleanup_old_backups() {

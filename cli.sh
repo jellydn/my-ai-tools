@@ -430,11 +430,17 @@ install_ccs() {
 install_ai_switcher() {
 	prompt_and_install() {
 		log_info "Installing ai-switcher..."
-		if command -v ai-switcher &>/dev/null; then
+		# Check for both 'ai-switcher' (legacy) and 'ai' (new binary name)
+		if command -v ai-switcher &>/dev/null || command -v ai &>/dev/null; then
 			log_warning "ai-switcher is already installed"
 		else
-			execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "ai-switcher"
-			log_success "ai-switcher installed"
+			# Use direct installation to avoid GitHub API rate limiting
+			if install_ai_launcher_direct; then
+				log_success "ai-switcher installed"
+			else
+				log_error "Failed to install ai-switcher"
+				return 1
+			fi
 		fi
 	}
 
