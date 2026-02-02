@@ -154,16 +154,11 @@ install_ai_launcher_direct() {
 	if [ "$VERSION" = "latest" ]; then
 		log_info "Determining latest version..."
 		local GITHUB_TOKEN="${GITHUB_TOKEN:-}"
-		local AUTH_HEADER=""
-		
-		if [ -n "$GITHUB_TOKEN" ]; then
-			AUTH_HEADER="-H \"Authorization: Bearer $GITHUB_TOKEN\""
-		fi
 		
 		# Try to get the latest release tag, with fallback
-		local LATEST_TAG
-		if [ -n "$AUTH_HEADER" ]; then
-			LATEST_TAG=$(curl -fsSL $AUTH_HEADER "https://api.github.com/repos/${REPO}/releases/latest" 2>/dev/null | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4 || echo "")
+		local LATEST_TAG=""
+		if [ -n "$GITHUB_TOKEN" ]; then
+			LATEST_TAG=$(curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" "https://api.github.com/repos/${REPO}/releases/latest" 2>/dev/null | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4 || echo "")
 		else
 			LATEST_TAG=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" 2>/dev/null | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4 || echo "")
 		fi
