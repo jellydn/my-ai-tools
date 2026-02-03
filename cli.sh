@@ -232,10 +232,11 @@ execute "mise use -g ruff@latest"
 			log_info "Installing Rust via mise..."
 			execute "mise use -g rust@latest"
 		elif command -v brew &>/dev/null; then
-			log_info "Install Rust with: brew install rust"
+log_info "Installing Rust via brew..."
+			execute "brew install rust"
 		else
-			log_info "Install Rust with: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
-			log_info "Or visit: https://rustup.rs/"
+			log_info "Installing Rust via rustup (non-interactive)..."
+			execute "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
 		fi
 	else
 		log_success "rustfmt found"
