@@ -551,8 +551,8 @@ Similar to Claude Code's PostToolUse hooks, formatters run automatically after w
 
 OpenCode supports community plugins that enhance functionality:
 
-- **[@plannotator/opencode](https://www.npmjs.com/package/@plannotator/opencode)** - Interactive code planning and annotation
-- **[@mohak34/opencode-notifier](https://www.npmjs.com/package/@mohak34/opencode-notifier)** - Sound and system notifications for events (permission requests, completion, errors, questions)
+- **[@plannotator/opencode](https://github.com/backnotprop/plannotator)** - Interactive code planning and annotation
+- **[@mohak34/opencode-notifier](https://github.com/mohak34/opencode-notifier)** - Sound and system notifications for events (permission requests, completion, errors, questions)
 
 Plugins are automatically installed on next OpenCode launch. Configure notification behavior via `~/.config/opencode/opencode-notifier.json` if desired.
 
