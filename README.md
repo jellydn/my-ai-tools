@@ -290,6 +290,10 @@ Auto-format after file edits:
           {
             "type": "command",
             "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.sh$ ]]; then shfmt -w \"$( jq -r .tool_input.file_path )\"; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.lua$ ]]; then stylua \"$( jq -r .tool_input.file_path )\"; fi"
           }
         ]
       }
@@ -305,6 +309,7 @@ Auto-format after file edits:
 - **ruff** - Python files (`.py`) - modern, fast formatter
 - **rustfmt** - Rust files (`.rs`)
 - **shfmt** - Shell scripts (`.sh`)
+- **stylua** - Lua files (`.lua`)
 
 **Installation:** The setup script (`./cli.sh`) automatically checks and installs these tools with mise priority:
 - `jq` - JSON parsing (required)
@@ -314,6 +319,7 @@ Auto-format after file edits:
 - `ruff` - Python formatting (installed via mise, pipx, or pip)
 - `rustfmt` - Rust formatting (installed via mise or rustup)
 - `shfmt` - Shell script formatting (installed via mise, brew, or go install)
+- `stylua` - Lua formatting (installed via mise, brew, or cargo)
 
 #### PreToolUse Hooks
 
@@ -517,6 +523,10 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
     "shfmt": {
       "command": ["shfmt", "-w", "$FILE"],
       "extensions": [".sh"]
+    },
+    "stylua": {
+      "command": ["stylua", "$FILE"],
+      "extensions": [".lua"]
     }
   }
 }
@@ -530,6 +540,7 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
 - **ruff** for Python files (`.py`)
 - **rustfmt** for Rust files (`.rs`)
 - **shfmt** for shell scripts (`.sh`)
+- **stylua** for Lua files (`.lua`)
 
 Similar to Claude Code's PostToolUse hooks, formatters run automatically after write/edit operations.
 

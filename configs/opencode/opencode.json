@@ -104,6 +104,15 @@
       "extensions": [
         ".sh"
       ]
+    },
+    "stylua": {
+      "command": [
+        "stylua",
+        "$FILE"
+      ],
+      "extensions": [
+        ".lua"
+      ]
     }
   }
 }

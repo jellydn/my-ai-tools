@@ -261,6 +261,25 @@ install_global_tools() {
 		log_success "shfmt found"
 	fi
 
+	# Check/install stylua (required for Lua formatting)
+	if ! command -v stylua &>/dev/null; then
+		log_warning "stylua not found. Installing stylua..."
+		if command -v mise &>/dev/null; then
+			log_info "Installing stylua via mise..."
+			execute "mise use -g stylua@latest"
+		elif command -v brew &>/dev/null; then
+			log_info "Installing stylua via brew..."
+			execute "brew install stylua"
+		elif command -v cargo &>/dev/null; then
+			log_info "Installing stylua via cargo..."
+			execute "cargo install stylua"
+		else
+			log_warning "No package manager found for stylua. Install manually: https://github.com/JohnnyMorganz/StyLua"
+		fi
+	else
+		log_success "stylua found"
+	fi
+
 	# Check/install backlog.md (only if Amp is installed)
 	if [ "$AMP_INSTALLED" = true ]; then
 		if ! command -v backlog &>/dev/null; then
