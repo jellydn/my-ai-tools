@@ -94,6 +94,16 @@
       "extensions": [
         ".rs"
       ]
+    },
+    "shfmt": {
+      "command": [
+        "shfmt",
+        "-w",
+        "$FILE"
+      ],
+      "extensions": [
+        ".sh"
+      ]
     }
   }
 }

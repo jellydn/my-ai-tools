@@ -242,6 +242,25 @@ install_global_tools() {
 		log_success "rustfmt found"
 	fi
 
+	# Check/install shfmt (required for shell script formatting)
+	if ! command -v shfmt &>/dev/null; then
+		log_warning "shfmt not found. Installing shfmt..."
+		if command -v mise &>/dev/null; then
+			log_info "Installing shfmt via mise..."
+			execute "mise use -g shfmt@latest"
+		elif command -v brew &>/dev/null; then
+			log_info "Installing shfmt via brew..."
+			execute "brew install shfmt"
+		elif command -v go &>/dev/null; then
+			log_info "Installing shfmt via go..."
+			execute "go install mvdan.cc/sh/v3/cmd/shfmt@latest"
+		else
+			log_warning "No package manager found for shfmt. Install manually: https://github.com/mvdan/sh"
+		fi
+	else
+		log_success "shfmt found"
+	fi
+
 	# Check/install backlog.md (only if Amp is installed)
 	if [ "$AMP_INSTALLED" = true ]; then
 		if ! command -v backlog &>/dev/null; then

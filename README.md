@@ -490,6 +490,10 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
     "rustfmt": {
       "command": ["rustfmt", "$FILE"],
       "extensions": [".rs"]
+    },
+    "shfmt": {
+      "command": ["shfmt", "-w", "$FILE"],
+      "extensions": [".sh"]
     }
   }
 }
@@ -502,6 +506,7 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
 - **prettier** for Markdown files (`.md`, `.mdx`)
 - **ruff** for Python files (`.py`)
 - **rustfmt** for Rust files (`.rs`)
+- **shfmt** for shell scripts (`.sh`)
 
 Similar to Claude Code's PostToolUse hooks, formatters run automatically after write/edit operations.
 
