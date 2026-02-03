@@ -202,6 +202,47 @@ install_global_tools() {
 		log_success "gofmt found"
 	fi
 
+	# Check/install ruff (required for Python formatting)
+	if ! command -v ruff &>/dev/null; then
+		log_warning "ruff not found. Installing ruff..."
+		if command -v mise &>/dev/null; then
+			log_info "Installing ruff via mise..."
+			execute "mise use -g python@latest"
+			execute "pip install ruff"
+		elif command -v pipx &>/dev/null; then
+			log_info "Installing ruff via pipx..."
+			execute "pipx install ruff"
+		elif command -v pip &>/dev/null || command -v pip3 &>/dev/null; then
+			log_info "Installing ruff via pip..."
+			if command -v pip3 &>/dev/null; then
+				execute "pip3 install ruff"
+			else
+				execute "pip install ruff"
+			fi
+		else
+			log_warning "No Python package manager found. Install ruff manually: https://docs.astral.sh/ruff/installation/"
+		fi
+	else
+		log_success "ruff found"
+	fi
+
+	# Check/install rustfmt (comes with Rust, required for Rust formatting)
+	if ! command -v rustfmt &>/dev/null; then
+		log_warning "rustfmt not found. Rust is not installed."
+		if command -v mise &>/dev/null; then
+			log_info "Installing Rust via mise..."
+			execute "mise use -g rust@latest"
+		elif command -v brew &>/dev/null; then
+			log_info "Install Rust with: brew install rust"
+		elif command -v apt-get &>/dev/null; then
+			log_info "Install Rust with: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+		else
+			log_info "Please install Rust manually: https://rustup.rs/"
+		fi
+	else
+		log_success "rustfmt found"
+	fi
+
 	# Check/install backlog.md (only if Amp is installed)
 	if [ "$AMP_INSTALLED" = true ]; then
 		if ! command -v backlog &>/dev/null; then

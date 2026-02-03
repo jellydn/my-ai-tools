@@ -482,6 +482,14 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
     "prettier": {
       "command": ["npx", "prettier", "--write", "$FILE"],
       "extensions": [".md", ".mdx"]
+    },
+    "ruff": {
+      "command": ["ruff", "format", "$FILE"],
+      "extensions": [".py"]
+    },
+    "rustfmt": {
+      "command": ["rustfmt", "$FILE"],
+      "extensions": [".rs"]
     }
   }
 }
@@ -492,6 +500,8 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
 - **biome** for TypeScript/JavaScript files (`.ts`, `.tsx`, `.js`, `.jsx`)
 - **gofmt** for Go files (`.go`)
 - **prettier** for Markdown files (`.md`, `.mdx`)
+- **ruff** for Python files (`.py`)
+- **rustfmt** for Rust files (`.rs`)
 
 Similar to Claude Code's PostToolUse hooks, formatters run automatically after write/edit operations.
 
