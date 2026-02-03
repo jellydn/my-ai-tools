@@ -68,8 +68,8 @@ preflight_check() {
 
 	log_info "Running preflight checks..."
 
-	# Core utilities required by the script
-	local required_tools=("jq" "awk" "sed" "basename" "cat" "head" "tail" "grep" "date")
+	# Core utilities required by the script (jq is installed later by install_global_tools)
+	local required_tools=("awk" "sed" "basename" "cat" "head" "tail" "grep" "date")
 
 	for tool in "${required_tools[@]}"; do
 		if ! command -v "$tool" &>/dev/null; then
