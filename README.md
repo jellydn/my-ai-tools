@@ -470,23 +470,20 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
     }
   },
   "plugin": ["@plannotator/opencode@latest"],
-  "formatters": [
-    {
-      "name": "biome",
-      "extensions": ["ts", "tsx", "js", "jsx"],
-      "command": "biome check --write {file}"
+  "formatter": {
+    "biome": {
+      "command": ["biome", "check", "--write", "$FILE"],
+      "extensions": [".ts", ".tsx", ".js", ".jsx"]
     },
-    {
-      "name": "gofmt",
-      "extensions": ["go"],
-      "command": "gofmt -w {file}"
+    "gofmt": {
+      "command": ["gofmt", "-w", "$FILE"],
+      "extensions": [".go"]
     },
-    {
-      "name": "prettier",
-      "extensions": ["md", "mdx"],
-      "command": "npx prettier --write {file}"
+    "prettier": {
+      "command": ["npx", "prettier", "--write", "$FILE"],
+      "extensions": [".md", ".mdx"]
     }
-  ]
+  }
 }
 ```
 

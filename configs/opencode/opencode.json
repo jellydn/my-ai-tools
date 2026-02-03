@@ -39,31 +39,42 @@
   "plugin": [
     "@plannotator/opencode@latest"
   ],
-  "formatters": [
-    {
-      "name": "biome",
-      "extensions": [
-        "ts",
-        "tsx",
-        "js",
-        "jsx"
+  "formatter": {
+    "biome": {
+      "command": [
+        "biome",
+        "check",
+        "--write",
+        "$FILE"
       ],
-      "command": "biome check --write {file}"
+      "extensions": [
+        ".ts",
+        ".tsx",
+        ".js",
+        ".jsx"
+      ]
     },
-    {
-      "name": "gofmt",
-      "extensions": [
-        "go"
+    "gofmt": {
+      "command": [
+        "gofmt",
+        "-w",
+        "$FILE"
       ],
-      "command": "gofmt -w {file}"
+      "extensions": [
+        ".go"
+      ]
     },
-    {
-      "name": "prettier",
-      "extensions": [
-        "md",
-        "mdx"
+    "prettier": {
+      "command": [
+        "npx",
+        "prettier",
+        "--write",
+        "$FILE"
       ],
-      "command": "npx prettier --write {file}"
+      "extensions": [
+        ".md",
+        ".mdx"
+      ]
     }
-  ]
+  }
 }
