@@ -206,8 +206,8 @@ install_global_tools() {
 	if ! command -v ruff &>/dev/null; then
 		log_warning "ruff not found. Installing ruff..."
 		if command -v mise &>/dev/null; then
-      log_info "Installing ruff via mise..."
-      execute "mise use -g ruff@latest"
+          log_info "Installing ruff via mise..."
+          execute "mise use -g ruff@latest"
 		elif command -v pipx &>/dev/null; then
 			log_info "Installing ruff via pipx..."
 			execute "pipx install ruff"
