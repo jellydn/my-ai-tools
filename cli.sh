@@ -206,9 +206,8 @@ install_global_tools() {
 	if ! command -v ruff &>/dev/null; then
 		log_warning "ruff not found. Installing ruff..."
 		if command -v mise &>/dev/null; then
-			log_info "Installing ruff via mise..."
-			execute "mise use -g python@latest"
-			execute "pip install ruff"
+          log_info "Installing ruff via mise..."
+          execute "mise use -g ruff@latest"
 		elif command -v pipx &>/dev/null; then
 			log_info "Installing ruff via pipx..."
 			execute "pipx install ruff"
@@ -233,10 +232,11 @@ install_global_tools() {
 			log_info "Installing Rust via mise..."
 			execute "mise use -g rust@latest"
 		elif command -v brew &>/dev/null; then
-			log_info "Install Rust with: brew install rust"
+      log_info "Installing Rust via brew..."
+			execute "brew install rust"
 		else
-			log_info "Install Rust with: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
-			log_info "Or visit: https://rustup.rs/"
+			log_info "Installing Rust via rustup (non-interactive)..."
+			execute "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
 		fi
 	else
 		log_success "rustfmt found"

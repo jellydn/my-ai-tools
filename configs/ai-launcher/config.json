@@ -64,31 +64,31 @@
 		},
 		{
 			"name": "types",
-			"command": "ccs mm --permission-mode acceptEdits -p 'Improve TypeScript types: Remove any, add proper type guards, ensure strict mode compliance for: $@'",
+			"command": "ccs glm --permission-mode acceptEdits -p 'Improve TypeScript types: Remove any, add proper type guards, ensure strict mode compliance for: $@'",
 			"description": "Enhance type safety",
 			"aliases": ["typescript"]
 		},
 		{
 			"name": "test",
-			"command": "ccs mm --permission-mode acceptEdits -p 'Write tests using Arrange-Act-Assert pattern. Focus on behavior, not implementation details for: $@'",
+			"command": "ccs glm --permission-mode acceptEdits -p 'Write tests using Arrange-Act-Assert pattern. Focus on behavior, not implementation details for: $@'",
 			"description": "Generate tests",
 			"aliases": ["spec", "tests"]
 		},
 		{
 			"name": "docs",
-			"command": "ccs mm --permission-mode acceptEdits -p 'Add JSDoc comments with @param and @returns. Include usage examples for: $@'",
+			"command": "ccs glm --permission-mode acceptEdits -p 'Add JSDoc comments with @param and @returns. Include usage examples for: $@'",
 			"description": "Add documentation",
 			"aliases": ["document"]
 		},
 		{
 			"name": "explain",
-			"command": "ccs mm --permission-mode plan -p 'Explain this code in detail: 1) What it does 2) How it works 3) Design decisions: $@'",
+			"command": "ccs glm --permission-mode plan -p 'Explain this code in detail: 1) What it does 2) How it works 3) Design decisions: $@'",
 			"description": "Code explanation",
 			"aliases": ["wtf", "explain-code"]
 		},
 		{
 			"name": "review-security",
-			"command": "ccs mm --permission-mode plan -p 'Security review: Check for injection vulnerabilities, input validation, auth issues, and sensitive data handling in: $@'",
+			"command": "ccs glm --permission-mode plan -p 'Security review: Check for injection vulnerabilities, input validation, auth issues, and sensitive data handling in: $@'",
 			"description": "Security-focused review",
 			"aliases": ["sec", "security"]
 		},
@@ -106,7 +106,7 @@
 		},
 		{
 			"name": "remove-verbal",
-			"command": "ccs mm --permission-mode acceptEdits -p 'Analyze code: Identify verbal comment and remove it, and ensure consistency in style for: $@'",
+			"command": "ccs glm --permission-mode acceptEdits -p 'Analyze code: Identify verbal comment and remove it, and ensure consistency in style for: $@'",
 			"description": "Clean verbal comments that explain 'what' the code is doing rather than 'why'",
 			"aliases": ["verbal", "comments"]
 		},
@@ -118,19 +118,19 @@
 		},
 		{
 			"name": "tidy-first",
-			"command": "ccs mm --permission-mode acceptEdits -p 'Apply Tidy First principles: 1) Use guard clauses 2) Extract helper variables for complex expressions 3) Remove dead code 4) Normalize symmetries. Focus on making the code easier to understand: $@'",
+			"command": "ccs glm --permission-mode acceptEdits -p 'Apply Tidy First principles: 1) Use guard clauses 2) Extract helper variables for complex expressions 3) Remove dead code 4) Normalize symmetries. Focus on making the code easier to understand: $@'",
 			"description": "Tidy code before making changes",
 			"aliases": ["tidy"]
 		},
 		{
 			"name": "simplify",
-			"command": "ccs mm --permission-mode acceptEdits -p \"Simplify this code: Remove unnecessary complexity, eliminate over-engineering, reduce coupling. Keep solutions simple and focused on what's actually needed: $@\"",
+			"command": "ccs glm --permission-mode acceptEdits -p \"Simplify this code: Remove unnecessary complexity, eliminate over-engineering, reduce coupling. Keep solutions simple and focused on what's actually needed: $@\"",
 			"description": "Simplify over-engineered code",
 			"aliases": ["simple"]
 		},
 		{
 			"name": "simplifier",
-			"command": "ccs mm --permission-mode acceptEdits -p \"@code-simplifier:code-simplifier",
+			"command": "ccs glm --permission-mode acceptEdits -p \"@code-simplifier:code-simplifier",
 			"description": "Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise.",
 			"aliases": ["simplify-code", "simplify"]
 		},

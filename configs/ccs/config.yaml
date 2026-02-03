@@ -17,9 +17,6 @@ profiles:
   glm:
     type: api
     settings: ~/.ccs/glm.settings.json
-  mm:
-    type: api
-    settings: ~/.ccs/mm.settings.json
   ollama-cloud:
     type: api
     settings: ~/.ccs/ollama-cloud.settings.json
@@ -46,6 +43,7 @@ cliproxy:
   logging:
     enabled: false
     request_log: false
+  auto_sync: true
 
 # ----------------------------------------------------------------------------
 # CLIProxy Server: Remote proxy connection settings
