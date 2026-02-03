@@ -498,7 +498,10 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
       }
     }
   },
-  "plugin": ["@plannotator/opencode@latest"],
+  "plugin": [
+    "@plannotator/opencode@latest",
+    "@mohak34/opencode-notifier@latest"
+  ],
   "formatter": {
     "biome": {
       "command": ["biome", "check", "--write", "$FILE"],
@@ -543,6 +546,15 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
 - **stylua** for Lua files (`.lua`)
 
 Similar to Claude Code's PostToolUse hooks, formatters run automatically after write/edit operations.
+
+### Plugins
+
+OpenCode supports community plugins that enhance functionality:
+
+- **[@plannotator/opencode](https://www.npmjs.com/package/@plannotator/opencode)** - Interactive code planning and annotation
+- **[@mohak34/opencode-notifier](https://www.npmjs.com/package/@mohak34/opencode-notifier)** - Sound and system notifications for events (permission requests, completion, errors, questions)
+
+Plugins are automatically installed on next OpenCode launch. Configure notification behavior via `~/.config/opencode/opencode-notifier.json` if desired.
 
 ### Custom Agents
 
