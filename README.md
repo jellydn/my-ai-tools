@@ -278,6 +278,22 @@ Auto-format after file edits:
           {
             "type": "command",
             "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(md|mdx)$'; then npx prettier --write \"$file_path\"; fi; }"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.py$ ]]; then ruff format \"$( jq -r .tool_input.file_path )\"; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.rs$ ]]; then rustfmt \"$( jq -r .tool_input.file_path )\"; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.sh$ ]]; then shfmt -w \"$( jq -r .tool_input.file_path )\"; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.lua$ ]]; then stylua \"$( jq -r .tool_input.file_path )\"; fi"
           }
         ]
       }
@@ -286,11 +302,24 @@ Auto-format after file edits:
 }
 ```
 
-**Required Tools:** The setup script (`./cli.sh`) automatically checks and installs these tools:
-- `jq` - JSON parsing
+**Supported Formatters:**
+- **biome** - TypeScript/JavaScript files (`.ts`, `.tsx`, `.js`, `.jsx`) - includes linting
+- **gofmt** - Go files (`.go`)
+- **prettier** - Markdown files (`.md`, `.mdx`)
+- **ruff** - Python files (`.py`) - modern, fast formatter
+- **rustfmt** - Rust files (`.rs`)
+- **shfmt** - Shell scripts (`.sh`)
+- **stylua** - Lua files (`.lua`)
+
+**Installation:** The setup script (`./cli.sh`) automatically checks and installs these tools with mise priority:
+- `jq` - JSON parsing (required)
 - `biome` - JavaScript/TypeScript formatting
 - `gofmt` - Go formatting (requires Go installation)
 - `prettier` - Markdown formatting (used via `npx`)
+- `ruff` - Python formatting (installed via mise, pipx, or pip)
+- `rustfmt` - Rust formatting (installed via mise or rustup)
+- `shfmt` - Shell script formatting (installed via mise, brew, or go install)
+- `stylua` - Lua formatting (installed via mise, brew, or cargo)
 
 #### PreToolUse Hooks
 
@@ -469,9 +498,51 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
       }
     }
   },
-  "plugin": ["@plannotator/opencode@latest"]
+  "plugin": ["@plannotator/opencode@latest"],
+  "formatter": {
+    "biome": {
+      "command": ["biome", "check", "--write", "$FILE"],
+      "extensions": [".ts", ".tsx", ".js", ".jsx"]
+    },
+    "gofmt": {
+      "command": ["gofmt", "-w", "$FILE"],
+      "extensions": [".go"]
+    },
+    "prettier": {
+      "command": ["npx", "prettier", "--write", "$FILE"],
+      "extensions": [".md", ".mdx"]
+    },
+    "ruff": {
+      "command": ["ruff", "format", "$FILE"],
+      "extensions": [".py"]
+    },
+    "rustfmt": {
+      "command": ["rustfmt", "$FILE"],
+      "extensions": [".rs"]
+    },
+    "shfmt": {
+      "command": ["shfmt", "-w", "$FILE"],
+      "extensions": [".sh"]
+    },
+    "stylua": {
+      "command": ["stylua", "$FILE"],
+      "extensions": [".lua"]
+    }
+  }
 }
 ```
+
+**Formatters**: OpenCode automatically formats code after edits using:
+
+- **biome** for TypeScript/JavaScript files (`.ts`, `.tsx`, `.js`, `.jsx`)
+- **gofmt** for Go files (`.go`)
+- **prettier** for Markdown files (`.md`, `.mdx`)
+- **ruff** for Python files (`.py`)
+- **rustfmt** for Rust files (`.rs`)
+- **shfmt** for shell scripts (`.sh`)
+- **stylua** for Lua files (`.lua`)
+
+Similar to Claude Code's PostToolUse hooks, formatters run automatically after write/edit operations.
 
 ### Custom Agents
 
