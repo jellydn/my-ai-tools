@@ -37,7 +37,8 @@
     }
   },
   "plugin": [
-    "@plannotator/opencode@latest"
+    "@plannotator/opencode@latest",
+    "@mohak34/opencode-notifier@latest"
   ],
   "formatter": {
     "biome": {
