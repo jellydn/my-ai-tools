@@ -90,7 +90,7 @@
           },
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.py$'; then ruff format \"$file_path\"; fi; }"
+            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.py$ ]]; then ruff format \"$( jq -r .tool_input.file_path )\"; fi"
           },
           {
             "type": "command",
