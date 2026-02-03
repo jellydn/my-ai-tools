@@ -1,3 +1,4 @@
+model_personality = "pragmatic"
 [features]
 unified_exec = true
 shell_snapshot = true
