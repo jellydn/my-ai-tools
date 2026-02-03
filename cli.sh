@@ -234,10 +234,9 @@ install_global_tools() {
 			execute "mise use -g rust@latest"
 		elif command -v brew &>/dev/null; then
 			log_info "Install Rust with: brew install rust"
-		elif command -v apt-get &>/dev/null; then
-			log_info "Install Rust with: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
 		else
-			log_info "Please install Rust manually: https://rustup.rs/"
+			log_info "Install Rust with: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+			log_info "Or visit: https://rustup.rs/"
 		fi
 	else
 		log_success "rustfmt found"
