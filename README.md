@@ -469,9 +469,34 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
       }
     }
   },
-  "plugin": ["@plannotator/opencode@latest"]
+  "plugin": ["@plannotator/opencode@latest"],
+  "formatters": [
+    {
+      "name": "biome",
+      "extensions": ["ts", "tsx", "js", "jsx"],
+      "command": "biome check --write {file}"
+    },
+    {
+      "name": "gofmt",
+      "extensions": ["go"],
+      "command": "gofmt -w {file}"
+    },
+    {
+      "name": "prettier",
+      "extensions": ["md", "mdx"],
+      "command": "npx prettier --write {file}"
+    }
+  ]
 }
 ```
+
+**Formatters**: OpenCode automatically formats code after edits using:
+
+- **biome** for TypeScript/JavaScript files (`.ts`, `.tsx`, `.js`, `.jsx`)
+- **gofmt** for Go files (`.go`)
+- **prettier** for Markdown files (`.md`, `.mdx`)
+
+Similar to Claude Code's PostToolUse hooks, formatters run automatically after write/edit operations.
 
 ### Custom Agents
 
