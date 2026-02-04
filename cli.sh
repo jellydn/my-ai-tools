@@ -136,7 +136,49 @@ check_prerequisites() {
 		log_success "Node.js found ($NODE_VERSION)"
 		log_warning "Some scripts (e.g., context-check) prefer Bun. Install with: brew install oven-sh/bun/bun"
 	else
-		log_error "Neither Bun nor Node.js is installed. Please install one of them first."
+		log_error "Neither Bun nor Node.js is installed."
+		
+		# Offer to install Bun in interactive mode
+		if [ "$YES_TO_ALL" = true ]; then
+			log_info "Auto-installing Bun (--yes flag)..."
+			install_bun_now
+		elif [ -t 0 ]; then
+			read -p "Would you like to install Bun now? (y/n) " -n 1 -r
+			echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				install_bun_now
+			else
+				log_error "Please install Bun or Node.js first."
+				exit 1
+			fi
+		else
+			log_error "Please install Bun or Node.js first."
+			log_info "  - Install Bun: curl -fsSL https://bun.sh/install | bash"
+			log_info "  - Or install Node.js: https://nodejs.org/"
+			exit 1
+		fi
+	fi
+}
+
+install_bun_now() {
+	log_info "Installing Bun..."
+	if curl -fsSL https://bun.sh/install | bash; then
+		# Source shell profile to get bun in PATH
+		export BUN_INSTALL="$HOME/.bun"
+		export PATH="$BUN_INSTALL/bin:$PATH"
+		
+		if command -v bun &>/dev/null; then
+			BUN_VERSION=$(bun --version)
+			log_success "Bun installed successfully ($BUN_VERSION)"
+			log_info "Note: You may need to restart your terminal for Bun to be available in new sessions"
+		else
+			log_error "Bun installation completed but 'bun' command not found in PATH"
+			log_info "Please restart your terminal and run the script again"
+			exit 1
+		fi
+	else
+		log_error "Failed to install Bun"
+		log_info "Please install manually: curl -fsSL https://bun.sh/install | bash"
 		exit 1
 	fi
 }
@@ -447,7 +489,6 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/claude" "$BACKUP_DIR" "config-claude"
 		copy_config_dir "$HOME/.config/opencode" "$BACKUP_DIR" "opencode"
 		copy_config_dir "$HOME/.config/amp" "$BACKUP_DIR" "amp"
-		copy_config_dir "$HOME/.ccs" "$BACKUP_DIR" "ccs"
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
