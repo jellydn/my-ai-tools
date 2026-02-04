@@ -15,7 +15,7 @@
 				"name": "Dung Huynh Duc",
 				"email": "dung@productsway.com"
 			},
-			"source": "./.claude-plugin/plugins/prd",
+			"source": "plugins/prd",
 			"category": "productivity"
 		},
 		{
@@ -26,7 +26,7 @@
 				"name": "Dung Huynh Duc",
 				"email": "dung@productsway.com"
 			},
-			"source": "./.claude-plugin/plugins/ralph",
+			"source": "plugins/ralph",
 			"category": "productivity"
 		},
 		{
@@ -37,7 +37,7 @@
 				"name": "Dung Huynh Duc",
 				"email": "dung@productsway.com"
 			},
-			"source": "./.claude-plugin/plugins/qmd-knowledge",
+			"source": "plugins/qmd-knowledge",
 			"category": "productivity",
 			"homepage": "https://github.com/jellydn/my-ai-tools"
 		},
@@ -49,7 +49,7 @@
 				"name": "Dung Huynh Duc",
 				"email": "dung@productsway.com"
 			},
-			"source": "./.claude-plugin/plugins/codemap",
+			"source": "plugins/codemap",
 			"category": "productivity",
 			"homepage": "https://github.com/jellydn/my-ai-tools"
 		},
@@ -61,7 +61,7 @@
 				"name": "Dung Huynh Duc",
 				"email": "dung@productsway.com"
 			},
-			"source": "./.claude-plugin/plugins/adr",
+			"source": "plugins/adr",
 			"category": "productivity"
 		},
 		{
@@ -72,7 +72,7 @@
 				"name": "Dung Huynh Duc",
 				"email": "dung@productsway.com"
 			},
-			"source": "./.claude-plugin/plugins/handoffs",
+			"source": "plugins/handoffs",
 			"category": "productivity"
 		},
 		{
@@ -83,7 +83,7 @@
 				"name": "Dung Huynh Duc",
 				"email": "dung@productsway.com"
 			},
-			"source": "./.claude-plugin/plugins/pickup",
+			"source": "plugins/pickup",
 			"category": "productivity"
 		},
 		{
@@ -94,7 +94,7 @@
 				"name": "Dung Huynh Duc",
 				"email": "dung@productsway.com"
 			},
-			"source": "./.claude-plugin/plugins/pr-review",
+			"source": "plugins/pr-review",
 			"category": "productivity"
 		},
 		{
@@ -105,7 +105,7 @@
 				"name": "Dung Huynh Duc",
 				"email": "dung@productsway.com"
 			},
-			"source": "./.claude-plugin/plugins/slop",
+			"source": "plugins/slop",
 			"category": "productivity"
 		},
 		{
@@ -116,7 +116,7 @@
 				"name": "Dung Huynh Duc",
 				"email": "dung@productsway.com"
 			},
-			"source": "./.claude-plugin/plugins/tdd",
+			"source": "plugins/tdd",
 			"category": "productivity"
 		}
 	]
