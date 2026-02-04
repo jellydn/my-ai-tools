@@ -812,8 +812,10 @@ check_marketplace_support() {
 	return 0
 }
 
-# Verify marketplace repository availability
-verify_marketplace_repo() {
+# Attempt to add marketplace repository and verify accessibility
+# Note: This function has a side effect - it will add the marketplace if successful
+# Returns 0 if marketplace is accessible, 1 if not
+try_add_marketplace_repo() {
 	local marketplace_repo="$1"
 	local repo_name="${marketplace_repo##*/}"
 
@@ -822,17 +824,15 @@ verify_marketplace_repo() {
 	if [[ "$marketplace_repo" == *"/"* ]] && [[ "$marketplace_repo" != /* ]]; then
 		owner_repo="$marketplace_repo"
 	else
-		# Local path or invalid format
+		# Local path or invalid format - skip verification
 		return 0
 	fi
 
-	# Test if marketplace can be added (non-destructive check)
-	local test_output
-	test_output=$(claude plugin marketplace add "$owner_repo" 2>&1 || true)
-	
-	if echo "$test_output" | grep -qE "(already exists|added|success)"; then
+	# Attempt to add marketplace (will succeed if already added or if accessible)
+	# Exit codes: 0 = success/already exists, non-zero = error
+	if claude plugin marketplace add "$owner_repo" 2>/dev/null; then
 		return 0
-	elif echo "$test_output" | grep -qE "(not found|invalid|unauthorized|forbidden)"; then
+	else
 		log_warning "Marketplace repository '$owner_repo' may not be accessible"
 		log_info "This could be due to:"
 		log_info "  - Repository visibility settings (private/public)"
@@ -840,8 +840,6 @@ verify_marketplace_repo() {
 		log_info "  - Network connectivity issues"
 		return 1
 	fi
-	
-	return 0
 }
 
 enable_plugins() {
@@ -1254,7 +1252,7 @@ EOF
 			fi
 
 			# Verify official marketplace accessibility
-			if ! verify_marketplace_repo "anthropics/claude-plugins-official"; then
+			if ! try_add_marketplace_repo "anthropics/claude-plugins-official"; then
 				log_warning "Official plugins marketplace may not be accessible"
 				log_info "Continuing with local plugins only..."
 				SKIP_MARKETPLACE_PLUGINS=true
