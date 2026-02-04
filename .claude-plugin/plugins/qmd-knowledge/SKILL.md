@@ -59,8 +59,8 @@ The `qmd` MCP server provides AI-powered search across all stored knowledge, all
 # Verify qmd is installed
 command -v qmd || echo "Install qmd: bun install -g https://github.com/tobi/qmd"
 
-# Verify your project collection exists
-qmd collection list | grep <project-name>
+# Verify your project collection exists (replace my-project with your actual project name)
+qmd collection list | grep my-project
 ```
 
 ```bash
@@ -74,7 +74,10 @@ $SKILL_PATH/scripts/record.sh issue 123 "Fixed by updating dependencies"
 $SKILL_PATH/scripts/record.sh note "Consider using agent skills for extensibility"
 ```
 
-**After recording**: The `record.sh` script automatically runs `qmd embed` to re-index the knowledge base. This embedding step is required to make the newly added content searchable for the next query. If the auto-embedding fails or you manually add files, run `qmd embed` explicitly.
+**After recording**: 
+- The `record.sh` script automatically runs `qmd embed` to re-index the knowledge base
+- This embedding step is **required** to make newly added content searchable for the next query
+- If auto-embedding fails or you manually add/edit files, run `qmd embed` explicitly to update the index
 
 ### Querying knowledge
 
