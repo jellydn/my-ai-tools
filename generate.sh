@@ -28,7 +28,7 @@ done
 
 skill_exists_in_plugins() {
 	local skill_name="$1"
-	if [ -d "$SCRIPT_DIR/.claude-plugin/plugins/$skill_name" ]; then
+	if [ -d "$SCRIPT_DIR/skills/$skill_name" ]; then
 		return 0  # exists
 	fi
 	return 1  # doesn't exist
@@ -98,9 +98,9 @@ generate_claude_configs() {
 							# Skip marketplace plugins - managed separately
 							;;
 						*)
-							# Check if skill already exists in .claude-plugin/plugins
+							# Check if skill already exists in skills
 							if skill_exists_in_plugins "$skill_name"; then
-								log_info "Skipping $skill_name (exists in .claude-plugin/plugins)"
+								log_info "Skipping $skill_name (exists in skills)"
 							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/claude/skills'/ 2>/dev/null"; then
 								log_success "Copied skill: $skill_name"
 							fi
@@ -156,9 +156,9 @@ generate_opencode_configs() {
 							# Skip marketplace plugins - managed separately
 							;;
 						*)
-							# Check if skill already exists in .claude-plugin/plugins
+							# Check if skill already exists in skills
 							if skill_exists_in_plugins "$skill_name"; then
-								log_info "Skipping $skill_name (exists in .claude-plugin/plugins)"
+								log_info "Skipping $skill_name (exists in skills)"
 							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/opencode/skill'/ 2>/dev/null"; then
 								log_success "Copied skill: $skill_name"
 							fi
@@ -232,9 +232,9 @@ generate_amp_configs() {
 							# Skip marketplace plugins - managed separately
 							;;
 						*)
-							# Check if skill already exists in .claude-plugin/plugins
+							# Check if skill already exists in skills
 							if skill_exists_in_plugins "$skill_name"; then
-								log_info "Skipping $skill_name (exists in .claude-plugin/plugins)"
+								log_info "Skipping $skill_name (exists in skills)"
 							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/amp/skills'/ 2>/dev/null"; then
 								log_success "Copied skill: $skill_name"
 							fi
@@ -311,7 +311,7 @@ generate_codex_configs() {
 		copy_single "$HOME/.codex/config.json" "$SCRIPT_DIR/configs/codex/config.json"
 		copy_single "$HOME/.codex/config.toml" "$SCRIPT_DIR/configs/codex/config.toml"
 
-		# Note: Codex CLI reads skills directly from .claude-plugin/plugins/ and invokes them via $
+		# Note: Codex CLI reads skills directly from skills/ and invokes them via $
 		# No need to copy skills or prompts
 
 		log_success "Codex CLI configs generated"
@@ -370,9 +370,9 @@ generate_gemini_configs() {
 							# Skip marketplace plugins - managed separately
 							;;
 						*)
-							# Check if skill already exists in .claude-plugin/plugins
+							# Check if skill already exists in skills
 							if skill_exists_in_plugins "$skill_name"; then
-								log_info "Skipping $skill_name (exists in .claude-plugin/plugins)"
+								log_info "Skipping $skill_name (exists in skills)"
 							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/gemini/skills'/ 2>/dev/null"; then
 								log_success "Copied skill: $skill_name"
 							fi

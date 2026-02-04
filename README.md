@@ -256,12 +256,12 @@ If you encounter marketplace access issues:
 
 1. **Verify subscription**: Ensure you have an active Claude Code subscription with plugin support
 2. **Check repository settings**: Plugin access may be limited to specific repository configurations
-3. **Use local plugins**: The setup script automatically falls back to local plugins from `.claude-plugin/` folder
-4. **Manual installation**: Copy plugin folders directly to `~/.claude/plugins/`
+3. **Use local skills**: The setup script automatically falls back to local skills from `skills/` folder
+4. **Manual installation**: Copy skill folders directly to `~/.claude/skills/`
 
 **Common issues:**
 
-- "Plugin marketplace not available" → Use local plugins by running `./cli.sh` and answering 'y' to continue with local plugins only
+- "Plugin marketplace not available" → Use local skills by running `./cli.sh` and answering 'y' to continue with local skills only
 - "Marketplace repository not accessible" → Check network connectivity and repository permissions
 - "Plugin install failed" → Plugin may already be installed or require specific dependencies
 
@@ -432,7 +432,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 
 #### Skills
 
-**Local Marketplace Plugins** - Installed by `cli.sh` from [`.claude-plugin/plugins/`](.claude-plugin/plugins/):
+**Local Marketplace Plugins** - Installed by `cli.sh` from [`skills/`](skills/):
 
 - `adr` - Architecture Decision Records
 - `codemap` - Parallel codebase analysis producing structured documentation
@@ -487,7 +487,7 @@ All configuration files are located in the [`configs/claude/`](configs/claude/) 
 - [`commands/`](configs/claude/commands/) - Custom slash commands
 - [`agents/`](configs/claude/agents/) - Custom agent definitions
 
-Local marketplace plugins are in [`.claude-plugin/plugins/`](.claude-plugin/plugins/).
+Local marketplace plugins are in [`skills/`](skills/).
 
 #### Tips & Tricks
 
