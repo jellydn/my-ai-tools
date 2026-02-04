@@ -53,6 +53,16 @@ The `qmd` MCP server provides AI-powered search across all stored knowledge, all
 
 ### Recording knowledge
 
+**Important**: Before recording knowledge, ensure qmd is installed and your project collection is set up. Run a preflight check:
+
+```bash
+# Verify qmd is installed
+command -v qmd || echo "Install qmd: bun install -g https://github.com/tobi/qmd"
+
+# Verify your project collection exists
+qmd collection list | grep <project-name>
+```
+
 ```bash
 # Record a learning (use the skill's script)
 $SKILL_PATH/scripts/record.sh learning "qmd MCP integration"
@@ -63,6 +73,8 @@ $SKILL_PATH/scripts/record.sh issue 123 "Fixed by updating dependencies"
 # Record a general note
 $SKILL_PATH/scripts/record.sh note "Consider using agent skills for extensibility"
 ```
+
+**After recording**: The `record.sh` script automatically runs `qmd embed` to re-index the knowledge base. This embedding step is required to make the newly added content searchable for the next query. If the auto-embedding fails or you manually add files, run `qmd embed` explicitly.
 
 ### Querying knowledge
 
@@ -86,6 +98,16 @@ qmd search "API" --all --files --min-score 0.3 -c <project-name>
 ```
 
 ## Setup
+
+**Preflight check**: Before starting, verify you have the required tools:
+
+```bash
+# Check for bun or node
+command -v bun || command -v node || echo "Install bun or node.js first"
+
+# Verify git is available (for project detection)
+command -v git || echo "Install git for automatic project name detection"
+```
 
 1. **Install qmd**:
    ```bash
@@ -156,14 +178,7 @@ The qmd MCP server allows Claude to:
    qmd query --collection <project-name> "MCP servers"
    ```
 
-## Benefits over claude-mem
 
-- **Portable**: Standard markdown files in `~/.ai-knowledges/`
-- **Project-scoped**: Each project has its own isolated knowledge base
-- **AI-searchable**: Powered by qmd's embedding-based search
-- **Self-documenting**: Follows skills.md specification
-- **No repository pollution**: Knowledge stored outside project directories
-- **Version controllable**: Can optionally track knowledge in separate git repos
 
 ## Project detection
 
@@ -215,4 +230,13 @@ When you detect these patterns, suggest recording:
 
 ### 🎨 Auto-Index Updates
 
-The record script automatically runs `qmd embed` after each write, ensuring the knowledge base is searchable immediately. No manual re-indexing required.
+The record script automatically runs `qmd embed` after each write, ensuring the knowledge base is searchable immediately. This re-indexing step is **required** to make new content available for search queries.
+
+**Important**: If you manually create or edit knowledge files (outside of the record script), you must run `qmd embed` manually to update the search index:
+
+```bash
+# Manual re-indexing after direct file edits
+qmd embed
+```
+
+Without re-indexing, newly added or modified content will not appear in search results.
