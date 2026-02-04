@@ -147,24 +147,38 @@ install_global_tools() {
 	# Check/install jq (required for JSON parsing in hooks)
 	if ! command -v jq &>/dev/null; then
 		log_warning "jq not found. Installing jq..."
+		local jq_installed=false
 		if [ "$IS_WINDOWS" = true ]; then
 			# Windows: use choco or winget, or download binary
 			if command -v choco &>/dev/null; then
-				execute "choco install jq -y"
+				execute "choco install jq -y" && jq_installed=true
 			elif command -v winget &>/dev/null; then
-				execute "winget install jq"
-			else
-				log_warning "Please install jq manually: https://stedolan.github.io/jq/download/"
+				execute "winget install jq" && jq_installed=true
 			fi
 		else
 			# Mac/Linux: use brew or apt
 			if command -v brew &>/dev/null; then
-				execute "brew install jq"
+				execute "brew install jq" && jq_installed=true
 			elif command -v apt-get &>/dev/null; then
-				execute "sudo apt-get install -y jq"
-			else
-				log_warning "Please install jq manually: https://stedolan.github.io/jq/download/"
+				# Check if we can use sudo non-interactively
+				if [ "$YES_TO_ALL" = true ] && sudo -n true 2>/dev/null; then
+					# Can use sudo without password
+					execute "sudo apt-get install -y jq" && jq_installed=true
+				elif [ "$YES_TO_ALL" = false ] && [ -t 0 ]; then
+					# Interactive mode - allow sudo prompt
+					execute "sudo apt-get install -y jq" && jq_installed=true
+				else
+					# Non-interactive mode and sudo needs password - skip
+					log_warning "Cannot install jq non-interactively (requires sudo)"
+				fi
 			fi
+		fi
+		
+		if [ "$jq_installed" = false ]; then
+			log_warning "Please install jq manually: https://stedolan.github.io/jq/download/"
+			log_info "  - macOS: brew install jq"
+			log_info "  - Ubuntu/Debian: sudo apt-get install jq"
+			log_info "  - Other: See https://stedolan.github.io/jq/download/"
 		fi
 	else
 		log_success "jq found"
@@ -173,7 +187,12 @@ install_global_tools() {
 	# Check/install biome (required for JS/TS formatting)
 	if ! command -v biome &>/dev/null; then
 		log_warning "biome not found. Installing biome globally..."
-		execute "npm install -g @biomejs/biome"
+		if execute "npm install -g @biomejs/biome" 2>/dev/null; then
+			log_success "biome installed"
+		else
+			log_warning "Failed to install biome. You may need to configure npm for global installs without sudo."
+			log_info "  See: https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally"
+		fi
 	else
 		log_success "biome found"
 	fi
@@ -455,8 +474,14 @@ install_claude_code() {
 		fi
 	fi
 
-	execute "npm install -g @anthropic-ai/claude-code"
-	log_success "Claude Code installed"
+	if execute "npm install -g @anthropic-ai/claude-code" 2>/dev/null; then
+		log_success "Claude Code installed"
+	else
+		log_error "Failed to install Claude Code"
+		log_info "You may need to configure npm for global installs without sudo."
+		log_info "  See: https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally"
+		log_info "Or install manually: npm install -g @anthropic-ai/claude-code"
+	fi
 }
 
 install_opencode() {
