@@ -931,8 +931,8 @@ enable_plugins() {
 		log_error "Plugin marketplace is not available"
 		log_info ""
 		log_info "📋 Manual Plugin Installation:"
-		log_info "   If marketplace is unavailable, you can still use local plugins from .claude-plugin folder"
-		log_info "   Local plugins will be installed automatically if available"
+		log_info "   If marketplace is unavailable, you can still use local skills from skills folder"
+		log_info "   Local skills will be installed automatically if available"
 		log_info ""
 		log_info "📖 For more information about plugin setup, see:"
 		log_info "   https://github.com/jellydn/my-ai-tools#plugins"
@@ -962,7 +962,7 @@ enable_plugins() {
 		SKILL_INSTALL_SOURCE="local"
 	elif [ -t 0 ]; then
 		log_info "How would you like to install community skills?"
-		printf "1) Local (from .claude-plugin folder) 2) Remote (from jellydn/my-ai-tools marketplace) [1/2]: "
+		printf "1) Local (from skills folder) 2) Remote (from jellydn/my-ai-tools marketplace) [1/2]: "
 		read REPLY
 		echo
 		case "$REPLY" in
@@ -1154,12 +1154,12 @@ enable_plugins() {
 	}
 
 	install_local_skills() {
-		if [ ! -d "$SCRIPT_DIR/.claude-plugin/plugins" ]; then
-			log_info ".claude-plugin/plugins folder not found, skipping local skills"
+		if [ ! -d "$SCRIPT_DIR/skills" ]; then
+			log_info "skills folder not found, skipping local skills"
 			return
 		fi
 
-		log_info "Installing skills from local .claude-plugin/plugins folder..."
+		log_info "Installing skills from local skills folder..."
 
 		# Define target directories
 		CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
@@ -1213,8 +1213,8 @@ enable_plugins() {
 		fi
 		mkdir -p "$GEMINI_SKILLS_DIR"
 
-		# Copy all skills from plugins folder to targets
-		for skill_dir in "$SCRIPT_DIR/.claude-plugin/plugins"/*; do
+		# Copy all skills from skills folder to targets
+		for skill_dir in "$SCRIPT_DIR/skills"/*; do
 			if [ -d "$skill_dir" ]; then
 				skill_name=$(basename "$skill_dir")
 
@@ -1372,14 +1372,14 @@ EOF
 		fi
 
 		if [ "$SKILL_INSTALL_SOURCE" = "local" ]; then
-			log_info "Installing community skills from local .claude-plugin folder..."
+			log_info "Installing community skills from local skills folder..."
 			install_local_skills
 			# Only install CLI-based plugins (plannotator, claude-hud, worktrunk)
 			for plugin_entry in "${community_plugins[@]}"; do
 				local name="${plugin_entry%%|*}"
 				case "$name" in
 					prd|ralph|qmd-knowledge|codemap)
-						# Skip marketplace plugins - will be installed from local .claude-plugin
+						# Skip marketplace plugins - will be installed from local skills
 						;;
 					*)
 						local rest="${plugin_entry#*|}"

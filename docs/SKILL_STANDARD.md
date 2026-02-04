@@ -55,10 +55,10 @@ Common workflow categories include:
 
 ## Skill Location
 
-All skills are located in `.claude-plugin/plugins/`:
+All skills are located in `skills/`:
 
 ```
-.claude-plugin/plugins/
+skills/
 ├── adr/
 ├── codemap/
 ├── handoffs/
@@ -77,12 +77,12 @@ To add a new skill:
 
 1. **Create the skill folder:**
    ```bash
-   mkdir -p .claude-plugin/plugins/my-skill
+   mkdir -p skills/my-skill
    ```
 
 2. **Create SKILL.md with proper frontmatter:**
    ```bash
-   cat > .claude-plugin/plugins/my-skill/SKILL.md << 'EOF'
+   cat > skills/my-skill/SKILL.md << 'EOF'
    ---
    name: my-skill
    description: Brief description of what the skill does
@@ -102,8 +102,8 @@ To add a new skill:
 
 3. **Add optional folders if needed:**
    ```bash
-   mkdir -p .claude-plugin/plugins/my-skill/templates
-   mkdir -p .claude-plugin/plugins/my-skill/scripts
+   mkdir -p skills/my-skill/templates
+   mkdir -p skills/my-skill/scripts
    ```
 
 4. **Test the skill:**
@@ -120,7 +120,7 @@ Skills are automatically installed to multiple platforms:
 | Claude Code | `~/.claude/skills/` | Skill invocation |
 | OpenCode | `~/.config/opencode/skill/` | Command files + skills |
 | Amp | `~/.config/amp/skills/` | Skill invocation |
-| Codex CLI | Reads from `.claude-plugin/plugins/` | Invoke via `$skill-name` |
+| Codex CLI | Reads from `skills/` | Invoke via `$skill-name` |
 
 ## Examples
 
@@ -189,14 +189,14 @@ To validate a skill:
 
 ```bash
 # Check for SKILL.md
-test -f .claude-plugin/plugins/my-skill/SKILL.md
+test -f skills/my-skill/SKILL.md
 
 # Check for YAML frontmatter
-head -10 .claude-plugin/plugins/my-skill/SKILL.md | grep -q "^---"
+head -10 skills/my-skill/SKILL.md | grep -q "^---"
 
 # Check for required fields
-grep -q "^name:" .claude-plugin/plugins/my-skill/SKILL.md
-grep -q "^description:" .claude-plugin/plugins/my-skill/SKILL.md
+grep -q "^name:" skills/my-skill/SKILL.md
+grep -q "^description:" skills/my-skill/SKILL.md
 ```
 
 ## See Also

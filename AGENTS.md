@@ -110,7 +110,7 @@ configs/<tool>/              # Source configurations
   amp/                       # Amp settings, skills
   ccs/                       # CCS configuration, hooks, cliproxy
   ai-launcher/               # AI Launcher config
-.claude-plugin/plugins/      # Local skills for distribution
+skills/      # Local skills for distribution
 ```
 
 ## Key Patterns
