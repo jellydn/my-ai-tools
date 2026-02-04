@@ -791,8 +791,8 @@ check_marketplace_support() {
 		return 1
 	fi
 
-	# Check if 'claude plugin' command exists
-	if ! claude --help 2>/dev/null | grep -q "plugin"; then
+	# Check if 'claude plugin' subcommand exists by trying to access its help
+	if ! claude plugin --help &>/dev/null; then
 		log_warning "Claude CLI does not support plugin commands"
 		log_info "Please ensure you have Claude Code installed with plugin support"
 		log_info "Visit: https://docs.claude.ai for installation instructions"
@@ -801,11 +801,11 @@ check_marketplace_support() {
 
 	# Try to list plugins to verify marketplace functionality
 	if ! claude plugin list &>/dev/null; then
-		log_warning "Plugin marketplace may not be enabled for this repository"
-		log_info "To enable plugins:"
-		log_info "  1. Ensure you have an active Claude Code subscription"
-		log_info "  2. Plugins may be limited to specific repository configurations"
-		log_info "  3. Check Claude Code settings to verify plugin access"
+		log_warning "Unable to list plugins. Plugin marketplace may not be available"
+		log_info "This could be due to:"
+		log_info "  1. Missing active Claude Code subscription"
+		log_info "  2. Network connectivity issues"
+		log_info "  3. Plugin access not enabled in Claude Code settings"
 		return 1
 	fi
 

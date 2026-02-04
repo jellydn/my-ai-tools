@@ -235,9 +235,9 @@ claude plugin install rust-analyzer-lsp@claude-plugins-official
 claude plugin install claude-md-management@claude-plugins-official
 
 # Community plugins (add marketplace first)
-# Note: Plugin format is plugin-name@marketplace-name
-# For plannotator: the plugin name is 'plannotator' and the marketplace name is also 'plannotator'
-# but the repository is 'backnotprop/plannotator'
+# Plugin installation format: plugin-name@marketplace-name
+# Example: The repository 'backnotprop/plannotator' registers as marketplace 'plannotator',
+#          then you install plugin 'plannotator' from that marketplace
 claude plugin marketplace add backnotprop/plannotator
 claude plugin install plannotator@plannotator
 
