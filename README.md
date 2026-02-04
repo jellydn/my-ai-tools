@@ -189,11 +189,39 @@ Replace deprecated `claude-mem` with **qmd-based knowledge system**:
 
 ### Plugins
 
-#### Installation
+#### Prerequisites
 
-Install via setup script or manually:
+Before installing plugins, ensure:
+
+1. **Claude Code subscription** - Active subscription with plugin support
+2. **Plugin marketplace access** - Verify marketplace is enabled for your repository
+3. **Network connectivity** - Required for downloading marketplace plugins
+
+To check marketplace availability:
 
 ```bash
+# Verify Claude CLI supports plugins
+claude plugin list
+
+# If the above fails, check your Claude Code installation and subscription
+```
+
+#### Installation
+
+The setup script (`./cli.sh`) automatically checks marketplace availability before installing plugins. If marketplace is unavailable, it will offer to install local plugins only.
+
+**Automated installation (recommended):**
+
+```bash
+./cli.sh  # Includes marketplace check and fallback to local plugins
+```
+
+**Manual installation** (requires marketplace access):
+
+```bash
+# First, add the official marketplace
+claude plugin marketplace add anthropics/claude-plugins-official
+
 # Official plugins
 claude plugin install typescript-lsp@claude-plugins-official
 claude plugin install pyright-lsp@claude-plugins-official
@@ -206,11 +234,33 @@ claude plugin install code-simplifier@claude-plugins-official
 claude plugin install rust-analyzer-lsp@claude-plugins-official
 claude plugin install claude-md-management@claude-plugins-official
 
-# Community plugins
-claude plugin install plannotator@backnotprop
+# Community plugins (add marketplace first)
+claude plugin marketplace add backnotprop/plannotator
+claude plugin install plannotator@plannotator
+
+claude plugin marketplace add jarrodwatts/claude-hud
 claude plugin install claude-hud@claude-hud
+
+claude plugin marketplace add max-sixty/worktrunk
 claude plugin install worktrunk@worktrunk
 ```
+
+#### Troubleshooting
+
+**Marketplace unavailable?**
+
+If you encounter marketplace access issues:
+
+1. **Verify subscription**: Ensure you have an active Claude Code subscription with plugin support
+2. **Check repository settings**: Plugin access may be limited to specific repository configurations
+3. **Use local plugins**: The setup script automatically falls back to local plugins from `.claude-plugin/` folder
+4. **Manual installation**: Copy plugin folders directly to `~/.claude/plugins/`
+
+**Common issues:**
+
+- "Plugin marketplace not available" → Use local plugins via `./cli.sh` (select option 1)
+- "Marketplace repository not accessible" → Check network connectivity and repository permissions
+- "Plugin install failed" → Plugin may already be installed or require specific dependencies
 
 #### Plugin List
 

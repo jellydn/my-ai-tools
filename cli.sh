@@ -784,8 +784,98 @@ copy_configurations() {
 	[ -f "$SCRIPT_DIR/MEMORY.md" ] && execute "cp $SCRIPT_DIR/MEMORY.md $HOME/.ai-tools/" && log_success "MEMORY.md copied to ~/.ai-tools/ (reference copy)"
 }
 
+# Check if Claude CLI supports plugin marketplace functionality
+check_marketplace_support() {
+	if ! command -v claude &>/dev/null; then
+		log_error "Claude Code CLI not found"
+		return 1
+	fi
+
+	# Check if 'claude plugin' command exists
+	if ! claude --help 2>/dev/null | grep -q "plugin"; then
+		log_warning "Claude CLI does not support plugin commands"
+		log_info "Please ensure you have Claude Code installed with plugin support"
+		log_info "Visit: https://docs.claude.ai for installation instructions"
+		return 1
+	fi
+
+	# Try to list plugins to verify marketplace functionality
+	if ! claude plugin list &>/dev/null; then
+		log_warning "Plugin marketplace may not be enabled for this repository"
+		log_info "To enable plugins:"
+		log_info "  1. Ensure you have an active Claude Code subscription"
+		log_info "  2. Plugins may be limited to specific repository configurations"
+		log_info "  3. Check Claude Code settings to verify plugin access"
+		return 1
+	fi
+
+	return 0
+}
+
+# Verify marketplace repository availability
+verify_marketplace_repo() {
+	local marketplace_repo="$1"
+	local repo_name="${marketplace_repo##*/}"
+
+	# Extract owner/repo format
+	local owner_repo
+	if [[ "$marketplace_repo" == *"/"* ]] && [[ "$marketplace_repo" != /* ]]; then
+		owner_repo="$marketplace_repo"
+	else
+		# Local path or invalid format
+		return 0
+	fi
+
+	# Test if marketplace can be added (non-destructive check)
+	local test_output
+	test_output=$(claude plugin marketplace add "$owner_repo" 2>&1 || true)
+	
+	if echo "$test_output" | grep -qE "(already exists|added|success)"; then
+		return 0
+	elif echo "$test_output" | grep -qE "(not found|invalid|unauthorized|forbidden)"; then
+		log_warning "Marketplace repository '$owner_repo' may not be accessible"
+		log_info "This could be due to:"
+		log_info "  - Repository visibility settings (private/public)"
+		log_info "  - Insufficient permissions"
+		log_info "  - Network connectivity issues"
+		return 1
+	fi
+	
+	return 0
+}
+
 enable_plugins() {
 	log_info "Installing Claude Code plugins..."
+
+	# Check marketplace support before attempting installation
+	if ! check_marketplace_support; then
+		log_error "Plugin marketplace is not available"
+		log_info ""
+		log_info "📋 Manual Plugin Installation:"
+		log_info "   If marketplace is unavailable, you can still use local plugins from .claude-plugin folder"
+		log_info "   Local plugins will be installed automatically if available"
+		log_info ""
+		log_info "📖 For more information about plugin setup, see:"
+		log_info "   https://github.com/jellydn/my-ai-tools#plugins"
+		
+		# Ask if user wants to continue with local plugins only
+		if [ "$YES_TO_ALL" = true ]; then
+			log_info "Continuing with local plugins only (--yes flag)"
+			SKIP_MARKETPLACE_PLUGINS=true
+		elif [ -t 0 ]; then
+			read -p "Continue with local plugins only? (y/n) " -n 1 -r
+			echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				SKIP_MARKETPLACE_PLUGINS=true
+			else
+				log_warning "Skipping plugin installation"
+				return
+			fi
+		else
+			log_warning "Skipping plugin installation (marketplace unavailable)"
+			return
+		fi
+	fi
 
 	# Ask for skill installation source
 	if [ "$YES_TO_ALL" = true ]; then
@@ -1153,39 +1243,53 @@ EOF
 	}
 
 	if command -v claude &>/dev/null; then
-		# Add official plugins marketplace first
-		log_info "Adding official plugins marketplace..."
-		if ! execute "claude plugin marketplace add 'anthropics/claude-plugins-official' 2>/dev/null"; then
-			log_info "Official plugins marketplace may already be added"
-		fi
-
-		log_info "Installing official plugins..."
-		if [ -t 0 ]; then
-			# Interactive mode: install sequentially with prompts
-			for plugin in "${official_plugins[@]}"; do
-				install_plugin "$plugin"
-			done
+		# Skip marketplace plugins if flag is set
+		if [ "${SKIP_MARKETPLACE_PLUGINS:-false}" = "true" ]; then
+			log_info "Skipping marketplace plugins (marketplace unavailable)"
 		else
-			# Non-interactive mode: install in parallel for faster execution
-			log_info "Installing plugins in parallel..."
-			local pids=()
-			for plugin in "${official_plugins[@]}"; do
-				(
-					setup_tmpdir
-					if claude plugin install "$plugin" 2>/dev/null; then
-						log_success "$plugin installed"
-					else
-						log_warning "$plugin may already be installed"
-					fi
-				) &
-				pids+=($!)
-			done
+			# Add official plugins marketplace first
+			log_info "Adding official plugins marketplace..."
+			if ! execute "claude plugin marketplace add 'anthropics/claude-plugins-official' 2>/dev/null"; then
+				log_info "Official plugins marketplace may already be added"
+			fi
 
-			# Wait for all installations to complete
-			for pid in "${pids[@]}"; do
-				wait "$pid" 2>/dev/null || true
-			done
-			log_success "Official plugins installation complete"
+			# Verify official marketplace accessibility
+			if ! verify_marketplace_repo "anthropics/claude-plugins-official"; then
+				log_warning "Official plugins marketplace may not be accessible"
+				log_info "Continuing with local plugins only..."
+				SKIP_MARKETPLACE_PLUGINS=true
+			fi
+
+			if [ "${SKIP_MARKETPLACE_PLUGINS:-false}" != "true" ]; then
+				log_info "Installing official plugins..."
+				if [ -t 0 ]; then
+					# Interactive mode: install sequentially with prompts
+					for plugin in "${official_plugins[@]}"; do
+						install_plugin "$plugin"
+					done
+				else
+					# Non-interactive mode: install in parallel for faster execution
+					log_info "Installing plugins in parallel..."
+					local pids=()
+					for plugin in "${official_plugins[@]}"; do
+						(
+							setup_tmpdir
+							if claude plugin install "$plugin" 2>/dev/null; then
+								log_success "$plugin installed"
+							else
+								log_warning "$plugin may already be installed"
+							fi
+						) &
+						pids+=($!)
+					done
+
+					# Wait for all installations to complete
+					for pid in "${pids[@]}"; do
+						wait "$pid" 2>/dev/null || true
+					done
+					log_success "Official plugins installation complete"
+				fi
+			fi
 		fi
 
 		if [ "$SKILL_INSTALL_SOURCE" = "local" ]; then
