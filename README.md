@@ -258,7 +258,7 @@ If you encounter marketplace access issues:
 
 **Common issues:**
 
-- "Plugin marketplace not available" → Use local plugins via `./cli.sh` (select option 1)
+- "Plugin marketplace not available" → Use local plugins by running `./cli.sh` and answering 'y' to continue with local plugins only
 - "Marketplace repository not accessible" → Check network connectivity and repository permissions
 - "Plugin install failed" → Plugin may already be installed or require specific dependencies
 
