@@ -136,7 +136,62 @@ check_prerequisites() {
 		log_success "Node.js found ($NODE_VERSION)"
 		log_warning "Some scripts (e.g., context-check) prefer Bun. Install with: brew install oven-sh/bun/bun"
 	else
-		log_error "Neither Bun nor Node.js is installed. Please install one of them first."
+		log_error "Neither Bun nor Node.js is installed."
+		
+		# Offer to install Bun in interactive mode
+		if [ "$YES_TO_ALL" = true ]; then
+			log_info "Auto-installing Bun (--yes flag)..."
+			install_bun_now
+		elif [ -t 0 ]; then
+			read -p "Would you like to install Bun now? (y/n) " -n 1 -r
+			echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				install_bun_now
+			else
+				log_error "Please install Bun or Node.js first."
+				exit 1
+			fi
+		else
+			log_error "Please install Bun or Node.js first."
+			log_info "  - Install Bun: curl -fsSL https://bun.sh/install | bash"
+			log_info "  - Or install Node.js: https://nodejs.org/"
+			exit 1
+		fi
+	fi
+}
+
+install_bun_now() {
+	log_info "Installing Bun..."
+	
+	# Download and execute Bun installer
+	if curl -fsSL https://bun.sh/install | bash; then
+		# Bun installer sets BUN_INSTALL, try to source common shell profiles
+		# to get the environment variables it sets
+		if [ -f "$HOME/.bashrc" ]; then
+			source "$HOME/.bashrc" 2>/dev/null || true
+		fi
+		if [ -f "$HOME/.zshrc" ]; then
+			source "$HOME/.zshrc" 2>/dev/null || true
+		fi
+		
+		# Fallback to default Bun location if not set
+		if [ -z "$BUN_INSTALL" ]; then
+			export BUN_INSTALL="$HOME/.bun"
+		fi
+		export PATH="$BUN_INSTALL/bin:$PATH"
+		
+		if command -v bun &>/dev/null; then
+			BUN_VERSION=$(bun --version)
+			log_success "Bun installed successfully ($BUN_VERSION)"
+			log_info "Note: You may need to restart your terminal for Bun to be available in new sessions"
+		else
+			log_error "Bun installation completed but 'bun' command not found in PATH"
+			log_info "Please restart your terminal and run the script again"
+			exit 1
+		fi
+	else
+		log_error "Failed to install Bun"
+		log_info "Please install manually: curl -fsSL https://bun.sh/install | bash"
 		exit 1
 	fi
 }
@@ -147,24 +202,40 @@ install_global_tools() {
 	# Check/install jq (required for JSON parsing in hooks)
 	if ! command -v jq &>/dev/null; then
 		log_warning "jq not found. Installing jq..."
+		local jq_installed=false
 		if [ "$IS_WINDOWS" = true ]; then
 			# Windows: use choco or winget, or download binary
 			if command -v choco &>/dev/null; then
-				execute "choco install jq -y"
+				execute "choco install jq -y" && jq_installed=true
 			elif command -v winget &>/dev/null; then
-				execute "winget install jq"
-			else
-				log_warning "Please install jq manually: https://stedolan.github.io/jq/download/"
+				execute "winget install jq" && jq_installed=true
 			fi
 		else
 			# Mac/Linux: use brew or apt
 			if command -v brew &>/dev/null; then
-				execute "brew install jq"
+				execute "brew install jq" && jq_installed=true
 			elif command -v apt-get &>/dev/null; then
-				execute "sudo apt-get install -y jq"
-			else
-				log_warning "Please install jq manually: https://stedolan.github.io/jq/download/"
+				# Check if we can use sudo non-interactively
+				# YES_TO_ALL=true indicates non-interactive mode (piped input or --yes flag)
+				# sudo -n tests if sudo can run without password prompt
+				if [ "$YES_TO_ALL" = true ] && sudo -n true 2>/dev/null; then
+					# Can use sudo without password in non-interactive mode
+					execute "sudo apt-get install -y jq" && jq_installed=true
+				elif [ "$YES_TO_ALL" = false ] && [ -t 0 ]; then
+					# Interactive mode - allow sudo to prompt for password
+					execute "sudo apt-get install -y jq" && jq_installed=true
+				else
+					# Non-interactive mode but sudo needs password - skip
+					log_warning "Cannot install jq non-interactively (requires sudo with password)"
+				fi
 			fi
+		fi
+		
+		if [ "$jq_installed" = false ]; then
+			log_warning "Please install jq manually: https://stedolan.github.io/jq/download/"
+			log_info "  - macOS: brew install jq"
+			log_info "  - Ubuntu/Debian: sudo apt-get install jq"
+			log_info "  - Other: See https://stedolan.github.io/jq/download/"
 		fi
 	else
 		log_success "jq found"
@@ -173,7 +244,12 @@ install_global_tools() {
 	# Check/install biome (required for JS/TS formatting)
 	if ! command -v biome &>/dev/null; then
 		log_warning "biome not found. Installing biome globally..."
-		execute "npm install -g @biomejs/biome"
+		if execute "npm install -g @biomejs/biome"; then
+			log_success "biome installed"
+		else
+			log_warning "Failed to install biome. You may need to configure npm for global installs without sudo."
+			log_info "  See: https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally"
+		fi
 	else
 		log_success "biome found"
 	fi
@@ -426,7 +502,6 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/claude" "$BACKUP_DIR" "config-claude"
 		copy_config_dir "$HOME/.config/opencode" "$BACKUP_DIR" "opencode"
 		copy_config_dir "$HOME/.config/amp" "$BACKUP_DIR" "amp"
-		copy_config_dir "$HOME/.ccs" "$BACKUP_DIR" "ccs"
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
@@ -455,8 +530,14 @@ install_claude_code() {
 		fi
 	fi
 
-	execute "npm install -g @anthropic-ai/claude-code"
-	log_success "Claude Code installed"
+	if execute "npm install -g @anthropic-ai/claude-code"; then
+		log_success "Claude Code installed"
+	else
+		log_error "Failed to install Claude Code"
+		log_info "You may need to configure npm for global installs without sudo."
+		log_info "  See: https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally"
+		log_info "Or install manually: npm install -g @anthropic-ai/claude-code"
+	fi
 }
 
 install_opencode() {
