@@ -161,15 +161,17 @@ install_global_tools() {
 				execute "brew install jq" && jq_installed=true
 			elif command -v apt-get &>/dev/null; then
 				# Check if we can use sudo non-interactively
+				# YES_TO_ALL=true indicates non-interactive mode (piped input or --yes flag)
+				# sudo -n tests if sudo can run without password prompt
 				if [ "$YES_TO_ALL" = true ] && sudo -n true 2>/dev/null; then
-					# Can use sudo without password
+					# Can use sudo without password in non-interactive mode
 					execute "sudo apt-get install -y jq" && jq_installed=true
 				elif [ "$YES_TO_ALL" = false ] && [ -t 0 ]; then
-					# Interactive mode - allow sudo prompt
+					# Interactive mode - allow sudo to prompt for password
 					execute "sudo apt-get install -y jq" && jq_installed=true
 				else
-					# Non-interactive mode and sudo needs password - skip
-					log_warning "Cannot install jq non-interactively (requires sudo)"
+					# Non-interactive mode but sudo needs password - skip
+					log_warning "Cannot install jq non-interactively (requires sudo with password)"
 				fi
 			fi
 		fi
@@ -187,7 +189,7 @@ install_global_tools() {
 	# Check/install biome (required for JS/TS formatting)
 	if ! command -v biome &>/dev/null; then
 		log_warning "biome not found. Installing biome globally..."
-		if execute "npm install -g @biomejs/biome" 2>/dev/null; then
+		if execute "npm install -g @biomejs/biome"; then
 			log_success "biome installed"
 		else
 			log_warning "Failed to install biome. You may need to configure npm for global installs without sudo."
@@ -474,7 +476,7 @@ install_claude_code() {
 		fi
 	fi
 
-	if execute "npm install -g @anthropic-ai/claude-code" 2>/dev/null; then
+	if execute "npm install -g @anthropic-ai/claude-code"; then
 		log_success "Claude Code installed"
 	else
 		log_error "Failed to install Claude Code"
