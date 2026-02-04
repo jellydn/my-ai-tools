@@ -162,9 +162,22 @@ check_prerequisites() {
 
 install_bun_now() {
 	log_info "Installing Bun..."
+	
+	# Download and execute Bun installer
 	if curl -fsSL https://bun.sh/install | bash; then
-		# Source shell profile to get bun in PATH
-		export BUN_INSTALL="$HOME/.bun"
+		# Bun installer sets BUN_INSTALL, try to source common shell profiles
+		# to get the environment variables it sets
+		if [ -f "$HOME/.bashrc" ]; then
+			source "$HOME/.bashrc" 2>/dev/null || true
+		fi
+		if [ -f "$HOME/.zshrc" ]; then
+			source "$HOME/.zshrc" 2>/dev/null || true
+		fi
+		
+		# Fallback to default Bun location if not set
+		if [ -z "$BUN_INSTALL" ]; then
+			export BUN_INSTALL="$HOME/.bun"
+		fi
 		export PATH="$BUN_INSTALL/bin:$PATH"
 		
 		if command -v bun &>/dev/null; then
