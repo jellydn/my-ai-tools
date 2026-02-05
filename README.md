@@ -246,6 +246,13 @@ claude plugin install claude-hud@claude-hud
 
 claude plugin marketplace add max-sixty/worktrunk
 claude plugin install worktrunk@worktrunk
+
+# Install skills from this repository (jellydn/my-ai-tools)
+claude plugin marketplace add jellydn/my-ai-tools
+# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd
+claude plugin install prd@my-ai-tools
+claude plugin install codemap@my-ai-tools
+# ... install any other skills you need
 ```
 
 #### Troubleshooting
