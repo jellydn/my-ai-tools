@@ -1338,7 +1338,7 @@ enable_plugins() {
 
 		# Extract command from skill SKILL.md frontmatter
 		if [ -f "$skill_md" ]; then
-			local cmd=$(awk '/^command:/ {print $2; exit}' "$skill_md" 2>/dev/null | tr -d '"'"'"')
+			local cmd=$(awk '/^command:/ {print $2; exit}' "$skill_md" 2>/dev/null | tr -d \')
 			if [ -n "$cmd" ]; then
 				# Create command file
 				mkdir -p "$target_dir"
@@ -1364,7 +1364,7 @@ EOF
 
 		# Extract command from skill SKILL.md frontmatter
 		if [ -f "$skill_md" ]; then
-			local cmd=$(awk '/^command:/ {print $2; exit}' "$skill_md" 2>/dev/null | tr -d '"'"'"')
+			local cmd=$(awk '/^command:/ {print $2; exit}' "$skill_md" 2>/dev/null | tr -d \')
 			if [ -n "$cmd" ]; then
 				# Create command file
 				mkdir -p "$target_dir"
