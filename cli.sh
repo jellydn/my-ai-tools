@@ -567,11 +567,11 @@ install_opencode() {
 
 install_kilo() {
 	prompt_and_install() {
-		log_info "Installing Kilo CLI..."
+		log_info "Installing Kilo Code CLI..."
 		if command -v kilocode &>/dev/null; then
-			log_warning "Kilo CLI is already installed"
+			log_warning "Kilo Code CLI is already installed"
 		else
-			log_info "Installing Kilo CLI via npm..."
+			log_info "Installing Kilo Code CLI via npm..."
 			log_info "Blog: https://blog.kilo.ai/p/kilo-cli"
 			log_info "Docs: https://kilo.ai/docs/code-with-ai/platforms/cli"
 			if execute "npm install -g @kilocode/cli"; then
@@ -583,14 +583,14 @@ install_kilo() {
 	}
 
 	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-accepting Kilo CLI installation (--yes flag)"
+		log_info "Auto-accepting Kilo Code CLI installation (--yes flag)"
 		prompt_and_install
 	elif [ -t 0 ]; then
-		read -p "Do you want to install Kilo CLI? (y/n) " -n 1 -r
+		read -p "Do you want to install Kilo Code CLI? (y/n) " -n 1 -r
 		echo
-		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Kilo CLI installation"
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Kilo Code CLI installation"
 	else
-		log_info "Installing Kilo CLI (non-interactive mode)..."
+		log_info "Installing Kilo Code CLI (non-interactive mode)..."
 		prompt_and_install
 	fi
 }
@@ -646,24 +646,24 @@ install_ccs() {
 
 install_ai_switcher() {
 	prompt_and_install() {
-		log_info "Installing ai-switcher..."
-		if command -v ai-switcher &>/dev/null; then
-			log_warning "ai-switcher is already installed"
+		log_info "Installing ai-launcher..."
+		if command -v ai-launcher &>/dev/null; then
+			log_warning "ai-launcher is already installed"
 		else
-			execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "ai-switcher"
-			log_success "ai-switcher installed"
+			execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "ai-launcher"
+			log_success "ai-launcher installed"
 		fi
 	}
 
 	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-accepting ai-switcher installation (--yes flag)"
+		log_info "Auto-accepting ai-launcher installation (--yes flag)"
 		prompt_and_install
 	elif [ -t 0 ]; then
-		read -p "Do you want to install ai-switcher? (y/n) " -n 1 -r
+		read -p "Do you want to install ai-launcher? (y/n) " -n 1 -r
 		echo
-		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping ai-switcher installation"
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping ai-launcher installation"
 	else
-		log_info "Installing ai-switcher (non-interactive mode)..."
+		log_info "Installing ai-launcher (non-interactive mode)..."
 		prompt_and_install
 	fi
 }
