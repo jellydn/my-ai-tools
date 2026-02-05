@@ -818,25 +818,25 @@ copy_configurations() {
 	# Copy Kilo configs
 	if [ -d "$HOME/.kilocode" ] || command -v kilocode &>/dev/null; then
 		execute "mkdir -p $HOME/.kilocode"
-		execute "cp $SCRIPT_DIR/configs/kilo/kilo.json $HOME/.kilocode/config.json"
+		execute "cp $SCRIPT_DIR/configs/kilocode/kilocode.json $HOME/.kilocode/config.json"
 		
 		# Copy agent directory
 		execute "rm -rf $HOME/.kilocode/agent"
-		if [ -d "$SCRIPT_DIR/configs/kilo/agent" ]; then
-			execute "cp -r $SCRIPT_DIR/configs/kilo/agent $HOME/.kilocode/"
+		if [ -d "$SCRIPT_DIR/configs/kilocode/agent" ]; then
+			execute "cp -r $SCRIPT_DIR/configs/kilocode/agent $HOME/.kilocode/"
 		fi
 		
 		# Copy commands (repo uses 'command', Kilo uses 'commands')
 		execute "rm -rf $HOME/.kilocode/commands"
 		execute "mkdir -p $HOME/.kilocode/commands"
-		if [ -d "$SCRIPT_DIR/configs/kilo/command" ]; then
-			execute "cp -r $SCRIPT_DIR/configs/kilo/command/* $HOME/.kilocode/commands/ 2>/dev/null || true"
+		if [ -d "$SCRIPT_DIR/configs/kilocode/command" ]; then
+			execute "cp -r $SCRIPT_DIR/configs/kilocode/command/* $HOME/.kilocode/commands/ 2>/dev/null || true"
 		fi
 		
 		# Copy skills (repo uses 'skill', Kilo uses 'skills')
 		execute "rm -rf $HOME/.kilocode/skills"
 		execute "mkdir -p $HOME/.kilocode/skills"
-		copy_non_marketplace_skills "$SCRIPT_DIR/configs/kilo/skill" "$HOME/.kilocode/skills"
+		copy_non_marketplace_skills "$SCRIPT_DIR/configs/kilocode/skill" "$HOME/.kilocode/skills"
 		
 		log_success "Kilo CLI configs copied"
 	fi

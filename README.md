@@ -648,7 +648,7 @@ Kilo CLI is built on OpenCode and extends its functionality.
 
 ### Configuration
 
-Copy [`configs/kilo/kilo.json`](configs/kilo/kilo.json) to `~/.kilocode/config.json`:
+Copy [`configs/kilocode/kilocode.json`](configs/kilocode/kilocode.json) to `~/.kilocode/config.json`:
 
 ```json
 {
@@ -729,7 +729,7 @@ Since Kilo is built on OpenCode, it supports the same features including:
 
 ### Custom Agents
 
-Located in [`configs/kilo/agent/`](configs/kilo/agent/):
+Located in [`configs/kilocode/agent/`](configs/kilocode/agent/):
 
 - `ai-slop-remover` - Remove AI-generated boilerplate
 - `docs-writer` - Generate documentation
@@ -738,7 +738,7 @@ Located in [`configs/kilo/agent/`](configs/kilo/agent/):
 
 ### Custom Commands
 
-Located in [`configs/kilo/command/`](configs/kilo/command/):
+Located in [`configs/kilocode/command/`](configs/kilocode/command/):
 
 - `plannotator-review` - Interactive code review
 
