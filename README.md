@@ -982,6 +982,32 @@ See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for det
 npx skills add vercel-labs/agent-browser
 ```
 
+### Dev Browser
+
+[**Dev Browser**](https://github.com/SawyerHood/dev-browser) - Browser automation plugin with persistent page state for Claude Code. Lets Claude control your browser to test and verify your work as you develop.
+
+**Key features:**
+- Persistent pages - Navigate once, interact across multiple scripts
+- Flexible execution - Full scripts when possible, step-by-step when exploring
+- LLM-friendly DOM snapshots - Structured page inspection optimized for AI
+
+**Installation:**
+
+For Claude Code:
+```bash
+/plugin marketplace add sawyerhood/dev-browser
+/plugin install dev-browser@sawyerhood/dev-browser
+```
+
+For Amp/Codex:
+```bash
+# Already included in skills/ directory
+# Run the installation script to set it up
+./cli.sh
+```
+
+See [dev-browser README](skills/dev-browser/SKILL.md) for detailed usage.
+
 </details>
 
 ---
