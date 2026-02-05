@@ -4,6 +4,7 @@ description: Removes AI-generated code slop from git diffs to maintain code qual
 license: MIT
 compatibility: claude, opencode, amp, codex, gemini
 hint: Use when cleaning up AI-generated code slop in git diffs
+user-invocable: true
 metadata:
   audience: all
   workflow: code-quality

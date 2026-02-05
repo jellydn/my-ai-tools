@@ -4,6 +4,7 @@ description: Resumes work from a previous handoff session which are stored in `.
 license: MIT
 compatibility: claude, opencode, codex, gemini
 hint: Use when resuming work from a previous handoff session
+user-invocable: true
 metadata:
   audience: all
   workflow: workflow

@@ -8,6 +8,7 @@ description: >-
   patterns, typo/test/refactor keywords. Excludes complex architecture,
   security-critical code, performance optimization, breaking changes.
 version: 3.0.0
+user-invocable: true
 ---
 
 # CCS Delegation

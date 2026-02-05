@@ -4,6 +4,7 @@ description: Orchestrate parallel codebase analysis to produce 7 structured docu
 license: MIT
 compatibility: opencode, claude, amp, codex, gemini
 hint: Use when mapping codebase structure, documenting architecture, or onboarding to a project
+user-invocable: true
 metadata:
   audience: all
   workflow: codebase-mapping
