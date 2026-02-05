@@ -30,7 +30,7 @@
           "qmd query": "allow",
           "qmd get": "allow",
           "qmd search": "allow",
-          "$HOME/.config/kilo/skill/qmd-knowledge/scripts/record.sh": "allow",
+          "$HOME/.kilocode/skills/qmd-knowledge/scripts/record.sh": "allow",
           "$HOME/.claude/skills/qmd-knowledge/scripts/record.sh": "allow"
         }
       }

@@ -208,15 +208,15 @@ generate_opencode_configs() {
 generate_kilo_configs() {
 	log_info "Generating Kilo CLI configs..."
 
-	if [ -d "$HOME/.config/kilo" ]; then
+	if [ -d "$HOME/.kilocode" ]; then
 		execute "mkdir -p $SCRIPT_DIR/configs/kilo"
-		copy_single "$HOME/.config/kilo/kilo.json" "$SCRIPT_DIR/configs/kilo/kilo.json"
+		copy_single "$HOME/.kilocode/config.json" "$SCRIPT_DIR/configs/kilo/kilo.json"
 
 		# Handle skill directory with plugin filtering
-		if [ -d "$HOME/.config/kilo/skill" ]; then
+		if [ -d "$HOME/.kilocode/skills" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/kilo/skill"
-			if [ "$(ls -A "$HOME/.config/kilo/skill" 2>/dev/null)" ]; then
-				for skill_dir in "$HOME/.config/kilo/skill"/*; do
+			if [ "$(ls -A "$HOME/.kilocode/skills" 2>/dev/null)" ]; then
+				for skill_dir in "$HOME/.kilocode/skills"/*; do
 					skill_name="$(basename "$skill_dir")"
 					case "$skill_name" in
 						prd|ralph|qmd-knowledge|codemap)
@@ -235,12 +235,12 @@ generate_kilo_configs() {
 			fi
 		fi
 
-		# Copy other subdirectories (agent, configs) - skip command/ai (generated locally)
+		# Copy other subdirectories (agent, configs) - skip commands (generated locally)
 		for subdir in agent configs; do
-			if [ -d "$HOME/.config/kilo/$subdir" ]; then
+			if [ -d "$HOME/.kilocode/$subdir" ]; then
 				execute "mkdir -p $SCRIPT_DIR/configs/kilo/$subdir"
-				if [ "$(ls -A "$HOME/.config/kilo/$subdir" 2>/dev/null)" ]; then
-					if execute "cp -r '$HOME/.config/kilo/$subdir'/* '$SCRIPT_DIR/configs/kilo/$subdir'/ 2>/dev/null"; then
+				if [ "$(ls -A "$HOME/.kilocode/$subdir" 2>/dev/null)" ]; then
+					if execute "cp -r '$HOME/.kilocode/$subdir'/* '$SCRIPT_DIR/configs/kilo/$subdir'/ 2>/dev/null"; then
 						log_success "Copied $subdir directory"
 					else
 						log_warning "Failed to copy $subdir directory"
@@ -249,26 +249,24 @@ generate_kilo_configs() {
 			fi
 		done
 
-		# Handle command directory - skip ai/ subfolder (generated from local skills)
-		if [ -d "$HOME/.config/kilo/command" ]; then
+		# Handle commands directory
+		if [ -d "$HOME/.kilocode/commands" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/kilo/command"
-			if [ "$(ls -A "$HOME/.config/kilo/command" 2>/dev/null)" ]; then
-				# Copy everything except ai/ folder
-				for item in "$HOME/.config/kilo/command"/*; do
+			if [ "$(ls -A "$HOME/.kilocode/commands" 2>/dev/null)" ]; then
+				# Copy command files
+				for item in "$HOME/.kilocode/commands"/*; do
 					item_name=$(basename "$item")
-					if [ "$item_name" != "ai" ]; then
+					if [ -f "$item" ]; then
 						if execute "cp -r '$item' '$SCRIPT_DIR/configs/kilo/command'/ 2>/dev/null"; then
 							log_success "Copied command: $item_name"
 						fi
-					else
-						log_info "Skipping ai/ command folder (generated from local skills)"
 					fi
 				done
 			fi
 		fi
 		log_success "Kilo CLI configs generated"
 	else
-		log_warning "Kilo CLI config directory not found: $HOME/.config/kilo"
+		log_warning "Kilo CLI config directory not found: $HOME/.kilocode"
 	fi
 }
 

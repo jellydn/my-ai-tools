@@ -501,7 +501,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.claude" "$BACKUP_DIR" "claude"
 		copy_config_dir "$HOME/.config/claude" "$BACKUP_DIR" "config-claude"
 		copy_config_dir "$HOME/.config/opencode" "$BACKUP_DIR" "opencode"
-		copy_config_dir "$HOME/.config/kilo" "$BACKUP_DIR" "kilo"
+		copy_config_dir "$HOME/.kilocode" "$BACKUP_DIR" "kilocode"
 		copy_config_dir "$HOME/.config/amp" "$BACKUP_DIR" "amp"
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
@@ -568,7 +568,7 @@ install_opencode() {
 install_kilo() {
 	prompt_and_install() {
 		log_info "Installing Kilo CLI..."
-		if command -v kilo &>/dev/null; then
+		if command -v kilocode &>/dev/null; then
 			log_warning "Kilo CLI is already installed"
 		else
 			log_info "Installing Kilo CLI via npm..."
@@ -816,15 +816,15 @@ copy_configurations() {
 	fi
 
 	# Copy Kilo configs
-	if [ -d "$HOME/.config/kilo" ] || command -v kilo &>/dev/null; then
-		execute "mkdir -p $HOME/.config/kilo"
-		execute "cp $SCRIPT_DIR/configs/kilo/kilo.json $HOME/.config/kilo/"
-		execute "rm -rf $HOME/.config/kilo/agent"
-		execute "cp -r $SCRIPT_DIR/configs/kilo/agent $HOME/.config/kilo/"
-		execute "rm -rf $HOME/.config/kilo/command"
-		execute "cp -r $SCRIPT_DIR/configs/kilo/command $HOME/.config/kilo/"
-		execute "rm -rf $HOME/.config/kilo/skill"
-		copy_non_marketplace_skills "$SCRIPT_DIR/configs/kilo/skill" "$HOME/.config/kilo/skill"
+	if [ -d "$HOME/.kilocode" ] || command -v kilocode &>/dev/null; then
+		execute "mkdir -p $HOME/.kilocode"
+		execute "cp $SCRIPT_DIR/configs/kilo/kilo.json $HOME/.kilocode/config.json"
+		execute "rm -rf $HOME/.kilocode/agent"
+		execute "cp -r $SCRIPT_DIR/configs/kilo/agent $HOME/.kilocode/"
+		execute "rm -rf $HOME/.kilocode/command"
+		execute "cp -r $SCRIPT_DIR/configs/kilo/command $HOME/.kilocode/commands"
+		execute "rm -rf $HOME/.kilocode/skill"
+		copy_non_marketplace_skills "$SCRIPT_DIR/configs/kilo/skill" "$HOME/.kilocode/skills"
 		log_success "Kilo CLI configs copied"
 	fi
 
@@ -1209,8 +1209,8 @@ enable_plugins() {
 		CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
 		OPENCODE_SKILL_DIR="$HOME/.config/opencode/skill"
 		OPENCODE_COMMAND_DIR="$HOME/.config/opencode/command/ai"
-		KILO_SKILL_DIR="$HOME/.config/kilo/skill"
-		KILO_COMMAND_DIR="$HOME/.config/kilo/command/ai"
+		KILO_SKILL_DIR="$HOME/.kilocode/skills"
+		KILO_COMMAND_DIR="$HOME/.kilocode/commands"
 		AMP_SKILLS_DIR="$HOME/.config/amp/skills"
 		CODEX_SKILLS_DIR="$HOME/.codex/skills"
 		GEMINI_SKILLS_DIR="$HOME/.gemini/skills"
@@ -1235,7 +1235,7 @@ enable_plugins() {
 		# Create OpenCode commands directory
 		mkdir -p "$OPENCODE_COMMAND_DIR"
 
-		# Copy to Kilo CLI (~/.config/kilo/skill/)
+		# Copy to Kilo CLI (~/.kilocode/skills/)
 		if [ -d "$KILO_SKILL_DIR" ]; then
 			for existing_skill in "$KILO_SKILL_DIR"/*; do
 				[ -d "$existing_skill" ] && rm -rf "$existing_skill"

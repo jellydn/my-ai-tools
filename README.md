@@ -648,7 +648,7 @@ Kilo CLI is built on OpenCode and extends its functionality.
 
 ### Configuration
 
-Copy [`configs/kilo/kilo.json`](configs/kilo/kilo.json) to `~/.config/kilo/`:
+Copy [`configs/kilo/kilo.json`](configs/kilo/kilo.json) to `~/.kilocode/config.json`:
 
 ```json
 {
