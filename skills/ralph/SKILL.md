@@ -4,6 +4,7 @@ description: "Convert PRDs to prd.json format for the Ralph autonomous agent sys
 license: MIT
 compatibility: claude, opencode, amp, codex, gemini
 hint: Use when converting PRDs to prd.json format for Ralph autonomous agent system
+user-invocable: true
 metadata:
   audience: all
   workflow: product

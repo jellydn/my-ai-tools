@@ -4,6 +4,7 @@ description: "Generate a Product Requirements Document (PRD) for a new feature. 
 license: MIT
 compatibility: claude, opencode, amp, codex, gemini
 hint: Use when planning a feature, starting a new project, or creating PRD documents
+user-invocable: true
 metadata:
   audience: all
   workflow: product

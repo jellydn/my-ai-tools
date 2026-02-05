@@ -4,6 +4,7 @@ description: Creates detailed handoff plans of conversations for continuing work
 license: MIT
 compatibility: claude, opencode, codex, gemini
 hint: Use when ending a session and want to continue work later with full context
+user-invocable: true
 metadata:
   audience: all
   workflow: workflow
