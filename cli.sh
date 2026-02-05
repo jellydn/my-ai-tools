@@ -574,7 +574,7 @@ install_kilo() {
 			# Kilo is built on OpenCode, so it may use a similar installation method
 			# Assuming it follows the same pattern as OpenCode
 			log_info "Kilo CLI installation requires manual setup"
-			log_info "Visit: https://www.reddit.com/r/opencodeCLI/ for installation instructions"
+			log_info "Visit: https://blog.kilo.ai/p/kilo-cli for installation instructions"
 			log_warning "Skipping automatic installation - configs will be copied if Kilo is already installed"
 		fi
 	}

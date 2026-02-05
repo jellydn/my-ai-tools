@@ -630,14 +630,14 @@ Located in [`configs/opencode/command/`](configs/opencode/command/):
 
 ## 🌟 Kilo CLI (Optional)
 
-AI coding assistant built on top of OpenCode. [Reddit Community](https://www.reddit.com/r/opencodeCLI/)
+AI coding assistant built on top of OpenCode. [Official Blog](https://blog.kilo.ai/p/kilo-cli)
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
 
 ### Installation
 
-Kilo CLI is built on OpenCode and extends its functionality. Visit the [Reddit community](https://www.reddit.com/r/opencodeCLI/s/bIH9w4zZs9) for installation instructions.
+Kilo CLI is built on OpenCode and extends its functionality. Visit the [official blog](https://blog.kilo.ai/p/kilo-cli) for installation instructions and more information.
 
 ### Configuration
 
