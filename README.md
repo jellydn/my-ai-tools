@@ -982,6 +982,15 @@ See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for det
 npx skills add vercel-labs/agent-browser
 ```
 
+### Dev Browser
+
+[**Dev Browser**](https://github.com/SawyerHood/dev-browser) - Browser automation plugin with persistent page state for Claude Code.
+
+```bash
+/plugin marketplace add sawyerhood/dev-browser
+/plugin install dev-browser@sawyerhood/dev-browser
+```
+
 </details>
 
 ---
