@@ -1,0 +1,123 @@
+{
+	"$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+	"name": "my-ai-tools",
+	"description": "Marketplace for my-ai-tools plugins",
+	"owner": {
+		"name": "my-ai-tools",
+		"email": "dung@productsway.com"
+	},
+	"plugins": [
+		{
+			"name": "prd",
+			"description": "Generate Product Requirements Documents (PRD) for new features. Use when planning features, starting projects, or creating specifications.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/prd",
+			"category": "productivity"
+		},
+		{
+			"name": "ralph",
+			"description": "Convert PRDs to prd.json format for the Ralph autonomous agent system. Converts markdown PRDs to Ralph's JSON format.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/ralph",
+			"category": "productivity"
+		},
+		{
+			"name": "qmd-knowledge",
+			"description": "Project-specific knowledge management system using qmd MCP server. Captures learnings, issue notes, and conventions in a searchable knowledge base.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/qmd-knowledge",
+			"category": "productivity",
+			"homepage": "https://github.com/jellydn/my-ai-tools"
+		},
+		{
+			"name": "codemap",
+			"description": "Orchestrate parallel codebase analysis to produce 7 structured documents (STACK, INTEGRATIONS, ARCHITECTURE, STRUCTURE, CONVENTIONS, TESTING, CONCERNS) in .planning/codebase/.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/codemap",
+			"category": "productivity",
+			"homepage": "https://github.com/jellydn/my-ai-tools"
+		},
+		{
+			"name": "adr",
+			"description": "Manages Architecture Decision Records (ADR) for tracking important architectural decisions. Initialize, create, list, search, and view ADRs.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/adr",
+			"category": "productivity"
+		},
+		{
+			"name": "handoffs",
+			"description": "Creates detailed handoff plans of conversations for continuing work in new sessions. Capture context, technical decisions, and pending tasks for seamless session continuation.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/handoffs",
+			"category": "productivity"
+		},
+		{
+			"name": "pickup",
+			"description": "Resumes work from a previous handoff session stored in .claude/handoffs/. Load and continue from where you left off in prior sessions.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/pickup",
+			"category": "productivity"
+		},
+		{
+			"name": "pr-review",
+			"description": "Fix PR review comments by implementing requested changes. Fetch review comments, implement fixes, run tests, and commit changes.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/pr-review",
+			"category": "productivity"
+		},
+		{
+			"name": "slop",
+			"description": "Removes AI-generated code slop from git diffs to maintain code quality. Clean up extra comments, defensive checks, type casts, and inconsistent style.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/slop",
+			"category": "productivity"
+		},
+		{
+			"name": "tdd",
+			"description": "Guides through the complete TDD workflow with Red-Green-Refactor cycle. Start features, write failing tests, implement minimal code, and refactor with confidence.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/tdd",
+			"category": "productivity"
+		}
+	]
+}
