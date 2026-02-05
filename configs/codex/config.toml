@@ -5,6 +5,7 @@ shell_snapshot = true
 apps = true
 steer = true
 personality = true
+collab = true
 
 [sandbox_workspace_write]
 network_access = true
@@ -29,4 +30,5 @@ args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 [mcp_servers.qmd]
 command = "qmd"
 args = ["mcp"]
+
 
