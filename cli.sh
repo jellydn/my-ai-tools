@@ -571,12 +571,11 @@ install_kilo() {
 		if command -v kilo &>/dev/null; then
 			log_warning "Kilo CLI is already installed"
 		else
-			# Kilo is built on OpenCode, so it may use a similar installation method
-			# Assuming it follows the same pattern as OpenCode
-			log_info "Kilo CLI installation requires manual setup"
+			log_info "Installing Kilo CLI via npm..."
 			log_info "Blog: https://blog.kilo.ai/p/kilo-cli"
 			log_info "Docs: https://kilo.ai/docs/code-with-ai/platforms/cli"
-			log_warning "Skipping automatic installation - configs will be copied if Kilo is already installed"
+			execute "npm install -g @kilocode/cli"
+			log_success "Kilo CLI installed"
 		fi
 	}
 

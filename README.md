@@ -637,6 +637,10 @@ AI coding assistant built on top of OpenCode. [Official Blog](https://blog.kilo.
 
 ### Installation
 
+```bash
+npm install -g @kilocode/cli
+```
+
 Kilo CLI is built on OpenCode and extends its functionality. 
 
 - **Getting Started**: Visit the [official blog](https://blog.kilo.ai/p/kilo-cli) for an introduction
