@@ -212,7 +212,7 @@ generate_kilo_configs() {
 		execute "mkdir -p $SCRIPT_DIR/configs/kilo"
 		copy_single "$HOME/.kilocode/config.json" "$SCRIPT_DIR/configs/kilo/kilo.json"
 
-		# Handle skill directory with plugin filtering
+		# Handle skills directory with plugin filtering (Kilo uses plural 'skills')
 		if [ -d "$HOME/.kilocode/skills" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/kilo/skill"
 			if [ "$(ls -A "$HOME/.kilocode/skills" 2>/dev/null)" ]; then
@@ -235,21 +235,19 @@ generate_kilo_configs() {
 			fi
 		fi
 
-		# Copy other subdirectories (agent, configs) - skip commands (generated locally)
-		for subdir in agent configs; do
-			if [ -d "$HOME/.kilocode/$subdir" ]; then
-				execute "mkdir -p $SCRIPT_DIR/configs/kilo/$subdir"
-				if [ "$(ls -A "$HOME/.kilocode/$subdir" 2>/dev/null)" ]; then
-					if execute "cp -r '$HOME/.kilocode/$subdir'/* '$SCRIPT_DIR/configs/kilo/$subdir'/ 2>/dev/null"; then
-						log_success "Copied $subdir directory"
-					else
-						log_warning "Failed to copy $subdir directory"
-					fi
+		# Copy agent directory
+		if [ -d "$HOME/.kilocode/agent" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/kilo/agent"
+			if [ "$(ls -A "$HOME/.kilocode/agent" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.kilocode/agent'/* '$SCRIPT_DIR/configs/kilo/agent'/ 2>/dev/null"; then
+					log_success "Copied agent directory"
+				else
+					log_warning "Failed to copy agent directory"
 				fi
 			fi
-		done
+		fi
 
-		# Handle commands directory
+		# Handle commands directory (Kilo uses plural 'commands')
 		if [ -d "$HOME/.kilocode/commands" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/kilo/command"
 			if [ "$(ls -A "$HOME/.kilocode/commands" 2>/dev/null)" ]; then
