@@ -118,18 +118,6 @@
 			},
 			"source": "./skills/tdd",
 			"category": "productivity"
-		},
-		{
-			"name": "dev-browser",
-			"description": "Browser automation with persistent page state for testing and verifying web applications. Navigate websites, fill forms, take screenshots, and automate browser workflows.",
-			"version": "1.0.0",
-			"author": {
-				"name": "Sawyer Hood",
-				"email": "sawyerhood@github.com"
-			},
-			"source": "./skills/dev-browser",
-			"category": "productivity",
-			"homepage": "https://github.com/SawyerHood/dev-browser"
 		}
 	]
 }
