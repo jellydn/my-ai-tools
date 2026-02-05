@@ -574,8 +574,11 @@ install_kilo() {
 			log_info "Installing Kilo CLI via npm..."
 			log_info "Blog: https://blog.kilo.ai/p/kilo-cli"
 			log_info "Docs: https://kilo.ai/docs/code-with-ai/platforms/cli"
-			execute "npm install -g @kilocode/cli"
-			log_success "Kilo CLI installed"
+			if execute "npm install -g @kilocode/cli"; then
+				log_success "Kilo CLI installed"
+			else
+				log_warning "Kilo CLI installation failed - configs will still be copied if installed manually"
+			fi
 		fi
 	}
 
