@@ -205,6 +205,73 @@ generate_opencode_configs() {
 	fi
 }
 
+generate_kilo_configs() {
+	log_info "Generating Kilo CLI configs..."
+
+	if [ -d "$HOME/.config/kilo" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/kilo"
+		copy_single "$HOME/.config/kilo/kilo.json" "$SCRIPT_DIR/configs/kilo/kilo.json"
+
+		# Handle skill directory with plugin filtering
+		if [ -d "$HOME/.config/kilo/skill" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/kilo/skill"
+			if [ "$(ls -A "$HOME/.config/kilo/skill" 2>/dev/null)" ]; then
+				for skill_dir in "$HOME/.config/kilo/skill"/*; do
+					skill_name="$(basename "$skill_dir")"
+					case "$skill_name" in
+						prd|ralph|qmd-knowledge|codemap)
+							# Skip marketplace plugins - managed separately
+							;;
+						*)
+							# Check if skill already exists in skills
+							if skill_exists_in_plugins "$skill_name"; then
+								log_info "Skipping $skill_name (exists in skills)"
+							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/kilo/skill'/ 2>/dev/null"; then
+								log_success "Copied skill: $skill_name"
+							fi
+							;;
+					esac
+				done
+			fi
+		fi
+
+		# Copy other subdirectories (agent, configs) - skip command/ai (generated locally)
+		for subdir in agent configs; do
+			if [ -d "$HOME/.config/kilo/$subdir" ]; then
+				execute "mkdir -p $SCRIPT_DIR/configs/kilo/$subdir"
+				if [ "$(ls -A "$HOME/.config/kilo/$subdir" 2>/dev/null)" ]; then
+					if execute "cp -r '$HOME/.config/kilo/$subdir'/* '$SCRIPT_DIR/configs/kilo/$subdir'/ 2>/dev/null"; then
+						log_success "Copied $subdir directory"
+					else
+						log_warning "Failed to copy $subdir directory"
+					fi
+				fi
+			fi
+		done
+
+		# Handle command directory - skip ai/ subfolder (generated from local skills)
+		if [ -d "$HOME/.config/kilo/command" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/kilo/command"
+			if [ "$(ls -A "$HOME/.config/kilo/command" 2>/dev/null)" ]; then
+				# Copy everything except ai/ folder
+				for item in "$HOME/.config/kilo/command"/*; do
+					item_name=$(basename "$item")
+					if [ "$item_name" != "ai" ]; then
+						if execute "cp -r '$item' '$SCRIPT_DIR/configs/kilo/command'/ 2>/dev/null"; then
+							log_success "Copied command: $item_name"
+						fi
+					else
+						log_info "Skipping ai/ command folder (generated from local skills)"
+					fi
+				done
+			fi
+		fi
+		log_success "Kilo CLI configs generated"
+	else
+		log_warning "Kilo CLI config directory not found: $HOME/.config/kilo"
+	fi
+}
+
 generate_amp_configs() {
 	log_info "Generating Amp configs..."
 
@@ -438,6 +505,9 @@ main() {
 	echo
 
 	generate_opencode_configs
+	echo
+
+	generate_kilo_configs
 	echo
 
 	generate_amp_configs

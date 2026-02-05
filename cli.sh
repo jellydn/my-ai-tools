@@ -501,6 +501,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.claude" "$BACKUP_DIR" "claude"
 		copy_config_dir "$HOME/.config/claude" "$BACKUP_DIR" "config-claude"
 		copy_config_dir "$HOME/.config/opencode" "$BACKUP_DIR" "opencode"
+		copy_config_dir "$HOME/.config/kilo" "$BACKUP_DIR" "kilo"
 		copy_config_dir "$HOME/.config/amp" "$BACKUP_DIR" "amp"
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
@@ -560,6 +561,33 @@ install_opencode() {
 		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping OpenCode installation"
 	else
 		log_info "Installing OpenCode (non-interactive mode)..."
+		prompt_and_install
+	fi
+}
+
+install_kilo() {
+	prompt_and_install() {
+		log_info "Installing Kilo CLI..."
+		if command -v kilo &>/dev/null; then
+			log_warning "Kilo CLI is already installed"
+		else
+			# Kilo is built on OpenCode, so it may use a similar installation method
+			# Assuming it follows the same pattern as OpenCode
+			log_info "Kilo CLI installation requires manual setup"
+			log_info "Visit: https://www.reddit.com/r/opencodeCLI/ for installation instructions"
+			log_warning "Skipping automatic installation - configs will be copied if Kilo is already installed"
+		fi
+	}
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting Kilo CLI installation (--yes flag)"
+		prompt_and_install
+	elif [ -t 0 ]; then
+		read -p "Do you want to install Kilo CLI? (y/n) " -n 1 -r
+		echo
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Kilo CLI installation"
+	else
+		log_info "Installing Kilo CLI (non-interactive mode)..."
 		prompt_and_install
 	fi
 }
@@ -782,6 +810,19 @@ copy_configurations() {
 		execute "rm -rf $HOME/.config/opencode/skill"
 		copy_non_marketplace_skills "$SCRIPT_DIR/configs/opencode/skill" "$HOME/.config/opencode/skill"
 		log_success "OpenCode configs copied"
+	fi
+
+	# Copy Kilo configs
+	if [ -d "$HOME/.config/kilo" ] || command -v kilo &>/dev/null; then
+		execute "mkdir -p $HOME/.config/kilo"
+		execute "cp $SCRIPT_DIR/configs/kilo/kilo.json $HOME/.config/kilo/"
+		execute "rm -rf $HOME/.config/kilo/agent"
+		execute "cp -r $SCRIPT_DIR/configs/kilo/agent $HOME/.config/kilo/"
+		execute "rm -rf $HOME/.config/kilo/command"
+		execute "cp -r $SCRIPT_DIR/configs/kilo/command $HOME/.config/kilo/"
+		execute "rm -rf $HOME/.config/kilo/skill"
+		copy_non_marketplace_skills "$SCRIPT_DIR/configs/kilo/skill" "$HOME/.config/kilo/skill"
+		log_success "Kilo CLI configs copied"
 	fi
 
 	# Copy Amp configs
@@ -1165,6 +1206,8 @@ enable_plugins() {
 		CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
 		OPENCODE_SKILL_DIR="$HOME/.config/opencode/skill"
 		OPENCODE_COMMAND_DIR="$HOME/.config/opencode/command/ai"
+		KILO_SKILL_DIR="$HOME/.config/kilo/skill"
+		KILO_COMMAND_DIR="$HOME/.config/kilo/command/ai"
 		AMP_SKILLS_DIR="$HOME/.config/amp/skills"
 		CODEX_SKILLS_DIR="$HOME/.codex/skills"
 		GEMINI_SKILLS_DIR="$HOME/.gemini/skills"
@@ -1188,6 +1231,17 @@ enable_plugins() {
 
 		# Create OpenCode commands directory
 		mkdir -p "$OPENCODE_COMMAND_DIR"
+
+		# Copy to Kilo CLI (~/.config/kilo/skill/)
+		if [ -d "$KILO_SKILL_DIR" ]; then
+			for existing_skill in "$KILO_SKILL_DIR"/*; do
+				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
+			done
+		fi
+		mkdir -p "$KILO_SKILL_DIR"
+
+		# Create Kilo commands directory
+		mkdir -p "$KILO_COMMAND_DIR"
 
 		# Copy to Amp (~/.config/amp/skills/)
 		if [ -d "$AMP_SKILLS_DIR" ]; then
@@ -1233,6 +1287,14 @@ enable_plugins() {
 					log_info "Skipped $skill_name for OpenCode (not compatible)"
 				fi
 
+				# Kilo is compatible with opencode skills since it's built on top of OpenCode
+				if skill_is_compatible_with "$skill_dir" "opencode" || skill_is_compatible_with "$skill_dir" "kilo"; then
+					cp -r "$skill_dir" "$KILO_SKILL_DIR/"
+					log_success "Copied $skill_name to Kilo CLI"
+				else
+					log_info "Skipped $skill_name for Kilo CLI (not compatible)"
+				fi
+
 				if skill_is_compatible_with "$skill_dir" "amp"; then
 					cp -r "$skill_dir" "$AMP_SKILLS_DIR/"
 					log_success "Copied $skill_name to Amp"
@@ -1258,6 +1320,11 @@ enable_plugins() {
 				if skill_is_compatible_with "$skill_dir" "opencode"; then
 					generate_opencode_command "$skill_dir" "$OPENCODE_COMMAND_DIR"
 				fi
+
+				# Generate Kilo CLI command from skill (only if compatible)
+				if skill_is_compatible_with "$skill_dir" "opencode" || skill_is_compatible_with "$skill_dir" "kilo"; then
+					generate_kilo_command "$skill_dir" "$KILO_COMMAND_DIR"
+				fi
 			fi
 		done
 	}
@@ -1265,60 +1332,53 @@ enable_plugins() {
 	# Generate OpenCode command file from skill SKILL.md
 	generate_opencode_command() {
 		local skill_dir="$1"
-		local command_dir="$2"
+		local target_dir="$2"
 		local skill_name=$(basename "$skill_dir")
 		local skill_md="$skill_dir/SKILL.md"
 
-		if [ ! -f "$skill_md" ]; then
-			log_warning "No SKILL.md found for $skill_name, skipping command generation"
-			return
-		fi
+		# Extract command from skill SKILL.md frontmatter
+		if [ -f "$skill_md" ]; then
+			local cmd=$(awk '/^command:/ {print $2; exit}' "$skill_md" 2>/dev/null | tr -d '"'"'"')
+			if [ -n "$cmd" ]; then
+				# Create command file
+				mkdir -p "$target_dir"
+				cat > "$target_dir/$cmd.md" << EOF
+# ${skill_name}
 
-		# Description for command - simple and consistent
-		local description="Trigger $skill_name skill"
+Execute the ${skill_name} skill
 
-
-		# Extract content after frontmatter for objective
-		local objective_content=""
-		objective_content=$(awk 'BEGIN{p=0} /^---$/{p++;next} p>=2' "$skill_md" 2>/dev/null | head -50)
-
-		# Create command file
-		local command_file="$command_dir/$skill_name.md"
-
-		# Add path allowances for codemap (writes to .planning/codebase/)
-		local path_allowance=""
-		if [ "$skill_name" = "codemap" ]; then
-			path_allowance="
-
-**Allowed paths:**
-- Write: .planning/codebase/"
-		fi
-
-		if [ "$DRY_RUN" = true ]; then
-			log_info "[DRY RUN] Would generate command: $command_file"
-			return
-		fi
-
-		cat > "$command_file" << EOF
----
-name: ai:$skill_name
-description: "$description"
-argument-hint: "[optional: arguments for $skill_name]"
-allowed-tools:
-  - Read
-  - Bash
-  - Glob
-  - Grep
-  - Write
-  - Task
----
-
-<objective>
-$objective_content$path_allowance
-</objective>
+\`\`\`
+@${skill_name}
+\`\`\`
 EOF
+			fi
+		fi
+	}
 
-		log_success "Generated command: $command_file"
+	# Generate Kilo CLI command file from skill SKILL.md
+	generate_kilo_command() {
+		local skill_dir="$1"
+		local target_dir="$2"
+		local skill_name=$(basename "$skill_dir")
+		local skill_md="$skill_dir/SKILL.md"
+
+		# Extract command from skill SKILL.md frontmatter
+		if [ -f "$skill_md" ]; then
+			local cmd=$(awk '/^command:/ {print $2; exit}' "$skill_md" 2>/dev/null | tr -d '"'"'"')
+			if [ -n "$cmd" ]; then
+				# Create command file
+				mkdir -p "$target_dir"
+				cat > "$target_dir/$cmd.md" << EOF
+# ${skill_name}
+
+Execute the ${skill_name} skill
+
+\`\`\`
+@${skill_name}
+\`\`\`
+EOF
+			fi
+		fi
 	}
 
 	if command -v claude &>/dev/null; then
@@ -1411,7 +1471,7 @@ EOF
 main() {
 	echo "╔════════════════════════════════════════════════════════════════════╗"
 	echo "║           AI Tools Setup                                           ║"
-	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • AI Switcher     ║"
+	echo "║   Claude • OpenCode • Kilo • Amp • CCS • Codex • Gemini            ║"
 	echo "╚════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -1433,6 +1493,9 @@ main() {
 	echo
 
 	install_opencode
+	echo
+
+	install_kilo
 	echo
 
 	install_amp

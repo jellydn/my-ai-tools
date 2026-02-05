@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Codex, Gemini CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Kilo CLI, Amp, Codex, Gemini CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -621,6 +621,117 @@ Located in [`configs/opencode/agent/`](configs/opencode/agent/):
 ### Custom Commands
 
 Located in [`configs/opencode/command/`](configs/opencode/command/):
+
+- `plannotator-review` - Interactive code review
+
+</details>
+
+---
+
+## 🌟 Kilo CLI (Optional)
+
+AI coding assistant built on top of OpenCode. [Reddit Community](https://www.reddit.com/r/opencodeCLI/)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Installation
+
+Kilo CLI is built on OpenCode and extends its functionality. Visit the [Reddit community](https://www.reddit.com/r/opencodeCLI/s/bIH9w4zZs9) for installation instructions.
+
+### Configuration
+
+Copy [`configs/kilo/kilo.json`](configs/kilo/kilo.json) to `~/.config/kilo/`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
+  "theme": "kanagawa",
+  "default_agent": "plan",
+  "mcp": {
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true
+    },
+    "qmd": {
+      "type": "local",
+      "command": ["qmd", "mcp"],
+      "enabled": true
+    }
+  },
+  "agent": {
+    "build": {
+      "permission": {
+        "bash": {
+          "git push": "ask",
+          "qmd": "allow",
+          "qmd query": "allow",
+          "qmd get": "allow",
+          "qmd search": "allow",
+          "$HOME/.config/kilo/skill/qmd-knowledge/scripts/record.sh": "allow",
+          "$HOME/.claude/skills/qmd-knowledge/scripts/record.sh": "allow"
+        }
+      }
+    }
+  },
+  "plugin": [
+    "@plannotator/opencode@latest",
+    "@mohak34/opencode-notifier@latest"
+  ],
+  "formatter": {
+    "biome": {
+      "command": ["biome", "check", "--write", "$FILE"],
+      "extensions": [".ts", ".tsx", ".js", ".jsx"]
+    },
+    "gofmt": {
+      "command": ["gofmt", "-w", "$FILE"],
+      "extensions": [".go"]
+    },
+    "prettier": {
+      "command": ["npx", "prettier", "--write", "$FILE"],
+      "extensions": [".md", ".mdx"]
+    },
+    "ruff": {
+      "command": ["ruff", "format", "$FILE"],
+      "extensions": [".py"]
+    },
+    "rustfmt": {
+      "command": ["rustfmt", "$FILE"],
+      "extensions": [".rs"]
+    },
+    "shfmt": {
+      "command": ["shfmt", "-w", "$FILE"],
+      "extensions": [".sh"]
+    },
+    "stylua": {
+      "command": ["stylua", "$FILE"],
+      "extensions": [".lua"]
+    }
+  }
+}
+```
+
+Since Kilo is built on OpenCode, it supports the same features including:
+
+- **MCP servers** - Context7 and qmd for enhanced context
+- **Formatters** - Automatic code formatting for multiple languages
+- **Plugins** - Compatible with OpenCode plugins
+- **Skills** - Shared skills from this repository
+
+### Custom Agents
+
+Located in [`configs/kilo/agent/`](configs/kilo/agent/):
+
+- `ai-slop-remover` - Remove AI-generated boilerplate
+- `docs-writer` - Generate documentation
+- `review` - Code review
+- `security-audit` - Security auditing
+
+### Custom Commands
+
+Located in [`configs/kilo/command/`](configs/kilo/command/):
 
 - `plannotator-review` - Interactive code review
 
