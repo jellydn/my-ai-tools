@@ -923,8 +923,33 @@ try_add_marketplace_repo() {
 	fi
 }
 
+# Helper: Install remote skills using npx skills add
+install_remote_skills() {
+	log_info "Installing community skills from remote marketplace..."
+	log_info "Using npx skills add to install from jellydn/my-ai-tools..."
+	
+	# Use npx skills add for remote skill installation
+	if command -v npx &>/dev/null; then
+		if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
+			# Non-interactive mode
+			execute "npx skills add jellydn/my-ai-tools --yes --global --agent claude-code"
+		else
+			# Interactive mode
+			execute "npx skills add jellydn/my-ai-tools --global --agent claude-code"
+		fi
+		log_success "Remote skills installed successfully"
+	else
+		log_error "npx not found. Please install Node.js to use remote skill installation."
+		log_info "Falling back to local skill installation..."
+		install_local_skills
+	fi
+}
+
 enable_plugins() {
 	log_info "Installing Claude Code plugins..."
+	
+	# List of skills that are installed via npx skills add (when using remote option)
+	local REMOTE_SKILLS="prd|ralph|qmd-knowledge|codemap|adr|handoffs|pickup|pr-review|slop|tdd"
 
 	# Check marketplace support before attempting installation
 	MARKETPLACE_AVAILABLE=false
@@ -1359,7 +1384,7 @@ EOF
 				for plugin_entry in "${community_plugins[@]}"; do
 					local name="${plugin_entry%%|*}"
 					case "$name" in
-						prd|ralph|qmd-knowledge|codemap)
+						$REMOTE_SKILLS)
 							# Skip marketplace plugins - will be installed from local skills
 							;;
 						*)
@@ -1372,31 +1397,14 @@ EOF
 				done
 			fi
 		else
-			log_info "Installing community skills from remote marketplace..."
-			log_info "Using npx skills add to install from jellydn/my-ai-tools..."
-			
-			# Use npx skills add for remote skill installation
-			if command -v npx &>/dev/null; then
-				if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
-					# Non-interactive mode
-					execute "npx skills add jellydn/my-ai-tools --yes --global --agent claude-code"
-				else
-					# Interactive mode
-					execute "npx skills add jellydn/my-ai-tools --global --agent claude-code"
-				fi
-				log_success "Remote skills installed successfully"
-			else
-				log_error "npx not found. Please install Node.js to use remote skill installation."
-				log_info "Falling back to local skill installation..."
-				install_local_skills
-			fi
+			install_remote_skills
 			
 			# Still install CLI-based plugins (plannotator, claude-hud, worktrunk) if Claude CLI is available
 			if command -v claude &>/dev/null; then
 				for plugin_entry in "${community_plugins[@]}"; do
 					local name="${plugin_entry%%|*}"
 					case "$name" in
-						prd|ralph|qmd-knowledge|codemap|adr|handoffs|pickup|pr-review|slop|tdd)
+						$REMOTE_SKILLS)
 							# Skip - already installed via npx skills add
 							;;
 						*)
@@ -1421,24 +1429,7 @@ EOF
 			log_info "Installing community skills from local skills folder..."
 			install_local_skills
 		else
-			log_info "Installing community skills from remote marketplace..."
-			log_info "Using npx skills add to install from jellydn/my-ai-tools..."
-			
-			# Use npx skills add for remote skill installation
-			if command -v npx &>/dev/null; then
-				if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
-					# Non-interactive mode
-					execute "npx skills add jellydn/my-ai-tools --yes --global --agent claude-code"
-				else
-					# Interactive mode
-					execute "npx skills add jellydn/my-ai-tools --global --agent claude-code"
-				fi
-				log_success "Remote skills installed successfully"
-			else
-				log_error "npx not found. Please install Node.js to use remote skill installation."
-				log_info "Falling back to local skill installation..."
-				install_local_skills
-			fi
+			install_remote_skills
 		fi
 		log_success "Community skills installation complete"
 	fi
