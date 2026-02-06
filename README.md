@@ -248,29 +248,32 @@ claude plugin marketplace add max-sixty/worktrunk
 claude plugin install worktrunk@worktrunk
 
 # Install skills from this repository (jellydn/my-ai-tools)
-claude plugin marketplace add jellydn/my-ai-tools
+# Recommended: Install all skills at once using npx skills add
+npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
+
+# Or install interactively (select which skills to install)
+npx skills add jellydn/my-ai-tools --global --agent claude-code
+
 # Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd
-claude plugin install prd@my-ai-tools
-claude plugin install codemap@my-ai-tools
-# ... install any other skills you need
+# Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
 #### Troubleshooting
 
-**Marketplace unavailable?**
+**Skills installation issues?**
 
-If you encounter marketplace access issues:
+If you encounter issues:
 
-1. **Verify subscription**: Ensure you have an active Claude Code subscription with plugin support
-2. **Check repository settings**: Plugin access may be limited to specific repository configurations
-3. **Use local skills**: The setup script automatically falls back to local skills from `skills/` folder
-4. **Manual installation**: Copy skill folders directly to `~/.claude/skills/`
+1. **Check npx availability**: Ensure Node.js and npx are installed (`npx --version`)
+2. **Use local skills**: The setup script automatically falls back to local skills from `skills/` folder
+3. **Manual installation**: Copy skill folders directly to `~/.claude/skills/`
+4. **Interactive mode**: Run without `--yes` flag to select specific skills
 
 **Common issues:**
 
-- "Plugin marketplace not available" → Use local skills by running `./cli.sh` and answering 'y' to continue with local skills only
-- "Marketplace repository not accessible" → Check network connectivity and repository permissions
-- "Plugin install failed" → Plugin may already be installed or require specific dependencies
+- "npx not found" → Install Node.js to use remote skill installation, or use local skills via `./cli.sh`
+- "Permission denied" → Try running without sudo, or use `--global` flag
+- "Skills already installed" → Remove existing skills first with `npx skills remove --global`
 
 #### Plugin List
 
