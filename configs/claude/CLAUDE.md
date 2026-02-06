@@ -13,3 +13,4 @@
 - Use meaningful variable and function names.
 - Prefer self-documenting code. Write comments and documentation where necessary.
 - Keep your code modular and reusable. Avoid tight coupling and excessive dependencies.
+- When working on complex tasks, consider using agent teams for coordinated multi-agent workflows (see @~/.claude/teams/README.md)

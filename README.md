@@ -421,7 +421,7 @@ Using claude-hud plugin:
 
 > **Tip:** Auto-compact is disabled. Use `claude-hud` to monitor context usage.
 
-### Custom Commands, Agents & Skills
+### Custom Commands, Agents, Teams & Skills
 
 #### Custom Commands
 
@@ -436,6 +436,17 @@ Located in [`configs/claude/commands/`](configs/claude/commands/):
 Located in [`configs/claude/agents/`](configs/claude/agents/):
 
 - `ai-slop-remover` - Remove AI-generated boilerplate and improve code quality
+
+#### Agent Teams
+
+Located in [`configs/claude/teams/`](configs/claude/teams/):
+
+Agent teams enable coordinated multi-agent workflows for complex tasks:
+
+- **Code Review Team** - Parallel review by quality, security, and documentation specialists
+- **Development Team** - Sequential workflow from architecture to implementation to testing
+
+See [`configs/claude/teams/README.md`](configs/claude/teams/README.md) for details on team structure and creating custom teams.
 
 #### Skills
 
@@ -493,6 +504,7 @@ All configuration files are located in the [`configs/claude/`](configs/claude/) 
 - [`mcp-servers.json`](configs/claude/mcp-servers.json) - MCP server configurations
 - [`commands/`](configs/claude/commands/) - Custom slash commands
 - [`agents/`](configs/claude/agents/) - Custom agent definitions
+- [`teams/`](configs/claude/teams/) - Agent team configurations for coordinated workflows
 
 Local marketplace plugins are in [`skills/`](skills/).
 
