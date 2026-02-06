@@ -927,33 +927,12 @@ enable_plugins() {
 	log_info "Installing Claude Code plugins..."
 
 	# Check marketplace support before attempting installation
-	if ! check_marketplace_support; then
-		log_error "Plugin marketplace is not available"
-		log_info ""
-		log_info "📋 Manual Plugin Installation:"
-		log_info "   If marketplace is unavailable, you can still use local skills from skills folder"
-		log_info "   Local skills will be installed automatically if available"
-		log_info ""
-		log_info "📖 For more information about plugin setup, see:"
-		log_info "   https://github.com/jellydn/my-ai-tools#plugins"
-		
-		# Ask if user wants to continue with local plugins only
-		if [ "$YES_TO_ALL" = true ]; then
-			log_info "Continuing with local plugins only (--yes flag)"
-			SKIP_MARKETPLACE_PLUGINS=true
-		elif [ -t 0 ]; then
-			read -p "Continue with local plugins only? (y/n) " -n 1 -r
-			echo
-			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				SKIP_MARKETPLACE_PLUGINS=true
-			else
-				log_warning "Skipping plugin installation"
-				return
-			fi
-		else
-			log_warning "Skipping plugin installation (marketplace unavailable)"
-			return
-		fi
+	MARKETPLACE_AVAILABLE=false
+	if check_marketplace_support; then
+		MARKETPLACE_AVAILABLE=true
+	else
+		log_warning "Claude plugin marketplace is not available"
+		log_info "Note: Skills can still be installed via 'npx skills add' (remote option)"
 	fi
 
 	# Ask for skill installation source
@@ -962,7 +941,7 @@ enable_plugins() {
 		SKILL_INSTALL_SOURCE="local"
 	elif [ -t 0 ]; then
 		log_info "How would you like to install community skills?"
-		printf "1) Local (from skills folder) 2) Remote (from jellydn/my-ai-tools marketplace) [1/2]: "
+		printf "1) Local (from skills folder) 2) Remote (from jellydn/my-ai-tools using npx skills) [1/2]: "
 		read REPLY
 		echo
 		case "$REPLY" in
@@ -1322,9 +1301,9 @@ EOF
 	}
 
 	if command -v claude &>/dev/null; then
-		# Skip marketplace plugins if flag is set
-		if [ "${SKIP_MARKETPLACE_PLUGINS:-false}" = "true" ]; then
-			log_info "Skipping marketplace plugins (marketplace unavailable)"
+		# Skip marketplace plugins if marketplace is not available
+		if [ "$MARKETPLACE_AVAILABLE" = "false" ]; then
+			log_info "Skipping official marketplace plugins (claude plugin command unavailable)"
 		else
 			# Add official plugins marketplace first
 			log_info "Adding official plugins marketplace..."
@@ -1335,11 +1314,11 @@ EOF
 			# Verify official marketplace accessibility
 			if ! try_add_marketplace_repo "anthropics/claude-plugins-official"; then
 				log_warning "Official plugins marketplace may not be accessible"
-				log_info "Continuing with local plugins only..."
-				SKIP_MARKETPLACE_PLUGINS=true
+				log_info "Continuing without official marketplace plugins..."
+				MARKETPLACE_AVAILABLE=false
 			fi
 
-			if [ "${SKIP_MARKETPLACE_PLUGINS:-false}" != "true" ]; then
+			if [ "$MARKETPLACE_AVAILABLE" = "true" ]; then
 				log_info "Installing official plugins..."
 				if [ -t 0 ]; then
 					# Interactive mode: install sequentially with prompts
@@ -1371,40 +1350,97 @@ EOF
 			fi
 		fi
 
+		# Install community skills (independent of Claude CLI availability)
 		if [ "$SKILL_INSTALL_SOURCE" = "local" ]; then
 			log_info "Installing community skills from local skills folder..."
 			install_local_skills
-			# Only install CLI-based plugins (plannotator, claude-hud, worktrunk)
-			for plugin_entry in "${community_plugins[@]}"; do
-				local name="${plugin_entry%%|*}"
-				case "$name" in
-					prd|ralph|qmd-knowledge|codemap)
-						# Skip marketplace plugins - will be installed from local skills
-						;;
-					*)
-						local rest="${plugin_entry#*|}"
-						local plugin_spec="${rest%%|*}"
-						local marketplace_repo="${rest##*|}"
-						install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
-						;;
-				esac
-			done
+			# Only install CLI-based plugins (plannotator, claude-hud, worktrunk) if Claude CLI is available
+			if command -v claude &>/dev/null; then
+				for plugin_entry in "${community_plugins[@]}"; do
+					local name="${plugin_entry%%|*}"
+					case "$name" in
+						prd|ralph|qmd-knowledge|codemap)
+							# Skip marketplace plugins - will be installed from local skills
+							;;
+						*)
+							local rest="${plugin_entry#*|}"
+							local plugin_spec="${rest%%|*}"
+							local marketplace_repo="${rest##*|}"
+							install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
+							;;
+					esac
+				done
+			fi
 		else
-			log_info "Installing community plugins from marketplace..."
-			for plugin_entry in "${community_plugins[@]}"; do
-				# Parse the pipe-separated entry
-				local name="${plugin_entry%%|*}"
-				local rest="${plugin_entry#*|}"
-				local plugin_spec="${rest%%|*}"
-				local marketplace_repo="${rest##*|}"
-				install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
-			done
+			log_info "Installing community skills from remote marketplace..."
+			log_info "Using npx skills add to install from jellydn/my-ai-tools..."
+			
+			# Use npx skills add for remote skill installation
+			if command -v npx &>/dev/null; then
+				if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
+					# Non-interactive mode
+					execute "npx skills add jellydn/my-ai-tools --yes --global --agent claude-code"
+				else
+					# Interactive mode
+					execute "npx skills add jellydn/my-ai-tools --global --agent claude-code"
+				fi
+				log_success "Remote skills installed successfully"
+			else
+				log_error "npx not found. Please install Node.js to use remote skill installation."
+				log_info "Falling back to local skill installation..."
+				install_local_skills
+			fi
+			
+			# Still install CLI-based plugins (plannotator, claude-hud, worktrunk) if Claude CLI is available
+			if command -v claude &>/dev/null; then
+				for plugin_entry in "${community_plugins[@]}"; do
+					local name="${plugin_entry%%|*}"
+					case "$name" in
+						prd|ralph|qmd-knowledge|codemap|adr|handoffs|pickup|pr-review|slop|tdd)
+							# Skip - already installed via npx skills add
+							;;
+						*)
+							local rest="${plugin_entry#*|}"
+							local plugin_spec="${rest%%|*}"
+							local marketplace_repo="${rest##*|}"
+							install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
+							;;
+					esac
+				done
+			fi
 		fi
 
-		log_success "Claude Code plugins installation complete"
+		log_success "Claude Code plugins/skills installation complete"
 		log_info "IMPORTANT: Restart Claude Code for plugins to take effect"
 	else
-		log_warning "Claude Code not installed - skipping plugin installation"
+		log_warning "Claude Code not installed - skipping official marketplace plugin installation"
+		log_info "Note: Community skills can still be installed without Claude CLI"
+		
+		# Still install community skills even if Claude CLI is not available
+		if [ "$SKILL_INSTALL_SOURCE" = "local" ]; then
+			log_info "Installing community skills from local skills folder..."
+			install_local_skills
+		else
+			log_info "Installing community skills from remote marketplace..."
+			log_info "Using npx skills add to install from jellydn/my-ai-tools..."
+			
+			# Use npx skills add for remote skill installation
+			if command -v npx &>/dev/null; then
+				if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
+					# Non-interactive mode
+					execute "npx skills add jellydn/my-ai-tools --yes --global --agent claude-code"
+				else
+					# Interactive mode
+					execute "npx skills add jellydn/my-ai-tools --global --agent claude-code"
+				fi
+				log_success "Remote skills installed successfully"
+			else
+				log_error "npx not found. Please install Node.js to use remote skill installation."
+				log_info "Falling back to local skill installation..."
+				install_local_skills
+			fi
+		fi
+		log_success "Community skills installation complete"
 	fi
 }
 
