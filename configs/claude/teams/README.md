@@ -2,6 +2,8 @@
 
 Teams allow you to coordinate multiple specialized agents to work together on complex tasks. Each team has a coordinator agent and member agents with specific roles.
 
+> **Note:** Agent teams are enabled by default through the `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` environment variable in `settings.json`.
+
 ## Team Structure
 
 Each team configuration file defines:
