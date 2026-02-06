@@ -925,12 +925,12 @@ try_add_marketplace_repo() {
 
 # Helper: Install remote skills using npx skills add
 install_remote_skills() {
-	log_info "Installing community skills from remote marketplace..."
-	log_info "Using npx skills add to install from jellydn/my-ai-tools..."
+	log_info "Installing community skills from jellydn/my-ai-tools repository..."
+	log_info "Using npx skills add command..."
 	
 	# Use npx skills add for remote skill installation
 	if command -v npx &>/dev/null; then
-		if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
+		if [ "${YES_TO_ALL:-false}" = "true" ] || [ ! -t 0 ]; then
 			# Non-interactive mode
 			execute "npx skills add jellydn/my-ai-tools --yes --global --agent claude-code"
 		else
@@ -967,11 +967,11 @@ enable_plugins() {
 		MARKETPLACE_AVAILABLE=true
 	else
 		log_warning "Claude plugin marketplace is not available"
-		log_info "Note: Skills can still be installed via 'npx skills add' (remote option)"
+		log_info "Note: Skills can still be installed remotely using the npx skills add command"
 	fi
 
 	# Ask for skill installation source
-	if [ "$YES_TO_ALL" = true ]; then
+	if [ "${YES_TO_ALL:-false}" = "true" ]; then
 		# In non-interactive mode, default to local
 		SKILL_INSTALL_SOURCE="local"
 	elif [ -t 0 ]; then
