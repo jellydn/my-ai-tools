@@ -777,8 +777,6 @@ copy_configurations() {
 		execute "cp $SCRIPT_DIR/configs/opencode/opencode.json $HOME/.config/opencode/"
 		execute "rm -rf $HOME/.config/opencode/agent"
 		execute "cp -r $SCRIPT_DIR/configs/opencode/agent $HOME/.config/opencode/"
-		execute "rm -rf $HOME/.config/opencode/command"
-		execute "cp -r $SCRIPT_DIR/configs/opencode/command $HOME/.config/opencode/"
 		execute "rm -rf $HOME/.config/opencode/skill"
 		copy_non_marketplace_skills "$SCRIPT_DIR/configs/opencode/skill" "$HOME/.config/opencode/skill"
 		log_success "OpenCode configs copied"
@@ -1178,7 +1176,6 @@ enable_plugins() {
 		# Define target directories
 		CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
 		OPENCODE_SKILL_DIR="$HOME/.config/opencode/skill"
-		OPENCODE_COMMAND_DIR="$HOME/.config/opencode/command/ai"
 		AMP_SKILLS_DIR="$HOME/.config/amp/skills"
 		CODEX_SKILLS_DIR="$HOME/.codex/skills"
 		GEMINI_SKILLS_DIR="$HOME/.gemini/skills"
@@ -1199,10 +1196,6 @@ enable_plugins() {
 			done
 		fi
 		mkdir -p "$OPENCODE_SKILL_DIR"
-
-		# Create OpenCode commands directory
-		mkdir -p "$OPENCODE_COMMAND_DIR"
-
 		# Copy to Amp (~/.config/amp/skills/)
 		if [ -d "$AMP_SKILLS_DIR" ]; then
 			for existing_skill in "$AMP_SKILLS_DIR"/*; do
@@ -1267,73 +1260,11 @@ enable_plugins() {
 				else
 					log_info "Skipped $skill_name for Gemini CLI (not compatible)"
 				fi
-
-				# Generate OpenCode command from skill (only if compatible)
-				if skill_is_compatible_with "$skill_dir" "opencode"; then
-					generate_opencode_command "$skill_dir" "$OPENCODE_COMMAND_DIR"
-				fi
 			fi
 		done
 	}
 
-	# Generate OpenCode command file from skill SKILL.md
-	generate_opencode_command() {
-		local skill_dir="$1"
-		local command_dir="$2"
-		local skill_name=$(basename "$skill_dir")
-		local skill_md="$skill_dir/SKILL.md"
 
-		if [ ! -f "$skill_md" ]; then
-			log_warning "No SKILL.md found for $skill_name, skipping command generation"
-			return
-		fi
-
-		# Description for command - simple and consistent
-		local description="Trigger $skill_name skill"
-
-
-		# Extract content after frontmatter for objective
-		local objective_content=""
-		objective_content=$(awk 'BEGIN{p=0} /^---$/{p++;next} p>=2' "$skill_md" 2>/dev/null | head -50)
-
-		# Create command file
-		local command_file="$command_dir/$skill_name.md"
-
-		# Add path allowances for codemap (writes to .planning/codebase/)
-		local path_allowance=""
-		if [ "$skill_name" = "codemap" ]; then
-			path_allowance="
-
-**Allowed paths:**
-- Write: .planning/codebase/"
-		fi
-
-		if [ "$DRY_RUN" = true ]; then
-			log_info "[DRY RUN] Would generate command: $command_file"
-			return
-		fi
-
-		cat > "$command_file" << EOF
----
-name: ai:$skill_name
-description: "$description"
-argument-hint: "[optional: arguments for $skill_name]"
-allowed-tools:
-  - Read
-  - Bash
-  - Glob
-  - Grep
-  - Write
-  - Task
----
-
-<objective>
-$objective_content$path_allowance
-</objective>
-EOF
-
-		log_success "Generated command: $command_file"
-	}
 
 	if command -v claude &>/dev/null; then
 		# Skip marketplace plugins if marketplace is not available
