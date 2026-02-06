@@ -205,6 +205,69 @@ generate_opencode_configs() {
 	fi
 }
 
+generate_kilo_configs() {
+	log_info "Generating Kilo CLI configs..."
+
+	if [ -d "$HOME/.kilocode" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/kilocode"
+		copy_single "$HOME/.kilocode/config.json" "$SCRIPT_DIR/configs/kilocode/kilocode.json"
+
+		# Handle skills directory with plugin filtering (Kilo uses plural 'skills')
+		if [ -d "$HOME/.kilocode/skills" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/kilocode/skill"
+			if [ "$(ls -A "$HOME/.kilocode/skills" 2>/dev/null)" ]; then
+				for skill_dir in "$HOME/.kilocode/skills"/*; do
+					skill_name="$(basename "$skill_dir")"
+					case "$skill_name" in
+						prd|ralph|qmd-knowledge|codemap)
+							# Skip marketplace plugins - managed separately
+							;;
+						*)
+							# Check if skill already exists in skills
+							if skill_exists_in_plugins "$skill_name"; then
+								log_info "Skipping $skill_name (exists in skills)"
+							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/kilocode/skill'/ 2>/dev/null"; then
+								log_success "Copied skill: $skill_name"
+							fi
+							;;
+					esac
+				done
+			fi
+		fi
+
+		# Copy agent directory
+		if [ -d "$HOME/.kilocode/agent" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/kilocode/agent"
+			if [ "$(ls -A "$HOME/.kilocode/agent" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.kilocode/agent'/* '$SCRIPT_DIR/configs/kilocode/agent'/ 2>/dev/null"; then
+					log_success "Copied agent directory"
+				else
+					log_warning "Failed to copy agent directory"
+				fi
+			fi
+		fi
+
+		# Handle commands directory (Kilo uses plural 'commands')
+		if [ -d "$HOME/.kilocode/commands" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/kilocode/command"
+			if [ "$(ls -A "$HOME/.kilocode/commands" 2>/dev/null)" ]; then
+				# Copy command files
+				for item in "$HOME/.kilocode/commands"/*; do
+					item_name=$(basename "$item")
+					if [ -f "$item" ]; then
+						if execute "cp -r '$item' '$SCRIPT_DIR/configs/kilocode/command'/ 2>/dev/null"; then
+							log_success "Copied command: $item_name"
+						fi
+					fi
+				done
+			fi
+		fi
+		log_success "Kilo CLI configs generated"
+	else
+		log_warning "Kilo CLI config directory not found: $HOME/.kilocode"
+	fi
+}
+
 generate_amp_configs() {
 	log_info "Generating Amp configs..."
 
@@ -438,6 +501,9 @@ main() {
 	echo
 
 	generate_opencode_configs
+	echo
+
+	generate_kilo_configs
 	echo
 
 	generate_amp_configs
