@@ -945,11 +945,21 @@ install_remote_skills() {
 	fi
 }
 
+# Helper: Check if a skill is in the remote skills list
+is_remote_skill() {
+	local skill="$1"
+	case "$skill" in
+		prd|ralph|qmd-knowledge|codemap|adr|handoffs|pickup|pr-review|slop|tdd)
+			return 0
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
 enable_plugins() {
 	log_info "Installing Claude Code plugins..."
-	
-	# List of skills that are installed via npx skills add (when using remote option)
-	local REMOTE_SKILLS="prd|ralph|qmd-knowledge|codemap|adr|handoffs|pickup|pr-review|slop|tdd"
 
 	# Check marketplace support before attempting installation
 	MARKETPLACE_AVAILABLE=false
@@ -1383,17 +1393,14 @@ EOF
 			if command -v claude &>/dev/null; then
 				for plugin_entry in "${community_plugins[@]}"; do
 					local name="${plugin_entry%%|*}"
-					case "$name" in
-						$REMOTE_SKILLS)
-							# Skip marketplace plugins - will be installed from local skills
-							;;
-						*)
-							local rest="${plugin_entry#*|}"
-							local plugin_spec="${rest%%|*}"
-							local marketplace_repo="${rest##*|}"
-							install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
-							;;
-					esac
+					# Skip remote skills - they're installed from local skills folder
+					if is_remote_skill "$name"; then
+						continue
+					fi
+					local rest="${plugin_entry#*|}"
+					local plugin_spec="${rest%%|*}"
+					local marketplace_repo="${rest##*|}"
+					install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
 				done
 			fi
 		else
@@ -1403,17 +1410,14 @@ EOF
 			if command -v claude &>/dev/null; then
 				for plugin_entry in "${community_plugins[@]}"; do
 					local name="${plugin_entry%%|*}"
-					case "$name" in
-						$REMOTE_SKILLS)
-							# Skip - already installed via npx skills add
-							;;
-						*)
-							local rest="${plugin_entry#*|}"
-							local plugin_spec="${rest%%|*}"
-							local marketplace_repo="${rest##*|}"
-							install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
-							;;
-					esac
+					# Skip remote skills - already installed via npx skills add
+					if is_remote_skill "$name"; then
+						continue
+					fi
+					local rest="${plugin_entry#*|}"
+					local plugin_spec="${rest%%|*}"
+					local marketplace_repo="${rest##*|}"
+					install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
 				done
 			fi
 		fi
