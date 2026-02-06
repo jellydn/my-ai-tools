@@ -1337,7 +1337,7 @@ EOF
 
 	if command -v claude &>/dev/null; then
 		# Skip marketplace plugins if marketplace is not available
-		if [ "$MARKETPLACE_AVAILABLE" = "false" ]; then
+		if [ "${MARKETPLACE_AVAILABLE:-false}" = "false" ]; then
 			log_info "Skipping official marketplace plugins (claude plugin command unavailable)"
 		else
 			# Add official plugins marketplace first
@@ -1353,7 +1353,7 @@ EOF
 				MARKETPLACE_AVAILABLE=false
 			fi
 
-			if [ "$MARKETPLACE_AVAILABLE" = "true" ]; then
+			if [ "${MARKETPLACE_AVAILABLE:-false}" = "true" ]; then
 				log_info "Installing official plugins..."
 				if [ -t 0 ]; then
 					# Interactive mode: install sequentially with prompts
