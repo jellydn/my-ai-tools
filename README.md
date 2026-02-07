@@ -484,10 +484,10 @@ Official and community-maintained skill collections for specific frameworks:
 **Installation:**
 
 ```bash
-# Clone skills to your local config directory
-git clone https://github.com/expo/skills.git ~/.claude/skills/expo
-git clone https://github.com/vercel-labs/agent-skills.git ~/.claude/skills/nextjs
-git clone https://github.com/blader/humanizer.git ~/.claude/skills/humanizer
+# Install skills using npx skills add
+npx skills add expo/skills --global --agent claude-code
+npx skills add vercel-labs/agent-skills --global --agent claude-code
+npx skills add blader/humanizer --global --agent claude-code
 ```
 
 ### Configuration Files
