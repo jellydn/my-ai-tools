@@ -478,6 +478,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Expo**             | [expo/skills](https://github.com/expo/skills)                                                                 | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows. |
 | **Next.js**          | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)                                       | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.          |
 | **Andrej Karpathy**  | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)                 | Community skills inspired by Andrej Karpathy's coding principles and practices for AI-focused development workflows.                         |
+| **Humanizer**        | [blader/humanizer](https://github.com/blader/humanizer)                                                       | Removes signs of AI-generated writing from text. Based on Wikipedia's AI writing detection guide, it detects 24 patterns to make text sound more natural and human. |
 | **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.          |
 
 **Installation:**
@@ -486,6 +487,7 @@ Official and community-maintained skill collections for specific frameworks:
 # Clone skills to your local config directory
 git clone https://github.com/expo/skills.git ~/.claude/skills/expo
 git clone https://github.com/vercel-labs/agent-skills.git ~/.claude/skills/nextjs
+git clone https://github.com/blader/humanizer.git ~/.claude/skills/humanizer
 ```
 
 ### Configuration Files
