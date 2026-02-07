@@ -86,6 +86,19 @@ generate_claude_configs() {
 			fi
 		fi
 
+		if [ -d "$HOME/.claude/teams" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/claude/teams"
+			if [ "$(ls -A "$HOME/.claude/teams" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.claude/teams'/* '$SCRIPT_DIR/configs/claude/teams'/ 2>/dev/null"; then
+					log_success "Copied teams directory"
+				else
+					log_warning "Failed to copy teams directory"
+				fi
+			else
+				log_warning "Claude teams directory is empty"
+			fi
+		fi
+
 		if [ -d "$HOME/.claude/skills" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/claude/skills"
 			# Check if skills directory has content

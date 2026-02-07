@@ -755,6 +755,10 @@ copy_configurations() {
 		execute "mkdir -p $HOME/.claude/agents"
 		execute "cp $SCRIPT_DIR/configs/claude/agents/* $HOME/.claude/agents/"
 	fi
+	if [ -d "$SCRIPT_DIR/configs/claude/teams" ]; then
+		execute "mkdir -p $HOME/.claude/teams"
+		execute "cp -r $SCRIPT_DIR/configs/claude/teams/* $HOME/.claude/teams/"
+	fi
 
 	# Add MCP servers using Claude Code CLI (globally, available in all projects)
 	if command -v claude &>/dev/null; then
