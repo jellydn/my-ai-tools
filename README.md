@@ -466,6 +466,9 @@ Real-world projects built using these AI tools:
 | [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development      | TypeScript        |
 | [AI Launcher](https://github.com/jellydn/ai-launcher)     | Fast launcher for switching between AI coding assistants | TypeScript        |
 | [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity               | TypeScript        |
+| [dotenv-tui](https://github.com/jellydn/dotenv-tui)               | Terminal UI for managing `.env` files across projects    | Go + Bubble Tea   |
+| [tiny-cloak.nvim](https://github.com/jellydn/tiny-cloak.nvim)     | Neovim plugin that masks sensitive data in `.env` files  | Lua + Neovim      |
+| [tiny-term.nvim](https://github.com/jellydn/tiny-term.nvim)       | Minimal terminal plugin for Neovim 0.11+                 | Lua + Neovim      |
 
 📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
 
@@ -1030,18 +1033,6 @@ Copy the file to your preferred location and reference it in your AI tools.
 - [Claude Code Showcase](https://github.com/ChrisWiles/claude-code-showcase) - Community examples
 - [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) - Production configs
 - [Why I switched to Claude Code 2.0](https://blog.silennai.com/claude-code)
-
----
-
-## 🤖 AI Projects
-
-Other AI-powered tools and plugins I've created:
-
-- [**dotenv-tui**](https://github.com/jellydn/dotenv-tui) - Terminal UI tool for managing `.env` files across projects and monorepos. Smart secret detection with format-hint placeholders, recursive monorepo scanning, and YOLO mode for quick setup.
-
-- [**tiny-cloak.nvim**](https://github.com/jellydn/tiny-cloak.nvim) - Lightweight Neovim plugin that masks sensitive data (API keys, secrets, tokens) in `.env`, JSON, and YAML files. Prevents accidental exposure during screen sharing or demos.
-
-- [**tiny-term.nvim**](https://github.com/jellydn/tiny-term.nvim) - Minimal Neovim 0.11+ terminal plugin with floating and split terminal windows. Drop-in replacement for `Snacks.terminal` with the same API shape.
 
 ---
 
