@@ -466,6 +466,9 @@ Real-world projects built using these AI tools:
 | [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development      | TypeScript        |
 | [AI Launcher](https://github.com/jellydn/ai-launcher)     | Fast launcher for switching between AI coding assistants | TypeScript        |
 | [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity               | TypeScript        |
+| [dotenv-tui](https://github.com/jellydn/dotenv-tui)               | Terminal UI for managing `.env` files across projects    | Go + Bubble Tea   |
+| [tiny-cloak.nvim](https://github.com/jellydn/tiny-cloak.nvim)     | Neovim plugin that masks sensitive data in `.env` files  | Lua + Neovim      |
+| [tiny-term.nvim](https://github.com/jellydn/tiny-term.nvim)       | Minimal terminal plugin for Neovim 0.11+                 | Lua + Neovim      |
 
 📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
 
