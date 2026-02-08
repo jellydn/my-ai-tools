@@ -1033,6 +1033,18 @@ Copy the file to your preferred location and reference it in your AI tools.
 
 ---
 
+## 🤖 AI Projects
+
+Other AI-powered tools and plugins I've created:
+
+- [**dotenv-tui**](https://github.com/jellydn/dotenv-tui) - Terminal UI tool for managing `.env` files across projects and monorepos. Smart secret detection with format-hint placeholders, recursive monorepo scanning, and YOLO mode for quick setup.
+
+- [**tiny-cloak.nvim**](https://github.com/jellydn/tiny-cloak.nvim) - Lightweight Neovim plugin that masks sensitive data (API keys, secrets, tokens) in `.env`, JSON, and YAML files. Prevents accidental exposure during screen sharing or demos.
+
+- [**tiny-term.nvim**](https://github.com/jellydn/tiny-term.nvim) - Minimal Neovim 0.11+ terminal plugin with floating and split terminal windows. Drop-in replacement for `Snacks.terminal` with the same API shape.
+
+---
+
 ## 👤 Author
 
 **Dung Huynh**
