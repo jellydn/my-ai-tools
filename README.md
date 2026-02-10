@@ -16,6 +16,7 @@
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 📦 **Plugin support** - Official and community plugins
+- 🛡️ **Git Guard Hook** - Prevents dangerous git commands (force push, hard reset, etc.)
 
 ## 🎬 Demo
 
@@ -385,6 +386,43 @@ Auto-format after file edits:
 - `stylua` - Lua formatting (installed via mise, brew, or cargo)
 
 #### PreToolUse Hooks
+
+##### Git Guard Hook
+
+Prevents dangerous git commands from being executed:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"~/.claude/hooks/git-guard.cjs\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Blocked commands:**
+- `git push --force` / `-f` (without lease protection)
+- `git reset --hard` (destroys uncommitted changes)
+- `git clean -fd` (removes untracked files)
+- `git branch -D` (force delete branch)
+- `git rebase -i` (interactive rebase)
+- `git checkout --force` / `-f` (force checkout)
+- `git stash drop/clear` (removes stashes)
+- And more...
+
+See [Git Guard Hook Documentation](docs/git-guard-hook.md) for complete details.
+
+##### WebSearch Transformer
 
 Transform WebSearch queries:
 
