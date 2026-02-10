@@ -411,8 +411,9 @@ safe_copy_dir() {
 		dest_file="$dest_dir/$rel_path"
 		mkdir -p "$(dirname "$dest_file")"
 		if cp "$file" "$dest_file" 2>/dev/null; then
-			((errors++))
+			:
 		else
+			((errors++))
 			((skipped++))
 			[ "$VERBOSE" = true ] && log_warning "Skipped busy file: $rel_path"
 		fi
@@ -433,7 +434,7 @@ copy_config_dir() {
 
 	if [ -d "$source_dir" ]; then
 		execute "mkdir -p $dest_parent"
-		execute "cp -r $source_dir $dest_parent/$dest_name"
+		safe_copy_dir "$source_dir" "$dest_parent/$dest_name"
 		log_success "Backed up $dest_name configs"
 	fi
 }
@@ -702,7 +703,7 @@ copy_non_marketplace_skills() {
 						# Skip marketplace plugins
 						;;
 					*)
-						execute "cp -r \"$skill_dir\" \"$dest_dir/\""
+						safe_copy_dir "$skill_dir" "$dest_dir/$skill_name"
 						;;
 				esac
 			fi
@@ -750,7 +751,7 @@ copy_configurations() {
 	execute "cp $SCRIPT_DIR/configs/claude/mcp-servers.json $HOME/.claude/mcp-servers.json"
 	execute "cp $SCRIPT_DIR/configs/claude/CLAUDE.md $HOME/.claude/CLAUDE.md"
 	execute "rm -rf $HOME/.claude/commands"
-	execute "cp -r $SCRIPT_DIR/configs/claude/commands $HOME/.claude/"
+	safe_copy_dir "$SCRIPT_DIR/configs/claude/commands" "$HOME/.claude/commands"
 	if [ -d "$SCRIPT_DIR/configs/claude/agents" ]; then
 		execute "mkdir -p $HOME/.claude/agents"
 		execute "cp $SCRIPT_DIR/configs/claude/agents/* $HOME/.claude/agents/"
@@ -781,7 +782,7 @@ copy_configurations() {
 		execute "mkdir -p $HOME/.config/opencode"
 		execute "cp $SCRIPT_DIR/configs/opencode/opencode.json $HOME/.config/opencode/"
 		execute "rm -rf $HOME/.config/opencode/agent"
-		execute "cp -r $SCRIPT_DIR/configs/opencode/agent $HOME/.config/opencode/"
+		safe_copy_dir "$SCRIPT_DIR/configs/opencode/agent" "$HOME/.config/opencode/agent"
 		execute "rm -rf $HOME/.config/opencode/skill"
 		copy_non_marketplace_skills "$SCRIPT_DIR/configs/opencode/skill" "$HOME/.config/opencode/skill"
 		log_success "OpenCode configs copied"
@@ -815,7 +816,7 @@ copy_configurations() {
 			safe_copy_dir "$SCRIPT_DIR/configs/ccs/cliproxy" "$HOME/.ccs/cliproxy"
 		fi
 		
-		[ -d "$SCRIPT_DIR/configs/ccs/hooks" ] && execute "cp -r $SCRIPT_DIR/configs/ccs/hooks $HOME/.ccs/"
+		[ -d "$SCRIPT_DIR/configs/ccs/hooks" ] && safe_copy_dir "$SCRIPT_DIR/configs/ccs/hooks" "$HOME/.ccs/hooks"
 		log_success "CCS configs copied"
 	fi
 
@@ -853,9 +854,9 @@ copy_configurations() {
 		copy_config_file "$SCRIPT_DIR/configs/gemini/GEMINI.md" "$HOME/.gemini/" || true
 		copy_config_file "$SCRIPT_DIR/configs/gemini/settings.json" "$HOME/.gemini/" || true
 		execute "rm -rf $HOME/.gemini/agents"
-		execute "cp -r $SCRIPT_DIR/configs/gemini/agents $HOME/.gemini/"
+		safe_copy_dir "$SCRIPT_DIR/configs/gemini/agents" "$HOME/.gemini/agents"
 		execute "rm -rf $HOME/.gemini/commands"
-		execute "cp -r $SCRIPT_DIR/configs/gemini/commands $HOME/.gemini/"
+		safe_copy_dir "$SCRIPT_DIR/configs/gemini/commands" "$HOME/.gemini/commands"
 		execute "rm -rf $HOME/.gemini/skills"
 		copy_non_marketplace_skills "$SCRIPT_DIR/configs/gemini/skills" "$HOME/.gemini/skills"
 		log_success "Gemini CLI configs copied"
@@ -1232,35 +1233,35 @@ enable_plugins() {
 
 				# Check compatibility and copy to each platform
 				if skill_is_compatible_with "$skill_dir" "claude"; then
-					cp -r "$skill_dir" "$CLAUDE_SKILLS_DIR/"
+					safe_copy_dir "$skill_dir" "$CLAUDE_SKILLS_DIR/$skill_name"
 					log_success "Copied $skill_name to Claude Code"
 				else
 					log_info "Skipped $skill_name for Claude Code (not compatible)"
 				fi
 
 				if skill_is_compatible_with "$skill_dir" "opencode"; then
-					cp -r "$skill_dir" "$OPENCODE_SKILL_DIR/"
+					safe_copy_dir "$skill_dir" "$OPENCODE_SKILL_DIR/$skill_name"
 					log_success "Copied $skill_name to OpenCode"
 				else
 					log_info "Skipped $skill_name for OpenCode (not compatible)"
 				fi
 
 				if skill_is_compatible_with "$skill_dir" "amp"; then
-					cp -r "$skill_dir" "$AMP_SKILLS_DIR/"
+					safe_copy_dir "$skill_dir" "$AMP_SKILLS_DIR/$skill_name"
 					log_success "Copied $skill_name to Amp"
 				else
 					log_info "Skipped $skill_name for Amp (not compatible)"
 				fi
 
 				if skill_is_compatible_with "$skill_dir" "codex"; then
-					cp -r "$skill_dir" "$CODEX_SKILLS_DIR/"
+					safe_copy_dir "$skill_dir" "$CODEX_SKILLS_DIR/$skill_name"
 					log_success "Copied $skill_name to Codex CLI"
 				else
 					log_info "Skipped $skill_name for Codex CLI (not compatible)"
 				fi
 
 				if skill_is_compatible_with "$skill_dir" "gemini"; then
-					cp -r "$skill_dir" "$GEMINI_SKILLS_DIR/"
+					safe_copy_dir "$skill_dir" "$GEMINI_SKILLS_DIR/$skill_name"
 					log_success "Copied $skill_name to Gemini CLI"
 				else
 					log_info "Skipped $skill_name for Gemini CLI (not compatible)"
