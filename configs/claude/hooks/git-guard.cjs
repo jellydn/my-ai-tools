@@ -16,8 +16,8 @@
 
 const DANGEROUS_PATTERNS = [
   // Force push variations
-  { pattern: /git\s+push\s+.*--force(?!-with-lease)/i, reason: "force push without --force-with-lease" },
-  { pattern: /git\s+push\s+.*-f(?:\s|$)/i, reason: "force push (-f) without lease" },
+  { pattern: /git\s+push\s+.*--force(?!-with-lease\b)/i, reason: "force push without --force-with-lease" },
+  { pattern: /git\s+push\s+(?:.*\s)?-f(?:\s|$)/i, reason: "force push (-f) without lease" },
   
   // Hard reset
   { pattern: /git\s+reset\s+--hard/i, reason: "hard reset (destroys uncommitted changes)" },
@@ -61,7 +61,7 @@ const SAFE_PATTERNS = [
   /git\s+branch(?!\s+.*-D)/i,  // branch listing/creation (not -D)
   /git\s+add/i,
   /git\s+commit/i,
-  /git\s+push(?!\s+.*(-f|--force))/i,  // push without force
+  /git\s+push/i,  // push without force
   /git\s+pull/i,
   /git\s+fetch/i,
   /git\s+checkout(?!\s+.*(-f|--force))/i,  // checkout without force
@@ -116,7 +116,7 @@ async function main() {
     // Read the tool input from stdin
     let input = '';
     
-    // For Node.js 16+, use stream async iterator
+    // Read from stdin using async iterator (Node.js 18+)
     for await (const chunk of process.stdin) {
       input += chunk;
     }
