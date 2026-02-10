@@ -110,6 +110,16 @@
     "UserPromptSubmit": [],
     "PreToolUse": [
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"~/.claude/hooks/git-guard.cjs\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "WebSearch",
         "hooks": [
           {
