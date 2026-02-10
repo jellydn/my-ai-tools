@@ -111,16 +111,15 @@ function checkGitCommand(command) {
   return { allowed: true };
 }
 
-async function main() {
-  try {
-    // Read the tool input from stdin
-    let input = '';
-    
-    // Read from stdin using async iterator (Node.js 18+)
-    for await (const chunk of process.stdin) {
-      input += chunk;
-    }
+// Read input from stdin
+let input = '';
 
+process.stdin.on('data', chunk => {
+  input += chunk;
+});
+
+process.stdin.on('end', () => {
+  try {
     if (!input.trim()) {
       // No input, allow
       process.exit(0);
@@ -161,7 +160,4 @@ async function main() {
     console.error(`⚠️  Git guard hook error: ${error.message}`);
     process.exit(0);
   }
-}
-
-// Run the main function
-main();
+});
