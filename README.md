@@ -482,6 +482,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Next.js**          | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)                                       | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.          |
 | **Andrej Karpathy**  | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)                 | Community skills inspired by Andrej Karpathy's coding principles and practices for AI-focused development workflows.                         |
 | **Humanizer**        | [blader/humanizer](https://github.com/blader/humanizer)                                                       | Removes signs of AI-generated writing from text. Based on Wikipedia's AI writing detection guide, it detects 24 patterns to make text sound more natural and human. |
+| **Claude Skills**    | [jezweb/claude-skills](https://github.com/jezweb/claude-skills)                                               | 97 production-ready skills for Claude Code CLI including Cloudflare, React, AI integrations, and more. Includes context-mate for project analysis and workflow management. |
 | **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.          |
 
 **Installation:**
@@ -491,6 +492,7 @@ Official and community-maintained skill collections for specific frameworks:
 npx skills add expo/skills --global --agent claude-code
 npx skills add vercel-labs/agent-skills --global --agent claude-code
 npx skills add blader/humanizer --global --agent claude-code
+npx skills add jezweb/claude-skills --global --agent claude-code
 ```
 
 ### Configuration Files
