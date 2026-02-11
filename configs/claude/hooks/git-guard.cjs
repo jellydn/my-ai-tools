@@ -136,27 +136,17 @@ process.stdin.on('end', () => {
     const result = checkGitCommand(command);
 
     if (!result.allowed) {
-      // Output error message to stderr for user visibility
-      console.error('');
-      console.error('🛑 GIT GUARD: Dangerous git command blocked!');
-      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      // Write reason to stderr (becomes Claude's feedback)
+      console.error(`Blocked: ${result.reason}`);
       console.error(`Command: ${result.command}`);
-      console.error(`Reason:  ${result.reason}`);
-      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.error('');
       console.error('This command has been blocked to prevent potential data loss.');
       console.error('If you need to run this command, please do so manually in your terminal.');
-      console.error('');
       
-      // Output the original input back to stdout (required by Claude Code)
-      console.log(JSON.stringify(toolInput));
-      
-      // Exit with error code to prevent execution
-      process.exit(1);
+      // Exit with code 2 to block the action (per Claude Code hooks spec)
+      process.exit(2);
     }
 
-    // Command is safe, output the original input and allow execution
-    console.log(JSON.stringify(toolInput));
+    // Command is safe, allow execution (exit 0)
     process.exit(0);
 
   } catch (error) {
