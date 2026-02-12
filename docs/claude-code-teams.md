@@ -405,6 +405,7 @@ When delegating to this agent:
 ## 📚 Additional Resources
 
 - [Agent Definition Example](../configs/claude/agents/ai-slop-remover.md)
+- [Agent Teams Usage Examples](./agent-teams-examples.md) - Practical examples and workflows
 - [Hook Implementation](../configs/claude/hooks/lib.ts)
 - [Session Management](../configs/claude/hooks/session.ts)
 - [Claude Code Settings](../configs/claude/settings.json)
@@ -412,9 +413,10 @@ When delegating to this agent:
 ## 🔄 Next Steps
 
 1. **Review existing agent** - Study `ai-slop-remover.md` for reference
-2. **Create your first agent** - Start with a simple subagent
-3. **Test coordination** - Use SubagentStop hook for data sharing
-4. **Build a team** - Create complementary agents that work together
+2. **Try the examples** - See [agent-teams-examples.md](./agent-teams-examples.md) for practical workflows
+3. **Create your first agent** - Start with a simple subagent
+4. **Test coordination** - Use SubagentStop hook for data sharing
+5. **Build a team** - Create complementary agents that work together
 
 ---
 
