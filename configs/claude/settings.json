@@ -46,7 +46,6 @@
 			"Bash(shellcheck:*)",
 			"Bash(qmd:*)",
 			"Bash(qmd embed:*)",
-			"Bash(~/.config/opencode/skill/qmd-knowledge/scripts/record.sh:*)",
 			"Bash(~/.claude/skills/qmd-knowledge/scripts/record.sh:*)",
 			"Bash(ls:*)",
 			"Bash(find:*)",
@@ -115,7 +114,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "bun \"~/.claude/hooks/index.ts PreToolUse\"",
+						"command": "bun ~/.claude/hooks/index.ts PreToolUse",
 						"timeout": 5
 					}
 				]
@@ -137,7 +136,6 @@
 		"command": "bash -c 'node \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
 	},
 	"enabledPlugins": {
-		"claude-mem@thedotmack": false,
 		"typescript-lsp@claude-plugins-official": true,
 		"pyright-lsp@claude-plugins-official": true,
 		"context7@claude-plugins-official": true,
