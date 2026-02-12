@@ -252,56 +252,6 @@ generate_amp_configs() {
 	fi
 }
 
-generate_ccs_configs() {
-	log_info "Generating CCS configs..."
-
-	if [ -d "$HOME/.ccs" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/ccs"
-
-		# Copy YAML config files (but skip settings.json with API keys unless explicitly requested)
-		for file in "$HOME/.ccs"/*.yaml; do
-			if [ -f "$file" ] && [[ ! $(basename "$file") =~ settings\.json$ ]]; then
-				copy_single "$file" "$SCRIPT_DIR/configs/ccs/"
-			fi
-		done
-
-		# Copy JSON config files (but skip settings.json with API keys)
-		for file in "$HOME/.ccs"/*.json; do
-			if [ -f "$file" ] && [[ ! $(basename "$file") =~ settings\.json$ ]]; then
-				copy_single "$file" "$SCRIPT_DIR/configs/ccs/"
-			fi
-		done
-
-		# Copy cliproxy directory
-		if [ -d "$HOME/.ccs/cliproxy" ]; then
-			execute "mkdir -p $SCRIPT_DIR/configs/ccs/cliproxy"
-			if [ "$(ls -A "$HOME/.ccs/cliproxy" 2>/dev/null)" ]; then
-				if execute "cp -r '$HOME/.ccs/cliproxy'/* '$SCRIPT_DIR/configs/ccs/cliproxy'/ 2>/dev/null"; then
-					log_success "Copied cliproxy directory"
-				else
-					log_warning "Failed to copy cliproxy directory"
-				fi
-			fi
-		fi
-
-		# Copy hooks directory
-		if [ -d "$HOME/.ccs/hooks" ]; then
-			execute "mkdir -p $SCRIPT_DIR/configs/ccs/hooks"
-			if [ "$(ls -A "$HOME/.ccs/hooks" 2>/dev/null)" ]; then
-				if execute "cp -r '$HOME/.ccs/hooks'/* '$SCRIPT_DIR/configs/ccs/hooks'/ 2>/dev/null"; then
-					log_success "Copied hooks directory"
-				else
-					log_warning "Failed to copy hooks directory"
-				fi
-			fi
-		fi
-
-		log_success "CCS configs generated (excluding sensitive settings files)"
-	else
-		log_warning "CCS config directory not found: $HOME/.ccs"
-	fi
-}
-
 generate_codex_configs() {
 	log_info "Generating Codex CLI configs..."
 
@@ -441,9 +391,6 @@ main() {
 	echo
 
 	generate_amp_configs
-	echo
-
-	generate_ccs_configs
 	echo
 
 	generate_codex_configs

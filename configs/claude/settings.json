@@ -110,12 +110,11 @@
 		"UserPromptSubmit": [],
 		"PreToolUse": [
 			{
-				"matcher": "Bash",
+				"matcher": "",
 				"hooks": [
 					{
 						"type": "command",
-						"command": "bun ~/.claude/hooks/index.ts PreToolUse",
-						"timeout": 5
+						"command": "bun ~/.claude/hooks/index.ts PreToolUse"
 					}
 				]
 			},

@@ -799,22 +799,6 @@ copy_configurations() {
 		log_success "Amp configs copied"
 	fi
 
-	# Copy CCS configs
-	if [ -d "$HOME/.ccs" ] || command -v ccs &>/dev/null; then
-		execute "mkdir -p $HOME/.ccs"
-		execute "cp $SCRIPT_DIR/configs/ccs/*.yaml $HOME/.ccs/ 2>/dev/null || true"
-		execute "cp $SCRIPT_DIR/configs/ccs/*.json $HOME/.ccs/ 2>/dev/null || true"
-		execute "cp $SCRIPT_DIR/configs/ccs/*.settings.json $HOME/.ccs/ 2>/dev/null || true"
-		
-		# Safely copy cliproxy (may contain running binaries)
-		if [ -d "$SCRIPT_DIR/configs/ccs/cliproxy" ]; then
-			safe_copy_dir "$SCRIPT_DIR/configs/ccs/cliproxy" "$HOME/.ccs/cliproxy"
-		fi
-		
-		[ -d "$SCRIPT_DIR/configs/ccs/hooks" ] && safe_copy_dir "$SCRIPT_DIR/configs/ccs/hooks" "$HOME/.ccs/hooks"
-		log_success "CCS configs copied"
-	fi
-
 	# Copy ai-launcher configs
 	if [ -d "$HOME/.config/ai-launcher" ] || [ -f "$HOME/.config/ai-launcher/config.json" ]; then
 		if copy_config_file "$SCRIPT_DIR/configs/ai-launcher/config.json" "$HOME/.config/ai-launcher"; then
