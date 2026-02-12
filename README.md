@@ -993,10 +993,10 @@ kilo
 kilocode
 
 # Use with specific model
-kilo --model giga-potato
+kilo --model kilo/giga-potato
 
 # Non-interactive mode
-kilo -p "Refactor this component to use hooks"
+kilo run "Refactor this component to use hooks"
 ```
 
 </details>
