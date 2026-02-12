@@ -373,6 +373,7 @@ install_global_tools() {
 }
 
 # Helper: Safely copy a directory, handling "Text file busy" errors
+# Skips node_modules to avoid copying large dependency trees
 # Usage: safe_copy_dir "source_dir" "dest_dir"
 safe_copy_dir() {
 	local source_dir="$1"
@@ -391,15 +392,9 @@ safe_copy_dir() {
 		return 1
 	fi
 
-	# Try regular copy first
-	if cp -r "$source_dir" "$dest_dir" 2>/dev/null; then
-		return 0
-	fi
-
-	# If copy failed, try with rsync to handle busy files
+	# Prefer rsync when available to exclude node_modules and handle busy files
 	if command -v rsync &>/dev/null; then
-		# Use rsync to copy, matching cp -r behavior
-		if rsync -a --ignore-errors "$source_dir" "$(dirname "$dest_dir")/" 2>/dev/null; then
+		if rsync -a --ignore-errors --exclude "node_modules" --exclude "node_modules/**" "$source_dir/" "$dest_dir/" 2>/dev/null; then
 			return 0
 		fi
 	fi
@@ -417,7 +412,7 @@ safe_copy_dir() {
 			((skipped++))
 			[ "$VERBOSE" = true ] && log_warning "Skipped busy file: $rel_path"
 		fi
-	done < <(find "$source_dir" -type f 2>/dev/null)
+	done < <(find "$source_dir" -type d -name node_modules -prune -o -type f -print 2>/dev/null)
 
 	# Log summary in verbose mode
 	[ "$VERBOSE" = true ] && [ $skipped -gt 0 ] && log_info "Skipped $skipped busy file(s)"
@@ -758,7 +753,7 @@ copy_configurations() {
 	fi
 	if [ -d "$SCRIPT_DIR/configs/claude/hooks" ]; then
 		execute "mkdir -p $HOME/.claude/hooks"
-		execute "cp $SCRIPT_DIR/configs/claude/hooks/* $HOME/.claude/hooks/"
+		safe_copy_dir "$SCRIPT_DIR/configs/claude/hooks" "$HOME/.claude/hooks"
 		log_success "Claude Code hooks installed"
 	fi
 
