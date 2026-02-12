@@ -367,6 +367,7 @@ Auto-format after file edits:
 ```
 
 **Supported Formatters:**
+
 - **biome** - TypeScript/JavaScript files (`.ts`, `.tsx`, `.js`, `.jsx`) - includes linting
 - **gofmt** - Go files (`.go`)
 - **prettier** - Markdown files (`.md`, `.mdx`)
@@ -376,6 +377,7 @@ Auto-format after file edits:
 - **stylua** - Lua files (`.lua`)
 
 **Installation:** The setup script (`./cli.sh`) automatically checks and installs these tools with mise priority:
+
 - `jq` - JSON parsing (required)
 - `biome` - JavaScript/TypeScript formatting
 - `gofmt` - Go formatting (requires Go installation)
@@ -411,6 +413,7 @@ Prevents dangerous git commands from being executed:
 ```
 
 **Blocked commands:**
+
 - `git push --force` / `-f` (without lease protection)
 - `git reset --hard` (destroys uncommitted changes)
 - `git clean -fd` (removes untracked files)
@@ -502,7 +505,7 @@ Real-world projects built using these AI tools:
 | [Keybinder](https://github.com/jellydn/keybinder)                 | macOS app for managing skhd keyboard shortcuts           | Claude + spec-kit |
 | [SealCode](https://github.com/jellydn/vscode-seal-code)           | VS Code extension for AI-powered code review             | Amp + Ralph       |
 | [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development      | TypeScript        |
-| [AI Launcher](https://github.com/jellydn/ai-launcher)     | Fast launcher for switching between AI coding assistants | TypeScript        |
+| [AI Launcher](https://github.com/jellydn/ai-launcher)             | Fast launcher for switching between AI coding assistants | TypeScript        |
 | [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity               | TypeScript        |
 | [dotenv-tui](https://github.com/jellydn/dotenv-tui)               | Terminal UI for managing `.env` files across projects    | Go + Bubble Tea   |
 | [tiny-cloak.nvim](https://github.com/jellydn/tiny-cloak.nvim)     | Neovim plugin that masks sensitive data in `.env` files  | Lua + Neovim      |
@@ -514,15 +517,15 @@ Real-world projects built using these AI tools:
 
 Official and community-maintained skill collections for specific frameworks:
 
-| Framework            | Skills Repository                                                                                             | Description                                                                                                                                  |
-| -------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **UI/UX Design**     | [Interface Design](https://interface-design.dev/)                                                             | Comprehensive guide to interface design patterns and best practices for anyone working with UI/UX development.                               |
-| **Expo**             | [expo/skills](https://github.com/expo/skills)                                                                 | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows. |
-| **Next.js**          | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)                                       | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.          |
-| **Andrej Karpathy**  | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)                 | Community skills inspired by Andrej Karpathy's coding principles and practices for AI-focused development workflows.                         |
-| **Humanizer**        | [blader/humanizer](https://github.com/blader/humanizer)                                                       | Removes signs of AI-generated writing from text. Based on Wikipedia's AI writing detection guide, it detects 24 patterns to make text sound more natural and human. |
+| Framework            | Skills Repository                                                                                             | Description                                                                                                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **UI/UX Design**     | [Interface Design](https://interface-design.dev/)                                                             | Comprehensive guide to interface design patterns and best practices for anyone working with UI/UX development.                                                             |
+| **Expo**             | [expo/skills](https://github.com/expo/skills)                                                                 | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows.                               |
+| **Next.js**          | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)                                       | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.                                        |
+| **Andrej Karpathy**  | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)                 | Community skills inspired by Andrej Karpathy's coding principles and practices for AI-focused development workflows.                                                       |
+| **Humanizer**        | [blader/humanizer](https://github.com/blader/humanizer)                                                       | Removes signs of AI-generated writing from text. Based on Wikipedia's AI writing detection guide, it detects 24 patterns to make text sound more natural and human.        |
 | **Claude Skills**    | [jezweb/claude-skills](https://github.com/jezweb/claude-skills)                                               | 97 production-ready skills for Claude Code CLI including Cloudflare, React, AI integrations, and more. Includes context-mate for project analysis and workflow management. |
-| **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.          |
+| **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.                                        |
 
 **Installation:**
 
@@ -755,6 +758,7 @@ CCS lets you run Claude, Gemini, GLM, and any Anthropic-compatible API - concurr
 ### Quick Start
 
 1. **Open Dashboard**:
+
    ```bash
    ccs config
    # Opens http://localhost:3000
@@ -849,12 +853,14 @@ brew install gemini-cli
 Gemini CLI supports multiple authentication methods:
 
 **Option 1: Login with Google (OAuth)**
+
 ```bash
 gemini
 # Follow the browser authentication flow
 ```
 
 **Option 2: Gemini API Key**
+
 ```bash
 export GEMINI_API_KEY="YOUR_API_KEY"
 gemini
@@ -967,43 +973,6 @@ Configuration is managed through:
 1. `/connect` command for provider setup (interactive)
 2. Config files directly at `~/.config/kilo/config.json`
 3. `kilo auth` for credential management
-
-#### Permissions
-
-Kilo uses the permission config to decide whether a given action should run automatically, prompt you, or be blocked.
-
-**Actions:**
-- `"allow"` — run without approval
-- `"ask"` — prompt for approval
-- `"deny"` — block the action
-
-**Example configuration:**
-
-```json
-{
-  "$schema": "https://kilo.ai/config.json",
-  "permission": {
-    "*": "ask",
-    "bash": {
-      "*": "ask",
-      "git *": "allow",
-      "npm *": "allow",
-      "rm *": "deny",
-      "grep *": "allow"
-    },
-    "edit": {
-      "*": "deny",
-      "packages/web/src/content/docs/*.mdx": "allow"
-    }
-  }
-}
-```
-
-Rules are evaluated by pattern match, with the last matching rule winning.
-
-### Authentication
-
-Use the `/connect` command within Kilo CLI or `kilo auth` to configure authentication for various AI providers
 
 ### Key Features
 
