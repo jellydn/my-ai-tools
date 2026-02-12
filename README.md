@@ -478,6 +478,7 @@ Official and community-maintained skill collections for specific frameworks:
 
 | Framework            | Skills Repository                                                                                             | Description                                                                                                                                  |
 | -------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **UI/UX Design**     | [Interface Design](https://interface-design.dev/)                                                             | Comprehensive guide to interface design patterns and best practices for anyone working with UI/UX development.                               |
 | **Expo**             | [expo/skills](https://github.com/expo/skills)                                                                 | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows. |
 | **Next.js**          | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)                                       | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.          |
 | **Andrej Karpathy**  | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)                 | Community skills inspired by Andrej Karpathy's coding principles and practices for AI-focused development workflows.                         |
@@ -1030,7 +1031,6 @@ Copy the file to your preferred location and reference it in your AI tools.
 - [MCP Servers Directory](https://mcp.so) - Model Context Protocol servers
 - [Context7 Documentation](https://context7.com/docs) - Library documentation lookup
 - [CCS Documentation](https://github.com/kaitranntt/ccs) - Claude Code Switch
-- [Interface Design](https://interface-design.dev/) - Interface design patterns and best practices
 - [Claude Code Showcase](https://github.com/ChrisWiles/claude-code-showcase) - Community examples
 - [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) - Production configs
 - [Why I switched to Claude Code 2.0](https://blog.silennai.com/claude-code)
