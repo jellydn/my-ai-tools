@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Codex, Gemini CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -936,6 +936,78 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
 ```
 
 > **Note:** Custom agents in `~/.gemini/agents/` are automatically discovered when `experimental.enableAgents` is set to `true`.
+
+</details>
+
+---
+
+## 🎯 Kilo CLI (Optional)
+
+AI coding assistant built on top of OpenCode with powerful productivity features. [Homepage](https://kilo.ai)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Installation
+
+```bash
+npm install -g @kilocode/cli
+```
+
+Kilo provides both `kilo` and `kilocode` commands.
+
+### Configuration
+
+Since Kilo is built on top of OpenCode, it uses the **OpenCode configuration** located in `~/.config/opencode/`:
+
+- [`opencode.json`](configs/opencode/opencode.json) - Main configuration (shared with OpenCode)
+- [`agents/`](configs/opencode/agent/) - Custom agent definitions
+- [`commands/`](configs/opencode/command/) - Custom commands
+
+### Authentication
+
+For Kilo-specific features, you can use the OpenCode plugin for authentication:
+
+```json
+{
+  "plugin": [
+    "opencode-kilocode-auth"
+  ],
+  "provider": {
+    "kilocode": {
+      "models": {
+        "giga-potato": {}
+      }
+    }
+  },
+  "model": "kilocode/giga-potato"
+}
+```
+
+### Key Features
+
+- 🚀 **Built on OpenCode**: Full compatibility with OpenCode configuration and plugins
+- 🤖 **300+ AI Models**: Access to Claude, GPT, Gemini, DeepSeek, Llama, and more
+- 🥔 **Giga Potato Model**: Free stealth model optimized for agentic programming with vision support
+- 🔌 **Plugin ecosystem**: Compatible with OpenCode plugins
+- 📝 **Custom agents**: Same agent system as OpenCode
+- 🎨 **Terminal UI**: Enhanced terminal interface for productivity
+
+### Usage
+
+```bash
+# Start Kilo CLI
+kilo
+
+# Or use the kilocode alias
+kilocode
+
+# Use with specific model
+kilo --model giga-potato
+
+# Non-interactive mode
+kilo -p "Refactor this component to use hooks"
+```
 
 </details>
 

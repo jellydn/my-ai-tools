@@ -680,6 +680,30 @@ install_gemini() {
 	fi
 }
 
+install_kilo() {
+	prompt_and_install() {
+		log_info "Installing Kilo CLI..."
+		if command -v kilo &>/dev/null; then
+			log_warning "Kilo CLI is already installed"
+		else
+			execute "npm install -g @kilocode/cli"
+			log_success "Kilo CLI installed"
+		fi
+	}
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting Kilo CLI installation (--yes flag)"
+		prompt_and_install
+	elif [ -t 0 ]; then
+		read -p "Do you want to install Kilo CLI? (y/n) " -n 1 -r
+		echo
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Kilo CLI installation"
+	else
+		log_info "Installing Kilo CLI (non-interactive mode)..."
+		prompt_and_install
+	fi
+}
+
 # Helper: Copy non-marketplace skills from source to destination
 # Usage: copy_non_marketplace_skills "source_dir" "dest_dir"
 copy_non_marketplace_skills() {
@@ -1397,6 +1421,9 @@ main() {
 	echo
 
 	install_gemini
+	echo
+
+	install_kilo
 	echo
 
 	copy_configurations
