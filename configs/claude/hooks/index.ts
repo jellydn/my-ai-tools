@@ -31,23 +31,39 @@ const preToolUse: PreToolUseHandler = async (payload) => {
     hook_type: "PreToolUse",
   } as const);
 
-  if (payload.tool_input && "command" in payload.tool_input) {
-    const command = (payload.tool_input as { command: string }).command;
+  if (payload.tool_name !== "Bash") {
+    return {};
+  }
+
+  if (payload.tool_input) {
+    const command = String(
+      (payload.tool_input as { command?: string; cmd?: string }).command ??
+        (payload.tool_input as { command?: string; cmd?: string }).cmd ??
+        "",
+    );
 
     const gitCheck = checkGitCommand(command);
     if (!gitCheck.allowed) {
       console.error(`❌ ${gitCheck.reason}`);
       return {
-        permissionDecision: "deny",
-        permissionDecisionReason: gitCheck.reason,
+        hookSpecificOutput: {
+          hookEventName: "PreToolUse",
+          permissionDecision: "deny",
+          permissionDecisionReason: gitCheck.reason,
+        },
+        systemMessage: gitCheck.reason,
       };
     }
 
     if (command.includes("rm -rf /") || command.includes("rm -rf ~")) {
       console.error("❌ Dangerous command detected! Blocking execution.");
       return {
-        permissionDecision: "deny",
-        permissionDecisionReason: `Dangerous command detected: ${command}`,
+        hookSpecificOutput: {
+          hookEventName: "PreToolUse",
+          permissionDecision: "deny",
+          permissionDecisionReason: `Dangerous command detected: ${command}`,
+        },
+        systemMessage: `Dangerous command detected: ${command}`,
       };
     }
   }

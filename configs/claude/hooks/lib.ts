@@ -339,12 +339,17 @@ export interface BaseHookResponse {
   continue?: boolean
   stopReason?: string
   suppressOutput?: boolean
+  systemMessage?: string
 }
 
 // PreToolUse specific response
 export interface PreToolUseResponse extends BaseHookResponse {
-  permissionDecision?: 'allow' | 'deny' | 'ask'
-  permissionDecisionReason?: string
+  hookSpecificOutput?: {
+    hookEventName?: 'PreToolUse'
+    permissionDecision?: 'allow' | 'deny' | 'ask'
+    permissionDecisionReason?: string
+    updatedInput?: Record<string, unknown>
+  }
 }
 
 // PostToolUse specific response
