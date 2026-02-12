@@ -1,80 +1,128 @@
 #!/usr/bin/env bun
 
-/**
- * Claude Code Hooks - Git Guard
- *
- * PreToolUse hook that blocks dangerous git commands from being executed.
- * Based on: https://github.com/johnlindquist/claude-hooks
- */
+import { checkGitCommand } from "./git-guard";
+import type {
+  NotificationHandler,
+  PostToolUseHandler,
+  PreCompactHandler,
+  PreToolUseHandler,
+  SessionStartHandler,
+  StopHandler,
+  SubagentStopHandler,
+  UserPromptSubmitHandler,
+} from "./lib";
+import { runHook } from "./lib";
+import { saveSessionData } from "./session";
 
-import { checkGitCommand } from './git-guard'
+const sessionStart: SessionStartHandler = async (payload) => {
+  await saveSessionData("SessionStart", {
+    ...payload,
+    hook_type: "SessionStart",
+  } as const);
 
-// Type definitions for Claude Code hooks
+  console.log(`Session started from: ${payload.source}`);
 
-export interface PreToolUsePayload {
-  session_id: string
-  transcript_path: string
-  hook_event_name: 'PreToolUse'
-  tool_name: string
-  tool_input: Record<string, unknown>
-}
+  return {};
+};
 
-export interface PreToolUseResponse {
-  permissionDecision?: 'allow' | 'deny' | 'ask'
-  permissionDecisionReason?: string
-}
-
-export type PreToolUseHandler = (
-  payload: PreToolUsePayload,
-) => Promise<PreToolUseResponse> | PreToolUseResponse
-
-export interface HookHandlers {
-  preToolUse?: PreToolUseHandler
-}
-
-// PreToolUse handler - called before Claude uses any tool
 const preToolUse: PreToolUseHandler = async (payload) => {
-  // Check git commands for Bash tool
-  if (payload.tool_name === 'Bash' && payload.tool_input && 'command' in payload.tool_input) {
-    const command = (payload.tool_input as { command: string }).command
-    const result = checkGitCommand(command)
+  await saveSessionData("PreToolUse", {
+    ...payload,
+    hook_type: "PreToolUse",
+  } as const);
 
-    if (!result.allowed) {
-      console.error(`🛡️ Git Guard: ${result.reason}`)
-      console.error(`Command: ${command}`)
-      console.error('This command has been blocked to prevent potential data loss.')
+  if (payload.tool_input && "command" in payload.tool_input) {
+    const command = (payload.tool_input as { command: string }).command;
 
+    const gitCheck = checkGitCommand(command);
+    if (!gitCheck.allowed) {
+      console.error(`❌ ${gitCheck.reason}`);
       return {
-        permissionDecision: 'deny',
-        permissionDecisionReason: result.reason,
-      }
+        permissionDecision: "deny",
+        permissionDecisionReason: gitCheck.reason,
+      };
+    }
+
+    if (command.includes("rm -rf /") || command.includes("rm -rf ~")) {
+      console.error("❌ Dangerous command detected! Blocking execution.");
+      return {
+        permissionDecision: "deny",
+        permissionDecisionReason: `Dangerous command detected: ${command}`,
+      };
     }
   }
 
-  // Allow all other tools
-  return {}
-}
+  return {};
+};
 
-// Main hook runner
-function runHook(handlers: HookHandlers): void {
-  const hook_type = process.argv[2] as string
+const postToolUse: PostToolUseHandler = async (payload) => {
+  await saveSessionData("PostToolUse", {
+    ...payload,
+    hook_type: "PostToolUse",
+  } as const);
 
-  process.stdin.on('data', async (data: Buffer) => {
-    try {
-      const inputData = JSON.parse(data.toString()) as PreToolUsePayload
+  return {};
+};
 
-      if (hook_type === 'PreToolUse' && handlers.preToolUse) {
-        const response = await handlers.preToolUse(inputData as PreToolUsePayload)
-        console.log(JSON.stringify(response))
-      } else {
-        console.log(JSON.stringify({}))
-      }
-    } catch (error) {
-      console.error('Hook error:', error)
-      console.log(JSON.stringify({}))
-    }
-  })
-}
+const notification: NotificationHandler = async (payload) => {
+  await saveSessionData("Notification", {
+    ...payload,
+    hook_type: "Notification",
+  } as const);
+
+  return {};
+};
+
+const stop: StopHandler = async (payload) => {
+  await saveSessionData("Stop", { ...payload, hook_type: "Stop" } as const);
+
+  return {};
+};
+
+const subagentStop: SubagentStopHandler = async (payload) => {
+  await saveSessionData("SubagentStop", {
+    ...payload,
+    hook_type: "SubagentStop",
+  } as const);
+
+  return {};
+};
+
+const userPromptSubmit: UserPromptSubmitHandler = async (payload) => {
+  await saveSessionData("UserPromptSubmit", {
+    ...payload,
+    hook_type: "UserPromptSubmit",
+  } as const);
+
+  const contextFiles: string[] = [];
+  if (payload.prompt.includes("delete all")) {
+    console.error("⚠️  Dangerous prompt detected! Blocking.");
+    return {
+      decision: "block",
+      reason: 'Prompts containing "delete all" are not allowed',
+    };
+  }
+
+  return contextFiles.length > 0 ? { contextFiles } : {};
+};
+
+const preCompact: PreCompactHandler = async (payload) => {
+  await saveSessionData("PreCompact", {
+    ...payload,
+    hook_type: "PreCompact",
+  } as const);
+
+  return {};
+};
 
 // Run the hook with our handlers
-runHook({ preToolUse })
+runHook({
+  sessionStart,
+  preToolUse,
+  postToolUse,
+  notification,
+  stop,
+  subagentStop,
+  userPromptSubmit,
+  preCompact,
+});

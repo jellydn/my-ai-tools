@@ -86,6 +86,19 @@ generate_claude_configs() {
 			fi
 		fi
 
+		if [ -d "$HOME/.claude/hooks" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/claude/hooks"
+			if [ "$(ls -A "$HOME/.claude/hooks" 2>/dev/null)" ]; then
+				if execute "cp -r '$HOME/.claude/hooks'/* '$SCRIPT_DIR/configs/claude/hooks'/ 2>/dev/null"; then
+					log_success "Copied hooks directory"
+				else
+					log_warning "Failed to copy hooks directory"
+				fi
+			else
+				log_warning "Claude hooks directory is empty"
+			fi
+		fi
+
 		if [ -d "$HOME/.claude/skills" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/claude/skills"
 			# Check if skills directory has content
