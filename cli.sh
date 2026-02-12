@@ -495,7 +495,6 @@ backup_configs() {
 		execute "mkdir -p $BACKUP_DIR"
 
 		copy_config_dir "$HOME/.claude" "$BACKUP_DIR" "claude"
-		copy_config_dir "$HOME/.config/claude" "$BACKUP_DIR" "config-claude"
 		copy_config_dir "$HOME/.config/opencode" "$BACKUP_DIR" "opencode"
 		copy_config_dir "$HOME/.config/amp" "$BACKUP_DIR" "amp"
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
