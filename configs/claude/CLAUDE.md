@@ -2,6 +2,7 @@
 
 - Follow my software development practice @~/.ai-tools/best-practices.md
 - Read @~/.ai-tools/MEMORY.md first - Understand when and how to use qmd for knowledge management
+- For interface design and UI/UX, refer to https://interface-design.dev/ for best practices and patterns
 - Keep responses concise and actionable.
 - Always propose a plan before edits. Use phases to break down tasks into manageable steps.
 - Run typecheck, lint and biome on js/ts file changes after finish
