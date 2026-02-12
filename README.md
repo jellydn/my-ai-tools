@@ -402,8 +402,7 @@ Prevents dangerous git commands from being executed:
         "hooks": [
           {
             "type": "command",
-            "command": "node \"~/.claude/hooks/git-guard.cjs\"",
-            "timeout": 5
+            "command": "bun ~/.claude/hooks/index.ts PreToolUse"
           }
         ]
       }
@@ -423,7 +422,7 @@ Prevents dangerous git commands from being executed:
 - `git stash drop/clear` (removes stashes)
 - And more...
 
-See [Git Guard Hook Documentation](docs/git-guard-hook.md) for complete details.
+The implementation can be found in `configs/claude/hooks/index.ts` and `configs/claude/hooks/git-guard.ts`.
 
 ##### WebSearch Transformer
 
