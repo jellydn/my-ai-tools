@@ -499,6 +499,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/amp" "$BACKUP_DIR" "amp"
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
+		copy_config_dir "$HOME/.config/kilo" "$BACKUP_DIR" "kilo"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -862,6 +863,13 @@ copy_configurations() {
 		execute "rm -rf $HOME/.gemini/skills"
 		copy_non_marketplace_skills "$SCRIPT_DIR/configs/gemini/skills" "$HOME/.gemini/skills"
 		log_success "Gemini CLI configs copied"
+	fi
+
+	# Copy Kilo CLI configs
+	if [ -d "$HOME/.config/kilo" ] || command -v kilo &>/dev/null; then
+		execute "mkdir -p $HOME/.config/kilo"
+		copy_config_file "$SCRIPT_DIR/configs/kilo/config.json" "$HOME/.config/kilo/" || true
+		log_success "Kilo CLI configs copied"
 	fi
 
 	# Copy best practices and MEMORY.md

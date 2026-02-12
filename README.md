@@ -958,31 +958,52 @@ Kilo provides both `kilo` and `kilocode` commands.
 
 ### Configuration
 
-Since Kilo is built on top of OpenCode, it uses the **OpenCode configuration** located in `~/.config/opencode/`:
+Kilo CLI uses its own configuration directory at `~/.config/kilo/`:
 
-- [`opencode.json`](configs/opencode/opencode.json) - Main configuration (shared with OpenCode)
-- [`agents/`](configs/opencode/agent/) - Custom agent definitions
-- [`commands/`](configs/opencode/command/) - Custom commands
+- [`config.json`](configs/kilo/config.json) - Main configuration with permissions and settings
 
-### Authentication
+Configuration is managed through:
 
-For Kilo-specific features, you can use the OpenCode plugin for authentication:
+1. `/connect` command for provider setup (interactive)
+2. Config files directly at `~/.config/kilo/config.json`
+3. `kilo auth` for credential management
+
+#### Permissions
+
+Kilo uses the permission config to decide whether a given action should run automatically, prompt you, or be blocked.
+
+**Actions:**
+- `"allow"` — run without approval
+- `"ask"` — prompt for approval
+- `"deny"` — block the action
+
+**Example configuration:**
 
 ```json
 {
-  "plugin": [
-    "opencode-kilocode-auth"
-  ],
-  "provider": {
-    "kilocode": {
-      "models": {
-        "giga-potato": {}
-      }
+  "$schema": "https://kilo.ai/config.json",
+  "permission": {
+    "*": "ask",
+    "bash": {
+      "*": "ask",
+      "git *": "allow",
+      "npm *": "allow",
+      "rm *": "deny",
+      "grep *": "allow"
+    },
+    "edit": {
+      "*": "deny",
+      "packages/web/src/content/docs/*.mdx": "allow"
     }
-  },
-  "model": "kilocode/giga-potato"
+  }
 }
 ```
+
+Rules are evaluated by pattern match, with the last matching rule winning.
+
+### Authentication
+
+Use the `/connect` command within Kilo CLI or `kilo auth` to configure authentication for various AI providers
 
 ### Key Features
 
