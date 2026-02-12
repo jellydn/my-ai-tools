@@ -1,0 +1,9 @@
+{
+  "name": "claude-hooks",
+  "version": "1.0.0",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest",
+    "@types/node": "latest"
+  }
+}
