@@ -351,6 +351,18 @@ generate_gemini_configs() {
 	fi
 }
 
+generate_kilo_configs() {
+	log_info "Generating Kilo CLI configs..."
+
+	if [ -d "$HOME/.config/kilo" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/kilo"
+		copy_single "$HOME/.config/kilo/config.json" "$SCRIPT_DIR/configs/kilo/config.json"
+		log_success "Kilo CLI configs generated"
+	else
+		log_warning "Kilo CLI config directory not found: $HOME/.config/kilo"
+	fi
+}
+
 generate_best_practices() {
 	log_info "Generating best-practices.md..."
 
@@ -410,6 +422,9 @@ main() {
 	echo
 
 	generate_gemini_configs
+	echo
+
+	generate_kilo_configs
 	echo
 
 	generate_best_practices
