@@ -1,4 +1,5 @@
 model_personality = "pragmatic"
+model = "gpt-5.3-codex"
 [features]
 unified_exec = true
 shell_snapshot = true
@@ -30,5 +31,11 @@ args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 [mcp_servers.qmd]
 command = "qmd"
 args = ["mcp"]
+
+[notice.model_migrations]
+"gpt-5.2-codex" = "gpt-5.3-codex"
+
+[tui]
+status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit"]
 
 

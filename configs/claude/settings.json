@@ -1,7 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "env": {
-    "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1"
+    "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "permissions": {
     "allow": [
@@ -45,7 +46,6 @@
       "Bash(shellcheck:*)",
       "Bash(qmd:*)",
       "Bash(qmd embed:*)",
-      "Bash(~/.config/opencode/skill/qmd-knowledge/scripts/record.sh:*)",
       "Bash(~/.claude/skills/qmd-knowledge/scripts/record.sh:*)",
       "Bash(ls:*)",
       "Bash(find:*)",
@@ -110,6 +110,15 @@
     "UserPromptSubmit": [],
     "PreToolUse": [
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun ~/.claude/hooks/index.ts PreToolUse"
+          }
+        ]
+      },
+      {
         "matcher": "WebSearch",
         "hooks": [
           {
@@ -126,7 +135,6 @@
     "command": "bash -c 'node \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
   },
   "enabledPlugins": {
-    "claude-mem@thedotmack": false,
     "typescript-lsp@claude-plugins-official": true,
     "pyright-lsp@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
