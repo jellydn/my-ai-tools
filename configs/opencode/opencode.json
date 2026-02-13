@@ -6,6 +6,25 @@
   ],
   "theme": "kanagawa",
   "default_agent": "plan",
+  "provider": {
+    "ollama": {
+      "models": {
+        "minimax-m2.5:cloud": {
+          "_launch": true,
+          "limit": {
+            "context": 204800,
+            "output": 128000
+          },
+          "name": "minimax-m2.5:cloud"
+        }
+      },
+      "name": "Ollama (local)",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://127.0.0.1:11434/v1"
+      }
+    }
+  },
   "mcp": {
     "context7": {
       "type": "remote",
