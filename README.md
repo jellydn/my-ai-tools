@@ -501,7 +501,7 @@ Real-world projects built using these AI tools:
 
 | Project                                                           | Description                                              | Tools Used                  |
 | ----------------------------------------------------------------- | -------------------------------------------------------- | --------------------------- |
-| [Oak](https://github.com/jellydn/oak)                             | Built with Ralph and OpenCode                            | Ralph + OpenCode + Codex GPT 5.2 |
+| [Oak](https://github.com/jellydn/oak)                             | AI-assisted development project with automated review and bug fixes | Ralph + OpenCode + Codex GPT 5.2 |
 | [Keybinder](https://github.com/jellydn/keybinder)                 | macOS app for managing skhd keyboard shortcuts           | Claude + spec-kit           |
 | [SealCode](https://github.com/jellydn/vscode-seal-code)           | VS Code extension for AI-powered code review             | Amp + Ralph                 |
 | [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development      | TypeScript                  |
