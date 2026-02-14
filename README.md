@@ -15,6 +15,7 @@
 - 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
+- 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
 - 📦 **Plugin support** - Official and community plugins
 - 🛡️ **Git Guard Hook** - Prevents dangerous git commands (force push, hard reset, etc.)
 
@@ -479,6 +480,12 @@ Located in [`configs/claude/commands/`](configs/claude/commands/):
 Located in [`configs/claude/agents/`](configs/claude/agents/):
 
 - `ai-slop-remover` - Remove AI-generated boilerplate and improve code quality
+- `code-reviewer` - Comprehensive code quality and security review
+- `test-generator` - Generate meaningful tests with edge case coverage
+- `documentation-writer` - Create clear, helpful documentation
+- `feature-team-coordinator` - Coordinate specialized agents for complex workflows
+
+📖 **[Agent Teams Guide](docs/claude-code-teams.md)** - Learn how to use Agent Teams to coordinate multiple specialized agents for complex tasks like feature development, code review, and documentation.
 
 #### Skills
 
