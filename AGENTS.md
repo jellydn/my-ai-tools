@@ -153,7 +153,8 @@ AI agents must follow these principles when working with git:
 #### ⛔ Prohibited Operations
 Never use these dangerous git commands without explicit user approval:
 - **Force push**: `git push --force`, `git push -f` (use `--force-with-lease` only if required)
-- **History rewriting**: `git rebase -i`, `git filter-branch`, `git commit --amend` on pushed commits
+- **History rewriting**: `git rebase -i`, `git filter-branch`
+- **Amending pushed commits**: `git commit --amend` (only safe for local, unpushed commits)
 - **Destructive resets**: `git reset --hard`
 - **Force operations**: `git checkout --force`, `git clean -f/-d`, `git branch -D`
 - **Stash deletion**: `git stash drop`, `git stash clear`
@@ -166,7 +167,7 @@ Never use these dangerous git commands without explicit user approval:
 - Prefer `git switch` over `git checkout` for branch switching (Git 2.23+)
 - Use descriptive commit messages following conventional commits format
 - Create feature branches instead of working directly on main/master
-- Pull before push to avoid conflicts: `git pull --rebase origin <branch>`
+- Pull before push to avoid conflicts: `git pull origin <branch>` (or `git fetch && git merge` for more control)
 
 #### Error Handling
 ```bash
