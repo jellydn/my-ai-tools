@@ -164,10 +164,10 @@ Never use these dangerous git commands without explicit user approval:
 - Always use `git --no-pager` to prevent interactive pagers in scripts
 - Check repository state with `git status` before operations
 - Use `git diff` to verify changes before committing
-- Prefer `git switch` over `git checkout` for branch switching (Git 2.23+, fallback to `git checkout -b` for older versions)
+- Prefer `git switch` over `git checkout` for branch switching (Git 2.23+; use `git checkout <branch>` for older versions)
 - Use descriptive commit messages following conventional commits format
 - Create feature branches instead of working directly on main/master
-- Pull before push to avoid conflicts: `git pull origin <branch>` (or `git fetch && git merge` for more control)
+- Pull before push to avoid conflicts: `git pull origin <branch>` (or `git fetch origin && git merge origin/<branch>` for more control)
 
 #### Error Handling
 ```bash
