@@ -510,6 +510,7 @@ Real-world projects built using these AI tools:
 | [dotenv-tui](https://github.com/jellydn/dotenv-tui)               | Terminal UI for managing `.env` files across projects    | Go + Bubble Tea             |
 | [tiny-cloak.nvim](https://github.com/jellydn/tiny-cloak.nvim)     | Neovim plugin that masks sensitive data in `.env` files  | Lua + Neovim                |
 | [tiny-term.nvim](https://github.com/jellydn/tiny-term.nvim)       | Minimal terminal plugin for Neovim 0.11+                 | Lua + Neovim                |
+| [Sky Alert](https://github.com/jellydn/sky-alert)                 | Real-time flight monitoring Telegram bot                 | OpenCode + GLM 4.7 + Amp + Codex CLI |
 
 📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
 
