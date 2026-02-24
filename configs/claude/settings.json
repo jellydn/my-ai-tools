@@ -148,5 +148,6 @@
     "worktrunk@worktrunk": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true
-  }
+  },
+  "skipDangerousModePermissionPrompt": true
 }

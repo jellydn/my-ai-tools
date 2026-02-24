@@ -138,6 +138,15 @@ execute() {
 - jq (required for JSON parsing)
 - biome (optional, for JS/TS formatting)
 
+## Git Guidelines
+
+AI agents should follow safe git practices. See @configs/git-guidelines.md for comprehensive guidelines including:
+
+- **Allowed operations**: Read operations, safe commits, branch management
+- **Operations to avoid**: Force push, history rewriting, destructive resets
+- **Best practices**: Pager handling, version compatibility, commit hygiene
+- **Error handling**: Repository checks, uncommitted changes detection
+
 ## Pre-commit Checklist
 - [ ] Shell scripts pass `bash -n` syntax check
 - [ ] Tested with `--dry-run`
@@ -145,3 +154,4 @@ execute() {
 - [ ] Colors and logging functions used consistently
 - [ ] Error handling with `set -e` and guard clauses
 - [ ] Documentation updated if workflow changed
+- [ ] Git operations follow safety guidelines
