@@ -22,8 +22,8 @@
 - Branch management: `git branch`, `git checkout -b`, `git switch`
 - Safe push: `git push` (standard push without force)
 
-### ⛔ Prohibited Git Operations
-Never use these dangerous git commands without explicit user approval:
+### ⛔ Operations to Avoid
+Avoid these dangerous git commands without explicit user approval:
 - **Force push**: `git push --force`, `git push -f`
 - **History rewriting**: `git rebase -i`, `git filter-branch`
 - **Amending pushed commits**: `git commit --amend` (only safe for unpushed commits)

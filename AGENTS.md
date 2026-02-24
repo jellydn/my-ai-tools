@@ -141,7 +141,7 @@ execute() {
 ## Git Guidelines
 
 ### Safe Git Operations
-AI agents must follow these principles when working with git:
+AI agents should follow these principles when working with git:
 
 #### ✅ Allowed Operations
 - **Read operations**: `git status`, `git log`, `git diff`, `git show`
@@ -150,9 +150,9 @@ AI agents must follow these principles when working with git:
 - **Safe push**: `git push` (standard push without force)
 - **Inspection**: `git blame`, `git ls-files`, `git rev-parse`
 
-#### ⛔ Prohibited Operations
-Never use these dangerous git commands without explicit user approval:
-- **Force push**: `git push --force`, `git push -f` (never use; if absolutely required, `--force-with-lease` is safer)
+#### ⛔ Operations to Avoid
+Avoid these dangerous git commands without explicit user approval:
+- **Force push**: `git push --force`, `git push -f` (not recommended; if absolutely required, `--force-with-lease` is safer)
 - **History rewriting**: `git rebase -i`, `git filter-branch`
 - **Amending pushed commits**: `git commit --amend` (only safe for local, unpushed commits)
 - **Destructive resets**: `git reset --hard`
