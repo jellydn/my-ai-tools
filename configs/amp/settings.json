@@ -1,31 +1,24 @@
 {
 	"amp.dangerouslyAllowAll": true,
 	"amp.experimental.autoHandoff": {
-    "context": 90
-  },
+		"context": 90
+	},
 	"amp.mcpServers": {
-    "context7": {
-      "url": "https://mcp.context7.com/mcp"
-    },
-    "chrome-devtools": {
-      "command": "npx",
-      "args": [
-        "chrome-devtools-mcp@latest"
-      ]
-    },
-    "backlog": {
-      "command": "backlog",
-      "args": [
-        "mcp",
-        "start"
-      ]
-    },
-    "qmd": {
-      "command": "qmd",
-      "args": [
-        "mcp"
-      ]
-    }
-  },
-  "amp.terminal.theme": "catppuccin-mocha"
+		"context7": {
+			"url": "https://mcp.context7.com/mcp"
+		},
+		"chrome-devtools": {
+			"command": "npx",
+			"args": ["chrome-devtools-mcp@latest"]
+		},
+		"backlog": {
+			"command": "backlog",
+			"args": ["mcp", "start"]
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
+		}
+	},
+	"amp.terminal.theme": "catppuccin-mocha"
 }
