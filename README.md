@@ -502,7 +502,7 @@ Real-world projects built using these AI tools:
 | Project                                                           | Description                                              | Tools Used                  |
 | ----------------------------------------------------------------- | -------------------------------------------------------- | --------------------------- |
 | [Oak](https://github.com/jellydn/oak)                             | Lightweight macOS focus companion for deep work with notch-first UI | Ralph + OpenCode + Codex GPT 5.2 |
-| [Prosody](https://github.com/jellydn/prosody)                     | Mobile app for English speaking rhythm coaching with AI feedback    | Ralph                            |
+| [Prosody](https://github.com/jellydn/prosody)                     | Mobile app for English speaking rhythm coaching with AI feedback    | Ralph + OpenCode + GLM + Amp/Codex (review) |
 | [Keybinder](https://github.com/jellydn/keybinder)                 | macOS app for managing skhd keyboard shortcuts           | Claude + spec-kit           |
 | [SealCode](https://github.com/jellydn/vscode-seal-code)           | VS Code extension for AI-powered code review             | Amp + Ralph                 |
 | [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development      | TypeScript                  |
