@@ -876,6 +876,8 @@ copy_configurations() {
 	execute "mkdir -p $HOME/.ai-tools"
 	execute "cp $SCRIPT_DIR/configs/best-practices.md $HOME/.ai-tools/"
 	log_success "Best practices copied to ~/.ai-tools/"
+	execute "cp $SCRIPT_DIR/configs/git-guidelines.md $HOME/.ai-tools/"
+	log_success "Git guidelines copied to ~/.ai-tools/"
 	[ -f "$SCRIPT_DIR/MEMORY.md" ] && execute "cp $SCRIPT_DIR/MEMORY.md $HOME/.ai-tools/" && log_success "MEMORY.md copied to ~/.ai-tools/ (reference copy)"
 }
 
