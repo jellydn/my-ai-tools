@@ -502,6 +502,7 @@ Real-world projects built using these AI tools:
 | Project                                                           | Description                                              | Tools Used                  |
 | ----------------------------------------------------------------- | -------------------------------------------------------- | --------------------------- |
 | [Oak](https://github.com/jellydn/oak)                             | Lightweight macOS focus companion for deep work with notch-first UI | Ralph + OpenCode + Codex GPT 5.2 |
+| [Prosody](https://github.com/jellydn/prosody)                     | Mobile app for English speaking rhythm coaching with AI feedback    | Ralph + OpenCode + GLM + Amp/Codex (review) |
 | [Keybinder](https://github.com/jellydn/keybinder)                 | macOS app for managing skhd keyboard shortcuts           | Claude + spec-kit           |
 | [SealCode](https://github.com/jellydn/vscode-seal-code)           | VS Code extension for AI-powered code review             | Amp + Ralph                 |
 | [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development      | TypeScript                  |
@@ -510,6 +511,7 @@ Real-world projects built using these AI tools:
 | [dotenv-tui](https://github.com/jellydn/dotenv-tui)               | Terminal UI for managing `.env` files across projects    | Go + Bubble Tea             |
 | [tiny-cloak.nvim](https://github.com/jellydn/tiny-cloak.nvim)     | Neovim plugin that masks sensitive data in `.env` files  | Lua + Neovim                |
 | [tiny-term.nvim](https://github.com/jellydn/tiny-term.nvim)       | Minimal terminal plugin for Neovim 0.11+                 | Lua + Neovim                |
+| [Sky Alert](https://github.com/jellydn/sky-alert)                 | Real-time flight monitoring Telegram bot                 | OpenCode + GLM 4.7 + Amp + Codex CLI |
 
 📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
 
