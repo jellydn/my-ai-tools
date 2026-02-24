@@ -33,12 +33,21 @@ Avoid these dangerous git commands without explicit user approval:
 ```bash
 # Check if git repository
 if ! git rev-parse --git-dir > /dev/null 2>&1; then
-    log_error "Not a git repository"
+    echo "Error: Not a git repository" >&2
     exit 1
 fi
 
 # Check for uncommitted changes
 if ! git diff-index --quiet HEAD --; then
-    log_warning "Uncommitted changes detected"
+    echo "Warning: Uncommitted changes detected" >&2
 fi
 ```
+
+## Pre-commit Checklist
+- [ ] Shell scripts pass `bash -n` syntax check
+- [ ] Tested with `--dry-run`
+- [ ] No absolute paths in configs
+- [ ] Colors and logging functions used consistently
+- [ ] Error handling with `set -e` and guard clauses
+- [ ] Documentation updated if workflow changed
+- [ ] Git operations follow safety guidelines
