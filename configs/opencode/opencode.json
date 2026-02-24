@@ -1,64 +1,21 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": [
-    "~/.ai-tools/best-practices.md",
-    "~/.ai-tools/MEMORY.md"
-  ],
-  "theme": "kanagawa",
-  "default_agent": "plan",
-  "provider": {
-    "ollama": {
-      "models": {
-        "minimax-m2.5:cloud": {
-          "_launch": true,
-          "limit": {
-            "context": 204800,
-            "output": 128000
-          },
-          "name": "minimax-m2.5:cloud"
-        }
-      },
-      "name": "Ollama (local)",
-      "npm": "@ai-sdk/openai-compatible",
-      "options": {
-        "baseURL": "http://127.0.0.1:11434/v1"
-      }
-    }
-  },
-  "mcp": {
-    "context7": {
-      "type": "remote",
-      "url": "https://mcp.context7.com/mcp",
-      "enabled": true
-    },
-    "qmd": {
-      "type": "local",
-      "command": [
-        "qmd",
-        "mcp"
-      ],
-      "enabled": true
-    }
-  },
   "agent": {
     "build": {
       "permission": {
         "bash": {
+          "$HOME/.claude/skills/qmd-knowledge/scripts/record.sh": "allow",
+          "$HOME/.config/opencode/skill/qmd-knowledge/scripts/record.sh": "allow",
           "git push": "ask",
           "qmd": "allow",
-          "qmd query": "allow",
           "qmd get": "allow",
-          "qmd search": "allow",
-          "$HOME/.config/opencode/skill/qmd-knowledge/scripts/record.sh": "allow",
-          "$HOME/.claude/skills/qmd-knowledge/scripts/record.sh": "allow"
+          "qmd query": "allow",
+          "qmd search": "allow"
         }
       }
     }
   },
-  "plugin": [
-    "@plannotator/opencode@latest",
-    "@mohak34/opencode-notifier@latest"
-  ],
+  "default_agent": "plan",
   "formatter": {
     "biome": {
       "command": [
@@ -134,5 +91,48 @@
         ".lua"
       ]
     }
-  }
+  },
+  "instructions": [
+    "~/.ai-tools/best-practices.md",
+    "~/.ai-tools/MEMORY.md"
+  ],
+  "mcp": {
+    "context7": {
+      "enabled": true,
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "qmd": {
+      "command": [
+        "qmd",
+        "mcp"
+      ],
+      "enabled": true,
+      "type": "local"
+    }
+  },
+  "plugin": [
+    "@plannotator/opencode@latest",
+    "@mohak34/opencode-notifier@latest"
+  ],
+  "provider": {
+    "ollama": {
+      "models": {
+        "minimax-m2.5:cloud": {
+          "_launch": true,
+          "limit": {
+            "context": 204800,
+            "output": 128000
+          },
+          "name": "minimax-m2.5:cloud"
+        }
+      },
+      "name": "Ollama (local)",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://127.0.0.1:11434/v1"
+      }
+    }
+  },
+  "theme": "kanagawa"
 }

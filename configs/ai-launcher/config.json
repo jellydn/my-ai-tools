@@ -19,7 +19,7 @@
 			"command": "opencode",
 			"description": "OpenCode AI assistant",
 			"aliases": ["o", "oc"],
-			"promptCommand": "opencode run --model opencode/big-pickle",
+			"promptCommand": "opencode run --model zai-coding-plan/glm-4.7",
 			"promptUseStdin": true
 		},
 		{
@@ -34,19 +34,19 @@
 	"templates": [
 		{
 			"name": "review",
-			"command": "opencode run --model opencode/big-pickle --agent plan 'Review the following changes and provide feedback: $@'",
+			"command": "opencode run --model zai-coding-plan/glm-4.7 --agent plan 'Review the following changes and provide feedback: $@'",
 			"description": "Code review with OpenCode",
 			"aliases": ["rev", "code-review"]
 		},
 		{
 			"name": "commit-zen",
-			"command": "opencode run --model opencode/big-pickle --agent plan 'Review the following changes on git and generate a concise git commit message, group by logical changes with commitizen convention, do atomic commit message'",
+			"command": "opencode run --model zai-coding-plan/glm-4.7 --agent plan 'Review the following changes on git and generate a concise git commit message, group by logical changes with commitizen convention, do atomic commit message'",
 			"description": "Generate commit message with OpenCode",
 			"aliases": ["zen", "logical-commit"]
 		},
 		{
 			"name": "commit-atomic",
-			"command": "opencode run --model opencode/big-pickle --agent build 'Run git diff --staged then do atomic commit message for the change with commitizen convention. Write clear, informative commit messages that explain the what and why behind changes, not just the how.'",
+			"command": "opencode run --model zai-coding-plan/glm-4.7 --agent build 'Run git diff --staged then do atomic commit message for the change with commitizen convention. Write clear, informative commit messages that explain the what and why behind changes, not just the how.'",
 			"description": "Atomic commit message with OpenCode",
 			"aliases": ["ac", "auto-commit"]
 		},

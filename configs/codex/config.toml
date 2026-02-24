@@ -6,7 +6,8 @@ shell_snapshot = true
 apps = true
 steer = true
 personality = true
-collab = true
+multi_agent = true
+prevent_idle_sleep = true
 
 [sandbox_workspace_write]
 network_access = true
