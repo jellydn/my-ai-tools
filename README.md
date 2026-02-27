@@ -730,6 +730,12 @@ Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/
 
 See [`configs/amp/AGENTS.md`](configs/amp/AGENTS.md) for agent guidelines.
 
+### Skills
+
+| Skill | Description |
+|-------|-------------|
+| `plannotator-review` | Interactive code review via Plannotator UI |
+
 </details>
 
 ---
