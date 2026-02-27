@@ -179,6 +179,24 @@ claude mcp remove context7
 claude mcp get qmd
 ```
 
+#### Memory Management
+
+Claude Code reads **`CLAUDE.md` files** from multiple locations to give it persistent memory across sessions:
+
+| File                          | Scope                      |
+| ----------------------------- | -------------------------- |
+| `~/.claude/CLAUDE.md`         | Global — all projects      |
+| `{project-root}/CLAUDE.md`    | Project — this repo only   |
+| `{subdirectory}/CLAUDE.md`    | Local — that folder only   |
+
+Use the `/memory` command inside Claude Code to add notes instantly:
+
+```
+/memory Add: always use pnpm instead of npm for this project
+```
+
+See [Claude Memory Management Guide](docs/claude-memory-management.md) for the full hierarchy, best practices, and tips.
+
 #### Knowledge Management
 
 Replace deprecated `claude-mem` with **qmd-based knowledge system**:
