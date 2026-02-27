@@ -255,7 +255,7 @@ npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
 
-# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd
+# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, plannotator-review, pr-review, slop, tdd
 # Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
@@ -492,6 +492,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `prd` - Generate Product Requirements Documents
 - `qmd-knowledge` - Project knowledge management
 - `ralph` - Convert PRDs to JSON for autonomous agent execution
+- `plannotator-review` - Interactive code review via Plannotator UI
 - `slop` - AI slop detection and removal
 - `tdd` - Test-Driven Development workflows
 
@@ -832,6 +833,12 @@ codex --oss
 # Use with a specific task
 codex "Explain this code"
 ```
+
+### Skills
+
+| Skill | Description |
+|-------|-------------|
+| `plannotator-review` | Interactive code review via Plannotator UI |
 
 </details>
 
