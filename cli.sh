@@ -848,7 +848,7 @@ copy_configurations() {
 			log_success "Copied Codex config.toml"
 		fi
 		if [ -d "$SCRIPT_DIR/configs/codex/themes" ]; then
-			execute "mkdir -p $HOME/.codex/themes"
+			execute "mkdir -p \"$HOME/.codex/themes\""
 			safe_copy_dir "$SCRIPT_DIR/configs/codex/themes" "$HOME/.codex/themes"
 			log_success "Copied Codex custom themes"
 		fi
