@@ -519,6 +519,7 @@ Real-world projects built using these AI tools:
 | [tiny-cloak.nvim](https://github.com/jellydn/tiny-cloak.nvim)     | Neovim plugin that masks sensitive data in `.env` files  | Lua + Neovim                |
 | [tiny-term.nvim](https://github.com/jellydn/tiny-term.nvim)       | Minimal terminal plugin for Neovim 0.11+                 | Lua + Neovim                |
 | [Sky Alert](https://github.com/jellydn/sky-alert)                 | Real-time flight monitoring Telegram bot                 | OpenCode + GLM 4.7 + Amp + Codex CLI |
+| [Docklight](https://github.com/jellydn/docklight)                 | Minimal, self-hosted web UI for managing a single-node Dokku server | Ralph + OpenCode |
 
 📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
 
