@@ -561,7 +561,7 @@ Local marketplace plugins are in [`skills/`](skills/).
 
 - **OpusPlan Mode**: Use opusplan mode to plan with Opus and implement with Sonnet, then use Plannotator to review plans
 - **Session Management**: Disable auto-compact in settings. Monitor context usage with `claude-hud`. Press `Ctrl+C` to quit or `/clear` to reset between coding sessions. Create a plan with `/handoffs` and resume with `/pickup` when approaching 90% context limit on big tasks.
-- **Git Worktree**: Use git worktree with `try` CLI. For tmux users, use `claude-squash` to manage sessions efficiently
+- **Git Worktree**: Use git worktree with `try` CLI. For tmux users, use `claude-squash` to manage sessions efficiently. Use [superset.sh](https://superset.sh/) to run multiple AI agents in parallel across worktrees
 - **Neovim Integration**: Check out [tiny-nvim](https://github.com/jellydn/tiny-nvim) for a complete setup with [sidekick.nvim](https://github.com/folke/sidekick.nvim) or [claudecode.nvim](https://github.com/coder/claudecode.nvim)
 - **Cost Optimization**: Use [CCS](https://ccs.kaitran.ca/) to switch between affordable providers.
 
