@@ -471,8 +471,10 @@ Using claude-hud plugin:
 
 Located in [`configs/claude/commands/`](configs/claude/commands/):
 
+- `/batch` - Execute multiple independent tasks in parallel using subagents
 - `/ccs` - CCS delegation and profile management
 - `/plannotator-review` - Interactive code review
+- `/simplify` - Simplify and refactor code to reduce complexity and improve readability
 - `/ultrathink` - Deep thinking mode
 
 #### Custom Agents
