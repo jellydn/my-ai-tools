@@ -363,6 +363,18 @@ generate_kilo_configs() {
 	fi
 }
 
+generate_pi_configs() {
+	log_info "Generating Pi configs..."
+
+	if [ -d "$HOME/.pi" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/pi"
+		copy_single "$HOME/.pi/settings.json" "$SCRIPT_DIR/configs/pi/settings.json"
+		log_success "Pi configs generated"
+	else
+		log_warning "Pi config directory not found: $HOME/.pi"
+	fi
+}
+
 generate_best_practices() {
 	log_info "Generating best-practices.md..."
 
@@ -425,6 +437,9 @@ main() {
 	echo
 
 	generate_kilo_configs
+	echo
+
+	generate_pi_configs
 	echo
 
 	generate_best_practices

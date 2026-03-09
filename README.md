@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -1013,6 +1013,61 @@ kilo --model kilo/giga-potato
 
 # Non-interactive mode
 kilo run "Refactor this component to use hooks"
+```
+
+</details>
+
+---
+
+## 🥧 Pi (Optional)
+
+AI coding agent built for agentic coding workflows. [Homepage](https://pi.dev)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Installation
+
+```bash
+curl -fsSL https://pi.dev/install.sh | sh
+```
+
+### Configuration
+
+Pi uses `~/.pi/settings.json` for global user settings and `.pi/settings.json` in project roots for project-level configuration.
+
+Located in [`configs/pi/`](configs/pi/):
+
+- [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
+
+### Installing Pi Packages
+
+Pi has its own package ecosystem. Install packages with:
+
+```bash
+pi install pi-flow-enforcer
+pi install pi-agent-pack
+```
+
+Then register them in `.pi/settings.json`:
+
+```json
+{
+  "packages": [
+    "pi-flow-enforcer",
+    "pi-agent-pack"
+  ]
+}
+```
+
+### Usage
+
+```bash
+# Start Pi
+pi
+
+# Run a task non-interactively
+pi "Refactor this function to be more readable"
 ```
 
 </details>

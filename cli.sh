@@ -705,6 +705,30 @@ install_kilo() {
 	fi
 }
 
+install_pi() {
+	prompt_and_install() {
+		log_info "Installing Pi..."
+		if command -v pi &>/dev/null; then
+			log_warning "Pi is already installed"
+		else
+			execute_installer "https://pi.dev/install.sh" "" "Pi"
+			log_success "Pi installed"
+		fi
+	}
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting Pi installation (--yes flag)"
+		prompt_and_install
+	elif [ -t 0 ]; then
+		read -p "Do you want to install Pi? (y/n) " -n 1 -r
+		echo
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Pi installation"
+	else
+		log_info "Installing Pi (non-interactive mode)..."
+		prompt_and_install
+	fi
+}
+
 # Helper: Copy non-marketplace skills from source to destination
 # Usage: copy_non_marketplace_skills "source_dir" "dest_dir"
 copy_non_marketplace_skills() {
@@ -875,6 +899,13 @@ copy_configurations() {
 		execute "mkdir -p $HOME/.config/kilo"
 		copy_config_file "$SCRIPT_DIR/configs/kilo/config.json" "$HOME/.config/kilo/" || true
 		log_success "Kilo CLI configs copied"
+	fi
+
+	# Copy Pi configs
+	if [ -d "$HOME/.pi" ] || command -v pi &>/dev/null; then
+		execute "mkdir -p $HOME/.pi"
+		copy_config_file "$SCRIPT_DIR/configs/pi/settings.json" "$HOME/.pi/" || true
+		log_success "Pi configs copied"
 	fi
 
 	# Copy best practices and MEMORY.md
@@ -1396,7 +1427,7 @@ enable_plugins() {
 main() {
 	echo "╔════════════════════════════════════════════════════════════════════╗"
 	echo "║           AI Tools Setup                                           ║"
-	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • AI Switcher     ║"
+	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo       ║"
 	echo "╚════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -1439,6 +1470,9 @@ main() {
 	echo
 
 	install_kilo
+	echo
+
+	install_pi
 	echo
 
 	copy_configurations
