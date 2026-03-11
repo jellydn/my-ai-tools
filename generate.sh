@@ -9,7 +9,7 @@ DRY_RUN=false
 # Detect OS (Windows vs Unix-like)
 IS_WINDOWS=false
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || -n "$MSYSTEM" ]]; then
-    IS_WINDOWS=true
+	IS_WINDOWS=true
 fi
 
 for arg in "$@"; do
@@ -29,9 +29,9 @@ done
 skill_exists_in_plugins() {
 	local skill_name="$1"
 	if [ -d "$SCRIPT_DIR/skills/$skill_name" ]; then
-		return 0  # exists
+		return 0 # exists
 	fi
-	return 1  # doesn't exist
+	return 1 # doesn't exist
 }
 
 copy_single() {
@@ -107,17 +107,17 @@ generate_claude_configs() {
 				for skill_dir in "$HOME/.claude/skills"/*; do
 					skill_name="$(basename "$skill_dir")"
 					case "$skill_name" in
-						prd|ralph|qmd-knowledge)
-							# Skip marketplace plugins - managed separately
-							;;
-						*)
-							# Check if skill already exists in skills
-							if skill_exists_in_plugins "$skill_name"; then
-								log_info "Skipping $skill_name (exists in skills)"
-							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/claude/skills'/ 2>/dev/null"; then
-								log_success "Copied skill: $skill_name"
-							fi
-							;;
+					prd | ralph | qmd-knowledge)
+						# Skip marketplace plugins - managed separately
+						;;
+					*)
+						# Check if skill already exists in skills
+						if skill_exists_in_plugins "$skill_name"; then
+							log_info "Skipping $skill_name (exists in skills)"
+						elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/claude/skills'/ 2>/dev/null"; then
+							log_success "Copied skill: $skill_name"
+						fi
+						;;
 					esac
 				done
 			else
@@ -165,17 +165,17 @@ generate_opencode_configs() {
 				for skill_dir in "$HOME/.config/opencode/skill"/*; do
 					skill_name="$(basename "$skill_dir")"
 					case "$skill_name" in
-						prd|ralph|qmd-knowledge|codemap)
-							# Skip marketplace plugins - managed separately
-							;;
-						*)
-							# Check if skill already exists in skills
-							if skill_exists_in_plugins "$skill_name"; then
-								log_info "Skipping $skill_name (exists in skills)"
-							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/opencode/skill'/ 2>/dev/null"; then
-								log_success "Copied skill: $skill_name"
-							fi
-							;;
+					prd | ralph | qmd-knowledge | codemap)
+						# Skip marketplace plugins - managed separately
+						;;
+					*)
+						# Check if skill already exists in skills
+						if skill_exists_in_plugins "$skill_name"; then
+							log_info "Skipping $skill_name (exists in skills)"
+						elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/opencode/skill'/ 2>/dev/null"; then
+							log_success "Copied skill: $skill_name"
+						fi
+						;;
 					esac
 				done
 			fi
@@ -241,17 +241,17 @@ generate_amp_configs() {
 				for skill_dir in "$HOME/.config/amp/skills"/*; do
 					skill_name="$(basename "$skill_dir")"
 					case "$skill_name" in
-						prd|ralph|qmd-knowledge)
-							# Skip marketplace plugins - managed separately
-							;;
-						*)
-							# Check if skill already exists in skills
-							if skill_exists_in_plugins "$skill_name"; then
-								log_info "Skipping $skill_name (exists in skills)"
-							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/amp/skills'/ 2>/dev/null"; then
-								log_success "Copied skill: $skill_name"
-							fi
-							;;
+					prd | ralph | qmd-knowledge)
+						# Skip marketplace plugins - managed separately
+						;;
+					*)
+						# Check if skill already exists in skills
+						if skill_exists_in_plugins "$skill_name"; then
+							log_info "Skipping $skill_name (exists in skills)"
+						elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/amp/skills'/ 2>/dev/null"; then
+							log_success "Copied skill: $skill_name"
+						fi
+						;;
 					esac
 				done
 			else
@@ -329,17 +329,17 @@ generate_gemini_configs() {
 				for skill_dir in "$HOME/.claude/skills"/*; do
 					skill_name="$(basename "$skill_dir")"
 					case "$skill_name" in
-						prd|ralph|qmd-knowledge|codemap)
-							# Skip marketplace plugins - managed separately
-							;;
-						*)
-							# Check if skill already exists in skills
-							if skill_exists_in_plugins "$skill_name"; then
-								log_info "Skipping $skill_name (exists in skills)"
-							elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/gemini/skills'/ 2>/dev/null"; then
-								log_success "Copied skill: $skill_name"
-							fi
-							;;
+					prd | ralph | qmd-knowledge | codemap)
+						# Skip marketplace plugins - managed separately
+						;;
+					*)
+						# Check if skill already exists in skills
+						if skill_exists_in_plugins "$skill_name"; then
+							log_info "Skipping $skill_name (exists in skills)"
+						elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/gemini/skills'/ 2>/dev/null"; then
+							log_success "Copied skill: $skill_name"
+						fi
+						;;
 					esac
 				done
 			fi
@@ -366,12 +366,12 @@ generate_kilo_configs() {
 generate_pi_configs() {
 	log_info "Generating Pi configs..."
 
-	if [ -d "$HOME/.pi" ]; then
+	if [ -f "$HOME/.pi/agent/settings.json" ]; then
 		execute "mkdir -p $SCRIPT_DIR/configs/pi"
-		copy_single "$HOME/.pi/settings.json" "$SCRIPT_DIR/configs/pi/settings.json"
+		copy_single "$HOME/.pi/agent/settings.json" "$SCRIPT_DIR/configs/pi/settings.json"
 		log_success "Pi configs generated"
 	else
-		log_warning "Pi config directory not found: $HOME/.pi"
+		log_warning "Pi settings.json not found: $HOME/.pi/agent/settings.json"
 	fi
 }
 

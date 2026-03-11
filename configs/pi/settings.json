@@ -1,3 +1,9 @@
 {
-	"packages": []
+  "lastChangelogVersion": "0.57.1",
+  "defaultProvider": "github-copilot",
+  "defaultModel": "gpt-4o",
+  "defaultThinkingLevel": "medium",
+  "packages": [
+    "npm:@plannotator/pi-extension"
+  ]
 }

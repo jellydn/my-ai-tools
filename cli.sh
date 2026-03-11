@@ -14,7 +14,7 @@ VERBOSE=false
 # Detect OS (Windows vs Unix-like)
 IS_WINDOWS=false
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || -n "$MSYSTEM" ]]; then
-    IS_WINDOWS=true
+	IS_WINDOWS=true
 fi
 
 # Track whether Amp is installed (for backlog.md dependency)
@@ -41,11 +41,11 @@ for arg in "$@"; do
 		PROMPT_BACKUP=false
 		shift
 		;;
-	--yes|-y)
+	--yes | -y)
 		YES_TO_ALL=true
 		shift
 		;;
-	-v|--verbose)
+	-v | --verbose)
 		VERBOSE=true
 		shift
 		;;
@@ -137,7 +137,7 @@ check_prerequisites() {
 		log_warning "Some scripts (e.g., context-check) prefer Bun. Install with: brew install oven-sh/bun/bun"
 	else
 		log_error "Neither Bun nor Node.js is installed."
-		
+
 		# Offer to install Bun in interactive mode
 		if [ "$YES_TO_ALL" = true ]; then
 			log_info "Auto-installing Bun (--yes flag)..."
@@ -162,7 +162,7 @@ check_prerequisites() {
 
 install_bun_now() {
 	log_info "Installing Bun..."
-	
+
 	# Download and execute Bun installer
 	if curl -fsSL https://bun.sh/install | bash; then
 		# Bun installer sets BUN_INSTALL, try to source common shell profiles
@@ -173,13 +173,13 @@ install_bun_now() {
 		if [ -f "$HOME/.zshrc" ]; then
 			source "$HOME/.zshrc" 2>/dev/null || true
 		fi
-		
+
 		# Fallback to default Bun location if not set
 		if [ -z "$BUN_INSTALL" ]; then
 			export BUN_INSTALL="$HOME/.bun"
 		fi
 		export PATH="$BUN_INSTALL/bin:$PATH"
-		
+
 		if command -v bun &>/dev/null; then
 			BUN_VERSION=$(bun --version)
 			log_success "Bun installed successfully ($BUN_VERSION)"
@@ -230,7 +230,7 @@ install_global_tools() {
 				fi
 			fi
 		fi
-		
+
 		if [ "$jq_installed" = false ]; then
 			log_warning "Please install jq manually: https://stedolan.github.io/jq/download/"
 			log_info "  - macOS: brew install jq"
@@ -282,8 +282,8 @@ install_global_tools() {
 	if ! command -v ruff &>/dev/null; then
 		log_warning "ruff not found. Installing ruff..."
 		if command -v mise &>/dev/null; then
-          log_info "Installing ruff via mise..."
-          execute "mise use -g ruff@latest"
+			log_info "Installing ruff via mise..."
+			execute "mise use -g ruff@latest"
 		elif command -v pipx &>/dev/null; then
 			log_info "Installing ruff via pipx..."
 			execute "pipx install ruff"
@@ -308,7 +308,7 @@ install_global_tools() {
 			log_info "Installing Rust via mise..."
 			execute "mise use -g rust@latest"
 		elif command -v brew &>/dev/null; then
-      log_info "Installing Rust via brew..."
+			log_info "Installing Rust via brew..."
 			execute "brew install rust"
 		else
 			log_info "Installing Rust via rustup (non-interactive)..."
@@ -500,6 +500,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
 		copy_config_dir "$HOME/.config/kilo" "$BACKUP_DIR" "kilo"
+		copy_config_dir "$HOME/.pi" "$BACKUP_DIR" "pi"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -711,7 +712,7 @@ install_pi() {
 		if command -v pi &>/dev/null; then
 			log_warning "Pi is already installed"
 		else
-			execute_installer "https://pi.dev/install.sh" "" "Pi"
+			execute "npm install -g @mariozechner/pi-coding-agent"
 			log_success "Pi installed"
 		fi
 	}
@@ -742,12 +743,12 @@ copy_non_marketplace_skills() {
 			if [ -d "$skill_dir" ]; then
 				skill_name="$(basename "$skill_dir")"
 				case "$skill_name" in
-					prd|ralph|qmd-knowledge|codemap)
-						# Skip marketplace plugins
-						;;
-					*)
-						safe_copy_dir "$skill_dir" "$dest_dir/$skill_name"
-						;;
+				prd | ralph | qmd-knowledge | codemap)
+					# Skip marketplace plugins
+					;;
+				*)
+					safe_copy_dir "$skill_dir" "$dest_dir/$skill_name"
+					;;
 				esac
 			fi
 		done
@@ -903,9 +904,13 @@ copy_configurations() {
 
 	# Copy Pi configs
 	if [ -d "$HOME/.pi" ] || command -v pi &>/dev/null; then
-		execute "mkdir -p $HOME/.pi"
-		copy_config_file "$SCRIPT_DIR/configs/pi/settings.json" "$HOME/.pi/" || true
-		log_success "Pi configs copied"
+		execute "mkdir -p $HOME/.pi/agent"
+		if [ ! -f "$HOME/.pi/agent/settings.json" ]; then
+			copy_config_file "$SCRIPT_DIR/configs/pi/settings.json" "$HOME/.pi/agent/" || true
+			log_success "Pi configs copied"
+		else
+			log_info "Pi settings.json already exists at ~/.pi/agent/, preserving existing config"
+		fi
 	fi
 
 	# Copy best practices and MEMORY.md
@@ -979,7 +984,7 @@ try_add_marketplace_repo() {
 install_remote_skills() {
 	log_info "Installing community skills from jellydn/my-ai-tools repository..."
 	log_info "Using npx skills add command..."
-	
+
 	# Use npx skills add for remote skill installation
 	if command -v npx &>/dev/null; then
 		if [ "${YES_TO_ALL:-false}" = "true" ] || [ ! -t 0 ]; then
@@ -1001,12 +1006,12 @@ install_remote_skills() {
 is_remote_skill() {
 	local skill="$1"
 	case "$skill" in
-		prd|ralph|qmd-knowledge|codemap|adr|handoffs|pickup|pr-review|slop|tdd)
-			return 0
-			;;
-		*)
-			return 1
-			;;
+	prd | ralph | qmd-knowledge | codemap | adr | handoffs | pickup | pr-review | slop | tdd)
+		return 0
+		;;
+	*)
+		return 1
+		;;
 	esac
 }
 
@@ -1032,8 +1037,8 @@ enable_plugins() {
 		read REPLY
 		echo
 		case "$REPLY" in
-			2) SKILL_INSTALL_SOURCE="remote" ;;
-			*) SKILL_INSTALL_SOURCE="local" ;;
+		2) SKILL_INSTALL_SOURCE="remote" ;;
+		*) SKILL_INSTALL_SOURCE="local" ;;
 		esac
 	else
 		SKILL_INSTALL_SOURCE="local"
@@ -1094,24 +1099,24 @@ enable_plugins() {
 		if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
 			# Non-interactive or auto-install mode - install CLI tools if needed
 			case "$name" in
-				plannotator)
-					if ! command -v plannotator &>/dev/null; then
-						log_info "Installing Plannator CLI..."
-						execute_installer "https://plannotator.ai/install.sh" "" "Plannator CLI" || log_warning "Plannator installation failed"
-					fi
-					;;
-				qmd-knowledge)
-					if ! command -v qmd &>/dev/null && command -v bun &>/dev/null; then
-						log_info "Installing qmd CLI via bun..."
-						bun install -g https://github.com/tobi/qmd 2>&1 || log_warning "qmd installation failed"
-					fi
-					;;
-				worktrunk)
-					if ! command -v wt &>/dev/null && command -v brew &>/dev/null; then
-						log_info "Installing Worktrunk CLI via Homebrew..."
-						brew install worktrunk 2>&1 && wt config shell install 2>&1 || log_warning "Worktrunk installation failed"
-					fi
-					;;
+			plannotator)
+				if ! command -v plannotator &>/dev/null; then
+					log_info "Installing Plannator CLI..."
+					execute_installer "https://plannotator.ai/install.sh" "" "Plannator CLI" || log_warning "Plannator installation failed"
+				fi
+				;;
+			qmd-knowledge)
+				if ! command -v qmd &>/dev/null && command -v bun &>/dev/null; then
+					log_info "Installing qmd CLI via bun..."
+					bun install -g https://github.com/tobi/qmd 2>&1 || log_warning "qmd installation failed"
+				fi
+				;;
+			worktrunk)
+				if ! command -v wt &>/dev/null && command -v brew &>/dev/null; then
+					log_info "Installing Worktrunk CLI via Homebrew..."
+					brew install worktrunk 2>&1 && wt config shell install 2>&1 || log_warning "Worktrunk installation failed"
+				fi
+				;;
 			esac
 			# Add marketplace and install plugin
 			setup_tmpdir
@@ -1127,50 +1132,50 @@ enable_plugins() {
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
 				# Install CLI tool if needed
 				case "$name" in
-					plannotator)
-						if ! command -v plannotator &>/dev/null; then
-							log_info "Installing Plannator CLI (this may take a moment)..."
-							if execute_installer "https://plannotator.ai/install.sh" "" "Plannator CLI"; then
-								log_success "Plannator CLI installed"
+				plannotator)
+					if ! command -v plannotator &>/dev/null; then
+						log_info "Installing Plannator CLI (this may take a moment)..."
+						if execute_installer "https://plannotator.ai/install.sh" "" "Plannator CLI"; then
+							log_success "Plannator CLI installed"
+						else
+							log_warning "Plannator installation failed or was cancelled"
+						fi
+					else
+						log_info "Plannator CLI already installed"
+					fi
+					;;
+				qmd-knowledge)
+					if ! command -v qmd &>/dev/null; then
+						if command -v bun &>/dev/null; then
+							log_info "Installing qmd CLI via bun..."
+							if bun install -g https://github.com/tobi/qmd 2>&1; then
+								log_success "qmd CLI installed"
 							else
-								log_warning "Plannator installation failed or was cancelled"
+								log_warning "qmd installation failed"
 							fi
 						else
-							log_info "Plannator CLI already installed"
+							log_warning "bun is required for qmd. Install from https://bun.sh"
 						fi
-						;;
-					qmd-knowledge)
-						if ! command -v qmd &>/dev/null; then
-							if command -v bun &>/dev/null; then
-								log_info "Installing qmd CLI via bun..."
-								if bun install -g https://github.com/tobi/qmd 2>&1; then
-									log_success "qmd CLI installed"
-								else
-									log_warning "qmd installation failed"
-								fi
+					else
+						log_info "qmd CLI already installed"
+					fi
+					;;
+				worktrunk)
+					if ! command -v wt &>/dev/null; then
+						if command -v brew &>/dev/null; then
+							log_info "Installing Worktrunk CLI via Homebrew (this may take a moment)..."
+							if brew install worktrunk 2>&1 && wt config shell install 2>&1; then
+								log_success "Worktrunk CLI installed"
 							else
-								log_warning "bun is required for qmd. Install from https://bun.sh"
+								log_warning "Worktrunk installation failed"
 							fi
 						else
-							log_info "qmd CLI already installed"
+							log_warning "Homebrew is required for worktrunk. Install from https://brew.sh"
 						fi
-						;;
-					worktrunk)
-						if ! command -v wt &>/dev/null; then
-							if command -v brew &>/dev/null; then
-								log_info "Installing Worktrunk CLI via Homebrew (this may take a moment)..."
-								if brew install worktrunk 2>&1 && wt config shell install 2>&1; then
-									log_success "Worktrunk CLI installed"
-								else
-									log_warning "Worktrunk installation failed"
-								fi
-							else
-								log_warning "Homebrew is required for worktrunk. Install from https://brew.sh"
-							fi
-						else
-							log_info "Worktrunk CLI already installed"
-						fi
-						;;
+					else
+						log_info "Worktrunk CLI already installed"
+					fi
+					;;
 				esac
 
 				# Add marketplace first
@@ -1318,8 +1323,6 @@ enable_plugins() {
 		done
 	}
 
-
-
 	if command -v claude &>/dev/null; then
 		# Skip marketplace plugins if marketplace is not available
 		if [ "${MARKETPLACE_AVAILABLE:-false}" = "false" ]; then
@@ -1390,7 +1393,7 @@ enable_plugins() {
 			fi
 		else
 			install_remote_skills
-			
+
 			# Still install CLI-based plugins (plannotator, claude-hud, worktrunk) if Claude CLI is available
 			if command -v claude &>/dev/null; then
 				for plugin_entry in "${community_plugins[@]}"; do
@@ -1412,7 +1415,7 @@ enable_plugins() {
 	else
 		log_warning "Claude Code not installed - skipping official marketplace plugin installation"
 		log_info "Note: Community skills can still be installed without Claude CLI"
-		
+
 		# Still install community skills even if Claude CLI is not available
 		if [ "$SKILL_INSTALL_SOURCE" = "local" ]; then
 			log_info "Installing community skills from local skills folder..."
