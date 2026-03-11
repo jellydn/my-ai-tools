@@ -128,11 +128,11 @@ test('should increment counter when button is clicked', () => {
   render(<Counter />);
   const button = screen.getByRole('button', { name: /increment/i });
   const counter = screen.getByTestId('counter-value');
-  
+
   // Act
   expect(counter).toHaveTextContent('0');
   fireEvent.click(button);
-  
+
   // Assert
   expect(counter).toHaveTextContent('1');
 });

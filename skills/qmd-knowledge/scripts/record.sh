@@ -15,7 +15,7 @@ if [ -n "$QMD_PROJECT" ]; then
 elif git rev-parse --is-inside-work-tree &>/dev/null; then
     # Try to get project name from git remote URL (most reliable)
     PROJECT_NAME=$(git remote get-url origin 2>/dev/null | xargs basename -s .git 2>/dev/null)
-    
+
     # Fall back to git repo folder name if remote URL fails or returns invalid values
     # Invalid: empty, "origin", or strings that look like URLs/paths
     if [ -z "$PROJECT_NAME" ] || [ "$PROJECT_NAME" = "origin" ] || [[ "$PROJECT_NAME" =~ ^[./:] ]]; then
@@ -45,11 +45,11 @@ setup_knowledge_base() {
         echo -e "${YELLOW}Warning: qmd not found. Install with: bun install -g https://github.com/tobi/qmd${NC}"
         return 1
     fi
-    
+
     # Create directory structure
     mkdir -p "$KNOWLEDGE_BASE/references/learnings"
     mkdir -p "$KNOWLEDGE_BASE/references/issues"
-    
+
     # Add collection (suppress error if already exists)
     local err_file="/tmp/qmd-collection-add-$$-err.txt"
     if qmd collection add "$KNOWLEDGE_BASE" --name "$PROJECT_NAME" 2>"$err_file"; then
@@ -72,13 +72,13 @@ setup_knowledge_base() {
             return 1
         fi
     fi
-    
+
     # Add context (suppress error if already exists)
     qmd context add "qmd://$PROJECT_NAME" "Knowledge base for $PROJECT_NAME project: learnings, issue notes, and conventions" 2>/dev/null || true
-    
+
     # Generate embeddings
     qmd embed 2>/dev/null || true
-    
+
     echo -e "${GREEN}✓ Knowledge base ready: $KNOWLEDGE_BASE${NC}"
     return 0
 }

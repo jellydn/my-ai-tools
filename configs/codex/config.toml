@@ -39,5 +39,3 @@ args = ["mcp"]
 [tui]
 status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit"]
 theme = "kanagawa"
-
-

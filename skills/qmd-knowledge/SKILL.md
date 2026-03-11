@@ -75,7 +75,7 @@ $SKILL_PATH/scripts/record.sh issue 123 "Fixed by updating dependencies"
 $SKILL_PATH/scripts/record.sh note "Consider using agent skills for extensibility"
 ```
 
-**After recording**: 
+**After recording**:
 - The `record.sh` script automatically runs `qmd embed` to re-index the knowledge base
 - This embedding step is **required** to make newly added content searchable for the next query
 - If auto-embedding fails or you manually add/edit files, run `qmd embed` explicitly to update the index
@@ -133,15 +133,15 @@ command -v git || echo "Install git for automatic project name detection"
    # The skill's record.sh script will auto-detect the project name when executed.
    # For manual setup, use your desired project name consistently in the commands below.
    # Optional: export QMD_PROJECT=<project-name> to override auto-detection
-   
+
    # Create storage directory for your project (replace <project-name> with your project)
    mkdir -p ~/.ai-knowledges/<project-name>/learnings
    mkdir -p ~/.ai-knowledges/<project-name>/issues
-   
+
    # Add qmd collection
    qmd collection add ~/.ai-knowledges/<project-name> --name <project-name>
    qmd context add qmd://<project-name> "Knowledge base for <project-name> project: learnings, issue notes, and conventions"
-   
+
    # Generate embeddings for AI-powered search
    qmd embed
    ```

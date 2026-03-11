@@ -64,6 +64,22 @@
 		"@mohak34/opencode-notifier@latest"
 	],
 	"provider": {
+		"llama.cpp": {
+			"npm": "@ai-sdk/openai-compatible",
+			"name": "llama-server (local)",
+			"options": {
+				"baseURL": "http://192.168.1.11:8000/v1"
+			},
+			"models": {
+				"glm": {
+					"name": "GLM-4.7-Flash (local)",
+					"limit": {
+						"context": 32768,
+						"output": 16384
+					}
+				}
+			}
+		},
 		"ollama": {
 			"models": {
 				"minimax-m2.5:cloud": {
@@ -84,4 +100,3 @@
 	},
 	"theme": "kanagawa"
 }
-

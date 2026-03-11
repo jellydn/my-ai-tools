@@ -43,7 +43,7 @@ download_and_verify_script() {
 	local url="$1"
 	local expected_sha256="$2"
 	local description="$3"
-	
+
 	# Use TMPDIR if set, otherwise use /tmp
 	local tmpdir="${TMPDIR:-/tmp}"
 	local temp_script="${tmpdir}/install-$(date +%s)-$$"

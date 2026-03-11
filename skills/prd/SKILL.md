@@ -92,7 +92,7 @@ Each story should be small enough to implement in one focused session.
 - [ ] **[UI stories only]** Verify in browser using dev-browser skill
 ```
 
-**Important:** 
+**Important:**
 - Acceptance criteria must be verifiable, not vague. "Works correctly" is bad. "Button shows confirmation dialog before deleting" is good.
 - **For any story with UI changes:** Always include "Verify in browser using dev-browser skill" as acceptance criteria. This ensures visual verification of frontend work.
 

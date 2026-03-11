@@ -64,7 +64,7 @@ Test component interactions:
 describe('OrderService', () => {
   it('creates order and sends confirmation email', async () => {
     const order = await orderService.create({ items: [...] });
-    
+
     expect(order.id).toBeDefined();
     expect(mockEmailService.send).toHaveBeenCalledWith({
       to: order.customer.email,
@@ -120,17 +120,17 @@ it('throws on invalid input', () => {
 // React component testing
 it('displays user name when loaded', async () => {
   render(<UserProfile userId={123} />);
-  
+
   expect(await screen.findByText('Alice')).toBeInTheDocument();
 });
 
 // User interactions
 it('submits form on button click', async () => {
   render(<ContactForm />);
-  
+
   await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
   await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
-  
+
   expect(mockSubmit).toHaveBeenCalledWith({ email: 'test@example.com' });
 });
 ```

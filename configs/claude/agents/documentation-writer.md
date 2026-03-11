@@ -51,11 +51,11 @@ Function, class, and module documentation:
 ```javascript
 /**
  * Calculates the total price of items in a cart
- * 
+ *
  * @param items - Array of cart items with price and quantity
  * @param taxRate - Tax rate as decimal (e.g., 0.08 for 8%)
  * @returns Total price including tax, rounded to 2 decimal places
- * 
+ *
  * @example
  * ```ts
  * const total = calculateTotal(
@@ -146,22 +146,22 @@ Members receive an email invitation with a join link.
 ```typescript
 /**
  * Brief one-line description
- * 
+ *
  * Longer description if needed, explaining behavior,
  * important details, and usage context.
- * 
+ *
  * @param paramName - What this parameter does
  * @param options - Configuration options
  * @param options.retry - Number of retry attempts (default: 3)
  * @returns Description of return value
  * @throws {ErrorType} When this specific error occurs
- * 
+ *
  * @example
  * Basic usage:
  * ```ts
  * const result = await fetchData('https://api.example.com');
  * ```
- * 
+ *
  * @example
  * With retry configuration:
  * ```ts
@@ -178,21 +178,21 @@ Members receive an email invitation with a join link.
 ```typescript
 /**
  * Manages user authentication and session handling
- * 
+ *
  * This class provides methods for user login, logout,
  * token management, and session validation. It uses
  * JWT tokens with Redis-based session storage.
- * 
+ *
  * @example
  * ```ts
  * const auth = new AuthManager({
  *   jwtSecret: process.env.JWT_SECRET,
  *   redisUrl: process.env.REDIS_URL
  * });
- * 
+ *
  * // Login user
  * const session = await auth.login('user@example.com', 'password');
- * 
+ *
  * // Validate token
  * const user = await auth.validateToken(session.accessToken);
  * ```
@@ -200,7 +200,7 @@ Members receive an email invitation with a join link.
 class AuthManager {
   /**
    * Creates a new AuthManager instance
-   * 
+   *
    * @param config - Authentication configuration
    * @param config.jwtSecret - Secret key for JWT signing
    * @param config.redisUrl - Redis connection URL

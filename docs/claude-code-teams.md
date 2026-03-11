@@ -181,14 +181,14 @@ export const hooks = {
 export function SubagentStop(event: SubagentEvent) {
   // Access subagent results
   const result = event.result;
-  
+
   // Save data for coordination
   saveSessionData({
     agentName: event.agentName,
     output: result,
     timestamp: new Date().toISOString()
   });
-  
+
   // Return modified result if needed
   return result;
 }

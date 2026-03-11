@@ -128,7 +128,7 @@ qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project: learn
 qmd embed
 ```
 
-**Note**: 
+**Note**:
 - The skill is installed once and manages knowledge for all your projects
 - Each project gets its own qmd collection for storing knowledge
 - The script handles existing collections gracefully (no errors if collection already exists)
