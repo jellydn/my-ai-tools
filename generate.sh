@@ -373,6 +373,13 @@ generate_pi_configs() {
 	else
 		log_warning "Pi settings.json not found: $HOME/.pi/agent/settings.json"
 	fi
+
+	if [ -d "$HOME/.pi/agent/themes" ]; then
+		copy_directory "$HOME/.pi/agent/themes" "$SCRIPT_DIR/configs/pi/themes"
+		log_success "Pi themes generated"
+	else
+		log_warning "Pi themes directory not found: $HOME/.pi/agent/themes"
+	fi
 }
 
 generate_best_practices() {

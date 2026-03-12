@@ -3,6 +3,7 @@
   "defaultProvider": "github-copilot",
   "defaultModel": "gpt-4o",
   "defaultThinkingLevel": "medium",
+  "theme": "dracula",
   "packages": [
     "npm:@plannotator/pi-extension"
   ]
