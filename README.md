@@ -690,6 +690,8 @@ Located in [`configs/opencode/agent/`](configs/opencode/agent/):
 Located in [`configs/opencode/command/`](configs/opencode/command/):
 
 - `plannotator-review` - Interactive code review
+- `simplify` - Simplify over-engineered code for clarity and maintainability
+- `batch` - Run multiple tasks in sequence as a batch operation
 
 </details>
 
