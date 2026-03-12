@@ -32,6 +32,7 @@
 		"dim": "#545978",
 		"text": "foreground",
 		"thinkingText": "comment",
+
 		"selectedBg": "currentLine",
 		"userMessageBg": "bgLight",
 		"userMessageText": "foreground",
@@ -43,6 +44,7 @@
 		"toolErrorBg": "bgRedTint",
 		"toolTitle": "foreground",
 		"toolOutput": "comment",
+
 		"mdHeading": "orange",
 		"mdLink": "cyan",
 		"mdLinkUrl": "comment",
@@ -53,9 +55,11 @@
 		"mdQuoteBorder": "comment",
 		"mdHr": "comment",
 		"mdListBullet": "pink",
+
 		"toolDiffAdded": "green",
 		"toolDiffRemoved": "red",
 		"toolDiffContext": "comment",
+
 		"syntaxComment": "comment",
 		"syntaxKeyword": "pink",
 		"syntaxFunction": "green",
@@ -65,12 +69,14 @@
 		"syntaxType": "cyan",
 		"syntaxOperator": "pink",
 		"syntaxPunctuation": "foreground",
+
 		"thinkingOff": "#545978",
 		"thinkingMinimal": "comment",
 		"thinkingLow": "cyan",
 		"thinkingMedium": "purple",
 		"thinkingHigh": "pink",
 		"thinkingXhigh": "red",
+
 		"bashMode": "green"
 	},
 	"export": {
