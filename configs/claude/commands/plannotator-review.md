@@ -1,12 +1,12 @@
 ---
-description: Open interactive code review for current changes
+description: Open interactive code review for current changes or a PR URL
 allowed-tools: Bash(plannotator:*)
 ---
 
 ## Code Review Feedback
 
-!`plannotator review`
+!`plannotator review $ARGUMENTS`
 
 ## Your task
 
-Address the code review feedback above. The user has reviewed your changes in the Plannotator UI and provided specific annotations and comments.
+If the review above contains feedback or annotations, address them. If no changes were requested, acknowledge and continue.
