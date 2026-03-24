@@ -911,6 +911,11 @@ copy_configurations() {
 		else
 			log_info "Pi settings.json already exists at ~/.pi/agent/, preserving existing config"
 		fi
+		if [ -d "$SCRIPT_DIR/configs/pi/themes" ]; then
+			execute "mkdir -p $HOME/.pi/agent/themes"
+			safe_copy_dir "$SCRIPT_DIR/configs/pi/themes" "$HOME/.pi/agent/themes"
+			log_success "Copied Pi custom themes"
+		fi
 	fi
 
 	# Copy best practices and MEMORY.md
