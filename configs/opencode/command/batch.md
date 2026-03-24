@@ -1,41 +1,68 @@
 ---
-description: Execute multiple tasks sequentially, running /simplify on each set of changes before committing
+description: Decompose a large migration or refactor into parallel worker tasks, each reviewed with /simplify and submitted as an independent PR
 ---
 
-Execute the following tasks as a batch operation: $ARGUMENTS
-
-After completing each task, apply the `/simplify` three-perspective review (Code Reuse, Code Quality, Efficiency) to the changes before committing, so every step's output is reviewed and cleaned up before moving to the next.
+Decompose the following work into parallel worker tasks and execute them: $ARGUMENTS
 
 ## How to Use
 
-Provide a newline- or semicolon-separated list of tasks:
+Describe the overall goal. `/batch` will plan and parallelize the work:
 
 ```
-/batch
-Refactor auth service to use async/await
-Add unit tests for the login function
-Update API documentation
+/batch Migrate all lodash usages to native equivalents
 ```
 
-Or inline with semicolons:
-
 ```
-/batch Refactor auth service; Add unit tests for login; Update API docs
+/batch Add type annotations to all untyped function parameters in src/
 ```
 
-## Process
+```
+/batch Replace deprecated API calls across the codebase with v2 equivalents
+```
 
-1. **Parse the task list**: Split `$ARGUMENTS` by newlines or semicolons to get individual tasks.
-2. **Plan execution order**: Identify dependencies between tasks and reorder if needed so later tasks can rely on earlier ones.
-3. **For each task**:
-   a. Implement the task fully.
-   b. Apply the `/simplify` review — analyze the changes from the Code Reuse, Code Quality, and Efficiency perspectives and apply all findings.
-   c. Commit the result before proceeding to the next task.
-4. **Report progress**: After each task is committed, briefly note what was done.
-5. **Summarize**: At the end, provide a concise summary of all completed tasks and any issues encountered.
+## Three Phases
 
-## Tips
+### Phase 1 — Research and Plan
 
-- Group related changes together to minimize context switching.
-- If a task fails or is unclear, note it and continue with the remaining tasks.
-- Use specific file paths and function names for precise, reproducible results.
+Explore the affected files, decompose the work into independent units (typically 5–30 tasks), and determine how to verify each one. Tasks that can be done independently are parallelized; tasks with dependencies are ordered correctly.
+
+### Phase 2 — Spawn Workers
+
+One background agent per task unit, each running in an isolated git worktree. Every agent:
+
+1. Implements its task fully.
+2. Runs `/simplify` on its changes (Code Reuse → Code Quality → Efficiency review).
+3. Executes tests to verify correctness.
+4. Commits and opens a pull request.
+
+Each worker operates independently — if one fails, the others keep going. Every PR is independently mergeable.
+
+### Phase 3 — Track Progress
+
+A status table updates as workers complete, showing which PRs are ready for review.
+
+## When to Use `/batch`
+
+**Good for:**
+
+- Framework migrations (e.g. class components → hooks, lodash → native)
+- API contract updates across all callers
+- Convention enforcement across a codebase
+- Dependency replacements
+- Test generation for untested modules
+
+**Not for:**
+
+- Tightly coupled changes that require coordination between units
+- Exploratory refactoring where you don't yet know the target shape
+- Single-file modifications (use `/simplify` instead)
+
+## `/simplify` vs `/batch`
+
+| Aspect | `/simplify` | `/batch` |
+| --- | --- | --- |
+| Scale | Recently changed files | Entire codebase |
+| Timing | After implementation | Before implementation |
+| Agent count | 3 parallel reviewers | 5–30 parallel implementers |
+| Output | Applied fixes on current branch | Multiple pull requests |
+| Git requirement | Optional | Required (uses worktrees) |
