@@ -5,5 +5,9 @@
   "defaultThinkingLevel": "medium",
   "packages": [
     "npm:@plannotator/pi-extension"
-  ]
+  ],
+  "collapseChangelog": true,
+  "quietStartup": true,
+  "theme": "dracula",
+  "editorPaddingX": 1
 }
