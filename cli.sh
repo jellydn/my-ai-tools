@@ -762,7 +762,7 @@ copy_opencode_commands() {
 	local dest_dir="$2"
 
 	if [ -d "$source_dir" ] && [ "$(ls -A "$source_dir" 2>/dev/null)" ]; then
-		execute "mkdir -p $dest_dir"
+		execute "mkdir -p \"$dest_dir\""
 		for item in "$source_dir"/*; do
 			if [ -d "$item" ]; then
 				command_name="$(basename "$item")"
@@ -773,7 +773,7 @@ copy_opencode_commands() {
 				safe_copy_dir "$item" "$dest_dir/$command_name"
 			elif [ -f "$item" ]; then
 				# Copy individual files (like .md files)
-				execute "cp '$item' '$dest_dir/'"
+				execute "cp \"$item\" \"$dest_dir/\""
 			fi
 		done
 	fi
