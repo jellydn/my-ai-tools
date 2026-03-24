@@ -506,21 +506,21 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 
 Real-world projects built using these AI tools:
 
-| Project                                                           | Description                                              | Tools Used                  |
-| ----------------------------------------------------------------- | -------------------------------------------------------- | --------------------------- |
-| [Oak](https://github.com/jellydn/oak)                             | Lightweight macOS focus companion for deep work with notch-first UI | Ralph + OpenCode + Codex GPT 5.2 |
-| [Prosody](https://github.com/jellydn/prosody)                     | Mobile app for English speaking rhythm coaching with AI feedback    | Ralph + OpenCode + GLM + Amp/Codex (review) |
-| [Keybinder](https://github.com/jellydn/keybinder)                 | macOS app for managing skhd keyboard shortcuts           | Claude + spec-kit           |
-| [SealCode](https://github.com/jellydn/vscode-seal-code)           | VS Code extension for AI-powered code review             | Amp + Ralph                 |
-| [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development      | TypeScript                  |
-| [AI Launcher](https://github.com/jellydn/ai-launcher)             | Fast launcher for switching between AI coding assistants | TypeScript                  |
-| [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity               | TypeScript                  |
-| [dotenv-tui](https://github.com/jellydn/dotenv-tui)               | Terminal UI for managing `.env` files across projects    | Go + Bubble Tea             |
-| [tiny-cloak.nvim](https://github.com/jellydn/tiny-cloak.nvim)     | Neovim plugin that masks sensitive data in `.env` files  | Lua + Neovim                |
-| [tiny-term.nvim](https://github.com/jellydn/tiny-term.nvim)       | Minimal terminal plugin for Neovim 0.11+                 | Lua + Neovim                |
-| [Sky Alert](https://github.com/jellydn/sky-alert)                 | Real-time flight monitoring Telegram bot                 | OpenCode + GLM 4.7 + Amp + Codex CLI |
-| [Docklight](https://github.com/jellydn/docklight)                 | Minimal, self-hosted web UI for managing a single-node Dokku server | Ralph + OpenCode |
-| [Little Writing](https://github.com/jellydn/little-writing)       | A handwriting tracing app for kids built with React, react-konva, and Capacitor               | Claude + spec-kit + GLM 5   |
+| Project                                                             | Description                                                                     | Tools Used                                  |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------- |
+| - [Oak](https://github.com/jellydn/oak)                             | Lightweight macOS focus companion for deep work with notch-first UI             | Ralph + OpenCode + Codex GPT 5.2            |
+| - [Prosody](https://github.com/jellydn/prosody)                     | Mobile app for English speaking rhythm coaching with AI feedback                | Ralph + OpenCode + GLM + Amp/Codex (review) |
+| - [Keybinder](https://github.com/jellydn/keybinder)                 | macOS app for managing skhd keyboard shortcuts                                  | Claude + spec-kit                           |
+| - [SealCode](https://github.com/jellydn/vscode-seal-code)           | VS Code extension for AI-powered code review                                    | Amp + Ralph                                 |
+| - [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development                             | TypeScript                                  |
+| - [AI Launcher](https://github.com/jellydn/ai-launcher)             | Fast launcher for switching between AI coding assistants                        | TypeScript                                  |
+| - [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity                                      | TypeScript                                  |
+| - [dotenv-tui](https://github.com/jellydn/dotenv-tui)               | Terminal UI for managing `.env` files across projects                           | Go + Bubble Tea                             |
+| - [tiny-cloak.nvim](https://github.com/jellydn/tiny-cloak.nvim)     | Neovim plugin that masks sensitive data in `.env` files                         | Lua + Neovim                                |
+| - [tiny-term.nvim](https://github.com/jellydn/tiny-term.nvim)       | Minimal terminal plugin for Neovim 0.11+                                        | Lua + Neovim                                |
+| - [Sky Alert](https://github.com/jellydn/sky-alert)                 | Real-time flight monitoring Telegram bot                                        | OpenCode + GLM 4.7 + Amp + Codex CLI        |
+| - [Docklight](https://github.com/jellydn/docklight)                 | Minimal, self-hosted web UI for managing a single-node Dokku server             | Ralph + OpenCode                            |
+| - [Little Writing](https://github.com/jellydn/little-writing)       | A handwriting tracing app for kids built with React, react-konva, and Capacitor | Claude + spec-kit + GLM 5                   |
 
 📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
 
@@ -692,7 +692,7 @@ Located in [`configs/opencode/command/`](configs/opencode/command/):
 
 - `plannotator-review` - Interactive code review
 - `simplify` - Simplify over-engineered code for clarity and maintainability
-- `batch` - Run multiple tasks in sequence as a batch operation
+- `batch` - Run multiple tasks in parallel as worker tasks
 
 </details>
 
@@ -743,8 +743,8 @@ See [`configs/amp/AGENTS.md`](configs/amp/AGENTS.md) for agent guidelines.
 
 ### Skills
 
-| Skill | Description |
-|-------|-------------|
+| Skill                | Description                                |
+| -------------------- | ------------------------------------------ |
 | `plannotator-review` | Interactive code review via Plannotator UI |
 
 </details>
@@ -1056,10 +1056,7 @@ Then register them in `.pi/settings.json`:
 
 ```json
 {
-  "packages": [
-    "pi-flow-enforcer",
-    "pi-agent-pack"
-  ]
+  "packages": ["pi-flow-enforcer", "pi-agent-pack"]
 }
 ```
 

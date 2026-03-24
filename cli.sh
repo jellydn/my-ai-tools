@@ -1279,7 +1279,7 @@ enable_plugins() {
 		fi
 		mkdir -p "$CLAUDE_SKILLS_DIR"
 
-		# Copy to OpenCode (~/.config/opencode/skill/)
+		# Copy to OpenCode (~/.config/opencode/skills/)
 		if [ -d "$OPENCODE_SKILL_DIR" ]; then
 			for existing_skill in "$OPENCODE_SKILL_DIR"/*; do
 				[ -d "$existing_skill" ] && rm -rf "$existing_skill"

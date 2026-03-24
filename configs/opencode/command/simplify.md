@@ -2,7 +2,7 @@
 description: Review recently modified code from three perspectives (Code Reuse, Code Quality, Efficiency) and apply all findings
 ---
 
-Review the recently modified code ($ARGUMENTS or `git diff` if no argument is given) from three distinct perspectives, then apply all actionable findings.
+Review the recently modified code ($ARGUMENTS or `git diff --name-only` if no argument is given) from three distinct perspectives, then apply all actionable findings.
 
 ## Three Review Perspectives
 
@@ -11,6 +11,7 @@ Work through each perspective independently before making any edits, so findings
 ### 1. Code Reuse
 
 Look for:
+
 - Logic duplicated across two or more places that could share a single implementation
 - Redundant patterns that could be consolidated
 - Helper functions or utilities that already exist in the codebase but were re-implemented
@@ -18,6 +19,7 @@ Look for:
 ### 2. Code Quality
 
 Look for:
+
 - Readability problems: confusing variable/function names, deeply nested blocks, long functions
 - Structural concerns: responsibilities mixed in a single function or module, missing abstractions
 - Style inconsistencies relative to the surrounding codebase
@@ -25,6 +27,7 @@ Look for:
 ### 3. Efficiency
 
 Look for:
+
 - Performance bottlenecks: N+1 queries, redundant loops, repeated expensive computations
 - Unnecessary computation that can be eliminated or cached
 - Wasted work: operations whose results are never used
