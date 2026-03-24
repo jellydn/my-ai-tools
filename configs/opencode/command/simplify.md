@@ -1,36 +1,44 @@
 ---
-description: Simplify over-engineered code for clarity and maintainability
+description: Review recently modified code from three perspectives (Code Reuse, Code Quality, Efficiency) and apply all findings
 ---
 
-Simplify the code in $ARGUMENTS (or the current file/selection if no argument is given).
+Review the recently modified code ($ARGUMENTS or `git diff` if no argument is given) from three distinct perspectives, then apply all actionable findings.
 
-## Goals
+## Three Review Perspectives
 
-- Remove unnecessary complexity and over-engineering
-- Eliminate redundant abstractions, helpers, or indirection that add no clear value
-- Reduce coupling between components where possible
-- Keep solutions simple and focused on what is actually needed
-- Preserve all existing functionality and behavior
+Work through each perspective independently before making any edits, so findings from all three are considered together:
+
+### 1. Code Reuse
+
+Look for:
+- Logic duplicated across two or more places that could share a single implementation
+- Redundant patterns that could be consolidated
+- Helper functions or utilities that already exist in the codebase but were re-implemented
+
+### 2. Code Quality
+
+Look for:
+- Readability problems: confusing variable/function names, deeply nested blocks, long functions
+- Structural concerns: responsibilities mixed in a single function or module, missing abstractions
+- Style inconsistencies relative to the surrounding codebase
+
+### 3. Efficiency
+
+Look for:
+- Performance bottlenecks: N+1 queries, redundant loops, repeated expensive computations
+- Unnecessary computation that can be eliminated or cached
+- Wasted work: operations whose results are never used
 
 ## Process
 
-1. **Identify the target**: Use `$ARGUMENTS` as the file path or scope. If empty, examine recently modified files via `git diff`.
-2. **Analyze complexity**: Look for over-abstracted patterns, unnecessary layers, redundant code, and excessive defensive checks not present elsewhere in the codebase.
-3. **Simplify surgically**: Apply the smallest possible changes to reduce complexity while keeping the code readable and idiomatic.
-4. **Verify**: Confirm the code still builds and tests pass after simplification.
-
-## What to Simplify
-
-- Unnecessary wrapper functions or classes that add no behavior
-- Excessive indirection (e.g., calling a function that just calls another function)
-- Over-parameterized functions where simpler signatures suffice
-- Premature abstractions not yet warranted by the codebase
-- Redundant comments describing obvious code
-- Dead code paths or unused variables
+1. **Identify the target files**: Use `$ARGUMENTS` as the file path or scope. If empty, run `git diff --name-only` to get recently modified files.
+2. **Apply all three review lenses**: Analyze the code from each perspective above and collect all findings before editing anything.
+3. **Apply fixes**: Work through the combined findings and apply all actionable improvements surgically, preserving functionality.
+4. **Verify**: Confirm the code still builds and tests pass after changes.
 
 ## What NOT to Change
 
 - Comments that explain non-obvious business logic or architecture decisions
-- Abstractions that are used in multiple places and genuinely reduce duplication
+- Abstractions used in multiple places that genuinely reduce duplication
 - Error handling that matches patterns used elsewhere in the codebase
 - Public API boundaries that other code depends on

@@ -1,32 +1,37 @@
 ---
-description: Run multiple tasks in sequence as a batch operation
+description: Execute multiple tasks sequentially, running /simplify on each set of changes before committing
 ---
 
 Execute the following tasks as a batch operation: $ARGUMENTS
 
+After completing each task, apply the `/simplify` three-perspective review (Code Reuse, Code Quality, Efficiency) to the changes before committing, so every step's output is reviewed and cleaned up before moving to the next.
+
 ## How to Use
 
-Provide a newline- or semicolon-separated list of tasks to execute in order:
+Provide a newline- or semicolon-separated list of tasks:
 
 ```
 /batch
-Fix lint errors in src/auth.ts
+Refactor auth service to use async/await
 Add unit tests for the login function
-Update the README with the new auth flow
+Update API documentation
 ```
 
-Or pass tasks inline as a semicolon-separated list:
+Or inline with semicolons:
 
 ```
-/batch Fix lint errors in auth.ts; Add tests for login; Update README
+/batch Refactor auth service; Add unit tests for login; Update API docs
 ```
 
 ## Process
 
 1. **Parse the task list**: Split `$ARGUMENTS` by newlines or semicolons to get individual tasks.
 2. **Plan execution order**: Identify dependencies between tasks and reorder if needed so later tasks can rely on earlier ones.
-3. **Execute sequentially**: Work through each task one at a time, completing it fully before moving to the next.
-4. **Report progress**: After each task, briefly note what was done before proceeding.
+3. **For each task**:
+   a. Implement the task fully.
+   b. Apply the `/simplify` review — analyze the changes from the Code Reuse, Code Quality, and Efficiency perspectives and apply all findings.
+   c. Commit the result before proceeding to the next task.
+4. **Report progress**: After each task is committed, briefly note what was done.
 5. **Summarize**: At the end, provide a concise summary of all completed tasks and any issues encountered.
 
 ## Tips
