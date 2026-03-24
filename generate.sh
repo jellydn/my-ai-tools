@@ -158,11 +158,11 @@ generate_opencode_configs() {
 		execute "mkdir -p $SCRIPT_DIR/configs/opencode"
 		copy_single "$HOME/.config/opencode/opencode.json" "$SCRIPT_DIR/configs/opencode/opencode.json"
 
-		# Handle skill directory with plugin filtering
-		if [ -d "$HOME/.config/opencode/skill" ]; then
-			execute "mkdir -p $SCRIPT_DIR/configs/opencode/skill"
-			if [ "$(ls -A "$HOME/.config/opencode/skill" 2>/dev/null)" ]; then
-				for skill_dir in "$HOME/.config/opencode/skill"/*; do
+		# Handle skills directory with plugin filtering
+		if [ -d "$HOME/.config/opencode/skills" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/opencode/skills"
+			if [ "$(ls -A "$HOME/.config/opencode/skills" 2>/dev/null)" ]; then
+				for skill_dir in "$HOME/.config/opencode/skills"/*; do
 					skill_name="$(basename "$skill_dir")"
 					case "$skill_name" in
 					prd | ralph | qmd-knowledge | codemap)
@@ -172,7 +172,7 @@ generate_opencode_configs() {
 						# Check if skill already exists in skills
 						if skill_exists_in_plugins "$skill_name"; then
 							log_info "Skipping $skill_name (exists in skills)"
-						elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/opencode/skill'/ 2>/dev/null"; then
+						elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/opencode/skills'/ 2>/dev/null"; then
 							log_success "Copied skill: $skill_name"
 						fi
 						;;

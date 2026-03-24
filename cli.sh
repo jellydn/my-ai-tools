@@ -755,6 +755,30 @@ copy_non_marketplace_skills() {
 	fi
 }
 
+# Helper: Copy OpenCode commands, skipping my-ai-tools folder
+# Usage: copy_opencode_commands "source_dir" "dest_dir"
+copy_opencode_commands() {
+	local source_dir="$1"
+	local dest_dir="$2"
+
+	if [ -d "$source_dir" ] && [ "$(ls -A "$source_dir" 2>/dev/null)" ]; then
+		execute "mkdir -p $dest_dir"
+		for item in "$source_dir"/*; do
+			if [ -d "$item" ]; then
+				command_name="$(basename "$item")"
+				# Skip my-ai-tools folder
+				if [ "$command_name" = "my-ai-tools" ]; then
+					continue
+				fi
+				safe_copy_dir "$item" "$dest_dir/$command_name"
+			elif [ -f "$item" ]; then
+				# Copy individual files (like .md files)
+				execute "cp '$item' '$dest_dir/'"
+			fi
+		done
+	fi
+}
+
 # Helper: Install MCP server with interactive prompts
 # Usage: install_mcp_interactive "name" "install_cmd" "description"
 install_mcp_interactive() {
@@ -827,8 +851,10 @@ copy_configurations() {
 		execute "cp $SCRIPT_DIR/configs/opencode/opencode.json $HOME/.config/opencode/"
 		execute "rm -rf $HOME/.config/opencode/agent"
 		safe_copy_dir "$SCRIPT_DIR/configs/opencode/agent" "$HOME/.config/opencode/agent"
-		execute "rm -rf $HOME/.config/opencode/skill"
-		copy_non_marketplace_skills "$SCRIPT_DIR/configs/opencode/skill" "$HOME/.config/opencode/skill"
+		execute "rm -rf $HOME/.config/opencode/command"
+		copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/command"
+		execute "rm -rf $HOME/.config/opencode/skills"
+		copy_non_marketplace_skills "$SCRIPT_DIR/skills" "$HOME/.config/opencode/skills"
 		log_success "OpenCode configs copied"
 	fi
 
@@ -1239,7 +1265,7 @@ enable_plugins() {
 
 		# Define target directories
 		CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
-		OPENCODE_SKILL_DIR="$HOME/.config/opencode/skill"
+		OPENCODE_SKILL_DIR="$HOME/.config/opencode/skills"
 		AMP_SKILLS_DIR="$HOME/.config/amp/skills"
 		CODEX_SKILLS_DIR="$HOME/.codex/skills"
 		GEMINI_SKILLS_DIR="$HOME/.gemini/skills"
