@@ -1,0 +1,20 @@
+{
+  "recommended_skills": [
+    {
+      "repo": "vercel-labs/agent-skills",
+      "description": "Vercel's agent skills for Next.js and React"
+    },
+    {
+      "repo": "expo/skills",
+      "description": "Official Expo skills for React Native development"
+    },
+    {
+      "repo": "blader/humanizer",
+      "description": "Removes AI-generated writing patterns from text"
+    },
+    {
+      "repo": "jezweb/claude-skills",
+      "description": "97 production-ready skills for Claude Code"
+    }
+  ]
+}

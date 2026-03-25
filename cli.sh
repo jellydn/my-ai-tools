@@ -1033,6 +1033,55 @@ install_remote_skills() {
 	fi
 }
 
+# Helper: Install recommended community skills from recommend-skills.json
+install_recommended_skills() {
+	log_info "Checking for recommended community skills..."
+
+	if ! command -v npx &>/dev/null; then
+		log_warning "npx not found, skipping recommended skills"
+		return
+	fi
+
+	if [ ! -f "$SCRIPT_DIR/configs/recommend-skills.json" ]; then
+		log_info "No recommended skills config found, skipping"
+		return
+	fi
+
+	local skills_json
+	skills_json=$(cat "$SCRIPT_DIR/configs/recommend-skills.json")
+	local skill_count
+	skill_count=$(echo "$skills_json" | jq '.recommended_skills | length')
+
+	if [ "$skill_count" -eq 0 ] || [ "$skill_count" = "null" ]; then
+		log_info "No recommended skills found in config"
+		return
+	fi
+
+	log_info "Found $skill_count recommended skill(s)"
+
+	for i in $(seq 0 $((skill_count - 1))); do
+		local repo description
+		repo=$(echo "$skills_json" | jq -r ".recommended_skills[$i].repo")
+		description=$(echo "$skills_json" | jq -r ".recommended_skills[$i].description")
+
+		log_info "  - $repo: $description"
+
+		if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
+			execute "npx skills add '$repo' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_info "Skipped: $repo"
+		elif [ -t 0 ]; then
+			read -p "Install $repo? (y/n) " -n 1 -r
+			echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				execute "npx skills add '$repo' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_warning "Failed to install: $repo"
+			else
+				log_info "Skipped: $repo"
+			fi
+		fi
+	done
+
+	log_success "Recommended skills check complete"
+}
+
 # Helper: Check if a skill is in the remote skills list
 is_remote_skill() {
 	local skill="$1"
@@ -1443,6 +1492,8 @@ enable_plugins() {
 
 		log_success "Claude Code plugins/skills installation complete"
 		log_info "IMPORTANT: Restart Claude Code for plugins to take effect"
+
+		install_recommended_skills
 	else
 		log_warning "Claude Code not installed - skipping official marketplace plugin installation"
 		log_info "Note: Community skills can still be installed without Claude CLI"
@@ -1455,6 +1506,8 @@ enable_plugins() {
 			install_remote_skills
 		fi
 		log_success "Community skills installation complete"
+
+		install_recommended_skills
 	fi
 }
 
