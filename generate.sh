@@ -382,6 +382,18 @@ generate_pi_configs() {
 	fi
 }
 
+generate_copilot_configs() {
+	log_info "Generating GitHub Copilot CLI configs..."
+
+	if command -v gh &>/dev/null && gh extension list 2>/dev/null | grep -q "github/gh-copilot"; then
+		execute "mkdir -p $SCRIPT_DIR/configs/copilot"
+		copy_single "$HOME/.config/gh-copilot/AGENTS.md" "$SCRIPT_DIR/configs/copilot/AGENTS.md"
+		log_success "GitHub Copilot CLI configs generated"
+	else
+		log_warning "GitHub Copilot CLI extension not found. Install with: gh extension install github/gh-copilot"
+	fi
+}
+
 generate_best_practices() {
 	log_info "Generating best-practices.md..."
 
@@ -447,6 +459,9 @@ main() {
 	echo
 
 	generate_pi_configs
+	echo
+
+	generate_copilot_configs
 	echo
 
 	generate_best_practices

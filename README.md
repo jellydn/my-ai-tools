@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi, GitHub Copilot CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -1068,6 +1068,53 @@ pi
 
 # Run a task non-interactively
 pi "Refactor this function to be more readable"
+```
+
+</details>
+
+---
+
+## 🐙 GitHub Copilot CLI (Optional)
+
+GitHub Copilot in the terminal — explain commands and get shell suggestions powered by Copilot. [Docs](https://docs.github.com/en/copilot/using-github-copilot/using-github-copilot-in-the-command-line)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Prerequisites
+
+Requires the [GitHub CLI](https://cli.github.com) (`gh`) and an active GitHub Copilot subscription.
+
+### Installation
+
+```bash
+# Install GitHub CLI first if needed
+# https://cli.github.com/manual/installation
+
+# Install the Copilot extension
+gh extension install github/gh-copilot
+
+# Authenticate with GitHub
+gh auth login
+```
+
+### Configuration
+
+Agent guidelines are stored in [`configs/copilot/`](configs/copilot/):
+
+- [`AGENTS.md`](configs/copilot/AGENTS.md) - Agent guidelines
+
+### Usage
+
+```bash
+# Explain a shell command
+gh copilot explain "git rebase -i HEAD~3"
+
+# Get a shell command suggestion
+gh copilot suggest "undo last git commit"
+
+# Configure preferences
+gh copilot config
 ```
 
 </details>

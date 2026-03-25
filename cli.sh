@@ -730,6 +730,34 @@ install_pi() {
 	fi
 }
 
+install_copilot() {
+	prompt_and_install() {
+		log_info "Installing GitHub Copilot CLI..."
+		if ! command -v gh &>/dev/null; then
+			log_error "GitHub CLI (gh) is required but not found. Install from: https://cli.github.com"
+			return 1
+		fi
+		if gh extension list 2>/dev/null | grep -q "github/gh-copilot"; then
+			log_warning "GitHub Copilot CLI is already installed"
+		else
+			execute "gh extension install github/gh-copilot"
+			log_success "GitHub Copilot CLI installed"
+		fi
+	}
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting GitHub Copilot CLI installation (--yes flag)"
+		prompt_and_install
+	elif [ -t 0 ]; then
+		read -p "Do you want to install GitHub Copilot CLI? (y/n) " -n 1 -r
+		echo
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping GitHub Copilot CLI installation"
+	else
+		log_info "Installing GitHub Copilot CLI (non-interactive mode)..."
+		prompt_and_install
+	fi
+}
+
 # Helper: Copy non-marketplace skills from source to destination
 # Usage: copy_non_marketplace_skills "source_dir" "dest_dir"
 copy_non_marketplace_skills() {
@@ -942,6 +970,15 @@ copy_configurations() {
 			safe_copy_dir "$SCRIPT_DIR/configs/pi/themes" "$HOME/.pi/agent/themes"
 			log_success "Copied Pi custom themes"
 		fi
+	fi
+
+	# Copy GitHub Copilot CLI configs
+	# Note: ~/.config/gh-copilot/ is a custom directory managed by this repo
+	# for storing reference documentation (AGENTS.md) alongside the installed extension.
+	if command -v gh &>/dev/null && gh extension list 2>/dev/null | grep -q "github/gh-copilot"; then
+		execute "mkdir -p $HOME/.config/gh-copilot"
+		copy_config_file "$SCRIPT_DIR/configs/copilot/AGENTS.md" "$HOME/.config/gh-copilot/" || true
+		log_success "GitHub Copilot CLI configs copied"
 	fi
 
 	# Copy best practices and MEMORY.md
@@ -1560,6 +1597,9 @@ main() {
 	echo
 
 	install_pi
+	echo
+
+	install_copilot
 	echo
 
 	copy_configurations
