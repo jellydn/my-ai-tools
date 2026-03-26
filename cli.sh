@@ -733,14 +733,10 @@ install_pi() {
 install_copilot() {
 	prompt_and_install() {
 		log_info "Installing GitHub Copilot CLI..."
-		if ! command -v gh &>/dev/null; then
-			log_error "GitHub CLI (gh) is required but not found. Install from: https://cli.github.com"
-			return 1
-		fi
-		if gh extension list 2>/dev/null | grep -q "github/gh-copilot"; then
+		if command -v copilot &>/dev/null; then
 			log_warning "GitHub Copilot CLI is already installed"
 		else
-			execute "gh extension install github/gh-copilot"
+			execute "npm install -g @github/copilot"
 			log_success "GitHub Copilot CLI installed"
 		fi
 	}
@@ -974,8 +970,8 @@ copy_configurations() {
 
 	# Copy GitHub Copilot CLI configs
 	# Note: ~/.config/gh-copilot/ is a custom directory managed by this repo
-	# for storing reference documentation (AGENTS.md) alongside the installed extension.
-	if command -v gh &>/dev/null && gh extension list 2>/dev/null | grep -q "github/gh-copilot"; then
+	# for storing reference documentation (AGENTS.md) alongside the installed CLI.
+	if command -v copilot &>/dev/null; then
 		execute "mkdir -p $HOME/.config/gh-copilot"
 		copy_config_file "$SCRIPT_DIR/configs/copilot/AGENTS.md" "$HOME/.config/gh-copilot/" || true
 		log_success "GitHub Copilot CLI configs copied"

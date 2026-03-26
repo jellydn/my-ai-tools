@@ -1083,19 +1083,12 @@ GitHub Copilot in the terminal — explain commands and get shell suggestions po
 
 ### Prerequisites
 
-Requires the [GitHub CLI](https://cli.github.com) (`gh`) and an active GitHub Copilot subscription.
+Requires an active GitHub Copilot subscription and Node.js/npm.
 
 ### Installation
 
 ```bash
-# Install GitHub CLI first if needed
-# https://cli.github.com/manual/installation
-
-# Install the Copilot extension
-gh extension install github/gh-copilot
-
-# Authenticate with GitHub
-gh auth login
+npm install -g @github/copilot
 ```
 
 ### Configuration
@@ -1108,13 +1101,10 @@ Agent guidelines are stored in [`configs/copilot/`](configs/copilot/):
 
 ```bash
 # Explain a shell command
-gh copilot explain "git rebase -i HEAD~3"
+copilot explain "git rebase -i HEAD~3"
 
 # Get a shell command suggestion
-gh copilot suggest "undo last git commit"
-
-# Configure preferences
-gh copilot config
+copilot suggest "undo last git commit"
 ```
 
 </details>
