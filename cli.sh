@@ -972,8 +972,9 @@ copy_configurations() {
 	# ~/.copilot/copilot-instructions.md is read automatically by Copilot CLI for all sessions.
 	if command -v copilot &>/dev/null; then
 		execute "mkdir -p $HOME/.copilot"
-		execute "cp $SCRIPT_DIR/configs/copilot/AGENTS.md $HOME/.copilot/copilot-instructions.md"
-		log_success "GitHub Copilot CLI configs copied"
+		if execute "cp \"$SCRIPT_DIR/configs/copilot/AGENTS.md\" \"$HOME/.copilot/copilot-instructions.md\""; then
+			log_success "GitHub Copilot CLI configs copied"
+		fi
 	fi
 
 	# Copy best practices and MEMORY.md
@@ -1546,7 +1547,7 @@ enable_plugins() {
 main() {
 	echo "╔════════════════════════════════════════════════════════════════════╗"
 	echo "║           AI Tools Setup                                           ║"
-	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo       ║"
+	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo • Copilot ║"
 	echo "╚════════════════════════════════════════════════════════════════════╝"
 	echo
 
