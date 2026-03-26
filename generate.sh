@@ -385,12 +385,21 @@ generate_pi_configs() {
 generate_copilot_configs() {
 	log_info "Generating GitHub Copilot CLI configs..."
 
-	if [ -f "$HOME/.copilot/copilot-instructions.md" ]; then
+	if [ -f "$HOME/.copilot/copilot-instructions.md" ] || [ -f "$HOME/.copilot/mcp-config.json" ]; then
 		execute "mkdir -p \"$SCRIPT_DIR/configs/copilot\""
-		copy_single "$HOME/.copilot/copilot-instructions.md" "$SCRIPT_DIR/configs/copilot/AGENTS.md"
+		if [ -f "$HOME/.copilot/copilot-instructions.md" ]; then
+			copy_single "$HOME/.copilot/copilot-instructions.md" "$SCRIPT_DIR/configs/copilot/AGENTS.md"
+		else
+			log_warning "GitHub Copilot CLI instructions not found: $HOME/.copilot/copilot-instructions.md"
+		fi
+		if [ -f "$HOME/.copilot/mcp-config.json" ]; then
+			copy_single "$HOME/.copilot/mcp-config.json" "$SCRIPT_DIR/configs/copilot/mcp-config.json"
+		else
+			log_warning "GitHub Copilot MCP config not found: $HOME/.copilot/mcp-config.json"
+		fi
 		log_success "GitHub Copilot CLI configs generated"
 	else
-		log_warning "GitHub Copilot CLI instructions not found: $HOME/.copilot/copilot-instructions.md"
+		log_warning "GitHub Copilot CLI configs not found in: $HOME/.copilot"
 	fi
 }
 

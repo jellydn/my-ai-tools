@@ -970,10 +970,13 @@ copy_configurations() {
 
 	# Copy GitHub Copilot CLI global instructions to the official location.
 	# ~/.copilot/copilot-instructions.md is read automatically by Copilot CLI for all sessions.
-	if command -v copilot &>/dev/null; then
+	if [ -f "$SCRIPT_DIR/configs/copilot/AGENTS.md" ] || [ -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ]; then
 		execute "mkdir -p $HOME/.copilot"
-		if execute "cp \"$SCRIPT_DIR/configs/copilot/AGENTS.md\" \"$HOME/.copilot/copilot-instructions.md\""; then
+		if [ -f "$SCRIPT_DIR/configs/copilot/AGENTS.md" ] && execute "cp \"$SCRIPT_DIR/configs/copilot/AGENTS.md\" \"$HOME/.copilot/copilot-instructions.md\""; then
 			log_success "GitHub Copilot CLI configs copied"
+		fi
+		if [ -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ] && execute "cp \"$SCRIPT_DIR/configs/copilot/mcp-config.json\" \"$HOME/.copilot/mcp-config.json\""; then
+			log_success "GitHub Copilot MCP config copied"
 		fi
 	fi
 

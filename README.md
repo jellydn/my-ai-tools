@@ -1093,9 +1093,10 @@ npm install -g @github/copilot
 
 ### Configuration
 
-Agent guidelines are stored in [`configs/copilot/`](configs/copilot/) and installed to the official global instructions path (`~/.copilot/copilot-instructions.md`), which Copilot CLI reads automatically for all sessions.
+Copilot CLI configs are stored in [`configs/copilot/`](configs/copilot/) and installed to the official global paths under `~/.copilot/`.
 
-- [`AGENTS.md`](configs/copilot/AGENTS.md) - Agent guidelines and best practices
+- [`AGENTS.md`](configs/copilot/AGENTS.md) - Agent guidelines and best practices, installed to `~/.copilot/copilot-instructions.md`
+- [`mcp-config.json`](configs/copilot/mcp-config.json) - MCP server configuration, installed to `~/.copilot/mcp-config.json`
 
 ### Usage
 
