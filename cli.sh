@@ -972,7 +972,7 @@ copy_configurations() {
 	# ~/.copilot/copilot-instructions.md is read automatically by Copilot CLI for all sessions.
 	if command -v copilot &>/dev/null; then
 		execute "mkdir -p $HOME/.copilot"
-		copy_config_file "$SCRIPT_DIR/configs/copilot/AGENTS.md" "$HOME/.copilot/copilot-instructions.md" || true
+		execute "cp $SCRIPT_DIR/configs/copilot/AGENTS.md $HOME/.copilot/copilot-instructions.md"
 		log_success "GitHub Copilot CLI configs copied"
 	fi
 

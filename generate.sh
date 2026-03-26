@@ -385,12 +385,12 @@ generate_pi_configs() {
 generate_copilot_configs() {
 	log_info "Generating GitHub Copilot CLI configs..."
 
-	if command -v copilot &>/dev/null; then
+	if [ -f "$HOME/.copilot/copilot-instructions.md" ]; then
 		execute "mkdir -p $SCRIPT_DIR/configs/copilot"
 		copy_single "$HOME/.copilot/copilot-instructions.md" "$SCRIPT_DIR/configs/copilot/AGENTS.md"
 		log_success "GitHub Copilot CLI configs generated"
 	else
-		log_warning "GitHub Copilot CLI not found. Install with: npm install -g @github/copilot"
+		log_warning "GitHub Copilot CLI instructions not found: $HOME/.copilot/copilot-instructions.md"
 	fi
 }
 

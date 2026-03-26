@@ -1,5 +1,5 @@
 model_personality = "pragmatic"
-model = "gpt-5.3-codex"
+model = "gpt-5.4"
 [features]
 unified_exec = true
 shell_snapshot = true
@@ -11,15 +11,6 @@ prevent_idle_sleep = true
 
 [sandbox_workspace_write]
 network_access = true
-
-[model_providers.ollama]
-name = "Ollama"
-base_url = "https://ollama.com/v1"
-env_key = "OLLAMA_API_KEY"
-
-[profiles.ollama]
-model = "glm-4.7:cloud"
-model_provider = "ollama"
 
 [mcp_servers.context7]
 command = "npx"
@@ -35,6 +26,7 @@ args = ["mcp"]
 
 [notice.model_migrations]
 "gpt-5.2-codex" = "gpt-5.3-codex"
+"gpt-5.3-codex" = "gpt-5.4"
 
 [tui]
 status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit"]
