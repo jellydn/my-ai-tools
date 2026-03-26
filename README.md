@@ -1076,7 +1076,7 @@ pi "Refactor this function to be more readable"
 
 ## 🐙 GitHub Copilot CLI (Optional)
 
-GitHub Copilot in the terminal — explain commands and get shell suggestions powered by Copilot. [Docs](https://docs.github.com/en/copilot/using-github-copilot/using-github-copilot-in-the-command-line)
+GitHub Copilot in the terminal — agentic coding assistant that brings AI capabilities directly to your command line. [Best Practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices) | [Docs](https://docs.github.com/en/copilot/using-github-copilot/using-github-copilot-in-the-command-line)
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
@@ -1093,18 +1093,27 @@ npm install -g @github/copilot
 
 ### Configuration
 
-Agent guidelines are stored in [`configs/copilot/`](configs/copilot/):
+Agent guidelines are stored in [`configs/copilot/`](configs/copilot/) and installed to the official global instructions path (`~/.copilot/copilot-instructions.md`), which Copilot CLI reads automatically for all sessions.
 
-- [`AGENTS.md`](configs/copilot/AGENTS.md) - Agent guidelines
+- [`AGENTS.md`](configs/copilot/AGENTS.md) - Agent guidelines and best practices
 
 ### Usage
 
 ```bash
-# Explain a shell command
-copilot explain "git rebase -i HEAD~3"
+# Start a Copilot CLI session
+copilot
 
-# Get a shell command suggestion
-copilot suggest "undo last git commit"
+# Use plan mode for complex tasks (or press Shift+Tab to toggle)
+/plan Add OAuth2 authentication with Google and GitHub providers
+
+# Delegate tangential tasks to the cloud agent
+/delegate Update documentation for the new API endpoints
+
+# Select model based on task complexity
+/model
+
+# Work across multiple repositories
+/add-dir /path/to/other-repo
 ```
 
 </details>

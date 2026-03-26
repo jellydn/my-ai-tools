@@ -968,12 +968,11 @@ copy_configurations() {
 		fi
 	fi
 
-	# Copy GitHub Copilot CLI configs
-	# Note: ~/.config/gh-copilot/ is a custom directory managed by this repo
-	# for storing reference documentation (AGENTS.md) alongside the installed CLI.
+	# Copy GitHub Copilot CLI global instructions to the official location.
+	# ~/.copilot/copilot-instructions.md is read automatically by Copilot CLI for all sessions.
 	if command -v copilot &>/dev/null; then
-		execute "mkdir -p $HOME/.config/gh-copilot"
-		copy_config_file "$SCRIPT_DIR/configs/copilot/AGENTS.md" "$HOME/.config/gh-copilot/" || true
+		execute "mkdir -p $HOME/.copilot"
+		copy_config_file "$SCRIPT_DIR/configs/copilot/AGENTS.md" "$HOME/.copilot/copilot-instructions.md" || true
 		log_success "GitHub Copilot CLI configs copied"
 	fi
 

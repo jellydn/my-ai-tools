@@ -387,7 +387,7 @@ generate_copilot_configs() {
 
 	if command -v copilot &>/dev/null; then
 		execute "mkdir -p $SCRIPT_DIR/configs/copilot"
-		copy_single "$HOME/.config/gh-copilot/AGENTS.md" "$SCRIPT_DIR/configs/copilot/AGENTS.md"
+		copy_single "$HOME/.copilot/copilot-instructions.md" "$SCRIPT_DIR/configs/copilot/AGENTS.md"
 		log_success "GitHub Copilot CLI configs generated"
 	else
 		log_warning "GitHub Copilot CLI not found. Install with: npm install -g @github/copilot"
