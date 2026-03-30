@@ -267,6 +267,46 @@ install_plugin_bg() {
 	rm -f "$log_file"
 }
 
+# Generic interactive installer helper
+# Handles auto-install (--yes), interactive prompts, and non-interactive modes
+# Usage: run_installer "tool_name" "install_command" "check_command" "version_command"
+run_installer() {
+	local tool_name="$1"
+	local install_cmd="$2"
+	local check_cmd="${3:-}"
+	local version_cmd="${4:-}"
+
+	_log_install() {
+		log_info "Installing $tool_name..."
+	}
+
+	_install() {
+		_log_install
+		if eval "$check_cmd" &>/dev/null; then
+			log_warning "$tool_name is already installed"
+		else
+			eval "$install_cmd"
+			log_success "$tool_name installed"
+		fi
+	}
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting $tool_name installation (--yes flag)"
+		_install
+	elif [ -t 0 ]; then
+		read -rp "Do you want to install $tool_name? (y/n) " -n 1
+		echo
+		if [[ $REPLY =~ ^[Yy]$ ]]; then
+			_install
+		else
+			log_warning "Skipping $tool_name installation"
+		fi
+	else
+		log_info "Installing $tool_name (non-interactive mode)..."
+		_install
+	fi
+}
+
 # Install community plugin in background (for parallel execution)
 # Usage: install_community_plugin_bg "name" "plugin_spec" "marketplace_repo"
 install_community_plugin_bg() {

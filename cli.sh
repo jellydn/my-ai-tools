@@ -537,8 +537,7 @@ install_claude_code() {
 }
 
 install_opencode() {
-	prompt_and_install() {
-		log_info "Installing OpenCode..."
+	_run_opencode_install() {
 		if command -v opencode &>/dev/null; then
 			log_warning "OpenCode is already installed"
 		else
@@ -546,23 +545,11 @@ install_opencode() {
 			log_success "OpenCode installed"
 		fi
 	}
-
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-accepting OpenCode installation (--yes flag)"
-		prompt_and_install
-	elif [ -t 0 ]; then
-		read -p "Do you want to install OpenCode? (y/n) " -n 1 -r
-		echo
-		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping OpenCode installation"
-	else
-		log_info "Installing OpenCode (non-interactive mode)..."
-		prompt_and_install
-	fi
+	run_installer "OpenCode" "_run_opencode_install" "command -v opencode" ""
 }
 
 install_amp() {
-	prompt_and_install() {
-		log_info "Installing Amp..."
+	_run_amp_install() {
 		if command -v amp &>/dev/null; then
 			log_warning "Amp is already installed"
 		else
@@ -571,23 +558,11 @@ install_amp() {
 		AMP_INSTALLED=true
 		log_success "Amp installed"
 	}
-
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-accepting Amp installation (--yes flag)"
-		prompt_and_install
-	elif [ -t 0 ]; then
-		read -p "Do you want to install Amp? (y/n) " -n 1 -r
-		echo
-		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Amp installation"
-	else
-		log_info "Installing Amp (non-interactive mode)..."
-		prompt_and_install
-	fi
+	run_installer "Amp" "_run_amp_install" "command -v amp" ""
 }
 
 install_ccs() {
-	prompt_and_install() {
-		log_info "Installing CCS..."
+	_run_ccs_install() {
 		if command -v ccs &>/dev/null; then
 			log_warning "CCS is already installed ($(ccs --version))"
 		else
@@ -595,23 +570,11 @@ install_ccs() {
 			log_success "CCS installed"
 		fi
 	}
-
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-accepting CCS installation (--yes flag)"
-		prompt_and_install
-	elif [ -t 0 ]; then
-		read -p "Do you want to install CCS (Claude Code Switch)? (y/n) " -n 1 -r
-		echo
-		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping CCS installation"
-	else
-		log_info "Installing CCS (non-interactive mode)..."
-		prompt_and_install
-	fi
+	run_installer "CCS" "_run_ccs_install" "command -v ccs" "ccs --version"
 }
 
 install_ai_switcher() {
-	prompt_and_install() {
-		log_info "Installing ai-switcher..."
+	_run_ai_switcher_install() {
 		if command -v ai-switcher &>/dev/null; then
 			log_warning "ai-switcher is already installed"
 		else
@@ -619,23 +582,11 @@ install_ai_switcher() {
 			log_success "ai-switcher installed"
 		fi
 	}
-
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-accepting ai-switcher installation (--yes flag)"
-		prompt_and_install
-	elif [ -t 0 ]; then
-		read -p "Do you want to install ai-switcher? (y/n) " -n 1 -r
-		echo
-		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping ai-switcher installation"
-	else
-		log_info "Installing ai-switcher (non-interactive mode)..."
-		prompt_and_install
-	fi
+	run_installer "ai-switcher" "_run_ai_switcher_install" "command -v ai-switcher" ""
 }
 
 install_codex() {
-	prompt_and_install() {
-		log_info "Installing Codex CLI..."
+	_run_codex_install() {
 		if command -v codex &>/dev/null; then
 			log_warning "Codex CLI is already installed"
 		else
@@ -643,23 +594,11 @@ install_codex() {
 			log_success "Codex CLI installed"
 		fi
 	}
-
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-accepting Codex installation (--yes flag)"
-		prompt_and_install
-	elif [ -t 0 ]; then
-		read -p "Do you want to install OpenAI Codex CLI? (y/n) " -n 1 -r
-		echo
-		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Codex CLI installation"
-	else
-		log_info "Installing Codex CLI (non-interactive mode)..."
-		prompt_and_install
-	fi
+	run_installer "OpenAI Codex CLI" "_run_codex_install" "command -v codex" ""
 }
 
 install_gemini() {
-	prompt_and_install() {
-		log_info "Installing Gemini CLI..."
+	_run_gemini_install() {
 		if command -v gemini &>/dev/null; then
 			log_warning "Gemini CLI is already installed"
 		else
@@ -667,23 +606,11 @@ install_gemini() {
 			log_success "Gemini CLI installed"
 		fi
 	}
-
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-accepting Gemini CLI installation (--yes flag)"
-		prompt_and_install
-	elif [ -t 0 ]; then
-		read -p "Do you want to install Google Gemini CLI? (y/n) " -n 1 -r
-		echo
-		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Gemini CLI installation"
-	else
-		log_info "Installing Gemini CLI (non-interactive mode)..."
-		prompt_and_install
-	fi
+	run_installer "Google Gemini CLI" "_run_gemini_install" "command -v gemini" ""
 }
 
 install_kilo() {
-	prompt_and_install() {
-		log_info "Installing Kilo CLI..."
+	_run_kilo_install() {
 		if command -v kilo &>/dev/null; then
 			log_warning "Kilo CLI is already installed"
 		else
@@ -691,23 +618,11 @@ install_kilo() {
 			log_success "Kilo CLI installed"
 		fi
 	}
-
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-accepting Kilo CLI installation (--yes flag)"
-		prompt_and_install
-	elif [ -t 0 ]; then
-		read -p "Do you want to install Kilo CLI? (y/n) " -n 1 -r
-		echo
-		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Kilo CLI installation"
-	else
-		log_info "Installing Kilo CLI (non-interactive mode)..."
-		prompt_and_install
-	fi
+	run_installer "Kilo CLI" "_run_kilo_install" "command -v kilo" ""
 }
 
 install_pi() {
-	prompt_and_install() {
-		log_info "Installing Pi..."
+	_run_pi_install() {
 		if command -v pi &>/dev/null; then
 			log_warning "Pi is already installed"
 		else
@@ -715,18 +630,7 @@ install_pi() {
 			log_success "Pi installed"
 		fi
 	}
-
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-accepting Pi installation (--yes flag)"
-		prompt_and_install
-	elif [ -t 0 ]; then
-		read -p "Do you want to install Pi? (y/n) " -n 1 -r
-		echo
-		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping Pi installation"
-	else
-		log_info "Installing Pi (non-interactive mode)..."
-		prompt_and_install
-	fi
+	run_installer "Pi" "_run_pi_install" "command -v pi" ""
 }
 
 # Helper: Copy non-marketplace skills from source to destination
