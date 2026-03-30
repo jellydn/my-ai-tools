@@ -659,17 +659,18 @@ install_copilot() {
 }
 
 install_cursor() {
-	_run_cursor_install() {
-		if command -v cursor &>/dev/null; then
-			log_warning "Cursor CLI is already installed"
-		else
-			log_info "Cursor CLI is bundled with the Cursor desktop app."
-			log_info "Install Cursor from https://cursor.com and then run:"
-			log_info "  Shell Command: Install 'cursor' command in PATH"
-			log_info "  (available in Cursor's Command Palette)"
-		fi
-	}
-	run_installer "Cursor CLI" "_run_cursor_install" "command -v cursor" ""
+	log_info "Checking Cursor CLI..."
+	if command -v cursor &>/dev/null; then
+		local cursor_version
+		cursor_version=$(cursor --version 2>/dev/null || echo 'version unknown')
+		log_warning "Cursor CLI is already installed ($cursor_version)"
+	else
+		log_warning "Cursor CLI is not installed; manual installation is required."
+		log_info "1. Download and install the Cursor app from https://cursor.com/download"
+		log_info "2. Open Cursor, open the Command Palette (Cmd/Ctrl+Shift+P)"
+		log_info "3. Run: Shell Command: Install 'cursor' command in PATH"
+		log_info "See: https://cursor.com/docs/cli/installation"
+	fi
 }
 
 # Helper: Copy non-marketplace skills from source to destination
