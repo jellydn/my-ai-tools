@@ -913,6 +913,10 @@ copy_configurations() {
 		execute "rm -rf $HOME/.cursor/skills"
 		copy_non_marketplace_skills "$SCRIPT_DIR/configs/cursor/skills" "$HOME/.cursor/skills"
 		log_success "Cursor skills copied"
+		# Copy commands to Cursor
+		execute "rm -rf $HOME/.cursor/commands"
+		safe_copy_dir "$SCRIPT_DIR/configs/cursor/commands" "$HOME/.cursor/commands"
+		log_success "Cursor commands copied"
 	fi
 
 	# Copy best practices and MEMORY.md
@@ -1346,6 +1350,14 @@ enable_plugins() {
 		fi
 		mkdir -p "$GEMINI_SKILLS_DIR"
 
+		# Copy to Cursor (~/.cursor/skills/)
+		if [ -d "$CURSOR_SKILLS_DIR" ]; then
+			for existing_skill in "$CURSOR_SKILLS_DIR"/*; do
+				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
+			done
+		fi
+		mkdir -p "$CURSOR_SKILLS_DIR"
+
 		# Copy all skills from skills folder to targets
 		for skill_dir in "$SCRIPT_DIR/skills"/*; do
 			if [ -d "$skill_dir" ]; then
@@ -1385,6 +1397,13 @@ enable_plugins() {
 					log_success "Copied $skill_name to Gemini CLI"
 				else
 					log_info "Skipped $skill_name for Gemini CLI (not compatible)"
+				fi
+
+				if skill_is_compatible_with "$skill_dir" "cursor"; then
+					safe_copy_dir "$skill_dir" "$CURSOR_SKILLS_DIR/$skill_name"
+					log_success "Copied $skill_name to Cursor"
+				else
+					log_info "Skipped $skill_name for Cursor (not compatible)"
 				fi
 			fi
 		done
