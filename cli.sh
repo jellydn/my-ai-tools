@@ -660,15 +660,15 @@ install_copilot() {
 
 install_cursor() {
 	log_info "Checking Cursor CLI..."
-	if command -v cursor &>/dev/null; then
-		local cursor_version
-		cursor_version=$(cursor --version 2>/dev/null || echo 'version unknown')
-		log_warning "Cursor CLI is already installed ($cursor_version)"
+	if command -v agent &>/dev/null; then
+		local agent_version
+		agent_version=$(agent --version 2>/dev/null || echo 'version unknown')
+		log_warning "Cursor Agent CLI is already installed ($agent_version)"
 	else
-		log_warning "Cursor CLI is not installed; manual installation is required."
-		log_info "1. Download and install the Cursor app from https://cursor.com/download"
-		log_info "2. Open Cursor, open the Command Palette (Cmd/Ctrl+Shift+P)"
-		log_info "3. Run: Shell Command: Install 'cursor' command in PATH"
+		log_warning "Cursor Agent CLI is not installed; manual installation is required."
+		log_info "1. Install with: curl https://cursor.com/install -fsS | bash"
+		log_info "2. Add to PATH: export PATH=\"\$HOME/.local/bin:\$PATH\""
+		log_info "3. Verify with: agent --version"
 		log_info "See: https://cursor.com/docs/cli/installation"
 	fi
 }
@@ -901,7 +901,7 @@ copy_configurations() {
 
 	# Copy Cursor Agent CLI global instructions.
 	# ~/.cursor/rules/ is read by the Cursor background agent for all sessions.
-	if [ -d "$HOME/.cursor" ] || command -v cursor &>/dev/null; then
+	if [ -d "$HOME/.cursor" ] || command -v agent &>/dev/null; then
 		execute "mkdir -p \"$HOME/.cursor/rules\""
 		if [ -f "$SCRIPT_DIR/configs/cursor/AGENTS.md" ] && execute "cp \"$SCRIPT_DIR/configs/cursor/AGENTS.md\" \"$HOME/.cursor/rules/general.mdc\""; then
 			log_success "Cursor Agent CLI configs copied"
