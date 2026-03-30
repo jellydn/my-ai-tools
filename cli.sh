@@ -1137,16 +1137,18 @@ enable_plugins() {
 		"claude-md-management@claude-plugins-official"
 	)
 
-	# Community plugins (name, plugin_spec, marketplace_repo)
-	# Format: "name|plugin_spec|marketplace_repo"
+	# Community plugins (name, plugin_spec, marketplace_repo, cli_tool)
+	# Format: "name|plugin_spec|marketplace_repo|cli_tool"
+	# cli_tool: claude (default), copilot, codex, etc.
 	community_plugins=(
-		"plannotator|plannotator@plannotator|backnotprop/plannotator"
-		"prd|prd@my-ai-tools|$SCRIPT_DIR"
-		"ralph|ralph@my-ai-tools|$SCRIPT_DIR"
-		"qmd-knowledge|qmd-knowledge@my-ai-tools|$SCRIPT_DIR"
-		"codemap|codemap@my-ai-tools|$SCRIPT_DIR"
-		"claude-hud|claude-hud@claude-hud|jarrodwatts/claude-hud"
-		"worktrunk|worktrunk@worktrunk|max-sixty/worktrunk"
+		"plannotator|plannotator@plannotator|backnotprop/plannotator|claude"
+		"plannotator-copilot|plannotator-copilot@plannotator|backnotprop/plannotator|copilot"
+		"prd|prd@my-ai-tools|$SCRIPT_DIR|claude"
+		"ralph|ralph@my-ai-tools|$SCRIPT_DIR|claude"
+		"qmd-knowledge|qmd-knowledge@my-ai-tools|$SCRIPT_DIR|claude"
+		"codemap|codemap@my-ai-tools|$SCRIPT_DIR|claude"
+		"claude-hud|claude-hud@claude-hud|jarrodwatts/claude-hud|claude"
+		"worktrunk|worktrunk@worktrunk|max-sixty/worktrunk|claude"
 	)
 
 	install_plugin() {
@@ -1175,11 +1177,12 @@ enable_plugins() {
 		local name="$1"
 		local plugin_spec="$2"
 		local marketplace_repo="$3"
+		local cli_tool="${4:-claude}" # Default to claude if not specified
 
 		if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
 			# Non-interactive or auto-install mode - install CLI tools if needed
 			case "$name" in
-			plannotator)
+			plannotator | plannotator-copilot)
 				if ! command -v plannotator &>/dev/null; then
 					log_info "Installing Plannator CLI..."
 					execute_installer "https://plannotator.ai/install.sh" "" "Plannator CLI" || log_warning "Plannator installation failed"
@@ -1200,10 +1203,10 @@ enable_plugins() {
 			esac
 			# Add marketplace and install plugin
 			setup_tmpdir
-			execute "claude plugin marketplace add '$marketplace_repo' 2>/dev/null || true"
+			execute "$cli_tool plugin marketplace add '$marketplace_repo' 2>/dev/null || true"
 			# Clear any stale plugin cache that might cause cross-device link errors
-			execute "rm -rf '$HOME/.claude/plugins/cache/$name' 2>/dev/null || true"
-			if ! execute "claude plugin install '$plugin_spec' 2>/dev/null"; then
+			execute "rm -rf '$HOME/.$cli_tool/plugins/cache/$name' 2>/dev/null || true"
+			if ! execute "$cli_tool plugin install '$plugin_spec' 2>/dev/null"; then
 				log_warning "$name plugin install failed (may already be installed)"
 			fi
 		elif [ -t 0 ]; then
@@ -1212,7 +1215,7 @@ enable_plugins() {
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
 				# Install CLI tool if needed
 				case "$name" in
-				plannotator)
+				plannotator | plannotator-copilot)
 					if ! command -v plannotator &>/dev/null; then
 						log_info "Installing Plannator CLI (this may take a moment)..."
 						if execute_installer "https://plannotator.ai/install.sh" "" "Plannator CLI"; then
@@ -1260,13 +1263,13 @@ enable_plugins() {
 
 				# Add marketplace first
 				setup_tmpdir
-				if ! execute "claude plugin marketplace add '$marketplace_repo' 2>/dev/null"; then
+				if ! execute "$cli_tool plugin marketplace add '$marketplace_repo' 2>/dev/null"; then
 					log_info "Marketplace $marketplace_repo may already be added"
 				fi
 				# Clear any stale plugin cache that might cause cross-device link errors
-				execute "rm -rf '$HOME/.claude/plugins/cache/$name' 2>/dev/null || true"
-				# Install plugin
-				if execute "claude plugin install '$plugin_spec'"; then
+				execute "rm -rf '$HOME/.$cli_tool/plugins/cache/$name' 2>/dev/null || true"
+				# Install plugin - suppress stderr to avoid output overlapping
+				if execute "$cli_tool plugin install '$plugin_spec' 2>/dev/null"; then
 					log_success "$name installed"
 				else
 					log_warning "$name install failed (may already be installed)"
@@ -1467,8 +1470,10 @@ enable_plugins() {
 					fi
 					local rest="${plugin_entry#*|}"
 					local plugin_spec="${rest%%|*}"
-					local marketplace_repo="${rest##*|}"
-					install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
+					local rest2="${rest#*|}"
+					local marketplace_repo="${rest2%%|*}"
+					local cli_tool="${rest2##*|}"
+					install_community_plugin "$name" "$plugin_spec" "$marketplace_repo" "$cli_tool"
 				done
 			fi
 		else
@@ -1484,8 +1489,10 @@ enable_plugins() {
 					fi
 					local rest="${plugin_entry#*|}"
 					local plugin_spec="${rest%%|*}"
-					local marketplace_repo="${rest##*|}"
-					install_community_plugin "$name" "$plugin_spec" "$marketplace_repo"
+					local rest2="${rest#*|}"
+					local marketplace_repo="${rest2%%|*}"
+					local cli_tool="${rest2##*|}"
+					install_community_plugin "$name" "$plugin_spec" "$marketplace_repo" "$cli_tool"
 				done
 			fi
 		fi
