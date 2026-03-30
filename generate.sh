@@ -422,6 +422,32 @@ generate_cursor_configs() {
 	else
 		log_warning "Cursor MCP config not found: $HOME/.cursor/mcp.json"
 	fi
+
+	# Copy skills from ~/.cursor/skills if it exists
+	if [ -d "$HOME/.cursor/skills" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/cursor/skills"
+		if [ "$(ls -A "$HOME/.cursor/skills" 2>/dev/null)" ]; then
+			for skill_dir in "$HOME/.cursor/skills"/*; do
+				skill_name="$(basename "$skill_dir")"
+				case "$skill_name" in
+				prd | ralph | qmd-knowledge | codemap)
+					# Skip marketplace plugins - managed separately
+					;;
+				*)
+					# Check if skill already exists in skills
+					if skill_exists_in_plugins "$skill_name"; then
+						log_info "Skipping $skill_name (exists in skills)"
+					elif execute "cp -r '$skill_dir' '$SCRIPT_DIR/configs/cursor/skills'/ 2>/dev/null"; then
+						log_success "Copied skill: $skill_name"
+					fi
+					;;
+				esac
+			done
+		fi
+		log_success "Cursor skills generated"
+	else
+		log_warning "Cursor skills directory not found: $HOME/.cursor/skills"
+	fi
 }
 
 generate_best_practices() {
