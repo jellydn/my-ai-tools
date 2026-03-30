@@ -730,6 +730,30 @@ install_pi() {
 	fi
 }
 
+install_copilot() {
+	prompt_and_install() {
+		log_info "Installing GitHub Copilot CLI..."
+		if command -v copilot &>/dev/null; then
+			log_warning "GitHub Copilot CLI is already installed"
+		else
+			execute "npm install -g @github/copilot"
+			log_success "GitHub Copilot CLI installed"
+		fi
+	}
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting GitHub Copilot CLI installation (--yes flag)"
+		prompt_and_install
+	elif [ -t 0 ]; then
+		read -p "Do you want to install GitHub Copilot CLI? (y/n) " -n 1 -r
+		echo
+		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping GitHub Copilot CLI installation"
+	else
+		log_info "Installing GitHub Copilot CLI (non-interactive mode)..."
+		prompt_and_install
+	fi
+}
+
 # Helper: Copy non-marketplace skills from source to destination
 # Usage: copy_non_marketplace_skills "source_dir" "dest_dir"
 copy_non_marketplace_skills() {
@@ -941,6 +965,18 @@ copy_configurations() {
 			execute "mkdir -p $HOME/.pi/agent/themes"
 			safe_copy_dir "$SCRIPT_DIR/configs/pi/themes" "$HOME/.pi/agent/themes"
 			log_success "Copied Pi custom themes"
+		fi
+	fi
+
+	# Copy GitHub Copilot CLI global instructions to the official location.
+	# ~/.copilot/copilot-instructions.md is read automatically by Copilot CLI for all sessions.
+	if [ -f "$SCRIPT_DIR/configs/copilot/AGENTS.md" ] || [ -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ]; then
+		execute "mkdir -p $HOME/.copilot"
+		if [ -f "$SCRIPT_DIR/configs/copilot/AGENTS.md" ] && execute "cp \"$SCRIPT_DIR/configs/copilot/AGENTS.md\" \"$HOME/.copilot/copilot-instructions.md\""; then
+			log_success "GitHub Copilot CLI configs copied"
+		fi
+		if [ -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ] && execute "cp \"$SCRIPT_DIR/configs/copilot/mcp-config.json\" \"$HOME/.copilot/mcp-config.json\""; then
+			log_success "GitHub Copilot MCP config copied"
 		fi
 	fi
 
@@ -1521,7 +1557,7 @@ enable_plugins() {
 main() {
 	echo "╔════════════════════════════════════════════════════════════════════╗"
 	echo "║           AI Tools Setup                                           ║"
-	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo       ║"
+	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo • Copilot ║"
 	echo "╚════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -1567,6 +1603,9 @@ main() {
 	echo
 
 	install_pi
+	echo
+
+	install_copilot
 	echo
 
 	copy_configurations

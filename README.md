@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi, GitHub Copilot CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -1068,6 +1068,53 @@ pi
 
 # Run a task non-interactively
 pi "Refactor this function to be more readable"
+```
+
+</details>
+
+---
+
+## 🐙 GitHub Copilot CLI (Optional)
+
+GitHub Copilot in the terminal — agentic coding assistant that brings AI capabilities directly to your command line. [Best Practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices) | [Docs](https://docs.github.com/en/copilot/using-github-copilot/using-github-copilot-in-the-command-line)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Prerequisites
+
+Requires an active GitHub Copilot subscription and Node.js/npm.
+
+### Installation
+
+```bash
+npm install -g @github/copilot
+```
+
+### Configuration
+
+Copilot CLI configs are stored in [`configs/copilot/`](configs/copilot/) and installed to the official global paths under `~/.copilot/`.
+
+- [`AGENTS.md`](configs/copilot/AGENTS.md) - Agent guidelines and best practices, installed to `~/.copilot/copilot-instructions.md`
+- [`mcp-config.json`](configs/copilot/mcp-config.json) - MCP server configuration, installed to `~/.copilot/mcp-config.json`
+
+### Usage
+
+```bash
+# Start a Copilot CLI session
+copilot
+
+# Use plan mode for complex tasks (or press Shift+Tab to toggle)
+/plan Add OAuth2 authentication with Google and GitHub providers
+
+# Delegate tangential tasks to the cloud agent
+/delegate Update documentation for the new API endpoints
+
+# Select model based on task complexity
+/model
+
+# Work across multiple repositories
+/add-dir /path/to/other-repo
 ```
 
 </details>
