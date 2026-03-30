@@ -969,12 +969,20 @@ install_recommended_skills() {
 		log_info "  - $repo: $description"
 
 		if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
-			execute "npx skills add '$repo' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_info "Skipped: $repo"
+			if execute "npx skills add '$repo' --yes --global --agent claude-code" 2>/dev/null; then
+				log_success "Installed: $repo"
+			else
+				log_info "Skipped: $repo"
+			fi
 		elif [ -t 0 ]; then
-			read -p "Install $repo? (y/n) " -n 1 -r
+			read -rp "Install $repo? (y/n) " -n 1
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				execute "npx skills add '$repo' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_warning "Failed to install: $repo"
+				if execute "npx skills add '$repo' --global --agent claude-code" 2>/dev/null; then
+					log_success "Installed: $repo"
+				else
+					log_warning "Failed to install: $repo"
+				fi
 			else
 				log_info "Skipped: $repo"
 			fi
@@ -1099,7 +1107,11 @@ enable_plugins() {
 			worktrunk)
 				if ! command -v wt &>/dev/null && command -v brew &>/dev/null; then
 					log_info "Installing Worktrunk CLI via Homebrew..."
-					brew install worktrunk 2>&1 && wt config shell install 2>&1 || log_warning "Worktrunk installation failed"
+					if brew install worktrunk 2>&1 && wt config shell install 2>&1; then
+						: # success
+					else
+						log_warning "Worktrunk installation failed"
+					fi
 				fi
 				;;
 			esac
