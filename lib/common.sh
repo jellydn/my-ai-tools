@@ -46,7 +46,8 @@ download_and_verify_script() {
 
 	# Use TMPDIR if set, otherwise use /tmp
 	local tmpdir="${TMPDIR:-/tmp}"
-	local temp_script="${tmpdir}/install-$(date +%s)-$$"
+	local temp_script
+	temp_script="${tmpdir}/install-$(date +%s)-$$"
 
 	log_info "Downloading $description..."
 	if ! curl -fsSL "$url" -o "$temp_script" 2>/dev/null; then
@@ -120,7 +121,7 @@ cleanup_old_backups() {
 
 	# Find all backup directories and sort by modification time (newest first)
 	local old_backups
-	old_backups=$(find "$HOME" -maxdepth 1 -type d -name "ai-tools-backup-*" -printf "%T@ %p\n" 2>/dev/null | sort -rn | tail -n +$((max_backups + 1)) | cut -d' ' -f2-)
+	old_backups=$(find "$HOME" -maxdepth 1 -type d -name "${backup_pattern##*/}*" -printf "%T@ %p\n" 2>/dev/null | sort -rn | tail -n +$((max_backups + 1)) | cut -d' ' -f2-)
 
 	if [ -n "$old_backups" ]; then
 		for backup_dir in $old_backups; do
@@ -215,14 +216,13 @@ run_parallel() {
 	shift
 
 	if [ "$DRY_RUN" = true ]; then
-		log_info "[DRY RUN] Would run parallel commands: $@"
+		log_info "[DRY RUN] Would run parallel commands: $*"
 		return 0
 	fi
 
 	local jobs=("$@")
 	local running=0
 	local completed=0
-	local total=${#jobs[@]}
 
 	for cmd in "${jobs[@]}"; do
 		if [ -z "$cmd" ]; then
@@ -234,7 +234,7 @@ run_parallel() {
 		) &
 		running=$((running + 1))
 
-		if [ $running -ge $max_jobs ]; then
+		if [ "$running" -ge "$max_jobs" ]; then
 			wait -n
 			running=$((running - 1))
 			completed=$((completed + 1))
@@ -283,7 +283,11 @@ run_installer() {
 	_install() {
 		_log_install
 		if eval "$check_cmd" &>/dev/null; then
-			log_warning "$tool_name is already installed"
+			if [ -n "$version_cmd" ]; then
+				log_warning "$tool_name is already installed ($($version_cmd 2>/dev/null))"
+			else
+				log_warning "$tool_name is already installed"
+			fi
 		else
 			eval "$install_cmd"
 			log_success "$tool_name installed"
@@ -321,7 +325,7 @@ install_community_plugin_bg() {
 		claude plugin marketplace add "$marketplace_repo" 2>/dev/null || true
 		rm -rf "$HOME/.claude/plugins/cache/$name" 2>/dev/null || true
 		claude plugin install "$plugin_spec" 2>/dev/null
-	) &>$log_file
+	) &>"$log_file"
 
 	if grep -qi "already\|success" "$log_file" 2>/dev/null; then
 		log_success "$name installed"
