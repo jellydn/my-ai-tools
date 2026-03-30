@@ -909,6 +909,10 @@ copy_configurations() {
 		if [ -f "$SCRIPT_DIR/configs/cursor/mcp.json" ] && execute "cp \"$SCRIPT_DIR/configs/cursor/mcp.json\" \"$HOME/.cursor/mcp.json\""; then
 			log_success "Cursor MCP config copied"
 		fi
+		# Copy skills to Cursor
+		execute "rm -rf $HOME/.cursor/skills"
+		copy_non_marketplace_skills "$SCRIPT_DIR/configs/cursor/skills" "$HOME/.cursor/skills"
+		log_success "Cursor skills copied"
 	fi
 
 	# Copy best practices and MEMORY.md
@@ -1300,6 +1304,7 @@ enable_plugins() {
 		AMP_SKILLS_DIR="$HOME/.config/amp/skills"
 		CODEX_SKILLS_DIR="$HOME/.codex/skills"
 		GEMINI_SKILLS_DIR="$HOME/.gemini/skills"
+		CURSOR_SKILLS_DIR="$HOME/.cursor/skills"
 
 		# Copy to Claude Code (~/.claude/skills/)
 		if [ -d "$CLAUDE_SKILLS_DIR" ]; then
