@@ -448,6 +448,22 @@ generate_cursor_configs() {
 	else
 		log_warning "Cursor skills directory not found: $HOME/.cursor/skills"
 	fi
+
+	# Copy commands from ~/.cursor/commands if it exists
+	if [ -d "$HOME/.cursor/commands" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/cursor/commands"
+		if [ "$(ls -A "$HOME/.cursor/commands" 2>/dev/null)" ]; then
+			if execute "cp -r '$HOME/.cursor/commands'/* '$SCRIPT_DIR/configs/cursor/commands'/ 2>/dev/null"; then
+				log_success "Cursor commands generated"
+			else
+				log_warning "Failed to copy some Cursor commands"
+			fi
+		else
+			log_warning "Cursor commands directory is empty"
+		fi
+	else
+		log_warning "Cursor commands directory not found: $HOME/.cursor/commands"
+	fi
 }
 
 generate_best_practices() {
