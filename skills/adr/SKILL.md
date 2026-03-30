@@ -2,7 +2,7 @@
 name: adr
 description: Manages Architecture Decision Records (ADR) for tracking important architectural decisions
 license: MIT
-compatibility: claude, opencode, amp, codex, gemini
+compatibility: claude, opencode, amp, codex, gemini, cursor
 hint: Use when managing architecture decisions, creating ADRs, or tracking architectural choices
 user-invocable: true
 metadata:

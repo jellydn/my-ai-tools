@@ -2,7 +2,7 @@
 name: qmd-knowledge
 description: Project-specific knowledge management system using qmd MCP server. Captures learnings, issue notes, and conventions in a searchable knowledge base.
 license: MIT
-compatibility: opencode, claude, amp, codex, gemini
+compatibility: opencode, claude, amp, codex, gemini, cursor
 hint: Use when recording or retrieving project knowledge, learnings, and issue notes
 user-invocable: true
 metadata:

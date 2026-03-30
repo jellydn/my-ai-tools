@@ -2,7 +2,7 @@
 name: codemap
 description: Orchestrate parallel codebase analysis to produce 7 structured documents about the codebase in .planning/codebase/
 license: MIT
-compatibility: opencode, claude, amp, codex, gemini
+compatibility: opencode, claude, amp, codex, gemini, cursor
 hint: Use when mapping codebase structure, documenting architecture, or onboarding to a project
 user-invocable: true
 metadata:

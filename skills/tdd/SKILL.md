@@ -2,7 +2,7 @@
 name: tdd
 description: Guides through the complete TDD workflow with Red-Green-Refactor cycle
 license: MIT
-compatibility: claude, opencode, amp, codex, gemini
+compatibility: claude, opencode, amp, codex, gemini, cursor
 hint: Use when doing test-driven development with Red-Green-Refactor cycle
 user-invocable: true
 metadata:

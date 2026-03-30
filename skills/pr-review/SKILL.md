@@ -2,7 +2,7 @@
 name: pr-review
 description: Fix PR review comments by implementing requested changes
 license: MIT
-compatibility: claude, opencode, amp, codex, gemini
+compatibility: claude, opencode, amp, codex, gemini, cursor
 hint: Use when fixing PR review comments or addressing review feedback. Accepts PR URL, PR number, or auto-detects from current branch
 user-invocable: true
 metadata:

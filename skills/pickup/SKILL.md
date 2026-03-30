@@ -2,7 +2,7 @@
 name: pickup
 description: Resumes work from a previous handoff session which are stored in `.claude/handoffs/`
 license: MIT
-compatibility: claude, opencode, codex, gemini
+compatibility: claude, opencode, codex, gemini, cursor
 hint: Use when resuming work from a previous handoff session
 user-invocable: true
 metadata:
