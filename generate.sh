@@ -413,6 +413,15 @@ generate_cursor_configs() {
 	else
 		log_warning "Cursor Agent CLI rules not found: $HOME/.cursor/rules/general.mdc"
 	fi
+
+	# Copy mcp.json for Cursor MCP server configuration
+	if [ -f "$HOME/.cursor/mcp.json" ]; then
+		execute "mkdir -p \"$SCRIPT_DIR/configs/cursor\""
+		copy_single "$HOME/.cursor/mcp.json" "$SCRIPT_DIR/configs/cursor/mcp.json"
+		log_success "Cursor MCP config generated"
+	else
+		log_warning "Cursor MCP config not found: $HOME/.cursor/mcp.json"
+	fi
 }
 
 generate_best_practices() {

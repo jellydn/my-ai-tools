@@ -905,6 +905,10 @@ copy_configurations() {
 		if [ -f "$SCRIPT_DIR/configs/cursor/AGENTS.md" ] && execute "cp \"$SCRIPT_DIR/configs/cursor/AGENTS.md\" \"$HOME/.cursor/rules/general.mdc\""; then
 			log_success "Cursor Agent CLI configs copied"
 		fi
+		# Copy mcp.json for Cursor MCP server configuration
+		if [ -f "$SCRIPT_DIR/configs/cursor/mcp.json" ] && execute "cp \"$SCRIPT_DIR/configs/cursor/mcp.json\" \"$HOME/.cursor/mcp.json\""; then
+			log_success "Cursor MCP config copied"
+		fi
 	fi
 
 	# Copy best practices and MEMORY.md
