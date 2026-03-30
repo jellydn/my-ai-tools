@@ -449,12 +449,11 @@ copy_config_file() {
 }
 
 # Helper: Ensure a CLI tool is installed, prompting if interactive
-# Usage: ensure_cli_tool "tool_name" "install_check_cmd" "install_cmd" "version_cmd"
+# Usage: ensure_cli_tool "tool_name" "install_cmd" "version_cmd"
 ensure_cli_tool() {
 	local name="$1"
-	local check_cmd="$2"
-	local install_cmd="$3"
-	local version_cmd="$4"
+	local install_cmd="$2"
+	local version_cmd="$3"
 
 	if command -v "$name" &>/dev/null; then
 		if [ -n "$version_cmd" ]; then
@@ -986,7 +985,6 @@ check_marketplace_support() {
 # Returns 0 if marketplace is accessible, 1 if not
 try_add_marketplace_repo() {
 	local marketplace_repo="$1"
-	local repo_name="${marketplace_repo##*/}"
 
 	# Extract owner/repo format
 	local owner_repo
@@ -1291,7 +1289,8 @@ enable_plugins() {
 		fi
 
 		# Extract compatibility line from frontmatter
-		local compat_line=$(awk '/^compatibility:/ {print; exit}' "$skill_md" 2>/dev/null)
+		local compat_line
+		compat_line=$(awk '/^compatibility:/ {print; exit}' "$skill_md" 2>/dev/null)
 
 		if [ -z "$compat_line" ]; then
 			# No compatibility field means assume compatible with all
