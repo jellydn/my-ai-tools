@@ -4,7 +4,9 @@
   "defaultModel": "gpt-4o",
   "defaultThinkingLevel": "medium",
   "packages": [
-    "npm:@plannotator/pi-extension"
+    "npm:@plannotator/pi-extension",
+    "npm:pi-subagents",
+    "https://github.com/davebcn87/pi-autoresearch"
   ],
   "collapseChangelog": true,
   "quietStartup": true,
