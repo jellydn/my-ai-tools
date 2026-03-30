@@ -58,7 +58,7 @@
 		},
 		{
 			"name": "draft-pull-request",
-			"command": "opencode run --model opencode-go/glm-5 --agent build 'Create draft pr with what why how by gh cli'",
+			"command": "opencode run --model opencode/minimax-m2.5-free --agent build 'Create draft pr with what why how by gh cli'",
 			"description": "Create draft pull request with GLM",
 			"aliases": ["pr", "draft-pr"]
 		},
