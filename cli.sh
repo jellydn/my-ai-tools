@@ -500,6 +500,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
 		copy_config_dir "$HOME/.config/kilo" "$BACKUP_DIR" "kilo"
 		copy_config_dir "$HOME/.pi" "$BACKUP_DIR" "pi"
+		copy_config_dir "$HOME/.cursor" "$BACKUP_DIR" "cursor"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -655,6 +656,20 @@ install_copilot() {
 		log_info "Installing GitHub Copilot CLI (non-interactive mode)..."
 		prompt_and_install
 	fi
+}
+
+install_cursor() {
+	_run_cursor_install() {
+		if command -v cursor &>/dev/null; then
+			log_warning "Cursor CLI is already installed"
+		else
+			log_info "Cursor CLI is bundled with the Cursor desktop app."
+			log_info "Install Cursor from https://cursor.com and then run:"
+			log_info "  Shell Command: Install 'cursor' command in PATH"
+			log_info "  (available in Cursor's Command Palette)"
+		fi
+	}
+	run_installer "Cursor CLI" "_run_cursor_install" "command -v cursor" ""
 }
 
 # Helper: Copy non-marketplace skills from source to destination
@@ -880,6 +895,15 @@ copy_configurations() {
 		fi
 		if [ -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ] && execute "cp \"$SCRIPT_DIR/configs/copilot/mcp-config.json\" \"$HOME/.copilot/mcp-config.json\""; then
 			log_success "GitHub Copilot MCP config copied"
+		fi
+	fi
+
+	# Copy Cursor Agent CLI global instructions.
+	# ~/.cursor/rules/ is read by the Cursor background agent for all sessions.
+	if [ -d "$HOME/.cursor" ] || command -v cursor &>/dev/null; then
+		execute "mkdir -p \"$HOME/.cursor/rules\""
+		if [ -f "$SCRIPT_DIR/configs/cursor/AGENTS.md" ] && execute "cp \"$SCRIPT_DIR/configs/cursor/AGENTS.md\" \"$HOME/.cursor/rules/general.mdc\""; then
+			log_success "Cursor Agent CLI configs copied"
 		fi
 	fi
 
@@ -1521,6 +1545,9 @@ main() {
 	echo
 
 	install_copilot
+	echo
+
+	install_cursor
 	echo
 
 	copy_configurations

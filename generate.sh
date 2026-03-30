@@ -403,6 +403,18 @@ generate_copilot_configs() {
 	fi
 }
 
+generate_cursor_configs() {
+	log_info "Generating Cursor Agent CLI configs..."
+
+	if [ -f "$HOME/.cursor/rules/general.mdc" ]; then
+		execute "mkdir -p \"$SCRIPT_DIR/configs/cursor\""
+		copy_single "$HOME/.cursor/rules/general.mdc" "$SCRIPT_DIR/configs/cursor/AGENTS.md"
+		log_success "Cursor Agent CLI configs generated"
+	else
+		log_warning "Cursor Agent CLI rules not found: $HOME/.cursor/rules/general.mdc"
+	fi
+}
+
 generate_best_practices() {
 	log_info "Generating best-practices.md..."
 
@@ -471,6 +483,9 @@ main() {
 	echo
 
 	generate_copilot_configs
+	echo
+
+	generate_cursor_configs
 	echo
 
 	generate_best_practices

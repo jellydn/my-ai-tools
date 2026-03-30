@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi, GitHub Copilot CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -1115,6 +1115,48 @@ copilot
 
 # Work across multiple repositories
 /add-dir /path/to/other-repo
+```
+
+</details>
+
+---
+
+## 🖱️ Cursor Agent CLI (Optional)
+
+Cursor's background agent CLI — run AI-powered coding tasks directly from your terminal. [Docs](https://cursor.com/docs/cli/using)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Prerequisites
+
+Requires the [Cursor](https://cursor.com) desktop application to be installed.
+
+### Installation
+
+The `cursor` CLI is bundled with the Cursor desktop app. After installing Cursor, add it to your PATH via the Command Palette:
+
+```
+Shell Command: Install 'cursor' command in PATH
+```
+
+### Configuration
+
+Cursor Agent CLI configs are stored in [`configs/cursor/`](configs/cursor/) and installed to `~/.cursor/rules/`.
+
+- [`AGENTS.md`](configs/cursor/AGENTS.md) - Agent guidelines and best practices, installed to `~/.cursor/rules/general.mdc`
+
+### Usage
+
+```bash
+# Open a project in Cursor
+cursor .
+
+# Open a specific file
+cursor /path/to/file
+
+# Check the CLI version
+cursor --version
 ```
 
 </details>
