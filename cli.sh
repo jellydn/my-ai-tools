@@ -402,7 +402,7 @@ safe_copy_dir() {
 	# Fallback: copy non-binary files, skip busy binaries
 	mkdir -p "$dest_dir"
 	while IFS= read -r file; do
-		rel_path="${file#$source_dir/}"
+		rel_path="${file#"$source_dir"/}"
 		dest_file="$dest_dir/$rel_path"
 		mkdir -p "$(dirname "$dest_file")"
 		if cp "$file" "$dest_file" 2>/dev/null; then
@@ -1016,7 +1016,7 @@ enable_plugins() {
 	elif [ -t 0 ]; then
 		log_info "How would you like to install community skills?"
 		printf "1) Local (from skills folder) 2) Remote (from jellydn/my-ai-tools using npx skills) [1/2]: "
-		read REPLY
+		read -r REPLY
 		echo
 		case "$REPLY" in
 		2) SKILL_INSTALL_SOURCE="remote" ;;
