@@ -1,15 +1,16 @@
 {
-  "lastChangelogVersion": "0.57.1",
-  "defaultProvider": "github-copilot",
-  "defaultModel": "gpt-4o",
+  "collapseChangelog": true,
+  "defaultModel": "accounts/fireworks/routers/kimi-k2p5-turbo",
+  "defaultProvider": "fireworks",
   "defaultThinkingLevel": "medium",
+  "editorPaddingX": 1,
+  "lastChangelogVersion": "0.64.0",
   "packages": [
     "npm:@plannotator/pi-extension",
     "npm:pi-subagents",
-    "https://github.com/davebcn87/pi-autoresearch"
+    "https://github.com/davebcn87/pi-autoresearch",
+    "git:github.com/jellydn/pi-fireworks-provider"
   ],
-  "collapseChangelog": true,
   "quietStartup": true,
-  "theme": "dracula",
-  "editorPaddingX": 1
+  "theme": "dracula"
 }
