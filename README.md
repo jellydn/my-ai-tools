@@ -301,7 +301,7 @@ If you encounter issues:
 | `codemap`               | Parallel codebase analysis        | Local Marketplace |
 | `claude-hud`            | Status line with usage monitoring | Community         |
 | `worktrunk`             | Work management                   | Community         |
-| `codex`                 | Codex code review & task delegation | Community       |
+| `codex`                 | Codex code review & task delegation | Community         |
 
 #### Key Marketplace Plugins
 
