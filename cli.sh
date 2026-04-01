@@ -1035,29 +1035,34 @@ install_recommended_skills() {
 	log_info "Found $skill_count recommended skill(s)"
 
 	for i in $(seq 0 $((skill_count - 1))); do
-		local repo description
+		local repo description skill skill_suffix
 		repo=$(echo "$skills_json" | jq -r ".recommended_skills[$i].repo")
 		description=$(echo "$skills_json" | jq -r ".recommended_skills[$i].description")
+		skill=$(echo "$skills_json" | jq -r ".recommended_skills[$i].skill // empty")
+		skill_suffix=""
+		if [ -n "$skill" ]; then
+			skill_suffix="/$skill"
+		fi
 
-		log_info "  - $repo: $description"
+		log_info "  - $repo${skill_suffix}: $description"
 
 		if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
-			if execute "npx skills add '$repo' --yes --global --agent claude-code" 2>/dev/null; then
-				log_success "Installed: $repo"
+			if [ -n "$skill" ]; then
+				execute "npx skills add '$repo' --skill '$skill' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_info "Skipped: $repo${skill_suffix}"
 			else
-				log_info "Skipped: $repo"
+				execute "npx skills add '$repo' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_info "Skipped: $repo"
 			fi
 		elif [ -t 0 ]; then
-			read -rp "Install $repo? (y/n) " -n 1
+			read -rp "Install $repo${skill_suffix}? (y/n) " -n 1
 			echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				if execute "npx skills add '$repo' --global --agent claude-code" 2>/dev/null; then
-					log_success "Installed: $repo"
+				if [ -n "$skill" ]; then
+					execute "npx skills add '$repo' --skill '$skill' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_warning "Failed to install: $repo${skill_suffix}"
 				else
-					log_warning "Failed to install: $repo"
+					execute "npx skills add '$repo' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_warning "Failed to install: $repo"
 				fi
 			else
-				log_info "Skipped: $repo"
+				log_info "Skipped: $repo${skill_suffix}"
 			fi
 		fi
 	done
