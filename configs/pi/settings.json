@@ -1,7 +1,7 @@
 {
   "collapseChangelog": true,
-  "defaultModel": "accounts/fireworks/routers/kimi-k2p5-turbo",
-  "defaultProvider": "fireworks",
+  "defaultModel": "gpt-5-mini",
+  "defaultProvider": "github-copilot",
   "defaultThinkingLevel": "medium",
   "editorPaddingX": 1,
   "lastChangelogVersion": "0.64.0",
@@ -9,8 +9,11 @@
     "npm:@plannotator/pi-extension",
     "npm:pi-subagents",
     "https://github.com/davebcn87/pi-autoresearch",
-    "git:github.com/jellydn/pi-fireworks-provider"
+    "git:github.com/jellydn/pi-fireworks-provider",
+    "npm:pi-hooks"
   ],
   "quietStartup": true,
-  "theme": "dracula"
+  "theme": "dracula",
+  "hideThinkingBlock": false,
+  "permissionLevel": "high"
 }

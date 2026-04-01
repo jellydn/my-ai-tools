@@ -56,4 +56,3 @@ A status table updates as workers complete, showing which PRs are ready for revi
 - Tightly coupled changes that require coordination between units
 - Exploratory refactoring where you don't yet know the target shape
 - Single-file modifications (use `/simplify` instead)
-
