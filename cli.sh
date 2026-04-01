@@ -392,16 +392,51 @@ safe_copy_dir() {
 		return 1
 	fi
 
-	# Prefer rsync when available to exclude node_modules and handle busy files
+	# Directories to exclude from copies (large, non-config data)
+	local -a exclude_dirs=(
+		"node_modules"
+		"plugins"
+		"projects"
+		"debug"
+		"sessions"
+		"git"
+		"cache"
+		"extensions"
+		"chats"
+		"antigravity"
+		"antigravity-browser-profile"
+		"log"
+		"logs"
+		"tmp"
+		"vendor_imports"
+		"file-history"
+		"ai-tracking"
+	)
+
+	# Prefer rsync when available to exclude large dirs and handle busy files
 	if command -v rsync &>/dev/null; then
-		if rsync -a --ignore-errors --exclude "node_modules" --exclude "node_modules/**" "$source_dir/" "$dest_dir/" 2>/dev/null; then
+		local -a rsync_excludes=()
+		for dir in "${exclude_dirs[@]}"; do
+			rsync_excludes+=(--exclude "$dir" --exclude "$dir/**")
+		done
+		rsync_excludes+=(--exclude "*.sqlite" --exclude "*.sqlite-wal" --exclude "*.sqlite-shm")
+		if rsync -a --ignore-errors "${rsync_excludes[@]}" "$source_dir/" "$dest_dir/" 2>/dev/null; then
 			return 0
 		fi
 	fi
 
-	# Fallback: copy non-binary files, skip busy binaries
+	# Fallback: copy non-binary files, skip busy binaries and excluded dirs
+	local prune_expr=""
+	for dir in "${exclude_dirs[@]}"; do
+		prune_expr="$prune_expr -name $dir -o"
+	done
+	# Remove trailing -o
+	prune_expr="${prune_expr% -o}"
+
 	mkdir -p "$dest_dir"
 	while IFS= read -r file; do
+		# Skip sqlite files
+		case "$file" in *.sqlite|*.sqlite-wal|*.sqlite-shm) continue ;; esac
 		rel_path="${file#"$source_dir"/}"
 		dest_file="$dest_dir/$rel_path"
 		mkdir -p "$(dirname "$dest_file")"
@@ -412,7 +447,7 @@ safe_copy_dir() {
 			((skipped++))
 			[ "$VERBOSE" = true ] && log_warning "Skipped busy file: $rel_path"
 		fi
-	done < <(find "$source_dir" -type d -name node_modules -prune -o -type f -print 2>/dev/null)
+	done < <(find "$source_dir" -type d \( $prune_expr \) -prune -o -type f -print 2>/dev/null)
 
 	# Log summary in verbose mode
 	[ "$VERBOSE" = true ] && [ $skipped -gt 0 ] && log_info "Skipped $skipped busy file(s)"
