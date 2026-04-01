@@ -249,6 +249,9 @@ claude plugin install claude-hud@claude-hud
 claude plugin marketplace add max-sixty/worktrunk
 claude plugin install worktrunk@worktrunk
 
+claude plugin marketplace add openai/codex-plugin-cc
+claude plugin install codex@openai-codex
+
 # Install skills from this repository (jellydn/my-ai-tools)
 # Recommended: Install all skills at once using npx skills add
 npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
@@ -298,6 +301,7 @@ If you encounter issues:
 | `codemap`               | Parallel codebase analysis        | Local Marketplace |
 | `claude-hud`            | Status line with usage monitoring | Community         |
 | `worktrunk`             | Work management                   | Community         |
+| `codex`                 | Codex code review & task delegation | Community       |
 
 #### Key Marketplace Plugins
 

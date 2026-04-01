@@ -146,6 +146,7 @@
     "claude-hud@claude-hud": true,
     "code-simplifier@claude-plugins-official": true,
     "worktrunk@worktrunk": true,
+    "codex@openai-codex": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true
   },
@@ -172,6 +173,12 @@
       "source": {
         "source": "github",
         "repo": "max-sixty/worktrunk"
+      }
+    },
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
       }
     }
   },
