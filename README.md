@@ -1242,6 +1242,10 @@ See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for det
 
 [**Claude Squad**](https://github.com/smtg-ai/claude-squad) - Manage multiple AI agents in separate workspaces with isolated git worktrees.
 
+### cmux
+
+[**cmux**](https://github.com/manaflow-ai/cmux) - Ghostty-based macOS terminal with vertical tabs and notifications for AI coding agents.
+
 ### Spec Kit
 
 [**Spec Kit**](https://github.com/github/spec-kit) - Toolkit for Spec-Driven Development. ([GitHub](https://github.com/github/spec-kit))
