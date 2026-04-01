@@ -1137,6 +1137,7 @@ enable_plugins() {
 		"codemap|codemap@my-ai-tools|$SCRIPT_DIR|claude"
 		"claude-hud|claude-hud@claude-hud|jarrodwatts/claude-hud|claude"
 		"worktrunk|worktrunk@worktrunk|max-sixty/worktrunk|claude"
+		"openai-codex|codex@openai-codex|openai/codex-plugin-cc|claude"
 	)
 
 	install_plugin() {
