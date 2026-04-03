@@ -1131,6 +1131,43 @@ install_recommended_skills() {
 	log_success "Recommended skills check complete"
 }
 
+# Helper: Remove skills from tool-specific directories that already exist in global ~/.agents/skills
+cleanup_duplicate_skills() {
+	local global_skills_dir="$HOME/.agents/skills"
+
+	# Skip if global skills directory doesn't exist
+	if [ ! -d "$global_skills_dir" ]; then
+		return 0
+	fi
+
+	log_info "Cleaning up duplicate skills from tool-specific directories..."
+
+	# Define target directories using existing variables where available
+	local -a target_dirs=(
+		"$CLAUDE_SKILLS_DIR"
+		"$OPENCODE_SKILL_DIR"
+		"$AMP_SKILLS_DIR"
+		"$CODEX_SKILLS_DIR"
+		"$GEMINI_SKILLS_DIR"
+		"$CURSOR_SKILLS_DIR"
+	)
+
+	for target_dir in "${target_dirs[@]}"; do
+		if [ -d "$target_dir" ]; then
+			for skill_dir in "$target_dir"/*; do
+				if [ -d "$skill_dir" ]; then
+					local skill_name
+					skill_name=$(basename "$skill_dir")
+					if [ -d "$global_skills_dir/$skill_name" ]; then
+						execute "rm -rf '$skill_dir'"
+						log_info "Removed duplicate skill $skill_name from $target_dir/"
+					fi
+				fi
+			done
+		fi
+	done
+}
+
 # Helper: Check if a skill is in the remote skills list
 is_remote_skill() {
 	local skill="$1"
@@ -1431,6 +1468,12 @@ enable_plugins() {
 			if [ -d "$skill_dir" ]; then
 				skill_name=$(basename "$skill_dir")
 
+				# Skip if skill already exists in global skills directory (to avoid conflicts)
+				if [ -d "$HOME/.agents/skills/$skill_name" ]; then
+					log_info "Skipped $skill_name (already exists in ~/.agents/skills/)"
+					continue
+				fi
+
 				# Check compatibility and copy to each platform
 				if skill_is_compatible_with "$skill_dir" "claude"; then
 					safe_copy_dir "$skill_dir" "$CLAUDE_SKILLS_DIR/$skill_name"
@@ -1586,6 +1629,9 @@ enable_plugins() {
 		log_success "Community skills installation complete"
 
 		install_recommended_skills
+
+		# Clean up duplicate skills that conflict with global ~/.agents/skills directory
+		cleanup_duplicate_skills
 	fi
 }
 
