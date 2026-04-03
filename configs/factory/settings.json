@@ -84,7 +84,7 @@
 			{
 				"hooks": [
 					{
-						"command": "node \"/Users/huynhdung/.ccs/hooks/websearch-transformer.cjs\"",
+						"command": "node \"$HOME/.ccs/hooks/websearch-transformer.cjs\"",
 						"timeout": 85,
 						"type": "command"
 					}
@@ -99,7 +99,7 @@
 		],
 		"claudeHooksImported": true,
 		"importedClaudeHooks": [
-			"node \"/Users/huynhdung/.ccs/hooks/websearch-transformer.cjs\""
+			"node \"$HOME/.ccs/hooks/websearch-transformer.cjs\""
 		],
 		"UserPromptSubmit": [
 			{

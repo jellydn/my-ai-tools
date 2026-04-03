@@ -1,104 +1,80 @@
 {
-  "$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
-  "mcpServers": {
-    "context7": {
-      "url": "https://mcp.context7.com/mcp"
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
-    },
-    "qmd": {
-      "command": "qmd",
-      "args": [
-        "mcp"
-      ]
-    }
-  },
-  "security": {
-    "auth": {
-      "selectedType": "oauth-personal"
-    },
-    "enablePermanentToolApproval": true,
-    "folderTrust": {
-      "enabled": true
-    },
-    "environmentVariableRedaction": {
-      "enabled": true
-    }
-  },
-  "ui": {
-    "theme": "Dracula",
-    "showStatusInTitle": true,
-    "hideBanner": true,
-    "footer": {
-      "hideContextPercentage": false
-    },
-    "showMemoryUsage": false,
-    "showCitations": true,
-    "showModelInfoInChat": true
-  },
-  "general": {
-    "previewFeatures": true,
-    "sessionRetention": {
-      "enabled": true,
-      "maxAge": "30d",
-      "warningAcknowledged": true
-    }
-  },
-  "context": {
-    "loadMemoryFromIncludeDirectories": true,
-    "fileName": [
-      "CLAUDE.md",
-      "GEMINI.md",
-      "AGENTS.md"
-    ]
-  },
-  "tools": {
-    "shell": {
-      "showColor": true
-    }
-  },
-  "ide": {
-    "enabled": true
-  },
-  "experimental": {
-    "enableAgents": true,
-    "plan": true
-  },
-  "hooks": {
-    "BeforeAgent": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/huynhdung/.superset/hooks/gemini-hook.sh"
-          }
-        ]
-      }
-    ],
-    "AfterAgent": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/huynhdung/.superset/hooks/gemini-hook.sh"
-          }
-        ]
-      }
-    ],
-    "AfterTool": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/huynhdung/.superset/hooks/gemini-hook.sh"
-          }
-        ]
-      }
-    ]
-  }
+	"$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
+	"mcpServers": {
+		"context7": {
+			"url": "https://mcp.context7.com/mcp"
+		},
+		"sequential-thinking": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
+		}
+	},
+	"security": {
+		"auth": {
+			"selectedType": "oauth-personal"
+		},
+		"enablePermanentToolApproval": true,
+		"folderTrust": {
+			"enabled": true
+		},
+		"environmentVariableRedaction": {
+			"enabled": true
+		}
+	},
+	"ui": {
+		"theme": "Dracula",
+		"showStatusInTitle": true,
+		"hideBanner": true,
+		"footer": {
+			"hideContextPercentage": false
+		},
+		"showMemoryUsage": false,
+		"showCitations": true,
+		"showModelInfoInChat": true
+	},
+	"general": {
+		"previewFeatures": true,
+		"sessionRetention": {
+			"enabled": true,
+			"maxAge": "30d",
+			"warningAcknowledged": true
+		}
+	},
+	"context": {
+		"loadMemoryFromIncludeDirectories": true,
+		"fileName": ["CLAUDE.md", "GEMINI.md", "AGENTS.md"]
+	},
+	"tools": {
+		"shell": {
+			"showColor": true
+		}
+	},
+	"ide": {
+		"enabled": true
+	},
+	"experimental": {
+		"enableAgents": true,
+		"plan": true
+	},
+	"hooks": {
+		"BeforeAgent": [
+			{
+				"hooks": []
+			}
+		],
+		"AfterAgent": [
+			{
+				"hooks": []
+			}
+		],
+		"AfterTool": [
+			{
+				"hooks": []
+			}
+		]
+	}
 }
