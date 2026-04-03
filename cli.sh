@@ -973,9 +973,7 @@ copy_configurations() {
 	# ~/.factory/droids/ contains custom droid definitions available globally.
 	if [ -d "$HOME/.factory" ] || command -v droid &>/dev/null; then
 		execute "mkdir -p $HOME/.factory/droids"
-		if [ -f "$SCRIPT_DIR/configs/factory/AGENTS.md" ] && execute "cp \"$SCRIPT_DIR/configs/factory/AGENTS.md\" \"$HOME/.factory/AGENTS.md\""; then
-			log_success "Factory Droid AGENTS.md copied"
-		fi
+		copy_config_file "$SCRIPT_DIR/configs/factory/AGENTS.md" "$HOME/.factory/" || true
 		if [ -d "$SCRIPT_DIR/configs/factory/droids" ] && [ "$(ls -A "$SCRIPT_DIR/configs/factory/droids" 2>/dev/null)" ]; then
 			safe_copy_dir "$SCRIPT_DIR/configs/factory/droids" "$HOME/.factory/droids"
 			log_success "Factory Droid custom droids copied"
@@ -1592,11 +1590,11 @@ enable_plugins() {
 }
 
 main() {
-	echo "╔════════════════════════════════════════════════════════════════════╗"
-	echo "║           AI Tools Setup                                           ║"
-	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo      ║"
-	echo "║   Copilot • Cursor • Factory Droid                                 ║"
-	echo "╚════════════════════════════════════════════════════════════════════╝"
+	echo "╔══════════════════════════════════════════════════════════════════════╗"
+	echo "║                        AI Tools Setup                               ║"
+	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo         ║"
+	echo "║  Copilot • Cursor • Factory Droid                                    ║"
+	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
 	if [ "$DRY_RUN" = true ]; then

@@ -479,11 +479,15 @@ generate_factory_configs() {
 		fi
 		if [ -d "$HOME/.factory/droids" ] && [ "$(ls -A "$HOME/.factory/droids" 2>/dev/null)" ]; then
 			execute "mkdir -p \"$SCRIPT_DIR/configs/factory/droids\""
-			if execute "cp -r '$HOME/.factory/droids'/* '$SCRIPT_DIR/configs/factory/droids'/ 2>/dev/null"; then
-				log_success "Factory Droid custom droids generated"
-			else
-				log_warning "Failed to copy some Factory Droid droids"
-			fi
+			for droid_file in "$HOME/.factory/droids"/*; do
+				if [ -f "$droid_file" ]; then
+					droid_name="$(basename "$droid_file")"
+					if execute "cp '$droid_file' '$SCRIPT_DIR/configs/factory/droids/$droid_name' 2>/dev/null"; then
+						log_success "Copied droid: $droid_name"
+					fi
+				fi
+			done
+			log_success "Factory Droid custom droids generated"
 		else
 			log_warning "Factory Droid droids directory not found or empty: $HOME/.factory/droids"
 		fi
