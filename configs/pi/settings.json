@@ -1,7 +1,7 @@
 {
   "collapseChangelog": true,
-  "defaultModel": "gpt-5-mini",
-  "defaultProvider": "github-copilot",
+  "defaultModel": "accounts/fireworks/routers/kimi-k2p5-turbo",
+  "defaultProvider": "fireworks",
   "defaultThinkingLevel": "medium",
   "editorPaddingX": 1,
   "lastChangelogVersion": "0.64.0",
