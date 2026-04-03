@@ -1207,12 +1207,12 @@ droid /login
 
 ### Configuration
 
-Factory Droid configs are stored in [`configs/factory/`](configs/factory/) and installed to `~/.factory/`:
+Factory Droid configs are stored in `@configs/factory/` and installed to `@~/.factory/`:
 
-- [`AGENTS.md`](configs/factory/AGENTS.md) - Global agent guidelines, installed to `~/.factory/AGENTS.md`
-- [`mcp.json`](configs/factory/mcp.json) - MCP server configurations, installed to `~/.factory/mcp.json`
-- [`settings.json`](configs/factory/settings.json) - Factory Droid settings, installed to `~/.factory/settings.json`
-- `droids/` - Optional user-created directory for custom droid definitions under `configs/factory/droids/`, installed to `~/.factory/droids/`
+- `@configs/factory/AGENTS.md` - Global agent guidelines, installed to `@~/.factory/AGENTS.md`
+- `@configs/factory/mcp.json` - MCP server configurations, installed to `@~/.factory/mcp.json`
+- `@configs/factory/settings.json` - Factory Droid settings, installed to `@~/.factory/settings.json`
+- `@configs/factory/droids/` - Optional user-created directory for custom droid definitions, installed to `@~/.factory/droids/`
 
 ### Usage
 
