@@ -40,14 +40,14 @@
 	"customModels": [
 		{
 			"model": "minimax-m2.5:cloud",
-			"displayName": "minimax-m2.5:cloud",
+			"id": "custom:minimax-m2.5:cloud-0",
+			"index": 0,
 			"baseUrl": "http://127.0.0.1:11434/v1",
 			"apiKey": "ollama",
-			"provider": "generic-chat-completion-api",
+			"displayName": "minimax-m2.5:cloud",
 			"maxOutputTokens": 128000,
-			"supportsImages": false,
-			"id": "custom:minimax-m2.5:cloud-0",
-			"index": 0
+			"noImageSupport": true,
+			"provider": "generic-chat-completion-api"
 		}
 	],
 	"diffMode": "github",
@@ -125,5 +125,12 @@
 	},
 	"showThinkingInMainView": false,
 	"soundFocusMode": "always",
-	"todoDisplayMode": "pinned"
+	"todoDisplayMode": "pinned",
+	"enabledPlugins": {
+		"core@factory-plugins": true,
+		"security-engineer@factory-plugins": true,
+		"droid-evolved@factory-plugins": true,
+		"autoresearch@factory-plugins": true
+	},
+	"logoAnimation": "off"
 }
