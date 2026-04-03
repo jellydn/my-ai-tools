@@ -482,9 +482,7 @@ generate_factory_configs() {
 			for droid_file in "$HOME/.factory/droids"/*; do
 				if [ -f "$droid_file" ]; then
 					droid_name="$(basename "$droid_file")"
-					if execute "cp '$droid_file' '$SCRIPT_DIR/configs/factory/droids/$droid_name' 2>/dev/null"; then
-						log_success "Copied droid: $droid_name"
-					fi
+					copy_single "$droid_file" "$SCRIPT_DIR/configs/factory/droids/$droid_name"
 				fi
 			done
 			log_success "Factory Droid custom droids generated"

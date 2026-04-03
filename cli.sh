@@ -711,12 +711,8 @@ install_cursor() {
 
 install_factory() {
 	_run_factory_install() {
-		if command -v droid &>/dev/null; then
-			log_warning "Factory Droid CLI is already installed"
-		else
-			execute "npm install -g @factory/cli"
-			log_success "Factory Droid CLI installed"
-		fi
+		execute "npm install -g @factory/cli"
+		log_success "Factory Droid CLI installed"
 	}
 	run_installer "Factory Droid" "_run_factory_install" "command -v droid" ""
 }
