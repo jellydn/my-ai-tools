@@ -473,11 +473,10 @@ generate_factory_configs() {
 		execute "mkdir -p \"$SCRIPT_DIR/configs/factory\""
 		if [ -f "$HOME/.factory/AGENTS.md" ]; then
 			copy_single "$HOME/.factory/AGENTS.md" "$SCRIPT_DIR/configs/factory/AGENTS.md"
-			log_success "Factory Droid AGENTS.md generated"
 		else
 			log_warning "Factory Droid AGENTS.md not found: $HOME/.factory/AGENTS.md"
 		fi
-		if [ -d "$HOME/.factory/droids" ] && [ "$(ls -A "$HOME/.factory/droids" 2>/dev/null)" ]; then
+		if [ -d "$HOME/.factory/droids" ] && find "$HOME/.factory/droids" -maxdepth 1 -type f -name '*.md' | grep -q .; then
 			execute "mkdir -p \"$SCRIPT_DIR/configs/factory/droids\""
 			for droid_file in "$HOME/.factory/droids"/*.md; do
 				if [ -f "$droid_file" ]; then
@@ -485,18 +484,15 @@ generate_factory_configs() {
 					copy_single "$droid_file" "$SCRIPT_DIR/configs/factory/droids/$droid_name"
 				fi
 			done
-			log_success "Factory Droid custom droids generated"
 		else
 			log_warning "Factory Droid droids directory not found or empty: $HOME/.factory/droids"
 		fi
 		# Export mcp.json and settings.json
 		if [ -f "$HOME/.factory/mcp.json" ]; then
 			copy_single "$HOME/.factory/mcp.json" "$SCRIPT_DIR/configs/factory/mcp.json"
-			log_success "Factory Droid mcp.json generated"
 		fi
 		if [ -f "$HOME/.factory/settings.json" ]; then
 			copy_single "$HOME/.factory/settings.json" "$SCRIPT_DIR/configs/factory/settings.json"
-			log_success "Factory Droid settings.json generated"
 		fi
 		log_success "Factory Droid configs generated"
 	else
