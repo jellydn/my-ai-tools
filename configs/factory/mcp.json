@@ -1,15 +1,31 @@
 {
-	"mcpServers": {
-		"context7": {
-			"type": "http",
-			"url": "https://mcp.context7.com/mcp",
-			"disabled": false
-		},
-		"playwright": {
-			"type": "stdio",
-			"command": "npx",
-			"args": ["-y", "@playwright/mcp@latest"],
-			"disabled": false
-		}
-	}
+  "mcpServers": {
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ],
+      "disabled": false
+    },
+    "sequential-thinking": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "disabled": false
+    },
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ],
+      "disabled": false
+    }
+  }
 }
