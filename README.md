@@ -282,25 +282,25 @@ If you encounter issues:
 
 #### Plugin List
 
-| Plugin                  | Description                       | Source            |
-| ----------------------- | --------------------------------- | ----------------- |
-| `typescript-lsp`        | TypeScript language server        | Official          |
-| `pyright-lsp`           | Python language server            | Official          |
-| `context7`              | Documentation lookup              | Official          |
-| `frontend-design`       | UI/UX design assistance           | Official          |
-| `learning-output-style` | Interactive learning mode         | Official          |
-| `swift-lsp`             | Swift language support            | Official          |
-| `lua-lsp`               | Lua language support              | Official          |
-| `code-simplifier`       | Code simplification               | Official          |
-| `rust-analyzer-lsp`     | Rust language support             | Official          |
-| `claude-md-management`  | Markdown management               | Official          |
-| `plannotator`           | Plan annotation tool              | Community         |
-| `prd`                   | Product Requirements Documents    | Local Marketplace |
-| `ralph`                 | PRD to JSON converter             | Local Marketplace |
-| `qmd-knowledge`         | Project knowledge management      | Local Marketplace |
-| `codemap`               | Parallel codebase analysis        | Local Marketplace |
-| `claude-hud`            | Status line with usage monitoring | Community         |
-| `worktrunk`             | Work management                   | Community         |
+| Plugin                  | Description                         | Source            |
+| ----------------------- | ----------------------------------- | ----------------- |
+| `typescript-lsp`        | TypeScript language server          | Official          |
+| `pyright-lsp`           | Python language server              | Official          |
+| `context7`              | Documentation lookup                | Official          |
+| `frontend-design`       | UI/UX design assistance             | Official          |
+| `learning-output-style` | Interactive learning mode           | Official          |
+| `swift-lsp`             | Swift language support              | Official          |
+| `lua-lsp`               | Lua language support                | Official          |
+| `code-simplifier`       | Code simplification                 | Official          |
+| `rust-analyzer-lsp`     | Rust language support               | Official          |
+| `claude-md-management`  | Markdown management                 | Official          |
+| `plannotator`           | Plan annotation tool                | Community         |
+| `prd`                   | Product Requirements Documents      | Local Marketplace |
+| `ralph`                 | PRD to JSON converter               | Local Marketplace |
+| `qmd-knowledge`         | Project knowledge management        | Local Marketplace |
+| `codemap`               | Parallel codebase analysis          | Local Marketplace |
+| `claude-hud`            | Status line with usage monitoring   | Community         |
+| `worktrunk`             | Work management                     | Community         |
 | `codex`                 | Codex code review & task delegation | Community         |
 
 #### Key Marketplace Plugins
@@ -1210,7 +1210,9 @@ droid /login
 Factory Droid configs are stored in [`configs/factory/`](configs/factory/) and installed to `~/.factory/`:
 
 - [`AGENTS.md`](configs/factory/AGENTS.md) - Global agent guidelines, installed to `~/.factory/AGENTS.md`
-- [`droids/`](configs/factory/droids/) - Custom droid definitions, installed to `~/.factory/droids/`
+- [`mcp.json`](configs/factory/mcp.json) - MCP server configurations, installed to `~/.factory/mcp.json`
+- [`settings.json`](configs/factory/settings.json) - Factory Droid settings, installed to `~/.factory/settings.json`
+- `droids/` - Optional user-created directory for custom droid definitions under `configs/factory/droids/`, installed to `~/.factory/droids/`
 
 ### Usage
 

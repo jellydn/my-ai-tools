@@ -436,7 +436,7 @@ safe_copy_dir() {
 	mkdir -p "$dest_dir"
 	while IFS= read -r file; do
 		# Skip sqlite files
-		case "$file" in *.sqlite|*.sqlite-wal|*.sqlite-shm) continue ;; esac
+		case "$file" in *.sqlite | *.sqlite-wal | *.sqlite-shm) continue ;; esac
 		rel_path="${file#"$source_dir"/}"
 		dest_file="$dest_dir/$rel_path"
 		mkdir -p "$(dirname "$dest_file")"
@@ -967,9 +967,13 @@ copy_configurations() {
 	# Copy Factory Droid configs.
 	# ~/.factory/AGENTS.md provides global agent guidelines for all Factory Droid sessions.
 	# ~/.factory/droids/ contains custom droid definitions available globally.
+	# ~/.factory/mcp.json contains MCP server configurations.
+	# ~/.factory/settings.json contains Factory Droid settings.
 	if [ -d "$HOME/.factory" ] || command -v droid &>/dev/null; then
-		execute "mkdir -p $HOME/.factory/droids"
+		execute "mkdir -p \"$HOME/.factory/droids\""
 		copy_config_file "$SCRIPT_DIR/configs/factory/AGENTS.md" "$HOME/.factory/" || true
+		copy_config_file "$SCRIPT_DIR/configs/factory/mcp.json" "$HOME/.factory/" || true
+		copy_config_file "$SCRIPT_DIR/configs/factory/settings.json" "$HOME/.factory/" || true
 		if [ -d "$SCRIPT_DIR/configs/factory/droids" ] && [ "$(ls -A "$SCRIPT_DIR/configs/factory/droids" 2>/dev/null)" ]; then
 			safe_copy_dir "$SCRIPT_DIR/configs/factory/droids" "$HOME/.factory/droids"
 			log_success "Factory Droid custom droids copied"

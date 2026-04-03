@@ -1,0 +1,130 @@
+{
+	"allowBackgroundProcesses": false,
+	"awaitingInputSound": "fx-ack01",
+	"claudeHooksImported": true,
+	"cloudSessionSync": true,
+	"commandAllowlist": ["ls", "pwd", "dir"],
+	"commandDenylist": [
+		"rm -rf /",
+		"rm -rf /*",
+		"rm -rf .",
+		"rm -rf ~",
+		"rm -rf ~/*",
+		"rm -rf $HOME",
+		"rm -r /",
+		"rm -r /*",
+		"rm -r ~",
+		"rm -r ~/*",
+		"mkfs",
+		"mkfs.ext4",
+		"mkfs.ext3",
+		"mkfs.vfat",
+		"mkfs.ntfs",
+		"dd if=/dev/zero of=/dev",
+		"dd of=/dev",
+		"shutdown",
+		"reboot",
+		"halt",
+		"poweroff",
+		"init 0",
+		"init 6",
+		":(){ :|: & };:",
+		":() { :|:& };:",
+		"chmod -R 777 /",
+		"chmod -R 000 /",
+		"chown -R",
+		"format",
+		"powershell Remove-Item -Recurse -Force"
+	],
+	"completionSound": "fx-ok01",
+	"customModels": [
+		{
+			"model": "minimax-m2.5:cloud",
+			"displayName": "minimax-m2.5:cloud",
+			"baseUrl": "http://127.0.0.1:11434/v1",
+			"apiKey": "ollama",
+			"provider": "generic-chat-completion-api",
+			"maxOutputTokens": 128000,
+			"supportsImages": false,
+			"id": "custom:minimax-m2.5:cloud-0",
+			"index": 0
+		}
+	],
+	"diffMode": "github",
+	"enableCompletionBell": false,
+	"enableCustomDroids": true,
+	"enableDroidShield": true,
+	"enableReadinessReport": false,
+	"hooks": {
+		"Notification": [],
+		"PostToolUse": [
+			{
+				"hooks": [
+					{
+						"command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(ts|tsx|js|jsx)$'; then biome check --write \"$file_path\"; fi; }",
+						"type": "command"
+					},
+					{
+						"command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.go$ ]]; then gofmt -w \"$( jq -r .tool_input.file_path )\"; fi",
+						"type": "command"
+					},
+					{
+						"command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(md|mdx)$'; then npx prettier --write \"$file_path\"; fi; }",
+						"type": "command"
+					}
+				],
+				"matcher": "Write|Edit|MultiEdit"
+			},
+			{
+				"matcher": "*",
+				"hooks": []
+			}
+		],
+		"PreToolUse": [
+			{
+				"hooks": [
+					{
+						"command": "node \"/Users/huynhdung/.ccs/hooks/websearch-transformer.cjs\"",
+						"timeout": 85,
+						"type": "command"
+					}
+				],
+				"matcher": "WebSearch"
+			}
+		],
+		"Stop": [
+			{
+				"hooks": []
+			}
+		],
+		"claudeHooksImported": true,
+		"importedClaudeHooks": [
+			"node \"/Users/huynhdung/.ccs/hooks/websearch-transformer.cjs\""
+		],
+		"UserPromptSubmit": [
+			{
+				"hooks": []
+			}
+		]
+	},
+	"ideActivationNudgedForVersion": {},
+	"ideExtensionPromptedAt": {
+		"cursor": 1764649301074,
+		"vscode": 1764668205907
+	},
+	"importedClaudeHooks": [
+		"jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(ts|tsx|js|jsx)$'; then biome check --write \"$file_path\"; fi; }",
+		"if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.go$ ]]; then gofmt -w \"$( jq -r .tool_input.file_path )\"; fi",
+		"jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(md|mdx)$'; then npx prettier --write \"$file_path\"; fi; }"
+	],
+	"includeCoAuthoredByDroid": true,
+	"sessionDefaultSettings": {
+		"autonomyMode": "auto-medium",
+		"model": "custom:minimax-m2.5:cloud-0",
+		"reasoningEffort": "none"
+	},
+	"showThinkingInMainView": false,
+	"soundFocusMode": "always",
+	"todoDisplayMode": "pinned"
+}
+
