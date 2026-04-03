@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -1163,6 +1163,72 @@ cursor /path/to/file
 
 # Check the CLI version
 cursor --version
+```
+
+</details>
+
+---
+
+## 🏭 Factory Droid (Optional)
+
+Factory's AI coding agent — end-to-end feature development from your terminal. [Homepage](https://factory.ai) | [Docs](https://docs.factory.ai/cli/getting-started/quickstart)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Installation
+
+```bash
+npm install -g @factory/cli
+```
+
+After installation, navigate to your project and start the droid CLI:
+
+```bash
+cd /path/to/your/project
+droid
+```
+
+### BYOK Setup (Bring Your Own Key)
+
+Factory Droid supports using your own AI provider API keys. See the [BYOK documentation](https://docs.factory.ai/cli/byok/overview) for supported providers and configuration.
+
+Set your API key via environment variable:
+
+```bash
+export FACTORY_API_KEY=your_api_key_here
+```
+
+Or use the interactive login:
+
+```bash
+droid /login
+```
+
+### Configuration
+
+Factory Droid configs are stored in [`configs/factory/`](configs/factory/) and installed to `~/.factory/`:
+
+- [`AGENTS.md`](configs/factory/AGENTS.md) - Global agent guidelines, installed to `~/.factory/AGENTS.md`
+- [`droids/`](configs/factory/droids/) - Custom droid definitions, installed to `~/.factory/droids/`
+
+### Usage
+
+```bash
+# Start interactive mode
+droid
+
+# Start with an initial prompt
+droid "review app.tsx"
+
+# Run non-interactively
+droid exec "analyze this file"
+
+# Resume last session
+droid --resume
+
+# Check for updates
+droid update
 ```
 
 </details>

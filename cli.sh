@@ -536,6 +536,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/kilo" "$BACKUP_DIR" "kilo"
 		copy_config_dir "$HOME/.pi" "$BACKUP_DIR" "pi"
 		copy_config_dir "$HOME/.cursor" "$BACKUP_DIR" "cursor"
+		copy_config_dir "$HOME/.factory" "$BACKUP_DIR" "factory"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -706,6 +707,18 @@ install_cursor() {
 		log_info "3. Verify with: agent --version"
 		log_info "See: https://cursor.com/docs/cli/installation"
 	fi
+}
+
+install_factory() {
+	_run_factory_install() {
+		if command -v droid &>/dev/null; then
+			log_warning "Factory Droid CLI is already installed"
+		else
+			execute "npm install -g @factory/cli"
+			log_success "Factory Droid CLI installed"
+		fi
+	}
+	run_installer "Factory Droid" "_run_factory_install" "command -v droid" ""
 }
 
 # Helper: Copy non-marketplace skills from source to destination
@@ -953,6 +966,21 @@ copy_configurations() {
 		execute "rm -rf $HOME/.cursor/commands"
 		safe_copy_dir "$SCRIPT_DIR/configs/cursor/commands" "$HOME/.cursor/commands"
 		log_success "Cursor commands copied"
+	fi
+
+	# Copy Factory Droid configs.
+	# ~/.factory/AGENTS.md provides global agent guidelines for all Factory Droid sessions.
+	# ~/.factory/droids/ contains custom droid definitions available globally.
+	if [ -d "$HOME/.factory" ] || command -v droid &>/dev/null; then
+		execute "mkdir -p $HOME/.factory/droids"
+		if [ -f "$SCRIPT_DIR/configs/factory/AGENTS.md" ] && execute "cp \"$SCRIPT_DIR/configs/factory/AGENTS.md\" \"$HOME/.factory/AGENTS.md\""; then
+			log_success "Factory Droid AGENTS.md copied"
+		fi
+		if [ -d "$SCRIPT_DIR/configs/factory/droids" ] && [ "$(ls -A "$SCRIPT_DIR/configs/factory/droids" 2>/dev/null)" ]; then
+			safe_copy_dir "$SCRIPT_DIR/configs/factory/droids" "$HOME/.factory/droids"
+			log_success "Factory Droid custom droids copied"
+		fi
+		log_success "Factory Droid configs copied"
 	fi
 
 	# Copy best practices and MEMORY.md
@@ -1566,7 +1594,8 @@ enable_plugins() {
 main() {
 	echo "╔════════════════════════════════════════════════════════════════════╗"
 	echo "║           AI Tools Setup                                           ║"
-	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo • Copilot ║"
+	echo "║   Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo      ║"
+	echo "║   Copilot • Cursor • Factory Droid                                 ║"
 	echo "╚════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -1618,6 +1647,9 @@ main() {
 	echo
 
 	install_cursor
+	echo
+
+	install_factory
 	echo
 
 	copy_configurations

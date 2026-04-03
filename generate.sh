@@ -466,6 +466,33 @@ generate_cursor_configs() {
 	fi
 }
 
+generate_factory_configs() {
+	log_info "Generating Factory Droid configs..."
+
+	if [ -d "$HOME/.factory" ] || command -v droid &>/dev/null; then
+		execute "mkdir -p \"$SCRIPT_DIR/configs/factory\""
+		if [ -f "$HOME/.factory/AGENTS.md" ]; then
+			copy_single "$HOME/.factory/AGENTS.md" "$SCRIPT_DIR/configs/factory/AGENTS.md"
+			log_success "Factory Droid AGENTS.md generated"
+		else
+			log_warning "Factory Droid AGENTS.md not found: $HOME/.factory/AGENTS.md"
+		fi
+		if [ -d "$HOME/.factory/droids" ] && [ "$(ls -A "$HOME/.factory/droids" 2>/dev/null)" ]; then
+			execute "mkdir -p \"$SCRIPT_DIR/configs/factory/droids\""
+			if execute "cp -r '$HOME/.factory/droids'/* '$SCRIPT_DIR/configs/factory/droids'/ 2>/dev/null"; then
+				log_success "Factory Droid custom droids generated"
+			else
+				log_warning "Failed to copy some Factory Droid droids"
+			fi
+		else
+			log_warning "Factory Droid droids directory not found or empty: $HOME/.factory/droids"
+		fi
+		log_success "Factory Droid configs generated"
+	else
+		log_warning "Factory Droid not found (install with: npm install -g @factory/cli)"
+	fi
+}
+
 generate_best_practices() {
 	log_info "Generating best-practices.md..."
 
@@ -537,6 +564,9 @@ main() {
 	echo
 
 	generate_cursor_configs
+	echo
+
+	generate_factory_configs
 	echo
 
 	generate_best_practices
