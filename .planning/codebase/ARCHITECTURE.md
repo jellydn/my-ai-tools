@@ -1,148 +1,195 @@
 # Architecture
 
-**Analysis Date:** 2026-03-30
+## Overview
 
-## Pattern Overview
+my-ai-tools is a configuration management repository for AI coding tools (Claude Code, OpenCode, Amp, CCS, and others). It provides bidirectional synchronization between the repository configurations and the user's home directory.
 
-**Overall:** Modular Shell Script Architecture with Library Pattern
+## Design Pattern
 
-**Key Characteristics:**
-- Separation of concerns between CLI, library, and configuration
-- Bidirectional sync capability (install and export)
-- Dry-run support for safe testing
-- Plugin-based extensibility
-- Multi-platform AI tool management
+### Bidirectional Config Sync
+
+The system follows a **source-to-destination** pattern with two operational modes:
+
+```
+┌─────────────────┐     cli.sh      ┌─────────────────┐
+│   Repository   │ ──────────────▶ │  Home Directory│
+│  (configs/)    │    (install)    │  (~/.claude/)  │
+└─────────────────┘                 └─────────────────┘
+       ▲                                 │
+       │     generate.sh                 │
+       │    (export)                     │
+└─────────────────┴───────────────────────┘
+```
 
 ## Layers
 
-**CLI Layer (Entry Points):**
-- Purpose: User-facing command execution
-- Location: `cli.sh`, `generate.sh`
-- Contains: Argument parsing, main workflow orchestration
-- Depends on: `lib/common.sh`
-- Used by: End users
+### 1. Entry Point Layer
 
-**Library Layer (Shared Utilities):**
-- Purpose: Reusable functions and utilities
-- Location: `lib/common.sh`
-- Contains: Logging, file operations, installation helpers, parallel execution
-- Depends on: POSIX utilities, external CLI tools
-- Used by: `cli.sh`, `generate.sh`
+| File | Purpose |
+|------|---------|
+| `cli.sh` | Main installer - copies configs from repo to home directory |
+| `generate.sh` | Export utility - copies configs from home directory to repo |
+| `install.sh` | Standalone installer for one-line curl installation |
 
-**Configuration Layer (Data):**
-- Purpose: Tool-specific configurations
-- Location: `configs/`
-- Contains: JSON configs, Markdown guides, themes
-- Depends on: Directory structure conventions
-- Used by: Installation scripts
+### 2. Shared Library Layer
 
-**Skills Layer (Extensions):**
-- Purpose: Reusable skill definitions
-- Location: `skills/`
-- Contains: SKILL.md files with agent definitions
-- Depends on: AI tool compatibility
-- Used by: All AI tools (Claude, OpenCode, etc.)
+The `lib/common.sh` provides reusable utilities:
+
+- **Logging**: `log_info()`, `log_success()`, `log_warning()`, `log_error()`
+- **Execution**: `execute()` - wrapper with dry-run support
+- **Download**: `download_and_verify_script()`, `execute_installer()`
+- **Error handling**: Cross-device link error handling via TMPDIR
+
+### 3. Configuration Layer
+
+Located in `configs/` - tool-specific configurations:
+
+| Tool | Config Location | Target Directory |
+|------|-----------------|------------------|
+| Claude Code | `configs/claude/` | `~/.claude/` |
+| OpenCode | `configs/opencode/` | `~/.config/opencode/` |
+| Amp | `configs/amp/` | `~/.config/amp/` |
+| CCS | `configs/ccs/` | `~/.ccs/` |
+| Codex | `configs/codex/` | `~/.codex/` |
+| Gemini CLI | `configs/gemini/` | `~/.gemini/` |
+| Cursor | `configs/cursor/` | `~/.cursor/` |
+| Factory | `configs/factory/` | `~/.factory/` |
+| Pi | `configs/pi/` | `~/.pi/` |
+| Kilo | `configs/kilo/` | `~/.config/kilo/` |
+| Copilot | `configs/copilot/` | `~/.copilot/` |
+
+### 4. Skills/Marketplace Layer
+
+Located in `skills/` - local marketplace plugins providing specialized capabilities:
+
+- `prd` - Product Requirements Document generation
+- `ralph` - PRD to JSON conversion
+- `qmd-knowledge` - Knowledge management
+- `codemap` - Codebase analysis
+- `adr` - Architecture Decision Records
+- `tdd` - Test-driven development
+- `pr-review` - Pull request review
+- `handoffs/pickup` - Session handoff management
+
+### 5. Hooks Layer
+
+Located in `configs/claude/hooks/` - TypeScript-based hooks for Claude Code:
+
+| File | Purpose |
+|------|---------|
+| `index.ts` | Main hook entry point |
+| `git-guard.ts` | Prevents dangerous git commands |
+| `session.ts` | Session management |
+| `lib.ts` | Shared hook utilities |
+
+### 6. Documentation Layer
+
+Located in `docs/` - user guides and tutorials.
 
 ## Data Flow
 
-**Installation Flow (cli.sh):**
-1. Parse arguments (`--dry-run`, `--backup`, `--yes`)
-2. Run preflight checks (git, bun/node)
-3. Backup existing configs (optional)
-4. Install AI tools (Claude, OpenCode, Amp, etc.)
-5. Install global tools (jq, biome, formatters)
-6. Copy configurations to home directory
-7. Install MCP servers and plugins
-8. Display completion message
+### Forward Sync (cli.sh)
 
-**Export Flow (generate.sh):**
-1. Parse arguments (`--dry-run`)
-2. Read configs from home directory
-3. Filter marketplace plugins
-4. Copy configurations back to repository
-5. Update best-practices.md and MEMORY.md
+```
+1. Parse CLI args (--dry-run, --backup, --yes, etc.)
+2. Preflight check (git, required tools)
+3. Check prerequisites (bun/node, jq)
+4. For each tool in configs/:
+   a. Install global tools (jq, formatters)
+   b. Copy config files to target directory
+   c. Install MCP servers
+   d. Install plugins/skills
+   e. Setup hooks (if applicable)
+5. Handle backup (if requested)
+6. Post-install cleanup
+```
 
-**Configuration Sync:**
-- Bidirectional: Repo → Home (`cli.sh`) and Home → Repo (`generate.sh`)
-- Safe: Dry-run mode for previewing changes
-- Version controlled: Git tracks config changes
+### Reverse Sync (generate.sh)
 
-## Key Abstractions
+```
+1. Parse CLI args (--dry-run)
+2. For each tool directory:
+   a. Read existing configs from home directory
+   b. Copy back to configs/ directory
+   c. Preserve as source for future installs
+```
 
-**execute():**
-- Purpose: Safe command execution with dry-run support
-- Location: `lib/common.sh`
-- Pattern: Wraps eval with DRY_RUN check
-- Usage: All destructive operations
+## Abstraction Patterns
 
-**run_installer():**
-- Purpose: Generic tool installer with interactive/non-interactive modes
-- Location: `lib/common.sh`
-- Pattern: Accepts check_cmd, install_cmd, version_cmd
-- Usage: All install_* functions
+### Dry-Run Support
 
-**safe_copy_dir():**
-- Purpose: Directory copying with error handling and exclusions
-- Location: `cli.sh`
-- Pattern: Uses rsync if available, fallback to find/cp
-- Usage: Config directory operations
+All destructive operations support `--dry-run`:
 
-**Logging Functions:**
-- Purpose: Consistent output formatting
-- Location: `lib/common.sh`
-- Pattern: Color-coded log levels (info, success, warning, error)
-- Usage: Throughout all scripts
+```bash
+execute() {
+    if [ "$DRY_RUN" = true ]; then
+        log_info "[DRY RUN] $1"
+    else
+        eval "$1"
+    fi
+}
+```
+
+### Prerequisite Checking
+
+```bash
+check_prerequisites() {
+    if ! command -v git &>/dev/null; then
+        log_error "Git is not installed"
+        exit 1
+    fi
+}
+```
+
+### MCP Server Installation
+
+```bash
+install_mcp_server() {
+    local server_name="$1"
+    local install_cmd="$2"
+    # Execute with error handling
+}
+```
+
+### Cross-Device Link Error Handling
+
+```bash
+setup_tmpdir() {
+    local tmp_dir="$HOME/.claude/tmp"
+    mkdir -p "$tmp_dir" 2>/dev/null || true
+    export TMPDIR="$tmp_dir"
+}
+```
 
 ## Entry Points
 
-**cli.sh main():**
-- Location: `cli.sh` (bottom of file)
-- Triggers: Direct execution or curl | bash
-- Responsibilities: Orchestrate full installation workflow
+| Entry Point | Trigger | Description |
+|-------------|---------|-------------|
+| `cli.sh` | Manual | Primary installer |
+| `generate.sh` | Manual | Config exporter |
+| `install.sh` | curl pipe | Standalone installer |
 
-**generate.sh main():**
-- Location: `generate.sh` (bottom of file)
-- Triggers: Direct execution
-- Responsibilities: Export home configs back to repo
+## Configuration Format Standards
 
-**Individual Install Functions:**
-- Location: `cli.sh` (install_claude_code, install_opencode, etc.)
-- Triggers: Called from main()
-- Responsibilities: Install specific AI tools
+- **JSON**: Standard formatting (no trailing commas), use `jq` for parsing
+- **YAML**: 2-space indentation (no tabs)
+- **Markdown**: Include language tags for code blocks
+- **Shell**: POSIX-compliant (`#!/bin/bash`), use `set -e`
 
-## Error Handling
+## Dependencies
 
-**Strategy:** Fail-fast with informative messages
+### Runtime Dependencies
+- bash (shell)
+- git (version control)
+- bun or node (script execution)
+- jq (JSON parsing)
+- curl (downloads)
 
-**Patterns:**
-- `set -e` at script start for immediate exit on error
-- Guard clauses for prerequisite checks
-- `|| true` for optional operations
-- Trap-based cleanup (in common.sh)
-- Error capture to temp files for analysis
-
-**Logging Levels:**
-- `log_info()` - Blue, informational
-- `log_success()` - Green, operations completed
-- `log_warning()` - Yellow, non-fatal issues
-- `log_error()` - Red, fatal errors (to stderr)
-
-## Cross-Cutting Concerns
-
-**Logging:**
-- Approach: Color-coded console output
-- Location: `lib/common.sh`
-- Pattern: All output via log_* functions
-
-**Validation:**
-- Approach: Shellcheck + runtime syntax check
-- Location: Pre-commit hooks, AGENTS.md
-- Pattern: `bash -n` for syntax, shellcheck for quality
-
-**Authentication:**
-- Approach: No direct auth in scripts
-- Pattern: Tools handle their own auth (Claude Code login, etc.)
-
----
-
-*Architecture analysis: 2026-03-30*
+### Optional Tools (auto-installed)
+- biome (JS/TS formatting)
+- gofmt (Go formatting)
+- prettier (Markdown formatting)
+- ruff (Python formatting)
+- rustfmt (Rust formatting)
+- shfmt (Shell formatting)
+- stylua (Lua formatting)

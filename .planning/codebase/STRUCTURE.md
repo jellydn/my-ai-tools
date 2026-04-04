@@ -1,104 +1,206 @@
 # Directory Structure
 
-**Analysis Date:** 2026-03-30
+## Root Level
 
-## Root Layout
+| File/Directory | Purpose |
+|----------------|---------|
+| `cli.sh` | Main installer script |
+| `generate.sh` | Config export script |
+| `install.sh` | Standalone installer for curl pipe |
+| `AGENTS.md` | Coding guidelines for AI agents |
+| `README.md` | Project documentation |
+| `CONTRIBUTING.md` | Contribution guidelines |
+| `TESTING.md` | Testing procedures |
+| `MEMORY.md` | Developer notes and learning |
+| `configs/` | Source configurations |
+| `skills/` | Local marketplace plugins |
+| `lib/` | Shared shell utilities |
+| `docs/` | User guides and tutorials |
+| `tests/` | Test fixtures and scripts |
+
+## `configs/` - Configuration Source
+
+### Configuration Directory Layout
 
 ```
-my-ai-tools/
-├── cli.sh                  # Main installation script (1546 lines)
-├── generate.sh            # Config export script (491 lines)
-├── install.sh             # One-line installer for curl | bash
-├── lib/
-│   └── common.sh          # Shared utilities (391 lines)
-├── configs/               # AI tool configurations
-│   ├── claude/           # Claude Code settings, MCP, commands, agents, hooks
-│   ├── opencode/         # OpenCode agents, commands, skills
-│   ├── amp/              # Amp settings, skills
-│   ├── ccs/              # CCS configuration, hooks, cliproxy
-│   ├── codex/            # Codex CLI configs
-│   ├── gemini/           # Gemini CLI configs
-│   ├── kilo/             # Kilo CLI configs
-│   ├── pi/               # Pi settings, themes
-│   ├── copilot/          # GitHub Copilot CLI configs
-│   ├── ai-launcher/      # AI Launcher config
-│   └── *.md              # Shared guidelines (best-practices.md, git-guidelines.md)
-├── skills/               # Local skills for distribution
-│   ├── adr/              # Architecture Decision Records
-│   ├── codemap/          # Codebase mapping
-│   ├── handoffs/         # Session handoffs
-│   ├── pickup/           # Resume work from handoffs
-│   ├── pr-review/        # PR review automation
-│   ├── prd/              # Product Requirements Document
-│   ├── qmd-knowledge/    # Knowledge management
-│   ├── ralph/            # Ralph agent system
-│   ├── slop/             # Remove AI code slop
-│   └── tdd/              # TDD workflow
-├── tests/                # Test files
-├── docs/                 # Documentation website
-├── .github/              # GitHub Actions, workflows
-├── .claude-plugin/       # Claude plugin manifests
-└── .planning/            # Planning documents (this directory)
+configs/
+├── claude/              # Claude Code settings
+│   ├── settings.json    # Main settings (hooks, statusLine, etc.)
+│   ├── mcp-servers.json # MCP server configurations
+│   ├── CLAUDE.md        # Agent guidelines
+│   ├── commands/        # Custom slash commands
+│   ├── agents/          # Custom agent definitions
+│   ├── hooks/           # TypeScript-based hooks
+│   └── skills/          # Installed skills (80+)
+│
+├── opencode/            # OpenCode configurations
+│   ├── opencode.json    # Main settings
+│   ├── agent/           # Custom agents
+│   └── command/         # Custom commands
+│
+├── amp/                 # Amp (Modular) settings
+│   ├── settings.json    # Main settings
+│   └── AGENTS.md        # Agent guidelines
+│
+├── ccs/                 # Claude Code Switch
+│   ├── config.yaml      # Main configuration
+│   ├── delegation-sessions.json
+│   └── hooks/           # CCS-specific hooks
+│
+├── codex/               # OpenAI Codex CLI
+│   ├── config.json      # Main config
+│   ├── config.toml      # Alternative format
+│   └── AGENTS.md        # Agent guidelines
+│
+├── gemini/              # Google Gemini CLI
+│   ├── settings.json    # Main settings
+│   ├── agents/          # Custom agents (.md)
+│   ├── commands/        # Custom commands (.toml)
+│   ├── GEMINI.md        # Main guidelines
+│   └── AGENTS.md        # Additional guidelines
+│
+├── cursor/              # Cursor Agent CLI
+│   └── AGENTS.md        # Agent guidelines
+│
+├── factory/             # Factory Droid
+│   ├── AGENTS.md        # Global guidelines
+│   ├── mcp.json         # MCP configuration
+│   ├── settings.json    # Settings
+│   └── droids/          # Custom droid definitions
+│
+├── pi/                  # Pi AI agent
+│   └── settings.json    # Global settings
+│
+├── kilo/                # Kilo CLI
+│   └── config.json      # Main config
+│
+├── copilot/             # GitHub Copilot CLI
+│   ├── AGENTS.md        # Agent guidelines
+│   └── mcp-config.json  # MCP config
+│
+├── ai-launcher/         # AI Launcher
+│   └── config.json      # Main config
+│
+├── best-practices.md    # Developer best practices
+└── git-guidelines.md    # Git safety guidelines
 ```
 
-## Key Locations
+## `skills/` - Local Marketplace Plugins
 
-**Scripts:**
-- `cli.sh` - Main entry point for installation
-- `generate.sh` - Export configs back to repo
-- `install.sh` - One-line installer (downloads and runs cli.sh)
-- `lib/common.sh` - Shared functions library
+Each skill is a directory containing a `SKILL.md` file:
 
-**Configuration:**
-- `configs/claude/` - Claude Code settings, MCP servers, commands, agents
-- `configs/opencode/` - OpenCode configuration
-- `configs/amp/` - Amp settings and skills
-- `configs/ccs/` - CCS configuration files
+```
+skills/
+├── adr/                    # Architecture Decision Records
+│   └── SKILL.md
+├── codemap/                # Codebase analysis
+│   └── SKILL.md
+├── handoffs/               # Session handoff creation
+│   ├── SKILL.md
+│   └── scripts/
+├── pickup/                 # Session handoff resume
+│   ├── SKILL.md
+│   └── scripts/
+├── plannotator-review/      # Code review via Plannotator
+│   └── SKILL.md
+├── pr-review/              # PR review workflows
+│   ├── SKILL.md
+│   └── scripts/
+├── prd/                    # PRD generation
+│   └── SKILL.md
+├── qmd-knowledge/          # Knowledge management
+│   ├── SKILL.md
+│   └── scripts/
+├── ralph/                  # PRD to JSON converter
+│   └── SKILL.md
+├── slop/                   # AI slop detection
+│   └── SKILL.md
+└── tdd/                    # Test-driven development
+    └── SKILL.md
+```
 
-**Extensions:**
-- `skills/` - Reusable skill definitions (SKILL.md format)
-- `configs/*/commands/` - Tool-specific commands
-- `configs/*/agents/` - Tool-specific agents
+## `lib/` - Shared Utilities
+
+```
+lib/
+└── common.sh    # Shared shell functions (logging, execution, downloads)
+```
+
+## `docs/` - User Documentation
+
+```
+docs/
+├── agent-teams-examples.md
+├── claude-code-teams.md
+├── learning-stories.md
+└── qmd-knowledge-management.md
+```
 
 ## Naming Conventions
 
-**Files:**
-- Shell scripts: `*.sh` (lowercase)
-- Config files: `*.json`, `*.yaml`, `*.md`
-- Commands: `command-name.md` (lowercase with hyphens)
-- Agents: `agent-name.md`
-- Skills: `skill-name/SKILL.md` (directory with SKILL.md)
+| Item | Convention | Example |
+|------|------------|---------|
+| Config files | lowercase with hyphens | `mcp-servers.json` |
+| Commands | command-name.md | `ultrathink.md` |
+| Agents | agent-name.md | `ai-slop-remover.md` |
+| Skills | skill-name/ (directory) | `codemap/` |
+| Best practices | best-practices.md | `best-practices.md` |
 
-**Functions:**
-- Public: `lowercase_with_underscores()`
-- Private/internal: `_leading_underscore()`
-- Constants: `UPPERCASE_WITH_UNDERSCORES`
+## Key Locations
 
-**Variables:**
-- Local: `lowercase_with_underscores`
-- Global: `UPPERCASE_FOR_EXPORTED`
-- Environment: Preserved from system
+| Resource | Location in Repo | Target in Home |
+|----------|-----------------|----------------|
+| Claude Code | `configs/claude/` | `~/.claude/` |
+| OpenCode | `configs/opencode/` | `~/.config/opencode/` |
+| Amp | `configs/amp/` | `~/.config/amp/` |
+| CCS | `configs/ccs/` | `~/.ccs/` |
+| Gemini CLI | `configs/gemini/` | `~/.gemini/` |
+| Best Practices | `configs/best-practices.md` | `~/.ai-tools/best-practices.md` |
+| Git Guidelines | `configs/git-guidelines.md` | `~/.ai-tools/git-guidelines.md` |
 
-## Organization Principles
+## Hooks Structure
 
-**By Tool:**
-Each AI tool has its own config directory under `configs/`
-- Separate concerns for each tool
-- Easy to add new tools
-- Tool-specific patterns
+Claude Code hooks implemented in TypeScript:
 
-**By Function:**
-- Scripts at root level
-- Shared code in `lib/`
-- Tool configs in `configs/`
-- Reusable skills in `skills/`
+```
+configs/claude/hooks/
+├── index.ts        # Entry point for hooks
+├── git-guard.ts    # Git safety hook
+├── session.ts      # Session management
+├── lib.ts          # Shared utilities
+├── package.json    # TypeScript dependencies
+└── tsconfig.json   # TypeScript config
+```
 
-**Documentation:**
-- README.md at root for users
-- AGENTS.md for AI coding guidelines
-- MEMORY.md for project context
-- Each skill has its own documentation
+## Commands Structure
 
----
+Custom slash commands as Markdown files:
 
-*Structure analysis: 2026-03-30*
+```
+configs/claude/commands/
+├── ccs/           # CCS delegation
+├── ccs.md         # CCS command
+├── ultrathink.md  # Deep thinking mode
+└── ...            # Other commands
+```
+
+## Agents Structure
+
+Custom agents as Markdown files with YAML frontmatter:
+
+```
+configs/claude/agents/
+├── ai-slop-remover.md
+├── code-reviewer.md
+├── documentation-writer.md
+├── feature-team-coordinator.md
+└── test-generator.md
+```
+
+## Configuration File Formats
+
+- **JSON**: Claude, OpenCode, Amp settings, MCP servers
+- **YAML**: CCS configuration
+- **Markdown**: Commands, agents, skills, guidelines
+- **TOML**: Gemini CLI commands, Codex config
+- **Shell**: Scripts, hooks (bash/TypeScript)

@@ -1,27 +1,172 @@
-# Testing Strategy
+# Testing Guide
 
-**Analysis Date:** 2026-03-30
+This document outlines the testing framework, structure, and patterns used in this codebase.
 
-## Testing Approach
+## Table of Contents
 
-**Philosophy:** Shell scripts are tested through validation, dry-runs, and linting rather than traditional unit tests.
+- [Testing Framework](#testing-framework)
+- [Shell Script Testing](#shell-script-testing)
+- [TypeScript Testing](#typescript-testing)
+- [Test Organization](#test-organization)
+- [Running Tests](#running-tests)
+- [Best Practices](#best-practices)
 
-**Primary Methods:**
-1. Static analysis (shellcheck)
-2. Syntax validation (bash -n)
-3. Dry-run execution (--dry-run flag)
-4. Manual testing with --dry-run first
-5. Pre-commit hooks for automated checks
+---
 
-## Test Framework
+## Testing Framework
 
-**Static Analysis:**
-- **Shellcheck** - Comprehensive shell script linter
-  - Checks for quoting issues, unused variables, unsafe patterns
-  - Current quality score: 98/100
-  - Only 2 info-level issues remain (both expected SC1091)
+### Shell Scripts: Bats
 
-**Syntax Validation:**
+The project uses [Bats](https://github.com/bats-core/bats-core) (Bash Automated Testing System) for shell script testing.
+
+- Source: `https://github.com/bats-core/bats-core`
+- Installation: `brew install bats-core` or via package manager
+
+### TypeScript: Bun Test
+
+TypeScript tests use Bun's built-in test runner for projects in the hooks directory.
+
+---
+
+## Shell Script Testing
+
+### Test File Structure
+
+```bash
+#!/usr/bin/env bats
+
+setup() {
+    # Load dependencies and setup test environment
+    load "$SCRIPT_DIR/lib/common.sh"
+    export DRY_RUN=false
+}
+
+teardown() {
+    # Cleanup after each test
+    rm -rf "$HOME/.claude.test.$$"
+}
+
+@test "test description" {
+    # Test implementation
+    run some_function
+    [ "$status" -eq 0 ]
+}
+```
+
+### Test Conventions
+
+1. **Shebang**: `#!/usr/bin/env bats`
+2. **Setup/Teardown**: Use `setup()` and `teardown()` functions
+3. **Test naming**: Use `kebab-case` with descriptive names
+4. **Assertions**: Use Bats built-in assertions
+
+### Common Test Patterns
+
+**Testing function existence:**
+```bash
+@test "function exists" {
+    type some_function &>/dev/null
+    [ "$status" -eq 0 ]
+}
+```
+
+**Testing dry-run mode:**
+```bash
+@test "execute respects dry-run mode" {
+    export DRY_RUN=true
+    run execute "rm -rf /tmp/test"
+    [ "$status" -eq 0 ]
+    [[ "$output" == "[DRY RUN]"* ]]
+}
+```
+
+**Testing error conditions:**
+```bash
+@test "validate_json returns 1 for invalid JSON" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    echo '{invalid json}' > /tmp/test_invalid.json
+    run validate_json /tmp/test_invalid.json
+    [ "$status" -eq 1 ]
+    rm -f /tmp/test_invalid.json
+}
+```
+
+**Testing output formatting:**
+```bash
+@test "log_info outputs with blue color prefix" {
+    run log_info "test message"
+    [ "$status" -eq 0 ]
+    [[ "$output" == "ℹ"* ]]
+}
+```
+
+### Special Variables
+
+- `$BATS_TEST_DIRNAME`: Directory containing the test file
+- `$BATS_TEST_DESCRIPTION`: Current test name
+- `$output`: Captured stdout from last command
+- `$status`: Exit status of last command
+
+### Skipping Tests
+
+Use `skip` for conditional test execution:
+```bash
+if ! command -v jq &>/dev/null; then
+    skip "jq not installed"
+fi
+```
+
+---
+
+## TypeScript Testing
+
+### Test Structure
+
+Tests follow standard Bun test patterns:
+```typescript
+import { describe, it, expect } from 'bun:test'
+
+describe('module', () => {
+  it('should return expected output', () => {
+    const result = someFunction(input)
+    expect(result).toBe(expected)
+  })
+})
+```
+
+### Running TypeScript Tests
+
+```bash
+bun test
+```
+
+---
+
+## Test Organization
+
+### Directory Structure
+
+```
+tests/
+├── cli.bats           # Tests for cli.sh
+├── install.bats       # Tests for install.sh
+└── lib_common.bats    # Tests for lib/common.sh
+```
+
+### Test Grouping
+
+Tests are grouped by the script/module they test:
+- `lib_common.bats` → Tests for shared utilities
+- `cli.bats` → Tests for main CLI commands
+
+---
+
+## Running Tests
+
+### Shell Script Syntax Validation
+
 ```bash
 # Check single script
 bash -n cli.sh
@@ -29,149 +174,125 @@ bash -n cli.sh
 # Check multiple scripts
 bash -n cli.sh generate.sh
 
-# Check with library
-bash -n cli.sh generate.sh lib/common.sh
+# Full check
+bash -n cli.sh generate.sh install.sh && echo "All scripts valid"
 ```
 
-**Manual Testing:**
+Exit codes:
+- `0` - Syntax is valid
+- `1` - Syntax error found
+
+### Bats Tests
+
 ```bash
-# Always use dry-run first
-./cli.sh --dry-run
+# Run all tests
+bats tests/
 
-# Test non-interactive mode
-echo "y" | ./cli.sh
+# Run specific test file
+bats tests/cli.bats
 
-# Test with backup
-./cli.sh --backup --dry-run
+# Run specific test
+bats tests/cli.bats --filter-tag "backup"
 ```
 
-## Test Structure
+### CI/Non-Interactive Mode
 
-**Pre-commit Hooks:**
-- `trailing-whitespace` - Remove trailing spaces
-- `end-of-file-fixer` - Ensure newline at EOF
-- `check-yaml` - Validate YAML syntax
-- `check-added-large-files` - Prevent large file commits
-
-**Configuration:** `.pre-commit-config.yaml`
-
-## Test Coverage Areas
-
-**Syntax Coverage:**
-- All shell scripts pass `bash -n`
-- All shell scripts pass shellcheck with quality score ≥98
-- No shellcheck warnings (0 warnings)
-- No shellcheck errors (0 errors)
-
-**Functional Coverage:**
-- `--dry-run` mode tests all execution paths without side effects
-- All install functions tested via dry-run
-- All copy operations tested via dry-run
-- All plugin installations tested via dry-run
-
-**Platform Coverage:**
-- macOS (primary development platform)
-- Linux (CI/GitHub Actions)
-- Windows Git Bash (supported)
-
-## Mocking
-
-**Dry-Run Mode:**
-- `DRY_RUN=true` environment variable
-- `execute()` function checks DRY_RUN before executing
-- All destructive operations wrapped in `execute()`
-- Safe testing without system modifications
-
-**Example:**
+For automated validation, use syntax checking:
 ```bash
-execute() {
-    if [ "$DRY_RUN" = true ]; then
-        log_info "[DRY RUN] $1"
-    else
-        eval "$1"
-    fi
-}
+bash -n cli.sh generate.sh && echo "All scripts valid"
 ```
-
-## Validation Patterns
-
-**Prerequisite Validation:**
-```bash
-check_prerequisites() {
-    if ! command -v git &>/dev/null; then
-        log_error "Git is not installed"
-        exit 1
-    fi
-}
-```
-
-**JSON Validation:**
-```bash
-validate_json() {
-    if command -v jq &>/dev/null; then
-        jq empty "$1" 2>/dev/null || log_warning "Invalid JSON: $1"
-    fi
-}
-```
-
-**File Existence:**
-```bash
-if [ -f "$file" ]; then
-    # proceed
-else
-    log_warning "File not found: $file"
-fi
-```
-
-## CI/CD Testing
-
-**GitHub Actions:**
-- Pre-commit hooks run on every PR
-- Shellcheck validation
-- Syntax checks
-- No automated functional tests (requires environment setup)
-
-**Manual Testing Checklist:**
-1. Run `bash -n` on all modified scripts
-2. Run shellcheck on all modified scripts
-3. Test with `./cli.sh --dry-run`
-4. Test with `./generate.sh --dry-run`
-5. Verify no breaking changes to CLI interface
-
-## Coverage Gaps
-
-**Untested Areas:**
-- Actual tool installation (requires network, tool downloads)
-- MCP server setup (requires Claude Code CLI)
-- Plugin installation (requires marketplace access)
-- Config file copying (side effects in home directory)
-
-**Mitigation:**
-- Dry-run mode covers all logic paths
-- Extensive shellcheck validation
-- Manual testing before releases
-- Community feedback for edge cases
-
-## Best Practices
-
-**Before Committing:**
-```bash
-# Syntax check
-bash -n cli.sh generate.sh lib/common.sh
-
-# Shellcheck
-shellcheck cli.sh generate.sh lib/common.sh
-
-# Dry run test
-./cli.sh --dry-run 2>&1 | head -50
-```
-
-**Release Testing:**
-- Test on fresh environment
-- Test with and without --backup
-- Test interactive and non-interactive modes
-- Verify all AI tools are correctly referenced
 
 ---
 
-*Testing analysis: 2026-03-30*
+## Best Practices
+
+### Test Coverage
+
+1. **Happy path tests**: Verify basic functionality
+2. **Error handling tests**: Test failure conditions
+3. **Edge cases**: Test boundary conditions (empty input, special characters)
+4. **Dry-run tests**: Verify preview mode doesn't execute
+
+### Test Isolation
+
+- Each test should be independent
+- Use `teardown()` to clean up resources
+- Avoid shared state between tests
+- Use temporary files with unique suffixes (`$$` for process ID)
+
+### Assertion Patterns
+
+```bash
+# Exit code
+[ "$status" -eq 0 ]
+
+# Output contains string
+[[ "$output" == *"expected"* ]]
+
+# Output matches pattern
+[[ "$output" == [DRY RUN]* ]]
+
+# Boolean conditions
+[ -f "$filepath" ]
+[ -d "$dirpath" ]
+[ -n "$variable" ]
+```
+
+### Debugging Failed Tests
+
+1. Print debug info with `echo` or `log_info`
+2. Check `$output` for captured output
+3. Check `$status` for exit codes
+4. Verify setup/teardown cleanup
+
+### Continuous Integration
+
+Add to CI pipeline:
+```yaml
+- name: Lint Shell Scripts
+  run: bash -n cli.sh generate.sh
+
+- name: Run Bats Tests
+  run: bats tests/
+```
+
+---
+
+## Example: Full Test File
+
+```bash
+#!/usr/bin/env bats
+# Test suite for lib/common.sh utilities
+
+setup() {
+    load "$SCRIPT_DIR/lib/common.sh"
+    export DRY_RUN=false
+}
+
+teardown() {
+    rm -f /tmp/test_*.json
+}
+
+@test "execute logs in dry-run mode" {
+    export DRY_RUN=true
+    run execute "echo test"
+    [ "$status" -eq 0 ]
+    [[ "$output" == "[DRY RUN]"* ]]
+}
+
+@test "execute runs command in normal mode" {
+    export DRY_RUN=false
+    run execute "echo hello"
+    [ "$status" -eq 0 ]
+    [ "$output" == "hello" ]
+}
+
+@test "validate_json returns 0 for valid JSON" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    echo '{"key": "value"}' > /tmp/test_valid.json
+    run validate_json /tmp/test_valid.json
+    [ "$status" -eq 0 ]
+}
+```
