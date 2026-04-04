@@ -10,38 +10,29 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Detect OS (Windows vs Unix-like)
-# Improved detection for cross-platform compatibility
 IS_WINDOWS=false
 _detect_os() {
 	case "$OSTYPE" in
-	msys*|mingw*|cygwin*|win*)
-		return 0
-		;;
-	*)
-		# Also check for MSYSTEM environment variable (common in MSYS2/Git Bash)
-		if [ -n "$MSYSTEM" ]; then
-			case "$MSYSTEM" in
-			MINGW*|MSYS*|CLANG*)
-				return 0
-				;;
-			esac
-		fi
-		return 1
-		;;
+	msys*|mingw*|cygwin*|win*) return 0 ;;
 	esac
+	# Also check for MSYSTEM environment variable (common in MSYS2/Git Bash)
+	if [ -n "$MSYSTEM" ]; then
+		case "$MSYSTEM" in
+		MINGW*|MSYS*|CLANG*) return 0 ;;
+		esac
+	fi
+	return 1
 }
 _detect_os && IS_WINDOWS=true
 
 # Path helper functions for cross-platform compatibility
 
 # Normalize path to use forward slashes (Unix-style)
-# Handles Windows backslash conversion and removes duplicate slashes
 # Usage: normalize_path "path/with\\slashes"
 normalize_path() {
 	local path="$1"
-	# Replace backslashes with forward slashes (for Windows paths)
+	# Replace backslashes with forward slashes and remove duplicate slashes
 	path="${path//\\//}"
-	# Remove duplicate slashes (but not for /// in file:// URLs)
 	path="${path//\/\//\//}"
 	# Remove trailing slashes (except for root paths like / or C:/)
 	path="${path%/}"
@@ -51,23 +42,12 @@ normalize_path() {
 # Get platform-specific temp directory
 # Usage: get_temp_dir
 get_temp_dir() {
-	if [ "$IS_WINDOWS" = true ]; then
-		# On Windows, use TEMP or TMPDIR environment variables
-		if [ -n "$TEMP" ]; then
-			echo "$TEMP"
-		elif [ -n "$TMPDIR" ]; then
-			echo "$TMPDIR"
-		else
-			# Fallback to /tmp (works in MSYS2)
-			echo "/tmp"
-		fi
+	if [ "$IS_WINDOWS" = true ] && [ -n "$TEMP" ]; then
+		echo "$TEMP"
+	elif [ -n "$TMPDIR" ]; then
+		echo "$TMPDIR"
 	else
-		# On Unix-like systems
-		if [ -n "$TMPDIR" ]; then
-			echo "$TMPDIR"
-		else
-			echo "/tmp"
-		fi
+		echo "/tmp"
 	fi
 }
 
@@ -75,10 +55,8 @@ get_temp_dir() {
 # Usage: quote_path "path with spaces"
 quote_path() {
 	local path="$1"
-	# Only quote if path contains spaces or special shell characters
 	case "$path" in
 	*[\ \'\"]*)
-		# Escape any existing quotes and wrap in quotes
 		path="${path//\"/\\\"}"
 		echo "\"$path\""
 		;;
@@ -92,39 +70,43 @@ quote_path() {
 # Usage: expand_path "~/path" -> "/home/user/path"
 expand_path() {
 	local path="$1"
-	# Expand tilde to HOME
 	if [ "${path:0:1}" = "~" ]; then
 		path="$HOME${path:1}"
 	fi
 	normalize_path "$path"
 }
 
-# Convert Windows path to Unix-style path (for MSYS/Cygwin)
-# Handles conversion using cygpath if available, otherwise uses normalize_path
-# Usage: to_unix_path "C:\Users\name" -> "/c/Users/name"
-to_unix_path() {
-	local path="$1"
-	# If cygpath is available (Cygwin/MSYS2), use it for proper conversion
+# Convert path between Unix and Windows formats
+# Usage: convert_path "unix|windows" "path"
+convert_path() {
+	local direction="$1"
+	local path="$2"
+	local cygpath_flag=""
+
+	case "$direction" in
+		unix) cygpath_flag="-u" ;;
+		windows) cygpath_flag="-w" ;;
+		*)
+			echo "$path"
+			return 1
+			;;
+	esac
+
 	if command -v cygpath &>/dev/null; then
-		cygpath -u "$path" 2>/dev/null || normalize_path "$path"
+		cygpath "$cygpath_flag" "$path" 2>/dev/null || echo "$path"
 	else
-		# Fallback: just normalize slashes
-		normalize_path "$path"
+		echo "$path"
 	fi
 }
 
+# Convert Windows path to Unix-style path (for MSYS/Cygwin)
+to_unix_path() {
+	convert_path "unix" "$1"
+}
+
 # Convert Unix path to Windows-style path (for MSYS/Cygwin)
-# Handles conversion using cygpath if available
-# Usage: to_windows_path "/c/Users/name" -> "C:/Users/name"
 to_windows_path() {
-	local path="$1"
-	# If cygpath is available (Cygwin/MSYS2), use it for proper conversion
-	if command -v cygpath &>/dev/null; then
-		cygpath -w "$path" 2>/dev/null || echo "$path"
-	else
-		# Fallback: just return the path as-is
-		echo "$path"
-	fi
+	convert_path "windows" "$1"
 }
 
 # Safe basename extraction that handles edge cases
@@ -135,7 +117,6 @@ safe_basename() {
 		echo ""
 		return 1
 	fi
-	# Use command basename instead of shell expansion for better safety
 	basename "$path" 2>/dev/null || echo "${path##*/}"
 }
 
@@ -147,77 +128,51 @@ safe_dirname() {
 		echo ""
 		return 1
 	fi
-	# Use command dirname instead of shell expansion for better safety
 	dirname "$path" 2>/dev/null || echo "${path%/*}"
 }
 
-# Detect tool installation with priority-based detection
-# Returns: 0 if tool is detected, 1 otherwise
-# Usage: detect_tool "claude" ".claude" "~/.config/claude"
-# Detection order: 1) command availability, 2) config directory, 3) config file
+# Detect tool installation with optional detailed status output
+# Usage: detect_tool [--detailed] "tool_name" "config_dir" "alt_config_dir"
+# Returns: 0 if detected, 1 if missing
+# Outputs: "command", "directory", or "missing" when --detailed is used
 detect_tool() {
+	local detailed=false
+	if [ "$1" = "--detailed" ]; then
+		detailed=true
+		shift
+	fi
+
 	local tool_name="$1"
 	local config_dir="${2:-}"
 	local alt_config_dir="${3:-}"
 
 	# Priority 1: Check if command is available
 	if command -v "$tool_name" &>/dev/null; then
+		if [ "$detailed" = true ]; then
+			echo "command"
+		fi
 		return 0
 	fi
 
 	# Priority 2: Check config directories
 	local dirs_to_check=()
-	if [ -n "$config_dir" ]; then
-		dirs_to_check+=("$config_dir")
-	fi
-	if [ -n "$alt_config_dir" ]; then
-		dirs_to_check+=("$alt_config_dir")
-	fi
+	[ -n "$config_dir" ] && dirs_to_check+=("$config_dir")
+	[ -n "$alt_config_dir" ] && dirs_to_check+=("$alt_config_dir")
 
 	for dir in "${dirs_to_check[@]}"; do
 		local expanded_dir
 		expanded_dir=$(expand_path "$dir")
 		if [ -d "$expanded_dir" ]; then
+			if [ "$detailed" = true ]; then
+				echo "directory"
+			fi
 			return 0
 		fi
 	done
 
-	return 1
-}
-
-# Detect tool with detailed status output
-# Outputs: "command", "directory", "missing" based on detection method
-# Usage: detect_tool_detailed "claude" "~/.claude" -> "command"
-detect_tool_detailed() {
-	local tool_name="$1"
-	local config_dir="${2:-}"
-	local alt_config_dir="${3:-}"
-
-	# Priority 1: Check if command is available
-	if command -v "$tool_name" &>/dev/null; then
-		echo "command"
-		return 0
+	if [ "$detailed" = true ]; then
+		echo "missing"
 	fi
-
-	# Priority 2: Check config directories
-	local dirs_to_check=()
-	if [ -n "$config_dir" ]; then
-		dirs_to_check+=("$config_dir")
-	fi
-	if [ -n "$alt_config_dir" ]; then
-		dirs_to_check+=("$alt_config_dir")
-	fi
-
-	for dir in "${dirs_to_check[@]}"; do
-		local expanded_dir
-		expanded_dir=$(expand_path "$dir")
-		if [ -d "$expanded_dir" ]; then
-			echo "directory"
-			return 0
-		fi
-	done
-
-	echo "missing"
 	return 1
 }
 
@@ -272,8 +227,6 @@ execute() {
 
 # Execute function that quotes paths automatically
 # Usage: execute_quoted mkdir -p "$dest_dir"
-# This is a convenience wrapper that ensures all arguments are properly quoted
-# and executes them safely without using eval()
 execute_quoted() {
 	if [ "$DRY_RUN" = true ]; then
 		# Build display string for logging
@@ -281,7 +234,6 @@ execute_quoted() {
 		for arg in "$@"; do
 			case "$arg" in
 			*[\ \'\"]*)
-				# Escape quotes for display
 				local display_arg="${arg//\"/\\\"}"
 				cmd_str="$cmd_str \"$display_arg\""
 				;;
@@ -297,7 +249,6 @@ execute_quoted() {
 	fi
 }
 
-
 # Download and verify script with checksum (if available)
 # Usage: download_and_verify_script "url" "expected_sha256" "description"
 download_and_verify_script() {
@@ -305,7 +256,6 @@ download_and_verify_script() {
 	local expected_sha256="$2"
 	local description="$3"
 
-	# Use platform-specific temp directory for cross-platform support
 	local tmpdir
 	tmpdir=$(get_temp_dir)
 	local temp_script
@@ -351,15 +301,10 @@ execute_installer() {
 	fi
 
 	# Ensure TMPDIR is set to avoid cross-device link errors
-	# Use HOME/.claude/tmp to keep it in the same filesystem (handles cross-platform)
 	local tmp_dir="${HOME}/.claude/tmp"
 	if ! mkdir -p "$tmp_dir" 2>/dev/null; then
-		# Fall back to platform-specific temp directory
 		tmp_dir=$(get_temp_dir)
-		if ! mkdir -p "$tmp_dir" 2>/dev/null; then
-			log_warning "Could not create temp directory, using /tmp"
-			tmp_dir="/tmp"
-		fi
+		mkdir -p "$tmp_dir" 2>/dev/null || tmp_dir="/tmp"
 	fi
 	export TMPDIR="$tmp_dir"
 
@@ -434,6 +379,20 @@ validate_json() {
 	_validate_with_tool "$1" "command -v jq" "jq empty '$filepath'" "JSON"
 }
 
+# Helper: Try a specific YAML validator
+# Usage: _try_yaml_validator "filepath" "validator_name" "validator_cmd"
+_try_yaml_validator() {
+	local filepath="$1"
+	local validator_name="$2"
+	local validator_cmd="$3"
+
+	if eval "$validator_cmd" 2>/dev/null; then
+		log_success "YAML validated: $filepath ($validator_name)"
+		return 0
+	fi
+	return 1
+}
+
 # Validate YAML file syntax with detailed error reporting
 # Usage: validate_yaml "filepath"
 # Returns: 0 if valid, 1 if invalid
@@ -445,48 +404,17 @@ validate_yaml() {
 		return 1
 	fi
 
-	local validation_failed=false
-	local validator_used=""
-
-	# Try Python with PyYAML first (best error messages)
-	if command -v python3 &>/dev/null; then
-		if python3 -c "import yaml; yaml.safe_load(open('$filepath'))" 2>/dev/null; then
-			log_success "YAML validated: $filepath (Python/PyYAML)"
-			return 0
-		else
-			validation_failed=true
-			validator_used="Python/PyYAML"
-		fi
+	# Try validators in order of preference
+	if command -v python3 &>/dev/null && _try_yaml_validator "$filepath" "Python/PyYAML" "python3 -c 'import yaml; yaml.safe_load(open(\"$filepath\"))'"; then
+		return 0
 	fi
 
-	# Try yq if available (better for YAML-specific validation)
-	if command -v yq &>/dev/null; then
-		if yq '.' "$filepath" &>/dev/null; then
-			log_success "YAML validated: $filepath (yq)"
-			return 0
-		else
-			validation_failed=true
-			validator_used="yq"
-		fi
+	if command -v yq &>/dev/null && _try_yaml_validator "$filepath" "yq" "yq '.' '$filepath'"; then
+		return 0
 	fi
 
-	# Fallback to Ruby
-	if command -v ruby &>/dev/null; then
-		if ruby -ryaml -e "YAML.safe_load(File.read('$filepath'))" 2>/dev/null; then
-			log_success "YAML validated: $filepath (Ruby)"
-			return 0
-		else
-			validation_failed=true
-			validator_used="Ruby"
-		fi
-	fi
-
-	if [ "$validation_failed" = true ]; then
-		log_error "Invalid YAML in: $filepath (checked with $validator_used)"
-		log_info "Install a YAML validator for better error messages:"
-		log_info "  - Python: pip install pyyaml"
-		log_info "  - yq: brew install yq (macOS) or download from https://github.com/mikefarah/yq"
-		return 1
+	if command -v ruby &>/dev/null && _try_yaml_validator "$filepath" "Ruby" "ruby -ryaml -e 'YAML.safe_load(File.read(\"$filepath\"))'"; then
+		return 0
 	fi
 
 	log_warning "No YAML validator available (python3/pyyaml, yq, or ruby), skipping YAML validation for: $filepath"
@@ -517,7 +445,7 @@ validate_config() {
 }
 
 # Run commands in parallel with controlled concurrency
-# Usage: run_parallel "cmd1" "cmd2" "cmd3" ... [max_jobs]
+# Usage: run_parallel "max_jobs" "cmd1" "cmd2" "cmd3" ...
 run_parallel() {
 	local max_jobs="${1:-4}"
 	shift
@@ -529,22 +457,15 @@ run_parallel() {
 
 	local jobs=("$@")
 	local running=0
-	local completed=0
 
 	for cmd in "${jobs[@]}"; do
-		if [ -z "$cmd" ]; then
-			continue
-		fi
-
-		(
-			eval "$cmd"
-		) &
+		[ -z "$cmd" ] && continue
+		(eval "$cmd") &
 		running=$((running + 1))
 
 		if [ "$running" -ge "$max_jobs" ]; then
 			wait -n
 			running=$((running - 1))
-			completed=$((completed + 1))
 		fi
 	done
 
@@ -552,26 +473,7 @@ run_parallel() {
 	while [ $running -gt 0 ]; do
 		wait -n
 		running=$((running - 1))
-		completed=$((completed + 1))
 	done
-}
-
-# Install plugin in background (for parallel execution)
-# Usage: install_plugin_bg "plugin_name"
-install_plugin_bg() {
-	local plugin="$1"
-	local log_file="/tmp/plugin-install-${plugin//\//-}-$$.log"
-
-	if execute "claude plugin install '$plugin' &>$log_file" 2>/dev/null; then
-		log_success "$plugin installed"
-	else
-		if grep -qi "already" "$log_file" 2>/dev/null; then
-			log_info "$plugin already installed"
-		else
-			log_warning "$plugin install failed (check $log_file for details)"
-		fi
-	fi
-	rm -f "$log_file"
 }
 
 # Generic interactive installer helper
@@ -583,12 +485,8 @@ run_installer() {
 	local check_cmd="${3:-}"
 	local version_cmd="${4:-}"
 
-	_log_install() {
-		log_info "Installing $tool_name..."
-	}
-
 	_install() {
-		_log_install
+		log_info "Installing $tool_name..."
 		if eval "$check_cmd" &>/dev/null; then
 			if [ -n "$version_cmd" ]; then
 				log_warning "$tool_name is already installed ($($version_cmd 2>/dev/null))"
@@ -616,30 +514,6 @@ run_installer() {
 		log_info "Installing $tool_name (non-interactive mode)..."
 		_install
 	fi
-}
-
-# Install community plugin in background (for parallel execution)
-# Usage: install_community_plugin_bg "name" "plugin_spec" "marketplace_repo"
-install_community_plugin_bg() {
-	local name="$1"
-	local plugin_spec="$2"
-	local marketplace_repo="$3"
-	local log_file="/tmp/community-plugin-${name}-$$.log"
-
-	# Add marketplace and install in background
-	(
-		setup_tmpdir
-		claude plugin marketplace add "$marketplace_repo" 2>/dev/null || true
-		cleanup_plugin_cache "claude" "$name"
-		claude plugin install "$plugin_spec" 2>/dev/null
-	) &>"$log_file"
-
-	if grep -qi "already\|success" "$log_file" 2>/dev/null; then
-		log_success "$name installed"
-	else
-		log_warning "$name install failed (check $log_file for details)"
-	fi
-	rm -f "$log_file"
 }
 
 # Transaction tracking for rollback support
@@ -700,24 +574,20 @@ end_transaction() {
 # Cleanup plugin cache with proper error handling
 # Usage: cleanup_plugin_cache "cli_tool" "plugin_name"
 # Returns: 0 on success or if directory doesn't exist, 1 on permission/other errors
-# Note: This function logs warnings but doesn't fail - cleanup is best-effort
 cleanup_plugin_cache() {
 	local cli_tool="$1"
 	local plugin_name="$2"
 	local cache_dir="$HOME/.${cli_tool}/plugins/cache/${plugin_name}"
 
 	if [ ! -d "$cache_dir" ]; then
-		# Directory doesn't exist - this is fine, no cleanup needed
 		return 0
 	fi
 
-	# Attempt removal and capture any error output
 	local err_output
 	err_output=$(rm -rf "$cache_dir" 2>&1)
 	local exit_code=$?
 
 	if [ $exit_code -ne 0 ]; then
-		# Check for specific error types
 		if echo "$err_output" | grep -qi "permission denied"; then
 			log_warning "Permission denied cleaning up ${cli_tool} cache for ${plugin_name}"
 		elif echo "$err_output" | grep -qi "read-only"; then
@@ -736,123 +606,20 @@ cleanup_plugin_cache() {
 # Detect if running in non-interactive mode
 # Usage: is_non_interactive
 # Returns: 0 if non-interactive, 1 if interactive
-# Checks multiple indicators to avoid false positives from simple stdin piping
 is_non_interactive() {
-	# Check standard indicators
 	if [ -n "${CI:-}" ]; then
-		# CI environment variable set - definitely non-interactive
 		return 0
 	fi
 
 	if [ ! -t 0 ] && [ ! -t 1 ]; then
-		# Neither stdin nor stdout is a terminal - likely non-interactive
 		return 0
 	fi
 
 	if [ -p /dev/stdin ] && [ ! -t 0 ]; then
-		# Stdin is a pipe and not a terminal
 		return 0
 	fi
 
 	return 1
-}
-
-# Validate JSON file against schema if $schema field is present
-# Usage: validate_json_schema "filepath"
-# Returns: 0 if valid or schema validation skipped, 1 if invalid
-# This performs install-time validation for configs with $schema fields
-validate_json_schema() {
-	local filepath="$1"
-
-	if [ ! -f "$filepath" ]; then
-		log_error "File not found: $filepath"
-		return 1
-	fi
-
-	# Basic JSON syntax validation first
-	if ! validate_json "$filepath"; then
-		return 1
-	fi
-
-	# Check if file has a $schema field
-	local schema_url
-	schema_url=$(jq -r '.["$schema"] // empty' "$filepath" 2>/dev/null)
-
-	if [ -z "$schema_url" ]; then
-		# No schema defined, skip schema validation
-		return 0
-	fi
-
-	log_info "Found schema reference: $schema_url"
-
-	# Try to validate with available tools
-	# Priority: check-jsonschema > ajv-cli > python jsonschema
-
-	if command -v check-jsonschema &>/dev/null; then
-		if check-jsonschema --schemafile "$schema_url" "$filepath" 2>/dev/null; then
-			log_success "Schema validation passed: $filepath (check-jsonschema)"
-			return 0
-		else
-			log_warning "Schema validation issues in: $filepath (may be non-critical)"
-			return 0
-		fi
-	fi
-
-	if command -v ajv &>/dev/null; then
-		# Download schema temporarily for ajv
-		local temp_schema
-		temp_schema=$(make_temp_file "schema" "json")
-		if curl -fsSL "$schema_url" -o "$temp_schema" 2>/dev/null; then
-			if ajv validate -s "$temp_schema" -d "$filepath" 2>/dev/null; then
-				log_success "Schema validation passed: $filepath (ajv)"
-				rm -f "$temp_schema"
-				return 0
-			else
-				log_warning "Schema validation issues in: $filepath (may be non-critical)"
-				rm -f "$temp_schema"
-				return 0
-			fi
-		else
-			log_warning "Could not download schema: $schema_url"
-			rm -f "$temp_schema"
-			return 0
-		fi
-	fi
-
-	if command -v python3 &>/dev/null; then
-		# Try python with jsonschema if available
-		if python3 -c "import jsonschema" 2>/dev/null; then
-			local temp_schema
-			temp_schema=$(make_temp_file "schema" "json")
-			if curl -fsSL "$schema_url" -o "$temp_schema" 2>/dev/null; then
-				if python3 -c "
-import json
-import jsonschema
-with open('$temp_schema') as s:
-    schema = json.load(s)
-with open('$filepath') as f:
-    data = json.load(f)
-jsonschema.validate(data, schema)
-" 2>/dev/null; then
-					log_success "Schema validation passed: $filepath (python-jsonschema)"
-					rm -f "$temp_schema"
-					return 0
-				else
-					log_warning "Schema validation issues in: $filepath (may be non-critical)"
-					rm -f "$temp_schema"
-					return 0
-				fi
-			else
-				log_warning "Could not download schema: $schema_url"
-				rm -f "$temp_schema"
-				return 0
-			fi
-		fi
-	fi
-
-	log_info "No schema validator available (install check-jsonschema, ajv-cli, or python-jsonschema)"
-	log_info "Skipping schema validation for: $filepath"
-	return 0
 }
 
 # Validate config file with full schema validation if available
@@ -866,12 +633,84 @@ validate_config_with_schema() {
 		return 1
 	fi
 
-	# Then perform schema validation if applicable (for JSON files)
+	# Then perform schema validation if applicable (for JSON files with $schema field)
 	local extension="${filepath##*.}"
-	if [ "$extension" = "json" ]; then
-		validate_json_schema "$filepath"
-		return $?
+	if [ "$extension" != "json" ]; then
+		return 0
 	fi
 
+	# Check if file has a $schema field
+	local schema_url
+	schema_url=$(jq -r '.["$schema"] // empty' "$filepath" 2>/dev/null)
+	[ -z "$schema_url" ] && return 0
+
+	log_info "Found schema reference: $schema_url"
+	_validate_with_json_schema "$filepath" "$schema_url"
+}
+
+# Internal: Validate JSON against schema URL using available tools
+# Usage: _validate_with_json_schema "filepath" "schema_url"
+_validate_with_json_schema() {
+	local filepath="$1"
+	local schema_url="$2"
+
+	# Try check-jsonschema first
+	if command -v check-jsonschema &>/dev/null; then
+		if check-jsonschema --schemafile "$schema_url" "$filepath" 2>/dev/null; then
+			log_success "Schema validation passed: $filepath (check-jsonschema)"
+			return 0
+		fi
+		log_warning "Schema validation issues in: $filepath (may be non-critical)"
+		return 0
+	fi
+
+	# Try ajv-cli
+	if command -v ajv &>/dev/null; then
+		local temp_schema
+		temp_schema=$(make_temp_file "schema" "json")
+		if curl -fsSL "$schema_url" -o "$temp_schema" 2>/dev/null; then
+			if ajv validate -s "$temp_schema" -d "$filepath" 2>/dev/null; then
+				log_success "Schema validation passed: $filepath (ajv)"
+				rm -f "$temp_schema"
+				return 0
+			fi
+			log_warning "Schema validation issues in: $filepath (may be non-critical)"
+			rm -f "$temp_schema"
+			return 0
+		fi
+		log_warning "Could not download schema: $schema_url"
+		rm -f "$temp_schema"
+		return 0
+	fi
+
+	# Try python with jsonschema
+	if command -v python3 &>/dev/null && python3 -c "import jsonschema" 2>/dev/null; then
+		local temp_schema
+		temp_schema=$(make_temp_file "schema" "json")
+		if curl -fsSL "$schema_url" -o "$temp_schema" 2>/dev/null; then
+			if python3 -c "
+import json
+import jsonschema
+with open('$temp_schema') as s:
+    schema = json.load(s)
+with open('$filepath') as f:
+    data = json.load(f)
+jsonschema.validate(data, schema)
+" 2>/dev/null; then
+				log_success "Schema validation passed: $filepath (python-jsonschema)"
+				rm -f "$temp_schema"
+				return 0
+			fi
+			log_warning "Schema validation issues in: $filepath (may be non-critical)"
+			rm -f "$temp_schema"
+			return 0
+		fi
+		log_warning "Could not download schema: $schema_url"
+		rm -f "$temp_schema"
+		return 0
+	fi
+
+	log_info "No schema validator available (install check-jsonschema, ajv-cli, or python-jsonschema)"
+	log_info "Skipping schema validation for: $filepath"
 	return 0
 }
