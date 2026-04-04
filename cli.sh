@@ -14,12 +14,7 @@ VERBOSE=false
 # Track whether Amp is installed (for backlog.md dependency)
 AMP_INSTALLED=false
 
-# Auto-detect non-interactive mode
-if is_non_interactive; then
-	YES_TO_ALL=true
-	log_info "Non-interactive mode detected (CI or piped input)"
-fi
-
+# Parse command-line arguments first
 for arg in "$@"; do
 	case $arg in
 	--dry-run)
@@ -56,6 +51,13 @@ for arg in "$@"; do
 		;;
 	esac
 done
+
+# Auto-detect non-interactive mode AFTER parsing arguments
+# This ensures DRY_RUN and other flags are set before any functions use them
+if is_non_interactive; then
+	YES_TO_ALL=true
+	log_info "Non-interactive mode detected (CI or piped input)"
+fi
 
 # Preflight check for required tools
 preflight_check() {
@@ -858,12 +860,12 @@ validate_all_configs() {
 
 	# Validate other tool configs
 	for config_file in "$SCRIPT_DIR/configs/amp/settings.json" \
-				   "$SCRIPT_DIR/configs/ai-launcher/config.json" \
-				   "$SCRIPT_DIR/configs/codex/config.json" \
-				   "$SCRIPT_DIR/configs/gemini/settings.json" \
-				   "$SCRIPT_DIR/configs/kilo/config.json" \
-				   "$SCRIPT_DIR/configs/pi/settings.json" \
-				   "$SCRIPT_DIR/configs/factory/settings.json"; do
+		"$SCRIPT_DIR/configs/ai-launcher/config.json" \
+		"$SCRIPT_DIR/configs/codex/config.json" \
+		"$SCRIPT_DIR/configs/gemini/settings.json" \
+		"$SCRIPT_DIR/configs/kilo/config.json" \
+		"$SCRIPT_DIR/configs/pi/settings.json" \
+		"$SCRIPT_DIR/configs/factory/settings.json"; do
 		if [ -f "$config_file" ] && ! validate_config "$config_file"; then
 			log_error "Config validation failed: $config_file"
 			config_validation_failed=true

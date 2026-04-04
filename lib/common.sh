@@ -13,12 +13,12 @@ NC='\033[0m'
 IS_WINDOWS=false
 _detect_os() {
 	case "$OSTYPE" in
-	msys*|mingw*|cygwin*|win*) return 0 ;;
+	msys* | mingw* | cygwin* | win*) return 0 ;;
 	esac
 	# Also check for MSYSTEM environment variable (common in MSYS2/Git Bash)
 	if [ -n "$MSYSTEM" ]; then
 		case "$MSYSTEM" in
-		MINGW*|MSYS*|CLANG*) return 0 ;;
+		MINGW* | MSYS* | CLANG*) return 0 ;;
 		esac
 	fi
 	return 1
@@ -84,12 +84,12 @@ convert_path() {
 	local cygpath_flag=""
 
 	case "$direction" in
-		unix) cygpath_flag="-u" ;;
-		windows) cygpath_flag="-w" ;;
-		*)
-			echo "$path"
-			return 1
-			;;
+	unix) cygpath_flag="-u" ;;
+	windows) cygpath_flag="-w" ;;
+	*)
+		echo "$path"
+		return 1
+		;;
 	esac
 
 	if command -v cygpath &>/dev/null; then
@@ -233,7 +233,7 @@ execute_quoted() {
 		local cmd_str=""
 		for arg in "$@"; do
 			case "$arg" in
-			*[\ \'\"]*)
+			*[\"\'[:space:]]*)
 				local display_arg="${arg//\"/\\\"}"
 				cmd_str="$cmd_str \"$display_arg\""
 				;;
@@ -242,7 +242,7 @@ execute_quoted() {
 				;;
 			esac
 		done
-		log_info "[DRY RUN]$cmd_str"
+		log_info "[DRY RUN] $cmd_str"
 	else
 		# Execute directly without eval - much safer for paths with spaces
 		"$@"
@@ -324,7 +324,6 @@ execute_installer() {
 # Usage: cleanup_old_backups [max_backups]
 cleanup_old_backups() {
 	local max_backups="${1:-5}"
-	local backup_pattern="$HOME/ai-tools-backup-"
 
 	if [ "$DRY_RUN" = true ]; then
 		log_info "[DRY RUN] Would clean up backups (keep $max_backups most recent)"
@@ -332,8 +331,9 @@ cleanup_old_backups() {
 	fi
 
 	# Find all backup directories and sort by modification time (newest first)
+	# Uses ls -t which is cross-platform (works on both GNU and BSD/macOS)
 	local old_backups
-	old_backups=$(find "$HOME" -maxdepth 1 -type d -name "${backup_pattern##*/}*" -printf "%T@ %p\n" 2>/dev/null | sort -rn | tail -n +$((max_backups + 1)) | cut -d' ' -f2-)
+	old_backups=$(ls -dt "$HOME"/ai-tools-backup-* 2>/dev/null | tail -n +$((max_backups + 1)))
 
 	if [ -n "$old_backups" ]; then
 		for backup_dir in $old_backups; do
@@ -345,52 +345,28 @@ cleanup_old_backups() {
 	fi
 }
 
-# Helper: Validate file exists and run validator command
-# Usage: _validate_with_tool "filepath" "tool_check_cmd" "validator_cmd" "error_type"
+# Validate JSON file syntax
+# Usage: validate_json "filepath"
 # Returns: 0 if valid, 1 if invalid
-_validate_with_tool() {
+validate_json() {
 	local filepath="$1"
-	local tool_check_cmd="$2"
-	local validator_cmd="$3"
-	local error_type="$4"
 
 	if [ ! -f "$filepath" ]; then
 		log_error "File not found: $filepath"
 		return 1
 	fi
 
-	if eval "$tool_check_cmd" &>/dev/null; then
-		if eval "$validator_cmd" 2>/dev/null; then
+	if command -v jq &>/dev/null; then
+		if jq empty "$filepath" 2>/dev/null; then
 			return 0
 		else
-			log_error "Invalid $error_type in: $filepath"
+			log_error "Invalid JSON in: $filepath"
 			return 1
 		fi
 	else
-		log_warning "Validator not available, skipping $error_type validation for: $filepath"
+		log_warning "jq not available, skipping JSON validation for: $filepath"
 		return 0
 	fi
-}
-
-# Validate JSON file syntax
-# Usage: validate_json "filepath"
-# Returns: 0 if valid, 1 if invalid
-validate_json() {
-	_validate_with_tool "$1" "command -v jq" "jq empty '$filepath'" "JSON"
-}
-
-# Helper: Try a specific YAML validator
-# Usage: _try_yaml_validator "filepath" "validator_name" "validator_cmd"
-_try_yaml_validator() {
-	local filepath="$1"
-	local validator_name="$2"
-	local validator_cmd="$3"
-
-	if eval "$validator_cmd" 2>/dev/null; then
-		log_success "YAML validated: $filepath ($validator_name)"
-		return 0
-	fi
-	return 1
 }
 
 # Validate YAML file syntax with detailed error reporting
@@ -405,16 +381,30 @@ validate_yaml() {
 	fi
 
 	# Try validators in order of preference
-	if command -v python3 &>/dev/null && _try_yaml_validator "$filepath" "Python/PyYAML" "python3 -c 'import yaml; yaml.safe_load(open(\"$filepath\"))'"; then
-		return 0
+	# Using separate if statements to avoid complex nested quoting issues
+
+	# Try Python/PyYAML first
+	if command -v python3 &>/dev/null; then
+		if python3 -c "import yaml; yaml.safe_load(open('$filepath'))" 2>/dev/null; then
+			log_success "YAML validated: $filepath (Python/PyYAML)"
+			return 0
+		fi
 	fi
 
-	if command -v yq &>/dev/null && _try_yaml_validator "$filepath" "yq" "yq '.' '$filepath'"; then
-		return 0
+	# Try yq
+	if command -v yq &>/dev/null; then
+		if yq '.' "$filepath" 2>/dev/null; then
+			log_success "YAML validated: $filepath (yq)"
+			return 0
+		fi
 	fi
 
-	if command -v ruby &>/dev/null && _try_yaml_validator "$filepath" "Ruby" "ruby -ryaml -e 'YAML.safe_load(File.read(\"$filepath\"))'"; then
-		return 0
+	# Try Ruby
+	if command -v ruby &>/dev/null; then
+		if ruby -ryaml -e "YAML.safe_load(File.read('$filepath'))" 2>/dev/null; then
+			log_success "YAML validated: $filepath (Ruby)"
+			return 0
+		fi
 	fi
 
 	log_warning "No YAML validator available (python3/pyyaml, yq, or ruby), skipping YAML validation for: $filepath"
@@ -429,18 +419,18 @@ validate_config() {
 	local extension="${filepath##*.}"
 
 	case "$extension" in
-		json)
-			validate_json "$filepath"
-			return $?
-			;;
-		yaml|yml)
-			validate_yaml "$filepath"
-			return $?
-			;;
-		*)
-			log_info "Skipping validation for: $filepath (unsupported type: $extension)"
-			return 0
-			;;
+	json)
+		validate_json "$filepath"
+		return $?
+		;;
+	yaml | yml)
+		validate_yaml "$filepath"
+		return $?
+		;;
+	*)
+		log_info "Skipping validation for: $filepath (unsupported type: $extension)"
+		return 0
+		;;
 	esac
 }
 
@@ -523,7 +513,7 @@ TRANSACTION_ACTIVE=false
 # Start a transaction (records actions for potential rollback)
 start_transaction() {
 	TRANSACTION_ACTIVE=true
-	: > "$TRANSACTION_LOG"
+	: >"$TRANSACTION_LOG"
 	log_info "Transaction started (actions logged to $TRANSACTION_LOG)"
 }
 
@@ -536,7 +526,7 @@ record_action() {
 	local restore_cmd="$4"
 
 	if [ "$TRANSACTION_ACTIVE" = true ] && [ "$DRY_RUN" = false ]; then
-		echo "$action_type|$target|$backup_cmd|$restore_cmd" >> "$TRANSACTION_LOG"
+		echo "$action_type|$target|$backup_cmd|$restore_cmd" >>"$TRANSACTION_LOG"
 	fi
 }
 
