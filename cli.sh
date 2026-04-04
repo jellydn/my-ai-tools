@@ -11,18 +11,18 @@ PROMPT_BACKUP=true
 YES_TO_ALL=false
 VERBOSE=false
 
-# Detect OS (Windows vs Unix-like)
-IS_WINDOWS=false
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || -n "$MSYSTEM" ]]; then
-	IS_WINDOWS=true
-fi
+# IS_WINDOWS is now detected in lib/common.sh for cross-platform consistency
+# Use IS_WINDOWS variable from common.sh for all platform-specific logic
 
 # Track whether Amp is installed (for backlog.md dependency)
 AMP_INSTALLED=false
 
-# Auto-detect non-interactive mode (stdin is piped)
-if [ ! -t 0 ]; then
+# Auto-detect non-interactive mode with improved detection
+# Uses is_non_interactive() helper from common.sh to avoid false positives
+# from simple stdin piping while still detecting CI/piped environments
+if is_non_interactive; then
 	YES_TO_ALL=true
+	log_info "Non-interactive mode detected (CI or piped input)"
 fi
 
 for arg in "$@"; do
@@ -86,29 +86,58 @@ preflight_check() {
 	log_success "All required tools available"
 }
 
-# Install MCP server with better error handling
+# Install MCP server with retry mechanism and better error handling
 install_mcp_server() {
 	local server_name="$1"
 	local install_cmd="$2"
+	local max_retries=3
+	local retry_count=0
+	local backoff=1
 
 	# Capture stderr to temp file for error analysis
 	local err_file="/tmp/claude-mcp-${server_name}.err"
 
-	if execute "$install_cmd" 2>"$err_file"; then
-		log_success "${server_name} MCP server added (global)"
-		rm -f "$err_file"
-		return 0
-	else
-		# Check if it's an "already exists" error (expected)
-		if grep -qi "already" "$err_file" 2>/dev/null; then
-			log_info "${server_name} already installed"
+	while [ $retry_count -lt $max_retries ]; do
+		if execute "$install_cmd" 2>"$err_file"; then
+			log_success "${server_name} MCP server added (global)"
+			rm -f "$err_file"
+			return 0
 		else
-			# Actual error - provide details for debugging
-			log_warning "${server_name} installation failed - check $err_file for details"
+			retry_count=$((retry_count + 1))
+
+			# Check if it's an "already exists" error (expected, no retry needed)
+			if grep -qi "already" "$err_file" 2>/dev/null; then
+				log_info "${server_name} already installed"
+				rm -f "$err_file"
+				return 0
+			fi
+
+			# Check for network-related errors that warrant retry
+			if grep -qiE "(connection|timed?out|network|econnrefused|etimedout)" "$err_file" 2>/dev/null; then
+				if [ $retry_count -lt $max_retries ]; then
+					log_warning "${server_name} installation failed (attempt $retry_count/$max_retries) - retrying in ${backoff}s..."
+					sleep "$backoff"
+					backoff=$((backoff * 2))
+					continue
+				fi
+			fi
+
+			# Final attempt failed - provide detailed error
+			if [ $retry_count -ge $max_retries ]; then
+				log_error "${server_name} installation failed after ${max_retries} attempts"
+				if [ -s "$err_file" ]; then
+					log_error "Error details:"
+					cat "$err_file" | head -20 >&2
+				fi
+				log_info "You can try installing manually: $install_cmd"
+			fi
+			rm -f "$err_file"
+			return 1
 		fi
-		rm -f "$err_file"
-		return 1
-	fi
+	done
+
+	rm -f "$err_file"
+	return 1
 }
 
 # Set up TMPDIR to avoid cross-device link errors
@@ -153,7 +182,8 @@ check_prerequisites() {
 			fi
 		else
 			log_error "Please install Bun or Node.js first."
-			log_info "  - Install Bun: curl -fsSL https://bun.sh/install | bash"
+			log_info "  - Install Bun: The script will download and verify before execution"
+			log_info "    Visit: https://bun.sh/install for manual installation"
 			log_info "  - Or install Node.js: https://nodejs.org/"
 			exit 1
 		fi
@@ -163,8 +193,8 @@ check_prerequisites() {
 install_bun_now() {
 	log_info "Installing Bun..."
 
-	# Download and execute Bun installer
-	if curl -fsSL https://bun.sh/install | bash; then
+	# Use execute_installer with checksum verification for security
+	if execute_installer "https://bun.sh/install" "" "Bun"; then
 		# Bun installer sets BUN_INSTALL, try to source common shell profiles
 		# to get the environment variables it sets
 		if [ -f "$HOME/.bashrc" ]; then
@@ -191,7 +221,7 @@ install_bun_now() {
 		fi
 	else
 		log_error "Failed to install Bun"
-		log_info "Please install manually: curl -fsSL https://bun.sh/install | bash"
+		log_info "Please install manually from: https://bun.sh/install"
 		exit 1
 	fi
 }
@@ -312,7 +342,7 @@ install_global_tools() {
 			execute "brew install rust"
 		else
 			log_info "Installing Rust via rustup (non-interactive)..."
-			execute "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+			execute_installer "https://sh.rustup.rs" "" "Rust" "-y"
 		fi
 	else
 		log_success "rustfmt found"
@@ -463,7 +493,7 @@ copy_config_dir() {
 	local dest_name="$3"
 
 	if [ -d "$source_dir" ]; then
-		execute "mkdir -p $dest_parent"
+		execute_quoted mkdir -p "$dest_parent"
 		safe_copy_dir "$source_dir" "$dest_parent/$dest_name"
 		log_success "Backed up $dest_name configs"
 	fi
@@ -476,8 +506,8 @@ copy_config_file() {
 	local dest_dir="$2"
 
 	if [ -f "$source_file" ]; then
-		execute "mkdir -p $dest_dir"
-		execute "cp $source_file $dest_dir/"
+		execute_quoted mkdir -p "$dest_dir"
+		execute_quoted cp "$source_file" "$dest_dir/"
 		return 0
 	fi
 	return 1
@@ -526,7 +556,7 @@ backup_configs() {
 
 	if [ "$BACKUP" = true ]; then
 		log_info "Creating backup at $BACKUP_DIR..."
-		execute "mkdir -p $BACKUP_DIR"
+		execute_quoted mkdir -p "$BACKUP_DIR"
 
 		copy_config_dir "$HOME/.claude" "$BACKUP_DIR" "claude"
 		copy_config_dir "$HOME/.config/opencode" "$BACKUP_DIR" "opencode"
@@ -724,8 +754,8 @@ copy_non_marketplace_skills() {
 	local dest_dir="$2"
 
 	if [ -d "$source_dir" ] && [ "$(ls -A "$source_dir" 2>/dev/null)" ]; then
-		execute "rm -rf $dest_dir"
-		execute "mkdir -p $dest_dir"
+		execute_quoted rm -rf "$dest_dir"
+		execute_quoted mkdir -p "$dest_dir"
 		for skill_dir in "$source_dir"/*; do
 			if [ -d "$skill_dir" ]; then
 				skill_name="$(basename "$skill_dir")"
@@ -749,7 +779,7 @@ copy_opencode_commands() {
 	local dest_dir="$2"
 
 	if [ -d "$source_dir" ] && [ "$(ls -A "$source_dir" 2>/dev/null)" ]; then
-		execute "mkdir -p \"$dest_dir\""
+		execute_quoted mkdir -p "$dest_dir"
 		for item in "$source_dir"/*; do
 			if [ -d "$item" ]; then
 				command_name="$(basename "$item")"
@@ -760,7 +790,7 @@ copy_opencode_commands() {
 				safe_copy_dir "$item" "$dest_dir/$command_name"
 			elif [ -f "$item" ]; then
 				# Copy individual files (like .md files)
-				execute "cp \"$item\" \"$dest_dir/\""
+				execute_quoted cp "$item" "$dest_dir/"
 			fi
 		done
 	fi
@@ -798,21 +828,75 @@ install_mcp_interactive() {
 copy_configurations() {
 	log_info "Copying configurations..."
 
+	# Validate config files before copying (with schema validation if available)
+	log_info "Validating configuration files..."
+	local config_validation_failed=false
+
+	# Validate Claude Code configs
+	if ! validate_config_with_schema "$SCRIPT_DIR/configs/claude/settings.json"; then
+		log_error "Claude Code settings.json failed validation"
+		config_validation_failed=true
+	fi
+	if ! validate_config "$SCRIPT_DIR/configs/claude/mcp-servers.json"; then
+		log_error "Claude Code mcp-servers.json failed validation"
+		config_validation_failed=true
+	fi
+
+	# Validate OpenCode configs
+	if [ -f "$SCRIPT_DIR/configs/opencode/opencode.json" ]; then
+		if ! validate_config_with_schema "$SCRIPT_DIR/configs/opencode/opencode.json"; then
+			log_error "OpenCode config failed validation"
+			config_validation_failed=true
+		fi
+	fi
+
+	# Validate other tool configs
+	for config_file in "$SCRIPT_DIR/configs/amp/settings.json" \
+				   "$SCRIPT_DIR/configs/ai-launcher/config.json" \
+				   "$SCRIPT_DIR/configs/codex/config.json" \
+				   "$SCRIPT_DIR/configs/gemini/settings.json" \
+				   "$SCRIPT_DIR/configs/kilo/config.json" \
+				   "$SCRIPT_DIR/configs/pi/settings.json" \
+				   "$SCRIPT_DIR/configs/factory/settings.json"; do
+		if [ -f "$config_file" ]; then
+			if ! validate_config "$config_file"; then
+				log_error "Config validation failed: $config_file"
+				config_validation_failed=true
+			fi
+		fi
+	done
+
+	if [ "$config_validation_failed" = true ]; then
+		log_warning "Some configuration files failed validation"
+		if [ "$YES_TO_ALL" = false ] && [ -t 0 ]; then
+			read -p "Continue anyway? (y/n) " -n 1 -r
+			echo
+			if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+				log_error "Installation aborted due to config validation failures"
+				exit 1
+			fi
+		else
+			log_info "Continuing despite validation failures (--yes or non-interactive mode)"
+		fi
+	else
+		log_success "All configuration files validated successfully"
+	fi
+
 	# Create ~/.claude directory
-	execute "mkdir -p $HOME/.claude"
+	execute_quoted mkdir -p "$HOME/.claude"
 
 	# Copy Claude Code configs
-	execute "cp $SCRIPT_DIR/configs/claude/settings.json $HOME/.claude/settings.json"
-	execute "cp $SCRIPT_DIR/configs/claude/mcp-servers.json $HOME/.claude/mcp-servers.json"
-	execute "cp $SCRIPT_DIR/configs/claude/CLAUDE.md $HOME/.claude/CLAUDE.md"
-	execute "rm -rf $HOME/.claude/commands"
+	execute_quoted cp "$SCRIPT_DIR/configs/claude/settings.json" "$HOME/.claude/settings.json"
+	execute_quoted cp "$SCRIPT_DIR/configs/claude/mcp-servers.json" "$HOME/.claude/mcp-servers.json"
+	execute_quoted cp "$SCRIPT_DIR/configs/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+	execute_quoted rm -rf "$HOME/.claude/commands"
 	safe_copy_dir "$SCRIPT_DIR/configs/claude/commands" "$HOME/.claude/commands"
 	if [ -d "$SCRIPT_DIR/configs/claude/agents" ]; then
-		execute "mkdir -p $HOME/.claude/agents"
-		execute "cp $SCRIPT_DIR/configs/claude/agents/* $HOME/.claude/agents/"
+		execute_quoted mkdir -p "$HOME/.claude/agents"
+		execute_quoted cp "$SCRIPT_DIR/configs/claude/agents/"* "$HOME/.claude/agents/"
 	fi
 	if [ -d "$SCRIPT_DIR/configs/claude/hooks" ]; then
-		execute "mkdir -p $HOME/.claude/hooks"
+		execute_quoted mkdir -p "$HOME/.claude/hooks"
 		safe_copy_dir "$SCRIPT_DIR/configs/claude/hooks" "$HOME/.claude/hooks"
 		log_success "Claude Code hooks installed"
 	fi
@@ -833,91 +917,125 @@ copy_configurations() {
 	log_success "Claude Code configs copied"
 
 	# Copy OpenCode configs
-	if [ -d "$HOME/.config/opencode" ] || command -v opencode &>/dev/null; then
-		execute "mkdir -p $HOME/.config/opencode"
-		execute "cp $SCRIPT_DIR/configs/opencode/opencode.json $HOME/.config/opencode/"
-		execute "rm -rf $HOME/.config/opencode/agent"
+	local opencode_status
+	opencode_status=$(detect_tool_detailed "opencode" "$HOME/.config/opencode")
+	if [ "$opencode_status" != "missing" ]; then
+		log_info "Detected OpenCode (via $opencode_status)"
+		execute_quoted mkdir -p "$HOME/.config/opencode"
+		execute_quoted cp "$SCRIPT_DIR/configs/opencode/opencode.json" "$HOME/.config/opencode/"
+		execute_quoted rm -rf "$HOME/.config/opencode/agent"
 		safe_copy_dir "$SCRIPT_DIR/configs/opencode/agent" "$HOME/.config/opencode/agent"
-		execute "rm -rf $HOME/.config/opencode/command"
+		execute_quoted rm -rf "$HOME/.config/opencode/command"
 		copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/command"
-		execute "rm -rf $HOME/.config/opencode/skills"
+		execute_quoted rm -rf "$HOME/.config/opencode/skills"
 		copy_non_marketplace_skills "$SCRIPT_DIR/skills" "$HOME/.config/opencode/skills"
 		log_success "OpenCode configs copied"
+	else
+		log_info "OpenCode not detected - skipping OpenCode config installation"
 	fi
 
 	# Copy Amp configs
-	if [ -d "$HOME/.config/amp" ] || command -v amp &>/dev/null; then
-		execute "mkdir -p $HOME/.config/amp"
-		execute "cp $SCRIPT_DIR/configs/amp/settings.json $HOME/.config/amp/"
+	local amp_status
+	amp_status=$(detect_tool_detailed "amp" "$HOME/.config/amp")
+	if [ "$amp_status" != "missing" ]; then
+		log_info "Detected Amp (via $amp_status)"
+		execute_quoted mkdir -p "$HOME/.config/amp"
+		execute_quoted cp "$SCRIPT_DIR/configs/amp/settings.json" "$HOME/.config/amp/"
 		copy_non_marketplace_skills "$SCRIPT_DIR/configs/amp/skills" "$HOME/.config/amp/skills"
 		if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
-			execute "cp $SCRIPT_DIR/configs/amp/AGENTS.md $HOME/.config/amp/"
+			execute_quoted cp "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/amp/"
 			if [ -f "$HOME/.config/AGENTS.md" ]; then
 				cp "$HOME/.config/AGENTS.md" "$HOME/.config/AGENTS.md.bak"
 				log_warning "Backed up existing AGENTS.md to .bak"
 			fi
-			execute "cp $SCRIPT_DIR/configs/amp/AGENTS.md $HOME/.config/AGENTS.md"
+			execute_quoted cp "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/AGENTS.md"
 		fi
 		log_success "Amp configs copied"
+	else
+		log_info "Amp not detected - skipping Amp config installation"
 	fi
 
 	# Copy ai-launcher configs
-	if [ -d "$HOME/.config/ai-launcher" ] || [ -f "$HOME/.config/ai-launcher/config.json" ]; then
+	local ai_launcher_status
+	ai_launcher_status=$(detect_tool_detailed "ai-launcher" "$HOME/.config/ai-launcher" "$HOME/.config/ai-launcher/config.json")
+	if [ "$ai_launcher_status" != "missing" ]; then
+		log_info "Detected ai-launcher (via $ai_launcher_status)"
+		execute_quoted mkdir -p "$HOME/.config/ai-launcher"
 		if copy_config_file "$SCRIPT_DIR/configs/ai-launcher/config.json" "$HOME/.config/ai-launcher"; then
 			log_success "ai-launcher configs copied"
 		else
 			log_info "ai-launcher config not found in source, preserving existing"
 		fi
+	else
+		log_info "ai-launcher not detected - skipping ai-launcher config installation"
 	fi
 
 	# Copy Codex CLI configs
-	if [ -d "$HOME/.codex" ] || command -v codex &>/dev/null; then
-		execute "mkdir -p $HOME/.codex"
+	local codex_status
+	codex_status=$(detect_tool_detailed "codex" "$HOME/.codex")
+	if [ "$codex_status" != "missing" ]; then
+		log_info "Detected Codex CLI (via $codex_status)"
+		execute_quoted mkdir -p "$HOME/.codex"
 		copy_config_file "$SCRIPT_DIR/configs/codex/AGENTS.md" "$HOME/.codex/" || true
 		copy_config_file "$SCRIPT_DIR/configs/codex/config.json" "$HOME/.codex/" || true
 		if [ -f "$SCRIPT_DIR/configs/codex/config.toml" ]; then
 			if [ -f "$HOME/.codex/config.toml" ]; then
 				# Backup existing config before overwriting
-				execute "cp $HOME/.codex/config.toml $HOME/.codex/config.toml.bak"
+				execute_quoted cp "$HOME/.codex/config.toml" "$HOME/.codex/config.toml.bak"
 				log_success "Backed up existing config.toml to config.toml.bak"
 			fi
 			# Copy new config (whether or not there was an old one)
-			execute "cp $SCRIPT_DIR/configs/codex/config.toml $HOME/.codex/"
+			execute_quoted cp "$SCRIPT_DIR/configs/codex/config.toml" "$HOME/.codex/"
 			log_success "Copied Codex config.toml"
 		fi
 		if [ -d "$SCRIPT_DIR/configs/codex/themes" ]; then
-			execute "mkdir -p \"$HOME/.codex/themes\""
+			execute_quoted mkdir -p "$HOME/.codex/themes"
 			safe_copy_dir "$SCRIPT_DIR/configs/codex/themes" "$HOME/.codex/themes"
 			log_success "Copied Codex custom themes"
 		fi
 		log_success "Codex CLI configs copied (skills invoked via \$, prompts no longer needed)"
+	else
+		log_info "Codex CLI not detected - skipping Codex config installation"
 	fi
 
 	# Copy Gemini CLI configs
-	if [ -d "$HOME/.gemini" ] || command -v gemini &>/dev/null; then
-		execute "mkdir -p $HOME/.gemini"
+	local gemini_status
+	gemini_status=$(detect_tool_detailed "gemini" "$HOME/.gemini")
+	if [ "$gemini_status" != "missing" ]; then
+		log_info "Detected Gemini CLI (via $gemini_status)"
+		execute_quoted mkdir -p "$HOME/.gemini"
 		copy_config_file "$SCRIPT_DIR/configs/gemini/AGENTS.md" "$HOME/.gemini/" || true
 		copy_config_file "$SCRIPT_DIR/configs/gemini/GEMINI.md" "$HOME/.gemini/" || true
 		copy_config_file "$SCRIPT_DIR/configs/gemini/settings.json" "$HOME/.gemini/" || true
-		execute "rm -rf $HOME/.gemini/agents"
+		execute_quoted rm -rf "$HOME/.gemini/agents"
 		safe_copy_dir "$SCRIPT_DIR/configs/gemini/agents" "$HOME/.gemini/agents"
-		execute "rm -rf $HOME/.gemini/commands"
+		execute_quoted rm -rf "$HOME/.gemini/commands"
 		safe_copy_dir "$SCRIPT_DIR/configs/gemini/commands" "$HOME/.gemini/commands"
-		execute "rm -rf $HOME/.gemini/skills"
+		execute_quoted rm -rf "$HOME/.gemini/skills"
 		copy_non_marketplace_skills "$SCRIPT_DIR/configs/gemini/skills" "$HOME/.gemini/skills"
 		log_success "Gemini CLI configs copied"
+	else
+		log_info "Gemini CLI not detected - skipping Gemini config installation"
 	fi
 
 	# Copy Kilo CLI configs
-	if [ -d "$HOME/.config/kilo" ] || command -v kilo &>/dev/null; then
-		execute "mkdir -p $HOME/.config/kilo"
+	local kilo_status
+	kilo_status=$(detect_tool_detailed "kilo" "$HOME/.config/kilo")
+	if [ "$kilo_status" != "missing" ]; then
+		log_info "Detected Kilo CLI (via $kilo_status)"
+		execute_quoted mkdir -p "$HOME/.config/kilo"
 		copy_config_file "$SCRIPT_DIR/configs/kilo/config.json" "$HOME/.config/kilo/" || true
 		log_success "Kilo CLI configs copied"
+	else
+		log_info "Kilo CLI not detected - skipping Kilo config installation"
 	fi
 
 	# Copy Pi configs
-	if [ -d "$HOME/.pi" ] || command -v pi &>/dev/null; then
-		execute "mkdir -p $HOME/.pi/agent"
+	local pi_status
+	pi_status=$(detect_tool_detailed "pi" "$HOME/.pi")
+	if [ "$pi_status" != "missing" ]; then
+		log_info "Detected Pi (via $pi_status)"
+		execute_quoted mkdir -p "$HOME/.pi/agent"
 		if [ ! -f "$HOME/.pi/agent/settings.json" ]; then
 			copy_config_file "$SCRIPT_DIR/configs/pi/settings.json" "$HOME/.pi/agent/" || true
 			log_success "Pi configs copied"
@@ -925,43 +1043,50 @@ copy_configurations() {
 			log_info "Pi settings.json already exists at ~/.pi/agent/, preserving existing config"
 		fi
 		if [ -d "$SCRIPT_DIR/configs/pi/themes" ]; then
-			execute "mkdir -p $HOME/.pi/agent/themes"
+			execute_quoted mkdir -p "$HOME/.pi/agent/themes"
 			safe_copy_dir "$SCRIPT_DIR/configs/pi/themes" "$HOME/.pi/agent/themes"
 			log_success "Copied Pi custom themes"
 		fi
+	else
+		log_info "Pi not detected - skipping Pi config installation"
 	fi
 
 	# Copy GitHub Copilot CLI global instructions to the official location.
 	# ~/.copilot/copilot-instructions.md is read automatically by Copilot CLI for all sessions.
 	if [ -f "$SCRIPT_DIR/configs/copilot/AGENTS.md" ] || [ -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ]; then
-		execute "mkdir -p $HOME/.copilot"
-		if [ -f "$SCRIPT_DIR/configs/copilot/AGENTS.md" ] && execute "cp \"$SCRIPT_DIR/configs/copilot/AGENTS.md\" \"$HOME/.copilot/copilot-instructions.md\""; then
+		execute_quoted mkdir -p "$HOME/.copilot"
+		if [ -f "$SCRIPT_DIR/configs/copilot/AGENTS.md" ] && execute_quoted cp "$SCRIPT_DIR/configs/copilot/AGENTS.md" "$HOME/.copilot/copilot-instructions.md"; then
 			log_success "GitHub Copilot CLI configs copied"
 		fi
-		if [ -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ] && execute "cp \"$SCRIPT_DIR/configs/copilot/mcp-config.json\" \"$HOME/.copilot/mcp-config.json\""; then
+		if [ -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ] && execute_quoted cp "$SCRIPT_DIR/configs/copilot/mcp-config.json" "$HOME/.copilot/mcp-config.json"; then
 			log_success "GitHub Copilot MCP config copied"
 		fi
 	fi
 
 	# Copy Cursor Agent CLI global instructions.
 	# ~/.cursor/rules/ is read by the Cursor background agent for all sessions.
-	if [ -d "$HOME/.cursor" ] || command -v agent &>/dev/null; then
-		execute "mkdir -p \"$HOME/.cursor/rules\""
-		if [ -f "$SCRIPT_DIR/configs/cursor/AGENTS.md" ] && execute "cp \"$SCRIPT_DIR/configs/cursor/AGENTS.md\" \"$HOME/.cursor/rules/general.mdc\""; then
+	local cursor_status
+	cursor_status=$(detect_tool_detailed "agent" "$HOME/.cursor")
+	if [ "$cursor_status" != "missing" ]; then
+		log_info "Detected Cursor (via $cursor_status)"
+		execute_quoted mkdir -p "$HOME/.cursor/rules"
+		if [ -f "$SCRIPT_DIR/configs/cursor/AGENTS.md" ] && execute_quoted cp "$SCRIPT_DIR/configs/cursor/AGENTS.md" "$HOME/.cursor/rules/general.mdc"; then
 			log_success "Cursor Agent CLI configs copied"
 		fi
 		# Copy mcp.json for Cursor MCP server configuration
-		if [ -f "$SCRIPT_DIR/configs/cursor/mcp.json" ] && execute "cp \"$SCRIPT_DIR/configs/cursor/mcp.json\" \"$HOME/.cursor/mcp.json\""; then
+		if [ -f "$SCRIPT_DIR/configs/cursor/mcp.json" ] && execute_quoted cp "$SCRIPT_DIR/configs/cursor/mcp.json" "$HOME/.cursor/mcp.json"; then
 			log_success "Cursor MCP config copied"
 		fi
 		# Copy skills to Cursor
-		execute "rm -rf $HOME/.cursor/skills"
+		execute_quoted rm -rf "$HOME/.cursor/skills"
 		copy_non_marketplace_skills "$SCRIPT_DIR/configs/cursor/skills" "$HOME/.cursor/skills"
 		log_success "Cursor skills copied"
 		# Copy commands to Cursor
-		execute "rm -rf $HOME/.cursor/commands"
+		execute_quoted rm -rf "$HOME/.cursor/commands"
 		safe_copy_dir "$SCRIPT_DIR/configs/cursor/commands" "$HOME/.cursor/commands"
 		log_success "Cursor commands copied"
+	else
+		log_info "Cursor not detected - skipping Cursor config installation"
 	fi
 
 	# Copy Factory Droid configs.
@@ -969,8 +1094,11 @@ copy_configurations() {
 	# ~/.factory/droids/ contains custom droid definitions available globally.
 	# ~/.factory/mcp.json contains MCP server configurations.
 	# ~/.factory/settings.json contains Factory Droid settings.
-	if [ -d "$HOME/.factory" ] || command -v droid &>/dev/null; then
-		execute "mkdir -p \"$HOME/.factory/droids\""
+	local factory_status
+	factory_status=$(detect_tool_detailed "droid" "$HOME/.factory")
+	if [ "$factory_status" != "missing" ]; then
+		log_info "Detected Factory Droid (via $factory_status)"
+		execute_quoted mkdir -p "$HOME/.factory/droids"
 		copy_config_file "$SCRIPT_DIR/configs/factory/AGENTS.md" "$HOME/.factory/" || true
 		copy_config_file "$SCRIPT_DIR/configs/factory/mcp.json" "$HOME/.factory/" || true
 		copy_config_file "$SCRIPT_DIR/configs/factory/settings.json" "$HOME/.factory/" || true
@@ -979,15 +1107,17 @@ copy_configurations() {
 			log_success "Factory Droid custom droids copied"
 		fi
 		log_success "Factory Droid configs copied"
+	else
+		log_info "Factory Droid not detected - skipping Factory Droid config installation"
 	fi
 
 	# Copy best practices and MEMORY.md
-	execute "mkdir -p $HOME/.ai-tools"
-	execute "cp $SCRIPT_DIR/configs/best-practices.md $HOME/.ai-tools/"
+	execute_quoted mkdir -p "$HOME/.ai-tools"
+	execute_quoted cp "$SCRIPT_DIR/configs/best-practices.md" "$HOME/.ai-tools/"
 	log_success "Best practices copied to ~/.ai-tools/"
-	execute "cp $SCRIPT_DIR/configs/git-guidelines.md $HOME/.ai-tools/"
+	execute_quoted cp "$SCRIPT_DIR/configs/git-guidelines.md" "$HOME/.ai-tools/"
 	log_success "Git guidelines copied to ~/.ai-tools/"
-	[ -f "$SCRIPT_DIR/MEMORY.md" ] && execute "cp $SCRIPT_DIR/MEMORY.md $HOME/.ai-tools/" && log_success "MEMORY.md copied to ~/.ai-tools/ (reference copy)"
+	[ -f "$SCRIPT_DIR/MEMORY.md" ] && execute_quoted cp "$SCRIPT_DIR/MEMORY.md" "$HOME/.ai-tools/" && log_success "MEMORY.md copied to ~/.ai-tools/ (reference copy)"
 }
 
 # Check if Claude CLI supports plugin marketplace functionality
@@ -1159,7 +1289,7 @@ cleanup_duplicate_skills() {
 					local skill_name
 					skill_name=$(basename "$skill_dir")
 					if [ -d "$global_skills_dir/$skill_name" ]; then
-						execute "rm -rf '$skill_dir'"
+						execute_quoted rm -rf "$skill_dir"
 						log_info "Removed duplicate skill $skill_name from $target_dir/"
 					fi
 				fi
@@ -1296,7 +1426,7 @@ enable_plugins() {
 			setup_tmpdir
 			execute "$cli_tool plugin marketplace add '$marketplace_repo' 2>/dev/null || true"
 			# Clear any stale plugin cache that might cause cross-device link errors
-			execute "rm -rf '$HOME/.$cli_tool/plugins/cache/$name' 2>/dev/null || true"
+			cleanup_plugin_cache "$cli_tool" "$name"
 			if ! execute "$cli_tool plugin install '$plugin_spec' 2>/dev/null"; then
 				log_warning "$name plugin install failed (may already be installed)"
 			fi
@@ -1358,7 +1488,7 @@ enable_plugins() {
 					log_info "Marketplace $marketplace_repo may already be added"
 				fi
 				# Clear any stale plugin cache that might cause cross-device link errors
-				execute "rm -rf '$HOME/.$cli_tool/plugins/cache/$name' 2>/dev/null || true"
+				cleanup_plugin_cache "$cli_tool" "$name"
 				# Install plugin - suppress stderr to avoid output overlapping
 				if execute "$cli_tool plugin install '$plugin_spec' 2>/dev/null"; then
 					log_success "$name installed"
