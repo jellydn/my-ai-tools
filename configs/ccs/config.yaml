@@ -1,5 +1,7 @@
 # CCS Unified Configuration
 # Docs: https://github.com/kaitranntt/ccs
+# Schema: CCS validates this file on startup. Install yq or python3-pyyaml for offline validation.
+# Validation: Run `yq '.' config.yaml` or `python3 -c "import yaml; yaml.safe_load(open('config.yaml'))"`
 version: 8
 
 # ----------------------------------------------------------------------------
