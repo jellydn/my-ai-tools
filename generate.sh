@@ -6,11 +6,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 DRY_RUN=false
 
-# Detect OS (Windows vs Unix-like)
-IS_WINDOWS=false
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || -n "$MSYSTEM" ]]; then
-	IS_WINDOWS=true
-fi
+# IS_WINDOWS is now detected in lib/common.sh for cross-platform consistency
+# Use IS_WINDOWS variable from common.sh for all platform-specific logic
 
 for arg in "$@"; do
 	case $arg in
