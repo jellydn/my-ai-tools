@@ -2,8 +2,20 @@
   "name": "claude-hooks",
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "bun": ">=1.0.0",
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "postinstall": "bun --version 2>/dev/null || node --version 2>/dev/null || echo 'Warning: Neither Bun nor Node.js found. Please install Bun from https://bun.sh'",
+    "typecheck": "tsc --noEmit 2>/dev/null || echo 'TypeScript check skipped (tsc not available)'"
+  },
   "devDependencies": {
     "bun-types": "latest",
-    "@types/node": "latest"
+    "@types/node": "latest",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "bun-types": ">=1.0.0"
   }
 }
