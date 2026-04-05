@@ -941,7 +941,7 @@ setup_claude_mcp_servers() {
 
 copy_opencode_configs() {
 	local opencode_status
-	opencode_status=$(detect_tool --detailed "opencode" "$HOME/.config/opencode")
+	opencode_status=$(detect_tool --detailed "opencode" "$HOME/.config/opencode") || opencode_status="missing"
 	if [ "$opencode_status" = "missing" ]; then
 		log_info "OpenCode not detected - skipping OpenCode config installation"
 		return 0
@@ -965,7 +965,7 @@ copy_opencode_configs() {
 
 copy_amp_configs() {
 	local amp_status
-	amp_status=$(detect_tool --detailed "amp" "$HOME/.config/amp")
+	amp_status=$(detect_tool --detailed "amp" "$HOME/.config/amp") || amp_status="missing"
 	if [ "$amp_status" = "missing" ]; then
 		log_info "Amp not detected - skipping Amp config installation"
 		return 0
@@ -991,7 +991,7 @@ copy_amp_configs() {
 
 copy_ai_launcher_configs() {
 	local ai_launcher_status
-	ai_launcher_status=$(detect_tool --detailed "ai-launcher" "$HOME/.config/ai-launcher" "$HOME/.config/ai-launcher/config.json")
+	ai_launcher_status=$(detect_tool --detailed "ai-launcher" "$HOME/.config/ai-launcher" "$HOME/.config/ai-launcher/config.json") || ai_launcher_status="missing"
 	if [ "$ai_launcher_status" = "missing" ]; then
 		log_info "ai-launcher not detected - skipping ai-launcher config installation"
 		return 0
@@ -1008,7 +1008,7 @@ copy_ai_launcher_configs() {
 
 copy_codex_configs() {
 	local codex_status
-	codex_status=$(detect_tool --detailed "codex" "$HOME/.codex")
+	codex_status=$(detect_tool --detailed "codex" "$HOME/.codex") || codex_status="missing"
 	if [ "$codex_status" = "missing" ]; then
 		log_info "Codex CLI not detected - skipping Codex config installation"
 		return 0
@@ -1038,7 +1038,7 @@ copy_codex_configs() {
 
 copy_gemini_configs() {
 	local gemini_status
-	gemini_status=$(detect_tool --detailed "gemini" "$HOME/.gemini")
+	gemini_status=$(detect_tool --detailed "gemini" "$HOME/.gemini") || gemini_status="missing"
 	if [ "$gemini_status" = "missing" ]; then
 		log_info "Gemini CLI not detected - skipping Gemini config installation"
 		return 0
@@ -1065,7 +1065,7 @@ copy_gemini_configs() {
 
 copy_kilo_configs() {
 	local kilo_status
-	kilo_status=$(detect_tool --detailed "kilo" "$HOME/.config/kilo")
+	kilo_status=$(detect_tool --detailed "kilo" "$HOME/.config/kilo") || kilo_status="missing"
 	if [ "$kilo_status" = "missing" ]; then
 		log_info "Kilo CLI not detected - skipping Kilo config installation"
 		return 0
@@ -1079,7 +1079,7 @@ copy_kilo_configs() {
 
 copy_pi_configs() {
 	local pi_status
-	pi_status=$(detect_tool --detailed "pi" "$HOME/.pi")
+	pi_status=$(detect_tool --detailed "pi" "$HOME/.pi") || pi_status="missing"
 	if [ "$pi_status" = "missing" ]; then
 		log_info "Pi not detected - skipping Pi config installation"
 		return 0
@@ -1122,7 +1122,7 @@ copy_copilot_configs() {
 
 copy_cursor_configs() {
 	local cursor_status
-	cursor_status=$(detect_tool --detailed "agent" "$HOME/.cursor")
+	cursor_status=$(detect_tool --detailed "agent" "$HOME/.cursor") || cursor_status="missing"
 	if [ "$cursor_status" = "missing" ]; then
 		log_info "Cursor not detected - skipping Cursor config installation"
 		return 0
@@ -1152,7 +1152,7 @@ copy_cursor_configs() {
 
 copy_factory_configs() {
 	local factory_status
-	factory_status=$(detect_tool --detailed "droid" "$HOME/.factory")
+	factory_status=$(detect_tool --detailed "droid" "$HOME/.factory") || factory_status="missing"
 	if [ "$factory_status" = "missing" ]; then
 		log_info "Factory Droid not detected - skipping Factory Droid config installation"
 		return 0
