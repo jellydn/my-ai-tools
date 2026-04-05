@@ -176,10 +176,44 @@ handle_bun_installation() {
 	fi
 }
 
+resolve_installer_checksum() {
+	local installer="$1"
+	local checksum_url=""
+
+	case "$installer" in
+	bun)
+		checksum_url="${BUN_INSTALL_SHA256_URL:-}"
+		;;
+	rust)
+		checksum_url="${RUSTUP_INIT_SHA256_URL:-}"
+		;;
+	plannotator)
+		checksum_url="${PLANNOTATOR_INSTALL_SHA256_URL:-}"
+		;;
+	esac
+
+	if [ -z "$checksum_url" ]; then
+		log_warning "No checksum URL configured for ${installer} installer"
+		echo ""
+		return 0
+	fi
+
+	local checksum
+	checksum=$(curl -fsSL "$checksum_url" 2>/dev/null | head -n1 | awk '{print $1}')
+
+	if [ -z "$checksum" ]; then
+		log_warning "Could not fetch checksum for ${installer} installer"
+	fi
+
+	echo "$checksum"
+}
+
 install_bun_now() {
 	log_info "Installing Bun..."
 
-	if execute_installer "https://bun.sh/install" "" "Bun"; then
+	local bun_checksum
+	bun_checksum=$(resolve_installer_checksum "bun")
+	if execute_installer "https://bun.sh/install" "$bun_checksum" "Bun"; then
 		# Source shell profiles to get Bun environment
 		[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc" 2>/dev/null || true
 		[ -f "$HOME/.zshrc" ] && source "$HOME/.zshrc" 2>/dev/null || true
@@ -355,7 +389,9 @@ install_rustfmt_if_needed() {
 	elif command -v brew &>/dev/null; then
 		execute "brew install rust"
 	else
-		execute_installer "https://sh.rustup.rs" "" "Rust" "-y"
+		local rust_checksum
+		rust_checksum=$(resolve_installer_checksum "rust")
+		execute_installer "https://sh.rustup.rs" "$rust_checksum" "Rust" "-y"
 	fi
 }
 
@@ -626,14 +662,14 @@ install_ccs() {
 
 install_ai_switcher() {
 	_run_ai_switcher_install() {
-		if command -v ai-switcher &>/dev/null; then
-			log_warning "ai-switcher is already installed"
+		if command -v ai &>/dev/null; then
+			log_warning "AI Launcher is already installed"
 		else
-			execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "ai-switcher"
-			log_success "ai-switcher installed"
+			execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "AI Launcher"
+			log_success "AI Launcher installed"
 		fi
 	}
-	run_installer "ai-switcher" "_run_ai_switcher_install" "command -v ai-switcher" ""
+	run_installer "AI Launcher" "_run_ai_switcher_install" "command -v ai" "ai --version"
 }
 
 install_codex() {
@@ -835,7 +871,7 @@ install_mcp_interactive() {
 copy_configurations() {
 	log_info "Copying configurations..."
 
-	validate_all_configs || true
+	validate_all_configs
 
 	copy_claude_configs
 	copy_opencode_configs
@@ -916,8 +952,7 @@ copy_claude_configs() {
 	safe_copy_dir "$SCRIPT_DIR/configs/claude/commands" "$HOME/.claude/commands"
 
 	if [ -d "$SCRIPT_DIR/configs/claude/agents" ]; then
-		execute_quoted mkdir -p "$HOME/.claude/agents"
-		execute_quoted cp "$SCRIPT_DIR/configs/claude/agents/"* "$HOME/.claude/agents/"
+		safe_copy_dir "$SCRIPT_DIR/configs/claude/agents" "$HOME/.claude/agents"
 	fi
 
 	if [ -d "$SCRIPT_DIR/configs/claude/hooks" ]; then
@@ -1380,10 +1415,16 @@ install_cli_dependency() {
 			return 0
 		fi
 		log_info "Installing Plannotator CLI..."
-		execute_installer "https://plannotator.ai/install.sh" "" "Plannotator CLI" || log_warning "Plannotator installation failed"
+		local plannotator_checksum
+		plannotator_checksum=$(resolve_installer_checksum "plannotator")
+		execute_installer "https://plannotator.ai/install.sh" "$plannotator_checksum" "Plannotator CLI" || log_warning "Plannotator installation failed"
 		;;
 	qmd-knowledge)
-		if command -v qmd &>/dev/null || ! command -v bun &>/dev/null; then
+		if command -v qmd &>/dev/null; then
+			return 0
+		fi
+		if ! command -v bun &>/dev/null; then
+			log_warning "Cannot install qmd automatically because Bun is not available"
 			return 0
 		fi
 		log_info "Installing qmd CLI via bun..."
@@ -1528,12 +1569,18 @@ install_official_plugins() {
 
 install_official_plugins_parallel() {
 	log_info "Installing plugins in parallel..."
+	if [ "$DRY_RUN" = true ]; then
+		for plugin in "${official_plugins[@]}"; do
+			log_info "[DRY RUN] Would install $plugin"
+		done
+		return 0
+	fi
 	local pids=()
 
 	for plugin in "${official_plugins[@]}"; do
 		(
 			setup_tmpdir
-			if claude plugin install "$plugin" 2>/dev/null; then
+			if execute "claude plugin install '$plugin' 2>/dev/null"; then
 				log_success "$plugin installed"
 			else
 				log_warning "$plugin may already be installed"
@@ -1716,20 +1763,76 @@ install_local_skills() {
 
 prepare_skills_dir() {
 	local dir="$1"
+	local manifest_file="$dir/.my-ai-tools-managed-skills"
+	local managed_marker=".my-ai-tools-managed"
+	local previous_managed_skill_names=()
+	local managed_skill_names=()
+	local repo_skill_dir=""
+
+	for repo_skill_dir in "$SCRIPT_DIR/skills"/*; do
+		[ -d "$repo_skill_dir" ] || continue
+		managed_skill_names+=("$(basename "$repo_skill_dir")")
+	done
+
+	if [ -f "$manifest_file" ]; then
+		while IFS= read -r managed_name; do
+			[ -n "$managed_name" ] || continue
+			previous_managed_skill_names+=("$managed_name")
+		done <"$manifest_file"
+	fi
+
 	if [ -d "$dir" ]; then
 		for existing_skill in "$dir"/*; do
-			[ -d "$existing_skill" ] && rm -rf "$existing_skill"
+			[ -d "$existing_skill" ] || continue
+			local existing_name
+			existing_name=$(basename "$existing_skill")
+			local managed=false
+			local managed_name=""
+			for managed_name in "${managed_skill_names[@]}"; do
+				if [ "$existing_name" = "$managed_name" ]; then
+					managed=true
+					break
+				fi
+			done
+			if [ "$managed" = false ] && [ -f "$existing_skill/$managed_marker" ]; then
+				managed=true
+			fi
+			if [ "$managed" = false ]; then
+				for managed_name in "${previous_managed_skill_names[@]}"; do
+					if [ "$existing_name" = "$managed_name" ]; then
+						managed=true
+						break
+					fi
+				done
+			fi
+			if [ "$managed" = true ]; then
+				execute_quoted rm -rf "$existing_skill"
+			else
+				log_info "Preserving user-managed skill: $existing_skill"
+			fi
 		done
 	fi
-	mkdir -p "$dir"
+	execute_quoted mkdir -p "$dir"
+
+	if [ "$DRY_RUN" = true ]; then
+		log_info "[DRY RUN] Would update managed skills manifest: $manifest_file"
+	else
+		: >"$manifest_file"
+		local managed_name=""
+		for managed_name in "${managed_skill_names[@]}"; do
+			printf '%s\n' "$managed_name" >>"$manifest_file"
+		done
+	fi
 }
 
 copy_skill_to_targets() {
 	local skill_name="$1"
 	local skill_dir="$2"
+	local managed_marker=".my-ai-tools-managed"
 
 	if skill_is_compatible_with "$skill_dir" "claude"; then
 		safe_copy_dir "$skill_dir" "$CLAUDE_SKILLS_DIR/$skill_name"
+		execute_quoted touch "$CLAUDE_SKILLS_DIR/$skill_name/$managed_marker"
 		log_success "Copied $skill_name to Claude Code"
 	else
 		log_info "Skipped $skill_name for Claude Code (not compatible)"
@@ -1737,6 +1840,7 @@ copy_skill_to_targets() {
 
 	if skill_is_compatible_with "$skill_dir" "opencode"; then
 		safe_copy_dir "$skill_dir" "$OPENCODE_SKILL_DIR/$skill_name"
+		execute_quoted touch "$OPENCODE_SKILL_DIR/$skill_name/$managed_marker"
 		log_success "Copied $skill_name to OpenCode"
 	else
 		log_info "Skipped $skill_name for OpenCode (not compatible)"
@@ -1744,6 +1848,7 @@ copy_skill_to_targets() {
 
 	if skill_is_compatible_with "$skill_dir" "amp"; then
 		safe_copy_dir "$skill_dir" "$AMP_SKILLS_DIR/$skill_name"
+		execute_quoted touch "$AMP_SKILLS_DIR/$skill_name/$managed_marker"
 		log_success "Copied $skill_name to Amp"
 	else
 		log_info "Skipped $skill_name for Amp (not compatible)"
@@ -1751,6 +1856,7 @@ copy_skill_to_targets() {
 
 	if skill_is_compatible_with "$skill_dir" "codex"; then
 		safe_copy_dir "$skill_dir" "$CODEX_SKILLS_DIR/$skill_name"
+		execute_quoted touch "$CODEX_SKILLS_DIR/$skill_name/$managed_marker"
 		log_success "Copied $skill_name to Codex CLI"
 	else
 		log_info "Skipped $skill_name for Codex CLI (not compatible)"
@@ -1758,6 +1864,7 @@ copy_skill_to_targets() {
 
 	if skill_is_compatible_with "$skill_dir" "gemini"; then
 		safe_copy_dir "$skill_dir" "$GEMINI_SKILLS_DIR/$skill_name"
+		execute_quoted touch "$GEMINI_SKILLS_DIR/$skill_name/$managed_marker"
 		log_success "Copied $skill_name to Gemini CLI"
 	else
 		log_info "Skipped $skill_name for Gemini CLI (not compatible)"
@@ -1765,6 +1872,7 @@ copy_skill_to_targets() {
 
 	if skill_is_compatible_with "$skill_dir" "cursor"; then
 		safe_copy_dir "$skill_dir" "$CURSOR_SKILLS_DIR/$skill_name"
+		execute_quoted touch "$CURSOR_SKILLS_DIR/$skill_name/$managed_marker"
 		log_success "Copied $skill_name to Cursor"
 	else
 		log_info "Skipped $skill_name for Cursor (not compatible)"
@@ -1772,6 +1880,7 @@ copy_skill_to_targets() {
 
 	if skill_is_compatible_with "$skill_dir" "pi"; then
 		safe_copy_dir "$skill_dir" "$PI_SKILLS_DIR/$skill_name"
+		execute_quoted touch "$PI_SKILLS_DIR/$skill_name/$managed_marker"
 		log_success "Copied $skill_name to Pi"
 	else
 		log_info "Skipped $skill_name for Pi (not compatible)"

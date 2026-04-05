@@ -50,13 +50,24 @@ normalize_path() {
 # Get platform-specific temp directory
 # Usage: get_temp_dir
 get_temp_dir() {
-	if [ "$IS_WINDOWS" = true ] && [ -n "$TEMP" ]; then
-		echo "$TEMP"
-	elif [ -n "$TMPDIR" ]; then
-		echo "$TMPDIR"
+	local temp_dir=""
+
+	if [ -n "$TMPDIR" ]; then
+		temp_dir="$TMPDIR"
+	elif [ "$IS_WINDOWS" = true ] && [ -n "$TEMP" ]; then
+		if command -v cygpath &>/dev/null; then
+			temp_dir=$(cygpath -u "$TEMP" 2>/dev/null || printf '%s' "$TEMP")
+		else
+			temp_dir=$(normalize_path "$TEMP")
+			case "$temp_dir" in
+			[A-Za-z]:/*) temp_dir="/tmp" ;;
+			esac
+		fi
 	else
-		echo "/tmp"
+		temp_dir="/tmp"
 	fi
+
+	echo "$temp_dir"
 }
 
 # Quote a path if it contains spaces or special characters
@@ -162,7 +173,7 @@ detect_tool() {
 		return 0
 	fi
 
-	# Priority 2: Check config directories
+	# Priority 2: Check config paths
 	local dirs_to_check=()
 	[ -n "$config_dir" ] && dirs_to_check+=("$config_dir")
 	[ -n "$alt_config_dir" ] && dirs_to_check+=("$alt_config_dir")
@@ -170,9 +181,13 @@ detect_tool() {
 	for dir in "${dirs_to_check[@]}"; do
 		local expanded_dir
 		expanded_dir=$(expand_path "$dir")
-		if [ -d "$expanded_dir" ]; then
+		if [ -d "$expanded_dir" ] || [ -f "$expanded_dir" ]; then
 			if [ "$detailed" = true ]; then
-				echo "directory"
+				if [ -d "$expanded_dir" ]; then
+					echo "directory"
+				else
+					echo "file"
+				fi
 			fi
 			return 0
 		fi
@@ -382,6 +397,7 @@ validate_json() {
 # Returns: 0 if valid, 1 if invalid
 validate_yaml() {
 	local filepath="$1"
+	local validator_found=false
 
 	if [ ! -f "$filepath" ]; then
 		log_error "File not found: $filepath"
@@ -389,30 +405,35 @@ validate_yaml() {
 	fi
 
 	# Try validators in order of preference
-	# Using separate if statements to avoid complex nested quoting issues
-
-	# Try Python/PyYAML first
 	if command -v python3 &>/dev/null; then
-		if python3 -c "import yaml; yaml.safe_load(open('$filepath'))" 2>/dev/null; then
-			log_success "YAML validated: $filepath (Python/PyYAML)"
-			return 0
+		if python3 -c 'import yaml' >/dev/null 2>&1; then
+			validator_found=true
+			if FILEPATH="$filepath" python3 -c 'import os, yaml; yaml.safe_load(open(os.environ["FILEPATH"]))' 2>/dev/null; then
+				log_success "YAML validated: $filepath (Python/PyYAML)"
+				return 0
+			fi
 		fi
 	fi
 
-	# Try yq
 	if command -v yq &>/dev/null; then
+		validator_found=true
 		if yq '.' "$filepath" 2>/dev/null; then
 			log_success "YAML validated: $filepath (yq)"
 			return 0
 		fi
 	fi
 
-	# Try Ruby
 	if command -v ruby &>/dev/null; then
-		if ruby -ryaml -e "YAML.safe_load(File.read('$filepath'))" 2>/dev/null; then
+		validator_found=true
+		if FILEPATH="$filepath" ruby -ryaml -e 'YAML.safe_load(File.read(ENV.fetch("FILEPATH")))' 2>/dev/null; then
 			log_success "YAML validated: $filepath (Ruby)"
 			return 0
 		fi
+	fi
+
+	if [ "$validator_found" = true ]; then
+		log_error "Invalid YAML in: $filepath"
+		return 1
 	fi
 
 	log_warning "No YAML validator available (python3/pyyaml, yq, or ruby), skipping YAML validation for: $filepath"
@@ -460,20 +481,20 @@ run_parallel() {
 	for cmd in "${jobs[@]}"; do
 		[ -z "$cmd" ] && continue
 		(eval "$cmd") &
-		pids+=($!)
+		pids+=("$!")
 		running=$((running + 1))
 
 		if [ "$running" -ge "$max_jobs" ]; then
 			# Wait for any job to complete (Bash 3.2 compatible)
-			wait ${pids[0]}
+			wait "${pids[0]}"
 			pids=("${pids[@]:1}")
 			running=$((running - 1))
 		fi
 	done
 
 	# Wait for remaining jobs
-	if [ ${#pids[@]} -gt 0 ]; then
-		wait ${pids[@]}
+	if [ "${#pids[@]}" -gt 0 ]; then
+		wait "${pids[@]}"
 	fi
 }
 
@@ -606,17 +627,15 @@ cleanup_plugin_cache() {
 	fi
 
 	# Dry-run guard
-	if [ "$DRY_RUN" = true ]; then
+	if [ "${DRY_RUN:-false}" = true ]; then
 		log_info "[DRY RUN] Would clean up ${cli_tool} cache for ${plugin_name}"
 		return 0
 	fi
 
 	# Perform deletion with proper error handling
 	local err_output=""
-	local exit_code=0
 
 	if ! err_output=$(rm -rf "$cache_dir" 2>&1); then
-		exit_code=$?
 		if echo "$err_output" | grep -qi "permission denied"; then
 			log_warning "Permission denied cleaning up ${cli_tool} cache for ${plugin_name}"
 		elif echo "$err_output" | grep -qi "read-only"; then
@@ -684,13 +703,15 @@ _validate_with_json_schema() {
 	local schema_url="$2"
 
 	# Try check-jsonschema first
+	local validation_output=""
 	if command -v check-jsonschema &>/dev/null; then
-		if check-jsonschema --schemafile "$schema_url" "$filepath" 2>/dev/null; then
+		if validation_output=$(check-jsonschema --schemafile "$schema_url" "$filepath" 2>&1); then
 			log_success "Schema validation passed: $filepath (check-jsonschema)"
 			return 0
 		fi
-		log_warning "Schema validation issues in: $filepath (may be non-critical)"
-		return 0
+		log_error "Schema validation failed: $filepath"
+		[ -n "$validation_output" ] && log_error "$validation_output"
+		return 1
 	fi
 
 	# Try ajv-cli
@@ -698,14 +719,15 @@ _validate_with_json_schema() {
 		local temp_schema
 		temp_schema=$(make_temp_file "schema" "json")
 		if curl -fsSL "$schema_url" -o "$temp_schema" 2>/dev/null; then
-			if ajv validate -s "$temp_schema" -d "$filepath" 2>/dev/null; then
+			if validation_output=$(ajv validate -s "$temp_schema" -d "$filepath" 2>&1); then
 				log_success "Schema validation passed: $filepath (ajv)"
 				rm -f "$temp_schema"
 				return 0
 			fi
-			log_warning "Schema validation issues in: $filepath (may be non-critical)"
+			log_error "Schema validation failed: $filepath"
+			[ -n "$validation_output" ] && log_error "$validation_output"
 			rm -f "$temp_schema"
-			return 0
+			return 1
 		fi
 		log_warning "Could not download schema: $schema_url"
 		rm -f "$temp_schema"
@@ -717,7 +739,7 @@ _validate_with_json_schema() {
 		local temp_schema
 		temp_schema=$(make_temp_file "schema" "json")
 		if curl -fsSL "$schema_url" -o "$temp_schema" 2>/dev/null; then
-			if python3 -c "
+			if validation_output=$(python3 -c "
 import json
 import jsonschema
 with open('$temp_schema') as s:
@@ -725,14 +747,15 @@ with open('$temp_schema') as s:
 with open('$filepath') as f:
     data = json.load(f)
 jsonschema.validate(data, schema)
-" 2>/dev/null; then
+" 2>&1); then
 				log_success "Schema validation passed: $filepath (python-jsonschema)"
 				rm -f "$temp_schema"
 				return 0
 			fi
-			log_warning "Schema validation issues in: $filepath (may be non-critical)"
+			log_error "Schema validation failed: $filepath"
+			[ -n "$validation_output" ] && log_error "$validation_output"
 			rm -f "$temp_schema"
-			return 0
+			return 1
 		fi
 		log_warning "Could not download schema: $schema_url"
 		rm -f "$temp_schema"

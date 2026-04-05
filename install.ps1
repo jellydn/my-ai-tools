@@ -41,7 +41,7 @@ function Write-Success {
     Write-Host "✓ $Message" -ForegroundColor Green
 }
 
-function Write-Warning {
+function Write-Warn {
     param([string]$Message)
     Write-Host "⚠ $Message" -ForegroundColor Yellow
 }
@@ -89,7 +89,7 @@ function Install-Jq {
         return $true
     }
 
-    Write-Warning "jq not found. Attempting to install via winget..."
+    Write-Warn "jq not found. Attempting to install via winget..."
 
     $winget = Get-Command winget -ErrorAction SilentlyContinue
     if (-not $winget) {
@@ -133,7 +133,7 @@ function Install-Jq {
             }
         }
 
-        Write-Warning "jq was installed but not found in PATH. Please restart your terminal."
+        Write-Warn "jq was installed but not found in PATH. Please restart your terminal."
         return $false
     }
     catch {
