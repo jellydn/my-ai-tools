@@ -1110,6 +1110,8 @@ copy_pi_configs() {
 		safe_copy_dir "$SCRIPT_DIR/configs/pi/themes" "$HOME/.pi/agent/themes"
 	fi
 
+	copy_non_marketplace_skills "$SCRIPT_DIR/configs/pi/skills" "$HOME/.pi/agent/skills"
+
 	log_success "Pi configs copied"
 }
 
@@ -1682,6 +1684,7 @@ install_local_skills() {
 	CODEX_SKILLS_DIR="$HOME/.codex/skills"
 	GEMINI_SKILLS_DIR="$HOME/.gemini/skills"
 	CURSOR_SKILLS_DIR="$HOME/.cursor/skills"
+	PI_SKILLS_DIR="$HOME/.pi/agent/skills"
 
 	# Prepare target directories
 	prepare_skills_dir "$CLAUDE_SKILLS_DIR"
@@ -1690,6 +1693,7 @@ install_local_skills() {
 	prepare_skills_dir "$CODEX_SKILLS_DIR"
 	prepare_skills_dir "$GEMINI_SKILLS_DIR"
 	prepare_skills_dir "$CURSOR_SKILLS_DIR"
+	prepare_skills_dir "$PI_SKILLS_DIR"
 
 	# Copy all skills from skills folder to targets
 	for skill_dir in "$SCRIPT_DIR/skills"/*; do
@@ -1764,6 +1768,13 @@ copy_skill_to_targets() {
 		log_success "Copied $skill_name to Cursor"
 	else
 		log_info "Skipped $skill_name for Cursor (not compatible)"
+	fi
+
+	if skill_is_compatible_with "$skill_dir" "pi"; then
+		safe_copy_dir "$skill_dir" "$PI_SKILLS_DIR/$skill_name"
+		log_success "Copied $skill_name to Pi"
+	else
+		log_info "Skipped $skill_name for Pi (not compatible)"
 	fi
 }
 
