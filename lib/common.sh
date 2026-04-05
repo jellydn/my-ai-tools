@@ -504,9 +504,7 @@ run_installer() {
 		log_info "Auto-accepting $tool_name installation (--yes flag)"
 		_install
 	elif [ -t 0 ]; then
-		read -rp "Do you want to install $tool_name? (y/n) " -n 1
-		echo
-		if [[ $REPLY =~ ^[Yy]$ ]]; then
+		if prompt_yn "Do you want to install $tool_name"; then
 			_install
 		else
 			log_warning "Skipping $tool_name installation"
@@ -515,6 +513,29 @@ run_installer() {
 		log_info "Installing $tool_name (non-interactive mode)..."
 		_install
 	fi
+}
+
+# Prompt user for y/n response with proper input handling
+# Returns: 0 if user answered 'y' or 'Y', 1 otherwise (including empty/Enter)
+# Usage: if prompt_yn "Your question?"; then ... fi
+prompt_yn() {
+	local prompt="$1"
+	local response
+
+	if [ ! -t 0 ]; then
+		return 1
+	fi
+
+	read -rp "$prompt (y/n) " -n 1 response
+	echo
+
+	# Clear any remaining input (like the Enter key)
+	while IFS= read -r -t 0 2>/dev/null; do
+		IFS= read -r -t 0.1 || break
+	done 2>/dev/null || true
+
+	# Return 0 only if response is y or Y
+	[[ "$response" =~ ^[Yy]$ ]]
 }
 
 # Transaction tracking for rollback support

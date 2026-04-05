@@ -164,9 +164,7 @@ handle_bun_installation() {
 		log_info "Auto-installing Bun (--yes flag)..."
 		install_bun_now
 	elif [ -t 0 ]; then
-		read -p "Would you like to install Bun now? (y/n) " -n 1 -r
-		echo
-		if [[ $REPLY =~ ^[Yy]$ ]]; then
+		if prompt_yn "Would you like to install Bun now"; then
 			install_bun_now
 		else
 			log_error "Please install Bun or Node.js first."
@@ -529,9 +527,9 @@ backup_configs() {
 			log_info "Auto-accepting backup (--yes flag)"
 			BACKUP=true
 		elif [ -t 0 ]; then
-			read -p "Do you want to backup existing configurations? (y/n) " -n 1 -r
-			echo
-			[[ $REPLY =~ ^[Yy]$ ]] && BACKUP=true
+			if prompt_yn "Do you want to backup existing configurations"; then
+				BACKUP=true
+			fi
 		else
 			log_info "Skipping backup prompt in non-interactive mode (use --backup to force backup)"
 		fi
@@ -574,9 +572,9 @@ install_claude_code() {
 		log_info "Auto-skipping reinstall (--yes flag)"
 		return
 	elif [ -t 0 ]; then
-		read -p "Do you want to reinstall? (y/n) " -n 1 -r
-		echo
-		[[ $REPLY =~ ^[Yy]$ ]] || return
+		if ! prompt_yn "Do you want to reinstall"; then
+			return
+		fi
 	else
 		log_info "Skipping reinstall in non-interactive mode"
 		return
@@ -701,9 +699,11 @@ install_copilot() {
 		log_info "Auto-accepting GitHub Copilot CLI installation (--yes flag)"
 		prompt_and_install
 	elif [ -t 0 ]; then
-		read -p "Do you want to install GitHub Copilot CLI? (y/n) " -n 1 -r
-		echo
-		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping GitHub Copilot CLI installation"
+		if prompt_yn "Do you want to install GitHub Copilot CLI"; then
+			prompt_and_install
+		else
+			log_warning "Skipping GitHub Copilot CLI installation"
+		fi
 	else
 		log_info "Installing GitHub Copilot CLI (non-interactive mode)..."
 		prompt_and_install
@@ -803,9 +803,7 @@ install_mcp_interactive() {
 			log_warning "$name already installed or failed"
 		fi
 	elif [ -t 0 ]; then
-		read -p "Install $name MCP server ($description)? (y/n) " -n 1 -r
-		echo
-		if [[ $REPLY =~ ^[Yy]$ ]]; then
+		if prompt_yn "Install $name MCP server ($description)"; then
 			if execute "$install_cmd"; then
 				log_success "$name MCP server added (global)"
 			else
@@ -876,9 +874,7 @@ validate_all_configs() {
 	if [ "$config_validation_failed" = true ]; then
 		log_warning "Some configuration files failed validation"
 		if [ "$YES_TO_ALL" = false ] && [ -t 0 ]; then
-			read -p "Continue anyway? (y/n) " -n 1 -r
-			echo
-			if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+			if ! prompt_yn "Continue anyway"; then
 				log_error "Installation aborted due to config validation failures"
 				exit 1
 			fi
@@ -1294,9 +1290,7 @@ install_single_recommended_skill() {
 			execute "npx skills add '$repo' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_info "Skipped: $repo"
 		fi
 	elif [ -t 0 ]; then
-		read -rp "Install $repo${skill_suffix}? (y/n) " -n 1
-		echo
-		if [[ $REPLY =~ ^[Yy]$ ]]; then
+		if prompt_yn "Install $repo${skill_suffix}"; then
 			if [ -n "$skill" ]; then
 				execute "npx skills add '$repo' --skill '$skill' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_warning "Failed to install: $repo${skill_suffix}"
 			else
@@ -1542,9 +1536,7 @@ install_plugin() {
 		setup_tmpdir
 		execute "claude plugin install '$plugin' 2>/dev/null" || log_warning "$plugin install failed (may already be installed)"
 	elif [ -t 0 ]; then
-		read -p "Install $plugin? (y/n) " -n 1 -r
-		echo
-		if [[ $REPLY =~ ^[Yy]$ ]]; then
+		if prompt_yn "Install $plugin"; then
 			setup_tmpdir
 			execute "claude plugin install '$plugin' && log_success '$plugin installed' || log_warning '$plugin install failed (may already be installed)'"
 		fi
@@ -1623,9 +1615,9 @@ install_community_plugin_interactive() {
 	local marketplace_repo="$3"
 	local cli_tool="$4"
 
-	read -p "Install $name? (y/n) " -n 1 -r
-	echo
-	[[ $REPLY =~ ^[Yy]$ ]] || return 0
+	if ! prompt_yn "Install $name"; then
+		return 0
+	fi
 
 	install_cli_dependency "$name"
 
