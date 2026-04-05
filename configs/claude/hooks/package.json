@@ -13,7 +13,7 @@
   "devDependencies": {
     "bun-types": "latest",
     "@types/node": "latest",
-    "typescript": "^5.0.0"
+    "typescript": "^6.0.0"
   },
   "peerDependencies": {
     "bun-types": ">=1.0.0"
