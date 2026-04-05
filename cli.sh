@@ -715,12 +715,18 @@ install_cursor() {
 	if command -v agent &>/dev/null; then
 		local agent_version
 		agent_version=$(agent --version 2>/dev/null || echo 'version unknown')
-		log_warning "Cursor Agent CLI is already installed ($agent_version)"
+		log_success "Cursor Agent CLI found ($agent_version)"
 	else
-		log_warning "Cursor Agent CLI is not installed; manual installation is required."
-		log_info "1. Install with: curl https://cursor.com/install -fsS | bash"
-		log_info "2. Add to PATH: export PATH=\"\$HOME/.local/bin:\$PATH\""
-		log_info "3. Verify with: agent --version"
+		log_warning "Cursor Agent CLI is not installed"
+		if [ -t 0 ]; then
+			if prompt_yn "Show manual installation instructions for Cursor CLI"; then
+				log_info "1. Install with: curl https://cursor.com/install -fsS | bash"
+				log_info "2. Add to PATH: export PATH=\"\$HOME/.local/bin:\$PATH\""
+				log_info "3. Verify with: agent --version"
+			fi
+		else
+			log_info "Manual installation required: curl https://cursor.com/install -fsS | bash"
+		fi
 	fi
 }
 
