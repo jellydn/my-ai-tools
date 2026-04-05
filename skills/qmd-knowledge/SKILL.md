@@ -2,7 +2,7 @@
 name: qmd-knowledge
 description: Project-specific knowledge management system using qmd MCP server. Captures learnings, issue notes, and conventions in a searchable knowledge base.
 license: MIT
-compatibility: opencode, claude, amp, codex, gemini, cursor
+compatibility: opencode, claude, amp, codex, gemini, cursor, pi
 hint: Use when recording or retrieving project knowledge, learnings, and issue notes
 user-invocable: true
 metadata:
@@ -76,6 +76,7 @@ $SKILL_PATH/scripts/record.sh note "Consider using agent skills for extensibilit
 ```
 
 **After recording**:
+
 - The `record.sh` script automatically runs `qmd embed` to re-index the knowledge base
 - This embedding step is **required** to make newly added content searchable for the next query
 - If auto-embedding fails or you manually add/edit files, run `qmd embed` explicitly to update the index
@@ -114,11 +115,13 @@ command -v git || echo "Install git for automatic project name detection"
 ```
 
 1. **Install qmd**:
+
    ```bash
    bun install -g https://github.com/tobi/qmd
    ```
 
 2. **Install the skill**:
+
    ```bash
    # The skill is installed to your AI tool's skills directory:
    # - OpenCode: ~/.config/opencode/skill/qmd-knowledge/
@@ -129,6 +132,7 @@ command -v git || echo "Install git for automatic project name detection"
 3. **Configure MCP server** (see installation docs for Claude/OpenCode/Amp)
 
 4. **Create a knowledge collection for your project**:
+
    ```bash
    # The skill's record.sh script will auto-detect the project name when executed.
    # For manual setup, use your desired project name consistently in the commands below.
@@ -167,14 +171,17 @@ The qmd MCP server allows Claude to:
 ## Example workflow
 
 1. **During development**, you discover something useful:
+
    > "I learned that qmd MCP server allows Claude to use tools autonomously."
 
 2. **Claude recognizes the skill and executes**:
+
    ```bash
    $SKILL_PATH/scripts/record.sh learning "qmd MCP autonomous tool use"
    ```
 
 3. **Later, you ask**:
+
    > "What did I learn about MCP servers?"
 
 4. **Claude queries the knowledge base** using qmd MCP tools:
@@ -182,13 +189,12 @@ The qmd MCP server allows Claude to:
    qmd query --collection <project-name> "MCP servers"
    ```
 
-
-
 ## Project detection
 
 The skill automatically detects your project name using the following priority:
 
 1. **QMD_PROJECT environment variable** (highest priority)
+
    ```bash
    export QMD_PROJECT=my-project-name
    ```
@@ -230,6 +236,7 @@ Be attentive to phrases that indicate valuable knowledge capture opportunities:
 - "Make sure to..."
 
 When you detect these patterns, suggest recording:
+
 > "That sounds like a useful learning. Would you like me to record it?"
 
 ### 🎨 Auto-Index Updates

@@ -2,7 +2,7 @@
 name: codemap
 description: Orchestrate parallel codebase analysis to produce 7 structured documents about the codebase in .planning/codebase/
 license: MIT
-compatibility: opencode, claude, amp, codex, gemini, cursor
+compatibility: opencode, claude, amp, codex, gemini, cursor, pi
 hint: Use when mapping codebase structure, documenting architecture, or onboarding to a project
 user-invocable: true
 metadata:
@@ -42,12 +42,14 @@ This skill orchestrates 4 parallel agents, each exploring a specific focus area:
 4. **Concerns Agent** → Identifies tech debt and issues → CONCERNS.md
 
 Each agent:
+
 - Explores the codebase in a fresh context
 - Uses templates from `$SKILL_PATH/templates/`
 - Writes documents directly to `.planning/codebase/`
 - Returns only confirmation (not document contents)
 
 The orchestrator:
+
 - Creates `.planning/codebase/` directory
 - Spawns 4 parallel agents with `run_in_background=true`
 - Collects confirmations
@@ -59,6 +61,7 @@ The orchestrator:
 ### Step 1: Check Existing Map
 
 If `.planning/codebase/` already exists, prompt:
+
 ```
 .planning/codebase/ already exists. What's next?
 1. Refresh - Delete existing and remap codebase
@@ -69,6 +72,7 @@ If `.planning/codebase/` already exists, prompt:
 ### Step 2: Create Structure
 
 Create the output directory:
+
 ```bash
 mkdir -p .planning/codebase
 ```
@@ -78,6 +82,7 @@ mkdir -p .planning/codebase
 Use the `Task` tool with `agent_type="explore"` and `run_in_background=true` for parallel execution.
 
 **Tech Agent:**
+
 ```
 agent_type: explore
 description: Map codebase tech stack
@@ -95,6 +100,7 @@ prompt: |
 ```
 
 **Architecture Agent:**
+
 ```
 agent_type: explore
 description: Map codebase architecture
@@ -112,6 +118,7 @@ prompt: |
 ```
 
 **Quality Agent:**
+
 ```
 agent_type: explore
 description: Map codebase conventions
@@ -129,6 +136,7 @@ prompt: |
 ```
 
 **Concerns Agent:**
+
 ```
 agent_type: explore
 description: Map codebase concerns
@@ -147,6 +155,7 @@ prompt: |
 ### Step 4: Verify Output
 
 Check that all documents were created:
+
 ```bash
 ls -la .planning/codebase/
 wc -l .planning/codebase/*.md
@@ -155,6 +164,7 @@ wc -l .planning/codebase/*.md
 ### Step 5: Commit (Optional)
 
 If `.planning/` is not gitignored and the user wants to commit:
+
 ```bash
 git add .planning/codebase/*.md
 git commit -m "docs: map existing codebase
@@ -171,6 +181,7 @@ git commit -m "docs: map existing codebase
 ### Step 6: Summary
 
 Present completion summary:
+
 ```
 Codebase mapping complete.
 
@@ -210,6 +221,7 @@ When spawned as a mapper agent:
 ### Exploration Commands
 
 **Helper: Use fd if available, fall back to find**
+
 ```bash
 # Define finder helper (fd if available, otherwise find)
 _finder() { command -v fd >/dev/null 2>&1 && fd "$@" || find "$@"; }
@@ -217,6 +229,7 @@ _rg() { command -v rg >/dev/null 2>&1 && rg "$@" || grep -r "$@"; }
 ```
 
 **Tech Focus:**
+
 ```bash
 # Package manifests
 cat package.json pyproject.toml Cargo.toml go.mod 2>/dev/null
@@ -229,6 +242,7 @@ _rg "import.*stripe|import.*supabase|import.*aws" src/ 2>/dev/null | head -50
 ```
 
 **Architecture Focus:**
+
 ```bash
 # Directory structure (fd is faster and ignores node_modules/.git by default)
 _finder -t d . | head -50
@@ -241,6 +255,7 @@ _rg "^import" src/ 2>/dev/null | head -100
 ```
 
 **Quality Focus:**
+
 ```bash
 # Linting/formatting config
 cat .eslintrc* .prettierrc* biome.json 2>/dev/null
@@ -250,6 +265,7 @@ _finder -t f "\.test\." "\.spec\." 2>/dev/null | head -30
 ```
 
 **Concerns Focus:**
+
 ```bash
 # TODO/FIXME comments
 _rg "TODO|FIXME|HACK|XXX" src/ 2>/dev/null | head -50
