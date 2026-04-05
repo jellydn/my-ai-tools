@@ -27,9 +27,19 @@
 
 ## 📋 Prerequisites
 
+### All Platforms
+
 - **Bun or Node.js LTS** - Runtime for tools and scripts
 - **Git** - Version control
 - **Claude Code subscription** or use [CCS](#-ccs---claude-code-switch-optional) with affordable providers (GLM, MiniMax)
+
+### Windows-Specific
+
+- **Git for Windows** - Required for Git Bash support
+  - Download: https://git-scm.com/download/win
+  - Make sure to select "Git from the command line and also from 3rd-party software" during installation
+- **PowerShell 5.1+** - For the PowerShell installer
+- **jq** - Will be auto-installed via winget if available, or download from [GitHub releases](https://github.com/jqlang/jq/releases)
 
 ## 🚀 Quick Start
 
@@ -98,9 +108,55 @@ Export your current configurations back to this repository for version control:
 
 > **Tip:** Use `generate.sh` after customizing your local setup to save changes back to this repo.
 
----
+## 🪟 Windows Installation
 
-## 🤖 Claude Code
+The installer supports Windows via PowerShell or Git Bash.
+
+### Prerequisites for Windows
+
+1. **Git for Windows** - Includes Git Bash (required for running shell scripts)
+   - Download from: https://git-scm.com/download/win
+   - During installation, choose "Use Git and optional Unix tools from the Command Prompt" to add Git Bash to PATH
+
+2. **jq** (JSON processor) - Auto-installed via winget if available
+   - Manual install: `winget install -e --id jqlang.jq`
+
+### Option 1: PowerShell (Recommended for Windows)
+
+```powershell
+# Download and run the PowerShell installer
+irm https://ai-tools.itman.fyi/install.ps1 | iex
+
+# Or download first, then run with options:
+irm https://ai-tools.itman.fyi/install.ps1 -OutFile install.ps1
+.\install.ps1 -DryRun
+```
+
+**Local execution:**
+
+```powershell
+# Clone and run locally
+git clone https://github.com/jellydn/my-ai-tools.git
+cd my-ai-tools
+.\install.ps1
+```
+
+### Option 2: Git Bash
+
+```bash
+# Open Git Bash (from right-click menu or Start menu)
+git clone https://github.com/jellydn/my-ai-tools.git
+cd my-ai-tools
+bash ./cli.sh
+```
+
+> **Note:** If `bash` is not recognized in PowerShell, add Git to your PATH:
+>
+> ```powershell
+> [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\Git\bin", "User")
+> ```
+
+---
 
 Primary AI coding assistant with extensive customization.
 

@@ -11,20 +11,10 @@ PROMPT_BACKUP=true
 YES_TO_ALL=false
 VERBOSE=false
 
-# Detect OS (Windows vs Unix-like)
-IS_WINDOWS=false
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || -n "$MSYSTEM" ]]; then
-	IS_WINDOWS=true
-fi
-
 # Track whether Amp is installed (for backlog.md dependency)
 AMP_INSTALLED=false
 
-# Auto-detect non-interactive mode (stdin is piped)
-if [ ! -t 0 ]; then
-	YES_TO_ALL=true
-fi
-
+# Parse command-line arguments first
 for arg in "$@"; do
 	case $arg in
 	--dry-run)
@@ -62,15 +52,20 @@ for arg in "$@"; do
 	esac
 done
 
+# Auto-detect non-interactive mode AFTER parsing arguments
+# This ensures DRY_RUN and other flags are set before any functions use them
+if is_non_interactive; then
+	YES_TO_ALL=true
+	log_info "Non-interactive mode detected (CI or piped input)"
+fi
+
 # Preflight check for required tools
 preflight_check() {
 	local missing_tools=()
 
 	log_info "Running preflight checks..."
 
-	# Core utilities required by the script (jq is installed later by install_global_tools)
 	local required_tools=("awk" "sed" "basename" "cat" "head" "tail" "grep" "date")
-
 	for tool in "${required_tools[@]}"; do
 		if ! command -v "$tool" &>/dev/null; then
 			missing_tools+=("$tool")
@@ -86,33 +81,56 @@ preflight_check() {
 	log_success "All required tools available"
 }
 
-# Install MCP server with better error handling
+# Install MCP server with retry mechanism and better error handling
 install_mcp_server() {
 	local server_name="$1"
 	local install_cmd="$2"
+	local max_retries=3
+	local retry_count=0
+	local backoff=1
+	local err_file
+	err_file=$(make_temp_file "claude-mcp-${server_name}" "err")
 
-	# Capture stderr to temp file for error analysis
-	local err_file="/tmp/claude-mcp-${server_name}.err"
+	while [ $retry_count -lt $max_retries ]; do
+		# Try installation
+		if execute "$install_cmd" 2>"$err_file"; then
+			log_success "${server_name} MCP server added (global)"
+			rm -f "$err_file"
+			return 0
+		fi
 
-	if execute "$install_cmd" 2>"$err_file"; then
-		log_success "${server_name} MCP server added (global)"
-		rm -f "$err_file"
-		return 0
-	else
-		# Check if it's an "already exists" error (expected)
+		# Check if already installed (success case)
 		if grep -qi "already" "$err_file" 2>/dev/null; then
 			log_info "${server_name} already installed"
-		else
-			# Actual error - provide details for debugging
-			log_warning "${server_name} installation failed - check $err_file for details"
+			rm -f "$err_file"
+			return 0
 		fi
-		rm -f "$err_file"
-		return 1
+
+		retry_count=$((retry_count + 1))
+
+		# Check if retryable error and we have retries left
+		if [ $retry_count -lt $max_retries ] && grep -qiE "(connection|timed?out|network|econnrefused|etimedout)" "$err_file" 2>/dev/null; then
+			log_warning "${server_name} installation failed (attempt $retry_count/$max_retries) - retrying in ${backoff}s..."
+			sleep "$backoff"
+			backoff=$((backoff * 2))
+		else
+			# Not retryable or out of retries
+			break
+		fi
+	done
+
+	# All retries exhausted or non-retryable error
+	log_error "${server_name} installation failed after ${retry_count} attempts"
+	if [ -s "$err_file" ]; then
+		log_error "Error details:"
+		head -20 "$err_file" >&2
 	fi
+	log_info "You can try installing manually: $install_cmd"
+	rm -f "$err_file"
+	return 1
 }
 
 # Set up TMPDIR to avoid cross-device link errors
-# Uses a temp directory within $HOME to ensure same filesystem
 setup_tmpdir() {
 	local tmp_dir="$HOME/.claude/tmp"
 	mkdir -p "$tmp_dir" 2>/dev/null || true
@@ -134,47 +152,39 @@ check_prerequisites() {
 	elif command -v node &>/dev/null; then
 		NODE_VERSION=$(node --version)
 		log_success "Node.js found ($NODE_VERSION)"
-		log_warning "Some scripts (e.g., context-check) prefer Bun. Install with: brew install oven-sh/bun/bun"
+		log_warning "Some scripts prefer Bun. Install with: brew install oven-sh/bun/bun"
 	else
 		log_error "Neither Bun nor Node.js is installed."
+		handle_bun_installation
+	fi
+}
 
-		# Offer to install Bun in interactive mode
-		if [ "$YES_TO_ALL" = true ]; then
-			log_info "Auto-installing Bun (--yes flag)..."
+handle_bun_installation() {
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-installing Bun (--yes flag)..."
+		install_bun_now
+	elif [ -t 0 ]; then
+		if prompt_yn "Would you like to install Bun now"; then
 			install_bun_now
-		elif [ -t 0 ]; then
-			read -p "Would you like to install Bun now? (y/n) " -n 1 -r
-			echo
-			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				install_bun_now
-			else
-				log_error "Please install Bun or Node.js first."
-				exit 1
-			fi
 		else
 			log_error "Please install Bun or Node.js first."
-			log_info "  - Install Bun: curl -fsSL https://bun.sh/install | bash"
-			log_info "  - Or install Node.js: https://nodejs.org/"
 			exit 1
 		fi
+	else
+		log_error "Please install Bun or Node.js first."
+		exit 1
 	fi
 }
 
 install_bun_now() {
 	log_info "Installing Bun..."
 
-	# Download and execute Bun installer
-	if curl -fsSL https://bun.sh/install | bash; then
-		# Bun installer sets BUN_INSTALL, try to source common shell profiles
-		# to get the environment variables it sets
-		if [ -f "$HOME/.bashrc" ]; then
-			source "$HOME/.bashrc" 2>/dev/null || true
-		fi
-		if [ -f "$HOME/.zshrc" ]; then
-			source "$HOME/.zshrc" 2>/dev/null || true
-		fi
+	if execute_installer "https://bun.sh/install" "" "Bun"; then
+		# Source shell profiles to get Bun environment
+		[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc" 2>/dev/null || true
+		[ -f "$HOME/.zshrc" ] && source "$HOME/.zshrc" 2>/dev/null || true
 
-		# Fallback to default Bun location if not set
+		# Fallback to default Bun location
 		if [ -z "$BUN_INSTALL" ]; then
 			export BUN_INSTALL="$HOME/.bun"
 		fi
@@ -183,15 +193,12 @@ install_bun_now() {
 		if command -v bun &>/dev/null; then
 			BUN_VERSION=$(bun --version)
 			log_success "Bun installed successfully ($BUN_VERSION)"
-			log_info "Note: You may need to restart your terminal for Bun to be available in new sessions"
 		else
 			log_error "Bun installation completed but 'bun' command not found in PATH"
-			log_info "Please restart your terminal and run the script again"
 			exit 1
 		fi
 	else
 		log_error "Failed to install Bun"
-		log_info "Please install manually: curl -fsSL https://bun.sh/install | bash"
 		exit 1
 	fi
 }
@@ -199,181 +206,209 @@ install_bun_now() {
 install_global_tools() {
 	log_info "Checking global tools for PostToolUse hooks..."
 
-	# Check/install jq (required for JSON parsing in hooks)
-	if ! command -v jq &>/dev/null; then
-		log_warning "jq not found. Installing jq..."
-		local jq_installed=false
-		if [ "$IS_WINDOWS" = true ]; then
-			# Windows: use choco or winget, or download binary
-			if command -v choco &>/dev/null; then
-				execute "choco install jq -y" && jq_installed=true
-			elif command -v winget &>/dev/null; then
-				execute "winget install jq" && jq_installed=true
-			fi
-		else
-			# Mac/Linux: use brew or apt
-			if command -v brew &>/dev/null; then
-				execute "brew install jq" && jq_installed=true
-			elif command -v apt-get &>/dev/null; then
-				# Check if we can use sudo non-interactively
-				# YES_TO_ALL=true indicates non-interactive mode (piped input or --yes flag)
-				# sudo -n tests if sudo can run without password prompt
-				if [ "$YES_TO_ALL" = true ] && sudo -n true 2>/dev/null; then
-					# Can use sudo without password in non-interactive mode
-					execute "sudo apt-get install -y jq" && jq_installed=true
-				elif [ "$YES_TO_ALL" = false ] && [ -t 0 ]; then
-					# Interactive mode - allow sudo to prompt for password
-					execute "sudo apt-get install -y jq" && jq_installed=true
-				else
-					# Non-interactive mode but sudo needs password - skip
-					log_warning "Cannot install jq non-interactively (requires sudo with password)"
-				fi
-			fi
-		fi
-
-		if [ "$jq_installed" = false ]; then
-			log_warning "Please install jq manually: https://stedolan.github.io/jq/download/"
-			log_info "  - macOS: brew install jq"
-			log_info "  - Ubuntu/Debian: sudo apt-get install jq"
-			log_info "  - Other: See https://stedolan.github.io/jq/download/"
-		fi
-	else
-		log_success "jq found"
-	fi
-
-	# Check/install biome (required for JS/TS formatting)
-	if ! command -v biome &>/dev/null; then
-		log_warning "biome not found. Installing biome globally..."
-		if execute "npm install -g @biomejs/biome"; then
-			log_success "biome installed"
-		else
-			log_warning "Failed to install biome. You may need to configure npm for global installs without sudo."
-			log_info "  See: https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally"
-		fi
-	else
-		log_success "biome found"
-	fi
-
-	# Check gofmt (comes with Go, required for Go formatting in PostToolUse hooks)
-	if ! command -v gofmt &>/dev/null; then
-		log_warning "gofmt not found. Go is not installed."
-		if [ "$IS_WINDOWS" = true ]; then
-			if command -v choco &>/dev/null; then
-				log_info "Install Go with: choco install golang -y"
-			elif command -v winget &>/dev/null; then
-				log_info "Install Go with: winget install GoLang.Go"
-			else
-				log_info "Please install Go manually: https://golang.org/dl/"
-			fi
-		else
-			if command -v brew &>/dev/null; then
-				log_info "Install Go with: brew install go"
-			elif command -v apt-get &>/dev/null; then
-				log_info "Install Go with: sudo apt-get install -y golang"
-			else
-				log_info "Please install Go manually: https://golang.org/dl/"
-			fi
-		fi
-	else
-		log_success "gofmt found"
-	fi
-
-	# Check/install ruff (required for Python formatting)
-	if ! command -v ruff &>/dev/null; then
-		log_warning "ruff not found. Installing ruff..."
-		if command -v mise &>/dev/null; then
-			log_info "Installing ruff via mise..."
-			execute "mise use -g ruff@latest"
-		elif command -v pipx &>/dev/null; then
-			log_info "Installing ruff via pipx..."
-			execute "pipx install ruff"
-		elif command -v pip &>/dev/null || command -v pip3 &>/dev/null; then
-			log_info "Installing ruff via pip..."
-			if command -v pip3 &>/dev/null; then
-				execute "pip3 install ruff"
-			else
-				execute "pip install ruff"
-			fi
-		else
-			log_warning "No Python package manager found. Install ruff manually: https://docs.astral.sh/ruff/installation/"
-		fi
-	else
-		log_success "ruff found"
-	fi
-
-	# Check/install rustfmt (comes with Rust, required for Rust formatting)
-	if ! command -v rustfmt &>/dev/null; then
-		log_warning "rustfmt not found. Rust is not installed."
-		if command -v mise &>/dev/null; then
-			log_info "Installing Rust via mise..."
-			execute "mise use -g rust@latest"
-		elif command -v brew &>/dev/null; then
-			log_info "Installing Rust via brew..."
-			execute "brew install rust"
-		else
-			log_info "Installing Rust via rustup (non-interactive)..."
-			execute "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
-		fi
-	else
-		log_success "rustfmt found"
-	fi
-
-	# Check/install shfmt (required for shell script formatting)
-	if ! command -v shfmt &>/dev/null; then
-		log_warning "shfmt not found. Installing shfmt..."
-		if command -v mise &>/dev/null; then
-			log_info "Installing shfmt via mise..."
-			execute "mise use -g shfmt@latest"
-		elif command -v brew &>/dev/null; then
-			log_info "Installing shfmt via brew..."
-			execute "brew install shfmt"
-		elif command -v go &>/dev/null; then
-			log_info "Installing shfmt via go..."
-			execute "go install mvdan.cc/sh/v3/cmd/shfmt@latest"
-		else
-			log_warning "No package manager found for shfmt. Install manually: https://github.com/mvdan/sh"
-		fi
-	else
-		log_success "shfmt found"
-	fi
-
-	# Check/install stylua (required for Lua formatting)
-	if ! command -v stylua &>/dev/null; then
-		log_warning "stylua not found. Installing stylua..."
-		if command -v mise &>/dev/null; then
-			log_info "Installing stylua via mise..."
-			execute "mise use -g stylua@latest"
-		elif command -v brew &>/dev/null; then
-			log_info "Installing stylua via brew..."
-			execute "brew install stylua"
-		elif command -v cargo &>/dev/null; then
-			log_info "Installing stylua via cargo..."
-			execute "cargo install stylua"
-		else
-			log_warning "No package manager found for stylua. Install manually: https://github.com/JohnnyMorganz/StyLua"
-		fi
-	else
-		log_success "stylua found"
-	fi
-
-	# Check/install backlog.md (only if Amp is installed)
-	if [ "$AMP_INSTALLED" = true ]; then
-		if ! command -v backlog &>/dev/null; then
-			log_info "Installing backlog.md for Amp integration..."
-			execute "npm install -g backlog.md"
-		else
-			log_success "backlog.md found"
-		fi
-	fi
-
-	# Note: prettier is used via 'npx' in PostToolUse hooks, so no explicit installation needed
-	# It will be automatically downloaded and cached by npm when first used
+	install_jq_if_needed
+	install_biome_if_needed
+	check_gofmt
+	install_ruff_if_needed
+	install_rustfmt_if_needed
+	install_shfmt_if_needed
+	install_stylua_if_needed
+	install_backlog_if_needed
 
 	log_success "Global tools check complete"
 }
 
+install_jq_if_needed() {
+	if command -v jq &>/dev/null; then
+		log_success "jq found"
+		return 0
+	fi
+
+	log_warning "jq not found. Installing jq..."
+	local jq_installed=false
+
+	if [ "$IS_WINDOWS" = true ]; then
+		if command -v choco &>/dev/null; then
+			execute "choco install jq -y" && jq_installed=true
+		elif command -v winget &>/dev/null; then
+			# Use correct package ID with exact match flag
+			execute "winget install -e --id jqlang.jq --accept-package-agreements --accept-source-agreements" && jq_installed=true
+		fi
+
+		# After winget install, refresh PATH in current session
+		if [ "$jq_installed" = true ]; then
+			# winget adds to PATH but current shell doesn't know about it
+			# Try common jq installation locations
+			local jq_path=""
+			if [ -f "$LOCALAPPDATA/Microsoft/WinGet/Packages/jqlang.jq_Microsoft.Winget.Source_8wekyb3d8bbwe/jq.exe" ]; then
+				jq_path="$LOCALAPPDATA/Microsoft/WinGet/Packages/jqlang.jq_Microsoft.Winget.Source_8wekyb3d8bbwe"
+			elif [ -f "$PROGRAMFILES/jq/jq.exe" ]; then
+				jq_path="$PROGRAMFILES/jq"
+			elif [ -f "$PROGRAMFILES/WinGet/Links/jq.exe" ]; then
+				jq_path="$PROGRAMFILES/WinGet/Links"
+			fi
+
+			if [ -n "$jq_path" ]; then
+				export PATH="$jq_path:$PATH"
+				log_info "Added jq to PATH: $jq_path"
+			fi
+
+			# Verify jq is now available
+			if ! command -v jq &>/dev/null; then
+				log_warning "jq installed but not found in PATH. Please restart your terminal."
+				jq_installed=false
+			fi
+		fi
+	else
+		if command -v brew &>/dev/null; then
+			execute "brew install jq" && jq_installed=true
+		elif command -v apt-get &>/dev/null; then
+			if ([ "$YES_TO_ALL" = true ] && sudo -n true 2>/dev/null) || ([ "$YES_TO_ALL" = false ] && [ -t 0 ]); then
+				execute "sudo apt-get install -y jq" && jq_installed=true
+			else
+				log_warning "Cannot install jq non-interactively (requires sudo with password)"
+			fi
+		fi
+	fi
+
+	if [ "$jq_installed" = false ]; then
+		log_warning "Please install jq manually: https://jqlang.github.io/jq/download/"
+		if [ "$IS_WINDOWS" = true ]; then
+			log_info "Windows installation options:"
+			log_info "  - winget: winget install -e --id jqlang.jq"
+			log_info "  - chocolatey: choco install jq"
+			log_info "  - Scoop: scoop install jq"
+			log_info "  - GitHub: https://github.com/jqlang/jq/releases"
+		fi
+	fi
+}
+
+install_biome_if_needed() {
+	if command -v biome &>/dev/null; then
+		log_success "biome found"
+		return 0
+	fi
+
+	log_warning "biome not found. Installing biome globally..."
+	if execute "npm install -g @biomejs/biome"; then
+		log_success "biome installed"
+	else
+		log_warning "Failed to install biome"
+	fi
+}
+
+check_gofmt() {
+	if command -v gofmt &>/dev/null; then
+		log_success "gofmt found"
+		return 0
+	fi
+
+	log_warning "gofmt not found. Go is not installed."
+	if [ "$IS_WINDOWS" = true ]; then
+		if command -v choco &>/dev/null; then
+			log_info "Install Go with: choco install golang -y"
+		elif command -v winget &>/dev/null; then
+			log_info "Install Go with: winget install GoLang.Go"
+		else
+			log_info "Please install Go manually: https://golang.org/dl/"
+		fi
+	else
+		if command -v brew &>/dev/null; then
+			log_info "Install Go with: brew install go"
+		elif command -v apt-get &>/dev/null; then
+			log_info "Install Go with: sudo apt-get install -y golang"
+		else
+			log_info "Please install Go manually: https://golang.org/dl/"
+		fi
+	fi
+}
+
+install_ruff_if_needed() {
+	if command -v ruff &>/dev/null; then
+		log_success "ruff found"
+		return 0
+	fi
+
+	log_warning "ruff not found. Installing ruff..."
+	if command -v mise &>/dev/null; then
+		execute "mise use -g ruff@latest"
+	elif command -v pipx &>/dev/null; then
+		execute "pipx install ruff"
+	elif command -v pip3 &>/dev/null; then
+		execute "pip3 install ruff"
+	elif command -v pip &>/dev/null; then
+		execute "pip install ruff"
+	else
+		log_warning "No Python package manager found. Install ruff manually: https://docs.astral.sh/ruff/installation/"
+	fi
+}
+
+install_rustfmt_if_needed() {
+	if command -v rustfmt &>/dev/null; then
+		log_success "rustfmt found"
+		return 0
+	fi
+
+	log_warning "rustfmt not found. Installing Rust..."
+	if command -v mise &>/dev/null; then
+		execute "mise use -g rust@latest"
+	elif command -v brew &>/dev/null; then
+		execute "brew install rust"
+	else
+		execute_installer "https://sh.rustup.rs" "" "Rust" "-y"
+	fi
+}
+
+install_shfmt_if_needed() {
+	if command -v shfmt &>/dev/null; then
+		log_success "shfmt found"
+		return 0
+	fi
+
+	log_warning "shfmt not found. Installing shfmt..."
+	if command -v mise &>/dev/null; then
+		execute "mise use -g shfmt@latest"
+	elif command -v brew &>/dev/null; then
+		execute "brew install shfmt"
+	elif command -v go &>/dev/null; then
+		execute "go install mvdan.cc/sh/v3/cmd/shfmt@latest"
+	else
+		log_warning "No package manager found for shfmt. Install manually: https://github.com/mvdan/sh"
+	fi
+}
+
+install_stylua_if_needed() {
+	if command -v stylua &>/dev/null; then
+		log_success "stylua found"
+		return 0
+	fi
+
+	log_warning "stylua not found. Installing stylua..."
+	if command -v mise &>/dev/null; then
+		execute "mise use -g stylua@latest"
+	elif command -v brew &>/dev/null; then
+		execute "brew install stylua"
+	elif command -v cargo &>/dev/null; then
+		execute "cargo install stylua"
+	else
+		log_warning "No package manager found for stylua. Install manually: https://github.com/JohnnyMorganz/StyLua"
+	fi
+}
+
+install_backlog_if_needed() {
+	if [ "$AMP_INSTALLED" = false ]; then
+		return 0
+	fi
+
+	if command -v backlog &>/dev/null; then
+		log_success "backlog.md found"
+	else
+		log_info "Installing backlog.md for Amp integration..."
+		execute "npm install -g backlog.md"
+	fi
+}
+
 # Helper: Safely copy a directory, handling "Text file busy" errors
-# Skips node_modules to avoid copying large dependency trees
 # Usage: safe_copy_dir "source_dir" "dest_dir"
 safe_copy_dir() {
 	local source_dir="$1"
@@ -386,34 +421,19 @@ safe_copy_dir() {
 		return 0
 	fi
 
-	# Ensure destination parent exists
 	if ! mkdir -p "$(dirname "$dest_dir")" 2>/dev/null; then
 		log_warning "Failed to create destination directory: $(dirname "$dest_dir")"
 		return 1
 	fi
 
-	# Directories to exclude from copies (large, non-config data)
+	# Directories to exclude from copies
 	local -a exclude_dirs=(
-		"node_modules"
-		"plugins"
-		"projects"
-		"debug"
-		"sessions"
-		"git"
-		"cache"
-		"extensions"
-		"chats"
-		"antigravity"
-		"antigravity-browser-profile"
-		"log"
-		"logs"
-		"tmp"
-		"vendor_imports"
-		"file-history"
-		"ai-tracking"
+		"node_modules" "plugins" "projects" "debug" "sessions" "git"
+		"cache" "extensions" "chats" "antigravity" "antigravity-browser-profile"
+		"log" "logs" "tmp" "vendor_imports" "file-history" "ai-tracking"
 	)
 
-	# Prefer rsync when available to exclude large dirs and handle busy files
+	# Prefer rsync when available
 	if command -v rsync &>/dev/null; then
 		local -a rsync_excludes=()
 		for dir in "${exclude_dirs[@]}"; do
@@ -425,33 +445,27 @@ safe_copy_dir() {
 		fi
 	fi
 
-	# Fallback: copy non-binary files, skip busy binaries and excluded dirs
+	# Fallback: manual copy
 	local prune_expr=""
 	for dir in "${exclude_dirs[@]}"; do
 		prune_expr="$prune_expr -name $dir -o"
 	done
-	# Remove trailing -o
 	prune_expr="${prune_expr% -o}"
 
 	mkdir -p "$dest_dir"
 	while IFS= read -r file; do
-		# Skip sqlite files
 		case "$file" in *.sqlite | *.sqlite-wal | *.sqlite-shm) continue ;; esac
-		rel_path="${file#"$source_dir"/}"
-		dest_file="$dest_dir/$rel_path"
+		local rel_path="${file#"$source_dir"/}"
+		local dest_file="$dest_dir/$rel_path"
 		mkdir -p "$(dirname "$dest_file")"
-		if cp "$file" "$dest_file" 2>/dev/null; then
-			:
-		else
+		if ! cp "$file" "$dest_file" 2>/dev/null; then
 			((errors++))
 			((skipped++))
 			[ "$VERBOSE" = true ] && log_warning "Skipped busy file: $rel_path"
 		fi
 	done < <(find "$source_dir" -type d \( $prune_expr \) -prune -o -type f -print 2>/dev/null)
 
-	# Log summary in verbose mode
 	[ "$VERBOSE" = true ] && [ $skipped -gt 0 ] && log_info "Skipped $skipped busy file(s)"
-
 	return 0
 }
 
@@ -463,7 +477,7 @@ copy_config_dir() {
 	local dest_name="$3"
 
 	if [ -d "$source_dir" ]; then
-		execute "mkdir -p $dest_parent"
+		execute_quoted mkdir -p "$dest_parent"
 		safe_copy_dir "$source_dir" "$dest_parent/$dest_name"
 		log_success "Backed up $dest_name configs"
 	fi
@@ -476,8 +490,8 @@ copy_config_file() {
 	local dest_dir="$2"
 
 	if [ -f "$source_file" ]; then
-		execute "mkdir -p $dest_dir"
-		execute "cp $source_file $dest_dir/"
+		execute_quoted mkdir -p "$dest_dir"
+		execute_quoted cp "$source_file" "$dest_dir/"
 		return 0
 	fi
 	return 1
@@ -488,7 +502,7 @@ copy_config_file() {
 ensure_cli_tool() {
 	local name="$1"
 	local install_cmd="$2"
-	local version_cmd="$3"
+	local version_cmd="${3:-}"
 
 	if command -v "$name" &>/dev/null; then
 		if [ -n "$version_cmd" ]; then
@@ -506,7 +520,6 @@ ensure_cli_tool() {
 }
 
 backup_configs() {
-	# Clean up old backups first (keep last 5)
 	cleanup_old_backups 5
 
 	if [ "$PROMPT_BACKUP" = true ]; then
@@ -514,9 +527,7 @@ backup_configs() {
 			log_info "Auto-accepting backup (--yes flag)"
 			BACKUP=true
 		elif [ -t 0 ]; then
-			read -p "Do you want to backup existing configurations? (y/n) " -n 1 -r
-			echo
-			if [[ $REPLY =~ ^[Yy]$ ]]; then
+			if prompt_yn "Do you want to backup existing configurations"; then
 				BACKUP=true
 			fi
 		else
@@ -526,7 +537,7 @@ backup_configs() {
 
 	if [ "$BACKUP" = true ]; then
 		log_info "Creating backup at $BACKUP_DIR..."
-		execute "mkdir -p $BACKUP_DIR"
+		execute_quoted mkdir -p "$BACKUP_DIR"
 
 		copy_config_dir "$HOME/.claude" "$BACKUP_DIR" "claude"
 		copy_config_dir "$HOME/.config/opencode" "$BACKUP_DIR" "opencode"
@@ -546,30 +557,33 @@ backup_configs() {
 install_claude_code() {
 	log_info "Installing Claude Code..."
 
-	if command -v claude &>/dev/null; then
-		log_warning "Claude Code is already installed ($(claude --version))"
-		if [ "$YES_TO_ALL" = true ]; then
-			log_info "Auto-skipping reinstall (--yes flag)"
-			return
-		elif [ -t 0 ]; then
-			read -p "Do you want to reinstall? (y/n) " -n 1 -r
-			echo
-			if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-				return
-			fi
+	if ! command -v claude &>/dev/null; then
+		if execute "npm install -g @anthropic-ai/claude-code"; then
+			log_success "Claude Code installed"
 		else
-			log_info "Skipping reinstall in non-interactive mode"
+			log_error "Failed to install Claude Code"
+		fi
+		return
+	fi
+
+	log_warning "Claude Code is already installed ($(claude --version))"
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-skipping reinstall (--yes flag)"
+		return
+	elif [ -t 0 ]; then
+		if ! prompt_yn "Do you want to reinstall"; then
 			return
 		fi
+	else
+		log_info "Skipping reinstall in non-interactive mode"
+		return
 	fi
 
 	if execute "npm install -g @anthropic-ai/claude-code"; then
-		log_success "Claude Code installed"
+		log_success "Claude Code reinstalled"
 	else
-		log_error "Failed to install Claude Code"
-		log_info "You may need to configure npm for global installs without sudo."
-		log_info "  See: https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally"
-		log_info "Or install manually: npm install -g @anthropic-ai/claude-code"
+		log_error "Failed to reinstall Claude Code"
 	fi
 }
 
@@ -685,9 +699,11 @@ install_copilot() {
 		log_info "Auto-accepting GitHub Copilot CLI installation (--yes flag)"
 		prompt_and_install
 	elif [ -t 0 ]; then
-		read -p "Do you want to install GitHub Copilot CLI? (y/n) " -n 1 -r
-		echo
-		[[ $REPLY =~ ^[Yy]$ ]] && prompt_and_install || log_warning "Skipping GitHub Copilot CLI installation"
+		if prompt_yn "Do you want to install GitHub Copilot CLI"; then
+			prompt_and_install
+		else
+			log_warning "Skipping GitHub Copilot CLI installation"
+		fi
 	else
 		log_info "Installing GitHub Copilot CLI (non-interactive mode)..."
 		prompt_and_install
@@ -699,13 +715,18 @@ install_cursor() {
 	if command -v agent &>/dev/null; then
 		local agent_version
 		agent_version=$(agent --version 2>/dev/null || echo 'version unknown')
-		log_warning "Cursor Agent CLI is already installed ($agent_version)"
+		log_success "Cursor Agent CLI found ($agent_version)"
 	else
-		log_warning "Cursor Agent CLI is not installed; manual installation is required."
-		log_info "1. Install with: curl https://cursor.com/install -fsS | bash"
-		log_info "2. Add to PATH: export PATH=\"\$HOME/.local/bin:\$PATH\""
-		log_info "3. Verify with: agent --version"
-		log_info "See: https://cursor.com/docs/cli/installation"
+		log_warning "Cursor Agent CLI is not installed"
+		if [ -t 0 ]; then
+			if prompt_yn "Show manual installation instructions for Cursor CLI"; then
+				log_info "1. Install with: curl https://cursor.com/install -fsS | bash"
+				log_info "2. Add to PATH: export PATH=\"\$HOME/.local/bin:\$PATH\""
+				log_info "3. Verify with: agent --version"
+			fi
+		else
+			log_info "Manual installation required: curl https://cursor.com/install -fsS | bash"
+		fi
 	fi
 }
 
@@ -723,23 +744,30 @@ copy_non_marketplace_skills() {
 	local source_dir="$1"
 	local dest_dir="$2"
 
-	if [ -d "$source_dir" ] && [ "$(ls -A "$source_dir" 2>/dev/null)" ]; then
-		execute "rm -rf $dest_dir"
-		execute "mkdir -p $dest_dir"
-		for skill_dir in "$source_dir"/*; do
-			if [ -d "$skill_dir" ]; then
-				skill_name="$(basename "$skill_dir")"
-				case "$skill_name" in
-				prd | ralph | qmd-knowledge | codemap)
-					# Skip marketplace plugins
-					;;
-				*)
-					safe_copy_dir "$skill_dir" "$dest_dir/$skill_name"
-					;;
-				esac
-			fi
-		done
+	if [ ! -d "$source_dir" ] || [ -z "$(ls -A "$source_dir" 2>/dev/null)" ]; then
+		return 0
 	fi
+
+	execute_quoted rm -rf "$dest_dir"
+	execute_quoted mkdir -p "$dest_dir"
+
+	for skill_dir in "$source_dir"/*; do
+		if [ ! -d "$skill_dir" ]; then
+			continue
+		fi
+
+		local skill_name
+		skill_name="$(basename "$skill_dir")"
+
+		case "$skill_name" in
+		prd | ralph | qmd-knowledge | codemap)
+			# Skip marketplace plugins
+			;;
+		*)
+			safe_copy_dir "$skill_dir" "$dest_dir/$skill_name"
+			;;
+		esac
+	done
 }
 
 # Helper: Copy OpenCode commands, skipping my-ai-tools folder
@@ -748,22 +776,22 @@ copy_opencode_commands() {
 	local source_dir="$1"
 	local dest_dir="$2"
 
-	if [ -d "$source_dir" ] && [ "$(ls -A "$source_dir" 2>/dev/null)" ]; then
-		execute "mkdir -p \"$dest_dir\""
-		for item in "$source_dir"/*; do
-			if [ -d "$item" ]; then
-				command_name="$(basename "$item")"
-				# Skip my-ai-tools folder
-				if [ "$command_name" = "my-ai-tools" ]; then
-					continue
-				fi
-				safe_copy_dir "$item" "$dest_dir/$command_name"
-			elif [ -f "$item" ]; then
-				# Copy individual files (like .md files)
-				execute "cp \"$item\" \"$dest_dir/\""
-			fi
-		done
+	if [ ! -d "$source_dir" ] || [ -z "$(ls -A "$source_dir" 2>/dev/null)" ]; then
+		return 0
 	fi
+
+	execute_quoted mkdir -p "$dest_dir"
+
+	for item in "$source_dir"/*; do
+		if [ -d "$item" ]; then
+			local command_name
+			command_name="$(basename "$item")"
+			[ "$command_name" = "my-ai-tools" ] && continue
+			safe_copy_dir "$item" "$dest_dir/$command_name"
+		elif [ -f "$item" ]; then
+			execute_quoted cp "$item" "$dest_dir/"
+		fi
+	done
 }
 
 # Helper: Install MCP server with interactive prompts
@@ -781,9 +809,7 @@ install_mcp_interactive() {
 			log_warning "$name already installed or failed"
 		fi
 	elif [ -t 0 ]; then
-		read -p "Install $name MCP server ($description)? (y/n) " -n 1 -r
-		echo
-		if [[ $REPLY =~ ^[Yy]$ ]]; then
+		if prompt_yn "Install $name MCP server ($description)"; then
 			if execute "$install_cmd"; then
 				log_success "$name MCP server added (global)"
 			else
@@ -798,196 +824,365 @@ install_mcp_interactive() {
 copy_configurations() {
 	log_info "Copying configurations..."
 
-	# Create ~/.claude directory
-	execute "mkdir -p $HOME/.claude"
+	validate_all_configs || true
 
-	# Copy Claude Code configs
-	execute "cp $SCRIPT_DIR/configs/claude/settings.json $HOME/.claude/settings.json"
-	execute "cp $SCRIPT_DIR/configs/claude/mcp-servers.json $HOME/.claude/mcp-servers.json"
-	execute "cp $SCRIPT_DIR/configs/claude/CLAUDE.md $HOME/.claude/CLAUDE.md"
-	execute "rm -rf $HOME/.claude/commands"
-	safe_copy_dir "$SCRIPT_DIR/configs/claude/commands" "$HOME/.claude/commands"
-	if [ -d "$SCRIPT_DIR/configs/claude/agents" ]; then
-		execute "mkdir -p $HOME/.claude/agents"
-		execute "cp $SCRIPT_DIR/configs/claude/agents/* $HOME/.claude/agents/"
+	copy_claude_configs
+	copy_opencode_configs
+	copy_amp_configs
+	copy_ai_launcher_configs
+	copy_codex_configs
+	copy_gemini_configs
+	copy_kilo_configs
+	copy_pi_configs
+	copy_copilot_configs
+	copy_cursor_configs
+	copy_factory_configs
+	copy_best_practices
+}
+
+# Validate all config files
+validate_all_configs() {
+	log_info "Validating configuration files..."
+	local config_validation_failed=false
+
+	# Validate Claude Code configs
+	if ! validate_config_with_schema "$SCRIPT_DIR/configs/claude/settings.json"; then
+		log_error "Claude Code settings.json failed validation"
+		config_validation_failed=true
 	fi
+	if ! validate_config "$SCRIPT_DIR/configs/claude/mcp-servers.json"; then
+		log_error "Claude Code mcp-servers.json failed validation"
+		config_validation_failed=true
+	fi
+
+	# Validate OpenCode config
+	if [ -f "$SCRIPT_DIR/configs/opencode/opencode.json" ]; then
+		if ! validate_config_with_schema "$SCRIPT_DIR/configs/opencode/opencode.json"; then
+			log_error "OpenCode config failed validation"
+			config_validation_failed=true
+		fi
+	fi
+
+	# Validate other tool configs
+	for config_file in "$SCRIPT_DIR/configs/amp/settings.json" \
+		"$SCRIPT_DIR/configs/ai-launcher/config.json" \
+		"$SCRIPT_DIR/configs/codex/config.json" \
+		"$SCRIPT_DIR/configs/gemini/settings.json" \
+		"$SCRIPT_DIR/configs/kilo/config.json" \
+		"$SCRIPT_DIR/configs/pi/settings.json" \
+		"$SCRIPT_DIR/configs/factory/settings.json"; do
+		if [ -f "$config_file" ] && ! validate_config "$config_file"; then
+			log_error "Config validation failed: $config_file"
+			config_validation_failed=true
+		fi
+	done
+
+	if [ "$config_validation_failed" = true ]; then
+		log_warning "Some configuration files failed validation"
+		if [ "$YES_TO_ALL" = false ] && [ -t 0 ]; then
+			if ! prompt_yn "Continue anyway"; then
+				log_error "Installation aborted due to config validation failures"
+				exit 1
+			fi
+		else
+			log_info "Continuing despite validation failures (--yes or non-interactive mode)"
+		fi
+	else
+		log_success "All configuration files validated successfully"
+	fi
+}
+
+copy_claude_configs() {
+	execute_quoted mkdir -p "$HOME/.claude"
+
+	# Copy core configs
+	execute_quoted cp "$SCRIPT_DIR/configs/claude/settings.json" "$HOME/.claude/settings.json"
+	execute_quoted cp "$SCRIPT_DIR/configs/claude/mcp-servers.json" "$HOME/.claude/mcp-servers.json"
+	execute_quoted cp "$SCRIPT_DIR/configs/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+
+	# Copy directories
+	execute_quoted rm -rf "$HOME/.claude/commands"
+	safe_copy_dir "$SCRIPT_DIR/configs/claude/commands" "$HOME/.claude/commands"
+
+	if [ -d "$SCRIPT_DIR/configs/claude/agents" ]; then
+		execute_quoted mkdir -p "$HOME/.claude/agents"
+		execute_quoted cp "$SCRIPT_DIR/configs/claude/agents/"* "$HOME/.claude/agents/"
+	fi
+
 	if [ -d "$SCRIPT_DIR/configs/claude/hooks" ]; then
-		execute "mkdir -p $HOME/.claude/hooks"
+		execute_quoted mkdir -p "$HOME/.claude/hooks"
 		safe_copy_dir "$SCRIPT_DIR/configs/claude/hooks" "$HOME/.claude/hooks"
 		log_success "Claude Code hooks installed"
 	fi
 
-	# Add MCP servers using Claude Code CLI (globally, available in all projects)
-	if command -v claude &>/dev/null; then
-		log_info "Setting up Claude Code MCP servers (global scope)..."
-		install_mcp_interactive "context7" "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest" "documentation lookup"
-		install_mcp_interactive "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking" "multi-step reasoning"
-		if command -v qmd &>/dev/null; then
-			install_mcp_interactive "qmd" "claude mcp add --scope user --transport stdio qmd -- qmd mcp" "knowledge management"
-		else
-			log_warning "qmd not found. MCP setup skipped. Install with: bun install -g https://github.com/tobi/qmd"
-		fi
-		log_success "MCP server setup complete (global scope)"
-	fi
+	# Add MCP servers
+	setup_claude_mcp_servers
 
 	log_success "Claude Code configs copied"
+}
 
-	# Copy OpenCode configs
-	if [ -d "$HOME/.config/opencode" ] || command -v opencode &>/dev/null; then
-		execute "mkdir -p $HOME/.config/opencode"
-		execute "cp $SCRIPT_DIR/configs/opencode/opencode.json $HOME/.config/opencode/"
-		execute "rm -rf $HOME/.config/opencode/agent"
-		safe_copy_dir "$SCRIPT_DIR/configs/opencode/agent" "$HOME/.config/opencode/agent"
-		execute "rm -rf $HOME/.config/opencode/command"
-		copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/command"
-		execute "rm -rf $HOME/.config/opencode/skills"
-		copy_non_marketplace_skills "$SCRIPT_DIR/skills" "$HOME/.config/opencode/skills"
-		log_success "OpenCode configs copied"
+setup_claude_mcp_servers() {
+	if ! command -v claude &>/dev/null; then
+		return 0
 	fi
 
-	# Copy Amp configs
-	if [ -d "$HOME/.config/amp" ] || command -v amp &>/dev/null; then
-		execute "mkdir -p $HOME/.config/amp"
-		execute "cp $SCRIPT_DIR/configs/amp/settings.json $HOME/.config/amp/"
-		copy_non_marketplace_skills "$SCRIPT_DIR/configs/amp/skills" "$HOME/.config/amp/skills"
-		if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
-			execute "cp $SCRIPT_DIR/configs/amp/AGENTS.md $HOME/.config/amp/"
-			if [ -f "$HOME/.config/AGENTS.md" ]; then
-				cp "$HOME/.config/AGENTS.md" "$HOME/.config/AGENTS.md.bak"
-				log_warning "Backed up existing AGENTS.md to .bak"
-			fi
-			execute "cp $SCRIPT_DIR/configs/amp/AGENTS.md $HOME/.config/AGENTS.md"
-		fi
-		log_success "Amp configs copied"
+	log_info "Setting up Claude Code MCP servers (global scope)..."
+	install_mcp_interactive "context7" "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest" "documentation lookup"
+	install_mcp_interactive "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking" "multi-step reasoning"
+
+	if command -v qmd &>/dev/null; then
+		install_mcp_interactive "qmd" "claude mcp add --scope user --transport stdio qmd -- qmd mcp" "knowledge management"
+	else
+		log_warning "qmd not found. MCP setup skipped. Install with: bun install -g https://github.com/tobi/qmd"
 	fi
 
-	# Copy ai-launcher configs
-	if [ -d "$HOME/.config/ai-launcher" ] || [ -f "$HOME/.config/ai-launcher/config.json" ]; then
-		if copy_config_file "$SCRIPT_DIR/configs/ai-launcher/config.json" "$HOME/.config/ai-launcher"; then
-			log_success "ai-launcher configs copied"
-		else
-			log_info "ai-launcher config not found in source, preserving existing"
-		fi
+	log_success "MCP server setup complete (global scope)"
+}
+
+copy_opencode_configs() {
+	local opencode_status
+	opencode_status=$(detect_tool --detailed "opencode" "$HOME/.config/opencode") || opencode_status="missing"
+	if [ "$opencode_status" = "missing" ]; then
+		log_info "OpenCode not detected - skipping OpenCode config installation"
+		return 0
 	fi
 
-	# Copy Codex CLI configs
-	if [ -d "$HOME/.codex" ] || command -v codex &>/dev/null; then
-		execute "mkdir -p $HOME/.codex"
-		copy_config_file "$SCRIPT_DIR/configs/codex/AGENTS.md" "$HOME/.codex/" || true
-		copy_config_file "$SCRIPT_DIR/configs/codex/config.json" "$HOME/.codex/" || true
-		if [ -f "$SCRIPT_DIR/configs/codex/config.toml" ]; then
-			if [ -f "$HOME/.codex/config.toml" ]; then
-				# Backup existing config before overwriting
-				execute "cp $HOME/.codex/config.toml $HOME/.codex/config.toml.bak"
-				log_success "Backed up existing config.toml to config.toml.bak"
-			fi
-			# Copy new config (whether or not there was an old one)
-			execute "cp $SCRIPT_DIR/configs/codex/config.toml $HOME/.codex/"
-			log_success "Copied Codex config.toml"
-		fi
-		if [ -d "$SCRIPT_DIR/configs/codex/themes" ]; then
-			execute "mkdir -p \"$HOME/.codex/themes\""
-			safe_copy_dir "$SCRIPT_DIR/configs/codex/themes" "$HOME/.codex/themes"
-			log_success "Copied Codex custom themes"
-		fi
-		log_success "Codex CLI configs copied (skills invoked via \$, prompts no longer needed)"
+	log_info "Detected OpenCode (via $opencode_status)"
+	execute_quoted mkdir -p "$HOME/.config/opencode"
+	execute_quoted cp "$SCRIPT_DIR/configs/opencode/opencode.json" "$HOME/.config/opencode/"
+
+	execute_quoted rm -rf "$HOME/.config/opencode/agent"
+	safe_copy_dir "$SCRIPT_DIR/configs/opencode/agent" "$HOME/.config/opencode/agent"
+
+	execute_quoted rm -rf "$HOME/.config/opencode/command"
+	copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/command"
+
+	execute_quoted rm -rf "$HOME/.config/opencode/skills"
+	copy_non_marketplace_skills "$SCRIPT_DIR/skills" "$HOME/.config/opencode/skills"
+
+	log_success "OpenCode configs copied"
+}
+
+copy_amp_configs() {
+	local amp_status
+	amp_status=$(detect_tool --detailed "amp" "$HOME/.config/amp") || amp_status="missing"
+	if [ "$amp_status" = "missing" ]; then
+		log_info "Amp not detected - skipping Amp config installation"
+		return 0
 	fi
 
-	# Copy Gemini CLI configs
-	if [ -d "$HOME/.gemini" ] || command -v gemini &>/dev/null; then
-		execute "mkdir -p $HOME/.gemini"
-		copy_config_file "$SCRIPT_DIR/configs/gemini/AGENTS.md" "$HOME/.gemini/" || true
-		copy_config_file "$SCRIPT_DIR/configs/gemini/GEMINI.md" "$HOME/.gemini/" || true
-		copy_config_file "$SCRIPT_DIR/configs/gemini/settings.json" "$HOME/.gemini/" || true
-		execute "rm -rf $HOME/.gemini/agents"
-		safe_copy_dir "$SCRIPT_DIR/configs/gemini/agents" "$HOME/.gemini/agents"
-		execute "rm -rf $HOME/.gemini/commands"
-		safe_copy_dir "$SCRIPT_DIR/configs/gemini/commands" "$HOME/.gemini/commands"
-		execute "rm -rf $HOME/.gemini/skills"
-		copy_non_marketplace_skills "$SCRIPT_DIR/configs/gemini/skills" "$HOME/.gemini/skills"
-		log_success "Gemini CLI configs copied"
+	log_info "Detected Amp (via $amp_status)"
+	execute_quoted mkdir -p "$HOME/.config/amp"
+	execute_quoted cp "$SCRIPT_DIR/configs/amp/settings.json" "$HOME/.config/amp/"
+
+	copy_non_marketplace_skills "$SCRIPT_DIR/configs/amp/skills" "$HOME/.config/amp/skills"
+
+	if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
+		execute_quoted cp "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/amp/"
+		if [ -f "$HOME/.config/AGENTS.md" ]; then
+			cp "$HOME/.config/AGENTS.md" "$HOME/.config/AGENTS.md.bak"
+			log_warning "Backed up existing AGENTS.md to .bak"
+		fi
+		execute_quoted cp "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/AGENTS.md"
 	fi
 
-	# Copy Kilo CLI configs
-	if [ -d "$HOME/.config/kilo" ] || command -v kilo &>/dev/null; then
-		execute "mkdir -p $HOME/.config/kilo"
-		copy_config_file "$SCRIPT_DIR/configs/kilo/config.json" "$HOME/.config/kilo/" || true
-		log_success "Kilo CLI configs copied"
+	log_success "Amp configs copied"
+}
+
+copy_ai_launcher_configs() {
+	local ai_launcher_status
+	ai_launcher_status=$(detect_tool --detailed "ai-launcher" "$HOME/.config/ai-launcher" "$HOME/.config/ai-launcher/config.json") || ai_launcher_status="missing"
+	if [ "$ai_launcher_status" = "missing" ]; then
+		log_info "ai-launcher not detected - skipping ai-launcher config installation"
+		return 0
 	fi
 
-	# Copy Pi configs
-	if [ -d "$HOME/.pi" ] || command -v pi &>/dev/null; then
-		execute "mkdir -p $HOME/.pi/agent"
-		if [ ! -f "$HOME/.pi/agent/settings.json" ]; then
-			copy_config_file "$SCRIPT_DIR/configs/pi/settings.json" "$HOME/.pi/agent/" || true
-			log_success "Pi configs copied"
-		else
-			log_info "Pi settings.json already exists at ~/.pi/agent/, preserving existing config"
-		fi
-		if [ -d "$SCRIPT_DIR/configs/pi/themes" ]; then
-			execute "mkdir -p $HOME/.pi/agent/themes"
-			safe_copy_dir "$SCRIPT_DIR/configs/pi/themes" "$HOME/.pi/agent/themes"
-			log_success "Copied Pi custom themes"
-		fi
+	log_info "Detected ai-launcher (via $ai_launcher_status)"
+	execute_quoted mkdir -p "$HOME/.config/ai-launcher"
+	if copy_config_file "$SCRIPT_DIR/configs/ai-launcher/config.json" "$HOME/.config/ai-launcher"; then
+		log_success "ai-launcher configs copied"
+	else
+		log_info "ai-launcher config not found in source, preserving existing"
+	fi
+}
+
+copy_codex_configs() {
+	local codex_status
+	codex_status=$(detect_tool --detailed "codex" "$HOME/.codex") || codex_status="missing"
+	if [ "$codex_status" = "missing" ]; then
+		log_info "Codex CLI not detected - skipping Codex config installation"
+		return 0
 	fi
 
-	# Copy GitHub Copilot CLI global instructions to the official location.
-	# ~/.copilot/copilot-instructions.md is read automatically by Copilot CLI for all sessions.
-	if [ -f "$SCRIPT_DIR/configs/copilot/AGENTS.md" ] || [ -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ]; then
-		execute "mkdir -p $HOME/.copilot"
-		if [ -f "$SCRIPT_DIR/configs/copilot/AGENTS.md" ] && execute "cp \"$SCRIPT_DIR/configs/copilot/AGENTS.md\" \"$HOME/.copilot/copilot-instructions.md\""; then
-			log_success "GitHub Copilot CLI configs copied"
+	log_info "Detected Codex CLI (via $codex_status)"
+	execute_quoted mkdir -p "$HOME/.codex"
+
+	copy_config_file "$SCRIPT_DIR/configs/codex/AGENTS.md" "$HOME/.codex/" || true
+	copy_config_file "$SCRIPT_DIR/configs/codex/config.json" "$HOME/.codex/" || true
+
+	if [ -f "$SCRIPT_DIR/configs/codex/config.toml" ]; then
+		if [ -f "$HOME/.codex/config.toml" ]; then
+			execute_quoted cp "$HOME/.codex/config.toml" "$HOME/.codex/config.toml.bak"
+			log_success "Backed up existing config.toml to config.toml.bak"
 		fi
-		if [ -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ] && execute "cp \"$SCRIPT_DIR/configs/copilot/mcp-config.json\" \"$HOME/.copilot/mcp-config.json\""; then
-			log_success "GitHub Copilot MCP config copied"
-		fi
+		execute_quoted cp "$SCRIPT_DIR/configs/codex/config.toml" "$HOME/.codex/"
 	fi
 
-	# Copy Cursor Agent CLI global instructions.
-	# ~/.cursor/rules/ is read by the Cursor background agent for all sessions.
-	if [ -d "$HOME/.cursor" ] || command -v agent &>/dev/null; then
-		execute "mkdir -p \"$HOME/.cursor/rules\""
-		if [ -f "$SCRIPT_DIR/configs/cursor/AGENTS.md" ] && execute "cp \"$SCRIPT_DIR/configs/cursor/AGENTS.md\" \"$HOME/.cursor/rules/general.mdc\""; then
-			log_success "Cursor Agent CLI configs copied"
-		fi
-		# Copy mcp.json for Cursor MCP server configuration
-		if [ -f "$SCRIPT_DIR/configs/cursor/mcp.json" ] && execute "cp \"$SCRIPT_DIR/configs/cursor/mcp.json\" \"$HOME/.cursor/mcp.json\""; then
-			log_success "Cursor MCP config copied"
-		fi
-		# Copy skills to Cursor
-		execute "rm -rf $HOME/.cursor/skills"
-		copy_non_marketplace_skills "$SCRIPT_DIR/configs/cursor/skills" "$HOME/.cursor/skills"
-		log_success "Cursor skills copied"
-		# Copy commands to Cursor
-		execute "rm -rf $HOME/.cursor/commands"
-		safe_copy_dir "$SCRIPT_DIR/configs/cursor/commands" "$HOME/.cursor/commands"
-		log_success "Cursor commands copied"
+	if [ -d "$SCRIPT_DIR/configs/codex/themes" ]; then
+		execute_quoted mkdir -p "$HOME/.codex/themes"
+		safe_copy_dir "$SCRIPT_DIR/configs/codex/themes" "$HOME/.codex/themes"
 	fi
 
-	# Copy Factory Droid configs.
-	# ~/.factory/AGENTS.md provides global agent guidelines for all Factory Droid sessions.
-	# ~/.factory/droids/ contains custom droid definitions available globally.
-	# ~/.factory/mcp.json contains MCP server configurations.
-	# ~/.factory/settings.json contains Factory Droid settings.
-	if [ -d "$HOME/.factory" ] || command -v droid &>/dev/null; then
-		execute "mkdir -p \"$HOME/.factory/droids\""
-		copy_config_file "$SCRIPT_DIR/configs/factory/AGENTS.md" "$HOME/.factory/" || true
-		copy_config_file "$SCRIPT_DIR/configs/factory/mcp.json" "$HOME/.factory/" || true
-		copy_config_file "$SCRIPT_DIR/configs/factory/settings.json" "$HOME/.factory/" || true
-		if [ -d "$SCRIPT_DIR/configs/factory/droids" ] && [ "$(ls -A "$SCRIPT_DIR/configs/factory/droids" 2>/dev/null)" ]; then
-			safe_copy_dir "$SCRIPT_DIR/configs/factory/droids" "$HOME/.factory/droids"
-			log_success "Factory Droid custom droids copied"
-		fi
-		log_success "Factory Droid configs copied"
+	log_success "Codex CLI configs copied"
+}
+
+copy_gemini_configs() {
+	local gemini_status
+	gemini_status=$(detect_tool --detailed "gemini" "$HOME/.gemini") || gemini_status="missing"
+	if [ "$gemini_status" = "missing" ]; then
+		log_info "Gemini CLI not detected - skipping Gemini config installation"
+		return 0
 	fi
 
-	# Copy best practices and MEMORY.md
-	execute "mkdir -p $HOME/.ai-tools"
-	execute "cp $SCRIPT_DIR/configs/best-practices.md $HOME/.ai-tools/"
+	log_info "Detected Gemini CLI (via $gemini_status)"
+	execute_quoted mkdir -p "$HOME/.gemini"
+
+	copy_config_file "$SCRIPT_DIR/configs/gemini/AGENTS.md" "$HOME/.gemini/" || true
+	copy_config_file "$SCRIPT_DIR/configs/gemini/GEMINI.md" "$HOME/.gemini/" || true
+	copy_config_file "$SCRIPT_DIR/configs/gemini/settings.json" "$HOME/.gemini/" || true
+
+	execute_quoted rm -rf "$HOME/.gemini/agents"
+	safe_copy_dir "$SCRIPT_DIR/configs/gemini/agents" "$HOME/.gemini/agents"
+
+	execute_quoted rm -rf "$HOME/.gemini/commands"
+	safe_copy_dir "$SCRIPT_DIR/configs/gemini/commands" "$HOME/.gemini/commands"
+
+	execute_quoted rm -rf "$HOME/.gemini/skills"
+	copy_non_marketplace_skills "$SCRIPT_DIR/configs/gemini/skills" "$HOME/.gemini/skills"
+
+	log_success "Gemini CLI configs copied"
+}
+
+copy_kilo_configs() {
+	local kilo_status
+	kilo_status=$(detect_tool --detailed "kilo" "$HOME/.config/kilo") || kilo_status="missing"
+	if [ "$kilo_status" = "missing" ]; then
+		log_info "Kilo CLI not detected - skipping Kilo config installation"
+		return 0
+	fi
+
+	log_info "Detected Kilo CLI (via $kilo_status)"
+	execute_quoted mkdir -p "$HOME/.config/kilo"
+	copy_config_file "$SCRIPT_DIR/configs/kilo/config.json" "$HOME/.config/kilo/" || true
+	log_success "Kilo CLI configs copied"
+}
+
+copy_pi_configs() {
+	local pi_status
+	pi_status=$(detect_tool --detailed "pi" "$HOME/.pi") || pi_status="missing"
+	if [ "$pi_status" = "missing" ]; then
+		log_info "Pi not detected - skipping Pi config installation"
+		return 0
+	fi
+
+	log_info "Detected Pi (via $pi_status)"
+	execute_quoted mkdir -p "$HOME/.pi/agent"
+
+	if [ ! -f "$HOME/.pi/agent/settings.json" ]; then
+		copy_config_file "$SCRIPT_DIR/configs/pi/settings.json" "$HOME/.pi/agent/" || true
+	else
+		log_info "Pi settings.json already exists at ~/.pi/agent/, preserving existing config"
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/pi/themes" ]; then
+		execute_quoted mkdir -p "$HOME/.pi/agent/themes"
+		safe_copy_dir "$SCRIPT_DIR/configs/pi/themes" "$HOME/.pi/agent/themes"
+	fi
+
+	log_success "Pi configs copied"
+}
+
+copy_copilot_configs() {
+	if [ ! -f "$SCRIPT_DIR/configs/copilot/AGENTS.md" ] && [ ! -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ]; then
+		return 0
+	fi
+
+	execute_quoted mkdir -p "$HOME/.copilot"
+
+	if [ -f "$SCRIPT_DIR/configs/copilot/AGENTS.md" ]; then
+		execute_quoted cp "$SCRIPT_DIR/configs/copilot/AGENTS.md" "$HOME/.copilot/copilot-instructions.md"
+		log_success "GitHub Copilot CLI configs copied"
+	fi
+
+	if [ -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ]; then
+		execute_quoted cp "$SCRIPT_DIR/configs/copilot/mcp-config.json" "$HOME/.copilot/mcp-config.json"
+		log_success "GitHub Copilot MCP config copied"
+	fi
+}
+
+copy_cursor_configs() {
+	local cursor_status
+	cursor_status=$(detect_tool --detailed "agent" "$HOME/.cursor") || cursor_status="missing"
+	if [ "$cursor_status" = "missing" ]; then
+		log_info "Cursor not detected - skipping Cursor config installation"
+		return 0
+	fi
+
+	log_info "Detected Cursor (via $cursor_status)"
+
+	if [ -f "$SCRIPT_DIR/configs/cursor/AGENTS.md" ]; then
+		execute_quoted mkdir -p "$HOME/.cursor/rules"
+		execute_quoted cp "$SCRIPT_DIR/configs/cursor/AGENTS.md" "$HOME/.cursor/rules/general.mdc"
+		log_success "Cursor Agent CLI configs copied"
+	fi
+
+	if [ -f "$SCRIPT_DIR/configs/cursor/mcp.json" ]; then
+		execute_quoted cp "$SCRIPT_DIR/configs/cursor/mcp.json" "$HOME/.cursor/mcp.json"
+		log_success "Cursor MCP config copied"
+	fi
+
+	execute_quoted rm -rf "$HOME/.cursor/skills"
+	copy_non_marketplace_skills "$SCRIPT_DIR/configs/cursor/skills" "$HOME/.cursor/skills"
+
+	execute_quoted rm -rf "$HOME/.cursor/commands"
+	safe_copy_dir "$SCRIPT_DIR/configs/cursor/commands" "$HOME/.cursor/commands"
+
+	log_success "Cursor configs copied"
+}
+
+copy_factory_configs() {
+	local factory_status
+	factory_status=$(detect_tool --detailed "droid" "$HOME/.factory") || factory_status="missing"
+	if [ "$factory_status" = "missing" ]; then
+		log_info "Factory Droid not detected - skipping Factory Droid config installation"
+		return 0
+	fi
+
+	log_info "Detected Factory Droid (via $factory_status)"
+	execute_quoted mkdir -p "$HOME/.factory/droids"
+
+	copy_config_file "$SCRIPT_DIR/configs/factory/AGENTS.md" "$HOME/.factory/" || true
+	copy_config_file "$SCRIPT_DIR/configs/factory/mcp.json" "$HOME/.factory/" || true
+	copy_config_file "$SCRIPT_DIR/configs/factory/settings.json" "$HOME/.factory/" || true
+
+	if [ -d "$SCRIPT_DIR/configs/factory/droids" ] && [ -n "$(ls -A "$SCRIPT_DIR/configs/factory/droids" 2>/dev/null)" ]; then
+		safe_copy_dir "$SCRIPT_DIR/configs/factory/droids" "$HOME/.factory/droids"
+	fi
+
+	log_success "Factory Droid configs copied"
+}
+
+copy_best_practices() {
+	execute_quoted mkdir -p "$HOME/.ai-tools"
+	execute_quoted cp "$SCRIPT_DIR/configs/best-practices.md" "$HOME/.ai-tools/"
 	log_success "Best practices copied to ~/.ai-tools/"
-	execute "cp $SCRIPT_DIR/configs/git-guidelines.md $HOME/.ai-tools/"
+	execute_quoted cp "$SCRIPT_DIR/configs/git-guidelines.md" "$HOME/.ai-tools/"
 	log_success "Git guidelines copied to ~/.ai-tools/"
-	[ -f "$SCRIPT_DIR/MEMORY.md" ] && execute "cp $SCRIPT_DIR/MEMORY.md $HOME/.ai-tools/" && log_success "MEMORY.md copied to ~/.ai-tools/ (reference copy)"
+
+	if [ -f "$SCRIPT_DIR/MEMORY.md" ]; then
+		execute_quoted cp "$SCRIPT_DIR/MEMORY.md" "$HOME/.ai-tools/"
+		log_success "MEMORY.md copied to ~/.ai-tools/"
+	fi
 }
 
 # Check if Claude CLI supports plugin marketplace functionality
@@ -997,21 +1192,13 @@ check_marketplace_support() {
 		return 1
 	fi
 
-	# Check if 'claude plugin' subcommand exists by trying to access its help
 	if ! claude plugin --help &>/dev/null; then
 		log_warning "Claude CLI does not support plugin commands"
-		log_info "Please ensure you have Claude Code installed with plugin support"
-		log_info "Visit: https://docs.claude.ai for installation instructions"
 		return 1
 	fi
 
-	# Try to list plugins to verify marketplace functionality
 	if ! claude plugin list &>/dev/null; then
 		log_warning "Unable to list plugins. Plugin marketplace may not be available"
-		log_info "This could be due to:"
-		log_info "  1. Missing active Claude Code subscription"
-		log_info "  2. Network connectivity issues"
-		log_info "  3. Plugin access not enabled in Claude Code settings"
 		return 1
 	fi
 
@@ -1019,30 +1206,21 @@ check_marketplace_support() {
 }
 
 # Attempt to add marketplace repository and verify accessibility
-# Note: This function has a side effect - it will add the marketplace if successful
-# Returns 0 if marketplace is accessible, 1 if not
 try_add_marketplace_repo() {
 	local marketplace_repo="$1"
 
 	# Extract owner/repo format
-	local owner_repo
+	local owner_repo=""
 	if [[ "$marketplace_repo" == *"/"* ]] && [[ "$marketplace_repo" != /* ]]; then
 		owner_repo="$marketplace_repo"
 	else
-		# Local path or invalid format - skip verification
 		return 0
 	fi
 
-	# Attempt to add marketplace (will succeed if already added or if accessible)
-	# Exit codes: 0 = success/already exists, non-zero = error
 	if claude plugin marketplace add "$owner_repo" 2>/dev/null; then
 		return 0
 	else
 		log_warning "Marketplace repository '$owner_repo' may not be accessible"
-		log_info "This could be due to:"
-		log_info "  - Repository visibility settings (private/public)"
-		log_info "  - Insufficient permissions"
-		log_info "  - Network connectivity issues"
 		return 1
 	fi
 }
@@ -1050,23 +1228,19 @@ try_add_marketplace_repo() {
 # Helper: Install remote skills using npx skills add
 install_remote_skills() {
 	log_info "Installing community skills from jellydn/my-ai-tools repository..."
-	log_info "Using npx skills add command..."
 
-	# Use npx skills add for remote skill installation
-	if command -v npx &>/dev/null; then
-		if [ "${YES_TO_ALL:-false}" = "true" ] || [ ! -t 0 ]; then
-			# Non-interactive mode
-			execute "npx skills add jellydn/my-ai-tools --yes --global --agent claude-code"
-		else
-			# Interactive mode
-			execute "npx skills add jellydn/my-ai-tools --global --agent claude-code"
-		fi
-		log_success "Remote skills installed successfully"
-	else
+	if ! command -v npx &>/dev/null; then
 		log_error "npx not found. Please install Node.js to use remote skill installation."
-		log_info "Falling back to local skill installation..."
 		install_local_skills
+		return 0
 	fi
+
+	if [ "${YES_TO_ALL:-false}" = "true" ] || [ ! -t 0 ]; then
+		execute "npx skills add jellydn/my-ai-tools --yes --global --agent claude-code"
+	else
+		execute "npx skills add jellydn/my-ai-tools --global --agent claude-code"
+	fi
+	log_success "Remote skills installed successfully"
 }
 
 # Helper: Install recommended community skills from recommend-skills.json
@@ -1075,12 +1249,12 @@ install_recommended_skills() {
 
 	if ! command -v npx &>/dev/null; then
 		log_warning "npx not found, skipping recommended skills"
-		return
+		return 0
 	fi
 
 	if [ ! -f "$SCRIPT_DIR/configs/recommend-skills.json" ]; then
 		log_info "No recommended skills config found, skipping"
-		return
+		return 0
 	fi
 
 	local skills_json
@@ -1090,7 +1264,7 @@ install_recommended_skills() {
 
 	if [ "$skill_count" -eq 0 ] || [ "$skill_count" = "null" ]; then
 		log_info "No recommended skills found in config"
-		return
+		return 0
 	fi
 
 	log_info "Found $skill_count recommended skill(s)"
@@ -1101,48 +1275,49 @@ install_recommended_skills() {
 		description=$(echo "$skills_json" | jq -r ".recommended_skills[$i].description")
 		skill=$(echo "$skills_json" | jq -r ".recommended_skills[$i].skill // empty")
 		skill_suffix=""
-		if [ -n "$skill" ]; then
-			skill_suffix="/$skill"
-		fi
+		[ -n "$skill" ] && skill_suffix="/$skill"
 
 		log_info "  - $repo${skill_suffix}: $description"
-
-		if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
-			if [ -n "$skill" ]; then
-				execute "npx skills add '$repo' --skill '$skill' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_info "Skipped: $repo${skill_suffix}"
-			else
-				execute "npx skills add '$repo' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_info "Skipped: $repo"
-			fi
-		elif [ -t 0 ]; then
-			read -rp "Install $repo${skill_suffix}? (y/n) " -n 1
-			echo
-			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				if [ -n "$skill" ]; then
-					execute "npx skills add '$repo' --skill '$skill' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_warning "Failed to install: $repo${skill_suffix}"
-				else
-					execute "npx skills add '$repo' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_warning "Failed to install: $repo"
-				fi
-			else
-				log_info "Skipped: $repo${skill_suffix}"
-			fi
-		fi
+		install_single_recommended_skill "$repo" "$skill" "$skill_suffix"
 	done
 
 	log_success "Recommended skills check complete"
+}
+
+install_single_recommended_skill() {
+	local repo="$1"
+	local skill="$2"
+	local skill_suffix="$3"
+
+	if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
+		if [ -n "$skill" ]; then
+			execute "npx skills add '$repo' --skill '$skill' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_info "Skipped: $repo${skill_suffix}"
+		else
+			execute "npx skills add '$repo' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_info "Skipped: $repo"
+		fi
+	elif [ -t 0 ]; then
+		if prompt_yn "Install $repo${skill_suffix}"; then
+			if [ -n "$skill" ]; then
+				execute "npx skills add '$repo' --skill '$skill' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_warning "Failed to install: $repo${skill_suffix}"
+			else
+				execute "npx skills add '$repo' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_warning "Failed to install: $repo"
+			fi
+		else
+			log_info "Skipped: $repo${skill_suffix}"
+		fi
+	fi
 }
 
 # Helper: Remove skills from tool-specific directories that already exist in global ~/.agents/skills
 cleanup_duplicate_skills() {
 	local global_skills_dir="$HOME/.agents/skills"
 
-	# Skip if global skills directory doesn't exist
 	if [ ! -d "$global_skills_dir" ]; then
 		return 0
 	fi
 
 	log_info "Cleaning up duplicate skills from tool-specific directories..."
 
-	# Define target directories using existing variables where available
 	local -a target_dirs=(
 		"$CLAUDE_SKILLS_DIR"
 		"$OPENCODE_SKILL_DIR"
@@ -1153,25 +1328,26 @@ cleanup_duplicate_skills() {
 	)
 
 	for target_dir in "${target_dirs[@]}"; do
-		if [ -d "$target_dir" ]; then
-			for skill_dir in "$target_dir"/*; do
-				if [ -d "$skill_dir" ]; then
-					local skill_name
-					skill_name=$(basename "$skill_dir")
-					if [ -d "$global_skills_dir/$skill_name" ]; then
-						execute "rm -rf '$skill_dir'"
-						log_info "Removed duplicate skill $skill_name from $target_dir/"
-					fi
-				fi
-			done
+		if [ ! -d "$target_dir" ]; then
+			continue
 		fi
+		for skill_dir in "$target_dir"/*; do
+			if [ ! -d "$skill_dir" ]; then
+				continue
+			fi
+			local skill_name
+			skill_name=$(basename "$skill_dir")
+			if [ -d "$global_skills_dir/$skill_name" ]; then
+				execute_quoted rm -rf "$skill_dir"
+				log_info "Removed duplicate skill $skill_name from $target_dir/"
+			fi
+		done
 	done
 }
 
 # Helper: Check if a skill is in the remote skills list
 is_remote_skill() {
-	local skill="$1"
-	case "$skill" in
+	case "$1" in
 	prd | ralph | qmd-knowledge | codemap | adr | handoffs | pickup | pr-review | slop | tdd)
 		return 0
 		;;
@@ -1181,10 +1357,44 @@ is_remote_skill() {
 	esac
 }
 
+# Helper: Install CLI dependency for community plugins
+install_cli_dependency() {
+	local name="$1"
+
+	case "$name" in
+	plannotator | plannotator-copilot)
+		if command -v plannotator &>/dev/null; then
+			return 0
+		fi
+		log_info "Installing Plannotator CLI..."
+		execute_installer "https://plannotator.ai/install.sh" "" "Plannotator CLI" || log_warning "Plannotator installation failed"
+		;;
+	qmd-knowledge)
+		if command -v qmd &>/dev/null || ! command -v bun &>/dev/null; then
+			return 0
+		fi
+		log_info "Installing qmd CLI via bun..."
+		if ! execute "bun install -g https://github.com/tobi/qmd"; then
+			log_warning "qmd installation failed"
+		fi
+		;;
+	worktrunk)
+		if command -v wt &>/dev/null || ! command -v brew &>/dev/null; then
+			return 0
+		fi
+		log_info "Installing Worktrunk CLI via Homebrew..."
+		if execute "brew install worktrunk"; then
+			execute "wt config shell install" || log_warning "Worktrunk shell config failed"
+		else
+			log_warning "Worktrunk installation failed"
+		fi
+		;;
+	esac
+}
+
 enable_plugins() {
 	log_info "Installing Claude Code plugins..."
 
-	# Check marketplace support before attempting installation
 	MARKETPLACE_AVAILABLE=false
 	if check_marketplace_support; then
 		MARKETPLACE_AVAILABLE=true
@@ -1193,23 +1403,10 @@ enable_plugins() {
 		log_info "Note: Skills can still be installed remotely using the npx skills add command"
 	fi
 
-	# Ask for skill installation source
-	if [ "${YES_TO_ALL:-false}" = "true" ]; then
-		# In non-interactive mode, default to local
-		SKILL_INSTALL_SOURCE="local"
-	elif [ -t 0 ]; then
-		log_info "How would you like to install community skills?"
-		printf "1) Local (from skills folder) 2) Remote (from jellydn/my-ai-tools using npx skills) [1/2]: "
-		read -r REPLY
-		echo
-		case "$REPLY" in
-		2) SKILL_INSTALL_SOURCE="remote" ;;
-		*) SKILL_INSTALL_SOURCE="local" ;;
-		esac
-	else
-		SKILL_INSTALL_SOURCE="local"
-	fi
+	# Determine skill installation source
+	determine_skill_install_source
 
+	# Define plugins
 	official_plugins=(
 		"typescript-lsp@claude-plugins-official"
 		"pyright-lsp@claude-plugins-official"
@@ -1223,9 +1420,7 @@ enable_plugins() {
 		"claude-md-management@claude-plugins-official"
 	)
 
-	# Community plugins (name, plugin_spec, marketplace_repo, cli_tool)
-	# Format: "name|plugin_spec|marketplace_repo|cli_tool"
-	# cli_tool: claude (default), copilot, codex, etc.
+	# Community plugins: "name|plugin_spec|marketplace_repo|cli_tool"
 	community_plugins=(
 		"plannotator|plannotator@plannotator|backnotprop/plannotator|claude"
 		"plannotator-copilot|plannotator-copilot@plannotator|backnotprop/plannotator|copilot"
@@ -1238,400 +1433,326 @@ enable_plugins() {
 		"openai-codex|codex@openai-codex|openai/codex-plugin-cc|claude"
 	)
 
-	install_plugin() {
-		local plugin="$1"
-		if [ "$YES_TO_ALL" = true ]; then
-			setup_tmpdir
-			if ! execute "claude plugin install '$plugin' 2>/dev/null"; then
-				log_warning "$plugin install failed (may already be installed)"
-			fi
-		elif [ -t 0 ]; then
-			read -p "Install $plugin? (y/n) " -n 1 -r
-			echo
-			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				setup_tmpdir
-				execute "claude plugin install '$plugin' && log_success '$plugin installed' || log_warning '$plugin install failed (may already be installed)'"
-			fi
-		else
-			setup_tmpdir
-			if ! execute "claude plugin install '$plugin' 2>/dev/null"; then
-				log_warning "$plugin install failed (may already be installed)"
-			fi
-		fi
-	}
+	if ! command -v claude &>/dev/null; then
+		handle_no_claude_cli
+		return 0
+	fi
 
-	install_community_plugin() {
-		local name="$1"
-		local plugin_spec="$2"
-		local marketplace_repo="$3"
-		local cli_tool="${4:-claude}" # Default to claude if not specified
+	install_plugins_if_marketplace_available
 
-		if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
-			# Non-interactive or auto-install mode - install CLI tools if needed
-			case "$name" in
-			plannotator | plannotator-copilot)
-				if ! command -v plannotator &>/dev/null; then
-					log_info "Installing Plannator CLI..."
-					execute_installer "https://plannotator.ai/install.sh" "" "Plannator CLI" || log_warning "Plannator installation failed"
-				fi
-				;;
-			qmd-knowledge)
-				if ! command -v qmd &>/dev/null && command -v bun &>/dev/null; then
-					log_info "Installing qmd CLI via bun..."
-					bun install -g https://github.com/tobi/qmd 2>&1 || log_warning "qmd installation failed"
-				fi
-				;;
-			worktrunk)
-				if ! command -v wt &>/dev/null && command -v brew &>/dev/null; then
-					log_info "Installing Worktrunk CLI via Homebrew..."
-					if brew install worktrunk 2>&1 && wt config shell install 2>&1; then
-						: # success
-					else
-						log_warning "Worktrunk installation failed"
-					fi
-				fi
-				;;
-			esac
-			# Add marketplace and install plugin
-			setup_tmpdir
-			execute "$cli_tool plugin marketplace add '$marketplace_repo' 2>/dev/null || true"
-			# Clear any stale plugin cache that might cause cross-device link errors
-			execute "rm -rf '$HOME/.$cli_tool/plugins/cache/$name' 2>/dev/null || true"
-			if ! execute "$cli_tool plugin install '$plugin_spec' 2>/dev/null"; then
-				log_warning "$name plugin install failed (may already be installed)"
-			fi
-		elif [ -t 0 ]; then
-			read -p "Install $name? (y/n) " -n 1 -r
-			echo
-			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				# Install CLI tool if needed
-				case "$name" in
-				plannotator | plannotator-copilot)
-					if ! command -v plannotator &>/dev/null; then
-						log_info "Installing Plannator CLI (this may take a moment)..."
-						if execute_installer "https://plannotator.ai/install.sh" "" "Plannator CLI"; then
-							log_success "Plannator CLI installed"
-						else
-							log_warning "Plannator installation failed or was cancelled"
-						fi
-					else
-						log_info "Plannator CLI already installed"
-					fi
-					;;
-				qmd-knowledge)
-					if ! command -v qmd &>/dev/null; then
-						if command -v bun &>/dev/null; then
-							log_info "Installing qmd CLI via bun..."
-							if bun install -g https://github.com/tobi/qmd 2>&1; then
-								log_success "qmd CLI installed"
-							else
-								log_warning "qmd installation failed"
-							fi
-						else
-							log_warning "bun is required for qmd. Install from https://bun.sh"
-						fi
-					else
-						log_info "qmd CLI already installed"
-					fi
-					;;
-				worktrunk)
-					if ! command -v wt &>/dev/null; then
-						if command -v brew &>/dev/null; then
-							log_info "Installing Worktrunk CLI via Homebrew (this may take a moment)..."
-							if brew install worktrunk 2>&1 && wt config shell install 2>&1; then
-								log_success "Worktrunk CLI installed"
-							else
-								log_warning "Worktrunk installation failed"
-							fi
-						else
-							log_warning "Homebrew is required for worktrunk. Install from https://brew.sh"
-						fi
-					else
-						log_info "Worktrunk CLI already installed"
-					fi
-					;;
-				esac
+	install_recommended_skills
+}
 
-				# Add marketplace first
-				setup_tmpdir
-				if ! execute "$cli_tool plugin marketplace add '$marketplace_repo' 2>/dev/null"; then
-					log_info "Marketplace $marketplace_repo may already be added"
-				fi
-				# Clear any stale plugin cache that might cause cross-device link errors
-				execute "rm -rf '$HOME/.$cli_tool/plugins/cache/$name' 2>/dev/null || true"
-				# Install plugin - suppress stderr to avoid output overlapping
-				if execute "$cli_tool plugin install '$plugin_spec' 2>/dev/null"; then
-					log_success "$name installed"
-				else
-					log_warning "$name install failed (may already be installed)"
-				fi
-			fi
-		fi
-	}
-
-	# Extract compatibility field from SKILL.md
-	# Returns 0 (true) if skill is compatible with platform, 1 (false) otherwise
-	skill_is_compatible_with() {
-		local skill_dir="$1"
-		local platform="$2"
-		local skill_md="$skill_dir/SKILL.md"
-
-		if [ ! -f "$skill_md" ]; then
-			# No SKILL.md means assume compatible with all
-			return 0
-		fi
-
-		# Extract compatibility line from frontmatter
-		local compat_line
-		compat_line=$(awk '/^compatibility:/ {print; exit}' "$skill_md" 2>/dev/null)
-
-		if [ -z "$compat_line" ]; then
-			# No compatibility field means assume compatible with all
-			return 0
-		fi
-
-		# Check if platform is in the compatibility list
-		# Compatibility format: "compatibility: claude, opencode, amp, codex"
-		if echo "$compat_line" | grep -qi "\\b$platform\\b"; then
-			return 0
-		else
-			return 1
-		fi
-	}
-
-	install_local_skills() {
-		if [ ! -d "$SCRIPT_DIR/skills" ]; then
-			log_info "skills folder not found, skipping local skills"
-			return
-		fi
-
-		log_info "Installing skills from local skills folder..."
-
-		# Define target directories
-		CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
-		OPENCODE_SKILL_DIR="$HOME/.config/opencode/skills"
-		AMP_SKILLS_DIR="$HOME/.config/amp/skills"
-		CODEX_SKILLS_DIR="$HOME/.codex/skills"
-		GEMINI_SKILLS_DIR="$HOME/.gemini/skills"
-		CURSOR_SKILLS_DIR="$HOME/.cursor/skills"
-
-		# Copy to Claude Code (~/.claude/skills/)
-		if [ -d "$CLAUDE_SKILLS_DIR" ]; then
-			# Remove existing skills safely using rm with quoted path
-			for existing_skill in "$CLAUDE_SKILLS_DIR"/*; do
-				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
-			done
-		fi
-		mkdir -p "$CLAUDE_SKILLS_DIR"
-
-		# Copy to OpenCode (~/.config/opencode/skills/)
-		if [ -d "$OPENCODE_SKILL_DIR" ]; then
-			for existing_skill in "$OPENCODE_SKILL_DIR"/*; do
-				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
-			done
-		fi
-		mkdir -p "$OPENCODE_SKILL_DIR"
-		# Copy to Amp (~/.config/amp/skills/)
-		if [ -d "$AMP_SKILLS_DIR" ]; then
-			for existing_skill in "$AMP_SKILLS_DIR"/*; do
-				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
-			done
-		fi
-		mkdir -p "$AMP_SKILLS_DIR"
-
-		# Copy to Codex CLI (~/.codex/skills/)
-		if [ -d "$CODEX_SKILLS_DIR" ]; then
-			for existing_skill in "$CODEX_SKILLS_DIR"/*; do
-				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
-			done
-		fi
-		mkdir -p "$CODEX_SKILLS_DIR"
-
-		# Copy to Gemini CLI (~/.gemini/skills/)
-		if [ -d "$GEMINI_SKILLS_DIR" ]; then
-			for existing_skill in "$GEMINI_SKILLS_DIR"/*; do
-				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
-			done
-		fi
-		mkdir -p "$GEMINI_SKILLS_DIR"
-
-		# Copy to Cursor (~/.cursor/skills/)
-		if [ -d "$CURSOR_SKILLS_DIR" ]; then
-			for existing_skill in "$CURSOR_SKILLS_DIR"/*; do
-				[ -d "$existing_skill" ] && rm -rf "$existing_skill"
-			done
-		fi
-		mkdir -p "$CURSOR_SKILLS_DIR"
-
-		# Copy all skills from skills folder to targets
-		for skill_dir in "$SCRIPT_DIR/skills"/*; do
-			if [ -d "$skill_dir" ]; then
-				skill_name=$(basename "$skill_dir")
-
-				# Skip if skill already exists in global skills directory (to avoid conflicts)
-				if [ -d "$HOME/.agents/skills/$skill_name" ]; then
-					log_info "Skipped $skill_name (already exists in ~/.agents/skills/)"
-					continue
-				fi
-
-				# Check compatibility and copy to each platform
-				if skill_is_compatible_with "$skill_dir" "claude"; then
-					safe_copy_dir "$skill_dir" "$CLAUDE_SKILLS_DIR/$skill_name"
-					log_success "Copied $skill_name to Claude Code"
-				else
-					log_info "Skipped $skill_name for Claude Code (not compatible)"
-				fi
-
-				if skill_is_compatible_with "$skill_dir" "opencode"; then
-					safe_copy_dir "$skill_dir" "$OPENCODE_SKILL_DIR/$skill_name"
-					log_success "Copied $skill_name to OpenCode"
-				else
-					log_info "Skipped $skill_name for OpenCode (not compatible)"
-				fi
-
-				if skill_is_compatible_with "$skill_dir" "amp"; then
-					safe_copy_dir "$skill_dir" "$AMP_SKILLS_DIR/$skill_name"
-					log_success "Copied $skill_name to Amp"
-				else
-					log_info "Skipped $skill_name for Amp (not compatible)"
-				fi
-
-				if skill_is_compatible_with "$skill_dir" "codex"; then
-					safe_copy_dir "$skill_dir" "$CODEX_SKILLS_DIR/$skill_name"
-					log_success "Copied $skill_name to Codex CLI"
-				else
-					log_info "Skipped $skill_name for Codex CLI (not compatible)"
-				fi
-
-				if skill_is_compatible_with "$skill_dir" "gemini"; then
-					safe_copy_dir "$skill_dir" "$GEMINI_SKILLS_DIR/$skill_name"
-					log_success "Copied $skill_name to Gemini CLI"
-				else
-					log_info "Skipped $skill_name for Gemini CLI (not compatible)"
-				fi
-
-				if skill_is_compatible_with "$skill_dir" "cursor"; then
-					safe_copy_dir "$skill_dir" "$CURSOR_SKILLS_DIR/$skill_name"
-					log_success "Copied $skill_name to Cursor"
-				else
-					log_info "Skipped $skill_name for Cursor (not compatible)"
-				fi
-			fi
-		done
-	}
-
-	if command -v claude &>/dev/null; then
-		# Skip marketplace plugins if marketplace is not available
-		if [ "${MARKETPLACE_AVAILABLE:-false}" = "false" ]; then
-			log_info "Skipping official marketplace plugins (claude plugin command unavailable)"
-		else
-			# Add official plugins marketplace first
-			log_info "Adding official plugins marketplace..."
-			if ! execute "claude plugin marketplace add 'anthropics/claude-plugins-official' 2>/dev/null"; then
-				log_info "Official plugins marketplace may already be added"
-			fi
-
-			# Verify official marketplace accessibility
-			if ! try_add_marketplace_repo "anthropics/claude-plugins-official"; then
-				log_warning "Official plugins marketplace may not be accessible"
-				log_info "Continuing without official marketplace plugins..."
-				MARKETPLACE_AVAILABLE=false
-			fi
-
-			if [ "${MARKETPLACE_AVAILABLE:-false}" = "true" ]; then
-				log_info "Installing official plugins..."
-				if [ -t 0 ]; then
-					# Interactive mode: install sequentially with prompts
-					for plugin in "${official_plugins[@]}"; do
-						install_plugin "$plugin"
-					done
-				else
-					# Non-interactive mode: install in parallel for faster execution
-					log_info "Installing plugins in parallel..."
-					local pids=()
-					for plugin in "${official_plugins[@]}"; do
-						(
-							setup_tmpdir
-							if claude plugin install "$plugin" 2>/dev/null; then
-								log_success "$plugin installed"
-							else
-								log_warning "$plugin may already be installed"
-							fi
-						) &
-						pids+=($!)
-					done
-
-					# Wait for all installations to complete
-					for pid in "${pids[@]}"; do
-						wait "$pid" 2>/dev/null || true
-					done
-					log_success "Official plugins installation complete"
-				fi
-			fi
-		fi
-
-		# Install community skills (independent of Claude CLI availability)
-		if [ "$SKILL_INSTALL_SOURCE" = "local" ]; then
-			log_info "Installing community skills from local skills folder..."
-			install_local_skills
-			# Only install CLI-based plugins (plannotator, claude-hud, worktrunk) if Claude CLI is available
-			if command -v claude &>/dev/null; then
-				for plugin_entry in "${community_plugins[@]}"; do
-					local name="${plugin_entry%%|*}"
-					# Skip remote skills - they're installed from local skills folder
-					if is_remote_skill "$name"; then
-						continue
-					fi
-					local rest="${plugin_entry#*|}"
-					local plugin_spec="${rest%%|*}"
-					local rest2="${rest#*|}"
-					local marketplace_repo="${rest2%%|*}"
-					local cli_tool="${rest2##*|}"
-					install_community_plugin "$name" "$plugin_spec" "$marketplace_repo" "$cli_tool"
-				done
-			fi
-		else
-			install_remote_skills
-
-			# Still install CLI-based plugins (plannotator, claude-hud, worktrunk) if Claude CLI is available
-			if command -v claude &>/dev/null; then
-				for plugin_entry in "${community_plugins[@]}"; do
-					local name="${plugin_entry%%|*}"
-					# Skip remote skills - already installed via npx skills add
-					if is_remote_skill "$name"; then
-						continue
-					fi
-					local rest="${plugin_entry#*|}"
-					local plugin_spec="${rest%%|*}"
-					local rest2="${rest#*|}"
-					local marketplace_repo="${rest2%%|*}"
-					local cli_tool="${rest2##*|}"
-					install_community_plugin "$name" "$plugin_spec" "$marketplace_repo" "$cli_tool"
-				done
-			fi
-		fi
-
-		log_success "Claude Code plugins/skills installation complete"
-		log_info "IMPORTANT: Restart Claude Code for plugins to take effect"
-
-		install_recommended_skills
+determine_skill_install_source() {
+	if [ "${YES_TO_ALL:-false}" = "true" ]; then
+		SKILL_INSTALL_SOURCE="local"
+	elif [ -t 0 ]; then
+		log_info "How would you like to install community skills?"
+		printf "1) Local (from skills folder) 2) Remote (from jellydn/my-ai-tools using npx skills) [1/2]: "
+		read -r REPLY
+		echo
+		case "$REPLY" in
+		2) SKILL_INSTALL_SOURCE="remote" ;;
+		*) SKILL_INSTALL_SOURCE="local" ;;
+		esac
 	else
-		log_warning "Claude Code not installed - skipping official marketplace plugin installation"
-		log_info "Note: Community skills can still be installed without Claude CLI"
+		SKILL_INSTALL_SOURCE="local"
+	fi
+}
 
-		# Still install community skills even if Claude CLI is not available
-		if [ "$SKILL_INSTALL_SOURCE" = "local" ]; then
-			log_info "Installing community skills from local skills folder..."
-			install_local_skills
-		else
-			install_remote_skills
+handle_no_claude_cli() {
+	log_warning "Claude Code not installed - skipping official marketplace plugin installation"
+	log_info "Note: Community skills can still be installed without Claude CLI"
+
+	if [ "$SKILL_INSTALL_SOURCE" = "local" ]; then
+		install_local_skills
+	else
+		install_remote_skills
+	fi
+	log_success "Community skills installation complete"
+	install_recommended_skills
+	cleanup_duplicate_skills
+}
+
+install_plugins_if_marketplace_available() {
+	if [ "${MARKETPLACE_AVAILABLE:-false}" = "false" ]; then
+		log_info "Skipping official marketplace plugins (claude plugin command unavailable)"
+	else
+		install_official_plugins
+	fi
+
+	install_community_skills
+
+	log_success "Claude Code plugins/skills installation complete"
+	log_info "IMPORTANT: Restart Claude Code for plugins to take effect"
+}
+
+install_official_plugins() {
+	log_info "Adding official plugins marketplace..."
+	if ! execute "claude plugin marketplace add 'anthropics/claude-plugins-official' 2>/dev/null"; then
+		log_info "Official plugins marketplace may already be added"
+	fi
+
+	if ! try_add_marketplace_repo "anthropics/claude-plugins-official"; then
+		log_warning "Official plugins marketplace may not be accessible"
+		MARKETPLACE_AVAILABLE=false
+		return 0
+	fi
+
+	if [ "${MARKETPLACE_AVAILABLE:-false}" = "false" ]; then
+		return 0
+	fi
+
+	log_info "Installing official plugins..."
+	if [ -t 0 ]; then
+		for plugin in "${official_plugins[@]}"; do
+			install_plugin "$plugin"
+		done
+	else
+		install_official_plugins_parallel
+	fi
+}
+
+install_official_plugins_parallel() {
+	log_info "Installing plugins in parallel..."
+	local pids=()
+
+	for plugin in "${official_plugins[@]}"; do
+		(
+			setup_tmpdir
+			if claude plugin install "$plugin" 2>/dev/null; then
+				log_success "$plugin installed"
+			else
+				log_warning "$plugin may already be installed"
+			fi
+		) &
+		pids+=($!)
+	done
+
+	for pid in "${pids[@]}"; do
+		wait "$pid" 2>/dev/null || true
+	done
+	log_success "Official plugins installation complete"
+}
+
+install_plugin() {
+	local plugin="$1"
+
+	if [ "$YES_TO_ALL" = true ]; then
+		setup_tmpdir
+		execute "claude plugin install '$plugin' 2>/dev/null" || log_warning "$plugin install failed (may already be installed)"
+	elif [ -t 0 ]; then
+		if prompt_yn "Install $plugin"; then
+			setup_tmpdir
+			execute "claude plugin install '$plugin' && log_success '$plugin installed' || log_warning '$plugin install failed (may already be installed)'"
 		fi
-		log_success "Community skills installation complete"
+	else
+		setup_tmpdir
+		execute "claude plugin install '$plugin' 2>/dev/null" || log_warning "$plugin install failed (may already be installed)"
+	fi
+}
 
-		install_recommended_skills
+install_community_skills() {
+	if [ "$SKILL_INSTALL_SOURCE" = "local" ]; then
+		log_info "Installing community skills from local skills folder..."
+		install_local_skills
+		install_local_community_plugins
+	else
+		install_remote_skills
+		install_local_community_plugins
+	fi
+}
 
-		# Clean up duplicate skills that conflict with global ~/.agents/skills directory
-		cleanup_duplicate_skills
+install_local_community_plugins() {
+	# Only install CLI-based plugins (non-remote skills) if Claude CLI is available
+	if ! command -v claude &>/dev/null; then
+		return 0
+	fi
+
+	for plugin_entry in "${community_plugins[@]}"; do
+		local name plugin_spec marketplace_repo cli_tool
+		name="${plugin_entry%%|*}"
+
+		# Skip remote skills - they're installed from local skills folder or npx
+		is_remote_skill "$name" && continue
+
+		local rest="${plugin_entry#*|}"
+		plugin_spec="${rest%%|*}"
+		local rest2="${rest#*|}"
+		marketplace_repo="${rest2%%|*}"
+		cli_tool="${rest2##*|}"
+
+		install_community_plugin "$name" "$plugin_spec" "$marketplace_repo" "$cli_tool"
+	done
+}
+
+install_community_plugin() {
+	local name="$1"
+	local plugin_spec="$2"
+	local marketplace_repo="$3"
+	local cli_tool="${4:-claude}"
+
+	if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
+		install_community_plugin_non_interactive "$name" "$plugin_spec" "$marketplace_repo" "$cli_tool"
+	elif [ -t 0 ]; then
+		install_community_plugin_interactive "$name" "$plugin_spec" "$marketplace_repo" "$cli_tool"
+	fi
+}
+
+install_community_plugin_non_interactive() {
+	local name="$1"
+	local plugin_spec="$2"
+	local marketplace_repo="$3"
+	local cli_tool="$4"
+
+	install_cli_dependency "$name"
+
+	setup_tmpdir
+	execute "$cli_tool plugin marketplace add '$marketplace_repo' 2>/dev/null || true"
+	cleanup_plugin_cache "$cli_tool" "$name"
+	if ! execute "$cli_tool plugin install '$plugin_spec' 2>/dev/null"; then
+		log_warning "$name plugin install failed (may already be installed)"
+	fi
+}
+
+install_community_plugin_interactive() {
+	local name="$1"
+	local plugin_spec="$2"
+	local marketplace_repo="$3"
+	local cli_tool="$4"
+
+	if ! prompt_yn "Install $name"; then
+		return 0
+	fi
+
+	install_cli_dependency "$name"
+
+	setup_tmpdir
+	if ! execute "$cli_tool plugin marketplace add '$marketplace_repo' 2>/dev/null"; then
+		log_info "Marketplace $marketplace_repo may already be added"
+	fi
+	cleanup_plugin_cache "$cli_tool" "$name"
+	if execute "$cli_tool plugin install '$plugin_spec' 2>/dev/null"; then
+		log_success "$name installed"
+	else
+		log_warning "$name install failed (may already be installed)"
+	fi
+}
+
+# Extract compatibility field from SKILL.md
+skill_is_compatible_with() {
+	local skill_dir="$1"
+	local platform="$2"
+	local skill_md="$skill_dir/SKILL.md"
+
+	if [ ! -f "$skill_md" ]; then
+		return 0
+	fi
+
+	local compat_line
+	compat_line=$(awk '/^compatibility:/ {print; exit}' "$skill_md" 2>/dev/null)
+	[ -z "$compat_line" ] && return 0
+
+	echo "$compat_line" | grep -qi "\\b$platform\\b"
+}
+
+install_local_skills() {
+	if [ ! -d "$SCRIPT_DIR/skills" ]; then
+		log_info "skills folder not found, skipping local skills"
+		return 0
+	fi
+
+	log_info "Installing skills from local skills folder..."
+
+	# Define target directories
+	CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
+	OPENCODE_SKILL_DIR="$HOME/.config/opencode/skills"
+	AMP_SKILLS_DIR="$HOME/.config/amp/skills"
+	CODEX_SKILLS_DIR="$HOME/.codex/skills"
+	GEMINI_SKILLS_DIR="$HOME/.gemini/skills"
+	CURSOR_SKILLS_DIR="$HOME/.cursor/skills"
+
+	# Prepare target directories
+	prepare_skills_dir "$CLAUDE_SKILLS_DIR"
+	prepare_skills_dir "$OPENCODE_SKILL_DIR"
+	prepare_skills_dir "$AMP_SKILLS_DIR"
+	prepare_skills_dir "$CODEX_SKILLS_DIR"
+	prepare_skills_dir "$GEMINI_SKILLS_DIR"
+	prepare_skills_dir "$CURSOR_SKILLS_DIR"
+
+	# Copy all skills from skills folder to targets
+	for skill_dir in "$SCRIPT_DIR/skills"/*; do
+		if [ ! -d "$skill_dir" ]; then
+			continue
+		fi
+
+		local skill_name
+		skill_name=$(basename "$skill_dir")
+
+		# Skip if skill already exists in global skills directory
+		if [ -d "$HOME/.agents/skills/$skill_name" ]; then
+			log_info "Skipped $skill_name (already exists in ~/.agents/skills/)"
+			continue
+		fi
+
+		copy_skill_to_targets "$skill_name" "$skill_dir"
+	done
+}
+
+prepare_skills_dir() {
+	local dir="$1"
+	if [ -d "$dir" ]; then
+		for existing_skill in "$dir"/*; do
+			[ -d "$existing_skill" ] && rm -rf "$existing_skill"
+		done
+	fi
+	mkdir -p "$dir"
+}
+
+copy_skill_to_targets() {
+	local skill_name="$1"
+	local skill_dir="$2"
+
+	if skill_is_compatible_with "$skill_dir" "claude"; then
+		safe_copy_dir "$skill_dir" "$CLAUDE_SKILLS_DIR/$skill_name"
+		log_success "Copied $skill_name to Claude Code"
+	else
+		log_info "Skipped $skill_name for Claude Code (not compatible)"
+	fi
+
+	if skill_is_compatible_with "$skill_dir" "opencode"; then
+		safe_copy_dir "$skill_dir" "$OPENCODE_SKILL_DIR/$skill_name"
+		log_success "Copied $skill_name to OpenCode"
+	else
+		log_info "Skipped $skill_name for OpenCode (not compatible)"
+	fi
+
+	if skill_is_compatible_with "$skill_dir" "amp"; then
+		safe_copy_dir "$skill_dir" "$AMP_SKILLS_DIR/$skill_name"
+		log_success "Copied $skill_name to Amp"
+	else
+		log_info "Skipped $skill_name for Amp (not compatible)"
+	fi
+
+	if skill_is_compatible_with "$skill_dir" "codex"; then
+		safe_copy_dir "$skill_dir" "$CODEX_SKILLS_DIR/$skill_name"
+		log_success "Copied $skill_name to Codex CLI"
+	else
+		log_info "Skipped $skill_name for Codex CLI (not compatible)"
+	fi
+
+	if skill_is_compatible_with "$skill_dir" "gemini"; then
+		safe_copy_dir "$skill_dir" "$GEMINI_SKILLS_DIR/$skill_name"
+		log_success "Copied $skill_name to Gemini CLI"
+	else
+		log_info "Skipped $skill_name for Gemini CLI (not compatible)"
+	fi
+
+	if skill_is_compatible_with "$skill_dir" "cursor"; then
+		safe_copy_dir "$skill_dir" "$CURSOR_SKILLS_DIR/$skill_name"
+		log_success "Copied $skill_name to Cursor"
+	else
+		log_info "Skipped $skill_name for Cursor (not compatible)"
 	fi
 }
 
