@@ -718,14 +718,25 @@ install_cursor() {
 		log_success "Cursor Agent CLI found ($agent_version)"
 	else
 		log_warning "Cursor Agent CLI is not installed"
-		if [ -t 0 ]; then
-			if prompt_yn "Show manual installation instructions for Cursor CLI"; then
-				log_info "1. Install with: curl https://cursor.com/install -fsS | bash"
-				log_info "2. Add to PATH: export PATH=\"\$HOME/.local/bin:\$PATH\""
-				log_info "3. Verify with: agent --version"
+		if [ "$YES_TO_ALL" = true ]; then
+			log_info "Auto-installing Cursor Agent CLI (--yes flag)..."
+			if execute "curl https://cursor.com/install -fsS | bash"; then
+				log_success "Cursor Agent CLI installed"
+			else
+				log_warning "Cursor Agent CLI installation failed"
+			fi
+		elif [ -t 0 ]; then
+			if prompt_yn "Install Cursor Agent CLI"; then
+				if execute "curl https://cursor.com/install -fsS | bash"; then
+					log_success "Cursor Agent CLI installed"
+				else
+					log_warning "Cursor Agent CLI installation failed"
+				fi
+			else
+				log_info "Skipping Cursor Agent CLI installation"
 			fi
 		else
-			log_info "Manual installation required: curl https://cursor.com/install -fsS | bash"
+			log_info "Skipping Cursor Agent CLI installation (non-interactive mode, use --yes to auto-install)"
 		fi
 	fi
 }
