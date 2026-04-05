@@ -243,6 +243,12 @@ install_qmd_now() {
 
 	log_info "Installing qmd CLI via bun..."
 	if execute "bun install -g @tobilu/qmd"; then
+		# Ensure bun's global bin directory is in PATH for the current session
+		local bun_global_bin
+		bun_global_bin="$(bun pm bin -g 2>/dev/null)"
+		if [ -n "$bun_global_bin" ] && [[ ":$PATH:" != *":$bun_global_bin:"* ]]; then
+			export PATH="$bun_global_bin:$PATH"
+		fi
 		local qmd_version
 		qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
 		log_success "qmd installed successfully ($qmd_version)"
@@ -1114,7 +1120,7 @@ copy_amp_configs() {
 	if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
 		execute_quoted cp "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/amp/"
 		if [ -f "$HOME/.config/AGENTS.md" ]; then
-			cp "$HOME/.config/AGENTS.md" "$HOME/.config/AGENTS.md.bak"
+			execute_quoted cp "$HOME/.config/AGENTS.md" "$HOME/.config/AGENTS.md.bak"
 			log_warning "Backed up existing AGENTS.md to .bak"
 		fi
 		execute_quoted cp "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/AGENTS.md"
@@ -1967,8 +1973,8 @@ copy_skill_to_targets() {
 
 main() {
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
-	echo "║                        AI Tools Setup                               ║"
-	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo         ║"
+	echo "║                        AI Tools Setup                                ║"
+	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo          ║"
 	echo "║  Copilot • Cursor • Factory Droid                                    ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
