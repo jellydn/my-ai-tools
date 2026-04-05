@@ -88,7 +88,8 @@ install_mcp_server() {
 	local max_retries=3
 	local retry_count=0
 	local backoff=1
-	local err_file="/tmp/claude-mcp-${server_name}.err"
+	local err_file
+	err_file=$(make_temp_file "claude-mcp-${server_name}" "err")
 
 	while [ $retry_count -lt $max_retries ]; do
 		# Try installation
@@ -1365,23 +1366,25 @@ install_cli_dependency() {
 		if command -v plannotator &>/dev/null; then
 			return 0
 		fi
-		log_info "Installing Plannator CLI..."
-		execute_installer "https://plannotator.ai/install.sh" "" "Plannator CLI" || log_warning "Plannator installation failed"
+		log_info "Installing Plannotator CLI..."
+		execute_installer "https://plannotator.ai/install.sh" "" "Plannotator CLI" || log_warning "Plannotator installation failed"
 		;;
 	qmd-knowledge)
 		if command -v qmd &>/dev/null || ! command -v bun &>/dev/null; then
 			return 0
 		fi
 		log_info "Installing qmd CLI via bun..."
-		bun install -g https://github.com/tobi/qmd 2>&1 || log_warning "qmd installation failed"
+		if ! execute "bun install -g https://github.com/tobi/qmd"; then
+			log_warning "qmd installation failed"
+		fi
 		;;
 	worktrunk)
 		if command -v wt &>/dev/null || ! command -v brew &>/dev/null; then
 			return 0
 		fi
 		log_info "Installing Worktrunk CLI via Homebrew..."
-		if brew install worktrunk 2>&1 && wt config shell install 2>&1; then
-			: # success
+		if execute "brew install worktrunk"; then
+			execute "wt config shell install" || log_warning "Worktrunk shell config failed"
 		else
 			log_warning "Worktrunk installation failed"
 		fi

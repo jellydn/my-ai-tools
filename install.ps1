@@ -46,7 +46,7 @@ function Write-Warning {
     Write-Host "⚠ $Message" -ForegroundColor Yellow
 }
 
-function Write-Error {
+function Write-Err {
     param([string]$Message)
     Write-Host "✗ $Message" -ForegroundColor Red
 }
@@ -93,7 +93,7 @@ function Install-Jq {
 
     $winget = Get-Command winget -ErrorAction SilentlyContinue
     if (-not $winget) {
-        Write-Error "winget not found. Please install jq manually:"
+        Write-Err "winget not found. Please install jq manually:"
         Write-Info "  1. Download from: https://github.com/jqlang/jq/releases"
         Write-Info "  2. Extract jq.exe to a folder in your PATH"
         return $false
@@ -137,7 +137,7 @@ function Install-Jq {
         return $false
     }
     catch {
-        Write-Error "Failed to install jq: $_"
+        Write-Err "Failed to install jq: $_"
         Write-Info "Please install jq manually from: https://github.com/jqlang/jq/releases"
         return $false
     }
@@ -172,9 +172,9 @@ function Test-Prerequisites {
     }
 
     if ($issues.Count -gt 0) {
-        Write-Error "Prerequisites check failed:"
+        Write-Err "Prerequisites check failed:"
         foreach ($issue in $issues) {
-            Write-Error "  - $issue"
+            Write-Err "  - $issue"
         }
         return $false
     }
@@ -197,7 +197,7 @@ function Start-Installation {
     # Find Git Bash
     $bashPath = Find-GitBash
     if (-not $bashPath) {
-        Write-Error "Git Bash not found"
+        Write-Err "Git Bash not found"
         Write-Info "Please install Git for Windows: https://git-scm.com/download/win"
         Write-Info "After installation, add Git\bin to your PATH: C:\Program Files\Git\bin"
         exit 1
@@ -228,7 +228,7 @@ function Start-Installation {
             & git clone --depth 1 https://github.com/jellydn/my-ai-tools.git $tempDir
 
             if ($LASTEXITCODE -ne 0) {
-                Write-Error "Failed to clone repository"
+                Write-Err "Failed to clone repository"
                 exit 1
             }
 
@@ -257,7 +257,7 @@ function Start-Installation {
         Write-Info "  2. Run 'claude' to start Claude Code"
         Write-Info "  3. Check the README.md for more information"
     } else {
-        Write-Error "Installation failed with exit code: $exitCode"
+        Write-Err "Installation failed with exit code: $exitCode"
         exit $exitCode
     }
 }
@@ -272,7 +272,7 @@ Write-Host @"
 
 # Check prerequisites
 if (-not (Test-Prerequisites)) {
-    Write-Error "Prerequisites check failed. Please install the required tools and try again."
+    Write-Err "Prerequisites check failed. Please install the required tools and try again."
     exit 1
 }
 

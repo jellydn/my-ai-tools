@@ -127,8 +127,9 @@ The installer supports Windows via PowerShell or Git Bash.
 # Download and run the PowerShell installer
 irm https://ai-tools.itman.fyi/install.ps1 | iex
 
-# Or with options:
-irm https://ai-tools.itman.fyi/install.ps1 | iex; .\install.ps1 -DryRun
+# Or download first, then run with options:
+irm https://ai-tools.itman.fyi/install.ps1 -OutFile install.ps1
+.\install.ps1 -DryRun
 ```
 
 **Local execution:**
@@ -150,6 +151,7 @@ bash ./cli.sh
 ```
 
 > **Note:** If `bash` is not recognized in PowerShell, add Git to your PATH:
+>
 > ```powershell
 > [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\Git\bin", "User")
 > ```

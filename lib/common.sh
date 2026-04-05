@@ -31,11 +31,19 @@ _detect_os && IS_WINDOWS=true
 # Usage: normalize_path "path/with\\slashes"
 normalize_path() {
 	local path="$1"
-	# Replace backslashes with forward slashes and remove duplicate slashes
+	# Replace backslashes with forward slashes (for Windows paths)
 	path="${path//\\//}"
-	path="${path//\/\//\//}"
+	# Remove duplicate slashes, but skip URLs (://) and UNC paths (// at start)
+	if [[ ! "$path" =~ :// ]] && [[ ! "$path" =~ ^// ]]; then
+		# Replace all // with / (repeat until no more consecutive slashes)
+		while [[ "$path" =~ // ]]; do
+			path="${path//\/\///}"
+		done
+	fi
 	# Remove trailing slashes (except for root paths like / or C:/)
-	path="${path%/}"
+	if [ "$path" != "/" ] && [[ ! "$path" =~ ^[A-Za-z]:/$ ]]; then
+		path="${path%/}"
+	fi
 	echo "$path"
 }
 
@@ -447,23 +455,26 @@ run_parallel() {
 
 	local jobs=("$@")
 	local running=0
+	local pids=()
 
 	for cmd in "${jobs[@]}"; do
 		[ -z "$cmd" ] && continue
 		(eval "$cmd") &
+		pids+=($!)
 		running=$((running + 1))
 
 		if [ "$running" -ge "$max_jobs" ]; then
-			wait -n
+			# Wait for any job to complete (Bash 3.2 compatible)
+			wait ${pids[0]}
+			pids=("${pids[@]:1}")
 			running=$((running - 1))
 		fi
 	done
 
 	# Wait for remaining jobs
-	while [ $running -gt 0 ]; do
-		wait -n
-		running=$((running - 1))
-	done
+	if [ ${#pids[@]} -gt 0 ]; then
+		wait ${pids[@]}
+	fi
 }
 
 # Generic interactive installer helper
@@ -573,11 +584,18 @@ cleanup_plugin_cache() {
 		return 0
 	fi
 
-	local err_output
-	err_output=$(rm -rf "$cache_dir" 2>&1)
-	local exit_code=$?
+	# Dry-run guard
+	if [ "$DRY_RUN" = true ]; then
+		log_info "[DRY RUN] Would clean up ${cli_tool} cache for ${plugin_name}"
+		return 0
+	fi
 
-	if [ $exit_code -ne 0 ]; then
+	# Perform deletion with proper error handling
+	local err_output=""
+	local exit_code=0
+
+	if ! err_output=$(rm -rf "$cache_dir" 2>&1); then
+		exit_code=$?
 		if echo "$err_output" | grep -qi "permission denied"; then
 			log_warning "Permission denied cleaning up ${cli_tool} cache for ${plugin_name}"
 		elif echo "$err_output" | grep -qi "read-only"; then
