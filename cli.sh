@@ -81,6 +81,35 @@ preflight_check() {
 	log_success "All required tools available"
 }
 
+# Refresh PATH from Windows registry after winget/choco installs
+# This is needed because winget updates registry PATH but the running bash session
+# doesn't pick up the new PATH automatically.
+# Usage: refresh_path_windows
+refresh_path_windows() {
+	if [ "$IS_WINDOWS" != true ]; then
+		return 0
+	fi
+
+	if ! command -v powershell.exe &>/dev/null; then
+		return 0
+	fi
+
+	local win_path
+	win_path=$(powershell.exe -NoProfile -Command \
+		"[Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')" \
+		2>/dev/null | tr -d '\r') || return 0
+
+	if [ -z "$win_path" ]; then
+		return 0
+	fi
+
+	if command -v cygpath &>/dev/null; then
+		local unix_path
+		unix_path=$(cygpath --path "$win_path" 2>/dev/null) || return 0
+		export PATH="$unix_path"
+	fi
+}
+
 # Install MCP server with retry mechanism and better error handling
 install_mcp_server() {
 	local server_name="$1"
@@ -362,22 +391,26 @@ install_jq_if_needed() {
 			execute "winget install -e --id jqlang.jq --accept-package-agreements --accept-source-agreements" && jq_installed=true
 		fi
 
-		# After winget install, refresh PATH in current session
+		# After winget/choco install, refresh PATH in current session
 		if [ "$jq_installed" = true ]; then
-			# winget adds to PATH but current shell doesn't know about it
-			# Try common jq installation locations
-			local jq_path=""
-			if [ -f "$LOCALAPPDATA/Microsoft/WinGet/Packages/jqlang.jq_Microsoft.Winget.Source_8wekyb3d8bbwe/jq.exe" ]; then
-				jq_path="$LOCALAPPDATA/Microsoft/WinGet/Packages/jqlang.jq_Microsoft.Winget.Source_8wekyb3d8bbwe"
-			elif [ -f "$PROGRAMFILES/jq/jq.exe" ]; then
-				jq_path="$PROGRAMFILES/jq"
-			elif [ -f "$PROGRAMFILES/WinGet/Links/jq.exe" ]; then
-				jq_path="$PROGRAMFILES/WinGet/Links"
-			fi
+			# First try to refresh PATH from Windows registry via PowerShell
+			refresh_path_windows
 
-			if [ -n "$jq_path" ]; then
-				export PATH="$jq_path:$PATH"
-				log_info "Added jq to PATH: $jq_path"
+			# If that didn't work, try common jq installation locations
+			if ! command -v jq &>/dev/null; then
+				local jq_path=""
+				if [ -f "$LOCALAPPDATA/Microsoft/WinGet/Packages/jqlang.jq_Microsoft.Winget.Source_8wekyb3d8bbwe/jq.exe" ]; then
+					jq_path="$LOCALAPPDATA/Microsoft/WinGet/Packages/jqlang.jq_Microsoft.Winget.Source_8wekyb3d8bbwe"
+				elif [ -f "$PROGRAMFILES/jq/jq.exe" ]; then
+					jq_path="$PROGRAMFILES/jq"
+				elif [ -f "$PROGRAMFILES/WinGet/Links/jq.exe" ]; then
+					jq_path="$PROGRAMFILES/WinGet/Links"
+				fi
+
+				if [ -n "$jq_path" ]; then
+					export PATH="$jq_path:$PATH"
+					log_info "Added jq to PATH: $jq_path"
+				fi
 			fi
 
 			# Verify jq is now available
@@ -754,6 +787,11 @@ install_ccs() {
 }
 
 install_ai_switcher() {
+	if [ "$IS_WINDOWS" = true ]; then
+		log_warning "AI Launcher is not supported on Windows (MINGW/Git Bash). Skipping."
+		log_info "Windows support is not yet available. Track progress at: https://github.com/jellydn/ai-launcher"
+		return 0
+	fi
 	_run_ai_switcher_install() {
 		if command -v ai &>/dev/null; then
 			log_warning "AI Launcher is already installed"
@@ -847,6 +885,13 @@ install_cursor() {
 		log_success "Cursor Agent CLI found ($agent_version)"
 	else
 		log_warning "Cursor Agent CLI is not installed"
+		if [ "$IS_WINDOWS" = true ]; then
+			log_warning "Cursor Agent CLI auto-install is not supported on Windows."
+			log_info "To install on Windows:"
+			log_info "  1. Download and install the Cursor desktop app from https://cursor.com"
+			log_info "  2. Open Cursor, press Ctrl+Shift+P and run: Shell Command: Install 'cursor' command in PATH"
+			return 0
+		fi
 		if [ "$YES_TO_ALL" = true ]; then
 			log_info "Auto-installing Cursor Agent CLI (--yes flag)..."
 			if execute "curl https://cursor.com/install -fsS | bash"; then
@@ -1032,6 +1077,49 @@ validate_all_configs() {
 	fi
 }
 
+
+# Transform MCP server config for Windows compatibility.
+# On Windows, Claude Code cannot invoke 'npx' directly; it must be called through
+# 'cmd /c' so the Windows command processor can resolve the executable.
+# This function rewrites every entry whose command is "npx" to use:
+#   "command": "cmd", "args": ["/c", "npx", <original args>...]
+# Usage: transform_mcp_for_windows "path/to/mcp-servers.json"
+transform_mcp_for_windows() {
+	local mcp_config="$1"
+
+	if [ "$IS_WINDOWS" != true ]; then
+		return 0
+	fi
+
+	if ! command -v jq &>/dev/null; then
+		return 0
+	fi
+
+	if [ "$DRY_RUN" = true ]; then
+		log_info "[DRY RUN] Would wrap npx MCP commands with 'cmd /c' for Windows in $mcp_config"
+		return 0
+	fi
+
+	[ -f "$mcp_config" ] || return 0
+
+	local tmp_mcp
+	tmp_mcp=$(mktemp)
+	# jq filter: for each MCP server entry whose command is "npx", prepend
+	# "/c" and "npx" to the args array and change the command to "cmd".
+	if jq '(.mcpServers // {}) |= with_entries(
+		if .value.command == "npx" then
+			.value.args = ["/c", "npx"] + .value.args |
+			.value.command = "cmd"
+		else . end
+	)' "$mcp_config" >"$tmp_mcp" 2>/dev/null; then
+		mv "$tmp_mcp" "$mcp_config"
+		log_info "Wrapped npx MCP commands with 'cmd /c' for Windows"
+	else
+		rm -f "$tmp_mcp"
+		log_warning "Could not transform $mcp_config for Windows; npx commands may need manual 'cmd /c' wrapping"
+	fi
+}
+
 copy_claude_configs() {
 	execute_quoted mkdir -p "$HOME/.claude"
 
@@ -1039,6 +1127,10 @@ copy_claude_configs() {
 	execute_quoted cp "$SCRIPT_DIR/configs/claude/settings.json" "$HOME/.claude/settings.json"
 	execute_quoted cp "$SCRIPT_DIR/configs/claude/mcp-servers.json" "$HOME/.claude/mcp-servers.json"
 	execute_quoted cp "$SCRIPT_DIR/configs/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+
+	# On Windows, Claude Code requires npx-based MCP server commands to be wrapped
+	# with "cmd /c" so the Windows command processor can resolve npx correctly.
+	transform_mcp_for_windows "$HOME/.claude/mcp-servers.json"
 
 	# Copy directories
 	execute_quoted rm -rf "$HOME/.claude/commands"
@@ -1509,9 +1601,18 @@ install_cli_dependency() {
 			return 0
 		fi
 		log_info "Installing Plannotator CLI..."
-		local plannotator_checksum
-		plannotator_checksum=$(resolve_installer_checksum "plannotator")
-		execute_installer "https://plannotator.ai/install.sh" "$plannotator_checksum" "Plannotator CLI" || log_warning "Plannotator installation failed"
+		if [ "$IS_WINDOWS" = true ]; then
+			log_info "Using PowerShell installer for Windows..."
+			if [ "$DRY_RUN" = true ]; then
+				log_info "[DRY RUN] Would run: powershell.exe -NoProfile -Command \"irm https://plannotator.ai/install.ps1 | iex\""
+			else
+				powershell.exe -NoProfile -Command "irm https://plannotator.ai/install.ps1 | iex" || log_warning "Plannotator installation failed"
+			fi
+		else
+			local plannotator_checksum
+			plannotator_checksum=$(resolve_installer_checksum "plannotator")
+			execute_installer "https://plannotator.ai/install.sh" "$plannotator_checksum" "Plannotator CLI" || log_warning "Plannotator installation failed"
+		fi
 		;;
 	qmd-knowledge)
 		handle_qmd_installation_if_needed
