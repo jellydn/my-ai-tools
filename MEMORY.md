@@ -10,7 +10,7 @@ Before using qmd knowledge features, check if the project's knowledge base is se
 
 ```bash
 # Check if qmd is installed
-command -v qmd || echo "qmd not found - install with: bun install -g https://github.com/tobi/qmd"
+command -v qmd || echo "qmd not found - install with: bun install -g @tobilu/qmd"
 
 # Check if MCP server is configured (should return qmd server info)
 mcp__qmd__status

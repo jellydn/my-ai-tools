@@ -42,7 +42,7 @@ NC='\033[0m'
 # Auto-setup knowledge base if needed
 setup_knowledge_base() {
     if ! command -v qmd &> /dev/null; then
-        echo -e "${YELLOW}Warning: qmd not found. Install with: bun install -g https://github.com/tobi/qmd${NC}"
+        echo -e "${YELLOW}Warning: qmd not found. Install with: bun install -g @tobilu/qmd${NC}"
         return 1
     fi
 
@@ -148,7 +148,7 @@ EMBED_MARKER="$KNOWLEDGE_BASE/.embed_pending"
 
 update_index() {
     if ! command -v qmd &> /dev/null; then
-        echo -e "${YELLOW}Warning: qmd not found. Install with: bun install -g https://github.com/tobi/qmd${NC}"
+        echo -e "${YELLOW}Warning: qmd not found. Install with: bun install -g @tobilu/qmd${NC}"
         return
     fi
 

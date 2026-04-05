@@ -152,10 +152,31 @@ check_prerequisites() {
 	elif command -v node &>/dev/null; then
 		NODE_VERSION=$(node --version)
 		log_success "Node.js found ($NODE_VERSION)"
-		log_warning "Some scripts prefer Bun. Install with: brew install oven-sh/bun/bun"
+		handle_optional_bun_installation
 	else
 		log_error "Neither Bun nor Node.js is installed."
 		handle_bun_installation
+	fi
+
+	handle_qmd_installation_if_needed
+}
+
+handle_optional_bun_installation() {
+	if command -v bun &>/dev/null; then
+		return 0
+	fi
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-installing Bun (--yes flag)..."
+		install_bun_now
+	elif [ -t 0 ]; then
+		if prompt_yn "Bun is not installed. Install it now"; then
+			install_bun_now
+		else
+			log_warning "Continuing with Node.js only. Some scripts prefer Bun."
+		fi
+	else
+		log_warning "Bun is not installed. Continuing with Node.js only."
 	fi
 }
 
@@ -174,6 +195,72 @@ handle_bun_installation() {
 		log_error "Please install Bun or Node.js first."
 		exit 1
 	fi
+}
+
+handle_qmd_installation_if_needed() {
+	if command -v qmd &>/dev/null; then
+		local qmd_version
+		qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
+		log_success "qmd found ($qmd_version)"
+		return 0
+	fi
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-installing qmd (--yes flag)..."
+		if ! install_qmd_now; then
+			log_warning "Continuing without qmd. Knowledge features will remain unavailable until qmd is installed."
+		fi
+	elif [ -t 0 ]; then
+		if prompt_yn "qmd is not installed. Install it now"; then
+			if ! install_qmd_now; then
+				log_warning "Continuing without qmd. Knowledge features will remain unavailable until qmd is installed."
+			fi
+		else
+			log_warning "qmd not installed. Knowledge features will be unavailable until you install it."
+		fi
+	else
+		log_warning "qmd not installed. Knowledge features will be unavailable until you install it."
+	fi
+}
+
+install_qmd_now() {
+	if command -v qmd &>/dev/null; then
+		local qmd_version
+		qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
+		log_success "qmd already installed ($qmd_version)"
+		return 0
+	fi
+
+	if ! command -v bun &>/dev/null; then
+		log_info "qmd requires Bun. Installing Bun first..."
+		handle_bun_installation
+	fi
+
+	if ! command -v bun &>/dev/null; then
+		log_error "Cannot install qmd because Bun is still unavailable"
+		return 1
+	fi
+
+	log_info "Installing qmd CLI via bun..."
+	if execute "bun install -g @tobilu/qmd"; then
+		local qmd_version
+		qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
+		log_success "qmd installed successfully ($qmd_version)"
+		return 0
+	fi
+
+	if command -v npm &>/dev/null; then
+		log_warning "Bun failed to install qmd. Retrying with npm..."
+		if execute "npm install -g @tobilu/qmd"; then
+			local qmd_version
+			qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
+			log_success "qmd installed successfully ($qmd_version)"
+			return 0
+		fi
+	fi
+
+	log_error "Failed to install qmd"
+	return 1
 }
 
 resolve_installer_checksum() {
@@ -976,10 +1063,11 @@ setup_claude_mcp_servers() {
 	install_mcp_interactive "context7" "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest" "documentation lookup"
 	install_mcp_interactive "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking" "multi-step reasoning"
 
+	handle_qmd_installation_if_needed
 	if command -v qmd &>/dev/null; then
 		install_mcp_interactive "qmd" "claude mcp add --scope user --transport stdio qmd -- qmd mcp" "knowledge management"
 	else
-		log_warning "qmd not found. MCP setup skipped. Install with: bun install -g https://github.com/tobi/qmd"
+		log_warning "qmd not found. MCP setup skipped. Install with: bun install -g @tobilu/qmd"
 	fi
 
 	log_success "MCP server setup complete (global scope)"
@@ -1420,17 +1508,7 @@ install_cli_dependency() {
 		execute_installer "https://plannotator.ai/install.sh" "$plannotator_checksum" "Plannotator CLI" || log_warning "Plannotator installation failed"
 		;;
 	qmd-knowledge)
-		if command -v qmd &>/dev/null; then
-			return 0
-		fi
-		if ! command -v bun &>/dev/null; then
-			log_warning "Cannot install qmd automatically because Bun is not available"
-			return 0
-		fi
-		log_info "Installing qmd CLI via bun..."
-		if ! execute "bun install -g https://github.com/tobi/qmd"; then
-			log_warning "qmd installation failed"
-		fi
+		handle_qmd_installation_if_needed
 		;;
 	worktrunk)
 		if command -v wt &>/dev/null || ! command -v brew &>/dev/null; then

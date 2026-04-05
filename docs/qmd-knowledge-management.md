@@ -51,7 +51,7 @@ The qmd-knowledge skill follows the Agent Skills specification:
 Install qmd globally via bun:
 
 ```bash
-bun install -g https://github.com/tobi/qmd
+bun install -g @tobilu/qmd
 ```
 
 ### 2. Configure MCP Server
@@ -322,7 +322,7 @@ qmd embed
 
 Install qmd:
 ```bash
-bun install -g https://github.com/tobi/qmd
+bun install -g @tobilu/qmd
 ```
 
 ### Knowledge collection not found

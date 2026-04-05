@@ -58,7 +58,7 @@ The `qmd` MCP server provides AI-powered search across all stored knowledge, all
 
 ```bash
 # Verify qmd is installed
-command -v qmd || echo "Install qmd: bun install -g https://github.com/tobi/qmd"
+command -v qmd || echo "Install qmd: bun install -g @tobilu/qmd"
 
 # Verify your project collection exists (replace my-project with your actual project name)
 qmd collection list | grep my-project
@@ -117,7 +117,7 @@ command -v git || echo "Install git for automatic project name detection"
 1. **Install qmd**:
 
    ```bash
-   bun install -g https://github.com/tobi/qmd
+   bun install -g @tobilu/qmd
    ```
 
 2. **Install the skill**:
