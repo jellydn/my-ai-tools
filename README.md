@@ -181,6 +181,7 @@ The script will prompt you to install each MCP server:
 - [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
 - [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
 - [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
+- [`fff`](https://github.com/dmtrKovalenko/fff.nvim) - Fast file search with built-in memory for AI agents
 
 #### Manual Setup
 
@@ -202,6 +203,11 @@ Add to [`~/.claude/mcp-servers.json`](configs/claude/mcp-servers.json):
     "qmd": {
       "command": "qmd",
       "args": ["mcp"]
+    },
+    "fff": {
+      "type": "stdio",
+      "command": "fff-mcp",
+      "args": []
     }
   }
 }
@@ -215,6 +221,7 @@ Use the CLI (installed globally for all projects):
 claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest
 claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
 claude mcp add --scope user --transport stdio qmd -- qmd mcp
+claude mcp add --scope user fff -- fff-mcp
 ```
 
 > **MCP Scopes:**

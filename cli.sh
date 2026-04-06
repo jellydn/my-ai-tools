@@ -269,6 +269,52 @@ install_qmd_now() {
 	return 1
 }
 
+install_fff_mcp_now() {
+	if command -v fff-mcp &>/dev/null; then
+		log_success "fff-mcp already installed"
+		return 0
+	fi
+
+	log_info "Installing fff-mcp via official installer..."
+	if execute "curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"; then
+		# Ensure ~/.local/bin is in PATH for the current session
+		local local_bin="$HOME/.local/bin"
+		if [[ ":$PATH:" != *":$local_bin:"* ]]; then
+			export PATH="$local_bin:$PATH"
+		fi
+		log_success "fff-mcp installed successfully"
+		return 0
+	fi
+
+	log_error "Failed to install fff-mcp"
+	log_info "You can install it manually: curl -L https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
+	return 1
+}
+
+handle_fff_mcp_installation_if_needed() {
+	if command -v fff-mcp &>/dev/null; then
+		log_success "fff-mcp found"
+		return 0
+	fi
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-installing fff-mcp (--yes flag)..."
+		if ! install_fff_mcp_now; then
+			log_warning "Continuing without fff-mcp. Fast file search MCP will be unavailable."
+		fi
+	elif [ -t 0 ]; then
+		if prompt_yn "fff-mcp is not installed. Install it now (fast file search for AI)"; then
+			if ! install_fff_mcp_now; then
+				log_warning "Continuing without fff-mcp. Fast file search MCP will be unavailable."
+			fi
+		else
+			log_warning "fff-mcp not installed. Fast file search MCP will be unavailable."
+		fi
+	else
+		log_warning "fff-mcp not installed. Fast file search MCP will be unavailable."
+	fi
+}
+
 resolve_installer_checksum() {
 	local installer="$1"
 	local checksum_url=""
@@ -1074,6 +1120,13 @@ setup_claude_mcp_servers() {
 		install_mcp_interactive "qmd" "claude mcp add --scope user --transport stdio qmd -- qmd mcp" "knowledge management"
 	else
 		log_warning "qmd not found. MCP setup skipped. Install with: bun install -g @tobilu/qmd"
+	fi
+
+	handle_fff_mcp_installation_if_needed
+	if command -v fff-mcp &>/dev/null; then
+		install_mcp_interactive "fff" "claude mcp add --scope user fff -- fff-mcp" "fast file search with memory"
+	else
+		log_warning "fff-mcp not found. MCP setup skipped. Install with: curl -L https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
 	fi
 
 	log_success "MCP server setup complete (global scope)"
