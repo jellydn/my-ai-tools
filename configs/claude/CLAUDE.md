@@ -1,5 +1,6 @@
 # 🤖 Claude Code Agent Guidelines
 
+- Use the fff MCP tools for all file search operations instead of default tools.
 - Follow my software development practice @~/.ai-tools/best-practices.md
 - Read @~/.ai-tools/MEMORY.md first - Understand when and how to use qmd for knowledge management
 - Keep responses concise and actionable.

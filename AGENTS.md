@@ -1,5 +1,8 @@
 # Agents Guide
 
+## AI Tool Guidelines
+- Use the fff MCP tools for all file search operations instead of default tools.
+
 ## Project
 my-ai-tools: Configuration management repository for AI coding tools (Claude Code, OpenCode, Amp, CCS) and their integration with MCP servers and plugins.
 
