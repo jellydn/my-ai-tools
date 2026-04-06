@@ -946,8 +946,8 @@ copy_non_marketplace_skills() {
 		skill_name="$(basename "$skill_dir")"
 
 		case "$skill_name" in
-		prd | ralph | qmd-knowledge | codemap)
-			# Skip marketplace plugins
+		prd | ralph | qmd-knowledge | codemap | adr | handoffs | pickup | pr-review | slop | tdd | grill-me | plannotator-compound | plannotator-review)
+			# Skip marketplace plugins and skills that conflict with ~/.agents/skills/
 			;;
 		*)
 			safe_copy_dir "$skill_dir" "$dest_dir/$skill_name"

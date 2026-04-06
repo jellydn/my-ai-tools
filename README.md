@@ -831,6 +831,10 @@ Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/
     "qmd": {
       "command": "qmd",
       "args": ["mcp"]
+    },
+    "fff": {
+      "command": "fff-mcp",
+      "args": []
     }
   }
 }

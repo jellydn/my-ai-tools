@@ -11,6 +11,10 @@
       "command": "npx -y chrome-devtools-mcp@latest",
       "env": {},
       "args": []
+    },
+    "fff": {
+      "command": "fff-mcp",
+      "args": []
     }
   }
 }

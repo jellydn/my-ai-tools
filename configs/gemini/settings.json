@@ -16,6 +16,10 @@
       "args": [
         "mcp"
       ]
+    },
+    "fff": {
+      "command": "fff-mcp",
+      "args": []
     }
   },
   "security": {
