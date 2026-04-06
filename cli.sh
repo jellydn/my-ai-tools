@@ -276,7 +276,7 @@ install_fff_mcp_now() {
 	fi
 
 	log_info "Installing fff-mcp via official installer..."
-	if execute "curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"; then
+	if execute_installer "https://dmtrkovalenko.dev/install-fff-mcp.sh" "" "fff-mcp"; then
 		# Ensure ~/.local/bin is in PATH for the current session
 		local local_bin="$HOME/.local/bin"
 		if [[ ":$PATH:" != *":$local_bin:"* ]]; then
