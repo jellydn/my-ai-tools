@@ -1,6 +1,11 @@
 {
   "recommended_skills": [
     {
+      "repo": "mattpocock/skills",
+      "skill": "grill-me",
+      "description": "Interview the user relentlessly about a plan or design until reaching shared understanding"
+    },
+    {
       "repo": "vercel-labs/agent-skills",
       "description": "Vercel's agent skills for Next.js and React"
     },
@@ -15,11 +20,6 @@
     {
       "repo": "jezweb/claude-skills",
       "description": "97 production-ready skills for Claude Code"
-    },
-    {
-      "repo": "mattpocock/skills",
-      "skill": "grill-me",
-      "description": "Interview the user relentlessly about a plan or design until reaching shared understanding"
     }
   ]
 }

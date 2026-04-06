@@ -934,6 +934,13 @@ copy_non_marketplace_skills() {
 		return 0
 	fi
 
+	# Check if global skills directory exists - if so, skip copying to tool-specific dirs
+	# to avoid conflicts. Global ~/.agents/skills/ is the preferred location.
+	if [ -d "$HOME/.agents/skills" ] && [ "$YES_TO_ALL" = true ]; then
+		log_info "Global skills directory found at ~/.agents/skills - skipping tool-specific skill copy to avoid conflicts"
+		return 0
+	fi
+
 	execute_quoted rm -rf "$dest_dir"
 	execute_quoted mkdir -p "$dest_dir"
 
@@ -1467,7 +1474,20 @@ install_recommended_skills() {
 
 	log_info "Found $skill_count recommended skill(s)"
 
+	# Install specific skills from recommend-skills.json based on YES_TO_ALL
+	# When -y is used, only install: grill-me from matt and 2 react skills from vercel
+	local install_count=0
+	local max_installs=3
+	if [ "$YES_TO_ALL" = true ]; then
+		max_installs=3  # grill-me + 2 react skills
+	fi
+
 	for i in $(seq 0 $((skill_count - 1))); do
+		# When using -y, limit to first 3 skills (grill-me + vercel + expo react skills)
+		if [ "$YES_TO_ALL" = true ] && [ "$install_count" -ge "$max_installs" ]; then
+			log_info "Reached maximum recommended skills for -y mode ($max_installs), skipping remaining"
+			break
+		fi
 		local repo description skill skill_suffix
 		repo=$(echo "$skills_json" | jq -r ".recommended_skills[$i].repo")
 		description=$(echo "$skills_json" | jq -r ".recommended_skills[$i].description")
@@ -1477,6 +1497,7 @@ install_recommended_skills() {
 
 		log_info "  - $repo${skill_suffix}: $description"
 		install_single_recommended_skill "$repo" "$skill" "$skill_suffix"
+		install_count=$((install_count + 1))
 	done
 
 	log_success "Recommended skills check complete"
@@ -1859,6 +1880,13 @@ skill_is_compatible_with() {
 install_local_skills() {
 	if [ ! -d "$SCRIPT_DIR/skills" ]; then
 		log_info "skills folder not found, skipping local skills"
+		return 0
+	fi
+
+	# Check if global skills directory exists - if so, skip tool-specific copies
+	# to avoid conflicts. Global ~/.agents/skills/ is the preferred location.
+	if [ -d "$HOME/.agents/skills" ] && [ "$YES_TO_ALL" = true ]; then
+		log_info "Global skills directory found at ~/.agents/skills - skipping tool-specific skill copy"
 		return 0
 	fi
 
