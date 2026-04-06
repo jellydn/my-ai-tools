@@ -1835,21 +1835,13 @@ install_local_skills() {
 		local skill_name
 		skill_name=$(basename "$skill_dir")
 
-		# Skip if skill already exists in global skills directory
-		if [ -d "$HOME/.agents/skills/$skill_name" ]; then
-			log_info "Skipped $skill_name (already exists in ~/.agents/skills/)"
-			continue
-		fi
-
 		copy_skill_to_targets "$skill_name" "$skill_dir"
 	done
 }
 
 prepare_skills_dir() {
 	local dir="$1"
-	local manifest_file="$dir/.my-ai-tools-managed-skills"
 	local managed_marker=".my-ai-tools-managed"
-	local previous_managed_skill_names=()
 	local managed_skill_names=()
 	local repo_skill_dir=""
 
@@ -1858,37 +1850,26 @@ prepare_skills_dir() {
 		managed_skill_names+=("$(basename "$repo_skill_dir")")
 	done
 
-	if [ -f "$manifest_file" ]; then
-		while IFS= read -r managed_name; do
-			[ -n "$managed_name" ] || continue
-			previous_managed_skill_names+=("$managed_name")
-		done <"$manifest_file"
-	fi
-
 	if [ -d "$dir" ]; then
 		for existing_skill in "$dir"/*; do
 			[ -d "$existing_skill" ] || continue
 			local existing_name
 			existing_name=$(basename "$existing_skill")
 			local managed=false
-			local managed_name=""
+
+			# Check if this skill is in our managed list
 			for managed_name in "${managed_skill_names[@]}"; do
 				if [ "$existing_name" = "$managed_name" ]; then
 					managed=true
 					break
 				fi
 			done
+
+			# Also check for marker file
 			if [ "$managed" = false ] && [ -f "$existing_skill/$managed_marker" ]; then
 				managed=true
 			fi
-			if [ "$managed" = false ]; then
-				for managed_name in "${previous_managed_skill_names[@]}"; do
-					if [ "$existing_name" = "$managed_name" ]; then
-						managed=true
-						break
-					fi
-				done
-			fi
+
 			if [ "$managed" = true ]; then
 				execute_quoted rm -rf "$existing_skill"
 			else
@@ -1897,16 +1878,6 @@ prepare_skills_dir() {
 		done
 	fi
 	execute_quoted mkdir -p "$dir"
-
-	if [ "$DRY_RUN" = true ]; then
-		log_info "[DRY RUN] Would update managed skills manifest: $manifest_file"
-	else
-		: >"$manifest_file"
-		local managed_name=""
-		for managed_name in "${managed_skill_names[@]}"; do
-			printf '%s\n' "$managed_name" >>"$manifest_file"
-		done
-	fi
 }
 
 copy_skill_to_targets() {
