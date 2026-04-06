@@ -1267,6 +1267,7 @@ copy_kilo_configs() {
 	log_info "Detected Kilo CLI (via $kilo_status)"
 	execute_quoted mkdir -p "$HOME/.config/kilo"
 	copy_config_file "$SCRIPT_DIR/configs/kilo/config.json" "$HOME/.config/kilo/" || true
+	copy_config_file "$SCRIPT_DIR/configs/kilo/AGENTS.md" "$HOME/.config/kilo/" || true
 	log_success "Kilo CLI configs copied"
 }
 
@@ -1291,6 +1292,8 @@ copy_pi_configs() {
 		execute_quoted mkdir -p "$HOME/.pi/agent/themes"
 		safe_copy_dir "$SCRIPT_DIR/configs/pi/themes" "$HOME/.pi/agent/themes"
 	fi
+
+	copy_config_file "$SCRIPT_DIR/configs/pi/AGENTS.md" "$HOME/.pi/agent/" || true
 
 	copy_non_marketplace_skills "$SCRIPT_DIR/configs/pi/skills" "$HOME/.pi/agent/skills"
 
