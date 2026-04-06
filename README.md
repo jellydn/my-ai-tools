@@ -226,6 +226,32 @@ curl -L https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
 claude mcp add --scope user fff -- fff-mcp
 ```
 
+##### For OpenCode
+
+The `fff` MCP is already included in [`configs/opencode/opencode.json`](configs/opencode/opencode.json). For manual setup, add to `~/.config/opencode/opencode.json`:
+
+```json
+{
+  "mcp": {
+    "fff": {
+      "type": "local",
+      "command": ["fff-mcp"],
+      "enabled": true
+    }
+  }
+}
+```
+
+##### For Codex
+
+The `fff` MCP is already included in [`configs/codex/config.toml`](configs/codex/config.toml). For manual setup, add to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.fff]
+command = "fff-mcp"
+args = []
+```
+
 > **MCP Scopes:**
 >
 > - `--scope user` (global): Available across all projects

@@ -25,6 +25,10 @@ args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 command = "qmd"
 args = ["mcp"]
 
+[mcp_servers.fff]
+command = "fff-mcp"
+args = []
+
 [notice.model_migrations]
 "gpt-5.2-codex" = "gpt-5.3-codex"
 "gpt-5.3-codex" = "gpt-5.4"

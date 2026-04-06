@@ -62,6 +62,11 @@
 			"enabled": true,
 			"type": "local",
 			"command": ["npx", "-y", "chrome-devtools-mcp@latest"]
+		},
+		"fff": {
+			"type": "local",
+			"command": ["fff-mcp"],
+			"enabled": true
 		}
 	},
 	"plugin": [
