@@ -20,6 +20,13 @@
 			"args": [],
 			"env": {},
 			"tools": ["*"]
+		},
+		"qmd": {
+			"type": "local",
+			"command": "qmd",
+			"args": ["mcp"],
+			"env": {},
+			"tools": ["*"]
 		}
 	}
 }

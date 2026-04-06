@@ -32,6 +32,12 @@
       "command": "fff-mcp",
       "args": [],
       "disabled": false
+    },
+    "qmd": {
+      "type": "stdio",
+      "command": "qmd",
+      "args": ["mcp"],
+      "disabled": false
     }
   }
 }
