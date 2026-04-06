@@ -222,8 +222,8 @@ claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/contex
 claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
 claude mcp add --scope user --transport stdio qmd -- qmd mcp
 # Install fff-mcp binary first, then register it
-curl -L https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
-claude mcp add --scope user fff -- fff-mcp
+curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
+claude mcp add --scope user --transport stdio fff -- fff-mcp
 ```
 
 ##### For OpenCode

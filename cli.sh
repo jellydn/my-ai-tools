@@ -287,7 +287,7 @@ install_fff_mcp_now() {
 	fi
 
 	log_error "Failed to install fff-mcp"
-	log_info "You can install it manually: curl -L https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
+	log_info "You can install it manually: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
 	return 1
 }
 
@@ -1124,9 +1124,9 @@ setup_claude_mcp_servers() {
 
 	handle_fff_mcp_installation_if_needed
 	if command -v fff-mcp &>/dev/null; then
-		install_mcp_interactive "fff" "claude mcp add --scope user fff -- fff-mcp" "fast file search with memory"
+		install_mcp_interactive "fff" "claude mcp add --scope user --transport stdio fff -- fff-mcp" "fast file search with memory"
 	else
-		log_warning "fff-mcp not found. MCP setup skipped. Install with: curl -L https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
+		log_warning "fff-mcp not found. MCP setup skipped. Install with: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
 	fi
 
 	log_success "MCP server setup complete (global scope)"
