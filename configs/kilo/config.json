@@ -13,6 +13,11 @@
 			"type": "local",
 			"command": ["qmd", "mcp"],
 			"enabled": true
+		},
+		"fff": {
+			"type": "local",
+			"command": ["fff-mcp"],
+			"enabled": true
 		}
 	},
 	"agent": {
