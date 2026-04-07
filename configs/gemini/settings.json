@@ -11,12 +11,6 @@
         "@modelcontextprotocol/server-sequential-thinking"
       ]
     },
-    "qmd": {
-      "command": "qmd",
-      "args": [
-        "mcp"
-      ]
-    },
     "fff": {
       "command": "fff-mcp",
       "args": []

@@ -20,10 +20,6 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
     },
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"]
-    },
     "mempalace": {
       "command": "python3",
       "args": ["-m", "mempalace.mcp_server"]

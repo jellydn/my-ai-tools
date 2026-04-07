@@ -7,12 +7,6 @@
   "permissions": {
     "allow": [
       "mcp__sequential-thinking__sequentialthinking",
-      "mcp__qmd__query",
-      "mcp__qmd__get",
-      "mcp__qmd__search",
-      "mcp__qmd__vsearch",
-      "mcp__qmd__multi_get",
-      "mcp__qmd__status",
       "mcp__mempalace__mempalace_status",
       "mcp__mempalace__mempalace_search",
       "mcp__mempalace__mempalace_list_wings",
@@ -58,9 +52,6 @@
       "Bash(npx biome:*)",
       "Bash(jq:*)",
       "Bash(shellcheck:*)",
-      "Bash(qmd:*)",
-      "Bash(qmd embed:*)",
-      "Bash(~/.claude/skills/qmd-knowledge/scripts/record.sh:*)",
       "Bash(ls:*)",
       "Bash(find:*)",
       "Bash(cat:*)",

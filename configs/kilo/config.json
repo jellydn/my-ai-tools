@@ -9,11 +9,6 @@
 			"url": "https://mcp.context7.com/mcp",
 			"enabled": true
 		},
-		"qmd": {
-			"type": "local",
-			"command": ["qmd", "mcp"],
-			"enabled": true
-		},
 		"fff": {
 			"type": "local",
 			"command": ["fff-mcp"],
@@ -34,13 +29,7 @@
 		"build": {
 			"permission": {
 				"bash": {
-					"git push": "ask",
-					"qmd": "allow",
-					"qmd query": "allow",
-					"qmd get": "allow",
-					"qmd search": "allow",
-					"$HOME/.config/opencode/skill/qmd-knowledge/scripts/record.sh": "allow",
-					"$HOME/.claude/skills/qmd-knowledge/scripts/record.sh": "allow"
+					"git push": "ask"
 				}
 			}
 		}

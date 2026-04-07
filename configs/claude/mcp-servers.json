@@ -8,10 +8,6 @@
 			"command": "npx",
 			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 		},
-		"qmd": {
-			"command": "qmd",
-			"args": ["mcp"]
-		},
 		"fff": {
 			"type": "stdio",
 			"command": "fff-mcp",

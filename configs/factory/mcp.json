@@ -33,12 +33,6 @@
       "args": [],
       "disabled": false
     },
-    "qmd": {
-      "type": "stdio",
-      "command": "qmd",
-      "args": ["mcp"],
-      "disabled": false
-    },
     "mempalace": {
       "type": "stdio",
       "command": "python3",

@@ -21,10 +21,6 @@ args = ["-y", "@upstash/context7-mcp"]
 command = "npx"
 args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 
-[mcp_servers.qmd]
-command = "qmd"
-args = ["mcp"]
-
 [mcp_servers.fff]
 command = "fff-mcp"
 args = []
