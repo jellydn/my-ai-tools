@@ -29,6 +29,10 @@ args = ["mcp"]
 command = "fff-mcp"
 args = []
 
+[mcp_servers.mempalace]
+command = "python"
+args = ["-m", "mempalace.mcp_server"]
+
 [notice.model_migrations]
 "gpt-5.2-codex" = "gpt-5.3-codex"
 "gpt-5.3-codex" = "gpt-5.4"

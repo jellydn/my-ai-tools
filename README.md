@@ -182,6 +182,7 @@ The script will prompt you to install each MCP server:
 - [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
 - [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
 - [`fff`](https://github.com/dmtrKovalenko/fff.nvim) - Fast file search with built-in memory for AI agents
+- [`mempalace`](https://github.com/milla-jovovich/mempalace) - AI memory system with palace structure for persistent cross-session memory
 
 #### Manual Setup
 
@@ -208,6 +209,11 @@ Add to [`~/.claude/mcp-servers.json`](configs/claude/mcp-servers.json):
       "type": "stdio",
       "command": "fff-mcp",
       "args": []
+    },
+    "mempalace": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "mempalace.mcp_server"]
     }
   }
 }
@@ -224,6 +230,9 @@ claude mcp add --scope user --transport stdio qmd -- qmd mcp
 # Install fff-mcp binary first, then register it
 curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
 claude mcp add --scope user --transport stdio fff -- fff-mcp
+# Install mempalace first, then register it
+pip3 install mempalace
+claude mcp add --scope user --transport stdio mempalace -- python -m mempalace.mcp_server
 ```
 
 ##### For OpenCode

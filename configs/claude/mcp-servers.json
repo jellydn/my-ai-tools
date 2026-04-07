@@ -16,6 +16,11 @@
 			"type": "stdio",
 			"command": "fff-mcp",
 			"args": []
+		},
+		"mempalace": {
+			"type": "stdio",
+			"command": "python",
+			"args": ["-m", "mempalace.mcp_server"]
 		}
 	}
 }

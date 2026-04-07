@@ -72,6 +72,11 @@
 			"type": "local",
 			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
 			"enabled": true
+		},
+		"mempalace": {
+			"type": "local",
+			"command": ["python", "-m", "mempalace.mcp_server"],
+			"enabled": true
 		}
 	},
 	"plugin": [

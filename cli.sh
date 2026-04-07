@@ -269,6 +269,47 @@ install_qmd_now() {
 	return 1
 }
 
+install_mempalace_now() {
+	if python3 -c "import mempalace" 2>/dev/null; then
+		log_success "mempalace already installed"
+		return 0
+	fi
+
+	log_info "Installing mempalace via pip..."
+	if execute "pip3 install mempalace"; then
+		log_success "mempalace installed successfully"
+		return 0
+	fi
+
+	log_error "Failed to install mempalace"
+	log_info "You can install it manually: pip3 install mempalace"
+	return 1
+}
+
+handle_mempalace_installation_if_needed() {
+	if python3 -c "import mempalace" 2>/dev/null; then
+		log_success "mempalace found"
+		return 0
+	fi
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-installing mempalace (--yes flag)..."
+		if ! install_mempalace_now; then
+			log_warning "Continuing without mempalace. AI memory MCP will be unavailable."
+		fi
+	elif [ -t 0 ]; then
+		if prompt_yn "mempalace is not installed. Install it now (AI memory system)"; then
+			if ! install_mempalace_now; then
+				log_warning "Continuing without mempalace. AI memory MCP will be unavailable."
+			fi
+		else
+			log_warning "mempalace not installed. AI memory MCP will be unavailable."
+		fi
+	else
+		log_warning "mempalace not installed. AI memory MCP will be unavailable."
+	fi
+}
+
 install_fff_mcp_now() {
 	if command -v fff-mcp &>/dev/null; then
 		log_success "fff-mcp already installed"
@@ -1134,6 +1175,13 @@ setup_claude_mcp_servers() {
 		install_mcp_interactive "fff" "claude mcp add --scope user --transport stdio fff -- fff-mcp" "fast file search with memory"
 	else
 		log_warning "fff-mcp not found. MCP setup skipped. Install with: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
+	fi
+
+	handle_mempalace_installation_if_needed
+	if python3 -c "import mempalace" 2>/dev/null; then
+		install_mcp_interactive "mempalace" "claude mcp add --scope user --transport stdio mempalace -- python -m mempalace.mcp_server" "AI memory system with palace structure"
+	else
+		log_warning "mempalace not found. MCP setup skipped. Install with: pip3 install mempalace"
 	fi
 
 	log_success "MCP server setup complete (global scope)"
