@@ -75,7 +75,7 @@
 		},
 		"mempalace": {
 			"type": "local",
-			"command": ["python", "-m", "mempalace.mcp_server"],
+			"command": ["python3", "-m", "mempalace.mcp_server"],
 			"enabled": true
 		}
 	},
@@ -103,7 +103,6 @@
 		"ollama": {
 			"models": {
 				"minimax-m2.5:cloud": {
-					"_launch": true,
 					"limit": {
 						"context": 204800,
 						"output": 128000
@@ -117,6 +116,5 @@
 				"baseURL": "http://127.0.0.1:11434/v1"
 			}
 		}
-	},
-	"theme": "kanagawa"
+	}
 }
