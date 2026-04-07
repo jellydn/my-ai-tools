@@ -182,7 +182,7 @@ The script will prompt you to install each MCP server:
 - [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
 - [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
 - [`fff`](https://github.com/dmtrKovalenko/fff.nvim) - Fast file search with built-in memory for AI agents
-- [`mempalace`](https://github.com/milla-jovovich/mempalace) - AI memory system with palace structure for persistent cross-session memory
+- [`mempalace`](https://github.com/milla-jovovich/mempalace) - AI memory system with palace structure for persistent cross-session memory ([Specialist Agents pattern](docs/mempalace-specialist-agents.md))
 
 #### Manual Setup
 
