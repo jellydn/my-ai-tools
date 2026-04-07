@@ -281,6 +281,16 @@ generate_codex_configs() {
 	copy_single "$HOME/.codex/config.json" "$SCRIPT_DIR/configs/codex/config.json"
 	copy_single "$HOME/.codex/config.toml" "$SCRIPT_DIR/configs/codex/config.toml"
 
+	# Export hooks configuration if it exists
+	if [ -f "$HOME/.codex/hooks.json" ]; then
+		copy_single "$HOME/.codex/hooks.json" "$SCRIPT_DIR/configs/codex/hooks.json"
+	fi
+
+	# Export hooks directory if it exists
+	if [ -d "$HOME/.codex/hooks" ]; then
+		copy_directory "$HOME/.codex/hooks" "$SCRIPT_DIR/configs/codex/hooks"
+	fi
+
 	log_success "Codex CLI configs generated"
 }
 
@@ -318,6 +328,11 @@ generate_gemini_configs() {
 	# Copy skills from ~/.claude/skills if it exists
 	if [ -d "$HOME/.claude/skills" ]; then
 		copy_skills_with_filter "$HOME/.claude/skills" "$SCRIPT_DIR/configs/gemini/skills" "Gemini CLI"
+	fi
+
+	# Copy hooks directory if it exists
+	if [ -d "$HOME/.gemini/hooks" ]; then
+		copy_directory "$HOME/.gemini/hooks" "$SCRIPT_DIR/configs/gemini/hooks"
 	fi
 
 	log_success "Gemini CLI configs generated"
@@ -444,6 +459,11 @@ generate_factory_configs() {
 	# Export mcp.json and settings.json
 	[ -f "$HOME/.factory/mcp.json" ] && copy_single "$HOME/.factory/mcp.json" "$SCRIPT_DIR/configs/factory/mcp.json"
 	[ -f "$HOME/.factory/settings.json" ] && copy_single "$HOME/.factory/settings.json" "$SCRIPT_DIR/configs/factory/settings.json"
+
+	# Export hooks directory if it exists
+	if [ -d "$HOME/.factory/hooks" ]; then
+		copy_directory "$HOME/.factory/hooks" "$SCRIPT_DIR/configs/factory/hooks"
+	fi
 
 	log_success "Factory Droid configs generated"
 }
