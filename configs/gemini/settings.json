@@ -106,7 +106,7 @@
     ],
     "BeforeTool": [
       {
-        "matcher": "mempalace_*",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",

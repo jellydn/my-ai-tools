@@ -515,6 +515,9 @@ main() {
 	generate_claude_configs
 	echo
 
+	generate_mempalace_configs
+	echo
+
 	generate_opencode_configs
 	echo
 

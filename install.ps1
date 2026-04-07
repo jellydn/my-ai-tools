@@ -184,8 +184,8 @@ function Test-Prerequisites {
 
             # Check jsonschema module (optional but recommended)
             $pyCmd = if ($python) { "python" } else { "python3" }
-            $hasJsonSchema = & $pyCmd -c "import jsonschema" 2>$null
-            if (-not $hasJsonSchema) {
+            & $pyCmd -c "import jsonschema" 2>$null
+            if ($LASTEXITCODE -ne 0) {
                 Write-Info "python-jsonschema not installed - some config validations will be skipped"
                 Write-Info "Install with: $pipPath install jsonschema"
             }
