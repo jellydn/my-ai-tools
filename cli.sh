@@ -1055,6 +1055,14 @@ install_mcp_interactive() {
 	fi
 }
 
+install_mempalace_agents() {
+	if [ -d "$SCRIPT_DIR/configs/mempalace/agents" ]; then
+		execute_quoted mkdir -p "$HOME/.mempalace/agents"
+		safe_copy_dir "$SCRIPT_DIR/configs/mempalace/agents" "$HOME/.mempalace/agents"
+		log_success "MemPalace specialist agents installed to ~/.mempalace/agents/"
+	fi
+}
+
 copy_configurations() {
 	log_info "Copying configurations..."
 
@@ -1072,6 +1080,7 @@ copy_configurations() {
 	copy_cursor_configs
 	copy_factory_configs
 	copy_best_practices
+	install_mempalace_agents
 }
 
 # Validate all config files

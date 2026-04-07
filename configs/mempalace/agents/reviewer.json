@@ -1,0 +1,16 @@
+{
+	"name": "reviewer",
+	"focus": [
+		"code quality",
+		"pattern violations",
+		"security vulnerabilities",
+		"performance regressions"
+	],
+	"wings": ["code_reviews", "bug_patterns", "security_findings"],
+	"diary_format": "AAAK",
+	"triggers": [
+		"before_commit",
+		"on_pr_create",
+		"after_test_failure"
+	]
+}
