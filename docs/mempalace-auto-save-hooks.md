@@ -2,8 +2,8 @@
 
 Auto-save memories across all AI tools. Two patterns:
 
-1. **Native Hooks** — tools with built-in lifecycle hooks (Claude Code, Gemini CLI, Factory)
-2. **Polling Mode** — tools without hooks use periodic background saves (Amp, Codex, OpenCode, Pi, Kilo, CCS)
+1. **Native Hooks** — tools with built-in lifecycle hooks (Claude Code, Gemini CLI, Codex CLI, Factory)
+2. **Polling Mode** — tools without hooks use periodic background saves (Amp, OpenCode, Pi, Kilo, CCS)
 
 ---
 
@@ -89,6 +89,41 @@ Gemini supports agent lifecycle hooks. Add to `~/.gemini/settings.json`:
 - `BeforeTool` — Before tool execution
 - `AfterTool` — After tool execution (filter by tool name)
 
+### Codex CLI
+
+Codex CLI supports hooks via `~/.codex/hooks.json`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.codex/hooks/mempal_session_start.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.codex/hooks/mempal_stop.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Available hooks:**
+- `SessionStart` — When a new Codex session starts
+- `Stop` — When a Codex session ends
+
 ### Factory Droid
 
 Factory imports Claude Code hooks. Add to `~/.factory/settings.json`:
@@ -120,7 +155,7 @@ Factory imports Claude Code hooks. Add to `~/.factory/settings.json`:
 
 For tools without native hooks, use background polling.
 
-### Amp, Codex, OpenCode, Pi, Kilo, CCS
+### Amp, OpenCode, Pi, Kilo, CCS
 
 These tools don't expose lifecycle hooks. Use the polling daemon:
 
@@ -162,21 +197,6 @@ Amp doesn't persist hooks. Use the MCP server with auto-save:
 }
 ```
 
-#### Codex (OpenAI)
-
-Codex doesn't have user-configurable hooks. Use shell wrapper:
-
-```bash
-# ~/.bashrc
-codex() {
-    # Pre-save before codex starts
-    python3 -c "import mempalace; mempalace.quick_checkpoint('codex_start')" 2>/dev/null || true
-    command codex "$@"
-    # Post-save after codex exits
-    python3 -c "import mempalace; mempalace.quick_checkpoint('codex_end')" 2>/dev/null || true
-}
-```
-
 #### OpenCode
 
 OpenCode has limited hook support. Use the pre-command hook in `~/.config/opencode/opencode.json`:
@@ -191,7 +211,7 @@ OpenCode has limited hook support. Use the pre-command hook in `~/.config/openco
 
 #### Pi
 
-Pi doesn't expose hooks. Use the polling daemon approach above or wrap the `pi` command similar to Codex.
+Pi doesn't expose hooks. Use the polling daemon approach above or use the generic `mempauto_compact.sh` script.
 
 #### Kilo
 
@@ -261,20 +281,24 @@ mempalace.quick_checkpoint(
 
 ## Installation
 
-### 1. Native Hook Tools (Claude, Gemini, Factory)
+### 1. Native Hook Tools (Claude, Gemini, Codex, Factory)
 
 ```bash
 # Copy hooks to tool directory
 cp configs/claude/hooks/mempal_*.sh ~/.claude/hooks/
 cp configs/gemini/hooks/mempal_*.sh ~/.gemini/hooks/
+cp configs/codex/hooks/mempal_*.sh ~/.codex/hooks/
 cp configs/factory/hooks/mempal_*.sh ~/.factory/hooks/
 
 chmod +x ~/.claude/hooks/mempal_*.sh
 chmod +x ~/.gemini/hooks/mempal_*.sh
+chmod +x ~/.codex/hooks/mempal_*.sh
 chmod +x ~/.factory/hooks/mempal_*.sh
-```
 
-### 2. Polling Mode Tools (Amp, Codex, OpenCode, Pi, Kilo, CCS)
+# Copy hooks.json for Codex
+cp configs/codex/hooks.json ~/.codex/
+
+### 2. Polling Mode Tools (Amp, OpenCode, Pi, Kilo, CCS)
 
 ```bash
 # Start polling daemon
@@ -317,12 +341,12 @@ Located at `configs/mempalace/hooks/mempauto_compact.sh`, this script provides:
 bash ~/.mempalace/hooks/mempauto_compact.sh "pre_command"
 ```
 
-**Command wrapper (for Codex, Pi, Kilo):**
+**Command wrapper (for Pi, Kilo):**
 ```bash
 # ~/.bashrc
-codex() {
+pi() {
     bash ~/.mempalace/hooks/mempauto_compact.sh "pre"
-    command codex "$@"
+    command pi "$@"
     bash ~/.mempalace/hooks/mempauto_compact.sh "post"
 }
 ```
@@ -451,7 +475,7 @@ python3 -c "import mempalace; print('OK')"
 | Factory | Imported | ✅ Stop | `~/.factory/settings.json` | Stop, PreToolUse, PostToolUse (from Claude) |
 | CCS | Imported | ✅ PreCompact | `~/.ccs/config.yaml` | Stop, PreCompact (from Claude) |
 | Amp | Polling | ⚠️ Manual | `~/.amp/settings.json` | Use `mempauto_compact.sh` wrapper |
-| Codex | Polling | ⚠️ Manual | Shell wrapper | Pre/post command with `mempauto_compact.sh` |
+| Codex | Native | ✅ SessionStart/Stop | `~/.codex/hooks.json` | Session lifecycle hooks |
 | OpenCode | Limited | ⚠️ Manual | `~/.config/opencode/opencode.json` | Use polling or wrapper |
 | Pi | Polling | ⚠️ Manual | Shell wrapper | Pre/post command with `mempauto_compact.sh` |
 | Kilo | Polling | ⚠️ Manual | Shell wrapper | Pre/post command with `mempauto_compact.sh` |

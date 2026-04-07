@@ -30,7 +30,7 @@ command = "fff-mcp"
 args = []
 
 [mcp_servers.mempalace]
-command = "python"
+command = "python3"
 args = ["-m", "mempalace.mcp_server"]
 
 [notice.model_migrations]

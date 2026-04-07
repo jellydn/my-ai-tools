@@ -1402,6 +1402,23 @@ copy_codex_configs() {
 		safe_copy_dir "$SCRIPT_DIR/configs/codex/themes" "$HOME/.codex/themes"
 	fi
 
+	# Copy hooks configuration and scripts
+	if [ -f "$SCRIPT_DIR/configs/codex/hooks.json" ]; then
+		execute_quoted cp "$SCRIPT_DIR/configs/codex/hooks.json" "$HOME/.codex/"
+		log_success "Codex hooks.json copied"
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/codex/hooks" ]; then
+		execute_quoted mkdir -p "$HOME/.codex/hooks"
+		for hook_file in "$SCRIPT_DIR"/configs/codex/hooks/*.sh; do
+			if [ -f "$hook_file" ]; then
+				execute_quoted cp "$hook_file" "$HOME/.codex/hooks/"
+				execute_quoted chmod +x "$HOME/.codex/hooks/$(basename "$hook_file")"
+			fi
+		done
+		log_success "Codex hooks copied and made executable"
+	fi
+
 	log_success "Codex CLI configs copied"
 }
 
