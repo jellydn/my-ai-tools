@@ -54,6 +54,14 @@ check_prerequisites() {
 		log_warning "pip not found - you may need to install pip for MemPalace"
 		log_info "Run: python3 -m ensurepip --upgrade"
 	fi
+
+	# Check for jsonschema (optional but recommended for config validation)
+	if command -v python3 &>/dev/null; then
+		if ! python3 -c "import jsonschema" 2>/dev/null; then
+			log_info "python-jsonschema not installed - some config validations will be skipped"
+			log_info "Install with: pip3 install jsonschema"
+		fi
+	fi
 }
 
 main() {

@@ -181,6 +181,14 @@ function Test-Prerequisites {
         } else {
             $pipPath = if ($pip) { "pip" } else { "pip3" }
             Write-Info "Install MemPalace later with: $pipPath install mempalace"
+
+            # Check jsonschema module (optional but recommended)
+            $pyCmd = if ($python) { "python" } else { "python3" }
+            $hasJsonSchema = & $pyCmd -c "import jsonschema" 2>$null
+            if (-not $hasJsonSchema) {
+                Write-Info "python-jsonschema not installed - some config validations will be skipped"
+                Write-Info "Install with: $pipPath install jsonschema"
+            }
         }
     }
 
