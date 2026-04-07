@@ -19,7 +19,7 @@
 		},
 		"mempalace": {
 			"type": "stdio",
-			"command": "python",
+			"command": "python3",
 			"args": ["-m", "mempalace.mcp_server"]
 		}
 	}

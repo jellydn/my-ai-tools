@@ -29,7 +29,7 @@ copy_single() {
 	local src="$1"
 	local dest="$2"
 	if [ -f "$src" ]; then
-		execute "mkdir -p $(dirname "$dest")"
+		execute "mkdir -p \"$(dirname "$dest")\""
 		execute "cp \"$src\" \"$dest\""
 		log_success "Copied: $src → $dest"
 	else

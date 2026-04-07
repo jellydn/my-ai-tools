@@ -1,195 +1,134 @@
 # Architecture
 
-## Overview
+**Analysis Date:** 2026-04-07
 
-my-ai-tools is a configuration management repository for AI coding tools (Claude Code, OpenCode, Amp, CCS, and others). It provides bidirectional synchronization between the repository configurations and the user's home directory.
+## System Pattern
 
-## Design Pattern
-
-### Bidirectional Config Sync
-
-The system follows a **source-to-destination** pattern with two operational modes:
-
-```
-┌─────────────────┐     cli.sh      ┌─────────────────┐
-│   Repository   │ ──────────────▶ │  Home Directory│
-│  (configs/)    │    (install)    │  (~/.claude/)  │
-└─────────────────┘                 └─────────────────┘
-       ▲                                 │
-       │     generate.sh                 │
-       │    (export)                     │
-└─────────────────┴───────────────────────┘
-```
+**Configuration Management Repository**
+- Bidirectional sync: Install configs → Export user configs
+- Template-based: Source configs in `configs/` → User home directories
+- Multi-tool support: 9 AI tools with unified configuration patterns
 
 ## Layers
 
-### 1. Entry Point Layer
+### Layer 1: CLI Scripts (Entry Points)
 
-| File | Purpose |
-|------|---------|
-| `cli.sh` | Main installer - copies configs from repo to home directory |
-| `generate.sh` | Export utility - copies configs from home directory to repo |
-| `install.sh` | Standalone installer for one-line curl installation |
+**`cli.sh`** - Installation orchestrator
+- Parses arguments (--dry-run, --backup, --yes, --verbose)
+- Validates prerequisites (git, jq, python3)
+- Detects installed AI tools
+- Copies configurations with validation
+- Sets up MCP servers interactively
+- Installs hooks and skills
 
-### 2. Shared Library Layer
+**`generate.sh`** - Export generator
+- Reverse operation: User configs → Repository configs
+- Preserves existing user customizations
+- Filters skills by tool type
 
-The `lib/common.sh` provides reusable utilities:
+**`install.sh`** - One-liner bootstrap
+- Temporary clone to avoid repository dependency
+- Delegates to cli.sh
+- Cleans up temp directory
 
-- **Logging**: `log_info()`, `log_success()`, `log_warning()`, `log_error()`
-- **Execution**: `execute()` - wrapper with dry-run support
-- **Download**: `download_and_verify_script()`, `execute_installer()`
-- **Error handling**: Cross-device link error handling via TMPDIR
+### Layer 2: Configuration Templates
 
-### 3. Configuration Layer
+**Per-Tool Structure:**
+```
+configs/
+├── claude/          # Most comprehensive
+│   ├── settings.json
+│   ├── mcp-servers.json
+│   ├── CLAUDE.md
+│   ├── commands/
+│   ├── agents/
+│   ├── hooks/
+│   └── skills/
+├── gemini/
+│   ├── settings.json
+│   └── hooks/
+├── opencode/
+│   ├── opencode.json
+│   └── agent/
+└── [7 more tools...]
+```
 
-Located in `configs/` - tool-specific configurations:
+### Layer 3: Library Functions
 
-| Tool | Config Location | Target Directory |
-|------|-----------------|------------------|
-| Claude Code | `configs/claude/` | `~/.claude/` |
-| OpenCode | `configs/opencode/` | `~/.config/opencode/` |
-| Amp | `configs/amp/` | `~/.config/amp/` |
-| CCS | `configs/ccs/` | `~/.ccs/` |
-| Codex | `configs/codex/` | `~/.codex/` |
-| Gemini CLI | `configs/gemini/` | `~/.gemini/` |
-| Cursor | `configs/cursor/` | `~/.cursor/` |
-| Factory | `configs/factory/` | `~/.factory/` |
-| Pi | `configs/pi/` | `~/.pi/` |
-| Kilo | `configs/kilo/` | `~/.config/kilo/` |
-| Copilot | `configs/copilot/` | `~/.copilot/` |
-
-### 4. Skills/Marketplace Layer
-
-Located in `skills/` - local marketplace plugins providing specialized capabilities:
-
-- `prd` - Product Requirements Document generation
-- `ralph` - PRD to JSON conversion
-- `qmd-knowledge` - Knowledge management
-- `codemap` - Codebase analysis
-- `adr` - Architecture Decision Records
-- `tdd` - Test-driven development
-- `pr-review` - Pull request review
-- `handoffs/pickup` - Session handoff management
-
-### 5. Hooks Layer
-
-Located in `configs/claude/hooks/` - TypeScript-based hooks for Claude Code:
-
-| File | Purpose |
-|------|---------|
-| `index.ts` | Main hook entry point |
-| `git-guard.ts` | Prevents dangerous git commands |
-| `session.ts` | Session management |
-| `lib.ts` | Shared hook utilities |
-
-### 6. Documentation Layer
-
-Located in `docs/` - user guides and tutorials.
+**`lib/common.sh`** - Shared utilities
+- Logging functions (log_info, log_success, log_warning, log_error)
+- File operations with dry-run support
+- Validation functions
+- Platform detection (is_macos, is_linux, is_windows)
 
 ## Data Flow
 
-### Forward Sync (cli.sh)
-
+### Installation Flow
 ```
-1. Parse CLI args (--dry-run, --backup, --yes, etc.)
-2. Preflight check (git, required tools)
-3. Check prerequisites (bun/node, jq)
-4. For each tool in configs/:
-   a. Install global tools (jq, formatters)
-   b. Copy config files to target directory
-   c. Install MCP servers
-   d. Install plugins/skills
-   e. Setup hooks (if applicable)
-5. Handle backup (if requested)
-6. Post-install cleanup
-```
-
-### Reverse Sync (generate.sh)
-
-```
-1. Parse CLI args (--dry-run)
-2. For each tool directory:
-   a. Read existing configs from home directory
-   b. Copy back to configs/ directory
-   c. Preserve as source for future installs
+1. User runs ./cli.sh
+2. Parse arguments → Set flags (DRY_RUN, YES_TO_ALL, etc.)
+3. Validate prerequisites
+4. Detect which AI tools are installed
+5. For each installed tool:
+   a. Copy configurations
+   b. Validate JSON/TOML/YAML
+   c. Set up MCP servers (if --yes or interactive)
+   d. Copy hooks
+   e. Copy skills (filtered by tool)
+6. Log completion
 ```
 
-## Abstraction Patterns
-
-### Dry-Run Support
-
-All destructive operations support `--dry-run`:
-
-```bash
-execute() {
-    if [ "$DRY_RUN" = true ]; then
-        log_info "[DRY RUN] $1"
-    else
-        eval "$1"
-    fi
-}
+### Export Flow
+```
+1. User runs ./generate.sh
+2. Read user configs from home directories
+3. Copy to configs/<tool>/ directories
+4. Filter and deduplicate
+5. Preserve tool-specific formatting
 ```
 
-### Prerequisite Checking
+## Key Abstractions
 
-```bash
-check_prerequisites() {
-    if ! command -v git &>/dev/null; then
-        log_error "Git is not installed"
-        exit 1
-    fi
-}
-```
+### Configuration Inheritance
+- Base patterns in `AGENTS.md` files
+- Tool-specific overrides in configs
+- User customizations preserved during export
 
-### MCP Server Installation
+### MCP Server Normalization
+Same MCP servers configured differently per tool:
+- Claude: `mcp-servers.json` + permissions in `settings.json`
+- Codex: `[mcp_servers]` section in TOML
+- OpenCode: `"mcp"` object in JSON
+- Gemini: `"mcpServers"` object in JSON
 
-```bash
-install_mcp_server() {
-    local server_name="$1"
-    local install_cmd="$2"
-    # Execute with error handling
-}
-```
-
-### Cross-Device Link Error Handling
-
-```bash
-setup_tmpdir() {
-    local tmp_dir="$HOME/.claude/tmp"
-    mkdir -p "$tmp_dir" 2>/dev/null || true
-    export TMPDIR="$tmp_dir"
-}
-```
+### Hook System Abstraction
+- **Native Hooks** (Claude, Gemini, Factory): Event-driven
+- **Polling Mode** (Amp, Codex, OpenCode, Pi, Kilo, CCS): Periodic saves
+- **Hybrid** (CCS): Imports Claude hooks
 
 ## Entry Points
 
-| Entry Point | Trigger | Description |
-|-------------|---------|-------------|
-| `cli.sh` | Manual | Primary installer |
-| `generate.sh` | Manual | Config exporter |
-| `install.sh` | curl pipe | Standalone installer |
+| Script | Purpose | Key Functions |
+|--------|---------|---------------|
+| `cli.sh` | Install configs | `main()`, `copy_claude_configs()`, `setup_claude_mcp_servers()` |
+| `generate.sh` | Export configs | `main()`, `generate_claude_configs()`, `copy_single()` |
+| `install.sh` | One-liner install | `main()`, `check_prerequisites()` |
 
-## Configuration Format Standards
+## Component Interactions
 
-- **JSON**: Standard formatting (no trailing commas), use `jq` for parsing
-- **YAML**: 2-space indentation (no tabs)
-- **Markdown**: Include language tags for code blocks
-- **Shell**: POSIX-compliant (`#!/bin/bash`), use `set -e`
+```
+cli.sh
+├── lib/common.sh (logging, file ops)
+├── configs/claude/ (templates)
+│   ├── hooks/mempal_*.sh
+│   └── skills/*/
+└── User home directory (~/.claude/, ~/.gemini/, etc.)
 
-## Dependencies
+generate.sh (reverse)
+├── User configs (~/.claude/settings.json)
+└── configs/claude/ (exported)
+```
 
-### Runtime Dependencies
-- bash (shell)
-- git (version control)
-- bun or node (script execution)
-- jq (JSON parsing)
-- curl (downloads)
+---
 
-### Optional Tools (auto-installed)
-- biome (JS/TS formatting)
-- gofmt (Go formatting)
-- prettier (Markdown formatting)
-- ruff (Python formatting)
-- rustfmt (Rust formatting)
-- shfmt (Shell formatting)
-- stylua (Lua formatting)
+*Architecture analysis: 2026-04-07*
