@@ -23,6 +23,11 @@
 			"type": "local",
 			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
 			"enabled": true
+		},
+		"mempalace": {
+			"type": "local",
+			"command": ["python3", "-m", "mempalace.mcp_server"],
+			"enabled": true
 		}
 	},
 	"agent": {

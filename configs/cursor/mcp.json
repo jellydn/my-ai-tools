@@ -23,6 +23,10 @@
     "qmd": {
       "command": "qmd",
       "args": ["mcp"]
+    },
+    "mempalace": {
+      "command": "python3",
+      "args": ["-m", "mempalace.mcp_server"]
     }
   }
 }

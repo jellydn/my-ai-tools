@@ -20,6 +20,13 @@
     "fff": {
       "command": "fff-mcp",
       "args": []
+    },
+    "mempalace": {
+      "command": "python3",
+      "args": [
+        "-m",
+        "mempalace.mcp_server"
+      ]
     }
   },
   "security": {

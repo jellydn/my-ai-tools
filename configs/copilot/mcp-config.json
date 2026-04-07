@@ -27,6 +27,13 @@
 			"args": ["mcp"],
 			"env": {},
 			"tools": ["*"]
+		},
+		"mempalace": {
+			"type": "local",
+			"command": "python3",
+			"args": ["-m", "mempalace.mcp_server"],
+			"env": {},
+			"tools": ["*"]
 		}
 	}
 }
