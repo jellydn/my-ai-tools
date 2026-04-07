@@ -299,6 +299,54 @@ pip3 install mempalace
 
 ---
 
+## Generic Auto-Compact Script
+
+For tools without native PreCompact support, use the generic auto-compact script:
+
+### `mempauto_compact.sh`
+
+Located at `configs/mempalace/hooks/mempauto_compact.sh`, this script provides:
+- Periodic checkpoint for polling-mode tools
+- Command wrapper integration
+- Signal handling for manual triggers
+
+### Usage
+
+**Manual trigger:**
+```bash
+bash ~/.mempalace/hooks/mempauto_compact.sh "pre_command"
+```
+
+**Command wrapper (for Codex, Pi, Kilo):**
+```bash
+# ~/.bashrc
+codex() {
+    bash ~/.mempalace/hooks/mempauto_compact.sh "pre"
+    command codex "$@"
+    bash ~/.mempalace/hooks/mempauto_compact.sh "post"
+}
+```
+
+**Cron/scheduled task:**
+```bash
+# Auto-compact every 5 minutes
+*/5 * * * * bash ~/.mempalace/hooks/mempauto_compact.sh "scheduled"
+```
+
+**Signal trigger:**
+```bash
+# Send SIGUSR1 to trigger auto-compact
+kill -USR1 $(pgrep -f mempauto_compact) 2>/dev/null || true
+```
+
+### Environment Variables
+
+- `MEMPALACE_DIR` - Override default `~/.mempalace`
+- `MEMPALACE_LOG_LEVEL` - Set to `debug` for verbose output
+- `AI_SESSION_ID` - Session identifier for context tracking
+
+---
+
 ## Customization
 
 ### Adjust Save Frequency
@@ -396,14 +444,14 @@ python3 -c "import mempalace; print('OK')"
 
 ## Summary Table
 
-| Tool | Hook Type | Setup File | Hook Triggers |
-|------|-------------|------------|---------------|
-| Claude Code | Native | `~/.claude/settings.json` | Stop, PreCompact, PreToolUse, PostToolUse |
-| Gemini CLI | Native | `~/.gemini/settings.json` | BeforeAgent, AfterAgent, BeforeTool, AfterTool |
-| Factory | Imported | `~/.factory/settings.json` | Stop, PreToolUse, PostToolUse (from Claude) |
-| CCS | Imported | `~/.ccs/config.yaml` | Stop, PreCompact (from Claude) |
-| Amp | Polling | `~/.amp/settings.json` | MCP with --auto-save |
-| Codex | Polling | Shell wrapper | Pre/post command hooks |
-| OpenCode | Limited | `~/.config/opencode/opencode.json` | pre_command only |
-| Pi | Polling | Shell wrapper | Pre/post command hooks |
-| Kilo | Polling | Shell wrapper | Pre/post command hooks |
+| Tool | Hook Type | Auto-Compact | Setup File | Hook Triggers |
+|------|-------------|--------------|------------|---------------|
+| Claude Code | Native | ✅ PreCompact | `~/.claude/settings.json` | Stop, PreCompact, PreToolUse, PostToolUse |
+| Gemini CLI | Native | ✅ BeforeTool | `~/.gemini/settings.json` | BeforeAgent, AfterAgent, BeforeTool, AfterTool |
+| Factory | Imported | ✅ Stop | `~/.factory/settings.json` | Stop, PreToolUse, PostToolUse (from Claude) |
+| CCS | Imported | ✅ PreCompact | `~/.ccs/config.yaml` | Stop, PreCompact (from Claude) |
+| Amp | Polling | ⚠️ Manual | `~/.amp/settings.json` | Use `mempauto_compact.sh` wrapper |
+| Codex | Polling | ⚠️ Manual | Shell wrapper | Pre/post command with `mempauto_compact.sh` |
+| OpenCode | Limited | ⚠️ Manual | `~/.config/opencode/opencode.json` | Use polling or wrapper |
+| Pi | Polling | ⚠️ Manual | Shell wrapper | Pre/post command with `mempauto_compact.sh` |
+| Kilo | Polling | ⚠️ Manual | Shell wrapper | Pre/post command with `mempauto_compact.sh` |

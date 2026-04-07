@@ -15,11 +15,5 @@
   "quietStartup": true,
   "theme": "dracula",
   "hideThinkingBlock": false,
-  "permissionLevel": "high",
-  "mcp": {
-    "mempalace": {
-      "command": "python3",
-      "args": ["-m", "mempalace.mcp_server"]
-    }
-  }
+  "permissionLevel": "high"
 }

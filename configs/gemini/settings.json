@@ -106,6 +106,15 @@
     ],
     "BeforeTool": [
       {
+        "matcher": "mempalace_*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.gemini/hooks/mempal_checkpoint.sh"
+          }
+        ]
+      },
+      {
         "matcher": "exit_plan_mode",
         "hooks": [
           {
