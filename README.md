@@ -31,6 +31,8 @@
 
 - **Bun or Node.js LTS** - Runtime for tools and scripts
 - **Git** - Version control
+- **Python 3.9+** - Required for MemPalace AI memory system
+  - `pip install mempalace` - Local-first AI memory (no API key, no internet after install)
 - **Claude Code subscription** or use [CCS](#-ccs---claude-code-switch-optional) with affordable providers (GLM, MiniMax)
 
 ### Windows-Specific

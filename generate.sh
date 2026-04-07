@@ -160,6 +160,46 @@ copy_claude_settings() {
 	fi
 }
 
+# Export MemPalace configuration
+generate_mempalace_configs() {
+	log_info "Generating MemPalace configs..."
+
+	local mempalace_dir="$HOME/.mempalace"
+	local target_dir="$SCRIPT_DIR/configs/mempalace"
+
+	if [ ! -d "$mempalace_dir" ]; then
+		log_warning "MemPalace directory not found: $mempalace_dir"
+		return 0
+	fi
+
+	execute "mkdir -p $target_dir"
+
+	# Copy core configuration files
+	if [ -f "$mempalace_dir/config.json" ]; then
+		copy_single "$mempalace_dir/config.json" "$target_dir/config.json"
+	fi
+
+	if [ -f "$mempalace_dir/wing_config.json" ]; then
+		copy_single "$mempalace_dir/wing_config.json" "$target_dir/wing_config.json"
+	fi
+
+	if [ -f "$mempalace_dir/identity.txt" ]; then
+		copy_single "$mempalace_dir/identity.txt" "$target_dir/identity.txt"
+	fi
+
+	# Copy agent configurations if they exist
+	if [ -d "$mempalace_dir/agents" ]; then
+		copy_directory "$mempalace_dir/agents" "$target_dir/agents"
+	fi
+
+	# Copy palace data (optional - may be large)
+	if [ -d "$mempalace_dir/palace" ]; then
+		log_info "MemPalace palace data found (not exported - use direct backup)"
+	fi
+
+	log_success "MemPalace configs generated"
+}
+
 generate_opencode_configs() {
 	log_info "Generating OpenCode configs..."
 

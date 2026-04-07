@@ -161,6 +161,29 @@ function Test-Prerequisites {
         Write-Success "Git Bash found at: $bashPath"
     }
 
+    # Check Python (for MemPalace)
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    $python3 = Get-Command python3 -ErrorAction SilentlyContinue
+    if (-not $python -and -not $python3) {
+        Write-Warn "Python not found - MemPalace AI memory will not be available"
+        Write-Info "Install Python 3.9+ for MemPalace: https://python.org/downloads"
+        Write-Info "Or run: winget install Python.Python.3.13"
+    } else {
+        $pyPath = if ($python) { $python.Source } else { $python3.Source }
+        Write-Success "Python found at: $pyPath"
+
+        # Check pip availability
+        $pip = Get-Command pip -ErrorAction SilentlyContinue
+        $pip3 = Get-Command pip3 -ErrorAction SilentlyContinue
+        if (-not $pip -and -not $pip3) {
+            Write-Warn "pip not found - you may need to install pip for MemPalace"
+            Write-Info "Run: python -m ensurepip --upgrade"
+        } else {
+            $pipPath = if ($pip) { "pip" } else { "pip3" }
+            Write-Info "Install MemPalace later with: $pipPath install mempalace"
+        }
+    }
+
     # Check/Install jq
     $jqInstalled = Install-Jq
     if (-not $jqInstalled) {

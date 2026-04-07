@@ -38,10 +38,21 @@ check_prerequisites() {
 		missing_tools+=("bash")
 	fi
 
+	if ! command -v python3 &>/dev/null; then
+		log_warning "Python 3 not found - MemPalace AI memory will not be available"
+		log_info "Install Python 3.9+ for MemPalace: https://python.org/downloads"
+	fi
+
 	if [ ${#missing_tools[@]} -gt 0 ]; then
 		log_error "Missing required tools: ${missing_tools[*]}"
 		log_info "Please install the missing tools and try again"
 		exit 1
+	fi
+
+	# Check for pip if Python is available
+	if command -v python3 &>/dev/null && ! command -v pip3 &>/dev/null && ! python3 -m pip --version &>/dev/null; then
+		log_warning "pip not found - you may need to install pip for MemPalace"
+		log_info "Run: python3 -m ensurepip --upgrade"
 	fi
 }
 
