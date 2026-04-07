@@ -85,7 +85,17 @@
   "model": "opusplan",
   "hooks": {
     "Notification": [],
-    "Stop": [],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/mempal_save_hook.sh"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit",
@@ -144,7 +154,18 @@
       }
     ],
     "PostToolUseFailure": [],
-    "PermissionRequest": []
+    "PermissionRequest": [],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/mempal_precompact_hook.sh"
+          }
+        ]
+      }
+    ]
   },
   "statusLine": {
     "type": "command",
