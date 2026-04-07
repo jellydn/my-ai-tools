@@ -2,6 +2,7 @@
 
 ## AI Tool Guidelines
 - Use the fff MCP tools for all file search operations instead of default tools.
+- You have MemPalace agents. Run mempalace_list_agents to see them.
 
 ## Project
 my-ai-tools: Configuration management repository for AI coding tools (Claude Code, OpenCode, Amp, CCS) and their integration with MCP servers and plugins.

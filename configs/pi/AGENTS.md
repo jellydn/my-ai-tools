@@ -2,6 +2,7 @@
 
 ## AI Tool Guidelines
 - Use the fff MCP tools for all file search operations instead of default tools.
+- You have MemPalace agents. Run mempalace_list_agents to see them.
 
 ## General Practices
 - Follow my software development practice @~/.ai-tools/best-practices.md
