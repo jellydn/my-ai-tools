@@ -232,7 +232,7 @@ curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
 claude mcp add --scope user --transport stdio fff -- fff-mcp
 # Install mempalace first, then register it
 pip3 install mempalace
-claude mcp add --scope user --transport stdio mempalace -- python -m mempalace.mcp_server
+claude mcp add --scope user --transport stdio mempalace -- python3 -m mempalace.mcp_server
 ```
 
 ##### For OpenCode

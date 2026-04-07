@@ -1179,7 +1179,7 @@ setup_claude_mcp_servers() {
 
 	handle_mempalace_installation_if_needed
 	if python3 -c "import mempalace" 2>/dev/null; then
-		install_mcp_interactive "mempalace" "claude mcp add --scope user --transport stdio mempalace -- python -m mempalace.mcp_server" "AI memory system with palace structure"
+		install_mcp_interactive "mempalace" "claude mcp add --scope user --transport stdio mempalace -- python3 -m mempalace.mcp_server" "AI memory system with palace structure"
 	else
 		log_warning "mempalace not found. MCP setup skipped. Install with: pip3 install mempalace"
 	fi
