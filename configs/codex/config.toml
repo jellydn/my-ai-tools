@@ -38,6 +38,9 @@ approval_mode = "approve"
 command = "python3"
 args = ["-m", "mempalace.mcp_server"]
 
+[mcp_servers.mempalace.tools.mempalace_add_drawer]
+approval_mode = "approve"
+
 [notice.model_migrations]
 "gpt-5.2-codex" = "gpt-5.3-codex"
 "gpt-5.3-codex" = "gpt-5.4"
