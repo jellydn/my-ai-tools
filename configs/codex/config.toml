@@ -25,6 +25,15 @@ args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 command = "fff-mcp"
 args = []
 
+[mcp_servers.fff.tools.find_files]
+approval_mode = "approve"
+
+[mcp_servers.fff.tools.grep]
+approval_mode = "approve"
+
+[mcp_servers.fff.tools.multi_grep]
+approval_mode = "approve"
+
 [mcp_servers.mempalace]
 command = "python3"
 args = ["-m", "mempalace.mcp_server"]
