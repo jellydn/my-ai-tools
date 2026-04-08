@@ -1455,6 +1455,10 @@ copy_gemini_configs() {
 	execute_quoted rm -rf "$HOME/.gemini/commands"
 	safe_copy_dir "$SCRIPT_DIR/configs/gemini/commands" "$HOME/.gemini/commands"
 
+	execute_quoted rm -rf "$HOME/.gemini/policies"
+	execute_quoted mkdir -p "$HOME/.gemini/policies"
+	safe_copy_dir "$SCRIPT_DIR/configs/gemini/policies" "$HOME/.gemini/policies"
+
 	execute_quoted rm -rf "$HOME/.gemini/skills"
 	copy_non_marketplace_skills "$SCRIPT_DIR/configs/gemini/skills" "$HOME/.gemini/skills"
 

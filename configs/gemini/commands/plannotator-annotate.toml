@@ -1,0 +1,10 @@
+description = "Open interactive annotation UI for a markdown file or folder"
+prompt = """
+## Markdown Annotations
+
+!{plannotator annotate {{args}}}
+
+## Your task
+
+Address the annotation feedback above. The user has reviewed the markdown file and provided specific annotations and comments.
+"""
