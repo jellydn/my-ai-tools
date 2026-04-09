@@ -271,6 +271,25 @@ install_qmd_now() {
 
 PYTHON_CMD=""
 
+get_python_tool_venv_dir() {
+	local tool_name="$1"
+	local data_home="${XDG_DATA_HOME:-$HOME/.local/share}"
+	echo "$data_home/my-ai-tools/venvs/$tool_name"
+}
+
+get_my_ai_tools_data_dir() {
+	echo "$HOME/.ai-tools"
+}
+
+get_python_venv_python_cmd() {
+	local venv_dir="$1"
+	if [ "$IS_WINDOWS" = true ]; then
+		echo "$venv_dir/Scripts/python.exe"
+	else
+		echo "$venv_dir/bin/python"
+	fi
+}
+
 ensure_mise_python_shims_in_path() {
 	local mise_shims=(
 		"$HOME/.local/share/mise/shims"
@@ -299,6 +318,14 @@ python_cmd_is_usable() {
 	[ -n "$candidate" ] || return 1
 
 	"$candidate" -c "import sys" >/dev/null 2>&1
+}
+
+python_cmd_has_module() {
+	local candidate="$1"
+	local module_name="$2"
+
+	python_cmd_is_usable "$candidate" || return 1
+	"$candidate" -c "import ${module_name}" >/dev/null 2>&1
 }
 
 resolve_python_cmd() {
@@ -408,7 +435,221 @@ python_has_module() {
 		return 1
 	fi
 
-	"$python_cmd" -c "import ${module_name}" 2>/dev/null
+	python_cmd_has_module "$python_cmd" "$module_name"
+}
+
+ensure_python_venv() {
+	local tool_name="$1"
+	local python_cmd="$2"
+	local venv_dir
+	local venv_python_cmd
+
+	venv_dir=$(get_python_tool_venv_dir "$tool_name")
+	venv_python_cmd=$(get_python_venv_python_cmd "$venv_dir")
+	if python_cmd_is_usable "$venv_python_cmd"; then
+		echo "$venv_python_cmd"
+		return 0
+	fi
+
+	if [ -z "$python_cmd" ]; then
+		if ! python_cmd=$(resolve_python_cmd); then
+			if ! ensure_python_available; then
+				return 1
+			fi
+			python_cmd=$(resolve_python_cmd)
+		fi
+	fi
+
+	execute_quoted mkdir -p "$(dirname "$venv_dir")"
+	if command -v uv &>/dev/null; then
+		if execute_quoted uv venv --allow-existing "$venv_dir" --python "$python_cmd"; then
+			if [ "$DRY_RUN" = true ] || python_cmd_is_usable "$venv_python_cmd"; then
+				echo "$venv_python_cmd"
+				return 0
+			fi
+		fi
+	fi
+
+	if execute_quoted "$python_cmd" -m venv "$venv_dir"; then
+		if [ "$DRY_RUN" = true ] || python_cmd_is_usable "$venv_python_cmd"; then
+			echo "$venv_python_cmd"
+			return 0
+		fi
+	fi
+
+	log_error "Failed to create Python virtual environment for $tool_name"
+	return 1
+}
+
+resolve_mempalace_python_cmd() {
+	local venv_python_cmd
+	venv_python_cmd=$(get_python_venv_python_cmd "$(get_python_tool_venv_dir "mempalace")")
+	if python_cmd_has_module "$venv_python_cmd" "mempalace"; then
+		echo "$venv_python_cmd"
+		return 0
+	fi
+
+	local python_cmd
+	if ! python_cmd=$(resolve_python_cmd); then
+		return 1
+	fi
+
+	if python_cmd_has_module "$python_cmd" "mempalace"; then
+		echo "$python_cmd"
+		return 0
+	fi
+
+	return 1
+}
+
+get_mempalace_launcher_path() {
+	local data_dir
+	data_dir=$(get_my_ai_tools_data_dir)
+	echo "$data_dir/bin/mempalace-mcp-launcher.py"
+}
+
+ensure_mempalace_python_cmd() {
+	local python_cmd
+	if ! python_cmd=$(resolve_python_cmd); then
+		if ! ensure_python_available; then
+			return 1
+		fi
+		python_cmd=$(resolve_python_cmd)
+	fi
+
+	ensure_python_venv "mempalace" "$python_cmd"
+}
+
+install_mempalace_launcher() {
+	local launcher_source="$SCRIPT_DIR/configs/mempalace/mcp-launcher.py"
+	local launcher_path
+	local launcher_dir
+
+	launcher_path=$(get_mempalace_launcher_path)
+	launcher_dir=$(dirname "$launcher_path")
+
+	if [ "$DRY_RUN" = true ]; then
+		log_info "[DRY RUN] Would install mempalace MCP launcher to $launcher_path"
+		return 0
+	fi
+
+	execute_quoted mkdir -p "$launcher_dir"
+	execute_quoted cp "$launcher_source" "$launcher_path"
+	execute_quoted chmod +x "$launcher_path"
+}
+
+configure_amp_mempalace() {
+	local amp_settings_file="$HOME/.config/amp/settings.json"
+	local python_cmd
+	local launcher_path
+	local temp_file
+
+	if [ ! -f "$amp_settings_file" ]; then
+		log_warning "Amp settings not found, skipping Amp mempalace configuration"
+		return 0
+	fi
+
+	if ! command -v jq &>/dev/null; then
+		log_warning "jq not found, skipping Amp mempalace configuration"
+		return 0
+	fi
+
+	if ! python_cmd=$(resolve_mempalace_python_cmd); then
+		log_warning "mempalace python not found, skipping Amp mempalace configuration"
+		return 0
+	fi
+
+	launcher_path=$(get_mempalace_launcher_path)
+	if [ "$DRY_RUN" = true ]; then
+		log_info "[DRY RUN] Would update Amp mempalace MCP to use $python_cmd $launcher_path"
+		return 0
+	fi
+
+	temp_file=$(make_temp_file "amp-settings" "json")
+
+	if jq \
+		--arg python_cmd "$python_cmd" \
+		--arg launcher_path "$launcher_path" \
+		'.["amp.mcpServers"].mempalace = {
+			"command": $python_cmd,
+			"args": [$launcher_path]
+		}' \
+		"$amp_settings_file" >"$temp_file"; then
+		execute_quoted mv "$temp_file" "$amp_settings_file"
+		log_success "Amp mempalace MCP configured"
+	else
+		rm -f "$temp_file"
+		log_warning "Failed to update Amp mempalace MCP configuration"
+		return 1
+	fi
+}
+
+configure_codex_mempalace() {
+	local codex_config_file="$HOME/.codex/config.toml"
+	local python_cmd
+	local launcher_path
+	local temp_file
+
+	if [ ! -f "$codex_config_file" ]; then
+		log_warning "Codex config.toml not found, skipping Codex mempalace configuration"
+		return 0
+	fi
+
+	if ! python_cmd=$(resolve_mempalace_python_cmd); then
+		log_warning "mempalace python not found, skipping Codex mempalace configuration"
+		return 0
+	fi
+
+	launcher_path=$(get_mempalace_launcher_path)
+	if [ "$DRY_RUN" = true ]; then
+		log_info "[DRY RUN] Would update Codex mempalace MCP to use $python_cmd $launcher_path"
+		return 0
+	fi
+
+	temp_file=$(make_temp_file "codex-config" "toml")
+	awk \
+		-v python_cmd="$python_cmd" \
+		-v launcher_path="$launcher_path" \
+		'
+		BEGIN { in_mempalace = 0 }
+		/^\[mcp_servers\.mempalace\]$/ {
+			in_mempalace = 1
+			print
+			print "command = \"" python_cmd "\""
+			print "args = [\"" launcher_path "\"]"
+			next
+		}
+		in_mempalace && /^command = / { next }
+		in_mempalace && /^args = / { next }
+		/^\[/ && $0 != "[mcp_servers.mempalace]" {
+			in_mempalace = 0
+		}
+		{ print }
+		' "$codex_config_file" >"$temp_file"
+
+	execute_quoted mv "$temp_file" "$codex_config_file"
+	log_success "Codex mempalace MCP configured"
+}
+
+install_python_package_into_python() {
+	local python_cmd="$1"
+	local package_name="$2"
+
+	if command -v uv &>/dev/null; then
+		execute_quoted uv pip install --python "$python_cmd" "$package_name"
+		return $?
+	fi
+
+	if ! "$python_cmd" -m pip --version &>/dev/null; then
+		if ! execute_quoted "$python_cmd" -m ensurepip --upgrade; then
+			return 1
+		fi
+		if [ "$DRY_RUN" != true ] && ! "$python_cmd" -m pip --version &>/dev/null; then
+			return 1
+		fi
+	fi
+
+	execute_quoted "$python_cmd" -m pip install "$package_name"
 }
 
 install_python_package() {
@@ -434,28 +675,29 @@ install_python_package() {
 }
 
 install_mempalace_now() {
-	if python_has_module "mempalace"; then
+	if resolve_mempalace_python_cmd >/dev/null; then
 		log_success "mempalace already installed"
 		return 0
 	fi
 
-	if ! ensure_python_available; then
+	log_info "Installing mempalace..."
+	local python_cmd
+	if ! python_cmd=$(ensure_mempalace_python_cmd); then
 		return 1
 	fi
 
-	log_info "Installing mempalace..."
-	if install_python_package "mempalace"; then
+	if install_python_package_into_python "$python_cmd" "mempalace"; then
 		log_success "mempalace installed successfully"
 		return 0
 	fi
 
 	log_error "Failed to install mempalace"
-	log_info "You can install it manually with uv or python -m pip install mempalace"
+	log_info "You can install it manually in a virtual environment with uv or python -m venv"
 	return 1
 }
 
 handle_mempalace_installation_if_needed() {
-	if python_has_module "mempalace"; then
+	if resolve_mempalace_python_cmd >/dev/null; then
 		log_success "mempalace found"
 		return 0
 	fi
@@ -484,6 +726,7 @@ setup_mempalace_config() {
 	local config_file="$mempalace_dir/config.json"
 	local wing_config_file="$mempalace_dir/wing_config.json"
 	local identity_file="$mempalace_dir/identity.txt"
+	local palace_path="$mempalace_dir/palace"
 
 	# Create .mempalace directory
 	if [[ ! -d "$mempalace_dir" ]]; then
@@ -497,9 +740,9 @@ setup_mempalace_config() {
 		if [ "$DRY_RUN" = true ]; then
 			log_info "[DRY RUN] Would create $config_file"
 		else
-			cat > "$config_file" <<'EOF'
+			cat > "$config_file" <<EOF
 {
-  "palace_path": "~/.mempalace/palace",
+  "palace_path": "$palace_path",
   "collection_name": "mempalace_drawers",
   "people_map": {
     "Kai": "KAI",
@@ -574,12 +817,12 @@ EOF
 # Initialize mempalace palace structure
 init_mempalace_palace() {
 	local python_cmd
-	if ! python_cmd=$(resolve_python_cmd); then
-		log_warning "Python not found, skipping mempalace palace initialization"
+	if ! python_cmd=$(resolve_mempalace_python_cmd); then
+		log_warning "mempalace not found, skipping palace initialization"
 		return 0
 	fi
 
-	if ! python_has_module "mempalace"; then
+	if ! python_cmd_has_module "$python_cmd" "mempalace"; then
 		log_warning "mempalace not installed, skipping palace initialization"
 		return 0
 	fi
@@ -1357,6 +1600,23 @@ install_mcp_interactive() {
 	fi
 }
 
+replace_mcp_server() {
+	local name="$1"
+	local install_cmd="$2"
+
+	if command -v claude &>/dev/null; then
+		execute "claude mcp remove --scope user \"$name\" >/dev/null 2>&1 || true"
+	fi
+
+	if execute "$install_cmd"; then
+		log_success "$name MCP server configured (global)"
+		return 0
+	fi
+
+	log_error "Failed to configure $name MCP server"
+	return 1
+}
+
 install_mempalace_agents() {
 	if [ -d "$SCRIPT_DIR/configs/mempalace/agents" ]; then
 		execute_quoted mkdir -p "$HOME/.mempalace/agents"
@@ -1489,19 +1749,28 @@ setup_claude_mcp_servers() {
 	fi
 
 	handle_mempalace_installation_if_needed
-	if python_has_module "mempalace"; then
+	if resolve_mempalace_python_cmd >/dev/null; then
+		local launcher_path
 		local python_cmd
+		local quoted_launcher_path
 		local quoted_python_cmd
-		python_cmd=$(resolve_python_cmd)
+		if ! install_mempalace_launcher; then
+			log_warning "Could not install mempalace MCP launcher. MCP setup skipped."
+			return 0
+		fi
+
+		launcher_path=$(get_mempalace_launcher_path)
+		python_cmd=$(resolve_mempalace_python_cmd)
+		quoted_launcher_path=$(quote_path "$launcher_path")
 		quoted_python_cmd=$(quote_path "$python_cmd")
 
 		# Set up MemPalace configuration and initialize palace
 		setup_mempalace_config
 		init_mempalace_palace
 
-		install_mcp_interactive "mempalace" "claude mcp add --scope user --transport stdio mempalace -- ${quoted_python_cmd} -m mempalace.mcp_server" "AI memory system with palace structure"
+		replace_mcp_server "mempalace" "claude mcp add --scope user --transport stdio mempalace -- ${quoted_python_cmd} ${quoted_launcher_path}"
 	else
-		log_warning "mempalace not found. MCP setup skipped. Install with: uv pip install mempalace"
+		log_warning "mempalace not found. MCP setup skipped. Install it in a virtual environment and rerun setup."
 	fi
 
 	log_success "MCP server setup complete (global scope)"
@@ -1552,6 +1821,14 @@ copy_amp_configs() {
 			log_warning "Backed up existing AGENTS.md to .bak"
 		fi
 		execute_quoted cp "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/AGENTS.md"
+	fi
+
+	if resolve_mempalace_python_cmd >/dev/null; then
+		if install_mempalace_launcher; then
+			configure_amp_mempalace
+		else
+			log_warning "Could not install mempalace launcher for Amp"
+		fi
 	fi
 
 	log_success "Amp configs copied"
@@ -1616,6 +1893,14 @@ copy_codex_configs() {
 			fi
 		done
 		log_success "Codex hooks copied and made executable"
+	fi
+
+	if resolve_mempalace_python_cmd >/dev/null; then
+		if install_mempalace_launcher; then
+			configure_codex_mempalace
+		else
+			log_warning "Could not install mempalace launcher for Codex"
+		fi
 	fi
 
 	log_success "Codex CLI configs copied"

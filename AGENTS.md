@@ -12,8 +12,9 @@ my-ai-tools: Configuration management repository for AI coding tools (Claude Cod
 ### Shell Script Validation
 ```bash
 bash -n cli.sh              # Syntax check single script
+bash -n health-check.sh     # Syntax check health check script
 bash -n generate.sh         # Syntax check single script
-bash -n cli.sh generate.sh  # Check all scripts
+bash -n cli.sh generate.sh health-check.sh  # Check all scripts
 ```
 
 ### Installation/Export
@@ -28,6 +29,7 @@ bash -n cli.sh generate.sh  # Check all scripts
 - Always use `--dry-run` first to preview changes
 - Verify with `git diff` before committing
 - Test in non-interactive mode: `echo "y" | ./cli.sh`
+- Verify installed state: `./health-check.sh`
 
 ## Code Style Guidelines
 
