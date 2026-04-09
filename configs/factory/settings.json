@@ -94,7 +94,12 @@
 		],
 		"Stop": [
 			{
-				"hooks": []
+				"hooks": [
+					{
+						"type": "command",
+						"command": "bash ~/.factory/hooks/mempal_save_hook.sh"
+					}
+				]
 			}
 		],
 		"claudeHooksImported": true,

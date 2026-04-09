@@ -21,10 +21,10 @@
 			"env": {},
 			"tools": ["*"]
 		},
-		"qmd": {
+		"mempalace": {
 			"type": "local",
-			"command": "qmd",
-			"args": ["mcp"],
+			"command": "python3",
+			"args": ["-m", "mempalace.mcp_server"],
 			"env": {},
 			"tools": ["*"]
 		}

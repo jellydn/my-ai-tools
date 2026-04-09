@@ -38,10 +38,29 @@ check_prerequisites() {
 		missing_tools+=("bash")
 	fi
 
+	if ! command -v python3 &>/dev/null; then
+		log_warning "Python 3 not found - MemPalace AI memory will not be available"
+		log_info "Install Python 3.9+ for MemPalace: https://python.org/downloads"
+	fi
+
 	if [ ${#missing_tools[@]} -gt 0 ]; then
 		log_error "Missing required tools: ${missing_tools[*]}"
 		log_info "Please install the missing tools and try again"
 		exit 1
+	fi
+
+	# Check for pip if Python is available
+	if command -v python3 &>/dev/null && ! command -v pip3 &>/dev/null && ! python3 -m pip --version &>/dev/null; then
+		log_warning "pip not found - you may need to install pip for MemPalace"
+		log_info "Run: python3 -m ensurepip --upgrade"
+	fi
+
+	# Check for jsonschema (optional but recommended for config validation)
+	if command -v python3 &>/dev/null; then
+		if ! python3 -c "import jsonschema" 2>/dev/null; then
+			log_info "python-jsonschema not installed - some config validations will be skipped"
+			log_info "Install with: pip3 install jsonschema"
+		fi
 	fi
 }
 

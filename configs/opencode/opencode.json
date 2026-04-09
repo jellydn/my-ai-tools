@@ -4,13 +4,7 @@
 		"build": {
 			"permission": {
 				"bash": {
-					"$HOME/.claude/skills/qmd-knowledge/scripts/record.sh": "allow",
-					"$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh": "allow",
-					"git push": "ask",
-					"qmd": "allow",
-					"qmd get": "allow",
-					"qmd query": "allow",
-					"qmd search": "allow"
+					"git push": "ask"
 				}
 			}
 		}
@@ -53,11 +47,6 @@
 			"type": "remote",
 			"url": "https://mcp.context7.com/mcp"
 		},
-		"qmd": {
-			"command": ["qmd", "mcp"],
-			"enabled": true,
-			"type": "local"
-		},
 		"chrome-devtools": {
 			"enabled": true,
 			"type": "local",
@@ -71,6 +60,11 @@
 		"sequential-thinking": {
 			"type": "local",
 			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+			"enabled": true
+		},
+		"mempalace": {
+			"type": "local",
+			"command": ["python3", "-m", "mempalace.mcp_server"],
 			"enabled": true
 		}
 	},
@@ -98,7 +92,6 @@
 		"ollama": {
 			"models": {
 				"minimax-m2.5:cloud": {
-					"_launch": true,
 					"limit": {
 						"context": 204800,
 						"output": 128000
@@ -112,6 +105,5 @@
 				"baseURL": "http://127.0.0.1:11434/v1"
 			}
 		}
-	},
-	"theme": "kanagawa"
+	}
 }

@@ -21,13 +21,25 @@ args = ["-y", "@upstash/context7-mcp"]
 command = "npx"
 args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 
-[mcp_servers.qmd]
-command = "qmd"
-args = ["mcp"]
-
 [mcp_servers.fff]
 command = "fff-mcp"
 args = []
+
+[mcp_servers.fff.tools.find_files]
+approval_mode = "approve"
+
+[mcp_servers.fff.tools.grep]
+approval_mode = "approve"
+
+[mcp_servers.fff.tools.multi_grep]
+approval_mode = "approve"
+
+[mcp_servers.mempalace]
+command = "python3"
+args = ["~/.ai-tools/bin/mempalace-mcp-launcher.py"]
+
+[mcp_servers.mempalace.tools.mempalace_add_drawer]
+approval_mode = "approve"
 
 [notice.model_migrations]
 "gpt-5.2-codex" = "gpt-5.3-codex"

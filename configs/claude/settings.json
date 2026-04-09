@@ -7,12 +7,20 @@
   "permissions": {
     "allow": [
       "mcp__sequential-thinking__sequentialthinking",
-      "mcp__qmd__query",
-      "mcp__qmd__get",
-      "mcp__qmd__search",
-      "mcp__qmd__vsearch",
-      "mcp__qmd__multi_get",
-      "mcp__qmd__status",
+      "mcp__mempalace__mempalace_status",
+      "mcp__mempalace__mempalace_search",
+      "mcp__mempalace__mempalace_list_wings",
+      "mcp__mempalace__mempalace_list_rooms",
+      "mcp__mempalace__mempalace_get_taxonomy",
+      "mcp__mempalace__mempalace_check_duplicate",
+      "mcp__mempalace__mempalace_get_aaak_spec",
+      "mcp__mempalace__mempalace_kg_query",
+      "mcp__mempalace__mempalace_kg_timeline",
+      "mcp__mempalace__mempalace_kg_stats",
+      "mcp__mempalace__mempalace_traverse",
+      "mcp__mempalace__mempalace_find_tunnels",
+      "mcp__mempalace__mempalace_graph_stats",
+      "mcp__mempalace__mempalace_diary_read",
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_click",
       "mcp__playwright__browser_close",
@@ -44,9 +52,6 @@
       "Bash(npx biome:*)",
       "Bash(jq:*)",
       "Bash(shellcheck:*)",
-      "Bash(qmd:*)",
-      "Bash(qmd embed:*)",
-      "Bash(~/.claude/skills/qmd-knowledge/scripts/record.sh:*)",
       "Bash(ls:*)",
       "Bash(find:*)",
       "Bash(cat:*)",
@@ -71,7 +76,17 @@
   "model": "opusplan",
   "hooks": {
     "Notification": [],
-    "Stop": [],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/mempal_save_hook.sh"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit",
@@ -130,7 +145,18 @@
       }
     ],
     "PostToolUseFailure": [],
-    "PermissionRequest": []
+    "PermissionRequest": [],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/mempal_precompact_hook.sh"
+          }
+        ]
+      }
+    ]
   },
   "statusLine": {
     "type": "command",

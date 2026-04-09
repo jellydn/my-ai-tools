@@ -1,0 +1,16 @@
+{
+	"name": "architect",
+	"focus": [
+		"design decisions",
+		"tradeoff analysis",
+		"technical debt",
+		"system boundaries"
+	],
+	"wings": ["adr", "rfc", "tech_debt"],
+	"diary_format": "AAAK",
+	"triggers": [
+		"on_adr_create",
+		"on_rfc_submit",
+		"before_refactor"
+	]
+}

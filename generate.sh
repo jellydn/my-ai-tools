@@ -29,7 +29,7 @@ copy_single() {
 	local src="$1"
 	local dest="$2"
 	if [ -f "$src" ]; then
-		execute "mkdir -p $(dirname "$dest")"
+		execute "mkdir -p \"$(dirname "$dest")\""
 		execute "cp \"$src\" \"$dest\""
 		log_success "Copied: $src → $dest"
 	else
@@ -160,6 +160,46 @@ copy_claude_settings() {
 	fi
 }
 
+# Export MemPalace configuration
+generate_mempalace_configs() {
+	log_info "Generating MemPalace configs..."
+
+	local mempalace_dir="$HOME/.mempalace"
+	local target_dir="$SCRIPT_DIR/configs/mempalace"
+
+	if [ ! -d "$mempalace_dir" ]; then
+		log_warning "MemPalace directory not found: $mempalace_dir"
+		return 0
+	fi
+
+	execute "mkdir -p $target_dir"
+
+	# Copy core configuration files
+	if [ -f "$mempalace_dir/config.json" ]; then
+		copy_single "$mempalace_dir/config.json" "$target_dir/config.json"
+	fi
+
+	if [ -f "$mempalace_dir/wing_config.json" ]; then
+		copy_single "$mempalace_dir/wing_config.json" "$target_dir/wing_config.json"
+	fi
+
+	if [ -f "$mempalace_dir/identity.txt" ]; then
+		copy_single "$mempalace_dir/identity.txt" "$target_dir/identity.txt"
+	fi
+
+	# Copy agent configurations if they exist
+	if [ -d "$mempalace_dir/agents" ]; then
+		copy_directory "$mempalace_dir/agents" "$target_dir/agents"
+	fi
+
+	# Copy palace data (optional - may be large)
+	if [ -d "$mempalace_dir/palace" ]; then
+		log_info "MemPalace palace data found (not exported - use direct backup)"
+	fi
+
+	log_success "MemPalace configs generated"
+}
+
 generate_opencode_configs() {
 	log_info "Generating OpenCode configs..."
 
@@ -241,6 +281,16 @@ generate_codex_configs() {
 	copy_single "$HOME/.codex/config.json" "$SCRIPT_DIR/configs/codex/config.json"
 	copy_single "$HOME/.codex/config.toml" "$SCRIPT_DIR/configs/codex/config.toml"
 
+	# Export hooks configuration if it exists
+	if [ -f "$HOME/.codex/hooks.json" ]; then
+		copy_single "$HOME/.codex/hooks.json" "$SCRIPT_DIR/configs/codex/hooks.json"
+	fi
+
+	# Export hooks directory if it exists
+	if [ -d "$HOME/.codex/hooks" ]; then
+		copy_directory "$HOME/.codex/hooks" "$SCRIPT_DIR/configs/codex/hooks"
+	fi
+
 	log_success "Codex CLI configs generated"
 }
 
@@ -278,6 +328,11 @@ generate_gemini_configs() {
 	# Copy skills from ~/.claude/skills if it exists
 	if [ -d "$HOME/.claude/skills" ]; then
 		copy_skills_with_filter "$HOME/.claude/skills" "$SCRIPT_DIR/configs/gemini/skills" "Gemini CLI"
+	fi
+
+	# Copy hooks directory if it exists
+	if [ -d "$HOME/.gemini/hooks" ]; then
+		copy_directory "$HOME/.gemini/hooks" "$SCRIPT_DIR/configs/gemini/hooks"
 	fi
 
 	log_success "Gemini CLI configs generated"
@@ -405,6 +460,11 @@ generate_factory_configs() {
 	[ -f "$HOME/.factory/mcp.json" ] && copy_single "$HOME/.factory/mcp.json" "$SCRIPT_DIR/configs/factory/mcp.json"
 	[ -f "$HOME/.factory/settings.json" ] && copy_single "$HOME/.factory/settings.json" "$SCRIPT_DIR/configs/factory/settings.json"
 
+	# Export hooks directory if it exists
+	if [ -d "$HOME/.factory/hooks" ]; then
+		copy_directory "$HOME/.factory/hooks" "$SCRIPT_DIR/configs/factory/hooks"
+	fi
+
 	log_success "Factory Droid configs generated"
 }
 
@@ -453,6 +513,9 @@ main() {
 	echo
 
 	generate_claude_configs
+	echo
+
+	generate_mempalace_configs
 	echo
 
 	generate_opencode_configs

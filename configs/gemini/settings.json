@@ -11,15 +11,16 @@
         "@modelcontextprotocol/server-sequential-thinking"
       ]
     },
-    "qmd": {
-      "command": "qmd",
-      "args": [
-        "mcp"
-      ]
-    },
     "fff": {
       "command": "fff-mcp",
       "args": []
+    },
+    "mempalace": {
+      "command": "python3",
+      "args": [
+        "-m",
+        "mempalace.mcp_server"
+      ]
     }
   },
   "security": {
@@ -59,6 +60,9 @@
       "enabled": true,
       "maxAge": "30d",
       "warningAcknowledged": true
+    },
+    "plan": {
+      "enabled": true
     }
   },
   "context": {
@@ -78,8 +82,7 @@
     "enabled": true
   },
   "experimental": {
-    "enableAgents": true,
-    "plan": true
+    "enableAgents": true
   },
   "hooks": {
     "BeforeAgent": [
@@ -99,6 +102,15 @@
     ],
     "BeforeTool": [
       {
+        "matcher": "mempalace_*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.gemini/hooks/mempal_checkpoint.sh"
+          }
+        ]
+      },
+      {
         "matcher": "exit_plan_mode",
         "hooks": [
           {
@@ -109,5 +121,8 @@
         ]
       }
     ]
+  },
+  "agents": {
+    "overrides": {}
   }
 }

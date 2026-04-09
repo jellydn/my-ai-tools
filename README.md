@@ -31,6 +31,8 @@
 
 - **Bun or Node.js LTS** - Runtime for tools and scripts
 - **Git** - Version control
+- **Python 3.9+** - Required for MemPalace AI memory system
+  - `pip install mempalace` - Local-first AI memory (no API key, no internet after install)
 - **Claude Code subscription** or use [CCS](#-ccs---claude-code-switch-optional) with affordable providers (GLM, MiniMax)
 
 ### Windows-Specific
@@ -182,6 +184,7 @@ The script will prompt you to install each MCP server:
 - [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
 - [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
 - [`fff`](https://github.com/dmtrKovalenko/fff.nvim) - Fast file search with built-in memory for AI agents
+- [`mempalace`](https://github.com/milla-jovovich/mempalace) - AI memory system with palace structure for persistent cross-session memory ([Specialist Agents pattern](docs/mempalace-specialist-agents.md))
 
 #### Manual Setup
 
@@ -208,6 +211,11 @@ Add to [`~/.claude/mcp-servers.json`](configs/claude/mcp-servers.json):
       "type": "stdio",
       "command": "fff-mcp",
       "args": []
+    },
+    "mempalace": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "mempalace.mcp_server"]
     }
   }
 }
@@ -224,6 +232,9 @@ claude mcp add --scope user --transport stdio qmd -- qmd mcp
 # Install fff-mcp binary first, then register it
 curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
 claude mcp add --scope user --transport stdio fff -- fff-mcp
+# Install mempalace first, then register it
+pip3 install mempalace
+claude mcp add --scope user --transport stdio mempalace -- python3 -m mempalace.mcp_server
 ```
 
 ##### For OpenCode

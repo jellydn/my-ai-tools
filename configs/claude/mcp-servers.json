@@ -8,14 +8,15 @@
 			"command": "npx",
 			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 		},
-		"qmd": {
-			"command": "qmd",
-			"args": ["mcp"]
-		},
 		"fff": {
 			"type": "stdio",
 			"command": "fff-mcp",
 			"args": []
+		},
+		"mempalace": {
+			"type": "stdio",
+			"command": "python3",
+			"args": ["-m", "mempalace.mcp_server"]
 		}
 	}
 }

@@ -1,0 +1,21 @@
+{
+  "default_wing": "wing_general",
+  "wings": {
+    "wing_general": {
+      "type": "default",
+      "keywords": ["general", "misc", "default"]
+    },
+    "wing_kai": {
+      "type": "person",
+      "keywords": ["kai", "kai's"]
+    },
+    "wing_priya": {
+      "type": "person",
+      "keywords": ["priya", "priya's"]
+    },
+    "wing_projects": {
+      "type": "project",
+      "keywords": ["project", "repo", "codebase"]
+    }
+  }
+}

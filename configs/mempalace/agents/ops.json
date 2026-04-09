@@ -1,0 +1,16 @@
+{
+	"name": "ops",
+	"focus": [
+		"deployments",
+		"incidents",
+		"infrastructure changes",
+		"monitoring alerts"
+	],
+	"wings": ["incidents", "deploys", "infra_changes"],
+	"diary_format": "AAAK",
+	"triggers": [
+		"after_deploy",
+		"on_incident",
+		"on_alert"
+	]
+}

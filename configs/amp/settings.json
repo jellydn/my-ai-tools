@@ -19,13 +19,13 @@
 			"command": "npx",
 			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 		},
-		"qmd": {
-			"command": "qmd",
-			"args": ["mcp"]
-		},
 		"fff": {
 			"command": "fff-mcp",
 			"args": []
+		},
+		"mempalace": {
+			"command": "python3",
+			"args": ["~/.ai-tools/bin/mempalace-mcp-launcher.py"]
 		}
 	},
 	"amp.terminal.theme": "kanagawa",

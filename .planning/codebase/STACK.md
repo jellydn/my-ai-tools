@@ -1,115 +1,95 @@
 # Technology Stack
 
-## Languages & Runtimes
+**Analysis Date:** 2026-04-07
 
-| Language | Version | Purpose |
-|----------|---------|---------|
-| **Shell (Bash)** | POSIX-compliant | Main installer scripts (`cli.sh`, `generate.sh`) |
-| **TypeScript** | ESNext | Claude hooks (`configs/claude/hooks/`) |
-| **JavaScript** | ES2022+ | Plugin configurations, MCP server configs |
+## Languages
 
-## Core Technologies
+**Primary:**
+- **Bash** - Shell scripting for CLI tools (cli.sh, generate.sh, install.sh, install.ps1)
+- **PowerShell** - Windows installer (install.ps1)
 
-### Runtime Environments
-- **Bun** (preferred) - JavaScript runtime for running hooks and scripts
-- **Node.js** (fallback) - Alternative runtime
-- **Python3** - YAML validation, general scripting support
-- **Go** - gofmt formatter for Go files
+**Secondary:**
+- **JSON** - Configuration files for all AI tools
+- **TOML** - Codex configuration (config.toml)
+- **YAML** - CCS configuration (config.yaml)
+- **Markdown** - Documentation (README.md, docs/, AGENTS.md)
 
-### Package Managers
-- **npm** - Package installation for AI tools and formatters
-- **bun** - Fast JavaScript runtime and package manager
-- **cargo** - Rust formatter (stylua) installation
-- **mise** - Tool version management
+## Runtime
 
-## AI Coding Tools
+**Environment:**
+- Bash 4+ (POSIX-compliant scripts)
+- PowerShell 5.1+ (Windows)
 
-| Tool | Config Location | Description |
-|------|-----------------|-------------|
-| **Claude Code** | `configs/claude/` | Primary AI coding assistant |
-| **OpenCode** | `configs/opencode/` | OpenAI-powered assistant |
-| **Amp** | `configs/amp/` | Modular AI coding tool |
-| **CCS** | `configs/ccs/` | Claude Code Switch - multi-provider |
-| **Gemini CLI** | `configs/gemini/` | Google Gemini CLI |
-| **Codex CLI** | `configs/codex/` | OpenAI Codex CLI |
-| **Pi** | `configs/pi/` | Agentic coding tool |
-| **Copilot CLI** | `configs/copilot/` | GitHub Copilot CLI |
-| **Cursor Agent** | `configs/cursor/` | Cursor Agent CLI |
-| **Kilo CLI** | `configs/kilo/` | OpenCode-based CLI |
-| **Factory Droid** | `configs/factory/` | Factory AI agent |
-| **AI Launcher** | `configs/ai-launcher/` | Tool switcher |
+**Package Manager:**
+- pip3 - For Python-based MCP servers (mempalace)
+- npm/npx - For Node.js MCP servers
+- Homebrew/winget - System package management
 
-## MCP Servers (Model Context Protocol)
+## Frameworks & Tools
 
-| Server | Package | Purpose |
-|--------|---------|---------|
-| **context7** | `@upstash/context7-mcp` | Documentation lookup |
-| **sequential-thinking** | `@modelcontextprotocol/server-sequential-thinking` | Multi-step reasoning |
-| **qmd** | `qmd` | Knowledge management |
-| **chrome-devtools** | `chrome-devtools-mcp` | Browser automation |
+**Core:**
+- **jq** - JSON processing and validation
+- **git** - Version control and installation
+- **curl** - HTTP requests for installers
 
-## Formatters & Linters
+**MCP Servers:**
+- **mempalace** - AI memory system (Python)
+- **fff-mcp** - Fast file search (Rust)
+- **qmd** - Knowledge management (Node.js)
+- **context7** - Documentation lookup (Remote)
+- **sequential-thinking** - Multi-step reasoning (Node.js)
 
-| Tool | Files | Language |
-|------|-------|----------|
-| **biome** | `.ts`, `.tsx`, `.js`, `.jsx` | TypeScript/JavaScript |
-| **gofmt** | `.go` | Go |
-| **prettier** | `.md`, `.mdx` | Markdown |
-| **ruff** | `.py` | Python |
-| **rustfmt** | `.rs` | Rust |
-| **shfmt** | `.sh` | Shell scripts |
-| **stylua** | `.lua` | Lua |
-
-## Configuration Formats
-
-| Format | Usage |
-|--------|-------|
-| **JSON** | Claude settings, MCP servers, general configs |
-| **YAML** | CCS configuration (`config.yaml`) |
-| **TOML** | Gemini commands, Codex config |
-| **Markdown** | Documentation, agents, skills |
+**Build/Dev:**
+- **pre-commit** - Git hooks for validation
+- **biome** - JS/TS formatting
+- **shfmt** - Shell script formatting
 
 ## Key Dependencies
 
-### Package.json Dependencies
-- `.opencode/package.json`: `@opencode-ai/plugin` (v1.3.7)
-- `configs/claude/hooks/package.json`: `bun-types`, `@types/node`
+**Critical:**
+- **jq** - Required for all JSON config validation
+- **git** - Required for cloning and installation
+- **python3** - Required for mempalace MCP server
+- **pip3** - Required for installing mempalace
 
-### Shell Script Dependencies
-- **jq** - JSON parsing (required)
-- **git** - Version control (required)
-- **curl** - Network requests
-- **ripgrep** - Text search
+**Infrastructure:**
+- **gh** (GitHub CLI) - For PR review features
+- **bun/node** - For JavaScript-based tools
 
-## Project Structure
+## Configuration
 
-```
-my-ai-tools/                  # Root configuration repository
-├── cli.sh                    # Installation script
-├── generate.sh               # Export script
-├── install.sh                # Remote installer
-├── configs/                  # Source configurations
-│   ├── claude/              # Claude Code config
-│   ├── opencode/            # OpenCode config
-│   ├── amp/                 # Amp config
-│   ├── ccs/                 # CCS config
-│   ├── gemini/              # Gemini CLI config
-│   ├── codex/               # Codex CLI config
-│   ├── factory/             # Factory Droid config
-│   └── ...
-├── skills/                   # Claude skills for distribution
-│   ├── codemap/
-│   ├── qmd-knowledge/
-│   ├── prd/
-│   └── ...
-├── lib/
-│   └── common.sh            # Shared shell functions
-└── tests/                    # Test files
-```
+**Environment:**
+- Configs stored in `configs/<tool>/` directories
+- Installation via `cli.sh` or one-liner curl install
+- Export via `generate.sh`
 
-## Prerequisites
+**Build:**
+- `.pre-commit-config.yaml` - Pre-commit hooks
+- `renovate.json` - Dependency updates
+- `.changeset/` - Version management
 
-- **Bun or Node.js LTS** - Runtime for tools and scripts
-- **Git** - Version control
-- **jq** - JSON parsing
-- **Claude Code subscription** - Or use CCS with affordable providers
+**Key Config Files:**
+- `configs/claude/settings.json` - Claude Code config with hooks
+- `configs/claude/mcp-servers.json` - MCP server definitions
+- `configs/opencode/opencode.json` - OpenCode config
+- `configs/gemini/settings.json` - Gemini CLI config
+- `configs/amp/settings.json` - Amp config
+- `configs/codex/config.toml` - Codex config
+- `configs/ccs/config.yaml` - CCS config
+
+## Platform Requirements
+
+**Development:**
+- macOS, Linux, or Windows (with Git Bash)
+- Bash 4+ or Git Bash
+- jq installed
+- git installed
+
+**Production (End User):**
+- Same as development
+- Python 3.9+ for mempalace
+- Node.js/Bun for some MCP servers
+
+---
+
+*Stack analysis: 2026-04-07*
