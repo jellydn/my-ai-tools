@@ -5,10 +5,7 @@
     Windows PowerShell installer for my-ai-tools
 .DESCRIPTION
     This script sets up the environment and runs the bash-based installer on Windows.
-    It handles:
-    - Git Bash detection and PATH setup
-    - jq installation via winget
-    - Proper bash invocation with Windows paths
+    It mirrors install.sh while handling Git Bash discovery and PowerShell invocation.
 .NOTES
     File Name      : install.ps1
     Author         : my-ai-tools
@@ -75,138 +72,49 @@ function Find-GitBash {
     return $null
 }
 
-# Install jq using winget
-function Install-Jq {
-    Write-Info "Checking for jq installation..."
-
-    $jqInPath = Get-Command jq -ErrorAction SilentlyContinue
-    if ($jqInPath) {
-        Write-Success "jq found at: $($jqInPath.Source)"
-        return $true
-    }
-
-    Write-Warn "jq not found. Attempting to install via winget..."
-
-    $winget = Get-Command winget -ErrorAction SilentlyContinue
-    if (-not $winget) {
-        Write-Err "winget not found. Please install jq manually:"
-        Write-Info "  1. Download from: https://github.com/jqlang/jq/releases"
-        Write-Info "  2. Extract jq.exe to a folder in your PATH"
-        return $false
-    }
-
-    try {
-        # Install jq using winget
-        Write-Info "Installing jq via winget..."
-        & winget install -e --id jqlang.jq --accept-package-agreements --accept-source-agreements
-
-        # Refresh environment variables
-        Write-Info "Refreshing PATH environment variable..."
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-
-        # Check if jq is now available
-        $jqInPath = Get-Command jq -ErrorAction SilentlyContinue
-        if ($jqInPath) {
-            Write-Success "jq installed successfully at: $($jqInPath.Source)"
-            return $true
-        }
-
-        # Try common installation paths
-        $jqPaths = @(
-            "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\jqlang.jq_Microsoft.Winget.Source_8wekyb3d8bbwe\jq.exe"
-            "$env:PROGRAMFILES\jq\jq.exe"
-            "$env:PROGRAMFILES\WinGet\Links\jq.exe"
-            "$env:LOCALAPPDATA\Microsoft\WinGet\Links\jq.exe"
-        )
-
-        foreach ($jqPath in $jqPaths) {
-            if (Test-Path $jqPath) {
-                $jqDir = Split-Path $jqPath -Parent
-                Write-Info "Adding jq directory to PATH: $jqDir"
-                $env:Path = "$jqDir;$env:Path"
-                Write-Success "jq found at: $jqPath"
-                return $true
-            }
-        }
-
-        Write-Warn "jq was installed but not found in PATH. Please restart your terminal."
-        return $false
-    }
-    catch {
-        Write-Err "Failed to install jq: $_"
-        Write-Info "Please install jq manually from: https://github.com/jqlang/jq/releases"
-        return $false
-    }
-}
-
 # Check prerequisites
 function Test-Prerequisites {
-    Write-Info "Checking prerequisites..."
+    $missingTools = @()
 
-    $issues = @()
-
-    # Check Git
     $git = Get-Command git -ErrorAction SilentlyContinue
     if (-not $git) {
-        $issues += "Git is not installed. Install from: https://git-scm.com/download/win"
+        $missingTools += "git"
     } else {
         Write-Success "Git found at: $($git.Source)"
     }
 
-    # Check Git Bash
     $bashPath = Find-GitBash
     if (-not $bashPath) {
-        $issues += "Git Bash not found. Install Git for Windows: https://git-scm.com/download/win"
+        $missingTools += "bash"
     } else {
         Write-Success "Git Bash found at: $bashPath"
     }
 
-    # Check Python (for MemPalace)
-    $python = Get-Command python -ErrorAction SilentlyContinue
     $python3 = Get-Command python3 -ErrorAction SilentlyContinue
-    if (-not $python -and -not $python3) {
-        Write-Warn "Python not found - MemPalace AI memory will not be available"
+    if (-not $python3) {
+        Write-Warn "Python 3 not found - MemPalace AI memory will not be available"
         Write-Info "Install Python 3.9+ for MemPalace: https://python.org/downloads"
-        Write-Info "Or run: winget install Python.Python.3.13"
-    } else {
-        $pyPath = if ($python) { $python.Source } else { $python3.Source }
-        Write-Success "Python found at: $pyPath"
-
-        # Check pip availability
-        $pip = Get-Command pip -ErrorAction SilentlyContinue
-        $pip3 = Get-Command pip3 -ErrorAction SilentlyContinue
-        if (-not $pip -and -not $pip3) {
+    }
+    else {
+        & $python3.Source -m pip --version *> $null
+        if ($LASTEXITCODE -ne 0) {
             Write-Warn "pip not found - you may need to install pip for MemPalace"
-            Write-Info "Run: python -m ensurepip --upgrade"
-        } else {
-            $pipPath = if ($pip) { "pip" } else { "pip3" }
-            Write-Info "Install MemPalace later with: $pipPath install mempalace"
+            Write-Info "Run: python3 -m ensurepip --upgrade"
+        }
 
-            # Check jsonschema module (optional but recommended)
-            $pyCmd = if ($python) { "python" } else { "python3" }
-            & $pyCmd -c "import jsonschema" 2>$null
-            if ($LASTEXITCODE -ne 0) {
-                Write-Info "python-jsonschema not installed - some config validations will be skipped"
-                Write-Info "Install with: $pipPath install jsonschema"
-            }
+        & $python3.Source -c "import jsonschema" 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Info "python-jsonschema not installed - some config validations will be skipped"
+            Write-Info "Install with: pip3 install jsonschema"
         }
     }
 
-    # Check/Install jq
-    $jqInstalled = Install-Jq
-    if (-not $jqInstalled) {
-        $issues += "jq installation failed. Some features may not work."
-    }
-
-    if ($issues.Count -gt 0) {
-        Write-Err "Prerequisites check failed:"
-        foreach ($issue in $issues) {
-            Write-Err "  - $issue"
-        }
+    if ($missingTools.Count -gt 0) {
+        Write-Err "Missing required tools: $($missingTools -join ' ')"
+        Write-Info "Please install the missing tools and try again"
         return $false
     }
 
-    Write-Success "All prerequisites met"
     return $true
 }
 
@@ -241,12 +149,10 @@ function Start-Installation {
         $arguments = @("--yes") + $arguments
     }
 
-    # Find Git Bash
     $bashPath = Find-GitBash
     if (-not $bashPath) {
-        Write-Err "Git Bash not found"
-        Write-Info "Please install Git for Windows: https://git-scm.com/download/win"
-        Write-Info "After installation, add Git\bin to your PATH: C:\Program Files\Git\bin"
+        Write-Err "Missing required tools: bash"
+        Write-Info "Please install the missing tools and try again"
         exit 1
     }
 
@@ -270,14 +176,21 @@ function Start-Installation {
 
         Write-Success "Repository cloned successfully"
         Write-Info "Running installation script..."
-        Write-Info "Bash path: $bashPath"
-        Write-Info "Arguments: $($arguments -join ' ')"
 
         Push-Location $tempDir
         try {
             if ($isNonInteractive) {
-                $bashArguments = if ($arguments.Count -gt 0) { $arguments -join ' ' } else { '' }
-                & $bashPath -lc "bash cli.sh $bashArguments </dev/null"
+                $bashCommandParts = @("bash", "cli.sh", "--yes")
+                $bashCommandParts += $arguments
+                $bashCommand = ($bashCommandParts | ForEach-Object {
+                    if ($_ -match '[\s"]') {
+                        '"' + ($_ -replace '"', '\"') + '"'
+                    }
+                    else {
+                        $_
+                    }
+                }) -join ' '
+                & $bashPath -lc "$bashCommand </dev/null"
             }
             else {
                 & $bashPath "cli.sh" @arguments
@@ -296,11 +209,7 @@ function Start-Installation {
     $exitCode = $LASTEXITCODE
 
     if ($exitCode -eq 0) {
-        Write-Success "Installation completed successfully!"
-        Write-Info "Next steps:"
-        Write-Info "  1. Restart your terminal"
-        Write-Info "  2. Run 'claude' to start Claude Code"
-        Write-Info "  3. Check the README.md for more information"
+        Write-Success "Installation complete!"
     } else {
         Write-Err "Installation failed with exit code: $exitCode"
         exit $exitCode
@@ -308,13 +217,6 @@ function Start-Installation {
 }
 
 # Main
-Write-Host @"
-╔══════════════════════════════════════════════════════════════════════╗
-║                    AI Tools Setup - Windows                          ║
-║  PowerShell wrapper for Windows installation                        ║
-╚══════════════════════════════════════════════════════════════════════╝
-"@ -ForegroundColor Cyan
-
 Write-Info "Starting my-ai-tools installation..."
 
 # Check prerequisites

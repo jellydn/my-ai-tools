@@ -269,25 +269,193 @@ install_qmd_now() {
 	return 1
 }
 
+PYTHON_CMD=""
+
+ensure_mise_python_shims_in_path() {
+	local mise_shims=(
+		"$HOME/.local/share/mise/shims"
+		"$HOME/.mise/shims"
+	)
+
+	local shims_dir
+	for shims_dir in "${mise_shims[@]}"; do
+		if [ -d "$shims_dir" ] && [[ ":$PATH:" != *":$shims_dir:"* ]]; then
+			export PATH="$shims_dir:$PATH"
+		fi
+	done
+}
+
+set_python_cmd() {
+	local candidate="$1"
+	if [ -n "$candidate" ]; then
+		PYTHON_CMD="$candidate"
+		return 0
+	fi
+	return 1
+}
+
+python_cmd_is_usable() {
+	local candidate="$1"
+	[ -n "$candidate" ] || return 1
+
+	"$candidate" -c "import sys" >/dev/null 2>&1
+}
+
+resolve_python_cmd() {
+	if [ -n "$PYTHON_CMD" ] && python_cmd_is_usable "$PYTHON_CMD"; then
+		echo "$PYTHON_CMD"
+		return 0
+	fi
+
+	if command -v python3 &>/dev/null; then
+		local python3_cmd
+		python3_cmd="$(command -v python3)"
+		if python_cmd_is_usable "$python3_cmd"; then
+			set_python_cmd "$python3_cmd"
+			echo "$PYTHON_CMD"
+			return 0
+		fi
+	fi
+
+	if command -v python &>/dev/null; then
+		local python_cmd
+		python_cmd="$(command -v python)"
+		if python_cmd_is_usable "$python_cmd"; then
+			set_python_cmd "$python_cmd"
+			echo "$PYTHON_CMD"
+			return 0
+		fi
+	fi
+
+	ensure_mise_python_shims_in_path
+	if command -v mise &>/dev/null; then
+		local mise_python
+		mise_python=$(mise which python3 2>/dev/null || mise which python 2>/dev/null || true)
+		if python_cmd_is_usable "$mise_python"; then
+			set_python_cmd "$mise_python"
+			echo "$PYTHON_CMD"
+			return 0
+		fi
+	fi
+
+	return 1
+}
+
+ensure_python_available() {
+	local python_cmd
+	python_cmd=$(resolve_python_cmd) && [ -n "$python_cmd" ] && return 0
+
+	if command -v uv &>/dev/null; then
+		log_info "Python not found. Installing Python via uv..."
+		if execute "uv python install"; then
+			python_cmd=$(uv python find 2>/dev/null | head -n1)
+			if python_cmd_is_usable "$python_cmd"; then
+				set_python_cmd "$python_cmd"
+				log_success "Python installed via uv"
+				return 0
+			fi
+		fi
+	fi
+
+	if command -v mise &>/dev/null; then
+		log_info "Python not found. Installing Python via mise..."
+		if execute "mise use -g python@latest"; then
+			ensure_mise_python_shims_in_path
+			python_cmd=$(mise which python3 2>/dev/null || mise which python 2>/dev/null || true)
+			if python_cmd_is_usable "$python_cmd"; then
+				set_python_cmd "$python_cmd"
+				log_success "Python installed via mise"
+				return 0
+			fi
+		fi
+	fi
+
+	log_error "Python is not installed and could not be provisioned with uv or mise"
+	return 1
+}
+
+ensure_python_pip() {
+	local python_cmd
+	if ! python_cmd=$(resolve_python_cmd); then
+		if ! ensure_python_available; then
+			return 1
+		fi
+		python_cmd=$(resolve_python_cmd)
+	fi
+
+	if "$python_cmd" -m pip --version &>/dev/null; then
+		return 0
+	fi
+
+	log_info "pip not found. Bootstrapping pip..."
+	if execute "\"$python_cmd\" -m ensurepip --upgrade"; then
+		if [ "$DRY_RUN" = true ]; then
+			return 0
+		fi
+		if "$python_cmd" -m pip --version &>/dev/null; then
+			return 0
+		fi
+	fi
+
+	log_error "pip is still unavailable after bootstrap"
+	return 1
+}
+
+python_has_module() {
+	local module_name="$1"
+	local python_cmd
+	if ! python_cmd=$(resolve_python_cmd); then
+		return 1
+	fi
+
+	"$python_cmd" -c "import ${module_name}" 2>/dev/null
+}
+
+install_python_package() {
+	local package_name="$1"
+	local python_cmd
+	if ! python_cmd=$(resolve_python_cmd); then
+		if ! ensure_python_available; then
+			return 1
+		fi
+		python_cmd=$(resolve_python_cmd)
+	fi
+
+	if command -v uv &>/dev/null; then
+		execute "uv pip install --python \"$python_cmd\" \"$package_name\""
+		return $?
+	fi
+
+	if ! ensure_python_pip; then
+		return 1
+	fi
+
+	execute "\"$python_cmd\" -m pip install \"$package_name\""
+}
+
 install_mempalace_now() {
-	if python3 -c "import mempalace" 2>/dev/null; then
+	if python_has_module "mempalace"; then
 		log_success "mempalace already installed"
 		return 0
 	fi
 
-	log_info "Installing mempalace via pip..."
-	if execute "pip3 install mempalace"; then
+	if ! ensure_python_available; then
+		return 1
+	fi
+
+	log_info "Installing mempalace..."
+	if install_python_package "mempalace"; then
 		log_success "mempalace installed successfully"
 		return 0
 	fi
 
 	log_error "Failed to install mempalace"
-	log_info "You can install it manually: pip3 install mempalace"
+	log_info "You can install it manually with uv or python -m pip install mempalace"
 	return 1
 }
 
 handle_mempalace_installation_if_needed() {
-	if python3 -c "import mempalace" 2>/dev/null; then
+	if python_has_module "mempalace"; then
 		log_success "mempalace found"
 		return 0
 	fi
@@ -405,7 +573,13 @@ EOF
 
 # Initialize mempalace palace structure
 init_mempalace_palace() {
-	if ! python3 -c "import mempalace" 2>/dev/null; then
+	local python_cmd
+	if ! python_cmd=$(resolve_python_cmd); then
+		log_warning "Python not found, skipping mempalace palace initialization"
+		return 0
+	fi
+
+	if ! python_has_module "mempalace"; then
 		log_warning "mempalace not installed, skipping palace initialization"
 		return 0
 	fi
@@ -417,7 +591,7 @@ init_mempalace_palace() {
 	fi
 
 	log_info "Initializing MemPalace palace structure..."
-	python3 -c "
+	"$python_cmd" -c "
 import mempalace
 import sys
 try:
@@ -666,12 +840,20 @@ install_ruff_if_needed() {
 	log_warning "ruff not found. Installing ruff..."
 	if command -v mise &>/dev/null; then
 		execute "mise use -g ruff@latest"
+	elif command -v uv &>/dev/null; then
+		if ! ensure_python_available; then
+			log_warning "Could not provision Python for uv-based ruff installation"
+			return 0
+		fi
+		local python_cmd
+		python_cmd=$(resolve_python_cmd)
+		execute "uv pip install --python \"$python_cmd\" ruff"
 	elif command -v pipx &>/dev/null; then
 		execute "pipx install ruff"
-	elif command -v pip3 &>/dev/null; then
-		execute "pip3 install ruff"
-	elif command -v pip &>/dev/null; then
-		execute "pip install ruff"
+	elif ensure_python_pip; then
+		local python_cmd
+		python_cmd=$(resolve_python_cmd)
+		execute "\"$python_cmd\" -m pip install ruff"
 	else
 		log_warning "No Python package manager found. Install ruff manually: https://docs.astral.sh/ruff/installation/"
 	fi
@@ -1307,14 +1489,19 @@ setup_claude_mcp_servers() {
 	fi
 
 	handle_mempalace_installation_if_needed
-	if python3 -c "import mempalace" 2>/dev/null; then
+	if python_has_module "mempalace"; then
+		local python_cmd
+		local quoted_python_cmd
+		python_cmd=$(resolve_python_cmd)
+		quoted_python_cmd=$(quote_path "$python_cmd")
+
 		# Set up MemPalace configuration and initialize palace
 		setup_mempalace_config
 		init_mempalace_palace
 
-		install_mcp_interactive "mempalace" "claude mcp add --scope user --transport stdio mempalace -- python3 -m mempalace.mcp_server" "AI memory system with palace structure"
+		install_mcp_interactive "mempalace" "claude mcp add --scope user --transport stdio mempalace -- ${quoted_python_cmd} -m mempalace.mcp_server" "AI memory system with palace structure"
 	else
-		log_warning "mempalace not found. MCP setup skipped. Install with: pip3 install mempalace"
+		log_warning "mempalace not found. MCP setup skipped. Install with: uv pip install mempalace"
 	fi
 
 	log_success "MCP server setup complete (global scope)"
