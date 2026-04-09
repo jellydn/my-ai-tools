@@ -36,7 +36,7 @@ approval_mode = "approve"
 
 [mcp_servers.mempalace]
 command = "python3"
-args = ["-m", "mempalace.mcp_server"]
+args = ["~/.ai-tools/bin/mempalace-mcp-launcher.py"]
 
 [mcp_servers.mempalace.tools.mempalace_add_drawer]
 approval_mode = "approve"

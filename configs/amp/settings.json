@@ -25,7 +25,7 @@
 		},
 		"mempalace": {
 			"command": "python3",
-			"args": ["-m", "mempalace.mcp_server"]
+			"args": ["~/.ai-tools/bin/mempalace-mcp-launcher.py"]
 		}
 	},
 	"amp.terminal.theme": "kanagawa",
