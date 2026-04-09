@@ -105,15 +105,30 @@ check_text_in_file() {
 }
 
 check_mempalace_launcher() {
-	local python_cmd="$HOME/.local/share/my-ai-tools/venvs/mempalace/bin/python"
+	local venv_python_cmd="$HOME/.local/share/my-ai-tools/venvs/mempalace/bin/python"
 	local launcher_path="$HOME/.ai-tools/bin/mempalace-mcp-launcher.py"
+	local python_cmd=""
 	local output_file
 	local exit_code=0
 
 	check_file "$launcher_path" "MemPalace launcher installed at ~/.ai-tools/bin"
-	check_python_import "$python_cmd" "mempalace" "MemPalace import works in dedicated venv"
 
-	if [ ! -x "$python_cmd" ] || [ ! -f "$launcher_path" ]; then
+	# Prefer dedicated venv, but fallback to system Python if mempalace is available
+	if [ -x "$venv_python_cmd" ] && "$venv_python_cmd" -c "import mempalace" >/dev/null 2>&1; then
+		python_cmd="$venv_python_cmd"
+		check_python_import "$python_cmd" "mempalace" "MemPalace import works in dedicated venv"
+	elif command -v python3 >/dev/null 2>&1 && python3 -c "import mempalace" >/dev/null 2>&1; then
+		python_cmd="$(command -v python3)"
+		record_warning "MemPalace not in dedicated venv, using system Python"
+	elif command -v python >/dev/null 2>&1 && python -c "import mempalace" >/dev/null 2>&1; then
+		python_cmd="$(command -v python)"
+		record_warning "MemPalace not in dedicated venv, using system Python"
+	else
+		record_failure "MemPalace import works in dedicated venv"
+		return 1
+	fi
+
+	if [ ! -f "$launcher_path" ]; then
 		return 1
 	fi
 
@@ -152,9 +167,26 @@ check_mempalace_launcher() {
 	rm -f "$output_file"
 }
 
+resolve_mempalace_python_for_check() {
+	local venv_python="$HOME/.local/share/my-ai-tools/venvs/mempalace/bin/python"
+	if [ -x "$venv_python" ] && "$venv_python" -c "import mempalace" >/dev/null 2>&1; then
+		echo "$venv_python"
+		return 0
+	fi
+	if command -v python3 >/dev/null 2>&1 && python3 -c "import mempalace" >/dev/null 2>&1; then
+		command -v python3
+		return 0
+	fi
+	if command -v python >/dev/null 2>&1 && python -c "import mempalace" >/dev/null 2>&1; then
+		command -v python
+		return 0
+	fi
+	return 1
+}
+
 check_claude_mempalace_registration() {
 	local claude_config="$HOME/.claude.json"
-	local python_cmd="$HOME/.local/share/my-ai-tools/venvs/mempalace/bin/python"
+	local python_cmd
 	local launcher_path="$HOME/.ai-tools/bin/mempalace-mcp-launcher.py"
 
 	if [ ! -f "$claude_config" ]; then
@@ -164,8 +196,27 @@ check_claude_mempalace_registration() {
 
 	record_success "Claude user config exists at ~/.claude.json"
 
-	check_text_in_file "$claude_config" "$python_cmd" "Claude MCP uses MemPalace venv python"
+	# Check for launcher path
 	check_text_in_file "$claude_config" "$launcher_path" "Claude MCP uses MemPalace launcher"
+
+	# Check for python - can be venv or system
+	if ! python_cmd=$(resolve_mempalace_python_for_check); then
+		record_failure "Claude MCP uses valid MemPalace python"
+		return 1
+	fi
+
+	if grep -Fq "$python_cmd" "$claude_config"; then
+		record_success "Claude MCP uses valid MemPalace python"
+	else
+		# Check if config uses any valid python with mempalace
+		local config_python
+		config_python=$(jq -r '.mcpServers.mempalace.command // empty' "$claude_config" 2>/dev/null)
+		if [ -n "$config_python" ] && [ -x "$config_python" ] && "$config_python" -c "import mempalace" >/dev/null 2>&1; then
+			record_success "Claude MCP uses valid MemPalace python"
+		else
+			record_failure "Claude MCP uses valid MemPalace python (config points to missing python)"
+		fi
+	fi
 
 	if grep -Fq '"mempalace.mcp_server"' "$claude_config" && ! grep -Fq "$launcher_path" "$claude_config"; then
 		record_failure "Claude MCP registration is still using direct mempalace.mcp_server"
@@ -174,7 +225,7 @@ check_claude_mempalace_registration() {
 
 check_amp_mempalace_registration() {
 	local amp_settings_file="$HOME/.config/amp/settings.json"
-	local python_cmd="$HOME/.local/share/my-ai-tools/venvs/mempalace/bin/python"
+	local python_cmd
 	local launcher_path="$HOME/.ai-tools/bin/mempalace-mcp-launcher.py"
 
 	if [ ! -f "$amp_settings_file" ]; then
@@ -183,8 +234,28 @@ check_amp_mempalace_registration() {
 	fi
 
 	record_success "Amp settings exist at ~/.config/amp/settings.json"
-	check_text_in_file "$amp_settings_file" "$python_cmd" "Amp MCP uses MemPalace venv python"
+
+	# Check for launcher path
 	check_text_in_file "$amp_settings_file" "$launcher_path" "Amp MCP uses MemPalace launcher"
+
+	# Check for python - can be venv or system
+	if ! python_cmd=$(resolve_mempalace_python_for_check); then
+		record_failure "Amp MCP uses valid MemPalace python"
+		return 1
+	fi
+
+	if grep -Fq "$python_cmd" "$amp_settings_file"; then
+		record_success "Amp MCP uses valid MemPalace python"
+	else
+		# Check if config uses any valid python with mempalace
+		local config_python
+		config_python=$(jq -r '.["amp.mcpServers"].mempalace.command // empty' "$amp_settings_file" 2>/dev/null)
+		if [ -n "$config_python" ] && [ -x "$config_python" ] && "$config_python" -c "import mempalace" >/dev/null 2>&1; then
+			record_success "Amp MCP uses valid MemPalace python"
+		else
+			record_failure "Amp MCP uses valid MemPalace python (config points to missing python)"
+		fi
+	fi
 
 	if grep -Fq '"mempalace.mcp_server"' "$amp_settings_file" && ! grep -Fq "$launcher_path" "$amp_settings_file"; then
 		record_failure "Amp MCP registration is still using direct mempalace.mcp_server"
@@ -193,7 +264,7 @@ check_amp_mempalace_registration() {
 
 check_codex_mempalace_registration() {
 	local codex_config_file="$HOME/.codex/config.toml"
-	local python_cmd="$HOME/.local/share/my-ai-tools/venvs/mempalace/bin/python"
+	local python_cmd
 	local launcher_path="$HOME/.ai-tools/bin/mempalace-mcp-launcher.py"
 
 	if [ ! -f "$codex_config_file" ]; then
@@ -202,8 +273,28 @@ check_codex_mempalace_registration() {
 	fi
 
 	record_success "Codex config exists at ~/.codex/config.toml"
-	check_text_in_file "$codex_config_file" "$python_cmd" "Codex MCP uses MemPalace venv python"
+
+	# Check for launcher path
 	check_text_in_file "$codex_config_file" "$launcher_path" "Codex MCP uses MemPalace launcher"
+
+	# Check for python - can be venv or system
+	if ! python_cmd=$(resolve_mempalace_python_for_check); then
+		record_failure "Codex MCP uses valid MemPalace python"
+		return 1
+	fi
+
+	if grep -Fq "$python_cmd" "$codex_config_file"; then
+		record_success "Codex MCP uses valid MemPalace python"
+	else
+		# Check if config uses any valid python with mempalace
+		local config_python
+		config_python=$(grep -A1 '\[mcp_servers\.mempalace\]' "$codex_config_file" | grep "^command" | sed 's/.*= *"\(.*\)".*/\1/')
+		if [ -n "$config_python" ] && [ -x "$config_python" ] && "$config_python" -c "import mempalace" >/dev/null 2>&1; then
+			record_success "Codex MCP uses valid MemPalace python"
+		else
+			record_failure "Codex MCP uses valid MemPalace python (config points to missing python)"
+		fi
+	fi
 
 	if grep -Fq '"-m", "mempalace.mcp_server"' "$codex_config_file" || grep -Fq 'args = ["-m", "mempalace.mcp_server"]' "$codex_config_file"; then
 		record_failure "Codex MCP registration is still using direct mempalace.mcp_server"
