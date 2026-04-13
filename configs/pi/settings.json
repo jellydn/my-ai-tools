@@ -11,7 +11,7 @@
     "https://github.com/davebcn87/pi-autoresearch",
     "git:github.com/jellydn/pi-fireworks-provider",
     "npm:pi-hooks",
-    "git:github.com/SamuelLHuber/pi-fff@main"
+    "git:github.com/SamuelLHuber/pi-fff"
   ],
   "quietStartup": true,
   "theme": "dracula",
