@@ -9,13 +9,13 @@ metadata:
   workflow: terminal-automation
 ---
 
-# tmux Skill
+# 🚀 tmux Skill
 
 Control tmux sessions programmatically to run interactive terminal applications (REPLs, debuggers, databases) without blocking.
 
 ---
 
-## Quickstart (Easy Way)
+## 📋 Quickstart (Easy Way)
 
 Use [LogPilot](https://github.com/jellydn/logpilot) for automatic output capture + AI analysis:
 
@@ -35,7 +35,7 @@ Add to Claude Code: `claude mcp add --scope user logpilot -- logpilot mcp-server
 
 ---
 
-## Manual Control (Raw tmux)
+## 📋 Manual Control (Raw tmux)
 
 Use isolated sockets to avoid conflicts with personal tmux:
 
@@ -56,7 +56,7 @@ tmux -S "$SOCKET" capture-pane -p -J -t "$SESSION" -S -100
 tmux -S "$SOCKET" kill-session -t "$SESSION"
 ```
 
-### Core Commands
+### 📋 Core Commands
 
 | Action | Command |
 |--------|---------|
@@ -71,9 +71,9 @@ tmux -S "$SOCKET" kill-session -t "$SESSION"
 
 ---
 
-## Interactive Recipes
+## 📋 Interactive Recipes
 
-### Python REPL
+### 🔁 Python REPL
 
 ```bash
 SESSION=agent-py
@@ -81,15 +81,17 @@ SOCKET="${TMPDIR:-/tmp}/ai-tmux-sockets/agent.sock"
 tmux -S "$SOCKET" new -d -s "$SESSION"
 tmux -S "$SOCKET" send-keys -t "$SESSION" 'PYTHON_BASIC_REPL=1 python3 -q' Enter
 sleep 1
-tmux -S "$SOCKET" send-keys -t "$SESSION" -l 'print(2+2)' Enter
+tmux -S "$SOCKET" send-keys -t "$SESSION" -l 'print(2+2)'
+tmux -S "$SOCKET" send-keys -t "$SESSION" Enter
 tmux -S "$SOCKET" capture-pane -p -J -t "$SESSION" -S -10
 tmux -S "$SOCKET" kill-session -t "$SESSION"
 ```
 
-### GDB Debugger
+### 🔁 GDB Debugger
 
 ```bash
 SESSION=agent-gdb
+SOCKET="${TMPDIR:-/tmp}/ai-tmux-sockets/agent.sock"
 tmux -S "$SOCKET" new -d -s "$SESSION"
 tmux -S "$SOCKET" send-keys -t "$SESSION" 'gdb --quiet ./program' Enter
 tmux -S "$SOCKET" send-keys -t "$SESSION" 'set pagination off' Enter
@@ -106,7 +108,7 @@ Same pattern: `new` → `send-keys` → `capture-pane` → `kill-session`
 
 ---
 
-## LogPilot Reference
+## 📋 LogPilot Reference
 
 | Task | Command |
 |------|---------|
@@ -134,7 +136,7 @@ Or: `claude mcp add --scope user --transport stdio logpilot -- logpilot mcp-serv
 
 ---
 
-## Best Practices
+## 🎨 Best Practices
 
 1. **Use LogPilot** — easiest way to capture and analyze output
 2. **Always use `-S "$SOCKET"`** — prevents conflicts with user tmux

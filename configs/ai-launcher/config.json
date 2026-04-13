@@ -59,7 +59,7 @@
 		{
 			"name": "draft-pull-request",
 			"command": "opencode run --model fireworks-ai/accounts/fireworks/routers/kimi-k2p5-turbo --agent build 'Create draft pr with what why how by gh cli'",
-			"description": "Create draft pull request with ghcp",
+			"description": "Create draft pull request with opencode",
 			"aliases": ["pr", "draft-pr"]
 		},
 		{
@@ -130,13 +130,13 @@
 		},
 		{
 			"name": "simplifier",
-			"command": "ccs ghcp --permission-mode acceptEdits -p \"@code-simplifier:code-simplifier",
+			"command": "ccs ghcp --permission-mode acceptEdits -p '@code-simplifier:code-simplifier'",
 			"description": "Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise.",
 			"aliases": ["simplify-code", "simplify"]
 		},
 		{
 			"name": "logical-grouping-pull-request",
-			"command": "ccs ghcp --permission-mode acceptEdits -p 'Analyze the git changes and create a draft PR, plan: 1) Group changes into logical, independent commits 2) Order them by dependency (low-level to high-level) 3) Run commit commit for each change group 4) Write PR description with what why how.'",
+			"command": "ccs ghcp --permission-mode acceptEdits -p 'Analyze the git changes and create a draft PR, plan: 1) Group changes into logical, independent commits 2) Order them by dependency (low-level to high-level) 3) Run git commit for each change group 4) Write PR description with what why how.'",
 			"description": "Create a draft pull request for the git changes with logical grouping",
 			"aliases": ["split-pr"]
 		}
