@@ -3,7 +3,6 @@ name: plannotator-review
 description: Open interactive code review for current changes using Plannotator UI
 license: MIT
 compatibility: amp, cursor, pi
-hint: Use when you want to open an interactive Plannotator code review for current changes
 user-invocable: true
 metadata:
   audience: all
