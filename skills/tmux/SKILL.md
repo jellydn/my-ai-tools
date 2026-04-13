@@ -41,7 +41,7 @@ Use isolated sockets to avoid conflicts with personal tmux:
 
 ```bash
 # Setup socket
-export SOCKET="${TMPDIR:-/tmp}/claude-tmux-sockets/agent.sock"
+export SOCKET="${TMPDIR:-/tmp}/ai-tmux-sockets/agent.sock"
 mkdir -p "$(dirname "$SOCKET")"
 
 # Create session and run
@@ -77,7 +77,7 @@ tmux -S "$SOCKET" kill-session -t "$SESSION"
 
 ```bash
 SESSION=agent-py
-SOCKET="${TMPDIR:-/tmp}/claude-tmux-sockets/agent.sock"
+SOCKET="${TMPDIR:-/tmp}/ai-tmux-sockets/agent.sock"
 tmux -S "$SOCKET" new -d -s "$SESSION"
 tmux -S "$SOCKET" send-keys -t "$SESSION" 'PYTHON_BASIC_REPL=1 python3 -q' Enter
 sleep 1

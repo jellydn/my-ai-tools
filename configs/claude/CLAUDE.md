@@ -1,5 +1,28 @@
 # 🤖 Claude Code Agent Guidelines
 
+## Session Management
+
+### Use tmux for All Long-Running Commands
+
+Always run dev servers, tests, builds, and interactive CLIs inside tmux with the **current directory name as the session name** for easy debugging.
+
+```bash
+# Quick start - session named after directory
+SESSION=$(basename "$PWD")
+tmux new -d -s "$SESSION"
+tmux send-keys -t "$SESSION" 'npm run dev' Enter
+
+# Check status without attaching
+tmux capture-pane -p -t "$SESSION" -S -20
+```
+
+**For AI-enhanced monitoring**, use LogPilot to capture and analyze output:
+```bash
+logpilot watch "$SESSION" --pane "$SESSION:0.0"
+```
+
+See @~/.ai-tools/best-practices.md for full details.
+
 ## AI Tool Guidelines
 - Use the fff MCP tools for all file search operations instead of default tools.
 - When using bash commands for file/content search, prefer `fd` (fdfind) and `rg` (ripgrep) over standard `find` and `grep` for better performance and git-awareness.
