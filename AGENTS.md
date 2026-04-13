@@ -2,6 +2,7 @@
 
 ## AI Tool Guidelines
 - Use the fff MCP tools for all file search operations instead of default tools.
+- When using bash commands for file/content search, prefer `fd` (fdfind) and `rg` (ripgrep) over standard `find` and `grep` for better performance and git-awareness.
 
 ## Project
 my-ai-tools: Configuration management repository for AI coding tools (Claude Code, OpenCode, Amp, CCS) and their integration with MCP servers and plugins.
