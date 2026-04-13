@@ -1,8 +1,9 @@
 ---
 name: tmux
 description: "Remote control tmux sessions for interactive CLIs (python, node, gdb, etc.) by sending keystrokes and capturing pane output."
-license: Vibecoded
+license: MIT
 compatibility: opencode, claude, amp, codex, gemini, cursor, pi
+hint: Use when you need to control tmux sessions programmatically for interactive terminal applications like REPLs, debuggers, or databases
 user-invocable: true
 metadata:
   audience: all
