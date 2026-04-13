@@ -1,5 +1,38 @@
 # Software Development Best Practices
 
+## AI Tool Session Management
+
+### Run Commands in tmux for Debuggability
+
+Always run long-running commands, development servers, tests, and interactive sessions inside tmux with the **current directory name as the session name**. This enables easy debugging and monitoring.
+
+```bash
+# Create session named after current directory (e.g., "my-project")
+SESSION=$(basename "$PWD")
+tmux new -d -s "$SESSION"
+
+# Run your command in the tmux session
+tmux send-keys -t "$SESSION" 'npm run dev' Enter
+
+# To check status later from another terminal:
+tmux ls                          # list all sessions
+tmux attach -t my-project        # attach to debug
+tmux capture-pane -p -t my-project -S -100  # view last 100 lines without attaching
+```
+
+**Benefits:**
+- Sessions survive terminal disconnects
+- Easy to reattach and debug from any terminal
+- Capture output without interrupting the process
+- Multiple users/agents can monitor the same session
+
+**Best Practice:** For AI-assisted log analysis, pair with [LogPilot](https://github.com/jellydn/logpilot):
+```bash
+logpilot watch "$SESSION" --pane "$SESSION:0.0"
+```
+
+---
+
 ## Context
 
 Comprehensive development guidelines for Agent OS projects, based on Kent Beck's "Tidy First?" principles and Kent C. Dodds' programming wisdom.

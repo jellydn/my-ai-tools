@@ -11,10 +11,6 @@
 			"command": "npx",
 			"args": ["chrome-devtools-mcp@latest"]
 		},
-		"backlog": {
-			"command": "backlog",
-			"args": ["mcp", "start"]
-		},
 		"sequential-thinking": {
 			"command": "npx",
 			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]

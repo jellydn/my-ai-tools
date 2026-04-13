@@ -59,6 +59,9 @@
       "enabled": true,
       "maxAge": "30d",
       "warningAcknowledged": true
+    },
+    "plan": {
+      "enabled": true
     }
   },
   "context": {
@@ -78,8 +81,7 @@
     "enabled": true
   },
   "experimental": {
-    "enableAgents": true,
-    "plan": true
+    "enableAgents": true
   },
   "hooks": {
     "BeforeAgent": [
@@ -109,5 +111,8 @@
         ]
       }
     ]
+  },
+  "agents": {
+    "overrides": {}
   }
 }

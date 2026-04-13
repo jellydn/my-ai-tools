@@ -633,6 +633,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Claude Skills**    | [jezweb/claude-skills](https://github.com/jezweb/claude-skills)                                               | 97 production-ready skills for Claude Code CLI including Cloudflare, React, AI integrations, and more. Includes context-mate for project analysis and workflow management. |
 | **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.                                        |
 | **Matt Pocock**      | [mattpocock/skills](https://github.com/mattpocock/skills)                                                     | Community skills by Matt Pocock. Includes `grill-me` for stress-testing plans via relentless Q&A, and more workflow-enhancing skills for AI-assisted development.          |
+| **Mitsuhiko**        | [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff)                                             | Skills and extensions by Armin Ronacher. Includes tmux session control, GitHub CLI, web browser automation, Sentry integration, mermaid diagrams, and more.                |
 
 **Installation:**
 
@@ -643,6 +644,7 @@ npx skills add vercel-labs/agent-skills --global --agent claude-code
 npx skills add blader/humanizer --global --agent claude-code
 npx skills add jezweb/claude-skills --global --agent claude-code
 npx skills add mattpocock/skills --skill grill-me --global --agent claude-code
+npx skills add mitsuhiko/agent-stuff --global --agent claude-code
 ```
 
 ### Configuration Files

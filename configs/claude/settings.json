@@ -13,6 +13,8 @@
       "mcp__qmd__vsearch",
       "mcp__qmd__multi_get",
       "mcp__qmd__status",
+      "mcp__fff__grep",
+      "mcp__fff__multi_grep",
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_click",
       "mcp__playwright__browser_close",

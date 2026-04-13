@@ -1,7 +1,29 @@
 # Agents Guide
 
+## Session Management with tmux
+
+### Run Commands in tmux for Easy Debugging
+
+Always run dev servers, tests, builds, and interactive CLIs inside tmux with the **current directory name as the session name**. This makes debugging and monitoring trivial.
+
+```bash
+# Quick pattern - use directory name as session name
+SESSION=$(basename "$PWD")
+tmux new -d -s "$SESSION"
+tmux send-keys -t "$SESSION" 'npm run dev' Enter
+
+# Check output without attaching
+tmux capture-pane -p -t "$SESSION" -S -20
+
+# For AI-enhanced log analysis, use LogPilot:
+logpilot watch "$SESSION" --pane "$SESSION:0.0"
+```
+
+See @~/.ai-tools/best-practices.md for full details.
+
 ## AI Tool Guidelines
 - Use the fff MCP tools for all file search operations instead of default tools.
+- When using bash commands for file/content search, prefer `fd` (fdfind) and `rg` (ripgrep) over standard `find` and `grep` for better performance and git-awareness.
 
 ## Project
 my-ai-tools: Configuration management repository for AI coding tools (Claude Code, OpenCode, Amp, CCS) and their integration with MCP servers and plugins.
