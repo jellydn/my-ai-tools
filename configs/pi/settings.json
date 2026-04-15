@@ -4,14 +4,15 @@
   "defaultProvider": "fireworks",
   "defaultThinkingLevel": "medium",
   "editorPaddingX": 1,
-  "lastChangelogVersion": "0.66.1",
+  "lastChangelogVersion": "0.67.2",
   "packages": [
     "npm:@plannotator/pi-extension",
     "npm:pi-subagents",
     "https://github.com/davebcn87/pi-autoresearch",
     "git:github.com/jellydn/pi-fireworks-provider",
     "npm:pi-hooks",
-    "git:github.com/SamuelLHuber/pi-fff"
+    "git:github.com/SamuelLHuber/pi-fff",
+    "npm:pi-annotate"
   ],
   "quietStartup": true,
   "theme": "dracula",
