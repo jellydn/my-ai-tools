@@ -1417,6 +1417,10 @@ See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for det
 
 [**cmux**](https://github.com/manaflow-ai/cmux) - Ghostty-based macOS terminal with vertical tabs and notifications for AI coding agents.
 
+### Conductor
+
+[**Conductor**](https://www.conductor.build/) - Orchestrate parallel AI coding agents to work on multiple tasks simultaneously.
+
 ### Spec Kit
 
 [**Spec Kit**](https://github.com/github/spec-kit) - Toolkit for Spec-Driven Development. ([GitHub](https://github.com/github/spec-kit))
