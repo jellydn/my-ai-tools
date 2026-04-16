@@ -38,6 +38,15 @@
       "command": "qmd",
       "args": ["mcp"],
       "disabled": false
+    },
+    "react-grab-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@react-grab/mcp",
+        "--stdio"
+      ]
     }
   }
 }

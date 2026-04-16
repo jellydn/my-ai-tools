@@ -22,7 +22,15 @@
 		"fff": {
 			"command": "fff-mcp",
 			"args": []
-		}
+    },
+    "react-grab-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@react-grab/mcp",
+        "--stdio"
+      ]
+    }
 	},
 	"amp.terminal.theme": "kanagawa",
 	"amp.terminal.customThemes": {

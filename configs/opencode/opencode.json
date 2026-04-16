@@ -70,14 +70,19 @@
 		},
 		"sequential-thinking": {
 			"type": "local",
-			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+			"command": [
+				"npx",
+				"-y",
+				"@modelcontextprotocol/server-sequential-thinking"
+			],
 			"enabled": true
+		},
+		"react-grab-mcp": {
+			"type": "local",
+			"command": ["npx", "-y", "@react-grab/mcp", "--stdio"]
 		}
 	},
-	"plugin": [
-		"@plannotator/opencode@latest",
-		"@mohak34/opencode-notifier@latest"
-	],
+	"plugin": ["@plannotator/opencode@latest"],
 	"provider": {
 		"llama.cpp": {
 			"npm": "@ai-sdk/openai-compatible",

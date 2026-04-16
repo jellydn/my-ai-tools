@@ -1,5 +1,6 @@
 model_personality = "pragmatic"
 model = "gpt-5.4"
+
 [features]
 unified_exec = true
 shell_snapshot = true
@@ -15,15 +16,15 @@ network_access = true
 
 [mcp_servers.context7]
 command = "npx"
-args = ["-y", "@upstash/context7-mcp"]
+args = [ "-y", "@upstash/context7-mcp" ]
 
 [mcp_servers.sequential-thinking]
 command = "npx"
-args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+args = [ "-y", "@modelcontextprotocol/server-sequential-thinking" ]
 
 [mcp_servers.qmd]
 command = "qmd"
-args = ["mcp"]
+args = [ "mcp" ]
 
 [mcp_servers.fff]
 command = "fff-mcp"
@@ -38,12 +39,16 @@ approval_mode = "approve"
 [mcp_servers.fff.tools.multi_grep]
 approval_mode = "approve"
 
+[mcp_servers.react-grab-mcp]
+command = "npx"
+args = [ "-y", "@react-grab/mcp", "--stdio" ]
+
 [notice.model_migrations]
 "gpt-5.2-codex" = "gpt-5.3-codex"
 "gpt-5.3-codex" = "gpt-5.4"
 
 [tui]
-status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "context-used"]
+status_line = [ "model-with-reasoning", "context-remaining", "five-hour-limit", "context-used" ]
 theme = "kanagawa"
 
 [plugins."github@openai-curated"]
