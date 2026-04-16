@@ -588,7 +588,6 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 
 - `adr` - Architecture Decision Records
 - `codemap` - Parallel codebase analysis producing structured documentation
-- `gh-stack-pr` - Stacked pull request workflow with `gh stack`
 - `handoffs` - Create handoff plans for continuing work (provides `/handoffs` command)
 - `pickup` - Resume work from previous handoff sessions (provides `/pickup` command)
 - `pr-review` - Pull request review workflows
