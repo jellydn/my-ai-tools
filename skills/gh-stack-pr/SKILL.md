@@ -51,3 +51,20 @@ gh stack sync
 gh stack rebase
 gh stack land
 ```
+
+## Compatibility
+
+### Universal (.agents/skills) — always included
+
+- Amp
+- Antigravity
+- Cline
+- Codex
+- Cursor
+- Deep Agents
+- Firebender
+- Gemini CLI
+- GitHub Copilot
+- Kimi Code CLI
+- OpenCode
+- Warp
