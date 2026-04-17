@@ -1479,15 +1479,15 @@ install_recommended_skills() {
 	log_info "Found $skill_count recommended skill(s)"
 
 	# Install specific skills from recommend-skills.json based on YES_TO_ALL
-	# When -y is used, only install: grill-me from matt and 2 react skills from vercel
+	# When -y is used, only install: 1 react/vercel skill (vercel-labs/agent-skills)
 	local install_count=0
 	local max_installs=3
 	if [ "$YES_TO_ALL" = true ]; then
-		max_installs=3 # grill-me + 2 react skills
+		max_installs=1 # limit to 1 skill in auto-yes mode
 	fi
 
 	for i in $(seq 0 $((skill_count - 1))); do
-		# When using -y, limit to first 3 skills (grill-me + vercel + expo react skills)
+		# When using -y, limit to first skill only
 		if [ "$YES_TO_ALL" = true ] && [ "$install_count" -ge "$max_installs" ]; then
 			log_info "Reached maximum recommended skills for -y mode ($max_installs), skipping remaining"
 			break
