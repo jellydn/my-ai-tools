@@ -20,6 +20,10 @@
     {
       "repo": "jezweb/claude-skills",
       "description": "97 production-ready skills for Claude Code"
+    },
+    {
+      "repo": "github/gh-stack",
+      "description": "GitHub CLI extension for managing stacked branches and pull requests"
     }
   ]
 }
