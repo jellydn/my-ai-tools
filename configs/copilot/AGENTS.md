@@ -1,13 +1,13 @@
 # 🤖 GitHub Copilot CLI Agent Guidelines
 
-## Session Management with tmux
+## Session Management with tmux + portless
 
-Run dev servers, tests, and interactive CLIs inside tmux with the **current directory name as the session name** for easy debugging:
+Run dev servers, tests, and interactive CLIs inside tmux with [portless](https://portless.sh) for stable `.localhost` URLs:
 
 ```bash
 SESSION=$(basename "$PWD")
-tmux new -d -s "$SESSION"
-tmux send-keys -t "$SESSION" 'npm run dev' Enter
+tmux new -d -s "$SESSION" 2>/dev/null || true
+tmux send-keys -t "$SESSION" 'portless run npm run dev' Enter
 tmux capture-pane -p -t "$SESSION" -S -20  # check output
 ```
 

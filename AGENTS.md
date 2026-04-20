@@ -1,16 +1,16 @@
 # Agents Guide
 
-## Session Management with tmux
+## Session Management with tmux + portless
 
-### Run Commands in tmux for Easy Debugging
+### Run Dev Servers in tmux with Clean .localhost URLs
 
-Always run dev servers, tests, builds, and interactive CLIs inside tmux with the **current directory name as the session name**. This makes debugging and monitoring trivial.
+Run dev servers inside tmux with [portless](https://portless.sh) for stable, named `.localhost` URLs. Get both debuggability (tmux) and clean URLs (portless).
 
 ```bash
 # Quick pattern - use directory name as session name
 SESSION=$(basename "$PWD")
-tmux new -d -s "$SESSION"
-tmux send-keys -t "$SESSION" 'npm run dev' Enter
+tmux new -d -s "$SESSION" 2>/dev/null || true
+tmux send-keys -t "$SESSION" 'portless run npm run dev' Enter
 
 # Check output without attaching
 tmux capture-pane -p -t "$SESSION" -S -20

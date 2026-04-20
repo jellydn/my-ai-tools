@@ -2,17 +2,17 @@
 
 ## AI Tool Session Management
 
-### Run Commands in tmux for Debuggability
+### Run Commands in tmux + portless
 
-Always run long-running commands, development servers, tests, and interactive sessions inside tmux with the **current directory name as the session name**. This enables easy debugging and monitoring.
+Always run dev servers, tests, and interactive sessions inside tmux with [portless](https://portless.sh) for stable `.localhost` URLs. This gives you debuggability (tmux) plus clean URLs (portless).
 
 ```bash
 # Create session named after current directory (e.g., "my-project")
 SESSION=$(basename "$PWD")
-tmux new -d -s "$SESSION"
+tmux new -d -s "$SESSION" 2>/dev/null || true
 
-# Run your command in the tmux session
-tmux send-keys -t "$SESSION" 'npm run dev' Enter
+# Run your dev server with portless inside the tmux session
+tmux send-keys -t "$SESSION" 'portless run npm run dev' Enter
 
 # To check status later from another terminal:
 tmux ls                          # list all sessions
@@ -23,6 +23,7 @@ tmux capture-pane -p -t my-project -S -100  # view last 100 lines without attach
 **Benefits:**
 
 - Sessions survive terminal disconnects
+- Stable `.localhost` URLs (no port numbers to remember)
 - Easy to reattach and debug from any terminal
 - Capture output without interrupting the process
 - Multiple users/agents can monitor the same session
@@ -33,16 +34,9 @@ tmux capture-pane -p -t my-project -S -100  # view last 100 lines without attach
 logpilot watch "$SESSION" --pane "$SESSION:0.0"
 ```
 
-**Best Practice:** For stable local URLs instead of port numbers, use [portless](https://portless.sh):
+**Example package.json:**
 
-```bash
-# Quick start - run your dev server with a stable .localhost URL
-portless myapp next dev  # -> https://myapp.localhost
-
-# Or let portless infer the name from package.json
-portless run next dev    # -> https://myapp.localhost
-
-# Add to package.json for permanent use
+```json
 {
   "scripts": {
     "dev": "portless run next dev"
