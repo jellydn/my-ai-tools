@@ -562,6 +562,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `codemap` - Parallel codebase analysis producing structured documentation
 - `handoffs` - Create handoff plans for continuing work (provides `/handoffs` command)
 - `pickup` - Resume work from previous handoff sessions (provides `/pickup` command)
+- `portless-local` - Named .localhost URLs for local development - replaces port numbers with stable URLs
 - `pr-review` - Pull request review workflows
 - `prd` - Generate Product Requirements Documents
 - `qmd-knowledge` - Project knowledge management
@@ -600,7 +601,6 @@ Official and community-maintained skill collections for specific frameworks:
 | **UI/UX Design**     | [Interface Design](https://interface-design.dev/)                                                             | Comprehensive guide to interface design patterns and best practices for anyone working with UI/UX development.                                                                |
 | **Expo**             | [expo/skills](https://github.com/expo/skills)                                                                 | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows.                                  |
 | **Next.js**          | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)                                       | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.                                           |
-| **Portless**         | [vercel-labs/portless](https://github.com/vercel-labs/portless)                                               | Replace port numbers with stable, named .localhost URLs for local development. For humans and agents.                                                                         |
 | **Andrej Karpathy**  | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)                 | Community skills inspired by Andrej Karpathy's coding principles and practices for AI-focused development workflows.                                                          |
 | **Humanizer**        | [blader/humanizer](https://github.com/blader/humanizer)                                                       | Removes signs of AI-generated writing from text. Based on Wikipedia's AI writing detection guide, it detects 24 patterns to make text sound more natural and human.           |
 | **Claude Skills**    | [jezweb/claude-skills](https://github.com/jezweb/claude-skills)                                               | 97 production-ready skills for Claude Code CLI including Cloudflare, React, AI integrations, and more. Includes context-mate for project analysis and workflow management.    |
@@ -615,7 +615,6 @@ Official and community-maintained skill collections for specific frameworks:
 # Install skills using npx skills add
 npx skills add expo/skills --global --agent claude-code
 npx skills add vercel-labs/agent-skills --global --agent claude-code
-npx skills add vercel-labs/portless --global --agent claude-code
 npx skills add blader/humanizer --global --agent claude-code
 npx skills add jezweb/claude-skills --global --agent claude-code
 npx skills add mattpocock/skills --skill grill-me --global --agent claude-code
