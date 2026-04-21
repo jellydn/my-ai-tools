@@ -1196,6 +1196,16 @@ Located in [`configs/pi/`](configs/pi/):
 
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 
+**Key Settings:**
+
+- **Default Model**: `accounts/fireworks/routers/kimi-k2p5-turbo` (via Fireworks)
+- **Default Provider**: `fireworks`
+- **Default Thinking Level**: `medium`
+- **Theme**: `dracula`
+- **Permission Level**: `high`
+- **Quiet Startup**: Enabled (skips changelog on launch)
+- **Hide Thinking Block**: Disabled (shows thinking process)
+
 ### Pi Packages
 
 Pi uses a package-based extension system (not MCP). Install packages with:
@@ -1216,10 +1226,32 @@ Then register them in `.pi/settings.json`:
     "git:github.com/jellydn/pi-fireworks-provider",
     "npm:pi-hooks",
     "git:github.com/SamuelLHuber/pi-fff",
-    "npm:pi-annotate"
+    "npm:pi-annotate",
+    "npm:pi-mcp-adapter",
+    "npm:pi-simplify",
+    "npm:@devkade/pi-plan",
+    "npm:pi-manage-todo-list",
+    "npm:pi-btw"
   ]
 }
 ```
+
+**Package Overview:**
+
+| Package | Description |
+|---------|-------------|
+| `@plannotator/pi-extension` | Interactive plan review with visual annotation |
+| `pi-subagents` | Delegate tasks to subagents with chains, parallel execution, and TUI |
+| `pi-autoresearch` | Autonomous experiment loop for optimization targets |
+| `pi-fireworks-provider` | Fireworks AI provider for Kimi and other models |
+| `pi-hooks` | Collection of extensions (checkpoint, lsp, permission, ralph-loop, repeat) |
+| `pi-fff` | FFF-powered fuzzy file and content search |
+| `pi-annotate` | Visual annotation tool with inline note cards |
+| `pi-mcp-adapter` | MCP (Model Context Protocol) adapter for Pi |
+| `pi-simplify` | Reviews changed code for clarity, consistency, and maintainability |
+| `@devkade/pi-plan` | Read-only planning mode with approval-based execution |
+| `pi-manage-todo-list` | GitHub Copilot-style todo list management tool |
+| `pi-btw` | Parallel side conversations with `/btw` command |
 
 ### Usage
 
