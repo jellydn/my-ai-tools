@@ -14,6 +14,8 @@ metadata:
 
 Replace port numbers with stable, named `.localhost` URLs for local development. For humans and agents.
 
+> **Note:** By default, use HTTP (`http://myapp.localhost`). Only enable HTTPS (`--https` or `PORTLESS_HTTPS=1`) if the user specifically requests it (e.g., for OAuth, secure cookies, or HTTPS-only features).
+
 ## Why Portless?
 
 Local dev with port numbers is fragile. Portless fixes that by giving each dev server a stable, named `.localhost` URL.
@@ -21,10 +23,10 @@ Local dev with port numbers is fragile. Portless fixes that by giving each dev s
 | Problem                    | With Ports                                              | With Portless                                   |
 | -------------------------- | ------------------------------------------------------- | ----------------------------------------------- |
 | **Port conflicts**         | Two projects on :3000 = EADDRINUSE                      | Auto-assigned ports, named URLs - no collisions |
-| **Memorizing ports**       | "Was the API on 3001 or 8080?"                          | Always `https://api.localhost`                  |
+| **Memorizing ports**       | "Was the API on 3001 or 8080?"                          | Always `http://api.localhost`                   |
 | **Wrong app on refresh**   | Stop one server, start another on same port = confusion | Named URLs eliminate this                       |
 | **Monorepo chaos**         | Every service needs a unique port                       | Distinct hostnames for each service             |
-| **Agent confusion**        | AI agents guess/hardcode wrong ports                    | `https://myapp.localhost` is deterministic      |
+| **Agent confusion**        | AI agents guess/hardcode wrong ports                    | `http://myapp.localhost` is deterministic       |
 | **Cookie/storage clashes** | Cookies bleed across ports on localhost                 | Each `.localhost` subdomain gets its own scope  |
 | **Hardcoded config**       | CORS, OAuth, .env break when ports change               | URLs are stable across restarts                 |
 | **Sharing URLs**           | "What port is that on?" in Slack                        | Everyone uses the same named URL                |
@@ -106,8 +108,8 @@ portless alias --remove <name>            # Remove the alias
 Register a route for a service not managed by portless (e.g. a Docker container). Aliases persist across stale-route cleanup.
 
 ```bash
-portless alias my-postgres 5432     # -> https://my-postgres.localhost
-portless alias redis 6379           # -> https://redis.localhost
+portless alias my-postgres 5432     # -> http://my-postgres.localhost
+portless alias redis 6379           # -> http://redis.localhost
 portless alias --remove my-postgres # Remove the alias
 ```
 
@@ -233,15 +235,15 @@ portless --version
 ```bash
 # Next.js
 portless myapp next dev
-# -> https://myapp.localhost
+# -> http://myapp.localhost
 
 # Vite (auto-detected, --port injected)
 portless myapp vite dev
-# -> https://myapp.localhost
+# -> http://myapp.localhost
 
 # Express
 portless api node server.js
-# -> https://api.localhost
+# -> http://api.localhost
 ```
 
 ### 2. Multiple Services with Subdomains
@@ -249,15 +251,15 @@ portless api node server.js
 ```bash
 # API service
 portless api.myapp pnpm start
-# -> https://api.myapp.localhost
+# -> http://api.myapp.localhost
 
 # Documentation
 portless docs.myapp next dev
-# -> https://docs.myapp.localhost
+# -> http://docs.myapp.localhost
 
 # Admin dashboard
 portless admin.myapp npm run dev
-# -> https://admin.myapp.localhost
+# -> http://admin.myapp.localhost
 ```
 
 ### 3. Use in package.json
@@ -278,11 +280,11 @@ portless admin.myapp npm run dev
 ```bash
 # Main worktree
 portless run next dev
-# -> https://myapp.localhost
+# -> http://myapp.localhost
 
 # Linked worktree on branch "fix-ui"
 portless run next dev
-# -> https://fix-ui.myapp.localhost
+# -> http://fix-ui.myapp.localhost
 ```
 
 Put `portless run` in your package.json once and it works everywhere - no collisions, no `--force`.
@@ -293,7 +295,7 @@ Put `portless run` in your package.json once and it works everywhere - no collis
 # Use .test TLD instead of .localhost
 portless proxy start --tld test
 portless myapp next dev
-# -> https://myapp.test
+# -> http://myapp.test
 ```
 
 Recommended TLDs:
@@ -307,11 +309,11 @@ Recommended TLDs:
 ```bash
 # Docker container running Postgres
 portless alias my-postgres 5432
-# -> https://my-postgres.localhost
+# -> http://my-postgres.localhost
 
 # Redis server
 portless alias redis 6379
-# -> https://redis.localhost
+# -> http://redis.localhost
 ```
 
 ### 7. Wire Services Together
@@ -326,14 +328,14 @@ portless frontend vite dev
 ## How It Works
 
 ```
-Browser (myapp.localhost) -> HTTPS Proxy (port 443) -> App (random port 4000-4999)
+Browser (myapp.localhost) -> HTTP Proxy (port 80) -> App (random port 4000-4999)
 ```
 
-1. Portless runs an HTTPS reverse proxy on port 443
+1. Portless runs an HTTP reverse proxy on port 80 (or HTTPS on 443 if enabled)
 2. Each app registers a route mapping hostname to assigned port
-3. Requests to `https://<name>.localhost` are proxied to the app
-4. Auto-generates local CA and trusts it on first run
-5. Auto-elevates with sudo on macOS/Linux for port 443 binding
+3. Requests to `http://<name>.localhost` are proxied to the app
+4. Optional HTTPS: Auto-generates local CA and trusts it on first run
+5. Auto-elevates with sudo on macOS/Linux for port binding
 
 ## Framework Support
 
@@ -423,7 +425,7 @@ portless myapp-v2 next dev
 
 | Tool         | Type          | URLs                              | Use Case             |
 | ------------ | ------------- | --------------------------------- | -------------------- |
-| **portless** | Local proxy   | `https://myapp.localhost`         | Clean local dev URLs |
+| **portless** | Local proxy   | `http://myapp.localhost`          | Clean local dev URLs |
 | ngrok        | Public tunnel | `https://random.ngrok.io`         | Share with others    |
 | cloudflared  | Public tunnel | `https://myapp.trycloudflare.com` | Share with others    |
 
