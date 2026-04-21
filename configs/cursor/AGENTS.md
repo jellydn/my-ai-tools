@@ -1,13 +1,20 @@
 # 🤖 Cursor Agent Guidelines
 
-## Session Management with tmux + portless
+## Session Management with tmux
 
-Run dev servers, tests, and interactive CLIs inside tmux with [portless](https://portless.sh) for stable `.localhost` URLs:
+Run dev servers, tests, and interactive CLIs inside tmux with the **current directory name as the session name** for easy debugging:
 
 ```bash
 SESSION=$(basename "$PWD")
 tmux new -d -s "$SESSION" 2>/dev/null || true
-tmux send-keys -t "$SESSION" 'portless run npm run dev' Enter
+
+# Run dev server with portless if available, otherwise fallback to npm
+if command -v portless &>/dev/null; then
+    tmux send-keys -t "$SESSION" 'portless run npm run dev' Enter
+else
+    tmux send-keys -t "$SESSION" 'npm run dev' Enter
+fi
+
 tmux capture-pane -p -t "$SESSION" -S -20  # check output
 ```
 

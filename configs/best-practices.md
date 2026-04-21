@@ -2,17 +2,21 @@
 
 ## AI Tool Session Management
 
-### Run Commands in tmux + portless
+### Run Commands in tmux for Debuggability
 
-Always run dev servers, tests, and interactive sessions inside tmux with [portless](https://portless.sh) for stable `.localhost` URLs. This gives you debuggability (tmux) plus clean URLs (portless).
+Always run long-running commands, development servers, tests, and interactive sessions inside tmux with the **current directory name as the session name**. This enables easy debugging and monitoring.
 
 ```bash
 # Create session named after current directory (e.g., "my-project")
 SESSION=$(basename "$PWD")
 tmux new -d -s "$SESSION" 2>/dev/null || true
 
-# Run your dev server with portless inside the tmux session
-tmux send-keys -t "$SESSION" 'portless run npm run dev' Enter
+# Run dev server with portless if available, otherwise fallback to npm
+if command -v portless &>/dev/null; then
+    tmux send-keys -t "$SESSION" 'portless run npm run dev' Enter
+else
+    tmux send-keys -t "$SESSION" 'npm run dev' Enter
+fi
 
 # To check status later from another terminal:
 tmux ls                          # list all sessions
@@ -23,7 +27,7 @@ tmux capture-pane -p -t my-project -S -100  # view last 100 lines without attach
 **Benefits:**
 
 - Sessions survive terminal disconnects
-- Stable `.localhost` URLs (no port numbers to remember)
+- Stable `.localhost` URLs via portless (no port numbers to remember)
 - Easy to reattach and debug from any terminal
 - Capture output without interrupting the process
 - Multiple users/agents can monitor the same session
