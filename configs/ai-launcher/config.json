@@ -29,6 +29,14 @@
 			"aliases": ["a"],
 			"promptCommand": "amp -x",
 			"promptUseStdin": true
+		},
+		{
+			"name": "pi",
+			"command": "pi",
+			"description": "AI coding assistant by Modular",
+			"aliases": ["p"],
+			"promptCommand": "pi -p",
+			"promptUseStdin": true
 		}
 	],
 	"templates": [
