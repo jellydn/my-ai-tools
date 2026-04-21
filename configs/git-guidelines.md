@@ -12,10 +12,11 @@ AI agents should follow these principles when working with git:
 
 ### ⛔ Operations to Avoid
 Avoid these dangerous git commands without explicit user approval:
+- **Add all files**: `git add -A`, `git add --all` (stages all changes including untracked files; prefer `git add <specific-files>` or `git add -p` for interactive staging)
 - **Force push**: `git push --force`, `git push -f` (not recommended; if absolutely required, `--force-with-lease` is safer)
 - **History rewriting**: `git rebase -i`, `git filter-branch`
 - **Amending pushed commits**: `git commit --amend` (only safe for local, unpushed commits)
-- **Destructive resets**: `git reset --hard`
+- **Reset operations**: `git reset`, `git reset --hard`, `git reset --mixed`, `git reset --soft` (unstages files or moves HEAD; can lose work or change history)
 - **Force operations**: `git checkout --force`, `git clean -f/-d`, `git branch -D`
 - **Stash deletion**: `git stash drop`, `git stash clear`
 - **Reference manipulation**: `git update-ref -d`, `git reflog expire`
@@ -23,6 +24,7 @@ Avoid these dangerous git commands without explicit user approval:
 ### Best Practices
 - Always use `git --no-pager` to prevent interactive pagers in scripts
 - Check repository state with `git status` before operations
+- Stage files intentionally: use `git add <specific-files>` or `git add -p` for interactive staging
 - Use `git diff` to verify changes before committing
 - Prefer `git switch` over `git checkout` for branch switching (Git 2.23+; use `git checkout <branch>` for older versions)
 - Use descriptive commit messages following conventional commits format
