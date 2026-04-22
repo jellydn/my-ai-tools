@@ -59,11 +59,8 @@ theme = "kanagawa"
 
 [plugins."github@openai-curated"]
 enabled = true
-<<<<<<< HEAD
 
 # Add your own project-specific trust settings here
 # Example:
 # [projects."/path/to/your/project"]
 # trust_level = "trusted"
-=======
->>>>>>> 6125e1f (refactor: clean up codex config and remove plannotator-review skill)
