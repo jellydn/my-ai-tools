@@ -1,140 +1,112 @@
 # External Integrations
 
-## AI Providers & APIs
+**Analysis Date:** 2026-04-22
 
-### Primary Providers
+## APIs & External Services
 
-| Provider | Integration Method | Config Location |
-|----------|-------------------|-----------------|
-| **Anthropic (Claude)** | Direct subscription | Claude Code |
-| **OpenAI** | API key, OAuth | OpenCode, Codex |
-| **Google AI (Gemini)** | OAuth / API key | Gemini CLI, CCS |
-| **GLM (Zhipu)** | API profile | CCS |
-| **Ollama** | Local API | CCS, Codex |
-| **OpenRouter** | API profile | CCS |
+**MCP (Model Context Protocol) Servers:**
+- **Context7** (`@upstash/context7-mcp`) - Documentation search and retrieval
+  - Auth: None required
+  - Usage: Library documentation queries
 
-### OAuth Providers (via CCS)
+- **Sequential Thinking** (`@modelcontextprotocol/server-sequential-thinking`) - Structured reasoning
+  - Auth: None required
+  - Usage: Complex problem breakdown
 
-| Provider | ID | Description |
-|----------|-----|-------------|
-| **Gemini** | `gemini` | Google Gemini (OAuth) |
-| **Codex** | `codex` | OpenAI Codex (OAuth) |
-| **Agy** | `agy` | AI provider |
-| **Qwen** | `qwen` | Alibaba Qwen |
-| **iFlow** | `iflow` | Flow provider |
-| **Kiro** | `kiro` | AI provider |
-| **GitHub Copilot** | `ghcp` | Copilot API (unofficial) |
+- **qmd** (`qmd mcp`) - Knowledge management
+  - Auth: Local filesystem
+  - Usage: Project-specific learnings and notes
 
-## MCP Server Integrations
+- **fff-mcp** - Fast file search (frecency-ranked)
+  - Auth: None
+  - Usage: File finding and content search
 
-### Documentation & Search
+- **react-grab-mcp** (`@react-grab/mcp`) - React component extraction
+  - Auth: None
+  - Usage: React component analysis
 
-| Service | Package | Endpoint | Purpose |
-|---------|---------|----------|---------|
-| **Context7** | `@upstash/context7-mcp` | `npx` stdio | Library documentation lookup |
-| **qmd** | `qmd` | Local command | Knowledge base search |
+- **Notion** (`mcp-remote`) - Notion workspace integration
+  - Auth: OAuth via `https://mcp.notion.com/mcp`
+  - Usage: Notion page access and updates
 
-### Reasoning & Analysis
+## Data Storage
 
-| Service | Package | Endpoint | Purpose |
-|---------|---------|----------|---------|
-| **Sequential Thinking** | `@modelcontextprotocol/server-sequential-thinking` | npx stdio | Multi-step reasoning |
+**Databases:**
+- None - All data stored as JSON/YAML files on local filesystem
 
-### Browser Automation
+**File Storage:**
+- Local filesystem only
+- Config locations:
+  - Claude Code: `~/.claude/`
+  - OpenCode: `~/.config/opencode/`
+  - Amp: `~/.config/amp/`
+  - CCS: `~/.ccs/`
+  - Pi: `~/.config/pi/`
 
-| Service | Package | Endpoint | Purpose |
-|---------|---------|----------|---------|
-| **Chrome DevTools** | `chrome-devtools-mcp` | npx stdio | Headless browser control |
+**Caching:**
+- Claude plugin cache: `~/.claude/plugins/cache/`
+- Bun/Node npm cache for MCP servers
 
-## External Services
+**Backup:**
+- Automatic backup to `$HOME/ai-tools-backup-{timestamp}`
+- Retention: Last 5 backups kept
 
-### Formatter Services
+## Authentication & Identity
 
-| Service | Installation | Purpose |
-|---------|-------------|---------|
-| **biome** | `npm install -g @biomejs/biome` | JS/TS formatting & linting |
-| **gofmt** | Go installation | Go formatting |
-| **prettier** | `npx prettier` | Markdown formatting |
-| **ruff** | `pip install ruff` | Python formatting |
-| **rustfmt** | Rust installation | Rust formatting |
-| **shfmt** | `go install mvdan.cc/sh/v3/cmd/shfmt` | Shell formatting |
-| **stylua** | `cargo install stylua` | Lua formatting |
+**Auth Provider:**
+- AI tools handle their own authentication (Claude Code, OpenCode, etc.)
+- This repo contains only configuration, not credentials
+- Users authenticate with Anthropic, OpenAI, Google, etc. directly
 
-### CLI Tools
+**API Keys:**
+- Not stored in this repository
+- Users provide their own API keys during AI tool setup
 
-| Tool | Installation | Purpose |
-|------|-------------|---------|
-| **Claude Code** | `npm install -g @anthropic-ai/claude-code` | AI coding assistant |
-| **OpenCode** | `curl -fsSL https://opencode.ai/install \| bash` | AI coding assistant |
-| **Amp** | `curl -fsSL https://ampcode.com/install.sh \| bash` | AI coding assistant |
-| **Gemini CLI** | `npm install -g @google/gemini-cli` | Google AI CLI |
-| **Codex CLI** | `npm install -g @openai/codex` | OpenAI Codex CLI |
-| **CCS** | `npm install -g @kaitranntt/ccs` | Claude Code Switch |
-| **Factory Droid** | `npm install -g @factory/cli` | AI agent |
-| **backlog.md** | `npm install -g backlog.md` | Task management |
+## Monitoring & Observability
 
-## Local Integrations
+**Error Tracking:**
+- None - Errors logged to console with color-coded output
 
-### Knowledge Management
+**Logs:**
+- Console output with color coding (RED, GREEN, YELLOW, BLUE)
+- Verbose mode available (`-v|--verbose`)
+- Transaction logging for rollback support
 
-| Service | Storage Location | Purpose |
-|---------|-----------------|---------|
-| **qmd** | `~/.ai-knowledges/` | Project knowledge base |
-| **qmd collections** | `~/.ai-knowledges/<project>/` | Per-project knowledge |
+## CI/CD & Deployment
 
-### Configuration Storage
+**Hosting:**
+- GitHub repository: `jellydn/my-ai-tools`
+- Documentation site: GitHub Pages (`ai-tools.itman.fyi`)
 
-| Service | Default Location | Backup Location |
-|---------|------------------|-----------------|
-| **Claude Code** | `~/.claude/` | `$HOME/ai-tools-backup-{timestamp}/` |
-| **OpenCode** | `~/.config/opencode/` | - |
-| **Amp** | `~/.config/amp/` | - |
-| **CCS** | `~/.ccs/` | - |
-| **Factory Droid** | `~/.factory/` | - |
-| **Cursor** | `~/.cursor/rules/` | - |
+**CI Pipeline:**
+- GitHub Actions (`.github/workflows/`)
+- Pre-commit hooks for shellcheck validation
 
-## Authentication Methods
+**Distribution:**
+- One-line installer: `curl -fsSL https://ai-tools.itman.fyi/install.sh | bash`
+- PowerShell installer: `irm https://ai-tools.itman.fyi/install.ps1 | iex`
 
-| Provider | Method | Configuration |
-|----------|--------|---------------|
-| **Anthropic** | Subscription | Claude Code app |
-| **Google** | OAuth | Gemini CLI browser flow |
-| **GitHub** | OAuth | Copilot API auth |
-| **API Keys** | Env vars | GLM, Ollama, OpenRouter |
+## Environment Configuration
 
-## Webhooks & Events
+**Required env vars:**
+- `HOME` - User home directory (for config paths)
+- `TMPDIR` - Temporary directory (optional, defaults to `/tmp`)
+- `OSTYPE` - OS detection for Windows compatibility
+- `MSYSTEM` - Windows environment detection
 
-### PostToolUse Hooks (Auto-formatting)
+**Secrets location:**
+- Not managed by this repository
+- AI tools store credentials in their own config directories
 
-Triggered after file edits:
-- `Write`, `Edit`, `MultiEdit` tools match
-- Runs formatters based on file extension
-- Supports: TS, JS, Go, Markdown, Python, Rust, Shell, Lua
+## Webhooks & Callbacks
 
-### PreToolUse Hooks (Git Guard)
+**Incoming:**
+- None
 
-Triggered before Bash commands:
-- Blocks dangerous git commands
-- Patterns: force push, hard reset, branch delete
-- Implementation: `configs/claude/hooks/git-guard.ts`
+**Outgoing:**
+- Claude Code hooks (PostToolUse, PreToolUse) trigger formatting commands
+- WebSearch hook transforms via `~/.ccs/hooks/websearch-transformer.cjs`
 
-### WebSearch Transformer
+---
 
-Transforms WebSearch queries:
-- Location: `~/.ccs/hooks/websearch-transformer.cjs`
-- Timeout: 120s
-
-## Plugin Marketplaces
-
-| Marketplace | URL | Plugins |
-|-------------|-----|---------|
-| **Anthropic Official** | `anthropics/claude-plugins-official` | typescript-lsp, pyright-lsp, context7, etc. |
-| **Community** | Various GitHub repos | plannotator, claude-hud, worktrunk, codex |
-| **Local Skills** | `skills/` folder | adr, codemap, handoffs, prd, qmd-knowledge, etc. |
-
-## Reference Configuration
-
-- MCP servers: `configs/claude/mcp-servers.json`
-- CCS config: `configs/ccs/config.yaml`
-- Factory MCP: `configs/factory/mcp.json`
-- Gemini settings: `configs/gemini/settings.json`
+*Integration audit: 2026-04-22*
