@@ -40,7 +40,7 @@ backup_existing_configs() {
 		if [ -d "$config_dir" ]; then
 			local dir_name
 			dir_name=$(basename "$config_dir")
-			if execute "cp -r '$config_dir' '$BACKUP_DIR/' 2>/dev/null"; then
+			if execute_quoted cp -r "$config_dir" "$BACKUP_DIR/"; then
 				backup_count=$((backup_count + 1))
 			fi
 		fi

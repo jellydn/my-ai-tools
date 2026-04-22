@@ -1133,9 +1133,6 @@ copy_opencode_configs() {
 	execute_quoted rm -rf "$HOME/.config/opencode/command"
 	copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/command"
 
-	execute_quoted rm -rf "$HOME/.config/opencode/skills"
-	copy_non_marketplace_skills "$SCRIPT_DIR/skills"
-
 	log_success "OpenCode configs copied"
 }
 
