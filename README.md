@@ -542,7 +542,6 @@ Using claude-hud plugin:
 Located in [`configs/claude/commands/`](configs/claude/commands/):
 
 - `/ccs` - CCS delegation and profile management
-- `/plannotator-review` - Interactive code review
 - `/ultrathink` - Deep thinking mode
 
 #### Custom Agents
@@ -781,7 +780,6 @@ Located in [`configs/opencode/agent/`](configs/opencode/agent/):
 
 Located in [`configs/opencode/command/`](configs/opencode/command/):
 
-- `plannotator-review` - Interactive code review
 - `simplify` - Simplify over-engineered code for clarity and maintainability
 - `batch` - Run multiple tasks in parallel as worker tasks
 
@@ -836,12 +834,6 @@ Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/
 ```
 
 See [`configs/amp/AGENTS.md`](configs/amp/AGENTS.md) for agent guidelines.
-
-### Skills
-
-| Skill                | Description                                |
-| -------------------- | ------------------------------------------ |
-| `plannotator-review` | Interactive code review via Plannotator UI |
 
 </details>
 
@@ -1148,11 +1140,6 @@ Configuration is managed through:
         "@modelcontextprotocol/server-sequential-thinking"
       ],
       "enabled": true
-    },
-    "react-grab-mcp": {
-      "type": "local",
-      "command": ["npx", "-y", "@react-grab/mcp", "--stdio"],
-      "enabled": true
     }
   }
 }
@@ -1250,20 +1237,20 @@ Then register them in `.pi/settings.json`:
 
 **Package Overview:**
 
-| Package | Description |
-|---------|-------------|
-| `@plannotator/pi-extension` | Interactive plan review with visual annotation |
-| `pi-subagents` | Delegate tasks to subagents with chains, parallel execution, and TUI |
-| `pi-autoresearch` | Autonomous experiment loop for optimization targets |
-| `pi-fireworks-provider` | Fireworks AI provider for Kimi and other models |
-| `pi-hooks` | Collection of extensions (checkpoint, lsp, permission, ralph-loop, repeat) |
-| `pi-fff` | FFF-powered fuzzy file and content search |
-| `pi-annotate` | Visual annotation tool with inline note cards |
-| `pi-mcp-adapter` | MCP (Model Context Protocol) adapter for Pi |
-| `pi-simplify` | Reviews changed code for clarity, consistency, and maintainability |
-| `@devkade/pi-plan` | Read-only planning mode with approval-based execution |
-| `pi-manage-todo-list` | GitHub Copilot-style todo list management tool |
-| `pi-btw` | Parallel side conversations with `/btw` command |
+| Package                     | Description                                                                |
+| --------------------------- | -------------------------------------------------------------------------- |
+| `@plannotator/pi-extension` | Interactive plan review with visual annotation                             |
+| `pi-subagents`              | Delegate tasks to subagents with chains, parallel execution, and TUI       |
+| `pi-autoresearch`           | Autonomous experiment loop for optimization targets                        |
+| `pi-fireworks-provider`     | Fireworks AI provider for Kimi and other models                            |
+| `pi-hooks`                  | Collection of extensions (checkpoint, lsp, permission, ralph-loop, repeat) |
+| `pi-fff`                    | FFF-powered fuzzy file and content search                                  |
+| `pi-annotate`               | Visual annotation tool with inline note cards                              |
+| `pi-mcp-adapter`            | MCP (Model Context Protocol) adapter for Pi                                |
+| `pi-simplify`               | Reviews changed code for clarity, consistency, and maintainability         |
+| `@devkade/pi-plan`          | Read-only planning mode with approval-based execution                      |
+| `pi-manage-todo-list`       | GitHub Copilot-style todo list management tool                             |
+| `pi-btw`                    | Parallel side conversations with `/btw` command                            |
 
 ### Usage
 
