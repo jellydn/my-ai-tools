@@ -23,11 +23,11 @@
     },
     "react-grab-mcp": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@react-grab/mcp",
-        "--stdio"
-      ]
+      "args": ["-y", "@react-grab/mcp", "--stdio"]
+    },
+    "notion": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"]
     }
   },
   "security": {

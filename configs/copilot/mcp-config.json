@@ -34,6 +34,10 @@
 			"args": ["-y", "@react-grab/mcp", "--stdio"],
 			"env": {},
 			"tools": ["*"]
+		},
+		"notion": {
+			"type": "http",
+			"url": "https://mcp.notion.com/mcp"
 		}
 	}
 }
