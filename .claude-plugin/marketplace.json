@@ -130,17 +130,6 @@
 			"source": "./skills/tmux",
 			"category": "terminal-automation",
 			"homepage": "https://github.com/jellydn/logpilot"
-		},
-		{
-			"name": "plannotator-review",
-			"description": "Open interactive code review for current changes using Plannotator UI. Run plannotator review to open the interactive review interface.",
-			"version": "1.0.0",
-			"author": {
-				"name": "Dung Huynh Duc",
-				"email": "dung@productsway.com"
-			},
-			"source": "./skills/plannotator-review",
-			"category": "code-quality"
 		}
 	]
 }

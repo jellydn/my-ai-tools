@@ -56,6 +56,3 @@ theme = "kanagawa"
 
 [plugins."github@openai-curated"]
 enabled = true
-
-[projects."/Users/huynhdung/src/tries/2026-01-30-jellydn-VoiceInk"]
-trust_level = "trusted"
