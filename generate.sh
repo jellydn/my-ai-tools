@@ -4,7 +4,9 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
+BACKUP_DIR="$SCRIPT_DIR/.backup/generate-$(date +%Y%m%d-%H%M%S)"
 DRY_RUN=false
+NO_BACKUP=false
 
 for arg in "$@"; do
 	case $arg in
@@ -12,13 +14,45 @@ for arg in "$@"; do
 		DRY_RUN=true
 		shift
 		;;
+	--no-backup)
+		NO_BACKUP=true
+		shift
+		;;
 	*)
 		echo "Unknown option: $arg"
-		echo "Usage: $0 [--dry-run]"
+		echo "Usage: $0 [--dry-run] [--no-backup]"
 		exit 1
 		;;
 	esac
 done
+
+# Backup existing repository configs before overwriting
+backup_existing_configs() {
+	if [ "$NO_BACKUP" = true ] || [ "$DRY_RUN" = true ]; then
+		return 0
+	fi
+
+	log_info "Creating backup of existing repository configs..."
+	execute "mkdir -p '$BACKUP_DIR'"
+
+	local backup_count=0
+	for config_dir in "$SCRIPT_DIR"/configs/*/; do
+		if [ -d "$config_dir" ]; then
+			local dir_name
+			dir_name=$(basename "$config_dir")
+			if execute "cp -r '$config_dir' '$BACKUP_DIR/' 2>/dev/null"; then
+				backup_count=$((backup_count + 1))
+			fi
+		fi
+	done
+
+	if [ $backup_count -gt 0 ]; then
+		log_success "Backup created: $BACKUP_DIR ($backup_count config directories)"
+	else
+		log_info "No existing configs to backup"
+		rmdir "$BACKUP_DIR" 2>/dev/null || true
+	fi
+}
 
 skill_exists_in_plugins() {
 	local skill_name="$1"
@@ -449,6 +483,10 @@ main() {
 		echo
 	fi
 
+	# Backup existing configs before overwriting
+	backup_existing_configs
+	echo
+
 	log_info "Generating configs from user directories..."
 	echo
 
@@ -493,6 +531,9 @@ main() {
 
 	log_success "Config generation complete!"
 	echo
+	if [ "$NO_BACKUP" != true ] && [ "$DRY_RUN" != true ] && [ -d "$BACKUP_DIR" ]; then
+		echo "Backup of previous configs: $BACKUP_DIR"
+	fi
 	echo "Review changes with: git diff"
 	echo "Commit changes with: git add . && git commit -m 'Update configs'"
 }

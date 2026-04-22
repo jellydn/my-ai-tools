@@ -58,11 +58,6 @@
 			"enabled": true,
 			"type": "local"
 		},
-		"chrome-devtools": {
-			"enabled": true,
-			"type": "local",
-			"command": ["npx", "-y", "chrome-devtools-mcp@latest"]
-		},
 		"fff": {
 			"type": "local",
 			"command": ["fff-mcp"],
@@ -80,6 +75,11 @@
 		"react-grab-mcp": {
 			"type": "local",
 			"command": ["npx", "-y", "@react-grab/mcp", "--stdio"]
+		},
+		"notion": {
+			"type": "local",
+			"command": ["npx", "-y", "mcp-remote", "https://mcp.notion.com/mcp"],
+			"enabled": true
 		}
 	},
 	"plugin": ["@plannotator/opencode@latest"],

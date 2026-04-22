@@ -7,10 +7,6 @@
 		"context7": {
 			"url": "https://mcp.context7.com/mcp"
 		},
-		"chrome-devtools": {
-			"command": "npx",
-			"args": ["chrome-devtools-mcp@latest"]
-		},
 		"sequential-thinking": {
 			"command": "npx",
 			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
@@ -22,15 +18,19 @@
 		"fff": {
 			"command": "fff-mcp",
 			"args": []
-    },
-    "react-grab-mcp": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@react-grab/mcp",
-        "--stdio"
-      ]
-    }
+		},
+		"react-grab-mcp": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@react-grab/mcp",
+				"--stdio"
+			]
+		},
+		"notion": {
+			"command": "npx",
+			"args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"]
+		}
 	},
 	"amp.terminal.theme": "kanagawa",
 	"amp.terminal.customThemes": {
