@@ -1113,30 +1113,165 @@ copy_claude_configs() {
 	log_success "Claude Code configs copied"
 }
 
+# Install MCP servers from central registry with interactive prompts
+# Usage: install_mcp_servers_from_registry [registry_file]
+install_mcp_servers_from_registry() {
+	local registry_file="${1:-$SCRIPT_DIR/configs/mcp-registry.json}"
+	local installed_count=0
+	local skipped_count=0
+	local failed_count=0
+
+	if ! command -v jq &>/dev/null; then
+		log_warning "jq not found. Cannot parse MCP registry. Install jq to use registry-based MCP installation."
+		return 1
+	fi
+
+	if [ ! -f "$registry_file" ]; then
+		log_warning "MCP registry not found: $registry_file"
+		return 1
+	fi
+
+	log_info "Loading MCP servers from registry..."
+
+	# Get list of server names from registry
+	local servers
+	servers=$(jq -r '.mcpServers | keys[]' "$registry_file" 2>/dev/null)
+
+	if [ -z "$servers" ]; then
+		log_warning "No MCP servers found in registry"
+		return 1
+	fi
+
+	# Track installation summary
+	local summary_lines=()
+
+	# Iterate through each server in the registry
+	while IFS= read -r server_name; do
+		local name description command args requires category
+		name=$(jq -r ".mcpServers[\"$server_name\"].name" "$registry_file")
+		description=$(jq -r ".mcpServers[\"$server_name\"].description" "$registry_file")
+		command=$(jq -r ".mcpServers[\"$server_name\"].command" "$registry_file")
+		args=$(jq -r ".mcpServers[\"$server_name\"].args | @sh" "$registry_file")
+		requires=$(jq -r ".mcpServers[\"$server_name\"].requires | @sh" "$registry_file")
+		category=$(jq -r ".mcpServers[\"$server_name\"].category" "$registry_file")
+
+		# Check if prerequisites are met
+		local prereqs_met=true
+		local missing_prereqs=()
+		if [ -n "$requires" ] && [ "$requires" != "''" ]; then
+			# Parse the shell-escaped array
+			eval "local prereq_array=$requires"
+			for prereq in "${prereq_array[@]}"; do
+				if ! command -v "$prereq" &>/dev/null; then
+					prereqs_met=false
+					missing_prereqs+=("$prereq")
+				fi
+			done
+		fi
+
+		# Skip if prerequisites not met
+		if [ "$prereqs_met" = false ]; then
+			log_info "Skipping $name - requires: ${missing_prereqs[*]}"
+			summary_lines+=("⏭️  $name (skipped - requires: ${missing_prereqs[*]})")
+			skipped_count=$((skipped_count + 1))
+			continue
+		fi
+
+		# Build the install command from command + args
+		eval "local args_array=$args"
+		local full_command="$command"
+		for arg in "${args_array[@]}"; do
+			full_command="$full_command $arg"
+		done
+
+		# Prompt user for installation
+		local prompt_msg="Install $name MCP server"
+		[ -n "$description" ] && prompt_msg="$prompt_msg ($description)"
+		[ -n "$category" ] && prompt_msg="$prompt_msg [category: $category]"
+
+		if [ "$YES_TO_ALL" = true ]; then
+			# Auto-accept in non-interactive mode
+			log_info "Auto-installing $name (--yes flag)"
+			if claude mcp add --scope user --transport stdio "$server_name" -- $full_command 2>/dev/null; then
+				log_success "$name installed"
+				summary_lines+=("✅ $name")
+				installed_count=$((installed_count + 1))
+			else
+				log_warning "$name installation failed or already installed"
+				summary_lines+=("⚠️  $name (failed or already installed)")
+				failed_count=$((failed_count + 1))
+			fi
+		elif [ -t 0 ]; then
+			# Interactive mode - ask user
+			if prompt_yn "$prompt_msg"; then
+				log_info "Installing $name..."
+				if claude mcp add --scope user --transport stdio "$server_name" -- $full_command 2>/dev/null; then
+					log_success "$name installed"
+					summary_lines+=("✅ $name")
+					installed_count=$((installed_count + 1))
+				else
+					log_warning "$name installation failed or already installed"
+					summary_lines+=("⚠️  $name (failed or already installed)")
+					failed_count=$((failed_count + 1))
+				fi
+			else
+				log_info "Skipped $name (user declined)"
+				summary_lines+=("❌ $name (declined)")
+				skipped_count=$((skipped_count + 1))
+			fi
+		else
+			# Non-interactive without --yes: skip
+			log_info "Skipping $name (non-interactive mode, use --yes to auto-install)"
+			summary_lines+=("⏭️  $name (skipped - non-interactive)")
+			skipped_count=$((skipped_count + 1))
+		fi
+	done <<< "$servers"
+
+	# Print summary
+	log_info ""
+	log_info "MCP Server Installation Summary:"
+	log_info "────────────────────────────────"
+	for line in "${summary_lines[@]}"; do
+		log_info "  $line"
+	done
+	log_info "────────────────────────────────"
+	log_info "Installed: $installed_count | Skipped: $skipped_count | Failed: $failed_count"
+
+	return 0
+}
+
 setup_claude_mcp_servers() {
 	if ! command -v claude &>/dev/null; then
 		return 0
 	fi
 
 	log_info "Setting up Claude Code MCP servers (global scope)..."
-	install_mcp_interactive "context7" "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest" "documentation lookup"
-	install_mcp_interactive "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking" "multi-step reasoning"
 
-	handle_qmd_installation_if_needed
-	if command -v qmd &>/dev/null; then
-		install_mcp_interactive "qmd" "claude mcp add --scope user --transport stdio qmd -- qmd mcp" "knowledge management"
+	# Try registry-based installation first
+	if install_mcp_servers_from_registry; then
+		log_success "MCP server setup complete via registry"
 	else
-		log_warning "qmd not found. MCP setup skipped. Install with: bun install -g @tobilu/qmd"
-	fi
+		# Fallback to legacy method if registry fails
+		log_info "Falling back to legacy MCP installation method..."
+		install_mcp_interactive "context7" "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest" "documentation lookup"
+		install_mcp_interactive "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking" "multi-step reasoning"
 
-	handle_fff_mcp_installation_if_needed
-	if command -v fff-mcp &>/dev/null; then
-		install_mcp_interactive "fff" "claude mcp add --scope user --transport stdio fff -- fff-mcp" "fast file search with memory"
-	else
-		log_warning "fff-mcp not found. MCP setup skipped. Install with: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
-	fi
+		handle_qmd_installation_if_needed
+		if command -v qmd &>/dev/null; then
+			install_mcp_interactive "qmd" "claude mcp add --scope user --transport stdio qmd -- qmd mcp" "knowledge management"
+		else
+			log_warning "qmd not found. MCP setup skipped. Install with: bun install -g @tobilu/qmd"
+		fi
 
-	log_success "MCP server setup complete (global scope)"
+		handle_fff_mcp_installation_if_needed
+		if command -v fff-mcp &>/dev/null; then
+			install_mcp_interactive "fff" "claude mcp add --scope user --transport stdio fff -- fff-mcp" "fast file search with memory"
+		else
+			log_warning "fff-mcp not found. MCP setup skipped. Install with: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
+		fi
+
+		log_success "MCP server setup complete (legacy mode)"
+	fi
 }
 
 copy_opencode_configs() {
