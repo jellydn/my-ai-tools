@@ -723,6 +723,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.pi" "$BACKUP_DIR" "pi"
 		copy_config_dir "$HOME/.cursor" "$BACKUP_DIR" "cursor"
 		copy_config_dir "$HOME/.factory" "$BACKUP_DIR" "factory"
+		copy_config_dir "$HOME/.cline" "$BACKUP_DIR" "cline"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -924,6 +925,18 @@ install_factory() {
 	run_installer "Factory Droid" "_run_factory_install" "command -v droid" ""
 }
 
+install_cline() {
+	_run_cline_install() {
+		if command -v cline &>/dev/null; then
+			log_warning "Cline is already installed"
+		else
+			execute "npm install -g cline"
+			log_success "Cline installed"
+		fi
+	}
+	run_installer "Cline" "_run_cline_install" "command -v cline" ""
+}
+
 # Helper: Copy non-marketplace skills to universal directory only
 # Usage: copy_non_marketplace_skills "source_dir"
 copy_non_marketplace_skills() {
@@ -1006,6 +1019,7 @@ copy_configurations() {
 	copy_copilot_configs
 	copy_cursor_configs
 	copy_factory_configs
+	copy_cline_configs
 	copy_best_practices
 }
 
@@ -1352,6 +1366,32 @@ copy_factory_configs() {
 	fi
 
 	log_success "Factory Droid configs copied"
+}
+
+copy_cline_configs() {
+	local cline_status
+	cline_status=$(detect_tool --detailed "cline" "$HOME/.cline") || cline_status="missing"
+	if [ "$cline_status" = "missing" ]; then
+		log_info "Cline not detected - skipping Cline config installation"
+		return 0
+	fi
+
+	log_info "Detected Cline (via $cline_status)"
+	execute_quoted mkdir -p "$HOME/.cline/data/settings"
+	execute_quoted mkdir -p "$HOME/.cline/kanban"
+
+	if [ -f "$SCRIPT_DIR/configs/cline/mcp-settings.json" ]; then
+		execute_quoted cp "$SCRIPT_DIR/configs/cline/mcp-settings.json" "$HOME/.cline/data/settings/cline_mcp_settings.json"
+		log_success "Cline MCP settings copied"
+	fi
+
+	copy_config_file "$SCRIPT_DIR/configs/cline/models.json" "$HOME/.cline/data/settings" || true
+	copy_config_file "$SCRIPT_DIR/configs/cline/providers.json" "$HOME/.cline/data/settings" || true
+	copy_config_file "$SCRIPT_DIR/configs/cline/kanban-config.json" "$HOME/.cline/kanban" || true
+
+	copy_non_marketplace_skills "$SCRIPT_DIR/configs/cline/skills"
+
+	log_success "Cline configs copied"
 }
 
 copy_best_practices() {
@@ -1868,7 +1908,7 @@ main() {
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo          ║"
-	echo "║  Copilot • Cursor • Factory Droid                                    ║"
+	echo "║  Copilot • Cursor • Factory Droid • Cline                            ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -1923,6 +1963,9 @@ main() {
 	echo
 
 	install_factory
+	echo
+
+	install_cline
 	echo
 
 	copy_configurations

@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -1487,6 +1487,110 @@ droid --resume
 # Check for updates
 droid update
 ```
+
+</details>
+
+---
+
+## 💻 Cline (Optional)
+
+AI coding assistant that runs in your terminal — built for high-performance agentic coding with support for multiple providers. [Homepage](https://cline.bot) | [Docs](https://docs.cline.bot)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Installation
+
+```bash
+npm install -g cline
+```
+
+### Authentication
+
+Cline supports multiple authentication methods:
+
+**Option 1: OAuth (Cline Account)**
+
+```bash
+cline
+# Follow the browser authentication flow
+```
+
+**Option 2: API Keys**
+
+Configure API keys via the Cline dashboard or set environment variables:
+
+```bash
+export FIREWORKS_API_KEY="your_key_here"
+export OPENAI_API_KEY="your_key_here"
+```
+
+### Configuration
+
+Cline configs are stored in `configs/cline/` and installed to `~/.cline/`:
+
+- [`mcp-settings.json`](configs/cline/mcp-settings.json) - MCP server configurations, installed to `~/.cline/data/settings/cline_mcp_settings.json`
+- [`models.json`](configs/cline/models.json) - Model configurations
+- [`providers.json`](configs/cline/providers.json.example) - Provider credentials (copy from example and fill in your keys)
+- [`kanban-config.json`](configs/cline/kanban-config.json) - Kanban board settings
+
+### MCP Servers
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "alwaysAllow": [],
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "sequential-thinking": {
+      "alwaysAllow": [],
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "qmd": {
+      "alwaysAllow": [],
+      "command": "qmd",
+      "args": ["mcp"]
+    },
+    "fff": {
+      "alwaysAllow": [],
+      "command": "fff-mcp",
+      "args": []
+    },
+    "react-grab-mcp": {
+      "alwaysAllow": [],
+      "command": "npx",
+      "args": ["-y", "@react-grab/mcp", "--stdio"]
+    },
+    "notion": {
+      "alwaysAllow": [],
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"]
+    }
+  }
+}
+```
+
+### Usage
+
+```bash
+# Start Cline interactive mode
+cline
+
+# Run a specific task
+cline "Refactor this component to use TypeScript"
+
+# Use with specific model
+cline --model accounts/fireworks/routers/kimi-k2p5-turbo
+
+# List available commands
+cline --help
+```
+
+### Skills
+
+Cline uses the universal skills directory at `~/.agents/skills/`. The installer automatically manages skills from the [`skills/`](skills/) folder.
 
 </details>
 

@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "lastUsedProvider": "firepass",
+  "providers": {
+    "cline": {
+      "settings": {
+        "provider": "cline",
+        "auth": {
+          "accessToken": "YOUR_OAUTH_ACCESS_TOKEN_HERE",
+          "refreshToken": "YOUR_REFRESH_TOKEN_HERE",
+          "expiresAt": 1776930569000
+        }
+      },
+      "updatedAt": "2026-04-23T06:49:32.784Z",
+      "tokenSource": "oauth"
+    },
+    "firepass": {
+      "settings": {
+        "provider": "firepass",
+        "apiKey": "YOUR_FIREWORKS_API_KEY_HERE",
+        "model": "accounts/fireworks/routers/kimi-k2p5-turbo",
+        "baseUrl": "https://api.fireworks.ai/inference/v1"
+      },
+      "updatedAt": "2026-04-23T06:55:07.354Z",
+      "tokenSource": "manual"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "mcpServers": {
+    "context7": {
+      "alwaysAllow": [],
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "sequential-thinking": {
+      "alwaysAllow": [],
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "qmd": {
+      "alwaysAllow": [],
+      "command": "qmd",
+      "args": [
+        "mcp"
+      ]
+    },
+    "fff": {
+      "alwaysAllow": [],
+      "command": "fff-mcp",
+      "args": []
+    },
+    "react-grab-mcp": {
+      "alwaysAllow": [],
+      "command": "npx",
+      "args": [
+        "-y",
+        "@react-grab/mcp",
+        "--stdio"
+      ]
+    },
+    "notion": {
+      "alwaysAllow": [],
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.notion.com/mcp"
+      ]
+    }
+  }
+}

@@ -408,6 +408,30 @@ generate_factory_configs() {
 	log_success "Factory Droid configs generated"
 }
 
+generate_cline_configs() {
+	log_info "Generating Cline configs..."
+
+	if [ ! -d "$HOME/.cline" ]; then
+		log_warning "Cline config directory not found: $HOME/.cline"
+		return 0
+	fi
+
+	execute "mkdir -p $SCRIPT_DIR/configs/cline"
+
+	# Copy settings files
+	copy_single "$HOME/.cline/data/settings/cline_mcp_settings.json" "$SCRIPT_DIR/configs/cline/mcp-settings.json"
+	copy_single "$HOME/.cline/data/settings/models.json" "$SCRIPT_DIR/configs/cline/models.json"
+	copy_single "$HOME/.cline/data/settings/providers.json" "$SCRIPT_DIR/configs/cline/providers.json"
+
+	# Copy kanban config
+	copy_single "$HOME/.cline/kanban/config.json" "$SCRIPT_DIR/configs/cline/kanban-config.json"
+
+	# Copy skills with filtering
+	copy_skills_with_filter "$HOME/.cline/skills" "$SCRIPT_DIR/configs/cline/skills" "Cline"
+
+	log_success "Cline configs generated"
+}
+
 generate_best_practices() {
 	log_info "Generating best-practices.md..."
 	copy_single "$HOME/.ai-tools/best-practices.md" "$SCRIPT_DIR/configs/best-practices.md"
@@ -480,6 +504,9 @@ main() {
 	echo
 
 	generate_factory_configs
+	echo
+
+	generate_cline_configs
 	echo
 
 	generate_best_practices

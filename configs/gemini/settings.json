@@ -23,11 +23,19 @@
     },
     "react-grab-mcp": {
       "command": "npx",
-      "args": ["-y", "@react-grab/mcp", "--stdio"]
+      "args": [
+        "-y",
+        "@react-grab/mcp",
+        "--stdio"
+      ]
     },
     "notion": {
       "command": "npx",
-      "args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"]
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.notion.com/mcp"
+      ]
     }
   },
   "security": {
@@ -54,8 +62,10 @@
         "sandbox",
         "model-name",
         "context-used",
-        "quota"
-      ]
+        "quota",
+        "code-changes"
+      ],
+      "showLabels": true
     },
     "showMemoryUsage": false,
     "showCitations": true,
@@ -70,7 +80,8 @@
     },
     "plan": {
       "enabled": true
-    }
+    },
+    "preferredEditor": "zed"
   },
   "context": {
     "loadMemoryFromIncludeDirectories": true,
