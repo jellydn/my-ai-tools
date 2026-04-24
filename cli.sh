@@ -311,6 +311,57 @@ handle_fff_mcp_installation_if_needed() {
 	fi
 }
 
+install_logpilot_now() {
+	if command -v logpilot &>/dev/null; then
+		log_success "logpilot already installed"
+		return 0
+	fi
+
+	if ! command -v cargo &>/dev/null; then
+		log_error "cargo not found. Cannot install logpilot. Install Rust first: https://rustup.rs/"
+		return 1
+	fi
+
+	log_info "Installing logpilot via cargo..."
+	if execute "cargo install logpilot"; then
+		# Ensure cargo bin is in PATH
+		local cargo_bin="${CARGO_HOME:-$HOME/.cargo}/bin"
+		if [[ ":$PATH:" != *":$cargo_bin:"* ]]; then
+			export PATH="$cargo_bin:$PATH"
+		fi
+		log_success "logpilot installed successfully"
+		return 0
+	fi
+
+	log_error "Failed to install logpilot"
+	log_info "You can install it manually: cargo install logpilot"
+	return 1
+}
+
+handle_logpilot_installation_if_needed() {
+	if command -v logpilot &>/dev/null; then
+		log_success "logpilot found"
+		return 0
+	fi
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-installing logpilot (--yes flag)..."
+		if ! install_logpilot_now; then
+			log_warning "Continuing without logpilot. Log monitoring MCP will be unavailable."
+		fi
+	elif [ -t 0 ]; then
+		if prompt_yn "logpilot is not installed. Install it now (AI-powered log analysis)"; then
+			if ! install_logpilot_now; then
+				log_warning "Continuing without logpilot. Log monitoring MCP will be unavailable."
+			fi
+		else
+			log_warning "logpilot not installed. Log monitoring MCP will be unavailable."
+		fi
+	else
+		log_warning "logpilot not installed. Log monitoring MCP will be unavailable."
+	fi
+}
+
 resolve_installer_checksum() {
 	local installer="$1"
 	local checksum_url=""
@@ -1315,7 +1366,7 @@ install_mcp_servers_from_registry() {
 		requires=$(jq -r ".mcpServers[\"$server_name\"].requires | @sh" "$registry_file")
 		category=$(jq -r ".mcpServers[\"$server_name\"].category" "$registry_file")
 
-		# Check if prerequisites are met
+		# Check if prerequisites are met (with auto-install for known tools)
 		local prereqs_met=true
 		local missing_prereqs=()
 		if [ -n "$requires" ] && [ "$requires" != "''" ]; then
@@ -1326,6 +1377,21 @@ install_mcp_servers_from_registry() {
 			done < <(jq -r ".mcpServers[\"$server_name\"].requires[]?" "$registry_file" 2>/dev/null | tr '\n' '\0')
 			for prereq in "${prereq_array[@]}"; do
 				if ! command -v "$prereq" &>/dev/null; then
+					# Try to auto-install known prerequisites
+					case "$prereq" in
+						"fff-mcp")
+							log_info "Auto-installing prerequisite: $prereq"
+							if install_fff_mcp_now; then
+								continue
+							fi
+							;;
+						"logpilot")
+							log_info "Auto-installing prerequisite: $prereq"
+							if install_logpilot_now; then
+								continue
+							fi
+							;;
+					esac
 					prereqs_met=false
 					missing_prereqs+=("$prereq")
 				fi
