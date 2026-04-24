@@ -1309,6 +1309,8 @@ install_mcp_servers_from_registry() {
 		name=$(jq -r ".mcpServers[\"$server_name\"].name" "$registry_file")
 		description=$(jq -r ".mcpServers[\"$server_name\"].description" "$registry_file")
 		command=$(jq -r ".mcpServers[\"$server_name\"].command" "$registry_file")
+		# Substitute {{SCRIPT_RUNNER}} placeholder with actual script runner
+		command="${command//\{\{SCRIPT_RUNNER\}\}/$script_runner}"
 		args=$(jq -r ".mcpServers[\"$server_name\"].args | @sh" "$registry_file")
 		requires=$(jq -r ".mcpServers[\"$server_name\"].requires | @sh" "$registry_file")
 		category=$(jq -r ".mcpServers[\"$server_name\"].category" "$registry_file")
@@ -1317,8 +1319,11 @@ install_mcp_servers_from_registry() {
 		local prereqs_met=true
 		local missing_prereqs=()
 		if [ -n "$requires" ] && [ "$requires" != "''" ]; then
-			# Parse the shell-escaped array
-			eval "local prereq_array=$requires"
+			# Parse the shell-escaped array safely
+			local prereq_array=()
+			while IFS= read -r -d '' prereq; do
+				prereq_array+=("$prereq")
+			done < <(jq -r ".mcpServers[\"$server_name\"].requires[]?" "$registry_file" 2>/dev/null | tr '\n' '\0')
 			for prereq in "${prereq_array[@]}"; do
 				if ! command -v "$prereq" &>/dev/null; then
 					prereqs_met=false
@@ -1335,8 +1340,11 @@ install_mcp_servers_from_registry() {
 			continue
 		fi
 
-		# Build the install command from command + args
-		eval "local args_array=$args"
+		# Build the install command from command + args safely
+		local args_array=()
+		while IFS= read -r -d '' arg; do
+			args_array+=("$arg")
+		done < <(jq -r ".mcpServers[\"$server_name\"].args[]?" "$registry_file" 2>/dev/null | tr '\n' '\0')
 		local full_command="$command"
 		for arg in "${args_array[@]}"; do
 			full_command="$full_command $arg"
