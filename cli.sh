@@ -1357,19 +1357,19 @@ install_mcp_servers_from_registry() {
 	# Iterate through each server in the registry
 	while IFS= read -r server_name; do
 		local name description command args requires category
-		name=$(jq -r ".mcpServers[\"$server_name\"].name" "$registry_file")
-		description=$(jq -r ".mcpServers[\"$server_name\"].description" "$registry_file")
-		command=$(jq -r ".mcpServers[\"$server_name\"].command" "$registry_file")
+		name=$(jq -r ".mcpServers[\"$server_name\"].name // empty" "$registry_file")
+		description=$(jq -r ".mcpServers[\"$server_name\"].description // empty" "$registry_file")
+		command=$(jq -r ".mcpServers[\"$server_name\"].command // empty" "$registry_file")
 		# Substitute {{SCRIPT_RUNNER}} placeholder with actual script runner
 		command="${command//\{\{SCRIPT_RUNNER\}\}/$script_runner}"
-		args=$(jq -r ".mcpServers[\"$server_name\"].args | @sh" "$registry_file")
-		requires=$(jq -r ".mcpServers[\"$server_name\"].requires | @sh" "$registry_file")
-		category=$(jq -r ".mcpServers[\"$server_name\"].category" "$registry_file")
+		args=$(jq -r ".mcpServers[\"$server_name\"].args // [] | @sh" "$registry_file")
+		requires=$(jq -r ".mcpServers[\"$server_name\"].requires // [] | @sh" "$registry_file")
+		category=$(jq -r ".mcpServers[\"$server_name\"].category // empty" "$registry_file")
 
 		# Check if prerequisites are met (with auto-install for known tools)
 		local prereqs_met=true
 		local missing_prereqs=()
-		if [ -n "$requires" ] && [ "$requires" != "''" ]; then
+		if [ -n "$requires" ] && [ "$requires" != "''" ] && [ "$requires" != "null" ]; then
 			# Parse the shell-escaped array safely
 			local prereq_array=()
 			while IFS= read -r -d '' prereq; do
@@ -1384,16 +1384,22 @@ install_mcp_servers_from_registry() {
 							if install_fff_mcp_now; then
 								continue
 							fi
+							prereqs_met=false
+							missing_prereqs+=("$prereq")
 							;;
 						"logpilot")
 							log_info "Auto-installing prerequisite: $prereq"
 							if install_logpilot_now; then
 								continue
 							fi
+							prereqs_met=false
+							missing_prereqs+=("$prereq")
+							;;
+						*)
+							prereqs_met=false
+							missing_prereqs+=("$prereq")
 							;;
 					esac
-					prereqs_met=false
-					missing_prereqs+=("$prereq")
 				fi
 			done
 		fi
@@ -1411,9 +1417,14 @@ install_mcp_servers_from_registry() {
 		while IFS= read -r -d '' arg; do
 			args_array+=("$arg")
 		done < <(jq -r ".mcpServers[\"$server_name\"].args[]?" "$registry_file" 2>/dev/null | tr '\n' '\0')
-		local full_command="$command"
+
+		# Build install command with properly quoted arguments
+		local install_cmd="claude mcp add --scope user --transport stdio $server_name --"
+		# Quote the command (which may contain the substituted script runner)
+		install_cmd="$install_cmd $(printf '%q' "$command")"
+		# Add each argument with proper shell quoting
 		for arg in "${args_array[@]}"; do
-			full_command="$full_command $arg"
+			install_cmd="$install_cmd $(printf '%q' "$arg")"
 		done
 
 		# Prompt user for installation
@@ -1424,28 +1435,42 @@ install_mcp_servers_from_registry() {
 		if [ "$YES_TO_ALL" = true ]; then
 			# Auto-accept in non-interactive mode
 			log_info "Auto-installing $name (--yes flag)"
-			if claude mcp add --scope user --transport stdio "$server_name" -- $full_command 2>/dev/null; then
+			local err_file="/tmp/claude-${server_name}.err"
+			if execute "$install_cmd" 2>"$err_file"; then
 				log_success "$name installed"
 				summary_lines+=("✅ $name")
 				installed_count=$((installed_count + 1))
 			else
-				log_warning "$name installation failed or already installed"
-				summary_lines+=("⚠️  $name (failed or already installed)")
-				failed_count=$((failed_count + 1))
+				if grep -qi "already" "$err_file" 2>/dev/null; then
+					log_info "$name already installed"
+					summary_lines+=("✅ $name (already installed)")
+				else
+					log_warning "$name installation failed"
+					summary_lines+=("⚠️  $name (failed)")
+					failed_count=$((failed_count + 1))
+				fi
 			fi
+			rm -f "$err_file"
 		elif [ -t 0 ]; then
 			# Interactive mode - ask user
 			if prompt_yn "$prompt_msg"; then
 				log_info "Installing $name..."
-				if claude mcp add --scope user --transport stdio "$server_name" -- $full_command 2>/dev/null; then
+				local err_file="/tmp/claude-${server_name}.err"
+				if execute "$install_cmd" 2>"$err_file"; then
 					log_success "$name installed"
 					summary_lines+=("✅ $name")
 					installed_count=$((installed_count + 1))
 				else
-					log_warning "$name installation failed or already installed"
-					summary_lines+=("⚠️  $name (failed or already installed)")
-					failed_count=$((failed_count + 1))
+					if grep -qi "already" "$err_file" 2>/dev/null; then
+						log_info "$name already installed"
+						summary_lines+=("✅ $name (already installed)")
+					else
+						log_warning "$name installation failed"
+						summary_lines+=("⚠️  $name (failed)")
+						failed_count=$((failed_count + 1))
+					fi
 				fi
+				rm -f "$err_file"
 			else
 				log_info "Skipped $name (user declined)"
 				summary_lines+=("❌ $name (declined)")
