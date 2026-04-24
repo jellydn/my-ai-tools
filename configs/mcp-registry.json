@@ -3,7 +3,7 @@
     "context7": {
       "name": "context7",
       "description": "documentation lookup for libraries and frameworks",
-      "command": "npx",
+      "command": "{{SCRIPT_RUNNER}}",
       "args": ["-y", "@upstash/context7-mcp@latest"],
       "requires": [],
       "category": "documentation"
@@ -11,7 +11,7 @@
     "sequential-thinking": {
       "name": "sequential-thinking",
       "description": "multi-step reasoning and problem solving",
-      "command": "npx",
+      "command": "{{SCRIPT_RUNNER}}",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
       "requires": [],
       "category": "reasoning"
@@ -35,7 +35,7 @@
     "chrome-devtools": {
       "name": "chrome-devtools",
       "description": "Chrome DevTools integration for browser automation",
-      "command": "npx",
+      "command": "{{SCRIPT_RUNNER}}",
       "args": ["-y", "chrome-devtools-mcp@latest"],
       "requires": [],
       "category": "browser"
@@ -43,7 +43,7 @@
     "react-grab-mcp": {
       "name": "react-grab-mcp",
       "description": "React component capture and inspection",
-      "command": "npx",
+      "command": "{{SCRIPT_RUNNER}}",
       "args": ["-y", "@react-grab/mcp", "--stdio"],
       "requires": [],
       "category": "frontend"

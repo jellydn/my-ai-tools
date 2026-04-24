@@ -1279,7 +1279,17 @@ install_mcp_servers_from_registry() {
 		return 1
 	fi
 
-	log_info "Loading MCP servers from registry..."
+	# Detect script runner (bunx preferred, fallback to npx)
+	local script_runner
+	script_runner=$(_detect_script_runner)
+
+	if [ -z "$script_runner" ]; then
+		log_warning "No script runner found (bunx or npx). Cannot install registry MCP servers."
+		return 1
+	fi
+
+	log_info "Loading MCP servers from registry (using $script_runner)..."
+	log_info "Script runner: $script_runner"
 
 	# Get list of server names from registry
 	local servers
