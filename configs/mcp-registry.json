@@ -32,14 +32,6 @@
       "requires": ["fff-mcp"],
       "category": "search"
     },
-    "chrome-devtools": {
-      "name": "chrome-devtools",
-      "description": "Chrome DevTools integration for browser automation",
-      "command": "{{SCRIPT_RUNNER}}",
-      "args": ["-y", "chrome-devtools-mcp@latest"],
-      "requires": [],
-      "category": "browser"
-    },
     "react-grab-mcp": {
       "name": "react-grab-mcp",
       "description": "React component capture and inspection",

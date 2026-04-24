@@ -26,10 +26,6 @@
 				"@react-grab/mcp",
 				"--stdio"
 			]
-		},
-		"notion": {
-			"command": "npx",
-			"args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"]
 		}
 	},
 	"amp.terminal.theme": "kanagawa",
