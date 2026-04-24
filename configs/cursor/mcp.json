@@ -1,20 +1,11 @@
 {
   "mcpServers": {
     "context7": {
-      "command": "bunx",
+      "command": "npx",
       "args": [
         "-y",
         "@upstash/context7-mcp@latest"
       ]
-    },
-    "chrome-devtools": {
-      "command": "npx -y chrome-devtools-mcp@latest",
-      "env": {},
-      "args": []
-    },
-    "fff": {
-      "command": "fff-mcp",
-      "args": []
     },
     "sequential-thinking": {
       "command": "npx",
@@ -24,6 +15,14 @@
       "command": "qmd",
       "args": ["mcp"]
     },
+    "fff": {
+      "command": "fff-mcp",
+      "args": []
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"]
+    },
     "react-grab-mcp": {
       "command": "npx",
       "args": [
@@ -31,6 +30,10 @@
         "@react-grab/mcp",
         "--stdio"
       ]
+    },
+    "logpilot": {
+      "command": "logpilot",
+      "args": ["mcp-server"]
     }
   }
 }

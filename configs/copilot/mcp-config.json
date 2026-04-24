@@ -27,6 +27,27 @@
 			"args": ["mcp"],
 			"env": {},
 			"tools": ["*"]
+		},
+		"chrome-devtools": {
+			"type": "local",
+			"command": "npx",
+			"args": ["-y", "chrome-devtools-mcp@latest"],
+			"env": {},
+			"tools": ["*"]
+		},
+		"react-grab-mcp": {
+			"type": "local",
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"],
+			"env": {},
+			"tools": ["*"]
+		},
+		"logpilot": {
+			"type": "local",
+			"command": "logpilot",
+			"args": ["mcp-server"],
+			"env": {},
+			"tools": ["*"]
 		}
 	}
 }
