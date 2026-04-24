@@ -60,8 +60,7 @@ theme = "kanagawa"
 [plugins."github@openai-curated"]
 enabled = true
 
-[projects."/Users/huynhdung/src/tries/2026-04-22-jellydn-my-ai-tools"]
-trust_level = "trusted"
-
-[projects."/Users/huynhdung/src/tries/2026-02-26-aircarbon-ac-monorepo2"]
-trust_level = "trusted"
+# Add your own project-specific trust settings here
+# Example:
+# [projects."/path/to/your/project"]
+# trust_level = "trusted"
