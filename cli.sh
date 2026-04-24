@@ -754,6 +754,18 @@ _detect_package_manager() {
 	fi
 }
 
+# Detect available script runner (bunx preferred, fallback to npx)
+# Outputs: script runner command or empty if none found
+_detect_script_runner() {
+	if command -v bunx &>/dev/null; then
+		echo "bunx"
+	elif command -v npx &>/dev/null; then
+		echo "npx"
+	else
+		echo ""
+	fi
+}
+
 install_claude_code() {
 	log_info "Installing Claude Code..."
 
@@ -1389,8 +1401,14 @@ setup_claude_mcp_servers() {
 	else
 		# Fallback to legacy method if registry fails
 		log_info "Falling back to legacy MCP installation method..."
-		install_mcp_interactive "context7" "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest" "documentation lookup"
-		install_mcp_interactive "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking" "multi-step reasoning"
+		local script_runner
+		script_runner=$(_detect_script_runner)
+		if [ -z "$script_runner" ]; then
+			log_warning "No script runner found (bunx or npx). Skipping legacy MCP installation."
+		else
+			install_mcp_interactive "context7" "claude mcp add --scope user --transport stdio context7 -- $script_runner -y @upstash/context7-mcp@latest" "documentation lookup"
+			install_mcp_interactive "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- $script_runner -y @modelcontextprotocol/server-sequential-thinking" "multi-step reasoning"
+		fi
 
 		handle_qmd_installation_if_needed
 		if command -v qmd &>/dev/null; then
@@ -1705,20 +1723,25 @@ try_add_marketplace_repo() {
 	fi
 }
 
-# Helper: Install remote skills using npx skills add
+# Helper: Install remote skills using bunx/npx skills add
 install_remote_skills() {
 	log_info "Installing community skills from jellydn/my-ai-tools repository..."
 
-	if ! command -v npx &>/dev/null; then
-		log_error "npx not found. Please install Node.js to use remote skill installation."
+	local script_runner
+	script_runner=$(_detect_script_runner)
+
+	if [ -z "$script_runner" ]; then
+		log_error "No script runner found (bunx or npx). Please install Bun or Node.js to use remote skill installation."
 		install_local_skills
 		return 0
 	fi
 
+	log_info "Using script runner: $script_runner"
+
 	if [ "${YES_TO_ALL:-false}" = "true" ] || [ ! -t 0 ]; then
-		execute "npx skills add jellydn/my-ai-tools --yes --global --agent claude-code"
+		execute "$script_runner skills add jellydn/my-ai-tools --yes --global --agent claude-code"
 	else
-		execute "npx skills add jellydn/my-ai-tools --global --agent claude-code"
+		execute "$script_runner skills add jellydn/my-ai-tools --global --agent claude-code"
 	fi
 	log_success "Remote skills installed successfully"
 }
@@ -1727,8 +1750,11 @@ install_remote_skills() {
 install_recommended_skills() {
 	log_info "Checking for recommended community skills..."
 
-	if ! command -v npx &>/dev/null; then
-		log_warning "npx not found, skipping recommended skills"
+	local script_runner
+	script_runner=$(_detect_script_runner)
+
+	if [ -z "$script_runner" ]; then
+		log_warning "No script runner found (bunx or npx), skipping recommended skills"
 		return 0
 	fi
 
@@ -1783,18 +1809,26 @@ install_single_recommended_skill() {
 	local skill="$2"
 	local skill_suffix="$3"
 
+	local script_runner
+	script_runner=$(_detect_script_runner)
+
+	if [ -z "$script_runner" ]; then
+		log_warning "No script runner available for installing $repo${skill_suffix}"
+		return 1
+	fi
+
 	if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
 		if [ -n "$skill" ]; then
-			execute "npx skills add '$repo' --skill '$skill' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_info "Skipped: $repo${skill_suffix}"
+			execute "$script_runner skills add '$repo' --skill '$skill' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_info "Skipped: $repo${skill_suffix}"
 		else
-			execute "npx skills add '$repo' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_info "Skipped: $repo"
+			execute "$script_runner skills add '$repo' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_info "Skipped: $repo"
 		fi
 	elif [ -t 0 ]; then
 		if prompt_yn "Install $repo${skill_suffix}"; then
 			if [ -n "$skill" ]; then
-				execute "npx skills add '$repo' --skill '$skill' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_warning "Failed to install: $repo${skill_suffix}"
+				execute "$script_runner skills add '$repo' --skill '$skill' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_warning "Failed to install: $repo${skill_suffix}"
 			else
-				execute "npx skills add '$repo' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_warning "Failed to install: $repo"
+				execute "$script_runner skills add '$repo' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_warning "Failed to install: $repo"
 			fi
 		else
 			log_info "Skipped: $repo${skill_suffix}"
@@ -1890,7 +1924,7 @@ enable_plugins() {
 		MARKETPLACE_AVAILABLE=true
 	else
 		log_warning "Claude plugin marketplace is not available"
-		log_info "Note: Skills can still be installed remotely using the npx skills add command"
+		log_info "Note: Skills can still be installed remotely using bunx/npx skills add command"
 	fi
 
 	# Determine skill installation source
@@ -1938,7 +1972,7 @@ determine_skill_install_source() {
 		SKILL_INSTALL_SOURCE="local"
 	elif [ -t 0 ]; then
 		log_info "How would you like to install community skills?"
-		printf "1) Local (from skills folder) 2) Remote (from jellydn/my-ai-tools using npx skills) [1/2]: "
+		printf "1) Local (from skills folder) 2) Remote (from jellydn/my-ai-tools using bunx/npx skills) [1/2]: "
 		read -r REPLY
 		echo
 		case "$REPLY" in
@@ -2069,7 +2103,7 @@ install_local_community_plugins() {
 		local name plugin_spec marketplace_repo cli_tool
 		name="${plugin_entry%%|*}"
 
-		# Skip remote skills - they're installed from local skills folder or npx
+		# Skip remote skills - they're installed from local skills folder or bunx/npx
 		is_remote_skill "$name" && continue
 
 		local rest="${plugin_entry#*|}"
