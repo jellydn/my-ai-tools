@@ -231,38 +231,34 @@ install_qmd_now() {
 		return 0
 	fi
 
+	# Prefer Bun for qmd (install if missing)
 	if ! command -v bun &>/dev/null; then
-		log_info "qmd requires Bun. Installing Bun first..."
+		log_info "qmd works best with Bun. Installing Bun first..."
 		handle_bun_installation
 	fi
 
-	if ! command -v bun &>/dev/null; then
-		log_error "Cannot install qmd because Bun is still unavailable"
+	local pkg_manager
+	pkg_manager=$(_detect_package_manager)
+
+	if [ -z "$pkg_manager" ]; then
+		log_error "No package manager found. Install Bun or Node.js/npm to install qmd."
 		return 1
 	fi
 
-	log_info "Installing qmd CLI via bun..."
-	if execute "bun install -g @tobilu/qmd"; then
-		# Ensure bun's global bin directory is in PATH for the current session
-		local bun_global_bin
-		bun_global_bin="$(bun pm bin -g 2>/dev/null)"
-		if [ -n "$bun_global_bin" ] && [[ ":$PATH:" != *":$bun_global_bin:"* ]]; then
-			export PATH="$bun_global_bin:$PATH"
+	log_info "Installing qmd CLI via $pkg_manager..."
+	if execute "$pkg_manager install -g @tobilu/qmd"; then
+		# Ensure bun's global bin directory is in PATH for the current session (if using bun)
+		if command -v bun &>/dev/null; then
+			local bun_global_bin
+			bun_global_bin="$(bun pm bin -g 2>/dev/null)"
+			if [ -n "$bun_global_bin" ] && [[ ":$PATH:" != *":$bun_global_bin:"* ]]; then
+				export PATH="$bun_global_bin:$PATH"
+			fi
 		fi
 		local qmd_version
 		qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
 		log_success "qmd installed successfully ($qmd_version)"
 		return 0
-	fi
-
-	if command -v npm &>/dev/null; then
-		log_warning "Bun failed to install qmd. Retrying with npm..."
-		if execute "npm install -g @tobilu/qmd"; then
-			local qmd_version
-			qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
-			log_success "qmd installed successfully ($qmd_version)"
-			return 0
-		fi
 	fi
 
 	log_error "Failed to install qmd"
@@ -462,8 +458,16 @@ install_biome_if_needed() {
 		return 0
 	fi
 
-	log_warning "biome not found. Installing biome globally..."
-	if execute "npm install -g @biomejs/biome"; then
+	local pkg_manager
+	pkg_manager=$(_detect_package_manager)
+
+	if [ -z "$pkg_manager" ]; then
+		log_warning "biome not found. No package manager available to install. Install Bun or Node.js/npm."
+		return 1
+	fi
+
+	log_warning "biome not found. Installing biome globally with $pkg_manager..."
+	if execute "$pkg_manager install -g @biomejs/biome"; then
 		log_success "biome installed"
 	else
 		log_warning "Failed to install biome"
@@ -577,10 +581,19 @@ install_backlog_if_needed() {
 
 	if command -v backlog &>/dev/null; then
 		log_success "backlog.md found"
-	else
-		log_info "Installing backlog.md for Amp integration..."
-		execute "npm install -g backlog.md"
+		return 0
 	fi
+
+	local pkg_manager
+	pkg_manager=$(_detect_package_manager)
+
+	if [ -z "$pkg_manager" ]; then
+		log_warning "backlog.md not found. No package manager available. Install Bun or Node.js/npm."
+		return 1
+	fi
+
+	log_info "Installing backlog.md for Amp integration with $pkg_manager..."
+	execute "$pkg_manager install -g backlog.md"
 }
 
 # Helper: Safely copy a directory, handling "Text file busy" errors
@@ -729,36 +742,62 @@ backup_configs() {
 	fi
 }
 
+# Detect available package manager (bun preferred, fallback to npm)
+# Outputs: package manager command or empty if none found
+_detect_package_manager() {
+	if command -v bun &>/dev/null; then
+		echo "bun"
+	elif command -v npm &>/dev/null; then
+		echo "npm"
+	else
+		echo ""
+	fi
+}
+
 install_claude_code() {
 	log_info "Installing Claude Code..."
 
+	local pkg_manager
+	pkg_manager=$(_detect_package_manager)
+
+	if [ -z "$pkg_manager" ]; then
+		log_error "No package manager found. Install Bun (preferred) or Node.js/npm:"
+		log_info "  Bun:    curl -fsSL https://bun.sh/install | bash"
+		log_info "  Node:   https://nodejs.org/ (includes npm)"
+		return 1
+	fi
+
+	log_info "Using package manager: $pkg_manager"
+
 	if ! command -v claude &>/dev/null; then
-		if execute "npm install -g @anthropic-ai/claude-code"; then
+		if execute "$pkg_manager install -g @anthropic-ai/claude-code"; then
 			log_success "Claude Code installed"
 		else
 			log_error "Failed to install Claude Code"
+			return 1
 		fi
-		return
+		return 0
 	fi
 
 	log_warning "Claude Code is already installed ($(claude --version))"
 
 	if [ "$YES_TO_ALL" = true ]; then
 		log_info "Auto-skipping reinstall (--yes flag)"
-		return
+		return 0
 	elif [ -t 0 ]; then
 		if ! prompt_yn "Do you want to reinstall"; then
-			return
+			return 0
 		fi
 	else
 		log_info "Skipping reinstall in non-interactive mode"
-		return
+		return 0
 	fi
 
-	if execute "npm install -g @anthropic-ai/claude-code"; then
+	if execute "$pkg_manager install -g @anthropic-ai/claude-code"; then
 		log_success "Claude Code reinstalled"
 	else
 		log_error "Failed to reinstall Claude Code"
+		return 1
 	fi
 }
 
@@ -791,9 +830,23 @@ install_ccs() {
 	_run_ccs_install() {
 		if command -v ccs &>/dev/null; then
 			log_warning "CCS is already installed ($(ccs --version))"
-		else
-			execute "npm install -g @kaitranntt/ccs"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_detect_package_manager)
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install CCS."
+			return 1
+		fi
+
+		log_info "Installing CCS with $pkg_manager..."
+		if execute "$pkg_manager install -g @kaitranntt/ccs"; then
 			log_success "CCS installed"
+		else
+			log_error "Failed to install CCS"
+			return 1
 		fi
 	}
 	run_installer "CCS" "_run_ccs_install" "command -v ccs" "ccs --version"
@@ -815,9 +868,23 @@ install_codex() {
 	_run_codex_install() {
 		if command -v codex &>/dev/null; then
 			log_warning "Codex CLI is already installed"
-		else
-			execute "npm install -g @openai/codex"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_detect_package_manager)
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Codex CLI."
+			return 1
+		fi
+
+		log_info "Installing Codex CLI with $pkg_manager..."
+		if execute "$pkg_manager install -g @openai/codex"; then
 			log_success "Codex CLI installed"
+		else
+			log_error "Failed to install Codex CLI"
+			return 1
 		fi
 	}
 	run_installer "OpenAI Codex CLI" "_run_codex_install" "command -v codex" ""
@@ -827,9 +894,23 @@ install_gemini() {
 	_run_gemini_install() {
 		if command -v gemini &>/dev/null; then
 			log_warning "Gemini CLI is already installed"
-		else
-			execute "npm install -g @google/gemini-cli"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_detect_package_manager)
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Gemini CLI."
+			return 1
+		fi
+
+		log_info "Installing Gemini CLI with $pkg_manager..."
+		if execute "$pkg_manager install -g @google/gemini-cli"; then
 			log_success "Gemini CLI installed"
+		else
+			log_error "Failed to install Gemini CLI"
+			return 1
 		fi
 	}
 	run_installer "Google Gemini CLI" "_run_gemini_install" "command -v gemini" ""
@@ -839,9 +920,23 @@ install_kilo() {
 	_run_kilo_install() {
 		if command -v kilo &>/dev/null; then
 			log_warning "Kilo CLI is already installed"
-		else
-			execute "npm install -g @kilocode/cli"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_detect_package_manager)
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Kilo CLI."
+			return 1
+		fi
+
+		log_info "Installing Kilo CLI with $pkg_manager..."
+		if execute "$pkg_manager install -g @kilocode/cli"; then
 			log_success "Kilo CLI installed"
+		else
+			log_error "Failed to install Kilo CLI"
+			return 1
 		fi
 	}
 	run_installer "Kilo CLI" "_run_kilo_install" "command -v kilo" ""
@@ -851,9 +946,23 @@ install_pi() {
 	_run_pi_install() {
 		if command -v pi &>/dev/null; then
 			log_warning "Pi is already installed"
-		else
-			execute "npm install -g @mariozechner/pi-coding-agent"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_detect_package_manager)
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Pi."
+			return 1
+		fi
+
+		log_info "Installing Pi with $pkg_manager..."
+		if execute "$pkg_manager install -g @mariozechner/pi-coding-agent"; then
 			log_success "Pi installed"
+		else
+			log_error "Failed to install Pi"
+			return 1
 		fi
 	}
 	run_installer "Pi" "_run_pi_install" "command -v pi" ""
@@ -864,9 +973,23 @@ install_copilot() {
 		log_info "Installing GitHub Copilot CLI..."
 		if command -v copilot &>/dev/null; then
 			log_warning "GitHub Copilot CLI is already installed"
-		else
-			execute "npm install -g @github/copilot"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_detect_package_manager)
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Copilot CLI."
+			return 1
+		fi
+
+		log_info "Installing GitHub Copilot CLI with $pkg_manager..."
+		if execute "$pkg_manager install -g @github/copilot"; then
 			log_success "GitHub Copilot CLI installed"
+		else
+			log_error "Failed to install GitHub Copilot CLI"
+			return 1
 		fi
 	}
 
@@ -918,8 +1041,21 @@ install_cursor() {
 
 install_factory() {
 	_run_factory_install() {
-		execute "npm install -g @factory/cli"
-		log_success "Factory Droid CLI installed"
+		local pkg_manager
+		pkg_manager=$(_detect_package_manager)
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Factory CLI."
+			return 1
+		fi
+
+		log_info "Installing Factory CLI with $pkg_manager..."
+		if execute "$pkg_manager install -g @factory/cli"; then
+			log_success "Factory Droid CLI installed"
+		else
+			log_error "Failed to install Factory CLI"
+			return 1
+		fi
 	}
 	run_installer "Factory Droid" "_run_factory_install" "command -v droid" ""
 }
