@@ -17,17 +17,12 @@
 			"command": "fff-mcp",
 			"args": []
 		},
-		"chrome-devtools": {
-			"command": "npx",
-			"args": ["-y", "chrome-devtools-mcp@latest"]
-		},
 		"react-grab-mcp": {
 			"command": "npx",
 			"args": ["-y", "@react-grab/mcp", "--stdio"]
 		},
-		"logpilot": {
-			"command": "logpilot",
-			"args": ["mcp-server"]
+		"notion": {
+			"url": "https://mcp.notion.com/mcp"
 		}
 	}
 }

@@ -1,27 +1,28 @@
 {
   "mcpServers": {
     "context7": {
-      "command": "npx",
+      "command": "bunx",
       "args": [
         "-y",
         "@upstash/context7-mcp@latest"
       ]
     },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"]
-    },
     "fff": {
       "command": "fff-mcp",
       "args": []
     },
-    "chrome-devtools": {
+    "sequential-thinking": {
       "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp@latest"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "qmd": {
+      "command": "qmd",
+      "args": [
+        "mcp"
+      ]
     },
     "react-grab-mcp": {
       "command": "npx",
@@ -31,9 +32,8 @@
         "--stdio"
       ]
     },
-    "logpilot": {
-      "command": "logpilot",
-      "args": ["mcp-server"]
+    "notion": {
+      "url": "https://mcp.notion.com/mcp"
     }
   }
 }

@@ -28,13 +28,6 @@
 			"env": {},
 			"tools": ["*"]
 		},
-		"chrome-devtools": {
-			"type": "local",
-			"command": "npx",
-			"args": ["-y", "chrome-devtools-mcp@latest"],
-			"env": {},
-			"tools": ["*"]
-		},
 		"react-grab-mcp": {
 			"type": "local",
 			"command": "npx",
@@ -42,12 +35,9 @@
 			"env": {},
 			"tools": ["*"]
 		},
-		"logpilot": {
-			"type": "local",
-			"command": "logpilot",
-			"args": ["mcp-server"],
-			"env": {},
-			"tools": ["*"]
+		"notion": {
+			"type": "http",
+			"url": "https://mcp.notion.com/mcp"
 		}
 	}
 }

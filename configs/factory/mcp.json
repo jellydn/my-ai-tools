@@ -18,25 +18,16 @@
       ],
       "disabled": false
     },
-    "qmd": {
-      "type": "stdio",
-      "command": "qmd",
-      "args": ["mcp"],
-      "disabled": false
-    },
     "fff": {
       "type": "stdio",
       "command": "fff-mcp",
       "args": [],
       "disabled": false
     },
-    "chrome-devtools": {
+    "qmd": {
       "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "chrome-devtools-mcp@latest"
-      ],
+      "command": "qmd",
+      "args": ["mcp"],
       "disabled": false
     },
     "react-grab-mcp": {
@@ -46,13 +37,12 @@
         "-y",
         "@react-grab/mcp",
         "--stdio"
-      ],
-      "disabled": false
+      ]
     },
-    "logpilot": {
+    "notion": {
       "type": "stdio",
-      "command": "logpilot",
-      "args": ["mcp-server"],
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"],
       "disabled": false
     }
   }
