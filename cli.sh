@@ -238,7 +238,7 @@ install_qmd_now() {
 	fi
 
 	local pkg_manager
-	pkg_manager=$(_detect_package_manager)
+	pkg_manager=$(_verify_package_manager "qmd")
 
 	if [ -z "$pkg_manager" ]; then
 		log_error "No package manager found. Install Bun or Node.js/npm to install qmd."
@@ -510,7 +510,7 @@ install_biome_if_needed() {
 	fi
 
 	local pkg_manager
-	pkg_manager=$(_detect_package_manager)
+	pkg_manager=$(_verify_package_manager "biome")
 
 	if [ -z "$pkg_manager" ]; then
 		log_warning "biome not found. No package manager available to install. Install Bun or Node.js/npm."
@@ -636,7 +636,7 @@ install_backlog_if_needed() {
 	fi
 
 	local pkg_manager
-	pkg_manager=$(_detect_package_manager)
+	pkg_manager=$(_verify_package_manager "backlog.md")
 
 	if [ -z "$pkg_manager" ]; then
 		log_warning "backlog.md not found. No package manager available. Install Bun or Node.js/npm."
@@ -805,6 +805,37 @@ _detect_package_manager() {
 	fi
 }
 
+# Verify and get a working package manager with fallback
+# This handles cases where the detected package manager may not be available
+# in the current shell context (e.g., subshell, different PATH)
+# Outputs: package manager command or empty if none available
+_verify_package_manager() {
+	local tool_name="${1:-tool}"
+	local pkg_manager
+	pkg_manager=$(_detect_package_manager)
+
+	if [ -z "$pkg_manager" ]; then
+		return 1
+	fi
+
+	# Verify the detected package manager is actually available in current shell
+	if ! command -v "$pkg_manager" &>/dev/null; then
+		log_warning "$pkg_manager was detected but is not available in current shell PATH"
+		# Try to find alternative
+		if [ "$pkg_manager" = "bun" ] && command -v npm &>/dev/null; then
+			pkg_manager="npm"
+			log_info "Falling back to npm for $tool_name installation"
+		elif [ "$pkg_manager" = "npm" ] && command -v bun &>/dev/null; then
+			pkg_manager="bun"
+			log_info "Falling back to bun for $tool_name installation"
+		else
+			return 1
+		fi
+	fi
+
+	echo "$pkg_manager"
+}
+
 # Detect available script runner (bunx preferred, fallback to npx)
 # Outputs: script runner command or empty if none found
 _detect_script_runner() {
@@ -821,7 +852,7 @@ install_claude_code() {
 	log_info "Installing Claude Code..."
 
 	local pkg_manager
-	pkg_manager=$(_detect_package_manager)
+	pkg_manager=$(_verify_package_manager "Claude Code")
 
 	if [ -z "$pkg_manager" ]; then
 		log_error "No package manager found. Install Bun (preferred) or Node.js/npm:"
@@ -897,7 +928,7 @@ install_ccs() {
 		fi
 
 		local pkg_manager
-		pkg_manager=$(_detect_package_manager)
+		pkg_manager=$(_verify_package_manager "CCS")
 
 		if [ -z "$pkg_manager" ]; then
 			log_error "No package manager found. Install Bun or Node.js/npm to install CCS."
@@ -935,7 +966,7 @@ install_codex() {
 		fi
 
 		local pkg_manager
-		pkg_manager=$(_detect_package_manager)
+		pkg_manager=$(_verify_package_manager "Codex CLI")
 
 		if [ -z "$pkg_manager" ]; then
 			log_error "No package manager found. Install Bun or Node.js/npm to install Codex CLI."
@@ -961,7 +992,7 @@ install_gemini() {
 		fi
 
 		local pkg_manager
-		pkg_manager=$(_detect_package_manager)
+		pkg_manager=$(_verify_package_manager "Gemini CLI")
 
 		if [ -z "$pkg_manager" ]; then
 			log_error "No package manager found. Install Bun or Node.js/npm to install Gemini CLI."
@@ -987,7 +1018,7 @@ install_kilo() {
 		fi
 
 		local pkg_manager
-		pkg_manager=$(_detect_package_manager)
+		pkg_manager=$(_verify_package_manager "Kilo CLI")
 
 		if [ -z "$pkg_manager" ]; then
 			log_error "No package manager found. Install Bun or Node.js/npm to install Kilo CLI."
@@ -1013,7 +1044,7 @@ install_pi() {
 		fi
 
 		local pkg_manager
-		pkg_manager=$(_detect_package_manager)
+		pkg_manager=$(_verify_package_manager "Pi")
 
 		if [ -z "$pkg_manager" ]; then
 			log_error "No package manager found. Install Bun or Node.js/npm to install Pi."
@@ -1040,7 +1071,7 @@ install_copilot() {
 		fi
 
 		local pkg_manager
-		pkg_manager=$(_detect_package_manager)
+		pkg_manager=$(_verify_package_manager "Copilot CLI")
 
 		if [ -z "$pkg_manager" ]; then
 			log_error "No package manager found. Install Bun or Node.js/npm to install Copilot CLI."
@@ -1105,7 +1136,7 @@ install_cursor() {
 install_factory() {
 	_run_factory_install() {
 		local pkg_manager
-		pkg_manager=$(_detect_package_manager)
+		pkg_manager=$(_verify_package_manager "Factory CLI")
 
 		if [ -z "$pkg_manager" ]; then
 			log_error "No package manager found. Install Bun or Node.js/npm to install Factory CLI."
