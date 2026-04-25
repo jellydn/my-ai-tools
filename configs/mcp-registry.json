@@ -3,7 +3,7 @@
     "context7": {
       "name": "context7",
       "description": "documentation lookup for libraries and frameworks",
-      "command": "{{SCRIPT_RUNNER}}",
+      "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"],
       "requires": [],
       "category": "documentation"
@@ -11,7 +11,7 @@
     "sequential-thinking": {
       "name": "sequential-thinking",
       "description": "multi-step reasoning and problem solving",
-      "command": "{{SCRIPT_RUNNER}}",
+      "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
       "requires": [],
       "category": "reasoning"
@@ -35,7 +35,7 @@
     "react-grab-mcp": {
       "name": "react-grab-mcp",
       "description": "React component capture and inspection",
-      "command": "{{SCRIPT_RUNNER}}",
+      "command": "npx",
       "args": ["-y", "@react-grab/mcp", "--stdio"],
       "requires": [],
       "category": "frontend"
