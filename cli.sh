@@ -197,30 +197,38 @@ handle_bun_installation() {
 	fi
 }
 
-handle_qmd_installation_if_needed() {
-	if command -v qmd &>/dev/null; then
-		local qmd_version
-		qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
-		log_success "qmd found ($qmd_version)"
+# Generic tool installation handler
+# Usage: handle_tool_installation "tool_name" "install_func" "check_cmd" "description" "feature_name"
+handle_tool_installation() {
+	local tool_name="$1"
+	local install_func="$2"
+	local check_cmd="${3:-command -v $tool_name}"
+	local description="${4:-$tool_name}"
+	local feature_name="${5:-$description}"
+
+	if eval "$check_cmd" &>/dev/null; then
+		log_success "$description found"
 		return 0
 	fi
 
+	local warning_msg="Continuing without $description. $feature_name will be unavailable."
+
 	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-installing qmd (--yes flag)..."
-		if ! install_qmd_now; then
-			log_warning "Continuing without qmd. Knowledge features will remain unavailable until qmd is installed."
-		fi
+		log_info "Auto-installing $description (--yes flag)..."
+		$install_func || log_warning "$warning_msg"
 	elif [ -t 0 ]; then
-		if prompt_yn "qmd is not installed. Install it now"; then
-			if ! install_qmd_now; then
-				log_warning "Continuing without qmd. Knowledge features will remain unavailable until qmd is installed."
-			fi
+		if prompt_yn "$description is not installed. Install it now"; then
+			$install_func || log_warning "$warning_msg"
 		else
-			log_warning "qmd not installed. Knowledge features will be unavailable until you install it."
+			log_warning "$warning_msg"
 		fi
 	else
-		log_warning "qmd not installed. Knowledge features will be unavailable until you install it."
+		log_warning "$warning_msg"
 	fi
+}
+
+handle_qmd_installation_if_needed() {
+	handle_tool_installation "qmd" "install_qmd_now" "command -v qmd" "qmd" "Knowledge features"
 }
 
 install_qmd_now() {
@@ -288,27 +296,7 @@ install_fff_mcp_now() {
 }
 
 handle_fff_mcp_installation_if_needed() {
-	if command -v fff-mcp &>/dev/null; then
-		log_success "fff-mcp found"
-		return 0
-	fi
-
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-installing fff-mcp (--yes flag)..."
-		if ! install_fff_mcp_now; then
-			log_warning "Continuing without fff-mcp. Fast file search MCP will be unavailable."
-		fi
-	elif [ -t 0 ]; then
-		if prompt_yn "fff-mcp is not installed. Install it now (fast file search for AI)"; then
-			if ! install_fff_mcp_now; then
-				log_warning "Continuing without fff-mcp. Fast file search MCP will be unavailable."
-			fi
-		else
-			log_warning "fff-mcp not installed. Fast file search MCP will be unavailable."
-		fi
-	else
-		log_warning "fff-mcp not installed. Fast file search MCP will be unavailable."
-	fi
+	handle_tool_installation "fff-mcp" "install_fff_mcp_now" "command -v fff-mcp" "fff-mcp" "Fast file search MCP"
 }
 
 install_logpilot_now() {
@@ -339,27 +327,7 @@ install_logpilot_now() {
 }
 
 handle_logpilot_installation_if_needed() {
-	if command -v logpilot &>/dev/null; then
-		log_success "logpilot found"
-		return 0
-	fi
-
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-installing logpilot (--yes flag)..."
-		if ! install_logpilot_now; then
-			log_warning "Continuing without logpilot. Log monitoring MCP will be unavailable."
-		fi
-	elif [ -t 0 ]; then
-		if prompt_yn "logpilot is not installed. Install it now (AI-powered log analysis)"; then
-			if ! install_logpilot_now; then
-				log_warning "Continuing without logpilot. Log monitoring MCP will be unavailable."
-			fi
-		else
-			log_warning "logpilot not installed. Log monitoring MCP will be unavailable."
-		fi
-	else
-		log_warning "logpilot not installed. Log monitoring MCP will be unavailable."
-	fi
+	handle_tool_installation "logpilot" "install_logpilot_now" "command -v logpilot" "logpilot" "Log monitoring MCP"
 }
 
 resolve_installer_checksum() {
@@ -814,26 +782,24 @@ _verify_package_manager() {
 	local pkg_manager
 	pkg_manager=$(_detect_package_manager)
 
-	if [ -z "$pkg_manager" ]; then
-		return 1
+	[ -z "$pkg_manager" ] && return 1
+	command -v "$pkg_manager" &>/dev/null && { echo "$pkg_manager"; return 0; }
+
+	log_warning "$pkg_manager was detected but is not available in current shell PATH"
+
+	if [ "$pkg_manager" = "bun" ] && command -v npm &>/dev/null; then
+		log_info "Falling back to npm for $tool_name installation"
+		echo "npm"
+		return 0
 	fi
 
-	# Verify the detected package manager is actually available in current shell
-	if ! command -v "$pkg_manager" &>/dev/null; then
-		log_warning "$pkg_manager was detected but is not available in current shell PATH"
-		# Try to find alternative
-		if [ "$pkg_manager" = "bun" ] && command -v npm &>/dev/null; then
-			pkg_manager="npm"
-			log_info "Falling back to npm for $tool_name installation"
-		elif [ "$pkg_manager" = "npm" ] && command -v bun &>/dev/null; then
-			pkg_manager="bun"
-			log_info "Falling back to bun for $tool_name installation"
-		else
-			return 1
-		fi
+	if [ "$pkg_manager" = "npm" ] && command -v bun &>/dev/null; then
+		log_info "Falling back to bun for $tool_name installation"
+		echo "bun"
+		return 0
 	fi
 
-	echo "$pkg_manager"
+	return 1
 }
 
 # Detect available script runner (bunx preferred, fallback to npx)
@@ -1361,7 +1327,6 @@ install_mcp_servers_from_registry() {
 		return 1
 	fi
 
-	# Detect script runner (bunx preferred, fallback to npx)
 	local script_runner
 	script_runner=$(_detect_script_runner)
 
@@ -1371,71 +1336,49 @@ install_mcp_servers_from_registry() {
 	fi
 
 	log_info "Loading MCP servers from registry (using $script_runner)..."
-	log_info "Script runner: $script_runner"
 
-	# Get list of server names from registry
-	local servers
-	servers=$(jq -r '.mcpServers | keys[]' "$registry_file" 2>/dev/null)
-
-	if [ -z "$servers" ]; then
-		log_warning "No MCP servers found in registry"
-		return 1
-	fi
-
-	# Track installation summary
 	local summary_lines=()
 
-	# Iterate through each server in the registry
-	while IFS= read -r server_name; do
-		local name description command args requires category
-		name=$(jq -r ".mcpServers[\"$server_name\"].name // empty" "$registry_file")
-		description=$(jq -r ".mcpServers[\"$server_name\"].description // empty" "$registry_file")
-		command=$(jq -r ".mcpServers[\"$server_name\"].command // empty" "$registry_file")
-		# Substitute {{SCRIPT_RUNNER}} placeholder with actual script runner
+	# Extract all server data in a single jq call for efficiency
+	# Fields: server_name, name, description, command, args_delimited, requires_delimited, category
+	while IFS=$'\t' read -r server_name name description command args_delimited requires_delimited category; do
+		# Substitute {{SCRIPT_RUNNER}} placeholder
 		command="${command//\{\{SCRIPT_RUNNER\}\}/$script_runner}"
-		args=$(jq -r ".mcpServers[\"$server_name\"].args // [] | @sh" "$registry_file")
-		requires=$(jq -r ".mcpServers[\"$server_name\"].requires // [] | @sh" "$registry_file")
-		category=$(jq -r ".mcpServers[\"$server_name\"].category // empty" "$registry_file")
 
-		# Check if prerequisites are met (with auto-install for known tools)
+		# Parse args into array (args are delimited by SOH character)
+		local args_array=()
+		if [ -n "$args_delimited" ]; then
+			while IFS= read -r -d $'\x01' arg; do
+				args_array+=("$arg")
+			done <<< "$args_delimited"
+		fi
+
+		# Check prerequisites
 		local prereqs_met=true
 		local missing_prereqs=()
-		if [ -n "$requires" ] && [ "$requires" != "''" ] && [ "$requires" != "null" ]; then
-			# Parse the shell-escaped array safely
-			local prereq_array=()
-			while IFS= read -r -d '' prereq; do
-				prereq_array+=("$prereq")
-			done < <(jq -r ".mcpServers[\"$server_name\"].requires[]?" "$registry_file" 2>/dev/null | tr '\n' '\0')
-			for prereq in "${prereq_array[@]}"; do
+
+		if [ -n "$requires_delimited" ]; then
+			local prereq
+			while IFS= read -r -d $'\x01' prereq; do
+				[ -z "$prereq" ] && continue
+
 				if ! command -v "$prereq" &>/dev/null; then
-					# Try to auto-install known prerequisites
 					case "$prereq" in
 						"fff-mcp")
 							log_info "Auto-installing prerequisite: $prereq"
-							if install_fff_mcp_now; then
-								continue
-							fi
-							prereqs_met=false
-							missing_prereqs+=("$prereq")
+							install_fff_mcp_now && continue
 							;;
 						"logpilot")
 							log_info "Auto-installing prerequisite: $prereq"
-							if install_logpilot_now; then
-								continue
-							fi
-							prereqs_met=false
-							missing_prereqs+=("$prereq")
-							;;
-						*)
-							prereqs_met=false
-							missing_prereqs+=("$prereq")
+							install_logpilot_now && continue
 							;;
 					esac
+					prereqs_met=false
+					missing_prereqs+=("$prereq")
 				fi
-			done
+			done <<< "$requires_delimited"
 		fi
 
-		# Skip if prerequisites not met
 		if [ "$prereqs_met" = false ]; then
 			log_info "Skipping $name - requires: ${missing_prereqs[*]}"
 			summary_lines+=("⏭️  $name (skipped - requires: ${missing_prereqs[*]})")
@@ -1443,79 +1386,71 @@ install_mcp_servers_from_registry() {
 			continue
 		fi
 
-		# Build the install command from command + args safely
-		local args_array=()
-		while IFS= read -r -d '' arg; do
-			args_array+=("$arg")
-		done < <(jq -r ".mcpServers[\"$server_name\"].args[]?" "$registry_file" 2>/dev/null | tr '\n' '\0')
-
-		# Build install command with properly quoted arguments
+		# Build install command
 		local install_cmd="claude mcp add --scope user --transport stdio $server_name --"
-		# Quote the command (which may contain the substituted script runner)
 		install_cmd="$install_cmd $(printf '%q' "$command")"
-		# Add each argument with proper shell quoting
 		for arg in "${args_array[@]}"; do
 			install_cmd="$install_cmd $(printf '%q' "$arg")"
 		done
 
-		# Prompt user for installation
 		local prompt_msg="Install $name MCP server"
 		[ -n "$description" ] && prompt_msg="$prompt_msg ($description)"
 		[ -n "$category" ] && prompt_msg="$prompt_msg [category: $category]"
 
+		# Determine install mode
+		local mode="skip"
 		if [ "$YES_TO_ALL" = true ]; then
-			# Auto-accept in non-interactive mode
-			log_info "Auto-installing $name (--yes flag)"
-			local err_file="/tmp/claude-${server_name}.err"
-			if execute "$install_cmd" 2>"$err_file"; then
-				log_success "$name installed"
-				summary_lines+=("✅ $name")
-				installed_count=$((installed_count + 1))
-			else
-				if grep -qi "already" "$err_file" 2>/dev/null; then
-					log_info "$name already installed"
-					summary_lines+=("✅ $name (already installed)")
-				else
-					log_warning "$name installation failed"
-					summary_lines+=("⚠️  $name (failed)")
-					failed_count=$((failed_count + 1))
-				fi
-			fi
-			rm -f "$err_file"
+			mode="auto"
 		elif [ -t 0 ]; then
-			# Interactive mode - ask user
 			if prompt_yn "$prompt_msg"; then
-				log_info "Installing $name..."
-				local err_file="/tmp/claude-${server_name}.err"
-				if execute "$install_cmd" 2>"$err_file"; then
-					log_success "$name installed"
-					summary_lines+=("✅ $name")
-					installed_count=$((installed_count + 1))
-				else
-					if grep -qi "already" "$err_file" 2>/dev/null; then
-						log_info "$name already installed"
-						summary_lines+=("✅ $name (already installed)")
-					else
-						log_warning "$name installation failed"
-						summary_lines+=("⚠️  $name (failed)")
-						failed_count=$((failed_count + 1))
-					fi
-				fi
-				rm -f "$err_file"
+				mode="install"
 			else
 				log_info "Skipped $name (user declined)"
 				summary_lines+=("❌ $name (declined)")
 				skipped_count=$((skipped_count + 1))
+				continue
 			fi
-		else
-			# Non-interactive without --yes: skip
+		fi
+
+		if [ "$mode" = "skip" ]; then
 			log_info "Skipping $name (non-interactive mode, use --yes to auto-install)"
 			summary_lines+=("⏭️  $name (skipped - non-interactive)")
 			skipped_count=$((skipped_count + 1))
+			continue
 		fi
-	done <<< "$servers"
 
-	# Print summary
+		# Execute installation
+		[ "$mode" = "auto" ] && log_info "Auto-installing $name (--yes flag)" || log_info "Installing $name..."
+
+		local err_file
+		err_file=$(make_temp_file "claude-mcp-${server_name}" "err")
+
+		if execute "$install_cmd" 2>"$err_file"; then
+			log_success "$name installed"
+			summary_lines+=("✅ $name")
+			installed_count=$((installed_count + 1))
+		elif grep -qi "already" "$err_file" 2>/dev/null; then
+			log_info "$name already installed"
+			summary_lines+=("✅ $name (already installed)")
+		else
+			log_warning "$name installation failed"
+			summary_lines+=("⚠️  $name (failed)")
+			failed_count=$((failed_count + 1))
+		fi
+		rm -f "$err_file"
+	done < <(jq -r '
+		.mcpServers | to_entries[] |
+		[
+			.key,
+			(.value.name // empty),
+			(.value.description // empty),
+			(.value.command // empty),
+			(.value.args | join("")),
+			(.value.requires | join("")),
+			(.value.category // empty)
+		] | @tsv
+	' "$registry_file")
+
 	log_info ""
 	log_info "MCP Server Installation Summary:"
 	log_info "────────────────────────────────"
@@ -1903,43 +1838,37 @@ install_recommended_skills() {
 		return 0
 	fi
 
-	local skills_json
-	skills_json=$(cat "$SCRIPT_DIR/configs/recommend-skills.json")
-	local skill_count
-	skill_count=$(echo "$skills_json" | jq '.recommended_skills | length')
+	# Extract all skills in a single jq call for efficiency
+	local skill_count=0
+	local skills_data
+	skills_data=$(jq -r '.recommended_skills[] | [.repo, .description, .skill // ""] | @tsv' "$SCRIPT_DIR/configs/recommend-skills.json" 2>/dev/null)
 
-	if [ "$skill_count" -eq 0 ] || [ "$skill_count" = "null" ]; then
+	if [ -z "$skills_data" ]; then
 		log_info "No recommended skills found in config"
 		return 0
 	fi
 
+	skill_count=$(jq '.recommended_skills | length' "$SCRIPT_DIR/configs/recommend-skills.json")
 	log_info "Found $skill_count recommended skill(s)"
 
-	# Install specific skills from recommend-skills.json based on YES_TO_ALL
-	# When -y is used, only install: 1 react/vercel skill (vercel-labs/agent-skills)
-	local install_count=0
+	# When -y is used, limit to 1 skill
 	local max_installs=3
-	if [ "$YES_TO_ALL" = true ]; then
-		max_installs=1 # limit to 1 skill in auto-yes mode
-	fi
+	[ "$YES_TO_ALL" = true ] && max_installs=1
 
-	for i in $(seq 0 $((skill_count - 1))); do
-		# When using -y, limit to first skill only
-		if [ "$YES_TO_ALL" = true ] && [ "$install_count" -ge "$max_installs" ]; then
-			log_info "Reached maximum recommended skills for -y mode ($max_installs), skipping remaining"
+	local install_count=0
+	while IFS=$'\t' read -r repo description skill; do
+		if [ "$install_count" -ge "$max_installs" ]; then
+			[ "$YES_TO_ALL" = true ] && log_info "Reached maximum recommended skills for -y mode ($max_installs), skipping remaining"
 			break
 		fi
-		local repo description skill skill_suffix
-		repo=$(echo "$skills_json" | jq -r ".recommended_skills[$i].repo")
-		description=$(echo "$skills_json" | jq -r ".recommended_skills[$i].description")
-		skill=$(echo "$skills_json" | jq -r ".recommended_skills[$i].skill // empty")
-		skill_suffix=""
+
+		local skill_suffix=""
 		[ -n "$skill" ] && skill_suffix="/$skill"
 
 		log_info "  - $repo${skill_suffix}: $description"
 		install_single_recommended_skill "$repo" "$skill" "$skill_suffix"
 		install_count=$((install_count + 1))
-	done
+	done <<< "$skills_data"
 
 	log_success "Recommended skills check complete"
 }
