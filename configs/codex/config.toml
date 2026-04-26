@@ -1,5 +1,6 @@
 model_personality = "pragmatic"
-model = "gpt-5.4"
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
 
 [features]
 unified_exec = true
@@ -10,21 +11,23 @@ personality = true
 multi_agent = true
 prevent_idle_sleep = true
 js_repl = true
+memories = true
+external_migration = true
 
 [sandbox_workspace_write]
 network_access = true
 
 [mcp_servers.context7]
 command = "npx"
-args = [ "-y", "@upstash/context7-mcp" ]
+args = ["-y", "@upstash/context7-mcp"]
 
 [mcp_servers.sequential-thinking]
 command = "npx"
-args = [ "-y", "@modelcontextprotocol/server-sequential-thinking" ]
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 
 [mcp_servers.qmd]
 command = "qmd"
-args = [ "mcp" ]
+args = ["mcp"]
 
 [mcp_servers.fff]
 command = "fff-mcp"
@@ -41,15 +44,20 @@ approval_mode = "approve"
 
 [mcp_servers.react-grab-mcp]
 command = "npx"
-args = [ "-y", "@react-grab/mcp", "--stdio" ]
+args = ["-y", "@react-grab/mcp", "--stdio"]
 
 [notice.model_migrations]
 "gpt-5.2-codex" = "gpt-5.3-codex"
 "gpt-5.3-codex" = "gpt-5.4"
 
 [tui]
-status_line = [ "model-with-reasoning", "context-remaining", "five-hour-limit", "context-used" ]
+status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "context-used"]
 theme = "kanagawa"
 
 [plugins."github@openai-curated"]
 enabled = true
+
+# Add your own project-specific trust settings here
+# Example:
+# [projects."/path/to/your/project"]
+# trust_level = "trusted"

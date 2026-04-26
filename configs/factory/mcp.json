@@ -18,15 +18,6 @@
       ],
       "disabled": false
     },
-    "chrome-devtools": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "chrome-devtools-mcp@latest"
-      ],
-      "disabled": false
-    },
     "fff": {
       "type": "stdio",
       "command": "fff-mcp",

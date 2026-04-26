@@ -27,6 +27,13 @@
 			"args": ["mcp"],
 			"env": {},
 			"tools": ["*"]
+		},
+		"react-grab-mcp": {
+			"type": "local",
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"],
+			"env": {},
+			"tools": ["*"]
 		}
 	}
 }

@@ -197,30 +197,38 @@ handle_bun_installation() {
 	fi
 }
 
-handle_qmd_installation_if_needed() {
-	if command -v qmd &>/dev/null; then
-		local qmd_version
-		qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
-		log_success "qmd found ($qmd_version)"
+# Generic tool installation handler
+# Usage: handle_tool_installation "tool_name" "install_func" "check_cmd" "description" "feature_name"
+handle_tool_installation() {
+	local tool_name="$1"
+	local install_func="$2"
+	local check_cmd="${3:-command -v $tool_name}"
+	local description="${4:-$tool_name}"
+	local feature_name="${5:-$description}"
+
+	if eval "$check_cmd" &>/dev/null; then
+		log_success "$description found"
 		return 0
 	fi
 
+	local warning_msg="Continuing without $description. $feature_name will be unavailable."
+
 	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-installing qmd (--yes flag)..."
-		if ! install_qmd_now; then
-			log_warning "Continuing without qmd. Knowledge features will remain unavailable until qmd is installed."
-		fi
+		log_info "Auto-installing $description (--yes flag)..."
+		$install_func || log_warning "$warning_msg"
 	elif [ -t 0 ]; then
-		if prompt_yn "qmd is not installed. Install it now"; then
-			if ! install_qmd_now; then
-				log_warning "Continuing without qmd. Knowledge features will remain unavailable until qmd is installed."
-			fi
+		if prompt_yn "$description is not installed. Install it now"; then
+			$install_func || log_warning "$warning_msg"
 		else
-			log_warning "qmd not installed. Knowledge features will be unavailable until you install it."
+			log_warning "$warning_msg"
 		fi
 	else
-		log_warning "qmd not installed. Knowledge features will be unavailable until you install it."
+		log_warning "$warning_msg"
 	fi
+}
+
+handle_qmd_installation_if_needed() {
+	handle_tool_installation "qmd" "install_qmd_now" "command -v qmd" "qmd" "Knowledge features"
 }
 
 install_qmd_now() {
@@ -231,38 +239,34 @@ install_qmd_now() {
 		return 0
 	fi
 
+	# Prefer Bun for qmd (install if missing)
 	if ! command -v bun &>/dev/null; then
-		log_info "qmd requires Bun. Installing Bun first..."
+		log_info "qmd works best with Bun. Installing Bun first..."
 		handle_bun_installation
 	fi
 
-	if ! command -v bun &>/dev/null; then
-		log_error "Cannot install qmd because Bun is still unavailable"
+	local pkg_manager
+	pkg_manager=$(_verify_package_manager "qmd")
+
+	if [ -z "$pkg_manager" ]; then
+		log_error "No package manager found. Install Bun or Node.js/npm to install qmd."
 		return 1
 	fi
 
-	log_info "Installing qmd CLI via bun..."
-	if execute "bun install -g @tobilu/qmd"; then
-		# Ensure bun's global bin directory is in PATH for the current session
-		local bun_global_bin
-		bun_global_bin="$(bun pm bin -g 2>/dev/null)"
-		if [ -n "$bun_global_bin" ] && [[ ":$PATH:" != *":$bun_global_bin:"* ]]; then
-			export PATH="$bun_global_bin:$PATH"
+	log_info "Installing qmd CLI via $pkg_manager..."
+	if execute "$pkg_manager install -g @tobilu/qmd"; then
+		# Ensure bun's global bin directory is in PATH for the current session (if using bun)
+		if command -v bun &>/dev/null; then
+			local bun_global_bin
+			bun_global_bin="$(bun pm bin -g 2>/dev/null)"
+			if [ -n "$bun_global_bin" ] && [[ ":$PATH:" != *":$bun_global_bin:"* ]]; then
+				export PATH="$bun_global_bin:$PATH"
+			fi
 		fi
 		local qmd_version
 		qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
 		log_success "qmd installed successfully ($qmd_version)"
 		return 0
-	fi
-
-	if command -v npm &>/dev/null; then
-		log_warning "Bun failed to install qmd. Retrying with npm..."
-		if execute "npm install -g @tobilu/qmd"; then
-			local qmd_version
-			qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
-			log_success "qmd installed successfully ($qmd_version)"
-			return 0
-		fi
 	fi
 
 	log_error "Failed to install qmd"
@@ -292,27 +296,38 @@ install_fff_mcp_now() {
 }
 
 handle_fff_mcp_installation_if_needed() {
-	if command -v fff-mcp &>/dev/null; then
-		log_success "fff-mcp found"
+	handle_tool_installation "fff-mcp" "install_fff_mcp_now" "command -v fff-mcp" "fff-mcp" "Fast file search MCP"
+}
+
+install_logpilot_now() {
+	if command -v logpilot &>/dev/null; then
+		log_success "logpilot already installed"
 		return 0
 	fi
 
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-installing fff-mcp (--yes flag)..."
-		if ! install_fff_mcp_now; then
-			log_warning "Continuing without fff-mcp. Fast file search MCP will be unavailable."
-		fi
-	elif [ -t 0 ]; then
-		if prompt_yn "fff-mcp is not installed. Install it now (fast file search for AI)"; then
-			if ! install_fff_mcp_now; then
-				log_warning "Continuing without fff-mcp. Fast file search MCP will be unavailable."
-			fi
-		else
-			log_warning "fff-mcp not installed. Fast file search MCP will be unavailable."
-		fi
-	else
-		log_warning "fff-mcp not installed. Fast file search MCP will be unavailable."
+	if ! command -v cargo &>/dev/null; then
+		log_error "cargo not found. Cannot install logpilot. Install Rust first: https://rustup.rs/"
+		return 1
 	fi
+
+	log_info "Installing logpilot via cargo..."
+	if execute "cargo install logpilot"; then
+		# Ensure cargo bin is in PATH
+		local cargo_bin="${CARGO_HOME:-$HOME/.cargo}/bin"
+		if [[ ":$PATH:" != *":$cargo_bin:"* ]]; then
+			export PATH="$cargo_bin:$PATH"
+		fi
+		log_success "logpilot installed successfully"
+		return 0
+	fi
+
+	log_error "Failed to install logpilot"
+	log_info "You can install it manually: cargo install logpilot"
+	return 1
+}
+
+handle_logpilot_installation_if_needed() {
+	handle_tool_installation "logpilot" "install_logpilot_now" "command -v logpilot" "logpilot" "Log monitoring MCP"
 }
 
 resolve_installer_checksum() {
@@ -462,8 +477,16 @@ install_biome_if_needed() {
 		return 0
 	fi
 
-	log_warning "biome not found. Installing biome globally..."
-	if execute "npm install -g @biomejs/biome"; then
+	local pkg_manager
+	pkg_manager=$(_verify_package_manager "biome")
+
+	if [ -z "$pkg_manager" ]; then
+		log_warning "biome not found. No package manager available to install. Install Bun or Node.js/npm."
+		return 1
+	fi
+
+	log_warning "biome not found. Installing biome globally with $pkg_manager..."
+	if execute "$pkg_manager install -g @biomejs/biome"; then
 		log_success "biome installed"
 	else
 		log_warning "Failed to install biome"
@@ -577,10 +600,19 @@ install_backlog_if_needed() {
 
 	if command -v backlog &>/dev/null; then
 		log_success "backlog.md found"
-	else
-		log_info "Installing backlog.md for Amp integration..."
-		execute "npm install -g backlog.md"
+		return 0
 	fi
+
+	local pkg_manager
+	pkg_manager=$(_verify_package_manager "backlog.md")
+
+	if [ -z "$pkg_manager" ]; then
+		log_warning "backlog.md not found. No package manager available. Install Bun or Node.js/npm."
+		return 1
+	fi
+
+	log_info "Installing backlog.md for Amp integration with $pkg_manager..."
+	execute "$pkg_manager install -g backlog.md"
 }
 
 # Helper: Safely copy a directory, handling "Text file busy" errors
@@ -729,36 +761,103 @@ backup_configs() {
 	fi
 }
 
+# Detect available package manager (bun preferred, fallback to npm)
+# Outputs: package manager command or empty if none found
+_detect_package_manager() {
+	if command -v bun &>/dev/null; then
+		echo "bun"
+	elif command -v npm &>/dev/null; then
+		echo "npm"
+	else
+		echo ""
+	fi
+}
+
+# Verify and get a working package manager with fallback
+# This handles cases where the detected package manager may not be available
+# in the current shell context (e.g., subshell, different PATH)
+# Outputs: package manager command or empty if none available
+_verify_package_manager() {
+	local tool_name="${1:-tool}"
+	local pkg_manager
+	pkg_manager=$(_detect_package_manager)
+
+	[ -z "$pkg_manager" ] && return 1
+	command -v "$pkg_manager" &>/dev/null && { echo "$pkg_manager"; return 0; }
+
+	log_warning "$pkg_manager was detected but is not available in current shell PATH"
+
+	if [ "$pkg_manager" = "bun" ] && command -v npm &>/dev/null; then
+		log_info "Falling back to npm for $tool_name installation"
+		echo "npm"
+		return 0
+	fi
+
+	if [ "$pkg_manager" = "npm" ] && command -v bun &>/dev/null; then
+		log_info "Falling back to bun for $tool_name installation"
+		echo "bun"
+		return 0
+	fi
+
+	return 1
+}
+
+# Detect available script runner (bunx preferred, fallback to npx)
+# Outputs: script runner command or empty if none found
+_detect_script_runner() {
+	if command -v bunx &>/dev/null; then
+		echo "bunx"
+	elif command -v npx &>/dev/null; then
+		echo "npx"
+	else
+		echo ""
+	fi
+}
+
 install_claude_code() {
 	log_info "Installing Claude Code..."
 
+	local pkg_manager
+	pkg_manager=$(_verify_package_manager "Claude Code")
+
+	if [ -z "$pkg_manager" ]; then
+		log_error "No package manager found. Install Bun (preferred) or Node.js/npm:"
+		log_info "  Bun:    curl -fsSL https://bun.sh/install | bash"
+		log_info "  Node:   https://nodejs.org/ (includes npm)"
+		return 1
+	fi
+
+	log_info "Using package manager: $pkg_manager"
+
 	if ! command -v claude &>/dev/null; then
-		if execute "npm install -g @anthropic-ai/claude-code"; then
+		if execute "$pkg_manager install -g @anthropic-ai/claude-code"; then
 			log_success "Claude Code installed"
 		else
 			log_error "Failed to install Claude Code"
+			return 1
 		fi
-		return
+		return 0
 	fi
 
 	log_warning "Claude Code is already installed ($(claude --version))"
 
 	if [ "$YES_TO_ALL" = true ]; then
 		log_info "Auto-skipping reinstall (--yes flag)"
-		return
+		return 0
 	elif [ -t 0 ]; then
 		if ! prompt_yn "Do you want to reinstall"; then
-			return
+			return 0
 		fi
 	else
 		log_info "Skipping reinstall in non-interactive mode"
-		return
+		return 0
 	fi
 
-	if execute "npm install -g @anthropic-ai/claude-code"; then
+	if execute "$pkg_manager install -g @anthropic-ai/claude-code"; then
 		log_success "Claude Code reinstalled"
 	else
 		log_error "Failed to reinstall Claude Code"
+		return 1
 	fi
 }
 
@@ -791,9 +890,23 @@ install_ccs() {
 	_run_ccs_install() {
 		if command -v ccs &>/dev/null; then
 			log_warning "CCS is already installed ($(ccs --version))"
-		else
-			execute "npm install -g @kaitranntt/ccs"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "CCS")
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install CCS."
+			return 1
+		fi
+
+		log_info "Installing CCS with $pkg_manager..."
+		if execute "$pkg_manager install -g @kaitranntt/ccs"; then
 			log_success "CCS installed"
+		else
+			log_error "Failed to install CCS"
+			return 1
 		fi
 	}
 	run_installer "CCS" "_run_ccs_install" "command -v ccs" "ccs --version"
@@ -815,9 +928,23 @@ install_codex() {
 	_run_codex_install() {
 		if command -v codex &>/dev/null; then
 			log_warning "Codex CLI is already installed"
-		else
-			execute "npm install -g @openai/codex"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "Codex CLI")
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Codex CLI."
+			return 1
+		fi
+
+		log_info "Installing Codex CLI with $pkg_manager..."
+		if execute "$pkg_manager install -g @openai/codex"; then
 			log_success "Codex CLI installed"
+		else
+			log_error "Failed to install Codex CLI"
+			return 1
 		fi
 	}
 	run_installer "OpenAI Codex CLI" "_run_codex_install" "command -v codex" ""
@@ -827,9 +954,23 @@ install_gemini() {
 	_run_gemini_install() {
 		if command -v gemini &>/dev/null; then
 			log_warning "Gemini CLI is already installed"
-		else
-			execute "npm install -g @google/gemini-cli"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "Gemini CLI")
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Gemini CLI."
+			return 1
+		fi
+
+		log_info "Installing Gemini CLI with $pkg_manager..."
+		if execute "$pkg_manager install -g @google/gemini-cli"; then
 			log_success "Gemini CLI installed"
+		else
+			log_error "Failed to install Gemini CLI"
+			return 1
 		fi
 	}
 	run_installer "Google Gemini CLI" "_run_gemini_install" "command -v gemini" ""
@@ -839,9 +980,23 @@ install_kilo() {
 	_run_kilo_install() {
 		if command -v kilo &>/dev/null; then
 			log_warning "Kilo CLI is already installed"
-		else
-			execute "npm install -g @kilocode/cli"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "Kilo CLI")
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Kilo CLI."
+			return 1
+		fi
+
+		log_info "Installing Kilo CLI with $pkg_manager..."
+		if execute "$pkg_manager install -g @kilocode/cli"; then
 			log_success "Kilo CLI installed"
+		else
+			log_error "Failed to install Kilo CLI"
+			return 1
 		fi
 	}
 	run_installer "Kilo CLI" "_run_kilo_install" "command -v kilo" ""
@@ -851,9 +1006,23 @@ install_pi() {
 	_run_pi_install() {
 		if command -v pi &>/dev/null; then
 			log_warning "Pi is already installed"
-		else
-			execute "npm install -g @mariozechner/pi-coding-agent"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "Pi")
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Pi."
+			return 1
+		fi
+
+		log_info "Installing Pi with $pkg_manager..."
+		if execute "$pkg_manager install -g @mariozechner/pi-coding-agent"; then
 			log_success "Pi installed"
+		else
+			log_error "Failed to install Pi"
+			return 1
 		fi
 	}
 	run_installer "Pi" "_run_pi_install" "command -v pi" ""
@@ -864,9 +1033,23 @@ install_copilot() {
 		log_info "Installing GitHub Copilot CLI..."
 		if command -v copilot &>/dev/null; then
 			log_warning "GitHub Copilot CLI is already installed"
-		else
-			execute "npm install -g @github/copilot"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "Copilot CLI")
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Copilot CLI."
+			return 1
+		fi
+
+		log_info "Installing GitHub Copilot CLI with $pkg_manager..."
+		if execute "$pkg_manager install -g @github/copilot"; then
 			log_success "GitHub Copilot CLI installed"
+		else
+			log_error "Failed to install GitHub Copilot CLI"
+			return 1
 		fi
 	}
 
@@ -918,8 +1101,21 @@ install_cursor() {
 
 install_factory() {
 	_run_factory_install() {
-		execute "npm install -g @factory/cli"
-		log_success "Factory Droid CLI installed"
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "Factory CLI")
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Factory CLI."
+			return 1
+		fi
+
+		log_info "Installing Factory CLI with $pkg_manager..."
+		if execute "$pkg_manager install -g @factory/cli"; then
+			log_success "Factory Droid CLI installed"
+		else
+			log_error "Failed to install Factory CLI"
+			return 1
+		fi
 	}
 	run_installer "Factory Droid" "_run_factory_install" "command -v droid" ""
 }
@@ -1113,30 +1309,198 @@ copy_claude_configs() {
 	log_success "Claude Code configs copied"
 }
 
+# Install MCP servers from central registry with interactive prompts
+# Usage: install_mcp_servers_from_registry [registry_file]
+install_mcp_servers_from_registry() {
+	local registry_file="${1:-$SCRIPT_DIR/configs/mcp-registry.json}"
+	local installed_count=0
+	local skipped_count=0
+	local failed_count=0
+
+	if ! command -v jq &>/dev/null; then
+		log_warning "jq not found. Cannot parse MCP registry. Install jq to use registry-based MCP installation."
+		return 1
+	fi
+
+	if [ ! -f "$registry_file" ]; then
+		log_warning "MCP registry not found: $registry_file"
+		return 1
+	fi
+
+	local script_runner
+	script_runner=$(_detect_script_runner)
+
+	if [ -z "$script_runner" ]; then
+		log_warning "No script runner found (bunx or npx). Cannot install registry MCP servers."
+		return 1
+	fi
+
+	log_info "Loading MCP servers from registry (using $script_runner)..."
+
+	local summary_lines=()
+
+	# Extract all server data in a single jq call for efficiency
+	# Fields: server_name, name, description, command, args_delimited, requires_delimited, category
+	while IFS=$'\t' read -r server_name name description command args_delimited requires_delimited category; do
+		# Substitute {{SCRIPT_RUNNER}} placeholder
+		command="${command//\{\{SCRIPT_RUNNER\}\}/$script_runner}"
+
+		# Parse args into array (args are delimited by SOH character)
+		local args_array=()
+		if [ -n "$args_delimited" ]; then
+			while IFS= read -r -d $'\x01' arg; do
+				args_array+=("$arg")
+			done <<< "$args_delimited"
+		fi
+
+		# Check prerequisites
+		local prereqs_met=true
+		local missing_prereqs=()
+
+		if [ -n "$requires_delimited" ]; then
+			local prereq
+			while IFS= read -r -d $'\x01' prereq; do
+				[ -z "$prereq" ] && continue
+
+				if ! command -v "$prereq" &>/dev/null; then
+					case "$prereq" in
+						"fff-mcp")
+							log_info "Auto-installing prerequisite: $prereq"
+							install_fff_mcp_now && continue
+							;;
+						"logpilot")
+							log_info "Auto-installing prerequisite: $prereq"
+							install_logpilot_now && continue
+							;;
+					esac
+					prereqs_met=false
+					missing_prereqs+=("$prereq")
+				fi
+			done <<< "$requires_delimited"
+		fi
+
+		if [ "$prereqs_met" = false ]; then
+			log_info "Skipping $name - requires: ${missing_prereqs[*]}"
+			summary_lines+=("⏭️  $name (skipped - requires: ${missing_prereqs[*]})")
+			skipped_count=$((skipped_count + 1))
+			continue
+		fi
+
+		# Build install command
+		local install_cmd="claude mcp add --scope user --transport stdio $server_name --"
+		install_cmd="$install_cmd $(printf '%q' "$command")"
+		for arg in "${args_array[@]}"; do
+			install_cmd="$install_cmd $(printf '%q' "$arg")"
+		done
+
+		local prompt_msg="Install $name MCP server"
+		[ -n "$description" ] && prompt_msg="$prompt_msg ($description)"
+		[ -n "$category" ] && prompt_msg="$prompt_msg [category: $category]"
+
+		# Determine install mode
+		local mode="skip"
+		if [ "$YES_TO_ALL" = true ]; then
+			mode="auto"
+		elif [ -t 0 ]; then
+			if prompt_yn "$prompt_msg"; then
+				mode="install"
+			else
+				log_info "Skipped $name (user declined)"
+				summary_lines+=("❌ $name (declined)")
+				skipped_count=$((skipped_count + 1))
+				continue
+			fi
+		fi
+
+		if [ "$mode" = "skip" ]; then
+			log_info "Skipping $name (non-interactive mode, use --yes to auto-install)"
+			summary_lines+=("⏭️  $name (skipped - non-interactive)")
+			skipped_count=$((skipped_count + 1))
+			continue
+		fi
+
+		# Execute installation
+		[ "$mode" = "auto" ] && log_info "Auto-installing $name (--yes flag)" || log_info "Installing $name..."
+
+		local err_file
+		err_file=$(make_temp_file "claude-mcp-${server_name}" "err")
+
+		if execute "$install_cmd" 2>"$err_file"; then
+			log_success "$name installed"
+			summary_lines+=("✅ $name")
+			installed_count=$((installed_count + 1))
+		elif grep -qi "already" "$err_file" 2>/dev/null; then
+			log_info "$name already installed"
+			summary_lines+=("✅ $name (already installed)")
+		else
+			log_warning "$name installation failed"
+			summary_lines+=("⚠️  $name (failed)")
+			failed_count=$((failed_count + 1))
+		fi
+		rm -f "$err_file"
+	done < <(jq -r '
+		.mcpServers | to_entries[] |
+		[
+			.key,
+			(.value.name // empty),
+			(.value.description // empty),
+			(.value.command // empty),
+			(.value.args | join("")),
+			(.value.requires | join("")),
+			(.value.category // empty)
+		] | @tsv
+	' "$registry_file")
+
+	log_info ""
+	log_info "MCP Server Installation Summary:"
+	log_info "────────────────────────────────"
+	for line in "${summary_lines[@]}"; do
+		log_info "  $line"
+	done
+	log_info "────────────────────────────────"
+	log_info "Installed: $installed_count | Skipped: $skipped_count | Failed: $failed_count"
+
+	return 0
+}
+
 setup_claude_mcp_servers() {
 	if ! command -v claude &>/dev/null; then
 		return 0
 	fi
 
 	log_info "Setting up Claude Code MCP servers (global scope)..."
-	install_mcp_interactive "context7" "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest" "documentation lookup"
-	install_mcp_interactive "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking" "multi-step reasoning"
 
-	handle_qmd_installation_if_needed
-	if command -v qmd &>/dev/null; then
-		install_mcp_interactive "qmd" "claude mcp add --scope user --transport stdio qmd -- qmd mcp" "knowledge management"
+	# Try registry-based installation first
+	if install_mcp_servers_from_registry; then
+		log_success "MCP server setup complete via registry"
 	else
-		log_warning "qmd not found. MCP setup skipped. Install with: bun install -g @tobilu/qmd"
-	fi
+		# Fallback to legacy method if registry fails
+		log_info "Falling back to legacy MCP installation method..."
+		local script_runner
+		script_runner=$(_detect_script_runner)
+		if [ -z "$script_runner" ]; then
+			log_warning "No script runner found (bunx or npx). Skipping legacy MCP installation."
+		else
+			install_mcp_interactive "context7" "claude mcp add --scope user --transport stdio context7 -- $script_runner -y @upstash/context7-mcp@latest" "documentation lookup"
+			install_mcp_interactive "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- $script_runner -y @modelcontextprotocol/server-sequential-thinking" "multi-step reasoning"
+		fi
 
-	handle_fff_mcp_installation_if_needed
-	if command -v fff-mcp &>/dev/null; then
-		install_mcp_interactive "fff" "claude mcp add --scope user --transport stdio fff -- fff-mcp" "fast file search with memory"
-	else
-		log_warning "fff-mcp not found. MCP setup skipped. Install with: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
-	fi
+		handle_qmd_installation_if_needed
+		if command -v qmd &>/dev/null; then
+			install_mcp_interactive "qmd" "claude mcp add --scope user --transport stdio qmd -- qmd mcp" "knowledge management"
+		else
+			log_warning "qmd not found. MCP setup skipped. Install with: bun install -g @tobilu/qmd"
+		fi
 
-	log_success "MCP server setup complete (global scope)"
+		handle_fff_mcp_installation_if_needed
+		if command -v fff-mcp &>/dev/null; then
+			install_mcp_interactive "fff" "claude mcp add --scope user --transport stdio fff -- fff-mcp" "fast file search with memory"
+		else
+			log_warning "fff-mcp not found. MCP setup skipped. Install with: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
+		fi
+
+		log_success "MCP server setup complete (legacy mode)"
+	fi
 }
 
 copy_opencode_configs() {
@@ -1434,20 +1798,25 @@ try_add_marketplace_repo() {
 	fi
 }
 
-# Helper: Install remote skills using npx skills add
+# Helper: Install remote skills using bunx/npx skills add
 install_remote_skills() {
 	log_info "Installing community skills from jellydn/my-ai-tools repository..."
 
-	if ! command -v npx &>/dev/null; then
-		log_error "npx not found. Please install Node.js to use remote skill installation."
+	local script_runner
+	script_runner=$(_detect_script_runner)
+
+	if [ -z "$script_runner" ]; then
+		log_error "No script runner found (bunx or npx). Please install Bun or Node.js to use remote skill installation."
 		install_local_skills
 		return 0
 	fi
 
+	log_info "Using script runner: $script_runner"
+
 	if [ "${YES_TO_ALL:-false}" = "true" ] || [ ! -t 0 ]; then
-		execute "npx skills add jellydn/my-ai-tools --yes --global --agent claude-code"
+		execute "$script_runner skills add jellydn/my-ai-tools --yes --global --agent claude-code"
 	else
-		execute "npx skills add jellydn/my-ai-tools --global --agent claude-code"
+		execute "$script_runner skills add jellydn/my-ai-tools --global --agent claude-code"
 	fi
 	log_success "Remote skills installed successfully"
 }
@@ -1456,8 +1825,11 @@ install_remote_skills() {
 install_recommended_skills() {
 	log_info "Checking for recommended community skills..."
 
-	if ! command -v npx &>/dev/null; then
-		log_warning "npx not found, skipping recommended skills"
+	local script_runner
+	script_runner=$(_detect_script_runner)
+
+	if [ -z "$script_runner" ]; then
+		log_warning "No script runner found (bunx or npx), skipping recommended skills"
 		return 0
 	fi
 
@@ -1466,43 +1838,37 @@ install_recommended_skills() {
 		return 0
 	fi
 
-	local skills_json
-	skills_json=$(cat "$SCRIPT_DIR/configs/recommend-skills.json")
-	local skill_count
-	skill_count=$(echo "$skills_json" | jq '.recommended_skills | length')
+	# Extract all skills in a single jq call for efficiency
+	local skill_count=0
+	local skills_data
+	skills_data=$(jq -r '.recommended_skills[] | [.repo, .description, .skill // ""] | @tsv' "$SCRIPT_DIR/configs/recommend-skills.json" 2>/dev/null)
 
-	if [ "$skill_count" -eq 0 ] || [ "$skill_count" = "null" ]; then
+	if [ -z "$skills_data" ]; then
 		log_info "No recommended skills found in config"
 		return 0
 	fi
 
+	skill_count=$(jq '.recommended_skills | length' "$SCRIPT_DIR/configs/recommend-skills.json")
 	log_info "Found $skill_count recommended skill(s)"
 
-	# Install specific skills from recommend-skills.json based on YES_TO_ALL
-	# When -y is used, only install: 1 react/vercel skill (vercel-labs/agent-skills)
-	local install_count=0
+	# When -y is used, limit to 1 skill
 	local max_installs=3
-	if [ "$YES_TO_ALL" = true ]; then
-		max_installs=1 # limit to 1 skill in auto-yes mode
-	fi
+	[ "$YES_TO_ALL" = true ] && max_installs=1
 
-	for i in $(seq 0 $((skill_count - 1))); do
-		# When using -y, limit to first skill only
-		if [ "$YES_TO_ALL" = true ] && [ "$install_count" -ge "$max_installs" ]; then
-			log_info "Reached maximum recommended skills for -y mode ($max_installs), skipping remaining"
+	local install_count=0
+	while IFS=$'\t' read -r repo description skill; do
+		if [ "$install_count" -ge "$max_installs" ]; then
+			[ "$YES_TO_ALL" = true ] && log_info "Reached maximum recommended skills for -y mode ($max_installs), skipping remaining"
 			break
 		fi
-		local repo description skill skill_suffix
-		repo=$(echo "$skills_json" | jq -r ".recommended_skills[$i].repo")
-		description=$(echo "$skills_json" | jq -r ".recommended_skills[$i].description")
-		skill=$(echo "$skills_json" | jq -r ".recommended_skills[$i].skill // empty")
-		skill_suffix=""
+
+		local skill_suffix=""
 		[ -n "$skill" ] && skill_suffix="/$skill"
 
 		log_info "  - $repo${skill_suffix}: $description"
 		install_single_recommended_skill "$repo" "$skill" "$skill_suffix"
 		install_count=$((install_count + 1))
-	done
+	done <<< "$skills_data"
 
 	log_success "Recommended skills check complete"
 }
@@ -1512,18 +1878,26 @@ install_single_recommended_skill() {
 	local skill="$2"
 	local skill_suffix="$3"
 
+	local script_runner
+	script_runner=$(_detect_script_runner)
+
+	if [ -z "$script_runner" ]; then
+		log_warning "No script runner available for installing $repo${skill_suffix}"
+		return 1
+	fi
+
 	if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
 		if [ -n "$skill" ]; then
-			execute "npx skills add '$repo' --skill '$skill' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_info "Skipped: $repo${skill_suffix}"
+			execute "$script_runner skills add '$repo' --skill '$skill' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_info "Skipped: $repo${skill_suffix}"
 		else
-			execute "npx skills add '$repo' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_info "Skipped: $repo"
+			execute "$script_runner skills add '$repo' --yes --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_info "Skipped: $repo"
 		fi
 	elif [ -t 0 ]; then
 		if prompt_yn "Install $repo${skill_suffix}"; then
 			if [ -n "$skill" ]; then
-				execute "npx skills add '$repo' --skill '$skill' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_warning "Failed to install: $repo${skill_suffix}"
+				execute "$script_runner skills add '$repo' --skill '$skill' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo${skill_suffix}" || log_warning "Failed to install: $repo${skill_suffix}"
 			else
-				execute "npx skills add '$repo' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_warning "Failed to install: $repo"
+				execute "$script_runner skills add '$repo' --global --agent claude-code" 2>/dev/null && log_success "Installed: $repo" || log_warning "Failed to install: $repo"
 			fi
 		else
 			log_info "Skipped: $repo${skill_suffix}"
@@ -1619,7 +1993,7 @@ enable_plugins() {
 		MARKETPLACE_AVAILABLE=true
 	else
 		log_warning "Claude plugin marketplace is not available"
-		log_info "Note: Skills can still be installed remotely using the npx skills add command"
+		log_info "Note: Skills can still be installed remotely using bunx/npx skills add command"
 	fi
 
 	# Determine skill installation source
@@ -1667,7 +2041,7 @@ determine_skill_install_source() {
 		SKILL_INSTALL_SOURCE="local"
 	elif [ -t 0 ]; then
 		log_info "How would you like to install community skills?"
-		printf "1) Local (from skills folder) 2) Remote (from jellydn/my-ai-tools using npx skills) [1/2]: "
+		printf "1) Local (from skills folder) 2) Remote (from jellydn/my-ai-tools using bunx/npx skills) [1/2]: "
 		read -r REPLY
 		echo
 		case "$REPLY" in
@@ -1798,7 +2172,7 @@ install_local_community_plugins() {
 		local name plugin_spec marketplace_repo cli_tool
 		name="${plugin_entry%%|*}"
 
-		# Skip remote skills - they're installed from local skills folder or npx
+		# Skip remote skills - they're installed from local skills folder or bunx/npx
 		is_remote_skill "$name" && continue
 
 		local rest="${plugin_entry#*|}"

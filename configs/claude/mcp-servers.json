@@ -16,6 +16,10 @@
 			"type": "stdio",
 			"command": "fff-mcp",
 			"args": []
+		},
+		"react-grab-mcp": {
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
 		}
 	}
 }

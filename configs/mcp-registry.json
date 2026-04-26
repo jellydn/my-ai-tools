@@ -1,0 +1,52 @@
+{
+  "mcpServers": {
+    "context7": {
+      "name": "context7",
+      "description": "documentation lookup for libraries and frameworks",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "requires": [],
+      "category": "documentation"
+    },
+    "sequential-thinking": {
+      "name": "sequential-thinking",
+      "description": "multi-step reasoning and problem solving",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "requires": [],
+      "category": "reasoning"
+    },
+    "qmd": {
+      "name": "qmd",
+      "description": "knowledge management with qmd",
+      "command": "qmd",
+      "args": ["mcp"],
+      "requires": ["qmd"],
+      "category": "knowledge"
+    },
+    "fff": {
+      "name": "fff",
+      "description": "fast file search with frecency ranking",
+      "command": "fff-mcp",
+      "args": [],
+      "requires": ["fff-mcp"],
+      "category": "search"
+    },
+    "react-grab-mcp": {
+      "name": "react-grab-mcp",
+      "description": "React component capture and inspection",
+      "command": "npx",
+      "args": ["-y", "@react-grab/mcp", "--stdio"],
+      "requires": [],
+      "category": "frontend"
+    },
+    "logpilot": {
+      "name": "logpilot",
+      "description": "AI-powered log analysis and tmux session monitoring",
+      "command": "logpilot",
+      "args": ["mcp-server"],
+      "requires": ["logpilot"],
+      "category": "monitoring"
+    }
+  }
+}

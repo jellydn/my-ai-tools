@@ -20,6 +20,14 @@
     "fff": {
       "command": "fff-mcp",
       "args": []
+    },
+    "react-grab-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@react-grab/mcp",
+        "--stdio"
+      ]
     }
   },
   "security": {
@@ -46,8 +54,10 @@
         "sandbox",
         "model-name",
         "context-used",
-        "quota"
-      ]
+        "quota",
+        "code-changes"
+      ],
+      "showLabels": true
     },
     "showMemoryUsage": false,
     "showCitations": true,
@@ -62,7 +72,8 @@
     },
     "plan": {
       "enabled": true
-    }
+    },
+    "preferredEditor": "zed"
   },
   "context": {
     "loadMemoryFromIncludeDirectories": true,

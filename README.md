@@ -182,7 +182,6 @@ The script will prompt you to install each MCP server:
 - [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
 - [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
 - [`fff`](https://github.com/dmtrKovalenko/fff.nvim) - Fast file search with built-in memory for AI agents
-- [`chrome-devtools`](https://github.com/vercel/chrome-devtools-mcp) - Chrome DevTools integration for browser automation
 - [`react-grab-mcp`](https://github.com/nyan-left/react-grab-mcp) - React component extraction and analysis
 
 #### Manual Setup
@@ -210,6 +209,10 @@ Configuration in [`~/.claude/mcp-servers.json`](configs/claude/mcp-servers.json)
       "type": "stdio",
       "command": "fff-mcp",
       "args": []
+    },
+    "react-grab-mcp": {
+      "command": "npx",
+      "args": ["-y", "@react-grab/mcp", "--stdio"]
     }
   }
 }
@@ -676,11 +679,6 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
       "command": ["qmd", "mcp"],
       "enabled": true
     },
-    "chrome-devtools": {
-      "type": "local",
-      "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
-      "enabled": true
-    },
     "fff": {
       "type": "local",
       "command": ["fff-mcp"],
@@ -810,10 +808,6 @@ Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/
   "amp.mcpServers": {
     "context7": {
       "url": "https://mcp.context7.com/mcp"
-    },
-    "chrome-devtools": {
-      "command": "npx",
-      "args": ["chrome-devtools-mcp@latest"]
     },
     "sequential-thinking": {
       "command": "npx",
@@ -1076,6 +1070,10 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
     "fff": {
       "command": "fff-mcp",
       "args": []
+    },
+    "react-grab-mcp": {
+      "command": "npx",
+      "args": ["-y", "@react-grab/mcp", "--stdio"]
     }
   },
   "experimental": {
@@ -1140,6 +1138,11 @@ Configuration is managed through:
     "sequential-thinking": {
       "type": "local",
       "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "enabled": true
+    },
+    "react-grab-mcp": {
+      "type": "local",
+      "command": ["npx", "-y", "@react-grab/mcp", "--stdio"],
       "enabled": true
     }
   }
@@ -1315,6 +1318,13 @@ Copilot CLI configs are stored in [`configs/copilot/`](configs/copilot/) and ins
       "type": "local",
       "command": "qmd",
       "args": ["mcp"]
+    },
+    "react-grab-mcp": {
+      "type": "local",
+      "command": "npx",
+      "args": ["-y", "@react-grab/mcp", "--stdio"],
+      "env": {},
+      "tools": ["*"]
     }
   }
 }
@@ -1444,11 +1454,6 @@ Factory Droid configs are stored in `configs/factory/` and installed to `~/.fact
       "type": "stdio",
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
-    "chrome-devtools": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp@latest"]
     },
     "fff": {
       "type": "stdio",

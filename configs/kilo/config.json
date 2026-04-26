@@ -35,6 +35,16 @@
         "@modelcontextprotocol/server-sequential-thinking"
       ],
       "enabled": true
+    },
+    "react-grab-mcp": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@react-grab/mcp",
+        "--stdio"
+      ],
+      "enabled": true
     }
   },
   "agent": {
