@@ -187,6 +187,5 @@
       }
     }
   },
-  "skipDangerousModePermissionPrompt": true,
-  "theme": "kanagawa"
+  "skipDangerousModePermissionPrompt": true
 }

@@ -6,15 +6,8 @@ Run dev servers, tests, and interactive CLIs inside tmux with the **current dire
 
 ```bash
 SESSION=$(basename "$PWD")
-tmux new -d -s "$SESSION" 2>/dev/null || true
-
-# Run dev server with portless if available, otherwise fallback to npm
-if command -v portless &>/dev/null; then
-    tmux send-keys -t "$SESSION" 'portless run npm run dev' Enter
-else
-    tmux send-keys -t "$SESSION" 'npm run dev' Enter
-fi
-
+tmux new -d -s "$SESSION"
+tmux send-keys -t "$SESSION" 'npm run dev' Enter
 tmux capture-pane -p -t "$SESSION" -S -20  # check output
 ```
 

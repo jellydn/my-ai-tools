@@ -7,22 +7,22 @@
         "@upstash/context7-mcp@latest"
       ]
     },
+    "chrome-devtools": {
+      "command": "npx -y chrome-devtools-mcp@latest",
+      "env": {},
+      "args": []
+    },
     "fff": {
       "command": "fff-mcp",
       "args": []
     },
     "sequential-thinking": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
     },
     "qmd": {
       "command": "qmd",
-      "args": [
-        "mcp"
-      ]
+      "args": ["mcp"]
     },
     "react-grab-mcp": {
       "command": "npx",
