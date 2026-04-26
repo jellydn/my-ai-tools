@@ -565,6 +565,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `codemap` - Parallel codebase analysis producing structured documentation
 - `handoffs` - Create handoff plans for continuing work (provides `/handoffs` command)
 - `pickup` - Resume work from previous handoff sessions (provides `/pickup` command)
+- `portless-local` - Named .localhost URLs for local development - replaces port numbers with stable URLs
 - `pr-review` - Pull request review workflows
 - `prd` - Generate Product Requirements Documents
 - `qmd-knowledge` - Project knowledge management
@@ -686,7 +687,11 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
     },
     "sequential-thinking": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
       "enabled": true
     }
   },
@@ -1137,7 +1142,11 @@ Configuration is managed through:
     },
     "sequential-thinking": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
       "enabled": true
     },
     "react-grab-mcp": {
