@@ -38,6 +38,13 @@
 		"notion": {
 			"type": "http",
 			"url": "https://mcp.notion.com/mcp"
+		},
+		"logpilot": {
+			"type": "local",
+			"command": "logpilot",
+			"args": ["mcp-server"],
+			"env": {},
+			"tools": ["*"]
 		}
 	}
 }

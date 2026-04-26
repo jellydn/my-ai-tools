@@ -41,6 +41,11 @@
         "mcp-remote",
         "https://mcp.notion.com/mcp"
       ]
+    },
+    "logpilot": {
+      "alwaysAllow": [],
+      "command": "logpilot",
+      "args": ["mcp-server"]
     }
   }
 }

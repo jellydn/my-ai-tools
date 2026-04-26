@@ -50,6 +50,10 @@ args = ["-y", "@react-grab/mcp", "--stdio"]
 [mcp_servers.notion]
 url = "https://mcp.notion.com/mcp"
 
+[mcp_servers.logpilot]
+command = "logpilot"
+args = ["mcp-server"]
+
 [notice.model_migrations]
 "gpt-5.2-codex" = "gpt-5.3-codex"
 "gpt-5.3-codex" = "gpt-5.4"
