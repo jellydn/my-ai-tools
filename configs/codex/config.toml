@@ -1,6 +1,7 @@
 model_personality = "pragmatic"
 model = "gpt-5.5"
 model_reasoning_effort = "medium"
+approvals_reviewer = "guardian_subagent"
 
 [features]
 unified_exec = true
@@ -53,14 +54,51 @@ url = "https://mcp.notion.com/mcp"
 "gpt-5.2-codex" = "gpt-5.3-codex"
 "gpt-5.3-codex" = "gpt-5.4"
 
+[notice.external_config_migration_prompts]
+home_last_prompted_at = 1777243300
+
 [tui]
 status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "context-used"]
 theme = "kanagawa"
 
+[tui.model_availability_nux]
+"gpt-5.5" = 1
+
 [plugins."github@openai-curated"]
 enabled = true
 
-# Add your own project-specific trust settings here
-# Example:
-# [projects."/path/to/your/project"]
-# trust_level = "trusted"
+[plugins."claude-md-management@claude-plugins-official"]
+enabled = true
+
+[plugins."code-simplifier@claude-plugins-official"]
+enabled = true
+
+[plugins."context7@claude-plugins-official"]
+enabled = true
+
+[plugins."frontend-design@claude-plugins-official"]
+enabled = true
+
+[plugins."learning-output-style@claude-plugins-official"]
+enabled = true
+
+[plugins."codex@openai-codex"]
+enabled = true
+
+[plugins."plannotator@plannotator"]
+enabled = true
+
+[marketplaces.claude-plugins-official]
+last_updated = "2026-04-26T22:42:16Z"
+source_type = "git"
+source = "https://github.com/anthropics/claude-plugins-official.git"
+
+[marketplaces.plannotator]
+last_updated = "2026-04-26T22:42:22Z"
+source_type = "git"
+source = "https://github.com/backnotprop/plannotator.git"
+
+[marketplaces.worktrunk]
+last_updated = "2026-04-26T22:42:28Z"
+source_type = "git"
+source = "https://github.com/max-sixty/worktrunk.git"

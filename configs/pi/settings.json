@@ -4,7 +4,7 @@
   "defaultProvider": "fireworks",
   "defaultThinkingLevel": "medium",
   "editorPaddingX": 1,
-  "lastChangelogVersion": "0.70.0",
+  "lastChangelogVersion": "0.70.2",
   "packages": [
     "npm:@plannotator/pi-extension",
     "npm:pi-subagents",
