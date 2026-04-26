@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "providers": {
+    "firepass": {
+      "provider": {
+        "name": "Firework - Firepass",
+        "baseUrl": "https://api.fireworks.ai/inference/v1",
+        "defaultModelId": "accounts/fireworks/routers/kimi-k2p5-turbo",
+        "capabilities": [
+          "streaming",
+          "tools",
+          "vision"
+        ]
+      },
+      "models": {
+        "accounts/fireworks/routers/kimi-k2p5-turbo": {
+          "id": "accounts/fireworks/routers/kimi-k2p5-turbo",
+          "name": "accounts/fireworks/routers/kimi-k2p5-turbo",
+          "supportsVision": true,
+          "supportsAttachments": true,
+          "supportsReasoning": false
+        }
+      }
+    }
+  }
+}
