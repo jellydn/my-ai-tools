@@ -183,6 +183,10 @@ The script will prompt you to install each MCP server:
 - [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
 - [`fff`](https://github.com/dmtrKovalenko/fff.nvim) - Fast file search with built-in memory for AI agents
 - [`react-grab-mcp`](https://github.com/nyan-left/react-grab-mcp) - React component extraction and analysis
+- [`notion`](https://www.notion.so) - Notion workspace integration for pages and databases
+- [`logpilot`](https://github.com/jellydn/logpilot) - AI-powered log analysis and tmux session monitoring
+
+> **Security Note on Remote MCP Servers**: The `notion` MCP server uses `mcp-remote` which fetches and executes remote code from Notion's servers. This requires authentication with your Notion account. While convenient, be aware that remote MCP servers execute code from external sources. Only install if you trust the provider (notion.com in this case).
 
 #### Manual Setup
 
