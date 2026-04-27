@@ -2248,6 +2248,7 @@ create_tool_skills_symlinks() {
 		"$HOME/.pi/skills"
 		"$HOME/.cursor/skills"
 		"$HOME/.config/amp/skills"
+		"$HOME/.codex/skills"
 	)
 
 	for tool_dir in "${tool_dirs[@]}"; do
