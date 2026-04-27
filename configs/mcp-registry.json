@@ -47,6 +47,14 @@
       "args": ["mcp-server"],
       "requires": ["logpilot"],
       "category": "monitoring"
+    },
+    "notion": {
+      "name": "notion",
+      "description": "Notion workspace integration for pages, databases, and content",
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"],
+      "requires": [],
+      "category": "productivity"
     }
   }
 }
