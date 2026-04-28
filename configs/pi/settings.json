@@ -4,7 +4,7 @@
   "defaultProvider": "fireworks",
   "defaultThinkingLevel": "medium",
   "editorPaddingX": 1,
-  "lastChangelogVersion": "0.70.2",
+  "lastChangelogVersion": "0.70.5",
   "packages": [
     "npm:@plannotator/pi-extension",
     "npm:pi-subagents",
@@ -23,5 +23,10 @@
   "theme": "kanagawa",
   "hideThinkingBlock": false,
   "permissionLevel": "high",
-  "treeFilterMode": "default"
+  "treeFilterMode": "default",
+  "enabledModels": [
+    "fireworks/accounts/fireworks/routers/kimi-k2p5-turbo",
+    "github-copilot/gpt-5-mini",
+    "github-copilot/gpt-4.1"
+  ]
 }
