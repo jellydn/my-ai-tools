@@ -2268,10 +2268,13 @@ create_tool_skills_symlinks() {
 			if [ -L "$tool_dir" ] && [ "$(readlink "$tool_dir")" = "$universal_dir" ]; then
 				continue
 			fi
-			# Back up existing non-symlink directory
+			# Back up existing non-symlink directory to central backup location
+			# (outside tool config to avoid skill conflicts from duplicate scanning)
 			if [ -d "$tool_dir" ] && [ ! -L "$tool_dir" ]; then
-				execute_quoted mv "$tool_dir" "$tool_dir.backup.$(date +%Y%m%d%H%M%S)"
-				log_info "Backed up existing skills directory: $tool_dir"
+				local backup_dir="$HOME/.my-ai-tools-backups/skills/$(basename "$tool_dir").backup.$(date +%Y%m%d%H%M%S)"
+				execute_quoted mkdir -p "$(dirname "$backup_dir")"
+				execute_quoted mv "$tool_dir" "$backup_dir"
+				log_info "Backed up existing skills directory to: $backup_dir"
 			else
 				execute_quoted rm -rf "$tool_dir"
 			fi
