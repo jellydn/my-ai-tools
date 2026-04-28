@@ -21,9 +21,6 @@
 			"command": "npx",
 			"args": ["-y", "@react-grab/mcp", "--stdio"]
 		},
-		"notion": {
-			"url": "https://mcp.notion.com/mcp"
-		},
 		"logpilot": {
 			"command": "logpilot",
 			"args": ["mcp-server"]

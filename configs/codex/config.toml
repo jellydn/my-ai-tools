@@ -47,9 +47,6 @@ approval_mode = "approve"
 command = "npx"
 args = ["-y", "@react-grab/mcp", "--stdio"]
 
-[mcp_servers.notion]
-url = "https://mcp.notion.com/mcp"
-
 [mcp_servers.logpilot]
 command = "logpilot"
 args = ["mcp-server"]

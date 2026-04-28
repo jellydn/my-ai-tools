@@ -33,15 +33,6 @@
         "--stdio"
       ]
     },
-    "notion": {
-      "alwaysAllow": [],
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://mcp.notion.com/mcp"
-      ]
-    },
     "logpilot": {
       "alwaysAllow": [],
       "command": "logpilot",

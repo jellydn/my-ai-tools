@@ -39,12 +39,6 @@
         "--stdio"
       ]
     },
-    "notion": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"],
-      "disabled": false
-    },
     "logpilot": {
       "type": "stdio",
       "command": "logpilot",

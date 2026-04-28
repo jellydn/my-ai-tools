@@ -29,14 +29,6 @@
         "--stdio"
       ]
     },
-    "notion": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://mcp.notion.com/mcp"
-      ]
-    },
     "logpilot": {
       "command": "logpilot",
       "args": ["mcp-server"]

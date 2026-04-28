@@ -46,16 +46,6 @@
       ],
       "enabled": true
     },
-    "notion": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "mcp-remote",
-        "https://mcp.notion.com/mcp"
-      ],
-      "enabled": true
-    },
     "logpilot": {
       "type": "local",
       "command": ["logpilot", "mcp-server"],
