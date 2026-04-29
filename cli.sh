@@ -784,7 +784,10 @@ _verify_package_manager() {
 	pkg_manager=$(_detect_package_manager)
 
 	[ -z "$pkg_manager" ] && return 1
-	command -v "$pkg_manager" &>/dev/null && { echo "$pkg_manager"; return 0; }
+	command -v "$pkg_manager" &>/dev/null && {
+		echo "$pkg_manager"
+		return 0
+	}
 
 	log_warning "$pkg_manager was detected but is not available in current shell PATH"
 
@@ -1125,9 +1128,22 @@ install_cline() {
 	_run_cline_install() {
 		if command -v cline &>/dev/null; then
 			log_warning "Cline is already installed"
-		else
-			execute "npm install -g cline"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "Cline")
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Cline."
+			return 1
+		fi
+
+		if execute "$pkg_manager install -g cline"; then
 			log_success "Cline installed"
+		else
+			log_error "Failed to install Cline"
+			return 1
 		fi
 	}
 	run_installer "Cline" "_run_cline_install" "command -v cline" ""
@@ -1340,7 +1356,7 @@ install_mcp_servers_from_registry() {
 		if [ -n "$args_delimited" ]; then
 			while IFS= read -r -d $'\x01' arg; do
 				args_array+=("$arg")
-			done <<< "$args_delimited"
+			done <<<"$args_delimited"
 		fi
 
 		# Check prerequisites
@@ -1354,19 +1370,19 @@ install_mcp_servers_from_registry() {
 
 				if ! command -v "$prereq" &>/dev/null; then
 					case "$prereq" in
-						"fff-mcp")
-							log_info "Auto-installing prerequisite: $prereq"
-							install_fff_mcp_now && continue
-							;;
-						"logpilot")
-							log_info "Auto-installing prerequisite: $prereq"
-							install_logpilot_now && continue
-							;;
+					"fff-mcp")
+						log_info "Auto-installing prerequisite: $prereq"
+						install_fff_mcp_now && continue
+						;;
+					"logpilot")
+						log_info "Auto-installing prerequisite: $prereq"
+						install_logpilot_now && continue
+						;;
 					esac
 					prereqs_met=false
 					missing_prereqs+=("$prereq")
 				fi
-			done <<< "$requires_delimited"
+			done <<<"$requires_delimited"
 		fi
 
 		if [ "$prereqs_met" = false ]; then
@@ -1741,9 +1757,25 @@ copy_cline_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/cline/models.json" "$HOME/.cline/data/settings" || true
 	copy_config_file "$SCRIPT_DIR/configs/cline/providers.json" "$HOME/.cline/data/settings" || true
-	copy_config_file "$SCRIPT_DIR/configs/cline/kanban-config.json" "$HOME/.cline/kanban" || true
 
-	copy_non_marketplace_skills "$SCRIPT_DIR/configs/cline/skills"
+	# Copy kanban file back as config.json (Cline expects this filename)
+	if [ -f "$SCRIPT_DIR/configs/cline/kanban-config.json" ]; then
+		execute_quoted cp "$SCRIPT_DIR/configs/cline/kanban-config.json" "$HOME/.cline/kanban/config.json"
+		log_success "Cline kanban config copied"
+	fi
+
+	# Copy Cline-specific skills directly to ~/.cline/skills
+	if [ -d "$SCRIPT_DIR/configs/cline/skills" ]; then
+		execute_quoted mkdir -p "$HOME/.cline/skills"
+		for skill_dir in "$SCRIPT_DIR/configs/cline/skills"/*; do
+			if [ -d "$skill_dir" ]; then
+				local skill_name
+				skill_name=$(basename "$skill_dir")
+				safe_copy_dir "$skill_dir" "$HOME/.cline/skills/$skill_name"
+			fi
+		done
+		log_success "Cline-specific skills copied"
+	fi
 
 	log_success "Cline configs copied"
 }
@@ -1871,7 +1903,7 @@ install_recommended_skills() {
 		log_info "  - $repo${skill_suffix}: $description"
 		install_single_recommended_skill "$repo" "$skill" "$skill_suffix"
 		install_count=$((install_count + 1))
-	done <<< "$skills_data"
+	done <<<"$skills_data"
 
 	log_success "Recommended skills check complete"
 }
@@ -2271,7 +2303,10 @@ create_tool_skills_symlinks() {
 			# Back up existing non-symlink directory to central backup location
 			# (outside tool config to avoid skill conflicts from duplicate scanning)
 			if [ -d "$tool_dir" ] && [ ! -L "$tool_dir" ]; then
-				local backup_dir="$HOME/.my-ai-tools-backups/skills/$(basename "$tool_dir").backup.$(date +%Y%m%d%H%M%S)"
+				local tool_name
+				tool_name=$(basename "$(dirname "$tool_dir")")
+				local backup_dir
+				backup_dir="$HOME/.my-ai-tools-backups/skills/${tool_name}.skills.backup.$(date +%Y%m%d%H%M%S).$$"
 				execute_quoted mkdir -p "$(dirname "$backup_dir")"
 				execute_quoted mv "$tool_dir" "$backup_dir"
 				log_info "Backed up existing skills directory to: $backup_dir"

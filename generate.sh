@@ -4,6 +4,8 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
+BACKUP_ROOT="${MY_AI_TOOLS_BACKUP_DIR:-$HOME/.ai-tools/backups}"
+BACKUP_DIR="$BACKUP_ROOT/generate-$(date +%Y%m%d-%H%M%S)"
 DRY_RUN=false
 
 for arg in "$@"; do
@@ -41,8 +43,8 @@ copy_directory() {
 	local src="$1"
 	local dest="$2"
 	if [ -d "$src" ]; then
-		execute "mkdir -p '$dest'"
-		execute "cp -r '$src'/* '$dest'/ 2>/dev/null || true"
+		execute_quoted mkdir -p "$dest"
+		execute_quoted cp -r "$src"/* "$dest"/ 2>/dev/null || true
 		log_success "Copied directory: $src → $dest"
 	else
 		log_warning "Skipped (not found): $src"
@@ -65,8 +67,8 @@ copy_claude_subdirectory() {
 		return 0
 	fi
 
-	execute "mkdir -p '$dest'"
-	if execute "cp -r '$src'/* '$dest'/ 2>/dev/null"; then
+	execute_quoted mkdir -p "$dest"
+	if execute_quoted cp -r "$src"/* "$dest"/ 2>/dev/null; then
 		log_success "Copied $name directory"
 	else
 		log_warning "Failed to copy $name directory"

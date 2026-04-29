@@ -56,32 +56,32 @@ Comprehensive development guidelines for Agent OS projects, based on Kent Beck's
 
 > "Software design is an exercise in human relationships" - Kent Beck
 
-## Core Principles
+## 🎯 Core Principles
 
-### Tidy First Philosophy
+### 🧹 Tidy First Philosophy
 
 - **Small, Safe Steps**: Make big changes through small, reversible steps
 - **Human Relationships**: Code is communication between humans
 - **Economic Thinking**: Balance current effort against future options
 - **Eliminate Problems**: Remove complexity rather than managing it
 
-### Code Quality Fundamentals
+### ✨ Code Quality Fundamentals
 
 - **Don't Solve Problems, Eliminate Them**: Look for ways to reduce complexity
 - **Optimize for Readability**: Prioritize code clarity over clever solutions
 - **Self-Documenting Code**: Use meaningful names and clear structure
 - **Test for Confidence**: Write tests that give confidence to change
 
-### Change-Friendly Design
+### 🔄 Change-Friendly Design
 
 - **Separate Tidying from Behavior Changes**: Keep refactoring separate from new features
 - **Build for the Next Developer**: Consider maintainability and understanding
 - **Options Over Things**: Create flexibility for uncertain future requirements
 - **Progressive Enhancement**: Start simple, add complexity when needed
 
-## Dependencies
+## 📦 Dependencies
 
-### Choose Libraries Wisely
+### 🧠 Choose Libraries Wisely
 
 When adding third-party dependencies:
 
@@ -92,9 +92,9 @@ When adding third-party dependencies:
   - Number of stars/downloads
   - Clear documentation
 
-## Tidying Practices
+## 🧹 Tidying Practices
 
-### When to Tidy
+### ⏰ When to Tidy
 
 **Before making a change**:
 
@@ -102,9 +102,9 @@ When adding third-party dependencies:
 - Will tidying take longer than the change? → No → Make change first, tidy after
 - Is the change urgent? → Skip tidying for now, schedule for later
 
-### Core Tidying Techniques
+### 🔧 Core Tidying Techniques
 
-#### Guard Clauses
+#### 🛡️ Guard Clauses
 
 Move preconditions to the top and return early:
 
@@ -130,15 +130,15 @@ function processUser(user) {
 }
 ```
 
-#### Dead Code Elimination
+#### 🗑️ Dead Code Elimination
 
 Delete code that isn't executed or referenced.
 
-#### Normalize Symmetries
+#### ⚖️ Normalize Symmetries
 
 Use consistent patterns throughout the codebase.
 
-#### Helper Variables and Functions
+#### 🆘 Helper Variables and Functions
 
 Extract complex expressions into well-named variables:
 
@@ -163,9 +163,9 @@ if (hasActivePremiumSubscription) {
 }
 ```
 
-## Testing Strategy
+## 🧪 Testing Strategy
 
-### The Testing Trophy Approach
+### 🏆 The Testing Trophy Approach
 
 Based on Kent C. Dodds' testing philosophy:
 
@@ -179,15 +179,15 @@ Based on Kent C. Dodds' testing philosophy:
  🏅 Static Analysis
 ```
 
-### Testing Guidelines
+### 📝 Testing Guidelines
 
-#### Write Tests That Give Confidence
+#### 💪 Write Tests That Give Confidence
 
 - Test behavior, not implementation details
 - Focus on user-facing functionality
 - Prefer integration tests over isolated unit tests
 
-#### Test Structure
+#### 🏗️ Test Structure
 
 ```javascript
 // ✅ Clear test structure
@@ -206,27 +206,27 @@ test("should increment counter when button is clicked", () => {
 });
 ```
 
-#### Avoid Testing Implementation Details
+#### 🙈 Avoid Testing Implementation Details
 
 - Don't test internal state or private methods
 - Test the component's public interface
 - Mock at the network boundary, not internal functions
 
-## Performance Practices
+## ⚡ Performance Practices
 
-### Optimize for the Right Metrics
+### 📊 Optimize for the Right Metrics
 
 - Focus on user-centric performance (loading, interaction)
 - Measure before optimizing
 - Avoid premature micro-optimizations
 
-### Progressive Enhancement
+### 📈 Progressive Enhancement
 
 - Build core functionality that works without JavaScript
 - Enhance with client-side features
 - Use lazy loading for non-critical resources
 
-### Performance Patterns
+### 🚀 Performance Patterns
 
 ```javascript
 // ✅ Lazy loading with Suspense
@@ -241,15 +241,15 @@ function App() {
 }
 ```
 
-## Collaboration Practices
+## 🤝 Collaboration Practices
 
-### Code as Communication
+### 💬 Code as Communication
 
 - Express intent clearly through naming and structure
 - Document decisions, not implementation
 - Consider the next developer who will read this code
 
-### Pull Request Guidelines
+### 🔍 Pull Request Guidelines
 
 **For Authors**:
 
@@ -263,7 +263,7 @@ function App() {
 - Ask questions when unclear
 - Praise good solutions
 
-### Continuous Improvement
+### ♻️ Continuous Improvement
 
 - Reflect on decisions and learn from mistakes
 - Share knowledge through documentation and mentoring
