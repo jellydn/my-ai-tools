@@ -2296,9 +2296,16 @@ create_tool_skills_symlinks() {
 
 		# Remove existing directory/symlink if it exists
 		if [ -e "$tool_dir" ] || [ -L "$tool_dir" ]; then
-			# Check if it's already correctly symlinked
-			if [ -L "$tool_dir" ] && [ "$(readlink "$tool_dir")" = "$universal_dir" ]; then
-				continue
+			# Check if it's already correctly symlinked (handle trailing slash variations)
+			if [ -L "$tool_dir" ]; then
+				local link_target
+				link_target=$(readlink "$tool_dir")
+				# Normalize paths: remove trailing slashes for comparison
+				local normalized_target="${link_target%/}"
+				local normalized_universal="${universal_dir%/}"
+				if [ "$normalized_target" = "$normalized_universal" ]; then
+					continue
+				fi
 			fi
 			# Back up existing non-symlink directory to central backup location
 			# (outside tool config to avoid skill conflicts from duplicate scanning)
