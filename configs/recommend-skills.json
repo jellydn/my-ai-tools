@@ -5,6 +5,11 @@
       "description": "Vercel's agent skills for Next.js and React"
     },
     {
+      "repo": "factory-ai/factory-plugins",
+      "skill": "no-use-effect",
+      "description": "Guides replacing useEffect with better patterns - derive state, use data-fetching libraries, event handlers, useMountEffect, and key prop resets"
+    },
+    {
       "repo": "mattpocock/skills",
       "skill": "grill-me",
       "description": "Interview the user relentlessly about a plan or design until reaching shared understanding"
