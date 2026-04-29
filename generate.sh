@@ -4,8 +4,6 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
-BACKUP_ROOT="${MY_AI_TOOLS_BACKUP_DIR:-$HOME/.ai-tools/backups}"
-BACKUP_DIR="$BACKUP_ROOT/generate-$(date +%Y%m%d-%H%M%S)"
 DRY_RUN=false
 
 for arg in "$@"; do
