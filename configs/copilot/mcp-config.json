@@ -34,6 +34,13 @@
 			"args": ["-y", "@react-grab/mcp", "--stdio"],
 			"env": {},
 			"tools": ["*"]
+		},
+		"logpilot": {
+			"type": "local",
+			"command": "logpilot",
+			"args": ["mcp-server"],
+			"env": {},
+			"tools": ["*"]
 		}
 	}
 }

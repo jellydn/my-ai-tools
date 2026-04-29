@@ -755,6 +755,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.pi" "$BACKUP_DIR" "pi"
 		copy_config_dir "$HOME/.cursor" "$BACKUP_DIR" "cursor"
 		copy_config_dir "$HOME/.factory" "$BACKUP_DIR" "factory"
+		copy_config_dir "$HOME/.cline" "$BACKUP_DIR" "cline"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -783,7 +784,10 @@ _verify_package_manager() {
 	pkg_manager=$(_detect_package_manager)
 
 	[ -z "$pkg_manager" ] && return 1
-	command -v "$pkg_manager" &>/dev/null && { echo "$pkg_manager"; return 0; }
+	command -v "$pkg_manager" &>/dev/null && {
+		echo "$pkg_manager"
+		return 0
+	}
 
 	log_warning "$pkg_manager was detected but is not available in current shell PATH"
 
@@ -1120,43 +1124,44 @@ install_factory() {
 	run_installer "Factory Droid" "_run_factory_install" "command -v droid" ""
 }
 
-# Helper: Copy non-marketplace skills from source to destination
-# Usage: copy_non_marketplace_skills "source_dir" "dest_dir"
+install_cline() {
+	_run_cline_install() {
+		if command -v cline &>/dev/null; then
+			log_warning "Cline is already installed"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "Cline")
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Cline."
+			return 1
+		fi
+
+		if execute "$pkg_manager install -g cline"; then
+			log_success "Cline installed"
+		else
+			log_error "Failed to install Cline"
+			return 1
+		fi
+	}
+	run_installer "Cline" "_run_cline_install" "command -v cline" ""
+}
+
+# Helper: Copy non-marketplace skills to universal directory only
+# Usage: copy_non_marketplace_skills "source_dir"
 copy_non_marketplace_skills() {
 	local source_dir="$1"
-	local dest_dir="$2"
 
 	if [ ! -d "$source_dir" ] || [ -z "$(ls -A "$source_dir" 2>/dev/null)" ]; then
 		return 0
 	fi
 
-	# Check if global skills directory exists - if so, skip copying to tool-specific dirs
-	# to avoid conflicts. Global ~/.agents/skills/ is the preferred location.
-	if [ -d "$HOME/.agents/skills" ] && [ "$YES_TO_ALL" = true ]; then
-		log_info "Global skills directory found at ~/.agents/skills - skipping tool-specific skill copy to avoid conflicts"
-		return 0
-	fi
-
-	execute_quoted rm -rf "$dest_dir"
-	execute_quoted mkdir -p "$dest_dir"
-
-	for skill_dir in "$source_dir"/*; do
-		if [ ! -d "$skill_dir" ]; then
-			continue
-		fi
-
-		local skill_name
-		skill_name="$(basename "$skill_dir")"
-
-		case "$skill_name" in
-		prd | ralph | qmd-knowledge | codemap | adr | handoffs | pickup | pr-review | slop | tdd | grill-me | plannotator-compound | plannotator-review)
-			# Skip marketplace plugins and skills that are managed via universal directory
-			;;
-		*)
-			safe_copy_dir "$skill_dir" "$dest_dir/$skill_name"
-			;;
-		esac
-	done
+	# All modern AI tools support ~/.agents/skills/ as the universal location
+	# We don't copy to tool-specific directories anymore to avoid conflicts
+	log_info "Skills are managed in universal directory ~/.agents/skills/"
+	return 0
 }
 
 # Helper: Copy OpenCode commands, skipping my-ai-tools folder
@@ -1226,6 +1231,7 @@ copy_configurations() {
 	copy_copilot_configs
 	copy_cursor_configs
 	copy_factory_configs
+	copy_cline_configs
 	copy_best_practices
 }
 
@@ -1350,7 +1356,7 @@ install_mcp_servers_from_registry() {
 		if [ -n "$args_delimited" ]; then
 			while IFS= read -r -d $'\x01' arg; do
 				args_array+=("$arg")
-			done <<< "$args_delimited"
+			done <<<"$args_delimited"
 		fi
 
 		# Check prerequisites
@@ -1364,19 +1370,19 @@ install_mcp_servers_from_registry() {
 
 				if ! command -v "$prereq" &>/dev/null; then
 					case "$prereq" in
-						"fff-mcp")
-							log_info "Auto-installing prerequisite: $prereq"
-							install_fff_mcp_now && continue
-							;;
-						"logpilot")
-							log_info "Auto-installing prerequisite: $prereq"
-							install_logpilot_now && continue
-							;;
+					"fff-mcp")
+						log_info "Auto-installing prerequisite: $prereq"
+						install_fff_mcp_now && continue
+						;;
+					"logpilot")
+						log_info "Auto-installing prerequisite: $prereq"
+						install_logpilot_now && continue
+						;;
 					esac
 					prereqs_met=false
 					missing_prereqs+=("$prereq")
 				fi
-			done <<< "$requires_delimited"
+			done <<<"$requires_delimited"
 		fi
 
 		if [ "$prereqs_met" = false ]; then
@@ -1521,9 +1527,6 @@ copy_opencode_configs() {
 	execute_quoted rm -rf "$HOME/.config/opencode/command"
 	copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/command"
 
-	execute_quoted rm -rf "$HOME/.config/opencode/skills"
-	copy_non_marketplace_skills "$SCRIPT_DIR/skills" "$HOME/.config/opencode/skills"
-
 	log_success "OpenCode configs copied"
 }
 
@@ -1538,8 +1541,6 @@ copy_amp_configs() {
 	log_info "Detected Amp (via $amp_status)"
 	execute_quoted mkdir -p "$HOME/.config/amp"
 	execute_quoted cp "$SCRIPT_DIR/configs/amp/settings.json" "$HOME/.config/amp/"
-
-	copy_non_marketplace_skills "$SCRIPT_DIR/configs/amp/skills" "$HOME/.config/amp/skills"
 
 	if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
 		execute_quoted cp "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/amp/"
@@ -1625,9 +1626,6 @@ copy_gemini_configs() {
 	execute_quoted mkdir -p "$HOME/.gemini/policies"
 	safe_copy_dir "$SCRIPT_DIR/configs/gemini/policies" "$HOME/.gemini/policies"
 
-	execute_quoted rm -rf "$HOME/.gemini/skills"
-	copy_non_marketplace_skills "$SCRIPT_DIR/configs/gemini/skills" "$HOME/.gemini/skills"
-
 	log_success "Gemini CLI configs copied"
 }
 
@@ -1669,8 +1667,6 @@ copy_pi_configs() {
 	fi
 
 	copy_config_file "$SCRIPT_DIR/configs/pi/AGENTS.md" "$HOME/.pi/agent/" || true
-
-	copy_non_marketplace_skills "$SCRIPT_DIR/configs/pi/skills" "$HOME/.pi/agent/skills"
 
 	log_success "Pi configs copied"
 }
@@ -1714,9 +1710,6 @@ copy_cursor_configs() {
 		log_success "Cursor MCP config copied"
 	fi
 
-	execute_quoted rm -rf "$HOME/.cursor/skills"
-	copy_non_marketplace_skills "$SCRIPT_DIR/configs/cursor/skills" "$HOME/.cursor/skills"
-
 	execute_quoted rm -rf "$HOME/.cursor/commands"
 	safe_copy_dir "$SCRIPT_DIR/configs/cursor/commands" "$HOME/.cursor/commands"
 
@@ -1743,6 +1736,48 @@ copy_factory_configs() {
 	fi
 
 	log_success "Factory Droid configs copied"
+}
+
+copy_cline_configs() {
+	local cline_status
+	cline_status=$(detect_tool --detailed "cline" "$HOME/.cline") || cline_status="missing"
+	if [ "$cline_status" = "missing" ]; then
+		log_info "Cline not detected - skipping Cline config installation"
+		return 0
+	fi
+
+	log_info "Detected Cline (via $cline_status)"
+	execute_quoted mkdir -p "$HOME/.cline/data/settings"
+	execute_quoted mkdir -p "$HOME/.cline/kanban"
+
+	if [ -f "$SCRIPT_DIR/configs/cline/mcp-settings.json" ]; then
+		execute_quoted cp "$SCRIPT_DIR/configs/cline/mcp-settings.json" "$HOME/.cline/data/settings/cline_mcp_settings.json"
+		log_success "Cline MCP settings copied"
+	fi
+
+	copy_config_file "$SCRIPT_DIR/configs/cline/models.json" "$HOME/.cline/data/settings" || true
+	copy_config_file "$SCRIPT_DIR/configs/cline/providers.json" "$HOME/.cline/data/settings" || true
+
+	# Copy kanban file back as config.json (Cline expects this filename)
+	if [ -f "$SCRIPT_DIR/configs/cline/kanban-config.json" ]; then
+		execute_quoted cp "$SCRIPT_DIR/configs/cline/kanban-config.json" "$HOME/.cline/kanban/config.json"
+		log_success "Cline kanban config copied"
+	fi
+
+	# Copy Cline-specific skills directly to ~/.cline/skills
+	if [ -d "$SCRIPT_DIR/configs/cline/skills" ]; then
+		execute_quoted mkdir -p "$HOME/.cline/skills"
+		for skill_dir in "$SCRIPT_DIR/configs/cline/skills"/*; do
+			if [ -d "$skill_dir" ]; then
+				local skill_name
+				skill_name=$(basename "$skill_dir")
+				safe_copy_dir "$skill_dir" "$HOME/.cline/skills/$skill_name"
+			fi
+		done
+		log_success "Cline-specific skills copied"
+	fi
+
+	log_success "Cline configs copied"
 }
 
 copy_best_practices() {
@@ -1868,7 +1903,7 @@ install_recommended_skills() {
 		log_info "  - $repo${skill_suffix}: $description"
 		install_single_recommended_skill "$repo" "$skill" "$skill_suffix"
 		install_count=$((install_count + 1))
-	done <<< "$skills_data"
+	done <<<"$skills_data"
 
 	log_success "Recommended skills check complete"
 }
@@ -1903,43 +1938,6 @@ install_single_recommended_skill() {
 			log_info "Skipped: $repo${skill_suffix}"
 		fi
 	fi
-}
-
-# Helper: Remove skills from tool-specific directories that already exist in global ~/.agents/skills
-cleanup_duplicate_skills() {
-	local global_skills_dir="$HOME/.agents/skills"
-
-	if [ ! -d "$global_skills_dir" ]; then
-		return 0
-	fi
-
-	log_info "Cleaning up duplicate skills from tool-specific directories..."
-
-	local -a target_dirs=(
-		"$CLAUDE_SKILLS_DIR"
-		"$OPENCODE_SKILL_DIR"
-		"$AMP_SKILLS_DIR"
-		"$CODEX_SKILLS_DIR"
-		"$GEMINI_SKILLS_DIR"
-		"$CURSOR_SKILLS_DIR"
-	)
-
-	for target_dir in "${target_dirs[@]}"; do
-		if [ ! -d "$target_dir" ]; then
-			continue
-		fi
-		for skill_dir in "$target_dir"/*; do
-			if [ ! -d "$skill_dir" ]; then
-				continue
-			fi
-			local skill_name
-			skill_name=$(basename "$skill_dir")
-			if [ -d "$global_skills_dir/$skill_name" ]; then
-				execute_quoted rm -rf "$skill_dir"
-				log_info "Removed duplicate skill $skill_name from $target_dir/"
-			fi
-		done
-	done
 }
 
 # Helper: Check if a skill is in the remote/universal skills list
@@ -2064,7 +2062,6 @@ handle_no_claude_cli() {
 	fi
 	log_success "Community skills installation complete"
 	install_recommended_skills
-	cleanup_duplicate_skills
 }
 
 install_plugins_if_marketplace_available() {
@@ -2238,47 +2235,21 @@ install_community_plugin_interactive() {
 	fi
 }
 
-# Extract compatibility field from SKILL.md
-skill_is_compatible_with() {
-	local skill_dir="$1"
-	local platform="$2"
-	local skill_md="$skill_dir/SKILL.md"
-
-	if [ ! -f "$skill_md" ]; then
-		return 0
-	fi
-
-	local compat_line
-	compat_line=$(awk '/^compatibility:/ {print; exit}' "$skill_md" 2>/dev/null)
-	[ -z "$compat_line" ] && return 0
-
-	echo "$compat_line" | grep -qi "\\b$platform\\b"
-}
-
 install_local_skills() {
 	if [ ! -d "$SCRIPT_DIR/skills" ]; then
 		log_info "skills folder not found, skipping local skills"
 		return 0
 	fi
 
-	log_info "Installing skills from local skills folder..."
+	log_info "Installing skills to universal directory..."
 
-	# Define the universal skills directory (always included for all AI tools)
-	UNIVERSAL_SKILLS_DIR="$HOME/.agents/skills"
+	# Universal skills directory - used by all modern AI tools
+	local UNIVERSAL_SKILLS_DIR="$HOME/.agents/skills"
 
-	# Define tool-specific target directories
-	CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
-	OPENCODE_SKILL_DIR="$HOME/.config/opencode/skills"
-	AMP_SKILLS_DIR="$HOME/.config/amp/skills"
-	CODEX_SKILLS_DIR="$HOME/.codex/skills"
-	GEMINI_SKILLS_DIR="$HOME/.gemini/skills"
-	CURSOR_SKILLS_DIR="$HOME/.cursor/skills"
-	PI_SKILLS_DIR="$HOME/.pi/agent/skills"
-
-	# Prepare universal skills directory first
+	# Prepare and clean up managed skills
 	prepare_universal_skills_dir "$UNIVERSAL_SKILLS_DIR"
 
-	# Copy all skills to universal directory first
+	# Copy all skills to universal directory
 	for skill_dir in "$SCRIPT_DIR/skills"/*; do
 		if [ ! -d "$skill_dir" ]; then
 			continue
@@ -2290,28 +2261,71 @@ install_local_skills() {
 		copy_skill_to_universal "$skill_name" "$skill_dir" "$UNIVERSAL_SKILLS_DIR"
 	done
 
-	# Prepare tool-specific directories
-	prepare_skills_dir "$CLAUDE_SKILLS_DIR"
-	prepare_skills_dir "$OPENCODE_SKILL_DIR"
-	prepare_skills_dir "$AMP_SKILLS_DIR"
-	prepare_skills_dir "$CODEX_SKILLS_DIR"
-	prepare_skills_dir "$GEMINI_SKILLS_DIR"
-	prepare_skills_dir "$CURSOR_SKILLS_DIR"
-	prepare_skills_dir "$PI_SKILLS_DIR"
+	log_success "Skills installed to universal directory: $UNIVERSAL_SKILLS_DIR"
+	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Gemini, Cursor, Pi, and more"
 
-	# Create symlinks from universal to tool-specific directories
-	for skill_dir in "$SCRIPT_DIR/skills"/*; do
-		if [ ! -d "$skill_dir" ]; then
+	# Create symlinks from tool-specific directories to universal directory
+	create_tool_skills_symlinks "$UNIVERSAL_SKILLS_DIR"
+}
+
+# Create symlinks from tool-specific skills directories to universal directory
+create_tool_skills_symlinks() {
+	local universal_dir="$1"
+
+	# Define tool-specific skills directories that should symlink to universal
+	local tool_dirs=(
+		"$HOME/.claude/skills"
+		"$HOME/.config/opencode/skills"
+		"$HOME/.gemini/skills"
+		"$HOME/.pi/skills"
+		"$HOME/.cursor/skills"
+		"$HOME/.config/amp/skills"
+		"$HOME/.codex/skills"
+	)
+
+	for tool_dir in "${tool_dirs[@]}"; do
+		# Skip if the parent directory doesn't exist (tool not installed)
+		local parent_dir
+		parent_dir=$(dirname "$tool_dir")
+		if [ ! -d "$parent_dir" ]; then
 			continue
 		fi
 
-		local skill_name
-		skill_name=$(basename "$skill_dir")
+		# Create parent directory if needed
+		execute_quoted mkdir -p "$parent_dir"
 
-		link_skill_to_targets "$skill_name" "$UNIVERSAL_SKILLS_DIR"
+		# Remove existing directory/symlink if it exists
+		if [ -e "$tool_dir" ] || [ -L "$tool_dir" ]; then
+			# Check if it's already correctly symlinked (handle trailing slash variations)
+			if [ -L "$tool_dir" ]; then
+				local link_target
+				link_target=$(readlink "$tool_dir")
+				# Normalize paths: remove trailing slashes for comparison
+				local normalized_target="${link_target%/}"
+				local normalized_universal="${universal_dir%/}"
+				if [ "$normalized_target" = "$normalized_universal" ]; then
+					continue
+				fi
+			fi
+			# Back up existing non-symlink directory to central backup location
+			# (outside tool config to avoid skill conflicts from duplicate scanning)
+			if [ -d "$tool_dir" ] && [ ! -L "$tool_dir" ]; then
+				local tool_name
+				tool_name=$(basename "$(dirname "$tool_dir")")
+				local backup_dir
+				backup_dir="$HOME/.my-ai-tools-backups/skills/${tool_name}.skills.backup.$(date +%Y%m%d%H%M%S).$$"
+				execute_quoted mkdir -p "$(dirname "$backup_dir")"
+				execute_quoted mv "$tool_dir" "$backup_dir"
+				log_info "Backed up existing skills directory to: $backup_dir"
+			else
+				execute_quoted rm -rf "$tool_dir"
+			fi
+		fi
+
+		# Create symlink to universal directory
+		execute_quoted ln -s "$universal_dir" "$tool_dir"
+		log_success "Created skills symlink: $tool_dir -> ~/.agents/skills"
 	done
-
-	log_success "Skills installed to universal directory: $UNIVERSAL_SKILLS_DIR"
 }
 
 # Prepare universal skills directory - cleans up managed skills
@@ -2349,101 +2363,11 @@ copy_skill_to_universal() {
 	log_success "Copied $skill_name to universal skills directory"
 }
 
-prepare_skills_dir() {
-	local dir="$1"
-	local managed_marker=".my-ai-tools-managed"
-	local managed_skill_names=()
-	local repo_skill_dir=""
-
-	for repo_skill_dir in "$SCRIPT_DIR/skills"/*; do
-		[ -d "$repo_skill_dir" ] || continue
-		managed_skill_names+=("$(basename "$repo_skill_dir")")
-	done
-
-	if [ -d "$dir" ]; then
-		for existing_skill in "$dir"/*; do
-			[ -d "$existing_skill" ] || continue
-			local existing_name
-			existing_name=$(basename "$existing_skill")
-			local managed=false
-
-			# Check if this skill is in our managed list
-			for managed_name in "${managed_skill_names[@]}"; do
-				if [ "$existing_name" = "$managed_name" ]; then
-					managed=true
-					break
-				fi
-			done
-
-			# Also check for marker file
-			if [ "$managed" = false ] && [ -f "$existing_skill/$managed_marker" ]; then
-				managed=true
-			fi
-
-			if [ "$managed" = true ]; then
-				execute_quoted rm -rf "$existing_skill"
-			else
-				log_info "Preserving user-managed skill: $existing_skill"
-			fi
-		done
-	fi
-	execute_quoted mkdir -p "$dir"
-}
-
-link_skill_to_targets() {
-	local skill_name="$1"
-	local universal_dir="$2"
-	local skill_dir="$universal_dir/$skill_name"
-	local managed_marker=".my-ai-tools-managed"
-
-	if skill_is_compatible_with "$skill_dir" "claude"; then
-		execute_quoted rm -rf "$CLAUDE_SKILLS_DIR/$skill_name"
-		execute_quoted ln -sf "$skill_dir" "$CLAUDE_SKILLS_DIR/$skill_name"
-		log_success "Linked $skill_name to Claude Code"
-	fi
-
-	if skill_is_compatible_with "$skill_dir" "opencode"; then
-		execute_quoted rm -rf "$OPENCODE_SKILL_DIR/$skill_name"
-		execute_quoted ln -sf "$skill_dir" "$OPENCODE_SKILL_DIR/$skill_name"
-		log_success "Linked $skill_name to OpenCode"
-	fi
-
-	if skill_is_compatible_with "$skill_dir" "amp"; then
-		execute_quoted rm -rf "$AMP_SKILLS_DIR/$skill_name"
-		execute_quoted ln -sf "$skill_dir" "$AMP_SKILLS_DIR/$skill_name"
-		log_success "Linked $skill_name to Amp"
-	fi
-
-	if skill_is_compatible_with "$skill_dir" "codex"; then
-		execute_quoted rm -rf "$CODEX_SKILLS_DIR/$skill_name"
-		execute_quoted ln -sf "$skill_dir" "$CODEX_SKILLS_DIR/$skill_name"
-		log_success "Linked $skill_name to Codex CLI"
-	fi
-
-	if skill_is_compatible_with "$skill_dir" "gemini"; then
-		execute_quoted rm -rf "$GEMINI_SKILLS_DIR/$skill_name"
-		execute_quoted ln -sf "$skill_dir" "$GEMINI_SKILLS_DIR/$skill_name"
-		log_success "Linked $skill_name to Gemini CLI"
-	fi
-
-	if skill_is_compatible_with "$skill_dir" "cursor"; then
-		execute_quoted rm -rf "$CURSOR_SKILLS_DIR/$skill_name"
-		execute_quoted ln -sf "$skill_dir" "$CURSOR_SKILLS_DIR/$skill_name"
-		log_success "Linked $skill_name to Cursor"
-	fi
-
-	if skill_is_compatible_with "$skill_dir" "pi"; then
-		execute_quoted rm -rf "$PI_SKILLS_DIR/$skill_name"
-		execute_quoted ln -sf "$skill_dir" "$PI_SKILLS_DIR/$skill_name"
-		log_success "Linked $skill_name to Pi"
-	fi
-}
-
 main() {
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo          ║"
-	echo "║  Copilot • Cursor • Factory Droid                                    ║"
+	echo "║  Copilot • Cursor • Factory Droid • Cline                            ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -2498,6 +2422,9 @@ main() {
 	echo
 
 	install_factory
+	echo
+
+	install_cline
 	echo
 
 	copy_configurations

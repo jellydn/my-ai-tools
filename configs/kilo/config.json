@@ -45,6 +45,11 @@
         "--stdio"
       ],
       "enabled": true
+    },
+    "logpilot": {
+      "type": "local",
+      "command": ["logpilot", "mcp-server"],
+      "enabled": true
     }
   },
   "agent": {

@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -183,6 +183,7 @@ The script will prompt you to install each MCP server:
 - [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
 - [`fff`](https://github.com/dmtrKovalenko/fff.nvim) - Fast file search with built-in memory for AI agents
 - [`react-grab-mcp`](https://github.com/nyan-left/react-grab-mcp) - React component extraction and analysis
+- [`logpilot`](https://github.com/jellydn/logpilot) - AI-powered log analysis and tmux session monitoring
 
 #### Manual Setup
 
@@ -213,6 +214,10 @@ Configuration in [`~/.claude/mcp-servers.json`](configs/claude/mcp-servers.json)
     "react-grab-mcp": {
       "command": "npx",
       "args": ["-y", "@react-grab/mcp", "--stdio"]
+    },
+    "logpilot": {
+      "command": "logpilot",
+      "args": ["mcp-server"]
     }
   }
 }
@@ -225,6 +230,7 @@ claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/contex
 claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
 claude mcp add --scope user --transport stdio qmd -- qmd mcp
 claude mcp add --scope user --transport stdio fff -- fff-mcp  # Requires: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
+claude mcp add --scope user --transport stdio logpilot -- logpilot mcp-server  # Requires: cargo install logpilot
 ```
 
 > **MCP Scopes:**
@@ -542,7 +548,6 @@ Using claude-hud plugin:
 Located in [`configs/claude/commands/`](configs/claude/commands/):
 
 - `/ccs` - CCS delegation and profile management
-- `/plannotator-review` - Interactive code review
 - `/ultrathink` - Deep thinking mode
 
 #### Custom Agents
@@ -781,7 +786,6 @@ Located in [`configs/opencode/agent/`](configs/opencode/agent/):
 
 Located in [`configs/opencode/command/`](configs/opencode/command/):
 
-- `plannotator-review` - Interactive code review
 - `simplify` - Simplify over-engineered code for clarity and maintainability
 - `batch` - Run multiple tasks in parallel as worker tasks
 
@@ -836,12 +840,6 @@ Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/
 ```
 
 See [`configs/amp/AGENTS.md`](configs/amp/AGENTS.md) for agent guidelines.
-
-### Skills
-
-| Skill                | Description                                |
-| -------------------- | ------------------------------------------ |
-| `plannotator-review` | Interactive code review via Plannotator UI |
 
 </details>
 
@@ -948,6 +946,10 @@ args = []
 [mcp_servers.react-grab-mcp]
 command = "npx"
 args = [ "-y", "@react-grab/mcp", "--stdio" ]
+
+[mcp_servers.logpilot]
+command = "logpilot"
+args = ["mcp-server"]
 ```
 
 ### Usage
@@ -1079,6 +1081,10 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
     "react-grab-mcp": {
       "command": "npx",
       "args": ["-y", "@react-grab/mcp", "--stdio"]
+    },
+    "logpilot": {
+      "command": "logpilot",
+      "args": ["mcp-server"]
     }
   },
   "experimental": {
@@ -1149,9 +1155,9 @@ Configuration is managed through:
       ],
       "enabled": true
     },
-    "react-grab-mcp": {
+    "logpilot": {
       "type": "local",
-      "command": ["npx", "-y", "@react-grab/mcp", "--stdio"],
+      "command": ["logpilot", "mcp-server"],
       "enabled": true
     }
   }
@@ -1250,20 +1256,20 @@ Then register them in `.pi/settings.json`:
 
 **Package Overview:**
 
-| Package | Description |
-|---------|-------------|
-| `@plannotator/pi-extension` | Interactive plan review with visual annotation |
-| `pi-subagents` | Delegate tasks to subagents with chains, parallel execution, and TUI |
-| `pi-autoresearch` | Autonomous experiment loop for optimization targets |
-| `pi-fireworks-provider` | Fireworks AI provider for Kimi and other models |
-| `pi-hooks` | Collection of extensions (checkpoint, lsp, permission, ralph-loop, repeat) |
-| `pi-fff` | FFF-powered fuzzy file and content search |
-| `pi-annotate` | Visual annotation tool with inline note cards |
-| `pi-mcp-adapter` | MCP (Model Context Protocol) adapter for Pi |
-| `pi-simplify` | Reviews changed code for clarity, consistency, and maintainability |
-| `@devkade/pi-plan` | Read-only planning mode with approval-based execution |
-| `pi-manage-todo-list` | GitHub Copilot-style todo list management tool |
-| `pi-btw` | Parallel side conversations with `/btw` command |
+| Package                     | Description                                                                |
+| --------------------------- | -------------------------------------------------------------------------- |
+| `@plannotator/pi-extension` | Interactive plan review with visual annotation                             |
+| `pi-subagents`              | Delegate tasks to subagents with chains, parallel execution, and TUI       |
+| `pi-autoresearch`           | Autonomous experiment loop for optimization targets                        |
+| `pi-fireworks-provider`     | Fireworks AI provider for Kimi and other models                            |
+| `pi-hooks`                  | Collection of extensions (checkpoint, lsp, permission, ralph-loop, repeat) |
+| `pi-fff`                    | FFF-powered fuzzy file and content search                                  |
+| `pi-annotate`               | Visual annotation tool with inline note cards                              |
+| `pi-mcp-adapter`            | MCP (Model Context Protocol) adapter for Pi                                |
+| `pi-simplify`               | Reviews changed code for clarity, consistency, and maintainability         |
+| `@devkade/pi-plan`          | Read-only planning mode with approval-based execution                      |
+| `pi-manage-todo-list`       | GitHub Copilot-style todo list management tool                             |
+| `pi-btw`                    | Parallel side conversations with `/btw` command                            |
 
 ### Usage
 
@@ -1334,6 +1340,11 @@ Copilot CLI configs are stored in [`configs/copilot/`](configs/copilot/) and ins
       "args": ["-y", "@react-grab/mcp", "--stdio"],
       "env": {},
       "tools": ["*"]
+    },
+    "logpilot": {
+      "type": "local",
+      "command": "logpilot",
+      "args": ["mcp-server"]
     }
   }
 }
@@ -1478,6 +1489,11 @@ Factory Droid configs are stored in `configs/factory/` and installed to `~/.fact
       "type": "stdio",
       "command": "npx",
       "args": ["-y", "@react-grab/mcp", "--stdio"]
+    },
+    "logpilot": {
+      "type": "stdio",
+      "command": "logpilot",
+      "args": ["mcp-server"]
     }
   }
 }
@@ -1501,6 +1517,110 @@ droid --resume
 # Check for updates
 droid update
 ```
+
+</details>
+
+---
+
+## 💻 Cline (Optional)
+
+AI coding assistant that runs in your terminal — built for high-performance agentic coding with support for multiple providers. [Homepage](https://cline.bot) | [Docs](https://docs.cline.bot)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Installation
+
+```bash
+npm install -g cline
+```
+
+### Authentication
+
+Cline supports multiple authentication methods:
+
+**Option 1: OAuth (Cline Account)**
+
+```bash
+cline
+# Follow the browser authentication flow
+```
+
+**Option 2: API Keys**
+
+Configure API keys via the Cline dashboard or set environment variables:
+
+```bash
+export FIREWORKS_API_KEY="your_key_here"
+export OPENAI_API_KEY="your_key_here"
+```
+
+### Configuration
+
+Cline configs are stored in `configs/cline/` and installed to `~/.cline/`:
+
+- [`mcp-settings.json`](configs/cline/mcp-settings.json) - MCP server configurations, installed to `~/.cline/data/settings/cline_mcp_settings.json`
+- [`models.json`](configs/cline/models.json) - Model configurations
+- [`providers.json`](configs/cline/providers.json.example) - Provider credentials (copy from example and fill in your keys)
+- [`kanban-config.json`](configs/cline/kanban-config.json) - Kanban board settings
+
+### MCP Servers
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "alwaysAllow": [],
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "sequential-thinking": {
+      "alwaysAllow": [],
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "qmd": {
+      "alwaysAllow": [],
+      "command": "qmd",
+      "args": ["mcp"]
+    },
+    "fff": {
+      "alwaysAllow": [],
+      "command": "fff-mcp",
+      "args": []
+    },
+    "react-grab-mcp": {
+      "alwaysAllow": [],
+      "command": "npx",
+      "args": ["-y", "@react-grab/mcp", "--stdio"]
+    },
+    "logpilot": {
+      "alwaysAllow": [],
+      "command": "logpilot",
+      "args": ["mcp-server"]
+    }
+  }
+}
+```
+
+### Usage
+
+```bash
+# Start Cline interactive mode
+cline
+
+# Run a specific task
+cline "Refactor this component to use TypeScript"
+
+# Use with specific model
+cline --model accounts/fireworks/routers/kimi-k2p5-turbo
+
+# List available commands
+cline --help
+```
+
+### Skills
+
+Cline uses the universal skills directory at `~/.agents/skills/`. The installer automatically manages skills from the [`skills/`](skills/) folder.
 
 </details>
 

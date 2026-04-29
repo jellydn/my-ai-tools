@@ -26,6 +26,10 @@
 				"@react-grab/mcp",
 				"--stdio"
 			]
+		},
+		"logpilot": {
+			"command": "logpilot",
+			"args": ["mcp-server"]
 		}
 	},
 	"amp.terminal.theme": "kanagawa",

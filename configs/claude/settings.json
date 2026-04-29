@@ -188,5 +188,7 @@
     }
   },
   "skipDangerousModePermissionPrompt": true,
-  "theme": "kanagawa"
+  "theme": "auto",
+  "verbose": true,
+  "teammateMode": "tmux"
 }

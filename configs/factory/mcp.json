@@ -38,6 +38,12 @@
         "@react-grab/mcp",
         "--stdio"
       ]
+    },
+    "logpilot": {
+      "type": "stdio",
+      "command": "logpilot",
+      "args": ["mcp-server"],
+      "disabled": false
     }
   }
 }

@@ -1,17 +1,11 @@
 {
   "mcpServers": {
     "context7": {
-      "command": "bunx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp@latest"
-      ]
-    },
-    "fff": {
-      "command": "fff-mcp",
-      "args": []
+      "alwaysAllow": [],
+      "url": "https://mcp.context7.com/mcp"
     },
     "sequential-thinking": {
+      "alwaysAllow": [],
       "command": "npx",
       "args": [
         "-y",
@@ -19,12 +13,19 @@
       ]
     },
     "qmd": {
+      "alwaysAllow": [],
       "command": "qmd",
       "args": [
         "mcp"
       ]
     },
+    "fff": {
+      "alwaysAllow": [],
+      "command": "fff-mcp",
+      "args": []
+    },
     "react-grab-mcp": {
+      "alwaysAllow": [],
       "command": "npx",
       "args": [
         "-y",
@@ -33,6 +34,7 @@
       ]
     },
     "logpilot": {
+      "alwaysAllow": [],
       "command": "logpilot",
       "args": ["mcp-server"]
     }
