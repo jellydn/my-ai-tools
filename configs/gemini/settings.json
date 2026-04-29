@@ -31,7 +31,9 @@
     },
     "logpilot": {
       "command": "logpilot",
-      "args": ["mcp-server"]
+      "args": [
+        "mcp-server"
+      ]
     }
   },
   "security": {
@@ -44,7 +46,10 @@
     },
     "environmentVariableRedaction": {
       "enabled": true
-    }
+    },
+    "toolSandboxing": true,
+    "autoAddToPolicyByDefault": true,
+    "enableConseca": true
   },
   "ui": {
     "theme": "Dracula",
@@ -61,11 +66,18 @@
         "quota",
         "code-changes"
       ],
-      "showLabels": true
+      "showLabels": true,
+      "hideCWD": true,
+      "hideSandboxStatus": true
     },
-    "showMemoryUsage": false,
+    "showMemoryUsage": true,
     "showCitations": true,
-    "showModelInfoInChat": true
+    "showModelInfoInChat": true,
+    "autoThemeSwitching": true,
+    "inlineThinkingMode": "off",
+    "hideTips": true,
+    "terminalBuffer": true,
+    "loadingPhrases": "all"
   },
   "general": {
     "previewFeatures": true,
@@ -75,9 +87,12 @@
       "warningAcknowledged": true
     },
     "plan": {
-      "enabled": true
+      "enabled": true,
+      "directory": ""
     },
-    "preferredEditor": "zed"
+    "preferredEditor": "zed",
+    "defaultApprovalMode": "plan",
+    "enableNotifications": true
   },
   "context": {
     "loadMemoryFromIncludeDirectories": true,
@@ -96,7 +111,14 @@
     "enabled": true
   },
   "experimental": {
-    "enableAgents": true
+    "enableAgents": true,
+    "worktrees": true,
+    "modelSteering": true,
+    "directWebFetch": true,
+    "memoryManager": true,
+    "generalistProfile": true,
+    "contextManagement": true,
+    "topicUpdateNarration": true
   },
   "hooks": {
     "BeforeAgent": [
@@ -129,5 +151,8 @@
   },
   "agents": {
     "overrides": {}
+  },
+  "model": {
+    "name": ""
   }
 }
