@@ -214,6 +214,10 @@ Configuration in [`~/.claude/mcp-servers.json`](configs/claude/mcp-servers.json)
     "react-grab-mcp": {
       "command": "npx",
       "args": ["-y", "@react-grab/mcp", "--stdio"]
+    },
+    "logpilot": {
+      "command": "logpilot",
+      "args": ["mcp-server"]
     }
   }
 }
@@ -226,6 +230,7 @@ claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/contex
 claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
 claude mcp add --scope user --transport stdio qmd -- qmd mcp
 claude mcp add --scope user --transport stdio fff -- fff-mcp  # Requires: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
+claude mcp add --scope user --transport stdio logpilot -- logpilot mcp-server  # Requires: cargo install logpilot
 ```
 
 > **MCP Scopes:**
@@ -941,6 +946,10 @@ args = []
 [mcp_servers.react-grab-mcp]
 command = "npx"
 args = [ "-y", "@react-grab/mcp", "--stdio" ]
+
+[mcp_servers.logpilot]
+command = "logpilot"
+args = ["mcp-server"]
 ```
 
 ### Usage
@@ -1072,6 +1081,10 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
     "react-grab-mcp": {
       "command": "npx",
       "args": ["-y", "@react-grab/mcp", "--stdio"]
+    },
+    "logpilot": {
+      "command": "logpilot",
+      "args": ["mcp-server"]
     }
   },
   "experimental": {
@@ -1140,6 +1153,11 @@ Configuration is managed through:
         "-y",
         "@modelcontextprotocol/server-sequential-thinking"
       ],
+      "enabled": true
+    },
+    "logpilot": {
+      "type": "local",
+      "command": ["logpilot", "mcp-server"],
       "enabled": true
     }
   }
@@ -1322,6 +1340,11 @@ Copilot CLI configs are stored in [`configs/copilot/`](configs/copilot/) and ins
       "args": ["-y", "@react-grab/mcp", "--stdio"],
       "env": {},
       "tools": ["*"]
+    },
+    "logpilot": {
+      "type": "local",
+      "command": "logpilot",
+      "args": ["mcp-server"]
     }
   }
 }
@@ -1466,6 +1489,11 @@ Factory Droid configs are stored in `configs/factory/` and installed to `~/.fact
       "type": "stdio",
       "command": "npx",
       "args": ["-y", "@react-grab/mcp", "--stdio"]
+    },
+    "logpilot": {
+      "type": "stdio",
+      "command": "logpilot",
+      "args": ["mcp-server"]
     }
   }
 }
