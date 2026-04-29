@@ -42,7 +42,7 @@ copy_directory() {
 	local dest="$2"
 	if [ -d "$src" ]; then
 		execute_quoted mkdir -p "$dest"
-		execute_quoted cp -r "$src"/* "$dest"/ 2>/dev/null || true
+		execute_quoted cp -r "$src"/. "$dest"/ 2>/dev/null || true
 		log_success "Copied directory: $src → $dest"
 	else
 		log_warning "Skipped (not found): $src"
@@ -66,7 +66,7 @@ copy_claude_subdirectory() {
 	fi
 
 	execute_quoted mkdir -p "$dest"
-	if execute_quoted cp -r "$src"/* "$dest"/ 2>/dev/null; then
+	if execute_quoted cp -r "$src"/. "$dest"/ 2>/dev/null; then
 		log_success "Copied $name directory"
 	else
 		log_warning "Failed to copy $name directory"
@@ -416,7 +416,7 @@ generate_cline_configs() {
 		return 0
 	fi
 
-	execute "mkdir -p $SCRIPT_DIR/configs/cline"
+	execute_quoted mkdir -p "$SCRIPT_DIR/configs/cline"
 
 	# Copy settings files
 	copy_single "$HOME/.cline/data/settings/cline_mcp_settings.json" "$SCRIPT_DIR/configs/cline/mcp-settings.json"

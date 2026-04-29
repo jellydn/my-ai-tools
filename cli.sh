@@ -2244,7 +2244,7 @@ install_local_skills() {
 	log_info "Installing skills to universal directory..."
 
 	# Universal skills directory - used by all modern AI tools
-	UNIVERSAL_SKILLS_DIR="$HOME/.agents/skills"
+	local UNIVERSAL_SKILLS_DIR="$HOME/.agents/skills"
 
 	# Prepare and clean up managed skills
 	prepare_universal_skills_dir "$UNIVERSAL_SKILLS_DIR"
