@@ -7,7 +7,7 @@
     {
       "repo": "factory-ai/factory-plugins",
       "skill": "no-use-effect",
-      "description": "Guides replacing useEffect with better patterns - derive state, use data-fetching libraries, event handlers, useMountEffect, and key prop resets"
+      "description": "Patterns to replace useEffect with better alternatives"
     },
     {
       "repo": "mattpocock/skills",
