@@ -1713,6 +1713,10 @@ See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for det
 
 [**Conductor**](https://www.conductor.build/) - Orchestrate parallel AI coding agents to work on multiple tasks simultaneously.
 
+### Helmor
+
+[**Helmor**](https://helmor.ai/) - Powerful workspace manager for AI coding agents with worktree isolation and automated setup.
+
 ### Spec Kit
 
 [**Spec Kit**](https://github.com/github/spec-kit) - Toolkit for Spec-Driven Development. ([GitHub](https://github.com/github/spec-kit))
