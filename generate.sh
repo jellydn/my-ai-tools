@@ -312,6 +312,12 @@ generate_pi_configs() {
 	else
 		log_warning "Pi themes directory not found: $HOME/.pi/agent/themes"
 	fi
+
+	if [ -f "$HOME/.pi/agent/mcp.json" ]; then
+		copy_single "$HOME/.pi/agent/mcp.json" "$SCRIPT_DIR/configs/pi/mcp.json"
+	else
+		log_warning "Pi MCP config not found: $HOME/.pi/agent/mcp.json"
+	fi
 }
 
 generate_copilot_configs() {
