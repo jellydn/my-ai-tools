@@ -1,7 +1,7 @@
 {
   "collapseChangelog": true,
-  "defaultModel": "accounts/fireworks/routers/kimi-k2p5-turbo",
-  "defaultProvider": "fireworks",
+  "defaultModel": "deepseek-v4-pro",
+  "defaultProvider": "opencode-go",
   "defaultThinkingLevel": "medium",
   "editorPaddingX": 1,
   "lastChangelogVersion": "0.70.6",
@@ -27,6 +27,11 @@
   "enabledModels": [
     "fireworks/accounts/fireworks/routers/kimi-k2p5-turbo",
     "github-copilot/gpt-5-mini",
-    "github-copilot/gpt-4.1"
+    "github-copilot/gpt-4.1",
+    "opencode-go/glm-5.1",
+    "opencode-go/kimi-k2.6",
+    "opencode-go/minimax-m2.7",
+    "opencode-go/deepseek-v4-pro",
+    "opencode-go/deepseek-v4-flash"
   ]
 }
