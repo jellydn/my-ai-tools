@@ -1,5 +1,5 @@
 {
     "scripts": {
-        "setup": "prek install && prek run --all-files && ./cli.sh --no-backup"
+        "setup": "prek install && prek run --all-files"
     }
 }
