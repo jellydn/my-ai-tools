@@ -60,7 +60,7 @@
 		},
 		{
 			"name": "architecture-explanation",
-			"command": "ccs gemini 'Explain this codebase architecture'",
+			"command": "ccs fw 'Explain this codebase architecture'",
 			"description": "Explain architecture with Gemini",
 			"aliases": ["arch", "arch-explanation"]
 		},
