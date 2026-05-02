@@ -90,12 +90,14 @@ enabled = true
 enabled = true
 
 [marketplaces.claude-plugins-official]
-last_updated = "2026-04-26T22:42:16Z"
+last_updated = "2026-04-30T03:09:11Z"
+last_revision = "0742692199b49af5c6c33cd68ee674fb2e679d50"
 source_type = "git"
 source = "https://github.com/anthropics/claude-plugins-official.git"
 
 [marketplaces.plannotator]
-last_updated = "2026-04-26T22:42:22Z"
+last_updated = "2026-04-30T03:09:17Z"
+last_revision = "a68463b6a4f5b3aba5367905961fb650f8e6f5a3"
 source_type = "git"
 source = "https://github.com/backnotprop/plannotator.git"
 

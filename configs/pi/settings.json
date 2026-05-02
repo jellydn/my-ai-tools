@@ -1,10 +1,10 @@
 {
   "collapseChangelog": true,
-  "defaultModel": "deepseek-v4-pro",
-  "defaultProvider": "opencode-go",
+  "defaultModel": "accounts/fireworks/routers/kimi-k2p5-turbo",
+  "defaultProvider": "fireworks",
   "defaultThinkingLevel": "medium",
   "editorPaddingX": 1,
-  "lastChangelogVersion": "0.70.6",
+  "lastChangelogVersion": "0.72.0",
   "packages": [
     "npm:@plannotator/pi-extension",
     "npm:pi-subagents",
