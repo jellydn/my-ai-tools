@@ -1345,9 +1345,10 @@ copy_claude_configs() {
 }
 
 # Install MCP servers from central registry with interactive prompts
-# Usage: install_mcp_servers_from_registry [registry_file]
+# Usage: install_mcp_servers_from_registry <tool_cmd> [registry_file]
 install_mcp_servers_from_registry() {
-	local registry_file="${1:-$SCRIPT_DIR/configs/mcp-registry.json}"
+	local tool_cmd="${1:-claude}"
+	local registry_file="${2:-$SCRIPT_DIR/configs/mcp-registry.json}"
 	local installed_count=0
 	local skipped_count=0
 	local failed_count=0
@@ -1422,7 +1423,7 @@ install_mcp_servers_from_registry() {
 		fi
 
 		# Build install command
-		local install_cmd="claude mcp add --scope user --transport stdio $server_name --"
+		local install_cmd="$tool_cmd mcp add --scope user --transport stdio $server_name --"
 		install_cmd="$install_cmd $(printf '%q' "$command")"
 		for arg in "${args_array[@]}"; do
 			install_cmd="$install_cmd $(printf '%q' "$arg")"
@@ -1458,7 +1459,7 @@ install_mcp_servers_from_registry() {
 		[ "$mode" = "auto" ] && log_info "Auto-installing $name (--yes flag)" || log_info "Installing $name..."
 
 		local err_file
-		err_file=$(make_temp_file "claude-mcp-${server_name}" "err")
+		err_file=$(make_temp_file "${tool_cmd}-mcp-${server_name}" "err")
 
 		if execute "$install_cmd" 2>"$err_file"; then
 			log_success "$name installed"
@@ -1506,7 +1507,7 @@ setup_claude_mcp_servers() {
 	log_info "Setting up Claude Code MCP servers (global scope)..."
 
 	# Try registry-based installation first
-	if install_mcp_servers_from_registry; then
+	if install_mcp_servers_from_registry "claude"; then
 		log_success "MCP server setup complete via registry"
 	else
 		# Fallback to legacy method if registry fails
@@ -1535,6 +1536,27 @@ setup_claude_mcp_servers() {
 		fi
 
 		log_success "MCP server setup complete (legacy mode)"
+	fi
+}
+
+setup_commandcode_mcp_servers() {
+	if ! command -v cmd &>/dev/null; then
+		return 0
+	fi
+
+	log_info "Setting up Command Code MCP servers..."
+
+	local mcp_file="$SCRIPT_DIR/configs/commandcode/mcp.json"
+	if [ ! -f "$mcp_file" ]; then
+		log_warning "Command Code MCP config not found: $mcp_file"
+		return 1
+	fi
+
+	if validate_config "$mcp_file"; then
+		copy_config_file "$mcp_file" "$HOME/.commandcode/" || true
+		log_success "Command Code MCP servers configured"
+	else
+		log_error "Command Code mcp.json failed validation"
 	fi
 }
 
@@ -1728,6 +1750,9 @@ copy_commandcode_configs() {
 		execute_quoted mkdir -p "$HOME/.commandcode/skills"
 		safe_copy_dir "$SCRIPT_DIR/configs/commandcode/skills" "$HOME/.commandcode/skills"
 	fi
+
+	# Copy MCP servers config
+	setup_commandcode_mcp_servers
 
 	log_success "Command Code configs copied"
 }
