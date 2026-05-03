@@ -696,12 +696,13 @@ copy_config_file() {
 	local source_file="$1"
 	local dest_dir="$2"
 
-	if [ -f "$source_file" ]; then
-		execute_quoted mkdir -p "$dest_dir"
-		execute_quoted cp "$source_file" "$dest_dir/"
-		return 0
+	if [ ! -f "$source_file" ]; then
+		return 1
 	fi
-	return 1
+
+	execute_quoted mkdir -p "$dest_dir" || return 1
+	execute_quoted cp -p "$source_file" "$dest_dir/" || return 1
+	return 0
 }
 
 # Helper: Ensure a CLI tool is installed, prompting if interactive
@@ -1553,11 +1554,39 @@ setup_commandcode_mcp_servers() {
 		return 1
 	fi
 
-	if validate_config "$mcp_file"; then
-		copy_config_file "$mcp_file" "$HOME/.commandcode/" || true
-		log_success "Command Code MCP servers configured"
-	else
+	if ! validate_config "$mcp_file"; then
 		log_error "Command Code mcp.json failed validation"
+		return 1
+	fi
+
+	# Ensure optional prerequisites are available
+	handle_qmd_installation_if_needed
+	handle_fff_mcp_installation_if_needed
+	handle_logpilot_installation_if_needed
+
+	local dest_file="$HOME/.commandcode/mcp.json"
+
+	# Merge with existing user config if present, otherwise copy directly
+	if [ -f "$dest_file" ] && command -v jq &>/dev/null; then
+		log_info "Merging with existing Command Code MCP config..."
+		local merged_file
+		merged_file=$(make_temp_file "commandcode-mcp" "json")
+		if jq -s '.[0].mcpServers as $existing | .[1].mcpServers as $repo | {mcpServers: ($existing + $repo)}' "$dest_file" "$mcp_file" > "$merged_file"; then
+			execute_quoted cp -p "$merged_file" "$dest_file"
+			rm -f "$merged_file"
+			log_success "Command Code MCP servers configured (merged)"
+		else
+			rm -f "$merged_file"
+			log_error "Failed to merge Command Code MCP config"
+			return 1
+		fi
+	else
+		if copy_config_file "$mcp_file" "$HOME/.commandcode/"; then
+			log_success "Command Code MCP servers configured"
+		else
+			log_error "Failed to copy Command Code MCP config"
+			return 1
+		fi
 	fi
 }
 
@@ -1753,7 +1782,9 @@ copy_commandcode_configs() {
 	fi
 
 	# Copy MCP servers config
-	setup_commandcode_mcp_servers
+	if ! setup_commandcode_mcp_servers; then
+		log_warning "Command Code MCP setup failed; continuing with other configs"
+	fi
 
 	log_success "Command Code configs copied"
 }
