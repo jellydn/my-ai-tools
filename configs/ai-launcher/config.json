@@ -19,7 +19,7 @@
 			"command": "opencode",
 			"description": "OpenCode AI assistant",
 			"aliases": ["o", "oc"],
-			"promptCommand": "opencode run --model fireworks-ai/accounts/fireworks/routers/kimi-k2p5-turbo",
+			"promptCommand": "opencode run --model opencode/big-pickle",
 			"promptUseStdin": true
 		},
 		{
@@ -42,31 +42,31 @@
 	"templates": [
 		{
 			"name": "review",
-			"command": "opencode run --model fireworks-ai/accounts/fireworks/routers/kimi-k2p5-turbo --agent plan 'Review the following changes and provide feedback: $@'",
+			"command": "opencode run --model opencode/big-pickle --agent plan 'Review the following changes and provide feedback: $@'",
 			"description": "Code review with OpenCode",
 			"aliases": ["rev", "code-review"]
 		},
 		{
 			"name": "commit-zen",
-			"command": "opencode run --model fireworks-ai/accounts/fireworks/routers/kimi-k2p5-turbo --agent plan 'Review the following changes on git and generate a concise git commit message, group by logical changes with commitizen convention, do atomic commit message'",
+			"command": "opencode run --model opencode/big-pickle --agent plan 'Review the following changes on git and generate a concise git commit message, group by logical changes with commitizen convention, do atomic commit message'",
 			"description": "Generate commit message with OpenCode",
 			"aliases": ["zen", "logical-commit"]
 		},
 		{
 			"name": "commit-atomic",
-			"command": "opencode run --model fireworks-ai/accounts/fireworks/routers/kimi-k2p5-turbo --agent build 'Run git diff --staged then do atomic commit message for the change with commitizen convention. Write clear, informative commit messages that explain the what and why behind changes, not just the how.'",
+			"command": "opencode run --model opencode/big-pickle --agent build 'Run git diff --staged then do atomic commit message for the change with commitizen convention. Write clear, informative commit messages that explain the what and why behind changes, not just the how.'",
 			"description": "Atomic commit message with OpenCode",
 			"aliases": ["ac", "auto-commit"]
 		},
 		{
 			"name": "architecture-explanation",
-			"command": "ccs fw 'Explain this codebase architecture'",
-			"description": "Explain architecture with Fireworks",
+			"command": "opencode run --model opencode/big-pickle 'Explain this codebase architecture'",
+			"description": "Explain architecture with Gemini",
 			"aliases": ["arch", "arch-explanation"]
 		},
 		{
 			"name": "draft-pull-request",
-			"command": "opencode run --model fireworks-ai/accounts/fireworks/routers/kimi-k2p5-turbo --agent build 'Create draft pr with what why how by gh cli'",
+			"command": "opencode run --model opencode/big-pickle --agent build 'Create draft pr with what why how by gh cli'",
 			"description": "Create draft pull request with opencode",
 			"aliases": ["pr", "draft-pr"]
 		},

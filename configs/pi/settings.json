@@ -1,10 +1,10 @@
 {
   "collapseChangelog": true,
-  "defaultModel": "accounts/fireworks/routers/kimi-k2p5-turbo",
-  "defaultProvider": "fireworks",
-  "defaultThinkingLevel": "medium",
+  "defaultModel": "kimi-k2.6",
+  "defaultProvider": "crofai",
+  "defaultThinkingLevel": "high",
   "editorPaddingX": 1,
-  "lastChangelogVersion": "0.72.0",
+  "lastChangelogVersion": "0.72.1",
   "packages": [
     "npm:@plannotator/pi-extension",
     "npm:pi-subagents",
@@ -17,7 +17,8 @@
     "npm:pi-simplify",
     "npm:@devkade/pi-plan",
     "npm:pi-manage-todo-list",
-    "npm:pi-btw"
+    "npm:pi-btw",
+    "npm:pi-crofai"
   ],
   "quietStartup": true,
   "theme": "kanagawa",
@@ -25,13 +26,16 @@
   "permissionLevel": "high",
   "treeFilterMode": "default",
   "enabledModels": [
-    "fireworks/accounts/fireworks/routers/kimi-k2p5-turbo",
     "github-copilot/gpt-5-mini",
     "github-copilot/gpt-4.1",
-    "opencode-go/glm-5.1",
     "opencode-go/kimi-k2.6",
     "opencode-go/minimax-m2.7",
     "opencode-go/deepseek-v4-pro",
-    "opencode-go/deepseek-v4-flash"
+    "opencode-go/deepseek-v4-flash",
+    "opencode-go/glm-5.1",
+    "crofai/kimi-k2.6",
+    "crofai/glm-5.1",
+    "crofai/deepseek-v4-pro",
+    "crofai/deepseek-v4-flash"
   ]
 }

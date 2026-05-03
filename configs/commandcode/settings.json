@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "shell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.commandcode/hooks/guard-bash.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "file_write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "After writing files, check if any formatting is needed and apply it."
+          }
+        ]
+      }
+    ]
+  }
+}

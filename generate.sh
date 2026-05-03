@@ -320,6 +320,54 @@ generate_pi_configs() {
 	fi
 }
 
+generate_commandcode_configs() {
+	log_info "Generating Command Code configs..."
+
+	if [ ! -d "$HOME/.commandcode" ]; then
+		log_warning "Command Code config directory not found: $HOME/.commandcode"
+		return 0
+	fi
+
+	execute "mkdir -p $SCRIPT_DIR/configs/commandcode"
+
+	if [ -f "$HOME/.commandcode/settings.json" ]; then
+		copy_single "$HOME/.commandcode/settings.json" "$SCRIPT_DIR/configs/commandcode/settings.json"
+		log_success "Command Code settings.json generated"
+	else
+		log_warning "Command Code settings.json not found: $HOME/.commandcode/settings.json"
+	fi
+
+	if [ -f "$HOME/.commandcode/AGENTS.md" ]; then
+		copy_single "$HOME/.commandcode/AGENTS.md" "$SCRIPT_DIR/configs/commandcode/AGENTS.md"
+		log_success "Command Code AGENTS.md generated"
+	else
+		log_warning "Command Code AGENTS.md not found: $HOME/.commandcode/AGENTS.md"
+	fi
+
+	if [ -d "$HOME/.commandcode/agents" ]; then
+		copy_directory "$HOME/.commandcode/agents" "$SCRIPT_DIR/configs/commandcode/agents"
+		log_success "Command Code agents generated"
+	else
+		log_warning "Command Code agents directory not found: $HOME/.commandcode/agents"
+	fi
+
+	if [ -d "$HOME/.commandcode/commands" ]; then
+		copy_directory "$HOME/.commandcode/commands" "$SCRIPT_DIR/configs/commandcode/commands"
+		log_success "Command Code commands generated"
+	else
+		log_warning "Command Code commands directory not found: $HOME/.commandcode/commands"
+	fi
+
+	if [ -d "$HOME/.commandcode/skills" ]; then
+		copy_skills_with_filter "$HOME/.commandcode/skills" "$SCRIPT_DIR/configs/commandcode/skills" "Command Code"
+		log_success "Command Code skills generated"
+	else
+		log_warning "Command Code skills directory not found: $HOME/.commandcode/skills"
+	fi
+
+	log_success "Command Code configs generated"
+}
+
 generate_copilot_configs() {
 	log_info "Generating GitHub Copilot CLI configs..."
 
@@ -501,6 +549,9 @@ main() {
 	echo
 
 	generate_pi_configs
+	echo
+
+	generate_commandcode_configs
 	echo
 
 	generate_copilot_configs
