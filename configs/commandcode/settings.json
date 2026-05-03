@@ -1,17 +1,5 @@
 {
   "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "shell",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.commandcode/hooks/guard-bash.sh",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "file_write",
