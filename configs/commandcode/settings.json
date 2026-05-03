@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./.commandcode/hooks/guard-bash.sh",
+            "command": "~/.commandcode/hooks/guard-bash.sh",
             "timeout": 5
           }
         ]
