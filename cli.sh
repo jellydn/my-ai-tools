@@ -757,7 +757,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.cursor" "$BACKUP_DIR" "cursor"
 		copy_config_dir "$HOME/.factory" "$BACKUP_DIR" "factory"
 		copy_config_dir "$HOME/.cline" "$BACKUP_DIR" "cline"
-			copy_config_dir "$HOME/.commandcode" "$BACKUP_DIR" "commandcode"
+		copy_config_dir "$HOME/.commandcode" "$BACKUP_DIR" "commandcode"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -1296,6 +1296,7 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/kilo/config.json" \
 		"$SCRIPT_DIR/configs/pi/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/settings.json" \
+		"$SCRIPT_DIR/configs/commandcode/mcp.json" \
 		"$SCRIPT_DIR/configs/factory/settings.json"; do
 		if [ -f "$config_file" ] && ! validate_config "$config_file"; then
 			log_error "Config validation failed: $config_file"
@@ -2399,7 +2400,7 @@ create_tool_skills_symlinks() {
 		"$HOME/.cursor/skills"
 		"$HOME/.config/amp/skills"
 		"$HOME/.codex/skills"
-			"$HOME/.commandcode/skills"
+		"$HOME/.commandcode/skills"
 	)
 
 	for tool_dir in "${tool_dirs[@]}"; do

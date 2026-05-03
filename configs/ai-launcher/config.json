@@ -61,7 +61,7 @@
 		{
 			"name": "architecture-explanation",
 			"command": "opencode run --model opencode/big-pickle 'Explain this codebase architecture'",
-			"description": "Explain architecture with Gemini",
+			"description": "Explain architecture with OpenCode",
 			"aliases": ["arch", "arch-explanation"]
 		},
 		{
