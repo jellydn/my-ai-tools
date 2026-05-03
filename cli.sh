@@ -1035,7 +1035,8 @@ install_pi() {
 
 install_commandcode() {
 	_run_commandcode_install() {
-		if command -v cmd &>/dev/null; then
+		# Check for Command Code specifically (not Windows cmd.exe)
+		if command -v cmd &>/dev/null && cmd --version 2>/dev/null | grep -q "Command Code"; then
 			log_warning "Command Code is already installed"
 			return 0
 		fi
@@ -2527,7 +2528,7 @@ main() {
 	echo
 	echo "Next steps:"
 	echo "  1. Restart your terminal"
-	echo "  2. Run .claude. to start Claude Code (or .cmd. for Command Code)"
+	echo "  2. Run 'claude' to start Claude Code (or 'cmd' for Command Code)"
 	echo "  3. Enable plugins with 'claude plugin enable <plugin-name>'"
 	echo "  4. Check out the README.md for more information"
 	echo
