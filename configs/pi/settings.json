@@ -1,7 +1,7 @@
 {
   "collapseChangelog": true,
   "defaultModel": "kimi-k2.6",
-  "defaultProvider": "crofai",
+  "defaultProvider": "opencode-go",
   "defaultThinkingLevel": "high",
   "editorPaddingX": 1,
   "lastChangelogVersion": "0.72.1",
