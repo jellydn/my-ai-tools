@@ -795,20 +795,20 @@ Located in [`configs/opencode/command/`](configs/opencode/command/):
 
 ---
 
-## ⌨️ Command Code (Optional)
+## 🚀 Command Code (Optional)
 
 AI coding assistant that continuously learns your taste of writing code. [Homepage](https://commandcode.ai)
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
 
-### Installation
+### 📋 Installation
 
 ```bash
 npm install -g command-code
 ```
 
-### Configuration
+### 🔧 Configuration
 
 Run the setup script to install configurations to `~/.commandcode/`:
 
@@ -818,16 +818,16 @@ Run the setup script to install configurations to `~/.commandcode/`:
 
 The setup script automatically configures MCP servers and copies agent guidelines.
 
-### Key Features
+### ✨ Key Features
 
 - **Taste Learning** - Learn your code style preferences from repositories
 - **MCP Servers** - Extend functionality with Model Context Protocol servers
 - **Skills** - Manage agent skills from GitHub repositories
 - **Slash Commands** - Built-in commands like `/resume`, `/taste`, `/review`, `/mcp`, etc.
 
-### MCP Servers
+### 🔌 MCP Servers
 
-Configuration in [`configs/commandcode/mcp.json`](configs/commandcode/mcp.json):
+Configuration in @configs/commandcode/mcp.json:
 
 ```json
 {
@@ -860,21 +860,21 @@ Configuration in [`configs/commandcode/mcp.json`](configs/commandcode/mcp.json):
 }
 ```
 
-### Custom Agents
+### 🤖 Custom Agents
 
-Located in [`configs/commandcode/agents/`](configs/commandcode/agents/):
+Located in @configs/commandcode/agents/:
 
 - `ai-slop-remover` - Remove AI-generated boilerplate
 - `review` - Code review
 
-### Custom Commands
+### ⌨️ Custom Commands
 
-Located in [`configs/commandcode/commands/`](configs/commandcode/commands/):
+Located in @configs/commandcode/commands/:
 
 - `simplify` - Simplify over-engineered code
 - `pr-review` - Pull request review workflows
 
-### Agent Guidelines
+### 📖 Agent Guidelines
 
 Installed to `~/.commandcode/AGENTS.md` with instructions for:
 

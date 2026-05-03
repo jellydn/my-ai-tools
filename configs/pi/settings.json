@@ -9,7 +9,6 @@
     "npm:@plannotator/pi-extension",
     "npm:pi-subagents",
     "https://github.com/davebcn87/pi-autoresearch",
-    "git:github.com/jellydn/pi-fireworks-provider",
     "npm:pi-hooks",
     "npm:@ff-labs/pi-fff",
     "npm:pi-annotate",

@@ -4,7 +4,7 @@ description: Fix PR review comments by implementing the requested changes
 
 Fix PR review comments. Analyze each comment, understand the requested change, and implement it.
 
-## Steps
+## 🧭 Steps
 
 1. Identify the PR from `$ARGUMENTS` or the current branch
 2. For each comment:

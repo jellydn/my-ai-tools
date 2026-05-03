@@ -1034,10 +1034,13 @@ install_pi() {
 	run_installer "Pi" "_run_pi_install" "command -v pi" ""
 }
 
+is_commandcode_installed() {
+	command -v cmd &>/dev/null && cmd --version 2>/dev/null | grep -q "Command Code"
+}
+
 install_commandcode() {
 	_run_commandcode_install() {
-		# Check for Command Code specifically (not Windows cmd.exe)
-		if command -v cmd &>/dev/null && cmd --version 2>/dev/null | grep -q "Command Code"; then
+		if is_commandcode_installed; then
 			log_warning "Command Code is already installed"
 			return 0
 		fi
@@ -1058,7 +1061,7 @@ install_commandcode() {
 			return 1
 		fi
 	}
-	run_installer "Command Code" "_run_commandcode_install" "command -v cmd" ""
+	run_installer "Command Code" "_run_commandcode_install" "is_commandcode_installed" ""
 }
 
 install_copilot() {
@@ -1543,7 +1546,7 @@ setup_claude_mcp_servers() {
 }
 
 setup_commandcode_mcp_servers() {
-	if ! command -v cmd &>/dev/null; then
+	if ! is_commandcode_installed; then
 		return 0
 	fi
 
@@ -1560,6 +1563,11 @@ setup_commandcode_mcp_servers() {
 		return 1
 	fi
 
+	if ! jq -e '.mcpServers | type == "object"' "$mcp_file" >/dev/null 2>&1; then
+		log_error "Command Code mcp.json must contain an object field: mcpServers"
+		return 1
+	fi
+
 	# Ensure optional prerequisites are available
 	handle_qmd_installation_if_needed
 	handle_fff_mcp_installation_if_needed
@@ -1572,7 +1580,12 @@ setup_commandcode_mcp_servers() {
 		log_info "Merging with existing Command Code MCP config..."
 		local merged_file
 		merged_file=$(make_temp_file "commandcode-mcp" "json")
-		if jq -s '.[0].mcpServers as $existing | .[1].mcpServers as $repo | {mcpServers: ($existing + $repo)}' "$dest_file" "$mcp_file" > "$merged_file"; then
+		if jq -s '
+			(.[0] // {}) as $existing |
+			(.[1] // {}) as $repo |
+			($existing * $repo)
+			| .mcpServers = (($existing.mcpServers // {}) + ($repo.mcpServers // {}))
+		' "$dest_file" "$mcp_file" > "$merged_file"; then
 			execute_quoted cp -p "$merged_file" "$dest_file"
 			rm -f "$merged_file"
 			log_success "Command Code MCP servers configured (merged)"
@@ -1755,7 +1768,13 @@ copy_pi_configs() {
 
 copy_commandcode_configs() {
 	local cmd_status
-	cmd_status=$(detect_tool --detailed "cmd" "$HOME/.commandcode") || cmd_status="missing"
+	if is_commandcode_installed; then
+		cmd_status="cli"
+	elif [ -d "$HOME/.commandcode" ]; then
+		cmd_status="config-dir"
+	else
+		cmd_status="missing"
+	fi
 	if [ "$cmd_status" = "missing" ]; then
 		log_info "Command Code not detected - skipping Command Code config installation"
 		return 0

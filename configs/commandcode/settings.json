@@ -2,11 +2,11 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "file_write",
+        "matcher": "write",
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "After writing files, check if any formatting is needed and apply it."
+            "type": "command",
+            "command": "echo 'Post-write hook: verify formatting if needed'"
           }
         ]
       }
