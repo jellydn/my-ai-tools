@@ -31,8 +31,8 @@
         depth: 6
       },
       plugins: [
-        function(hook, vm) {
-          hook.beforeEach(function(html) {
+        (hook, vm) => {
+          hook.beforeEach((html) => {
             // Add edit link
             const editLink = [
               '<div style="text-align: right; padding: 10px 0;">',
