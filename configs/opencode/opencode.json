@@ -82,7 +82,7 @@
 			"enabled": true
 		}
 	},
-	"plugin": ["@plannotator/opencode@latest"],
+	"plugin": ["@plannotator/opencode@latest", "opencode-crofai@latest"],
 	"provider": {
 		"llama.cpp": {
 			"npm": "@ai-sdk/openai-compatible",

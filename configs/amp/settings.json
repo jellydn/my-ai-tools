@@ -21,11 +21,7 @@
 		},
 		"react-grab-mcp": {
 			"command": "npx",
-			"args": [
-				"-y",
-				"@react-grab/mcp",
-				"--stdio"
-			]
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
 		},
 		"logpilot": {
 			"command": "logpilot",

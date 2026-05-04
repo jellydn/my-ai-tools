@@ -1,9 +1,11 @@
+// Session logging utility — unused by current hooks but available for
+// PostToolUse auditing or future event handlers.
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
 import type { HookPayload } from "./lib";
 
-const SESSIONS_DIR = path.join(tmpdir(), "claude-hooks-sessions");
+const SESSIONS_DIR = path.join(tmpdir(), "cmd-hooks-sessions");
 
 export async function saveSessionData(
 	hookType: string,

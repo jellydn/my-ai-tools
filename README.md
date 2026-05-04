@@ -610,7 +610,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **UI/UX Design**     | [Interface Design](https://interface-design.dev/)                                                             | Comprehensive guide to interface design patterns and best practices for anyone working with UI/UX development.                                                                |
 | **Expo**             | [expo/skills](https://github.com/expo/skills)                                                                 | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows.                                  |
 | **Next.js**          | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)                                       | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.                                           |
-| **React Patterns**   | [factory-ai/factory-plugins](https://skills.sh/factory-ai/factory-plugins/no-use-effect)                      | No-use-effect skill: 5 patterns to replace useEffect with better alternatives - derived state, data-fetching libraries, event handlers, useMountEffect, and key prop resets.   |
+| **React Patterns**   | [factory-ai/factory-plugins](https://skills.sh/factory-ai/factory-plugins/no-use-effect)                      | No-use-effect skill: 5 patterns to replace useEffect with better alternatives - derived state, data-fetching libraries, event handlers, useMountEffect, and key prop resets.  |
 | **Andrej Karpathy**  | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)                 | Community skills inspired by Andrej Karpathy's coding principles and practices for AI-focused development workflows.                                                          |
 | **Humanizer**        | [blader/humanizer](https://github.com/blader/humanizer)                                                       | Removes signs of AI-generated writing from text. Based on Wikipedia's AI writing detection guide, it detects 24 patterns to make text sound more natural and human.           |
 | **Claude Skills**    | [jezweb/claude-skills](https://github.com/jezweb/claude-skills)                                               | 97 production-ready skills for Claude Code CLI including Cloudflare, React, AI integrations, and more. Includes context-mate for project analysis and workflow management.    |
@@ -790,6 +790,99 @@ Located in [`configs/opencode/command/`](configs/opencode/command/):
 
 - `simplify` - Simplify over-engineered code for clarity and maintainability
 - `batch` - Run multiple tasks in parallel as worker tasks
+
+</details>
+
+---
+
+## 🚀 Command Code (Optional)
+
+AI coding assistant that continuously learns your taste of writing code. [Homepage](https://commandcode.ai)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### 📋 Installation
+
+```bash
+npm install -g command-code
+```
+
+### 🔧 Configuration
+
+Run the setup script to install configurations to `~/.commandcode/`:
+
+```bash
+./cli.sh
+```
+
+The setup script automatically configures MCP servers and copies agent guidelines.
+
+### ✨ Key Features
+
+- **Taste Learning** - Learn your code style preferences from repositories
+- **MCP Servers** - Extend functionality with Model Context Protocol servers
+- **Skills** - Manage agent skills from GitHub repositories
+- **Slash Commands** - Built-in commands like `/resume`, `/taste`, `/review`, `/mcp`, etc.
+
+### 🔌 MCP Servers
+
+Configuration in @configs/commandcode/mcp.json:
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "qmd": {
+      "command": "qmd",
+      "args": ["mcp"]
+    },
+    "fff": {
+      "command": "fff-mcp",
+      "args": []
+    },
+    "react-grab-mcp": {
+      "command": "npx",
+      "args": ["-y", "@react-grab/mcp", "--stdio"]
+    },
+    "logpilot": {
+      "command": "logpilot",
+      "args": ["mcp-server"]
+    }
+  }
+}
+```
+
+### 🤖 Custom Agents
+
+Located in @configs/commandcode/agents/:
+
+- `ai-slop-remover` - Remove AI-generated boilerplate
+- `review` - Code review
+
+### ⌨️ Custom Commands
+
+Located in @configs/commandcode/commands/:
+
+- `simplify` - Simplify over-engineered code
+- `pr-review` - Pull request review workflows
+
+### 📖 Agent Guidelines
+
+Installed to `~/.commandcode/AGENTS.md` with instructions for:
+
+- Session management with tmux
+- Using fff MCP for file search
+- Following best practices from `~/.ai-tools/best-practices.md`
+- qmd knowledge management integration
+- Git safety guidelines
 
 </details>
 

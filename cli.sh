@@ -696,12 +696,13 @@ copy_config_file() {
 	local source_file="$1"
 	local dest_dir="$2"
 
-	if [ -f "$source_file" ]; then
-		execute_quoted mkdir -p "$dest_dir"
-		execute_quoted cp "$source_file" "$dest_dir/"
-		return 0
+	if [ ! -f "$source_file" ]; then
+		return 1
 	fi
-	return 1
+
+	execute_quoted mkdir -p "$dest_dir" || return 1
+	execute_quoted cp -p "$source_file" "$dest_dir/" || return 1
+	return 0
 }
 
 # Helper: Ensure a CLI tool is installed, prompting if interactive
@@ -756,6 +757,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.cursor" "$BACKUP_DIR" "cursor"
 		copy_config_dir "$HOME/.factory" "$BACKUP_DIR" "factory"
 		copy_config_dir "$HOME/.cline" "$BACKUP_DIR" "cline"
+		copy_config_dir "$HOME/.commandcode" "$BACKUP_DIR" "commandcode"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -1032,6 +1034,36 @@ install_pi() {
 	run_installer "Pi" "_run_pi_install" "command -v pi" ""
 }
 
+is_commandcode_installed() {
+	command -v cmd &>/dev/null && cmd --version 2>/dev/null | grep -q "Command Code"
+}
+
+install_commandcode() {
+	_run_commandcode_install() {
+		if is_commandcode_installed; then
+			log_warning "Command Code is already installed"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "Command Code")
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Command Code."
+			return 1
+		fi
+
+		log_info "Installing Command Code with $pkg_manager..."
+		if execute "$pkg_manager install -g command-code"; then
+			log_success "Command Code installed (binary: cmd)"
+		else
+			log_error "Failed to install Command Code"
+			return 1
+		fi
+	}
+	run_installer "Command Code" "_run_commandcode_install" "is_commandcode_installed" ""
+}
+
 install_copilot() {
 	prompt_and_install() {
 		log_info "Installing GitHub Copilot CLI..."
@@ -1228,6 +1260,7 @@ copy_configurations() {
 	copy_gemini_configs
 	copy_kilo_configs
 	copy_pi_configs
+	copy_commandcode_configs
 	copy_copilot_configs
 	copy_cursor_configs
 	copy_factory_configs
@@ -1265,6 +1298,8 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/gemini/settings.json" \
 		"$SCRIPT_DIR/configs/kilo/config.json" \
 		"$SCRIPT_DIR/configs/pi/settings.json" \
+		"$SCRIPT_DIR/configs/commandcode/settings.json" \
+		"$SCRIPT_DIR/configs/commandcode/mcp.json" \
 		"$SCRIPT_DIR/configs/factory/settings.json"; do
 		if [ -f "$config_file" ] && ! validate_config "$config_file"; then
 			log_error "Config validation failed: $config_file"
@@ -1316,9 +1351,10 @@ copy_claude_configs() {
 }
 
 # Install MCP servers from central registry with interactive prompts
-# Usage: install_mcp_servers_from_registry [registry_file]
+# Usage: install_mcp_servers_from_registry <tool_cmd> [registry_file]
 install_mcp_servers_from_registry() {
-	local registry_file="${1:-$SCRIPT_DIR/configs/mcp-registry.json}"
+	local tool_cmd="${1:-claude}"
+	local registry_file="${2:-$SCRIPT_DIR/configs/mcp-registry.json}"
 	local installed_count=0
 	local skipped_count=0
 	local failed_count=0
@@ -1393,7 +1429,7 @@ install_mcp_servers_from_registry() {
 		fi
 
 		# Build install command
-		local install_cmd="claude mcp add --scope user --transport stdio $server_name --"
+		local install_cmd="$tool_cmd mcp add --scope user --transport stdio $server_name --"
 		install_cmd="$install_cmd $(printf '%q' "$command")"
 		for arg in "${args_array[@]}"; do
 			install_cmd="$install_cmd $(printf '%q' "$arg")"
@@ -1429,7 +1465,7 @@ install_mcp_servers_from_registry() {
 		[ "$mode" = "auto" ] && log_info "Auto-installing $name (--yes flag)" || log_info "Installing $name..."
 
 		local err_file
-		err_file=$(make_temp_file "claude-mcp-${server_name}" "err")
+		err_file=$(make_temp_file "${tool_cmd}-mcp-${server_name}" "err")
 
 		if execute "$install_cmd" 2>"$err_file"; then
 			log_success "$name installed"
@@ -1477,7 +1513,7 @@ setup_claude_mcp_servers() {
 	log_info "Setting up Claude Code MCP servers (global scope)..."
 
 	# Try registry-based installation first
-	if install_mcp_servers_from_registry; then
+	if install_mcp_servers_from_registry "claude"; then
 		log_success "MCP server setup complete via registry"
 	else
 		# Fallback to legacy method if registry fails
@@ -1506,6 +1542,70 @@ setup_claude_mcp_servers() {
 		fi
 
 		log_success "MCP server setup complete (legacy mode)"
+	fi
+}
+
+setup_commandcode_mcp_servers() {
+	if [ ! -d "$HOME/.commandcode" ]; then
+		return 0
+	fi
+
+	log_info "Setting up Command Code MCP servers..."
+
+	local mcp_file="$SCRIPT_DIR/configs/commandcode/mcp.json"
+	if [ ! -f "$mcp_file" ]; then
+		log_warning "Command Code MCP config not found: $mcp_file"
+		return 1
+	fi
+
+	if ! validate_config "$mcp_file"; then
+		log_error "Command Code mcp.json failed validation"
+		return 1
+	fi
+
+	if ! jq -e '.mcpServers | type == "object"' "$mcp_file" >/dev/null 2>&1; then
+		log_error "Command Code mcp.json must contain an object field: mcpServers"
+		return 1
+	fi
+
+	# Ensure optional prerequisites are available
+	handle_qmd_installation_if_needed
+	handle_fff_mcp_installation_if_needed
+	handle_logpilot_installation_if_needed
+
+	local dest_file="$HOME/.commandcode/mcp.json"
+
+	# Merge with existing user config, warn if jq is missing, otherwise copy directly
+	if [ -f "$dest_file" ]; then
+		if command -v jq &>/dev/null; then
+			log_info "Merging with existing Command Code MCP config..."
+			local merged_file
+			merged_file=$(make_temp_file "commandcode-mcp" "json")
+			if jq -s '
+				(.[0] // {}) as $existing |
+				(.[1] // {}) as $repo |
+				($existing * $repo)
+				| .mcpServers = (($existing.mcpServers // {}) + ($repo.mcpServers // {}))
+			' "$dest_file" "$mcp_file" > "$merged_file"; then
+				execute_quoted cp -p "$merged_file" "$dest_file" || return 1
+				rm -f "$merged_file"
+				log_success "Command Code MCP servers configured (merged)"
+			else
+				rm -f "$merged_file"
+				log_error "Failed to merge Command Code MCP config"
+				return 1
+			fi
+		else
+			log_warning "Existing mcp.json found but jq is not installed. Install jq to merge configs, or manually update $dest_file"
+			return 1
+		fi
+	else
+		if copy_config_file "$mcp_file" "$HOME/.commandcode/"; then
+			log_success "Command Code MCP servers configured"
+		else
+			log_error "Failed to copy Command Code MCP config"
+			return 1
+		fi
 	fi
 }
 
@@ -1669,6 +1769,54 @@ copy_pi_configs() {
 	copy_config_file "$SCRIPT_DIR/configs/pi/AGENTS.md" "$HOME/.pi/agent/" || true
 
 	log_success "Pi configs copied"
+}
+
+copy_commandcode_configs() {
+	local cmd_status
+	if is_commandcode_installed; then
+		cmd_status="cli"
+	elif [ -d "$HOME/.commandcode" ]; then
+		cmd_status="config-dir"
+	else
+		cmd_status="missing"
+	fi
+	if [ "$cmd_status" = "missing" ]; then
+		log_info "Command Code not detected - skipping Command Code config installation"
+		return 0
+	fi
+
+	log_info "Detected Command Code (via $cmd_status)"
+	execute_quoted mkdir -p "$HOME/.commandcode"
+
+	copy_config_file "$SCRIPT_DIR/configs/commandcode/settings.json" "$HOME/.commandcode/" || true
+	copy_config_file "$SCRIPT_DIR/configs/commandcode/AGENTS.md" "$HOME/.commandcode/" || true
+
+	if [ -d "$SCRIPT_DIR/configs/commandcode/agents" ]; then
+		execute_quoted mkdir -p "$HOME/.commandcode/agents"
+		safe_copy_dir "$SCRIPT_DIR/configs/commandcode/agents" "$HOME/.commandcode/agents"
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/commandcode/commands" ]; then
+		execute_quoted mkdir -p "$HOME/.commandcode/commands"
+		safe_copy_dir "$SCRIPT_DIR/configs/commandcode/commands" "$HOME/.commandcode/commands"
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/commandcode/skills" ]; then
+		execute_quoted mkdir -p "$HOME/.commandcode/skills"
+		safe_copy_dir "$SCRIPT_DIR/configs/commandcode/skills" "$HOME/.commandcode/skills"
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/commandcode/hooks" ]; then
+		execute_quoted mkdir -p "$HOME/.commandcode/hooks"
+		safe_copy_dir "$SCRIPT_DIR/configs/commandcode/hooks" "$HOME/.commandcode/hooks"
+	fi
+
+	# Copy MCP servers config
+	if ! setup_commandcode_mcp_servers; then
+		log_warning "Command Code MCP setup failed; continuing with other configs"
+	fi
+
+	log_success "Command Code configs copied"
 }
 
 copy_copilot_configs() {
@@ -2262,7 +2410,7 @@ install_local_skills() {
 	done
 
 	log_success "Skills installed to universal directory: $UNIVERSAL_SKILLS_DIR"
-	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Gemini, Cursor, Pi, and more"
+	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Gemini, Cursor, Pi, Command Code, and more"
 
 	# Create symlinks from tool-specific directories to universal directory
 	create_tool_skills_symlinks "$UNIVERSAL_SKILLS_DIR"
@@ -2281,6 +2429,7 @@ create_tool_skills_symlinks() {
 		"$HOME/.cursor/skills"
 		"$HOME/.config/amp/skills"
 		"$HOME/.codex/skills"
+		"$HOME/.commandcode/skills"
 	)
 
 	for tool_dir in "${tool_dirs[@]}"; do
@@ -2367,7 +2516,7 @@ main() {
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo          ║"
-	echo "║  Copilot • Cursor • Factory Droid • Cline                            ║"
+	echo "║  Copilot • Cursor • Factory Droid • Cline • Command Code              ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -2415,6 +2564,9 @@ main() {
 	install_pi
 	echo
 
+	install_commandcode
+	echo
+
 	install_copilot
 	echo
 
@@ -2437,7 +2589,7 @@ main() {
 	echo
 	echo "Next steps:"
 	echo "  1. Restart your terminal"
-	echo "  2. Run 'claude' to start Claude Code"
+	echo "  2. Run 'claude' to start Claude Code (or 'cmd' for Command Code)"
 	echo "  3. Enable plugins with 'claude plugin enable <plugin-name>'"
 	echo "  4. Check out the README.md for more information"
 	echo

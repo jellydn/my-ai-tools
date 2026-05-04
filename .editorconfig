@@ -1,0 +1,29 @@
+# EditorConfig: https://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{ts,tsx,js,jsx}]
+indent_style = tab
+indent_size = tab
+quote_type = double
+
+[*.json]
+indent_style = tab
+indent_size = tab
+
+[*.{md,mdx}]
+indent_style = tab
+trim_trailing_whitespace = false
+
+[*.sh]
+indent_style = tab
+indent_size = tab
+
+[*.{yaml,yml}]
+indent_style = space
+indent_size = 2

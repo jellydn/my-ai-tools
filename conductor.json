@@ -1,5 +1,5 @@
 {
-    "scripts": {
-        "setup": "prek install"
-    }
+	"scripts": {
+		"setup": "prek install"
+	}
 }

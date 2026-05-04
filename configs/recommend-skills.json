@@ -1,34 +1,34 @@
 {
-  "recommended_skills": [
-    {
-      "repo": "vercel-labs/agent-skills",
-      "description": "Vercel's agent skills for Next.js and React"
-    },
-    {
-      "repo": "factory-ai/factory-plugins",
-      "skill": "no-use-effect",
-      "description": "Patterns to replace useEffect with better alternatives"
-    },
-    {
-      "repo": "mattpocock/skills",
-      "skill": "grill-me",
-      "description": "Interview the user relentlessly about a plan or design until reaching shared understanding"
-    },
-    {
-      "repo": "github/gh-stack",
-      "description": "GitHub CLI extension for managing stacked branches and pull requests"
-    },
-    {
-      "repo": "expo/skills",
-      "description": "Official Expo skills for React Native development"
-    },
-    {
-      "repo": "blader/humanizer",
-      "description": "Removes AI-generated writing patterns from text"
-    },
-    {
-      "repo": "jezweb/claude-skills",
-      "description": "97 production-ready skills for Claude Code"
-    }
-  ]
+	"recommended_skills": [
+		{
+			"repo": "vercel-labs/agent-skills",
+			"description": "Vercel's agent skills for Next.js and React"
+		},
+		{
+			"repo": "factory-ai/factory-plugins",
+			"skill": "no-use-effect",
+			"description": "Patterns to replace useEffect with better alternatives"
+		},
+		{
+			"repo": "mattpocock/skills",
+			"skill": "grill-me",
+			"description": "Interview the user relentlessly about a plan or design until reaching shared understanding"
+		},
+		{
+			"repo": "github/gh-stack",
+			"description": "GitHub CLI extension for managing stacked branches and pull requests"
+		},
+		{
+			"repo": "expo/skills",
+			"description": "Official Expo skills for React Native development"
+		},
+		{
+			"repo": "blader/humanizer",
+			"description": "Removes AI-generated writing patterns from text"
+		},
+		{
+			"repo": "jezweb/claude-skills",
+			"description": "97 production-ready skills for Claude Code"
+		}
+	]
 }
