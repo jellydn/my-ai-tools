@@ -1586,7 +1586,7 @@ setup_commandcode_mcp_servers() {
 			($existing * $repo)
 			| .mcpServers = (($existing.mcpServers // {}) + ($repo.mcpServers // {}))
 		' "$dest_file" "$mcp_file" > "$merged_file"; then
-			execute_quoted cp -p "$merged_file" "$dest_file"
+			execute_quoted cp -p "$merged_file" "$dest_file" || return 1
 			rm -f "$merged_file"
 			log_success "Command Code MCP servers configured (merged)"
 		else
