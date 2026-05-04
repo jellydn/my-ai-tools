@@ -459,7 +459,7 @@ export interface HookHandlers {
 
 // Logging utility
 export function log(...args: unknown[]): void {
-	console.log(`[${new Date().toISOString()}]`, ...args);
+	console.error(`[${new Date().toISOString()}]`, ...args);
 }
 
 // Main hook runner
@@ -560,7 +560,7 @@ export function runHook(handlers: HookHandlers): void {
 			}
 		} catch (error) {
 			console.error("Hook error:", error);
-			console.log(JSON.stringify({ action: "continue" }));
+			console.log(JSON.stringify({}));
 		}
 	});
 }

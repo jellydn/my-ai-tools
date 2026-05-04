@@ -1,3 +1,5 @@
+// Session logging utility — unused by current hooks but available for
+// PostToolUse auditing or future event handlers.
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import * as path from "node:path";

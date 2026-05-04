@@ -2,7 +2,7 @@
 	"hooks": {
 		"PostToolUse": [
 			{
-				"matcher": "Write|Edit",
+				"matcher": "write|edit",
 				"hooks": [
 					{
 						"type": "command",
@@ -33,11 +33,12 @@
 		],
 		"PreToolUse": [
 			{
-				"matcher": "Bash",
+				"matcher": "shell",
 				"hooks": [
 					{
 						"type": "command",
-						"command": "bun ~/.commandcode/hooks/index.ts PreToolUse"
+						"command": "bun ~/.commandcode/hooks/index.ts PreToolUse",
+				"timeout": 10
 					}
 				]
 			}

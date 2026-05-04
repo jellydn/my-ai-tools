@@ -1546,7 +1546,7 @@ setup_claude_mcp_servers() {
 }
 
 setup_commandcode_mcp_servers() {
-	if ! is_commandcode_installed; then
+	if [ ! -d "$HOME/.commandcode" ]; then
 		return 0
 	fi
 
@@ -1575,23 +1575,28 @@ setup_commandcode_mcp_servers() {
 
 	local dest_file="$HOME/.commandcode/mcp.json"
 
-	# Merge with existing user config if present, otherwise copy directly
-	if [ -f "$dest_file" ] && command -v jq &>/dev/null; then
-		log_info "Merging with existing Command Code MCP config..."
-		local merged_file
-		merged_file=$(make_temp_file "commandcode-mcp" "json")
-		if jq -s '
-			(.[0] // {}) as $existing |
-			(.[1] // {}) as $repo |
-			($existing * $repo)
-			| .mcpServers = (($existing.mcpServers // {}) + ($repo.mcpServers // {}))
-		' "$dest_file" "$mcp_file" > "$merged_file"; then
-			execute_quoted cp -p "$merged_file" "$dest_file" || return 1
-			rm -f "$merged_file"
-			log_success "Command Code MCP servers configured (merged)"
+	# Merge with existing user config, warn if jq is missing, otherwise copy directly
+	if [ -f "$dest_file" ]; then
+		if command -v jq &>/dev/null; then
+			log_info "Merging with existing Command Code MCP config..."
+			local merged_file
+			merged_file=$(make_temp_file "commandcode-mcp" "json")
+			if jq -s '
+				(.[0] // {}) as $existing |
+				(.[1] // {}) as $repo |
+				($existing * $repo)
+				| .mcpServers = (($existing.mcpServers // {}) + ($repo.mcpServers // {}))
+			' "$dest_file" "$mcp_file" > "$merged_file"; then
+				execute_quoted cp -p "$merged_file" "$dest_file" || return 1
+				rm -f "$merged_file"
+				log_success "Command Code MCP servers configured (merged)"
+			else
+				rm -f "$merged_file"
+				log_error "Failed to merge Command Code MCP config"
+				return 1
+			fi
 		else
-			rm -f "$merged_file"
-			log_error "Failed to merge Command Code MCP config"
+			log_warning "Existing mcp.json found but jq is not installed. Install jq to merge configs, or manually update $dest_file"
 			return 1
 		fi
 	else

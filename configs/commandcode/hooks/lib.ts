@@ -229,78 +229,89 @@ export async function getToolUsage(
 	return toolUsage;
 }
 
-// Input payload types based on official Claude Code schemas
+/**
+ * Next steps for transcript operations:
+ *
+ * 1. Session Analysis Functions:
+ *    - getSessionMetadata(): Extract session ID, version, CWD, git branch
+ *    - getSessionDuration(): Calculate time between first and last message
+ *    - getTokenUsage(): Sum all token usage from assistant messages
+ *
+ * 2. Tool Analysis Functions:
+ *    - getToolErrors(): Extract tool results with is_error: true
+ *    - getToolSuccessRate(): Calculate success/failure ratio
+ *    - getMostUsedTools(): Rank tools by frequency
+ *    - getToolSequences(): Identify common tool usage patterns
+ *
+ * 3. Content Analysis Functions:
+ *    - searchTranscript(): Find messages containing specific keywords
+ *    - getCodeBlocks(): Extract code from assistant responses
+ *    - getFileOperations(): Track file reads/writes/edits
+ *
+ * 4. Advanced Analysis:
+ *    - getConversationFlow(): Build a tree of message parent/child relationships
+ *    - identifyProblems(): Find error patterns or failed attempts
+ *    - getSummaries(): Extract all summary messages
+ *
+ * 5. Export Functions:
+ *    - exportToMarkdown(): Convert conversation to readable markdown
+ *    - exportToJSON(): Clean JSON export without internal fields
+ *    - generateReport(): Create analytics report of the session
+ *
+ * Usage Example in Hooks:
+ * ```typescript
+ * export const preToolUse: PreToolUseHandler = async (payload) => {
+ *   // Block dangerous shell commands
+ *   if (payload.tool_name === "shell_command") {
+ *     const cmd = (payload.tool_input as { command?: string }).command ?? "";
+ *     if (cmd.includes("rm -rf /")) {
+ *       return {
+ *         continue: true,
+ *         hookSpecificOutput: {
+ *           hookEventName: "PreToolUse",
+ *           permissionDecision: "deny",
+ *           permissionDecisionReason: "Blocked destructive command",
+ *         },
+ *       };
+ *     }
+ *   }
+ *   return {};
+ * };
+ * ```
+ */
+
+// Input payload types based on official Command Code schemas
 export interface PreToolUsePayload {
 	session_id: string;
 	transcript_path: string;
+	cwd: string;
 	hook_event_name: "PreToolUse";
+	permission_mode: "standard" | "auto-accept" | "plan";
+	tool_use_id?: string;
 	tool_name: string;
+	tool_display_name?: string;
 	tool_input: Record<string, unknown>;
 }
 
 export interface PostToolUsePayload {
 	session_id: string;
 	transcript_path: string;
+	cwd: string;
 	hook_event_name: "PostToolUse";
+	permission_mode: "standard" | "auto-accept" | "plan";
+	tool_use_id?: string;
 	tool_name: string;
+	tool_display_name?: string;
 	tool_input: Record<string, unknown>;
-	tool_response: Record<string, unknown> & {
-		success?: boolean;
-	};
+	tool_response: string;
 }
 
-export interface NotificationPayload {
-	session_id: string;
-	transcript_path: string;
-	hook_event_name: "Notification";
-	message: string;
-	title?: string;
-}
-
-export interface StopPayload {
-	session_id: string;
-	transcript_path: string;
-	hook_event_name: "Stop";
-	stop_hook_active: boolean;
-}
-
-export interface SubagentStopPayload {
-	session_id: string;
-	transcript_path: string;
-	hook_event_name: "SubagentStop";
-	stop_hook_active: boolean;
-}
-
-export interface UserPromptSubmitPayload {
-	session_id: string;
-	transcript_path: string;
-	hook_event_name: "UserPromptSubmit";
-	prompt: string;
-}
-
-export interface PreCompactPayload {
-	session_id: string;
-	transcript_path: string;
-	hook_event_name: "PreCompact";
-	trigger: "manual" | "auto";
-}
-
-export interface SessionStartPayload {
-	session_id: string;
-	transcript_path: string;
-	hook_event_name: "SessionStart";
-	source: string;
-}
+// Command Code currently only supports PreToolUse and PostToolUse events.
+// Additional events (Notification, Stop, etc.) may be added in future versions.
 
 export type HookPayload =
 	| (PreToolUsePayload & { hook_type: "PreToolUse" })
-	| (PostToolUsePayload & { hook_type: "PostToolUse" })
-	| (NotificationPayload & { hook_type: "Notification" })
-	| (StopPayload & { hook_type: "Stop" })
-	| (SubagentStopPayload & { hook_type: "SubagentStop" })
-	| (UserPromptSubmitPayload & { hook_type: "UserPromptSubmit" })
-	| (PreCompactPayload & { hook_type: "PreCompact" })
-	| (SessionStartPayload & { hook_type: "SessionStart" });
+	| (PostToolUsePayload & { hook_type: "PostToolUse" });
 
 // Base response fields available to all hooks
 export interface BaseHookResponse {
@@ -314,9 +325,9 @@ export interface BaseHookResponse {
 export interface PreToolUseResponse extends BaseHookResponse {
 	hookSpecificOutput?: {
 		hookEventName?: "PreToolUse";
-		permissionDecision?: "allow" | "deny" | "ask";
+		permissionDecision?: "allow" | "deny";
 		permissionDecisionReason?: string;
-		updatedInput?: Record<string, unknown>;
+		additionalContext?: string;
 	};
 }
 
@@ -324,38 +335,8 @@ export interface PreToolUseResponse extends BaseHookResponse {
 export interface PostToolUseResponse extends BaseHookResponse {
 	decision?: "block";
 	reason?: string;
-}
-
-// Stop/SubagentStop specific response
-export interface StopResponse extends BaseHookResponse {
-	decision?: "block";
-	reason?: string; // Required when decision is 'block'
-}
-
-// UserPromptSubmit specific response
-export interface UserPromptSubmitResponse extends BaseHookResponse {
-	decision?: "approve" | "block";
-	reason?: string;
-	contextFiles?: string[];
-	updatedPrompt?: string;
 	hookSpecificOutput?: {
-		hookEventName: "UserPromptSubmit";
-		additionalContext?: string;
-	};
-}
-
-// PreCompact specific response
-export interface PreCompactResponse extends BaseHookResponse {
-	decision?: "approve" | "block";
-	reason?: string;
-}
-
-// SessionStart specific response
-export interface SessionStartResponse extends BaseHookResponse {
-	decision?: "approve" | "block";
-	reason?: string;
-	hookSpecificOutput?: {
-		hookEventName: "SessionStart";
+		hookEventName?: "PostToolUse";
 		additionalContext?: string;
 	};
 }
@@ -366,10 +347,31 @@ export interface HookResponse {
 	stopReason?: string;
 }
 
-export interface BashToolInput {
+// Command Code tool input types
+export interface ShellToolInput {
 	command: string;
+	args?: string[];
+	directory?: string;
 	timeout?: number;
-	description?: string;
+}
+
+export interface ReadToolInput {
+	absolute_path: string;
+	offset?: number;
+	limit?: number;
+}
+
+export interface WriteToolInput {
+	file_path: string;
+	content: string;
+}
+
+export interface EditToolInput {
+	file_path: string;
+	old_value: string;
+	new_value: string;
+	replacement_count?: number;
+	replace_all?: boolean;
 }
 
 // Hook handler types
@@ -379,39 +381,15 @@ export type PreToolUseHandler = (
 export type PostToolUseHandler = (
 	payload: PostToolUsePayload,
 ) => Promise<PostToolUseResponse> | PostToolUseResponse;
-export type NotificationHandler = (
-	payload: NotificationPayload,
-) => Promise<BaseHookResponse> | BaseHookResponse;
-export type StopHandler = (
-	payload: StopPayload,
-) => Promise<StopResponse> | StopResponse;
-export type SubagentStopHandler = (
-	payload: SubagentStopPayload,
-) => Promise<StopResponse> | StopResponse;
-export type UserPromptSubmitHandler = (
-	payload: UserPromptSubmitPayload,
-) => Promise<UserPromptSubmitResponse> | UserPromptSubmitResponse;
-export type PreCompactHandler = (
-	payload: PreCompactPayload,
-) => Promise<PreCompactResponse> | PreCompactResponse;
-export type SessionStartHandler = (
-	payload: SessionStartPayload,
-) => Promise<SessionStartResponse> | SessionStartResponse;
 
 export interface HookHandlers {
 	preToolUse?: PreToolUseHandler;
 	postToolUse?: PostToolUseHandler;
-	notification?: NotificationHandler;
-	stop?: StopHandler;
-	subagentStop?: SubagentStopHandler;
-	userPromptSubmit?: UserPromptSubmitHandler;
-	preCompact?: PreCompactHandler;
-	sessionStart?: SessionStartHandler;
 }
 
 // Logging utility
 export function log(...args: unknown[]): void {
-	console.log(`[${new Date().toISOString()}]`, ...args);
+	console.error(`[${new Date().toISOString()}]`, ...args);
 }
 
 // Main hook runner
@@ -451,68 +429,12 @@ export function runHook(handlers: HookHandlers): void {
 					}
 					break;
 
-				case "Notification":
-					if (handlers.notification) {
-						const response = await handlers.notification(payload);
-						console.log(JSON.stringify(response));
-					} else {
-						console.log(JSON.stringify({}));
-					}
-					break;
-
-				case "Stop":
-					if (handlers.stop) {
-						const response = await handlers.stop(payload);
-						console.log(JSON.stringify(response));
-					} else {
-						console.log(JSON.stringify({}));
-					}
-					process.exit(0);
-					return; // Unreachable but satisfies linter
-
-				case "SubagentStop":
-					if (handlers.subagentStop) {
-						const response = await handlers.subagentStop(payload);
-						console.log(JSON.stringify(response));
-					} else {
-						console.log(JSON.stringify({}));
-					}
-					process.exit(0);
-					return; // Unreachable but satisfies linter
-
-				case "UserPromptSubmit":
-					if (handlers.userPromptSubmit) {
-						const response = await handlers.userPromptSubmit(payload);
-						console.log(JSON.stringify(response));
-					} else {
-						console.log(JSON.stringify({}));
-					}
-					break;
-
-				case "PreCompact":
-					if (handlers.preCompact) {
-						const response = await handlers.preCompact(payload);
-						console.log(JSON.stringify(response));
-					} else {
-						console.log(JSON.stringify({}));
-					}
-					break;
-
-				case "SessionStart":
-					if (handlers.sessionStart) {
-						const response = await handlers.sessionStart(payload);
-						console.log(JSON.stringify(response));
-					} else {
-						console.log(JSON.stringify({}));
-					}
-					break;
-
 				default:
 					console.log(JSON.stringify({}));
 			}
 		} catch (error) {
 			console.error("Hook error:", error);
-			console.log(JSON.stringify({ action: "continue" }));
+			console.log(JSON.stringify({}));
 		}
 	});
 }

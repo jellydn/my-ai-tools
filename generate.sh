@@ -372,6 +372,13 @@ generate_commandcode_configs() {
 		log_warning "Command Code hooks directory not found: $HOME/.commandcode/hooks"
 	fi
 
+	if [ -f "$HOME/.commandcode/mcp.json" ]; then
+		copy_single "$HOME/.commandcode/mcp.json" "$SCRIPT_DIR/configs/commandcode/mcp.json"
+		log_success "Command Code mcp.json generated"
+	else
+		log_warning "Command Code mcp.json not found: $HOME/.commandcode/mcp.json"
+	fi
+
 	log_success "Command Code configs generated"
 }
 
