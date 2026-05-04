@@ -1801,6 +1801,11 @@ copy_commandcode_configs() {
 		safe_copy_dir "$SCRIPT_DIR/configs/commandcode/skills" "$HOME/.commandcode/skills"
 	fi
 
+	if [ -d "$SCRIPT_DIR/configs/commandcode/hooks" ]; then
+		execute_quoted mkdir -p "$HOME/.commandcode/hooks"
+		safe_copy_dir "$SCRIPT_DIR/configs/commandcode/hooks" "$HOME/.commandcode/hooks"
+	fi
+
 	# Copy MCP servers config
 	if ! setup_commandcode_mcp_servers; then
 		log_warning "Command Code MCP setup failed; continuing with other configs"

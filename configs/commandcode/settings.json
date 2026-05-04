@@ -2,11 +2,42 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "write",
+        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'Post-write hook: verify formatting if needed'"
+            "command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.ts$|\\.tsx$|\\.js$|\\.jsx$ ]]; then biome check --write \"$(jq -r .tool_input.file_path)\"; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.go$ ]]; then gofmt -w \"$(jq -r .tool_input.file_path)\"; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.md$|\\.mdx$ ]]; then npx prettier --write \"$(jq -r .tool_input.file_path)\"; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.py$ ]]; then ruff format \"$(jq -r .tool_input.file_path)\"; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.rs$ ]]; then rustfmt \"$(jq -r .tool_input.file_path)\"; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.sh$ ]]; then shfmt -w \"$(jq -r .tool_input.file_path)\"; fi"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun ~/.commandcode/hooks/index.ts PreToolUse"
           }
         ]
       }

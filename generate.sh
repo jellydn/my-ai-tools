@@ -365,6 +365,13 @@ generate_commandcode_configs() {
 		log_warning "Command Code skills directory not found: $HOME/.commandcode/skills"
 	fi
 
+	if [ -d "$HOME/.commandcode/hooks" ]; then
+		copy_directory "$HOME/.commandcode/hooks" "$SCRIPT_DIR/configs/commandcode/hooks"
+		log_success "Command Code hooks generated"
+	else
+		log_warning "Command Code hooks directory not found: $HOME/.commandcode/hooks"
+	fi
+
 	log_success "Command Code configs generated"
 }
 
