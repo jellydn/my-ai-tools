@@ -2,6 +2,7 @@ model_personality = "pragmatic"
 model = "gpt-5.5"
 model_reasoning_effort = "medium"
 approvals_reviewer = "guardian_subagent"
+personality = "pragmatic"
 
 [features]
 unified_exec = true
@@ -21,6 +22,9 @@ network_access = true
 [mcp_servers.context7]
 command = "npx"
 args = ["-y", "@upstash/context7-mcp"]
+
+[mcp_servers.notion]
+url = "https://mcp.notion.com/mcp"
 
 [mcp_servers.sequential-thinking]
 command = "npx"
@@ -56,14 +60,14 @@ args = ["mcp-server"]
 "gpt-5.3-codex" = "gpt-5.4"
 
 [notice.external_config_migration_prompts]
-home_last_prompted_at = 1777243300
+home_last_prompted_at = 1777953592
 
 [tui]
 status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "context-used"]
 theme = "kanagawa"
 
 [tui.model_availability_nux]
-"gpt-5.5" = 1
+"gpt-5.5" = 4
 
 [plugins."github@openai-curated"]
 enabled = true
@@ -89,19 +93,23 @@ enabled = true
 [plugins."plannotator@plannotator"]
 enabled = true
 
+[plugins."computer-use@openai-bundled"]
+enabled = true
+
 [marketplaces.claude-plugins-official]
-last_updated = "2026-04-30T03:09:11Z"
-last_revision = "0742692199b49af5c6c33cd68ee674fb2e679d50"
+last_updated = "2026-05-05T09:03:33Z"
+last_revision = "ac45fdae4b7af187b5624599ab054090dedadd94"
 source_type = "git"
 source = "https://github.com/anthropics/claude-plugins-official.git"
 
 [marketplaces.plannotator]
-last_updated = "2026-04-30T03:09:17Z"
-last_revision = "a68463b6a4f5b3aba5367905961fb650f8e6f5a3"
+last_updated = "2026-05-05T09:03:40Z"
+last_revision = "ff2759b553c1186c5a437869cf982a6431e4e415"
 source_type = "git"
 source = "https://github.com/backnotprop/plannotator.git"
 
 [marketplaces.worktrunk]
-last_updated = "2026-04-26T22:42:28Z"
+last_updated = "2026-05-05T09:03:48Z"
+last_revision = "3acce3231d8778421ea050ecaa4b0cc03533f58c"
 source_type = "git"
 source = "https://github.com/max-sixty/worktrunk.git"
