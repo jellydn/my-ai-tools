@@ -193,33 +193,33 @@ Configuration in [`~/.claude/mcp-servers.json`](configs/claude/mcp-servers.json)
 
 ```json
 {
-  "mcpServers": {
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"]
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"]
-    },
-    "fff": {
-      "type": "stdio",
-      "command": "fff-mcp",
-      "args": []
-    },
-    "react-grab-mcp": {
-      "command": "npx",
-      "args": ["-y", "@react-grab/mcp", "--stdio"]
-    },
-    "logpilot": {
-      "command": "logpilot",
-      "args": ["mcp-server"]
-    }
-  }
+	"mcpServers": {
+		"context7": {
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@latest"]
+		},
+		"sequential-thinking": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
+		},
+		"fff": {
+			"type": "stdio",
+			"command": "fff-mcp",
+			"args": []
+		},
+		"react-grab-mcp": {
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
+		},
+		"logpilot": {
+			"command": "logpilot",
+			"args": ["mcp-server"]
+		}
+	}
 }
 ```
 
@@ -403,43 +403,43 @@ Auto-format after file edits:
 
 ```json
 {
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(ts|tsx|js|jsx)$'; then biome check --write \"$file_path\"; fi; }"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.go$ ]]; then gofmt -w \"$( jq -r .tool_input.file_path )\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(md|mdx)$'; then npx prettier --write \"$file_path\"; fi; }"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.py$ ]]; then ruff format \"$( jq -r .tool_input.file_path )\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.rs$ ]]; then rustfmt \"$( jq -r .tool_input.file_path )\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.sh$ ]]; then shfmt -w \"$( jq -r .tool_input.file_path )\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.lua$ ]]; then stylua \"$( jq -r .tool_input.file_path )\"; fi"
-          }
-        ]
-      }
-    ]
-  }
+	"hooks": {
+		"PostToolUse": [
+			{
+				"matcher": "Write|Edit|MultiEdit",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(ts|tsx|js|jsx)$'; then biome check --write \"$file_path\"; fi; }"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.go$ ]]; then gofmt -w \"$( jq -r .tool_input.file_path )\"; fi"
+					},
+					{
+						"type": "command",
+						"command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(md|mdx)$'; then npx prettier --write \"$file_path\"; fi; }"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.py$ ]]; then ruff format \"$( jq -r .tool_input.file_path )\"; fi"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.rs$ ]]; then rustfmt \"$( jq -r .tool_input.file_path )\"; fi"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.sh$ ]]; then shfmt -w \"$( jq -r .tool_input.file_path )\"; fi"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.lua$ ]]; then stylua \"$( jq -r .tool_input.file_path )\"; fi"
+					}
+				]
+			}
+		]
+	}
 }
 ```
 
@@ -472,19 +472,19 @@ Prevents dangerous git commands from being executed:
 
 ```json
 {
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun ~/.claude/hooks/index.ts PreToolUse"
-          }
-        ]
-      }
-    ]
-  }
+	"hooks": {
+		"PreToolUse": [
+			{
+				"matcher": "Bash",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "bun ~/.claude/hooks/index.ts PreToolUse"
+					}
+				]
+			}
+		]
+	}
 }
 ```
 
@@ -507,20 +507,20 @@ Transform WebSearch queries:
 
 ```json
 {
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "WebSearch",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"~/.ccs/hooks/websearch-transformer.cjs\"",
-            "timeout": 120
-          }
-        ]
-      }
-    ]
-  }
+	"hooks": {
+		"PreToolUse": [
+			{
+				"matcher": "WebSearch",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "node \"~/.ccs/hooks/websearch-transformer.cjs\"",
+						"timeout": 120
+					}
+				]
+			}
+		]
+	}
 }
 ```
 
@@ -530,10 +530,10 @@ Using claude-hud plugin:
 
 ```json
 {
-  "statusLine": {
-    "type": "command",
-    "command": "bash -c 'node \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
-  }
+	"statusLine": {
+		"type": "command",
+		"command": "bash -c 'node \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
+	}
 }
 ```
 
@@ -672,85 +672,85 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
 
 ```json
 {
-  "$schema": "https://opencode.ai/config.json",
-  "instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
-  "theme": "kanagawa",
-  "default_agent": "plan",
-  "mcp": {
-    "context7": {
-      "type": "remote",
-      "url": "https://mcp.context7.com/mcp",
-      "enabled": true
-    },
-    "qmd": {
-      "type": "local",
-      "command": ["qmd", "mcp"],
-      "enabled": true
-    },
-    "fff": {
-      "type": "local",
-      "command": ["fff-mcp"],
-      "enabled": true
-    },
-    "sequential-thinking": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ],
-      "enabled": true
-    }
-  },
-  "agent": {
-    "build": {
-      "permission": {
-        "bash": {
-          "git push": "ask",
-          "qmd": "allow",
-          "qmd query": "allow",
-          "qmd get": "allow",
-          "qmd search": "allow",
-          "$HOME/.config/opencode/skill/qmd-knowledge/scripts/record.sh": "allow",
-          "$HOME/.claude/skills/qmd-knowledge/scripts/record.sh": "allow"
-        }
-      }
-    }
-  },
-  "plugin": [
-    "@plannotator/opencode@latest",
-    "@mohak34/opencode-notifier@latest"
-  ],
-  "formatter": {
-    "biome": {
-      "command": ["biome", "check", "--write", "$FILE"],
-      "extensions": [".ts", ".tsx", ".js", ".jsx"]
-    },
-    "gofmt": {
-      "command": ["gofmt", "-w", "$FILE"],
-      "extensions": [".go"]
-    },
-    "prettier": {
-      "command": ["npx", "prettier", "--write", "$FILE"],
-      "extensions": [".md", ".mdx"]
-    },
-    "ruff": {
-      "command": ["ruff", "format", "$FILE"],
-      "extensions": [".py"]
-    },
-    "rustfmt": {
-      "command": ["rustfmt", "$FILE"],
-      "extensions": [".rs"]
-    },
-    "shfmt": {
-      "command": ["shfmt", "-w", "$FILE"],
-      "extensions": [".sh"]
-    },
-    "stylua": {
-      "command": ["stylua", "$FILE"],
-      "extensions": [".lua"]
-    }
-  }
+	"$schema": "https://opencode.ai/config.json",
+	"instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
+	"theme": "kanagawa",
+	"default_agent": "plan",
+	"mcp": {
+		"context7": {
+			"type": "remote",
+			"url": "https://mcp.context7.com/mcp",
+			"enabled": true
+		},
+		"qmd": {
+			"type": "local",
+			"command": ["qmd", "mcp"],
+			"enabled": true
+		},
+		"fff": {
+			"type": "local",
+			"command": ["fff-mcp"],
+			"enabled": true
+		},
+		"sequential-thinking": {
+			"type": "local",
+			"command": [
+				"npx",
+				"-y",
+				"@modelcontextprotocol/server-sequential-thinking"
+			],
+			"enabled": true
+		}
+	},
+	"agent": {
+		"build": {
+			"permission": {
+				"bash": {
+					"git push": "ask",
+					"qmd": "allow",
+					"qmd query": "allow",
+					"qmd get": "allow",
+					"qmd search": "allow",
+					"$HOME/.config/opencode/skill/qmd-knowledge/scripts/record.sh": "allow",
+					"$HOME/.claude/skills/qmd-knowledge/scripts/record.sh": "allow"
+				}
+			}
+		}
+	},
+	"plugin": [
+		"@plannotator/opencode@latest",
+		"@mohak34/opencode-notifier@latest"
+	],
+	"formatter": {
+		"biome": {
+			"command": ["biome", "check", "--write", "$FILE"],
+			"extensions": [".ts", ".tsx", ".js", ".jsx"]
+		},
+		"gofmt": {
+			"command": ["gofmt", "-w", "$FILE"],
+			"extensions": [".go"]
+		},
+		"prettier": {
+			"command": ["npx", "prettier", "--write", "$FILE"],
+			"extensions": [".md", ".mdx"]
+		},
+		"ruff": {
+			"command": ["ruff", "format", "$FILE"],
+			"extensions": [".py"]
+		},
+		"rustfmt": {
+			"command": ["rustfmt", "$FILE"],
+			"extensions": [".rs"]
+		},
+		"shfmt": {
+			"command": ["shfmt", "-w", "$FILE"],
+			"extensions": [".sh"]
+		},
+		"stylua": {
+			"command": ["stylua", "$FILE"],
+			"extensions": [".lua"]
+		}
+	}
 }
 ```
 
@@ -831,32 +831,32 @@ Configuration in @configs/commandcode/mcp.json:
 
 ```json
 {
-  "mcpServers": {
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"]
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"]
-    },
-    "fff": {
-      "command": "fff-mcp",
-      "args": []
-    },
-    "react-grab-mcp": {
-      "command": "npx",
-      "args": ["-y", "@react-grab/mcp", "--stdio"]
-    },
-    "logpilot": {
-      "command": "logpilot",
-      "args": ["mcp-server"]
-    }
-  }
+	"mcpServers": {
+		"context7": {
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@latest"]
+		},
+		"sequential-thinking": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
+		},
+		"fff": {
+			"command": "fff-mcp",
+			"args": []
+		},
+		"react-grab-mcp": {
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
+		},
+		"logpilot": {
+			"command": "logpilot",
+			"args": ["mcp-server"]
+		}
+	}
 }
 ```
 
@@ -907,30 +907,30 @@ Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/
 
 ```json
 {
-  "amp.dangerouslyAllowAll": true,
-  "amp.experimental.autoHandoff": { "context": 90 },
-  "amp.mcpServers": {
-    "context7": {
-      "url": "https://mcp.context7.com/mcp"
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"]
-    },
-    "fff": {
-      "command": "fff-mcp",
-      "args": []
-    },
-    "react-grab-mcp": {
-      "command": "npx",
-      "args": ["-y", "@react-grab/mcp", "--stdio"]
-    }
-  },
-  "amp.terminal.theme": "kanagawa"
+	"amp.dangerouslyAllowAll": true,
+	"amp.experimental.autoHandoff": { "context": 90 },
+	"amp.mcpServers": {
+		"context7": {
+			"url": "https://mcp.context7.com/mcp"
+		},
+		"sequential-thinking": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
+		},
+		"fff": {
+			"command": "fff-mcp",
+			"args": []
+		},
+		"react-grab-mcp": {
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
+		}
+	},
+	"amp.terminal.theme": "kanagawa"
 }
 ```
 
@@ -1026,6 +1026,9 @@ Located in [`configs/codex/`](configs/codex/):
 command = "npx"
 args = [ "-y", "@upstash/context7-mcp" ]
 
+[mcp_servers.notion]
+url = "https://mcp.notion.com/mcp"
+
 [mcp_servers.sequential-thinking]
 command = "npx"
 args = [ "-y", "@modelcontextprotocol/server-sequential-thinking" ]
@@ -1045,6 +1048,19 @@ args = [ "-y", "@react-grab/mcp", "--stdio" ]
 [mcp_servers.logpilot]
 command = "logpilot"
 args = ["mcp-server"]
+```
+
+### Plugins
+
+```toml
+[plugins."github@openai-curated"]
+enabled = true
+
+[plugins."computer-use@openai-bundled"]
+enabled = true
+
+[plugins."plannotator@plannotator"]
+enabled = true
 ```
 
 ### Usage
@@ -1157,34 +1173,34 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
 
 ```json
 {
-  "mcpServers": {
-    "context7": {
-      "url": "https://mcp.context7.com/mcp"
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"]
-    },
-    "fff": {
-      "command": "fff-mcp",
-      "args": []
-    },
-    "react-grab-mcp": {
-      "command": "npx",
-      "args": ["-y", "@react-grab/mcp", "--stdio"]
-    },
-    "logpilot": {
-      "command": "logpilot",
-      "args": ["mcp-server"]
-    }
-  },
-  "experimental": {
-    "enableAgents": true
-  }
+	"mcpServers": {
+		"context7": {
+			"url": "https://mcp.context7.com/mcp"
+		},
+		"sequential-thinking": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
+		},
+		"fff": {
+			"command": "fff-mcp",
+			"args": []
+		},
+		"react-grab-mcp": {
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
+		},
+		"logpilot": {
+			"command": "logpilot",
+			"args": ["mcp-server"]
+		}
+	},
+	"experimental": {
+		"enableAgents": true
+	}
 }
 ```
 
@@ -1225,37 +1241,37 @@ Configuration is managed through:
 
 ```json
 {
-  "mcp": {
-    "context7": {
-      "type": "remote",
-      "url": "https://mcp.context7.com/mcp",
-      "enabled": true
-    },
-    "qmd": {
-      "type": "local",
-      "command": ["qmd", "mcp"],
-      "enabled": true
-    },
-    "fff": {
-      "type": "local",
-      "command": ["fff-mcp"],
-      "enabled": true
-    },
-    "sequential-thinking": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ],
-      "enabled": true
-    },
-    "logpilot": {
-      "type": "local",
-      "command": ["logpilot", "mcp-server"],
-      "enabled": true
-    }
-  }
+	"mcp": {
+		"context7": {
+			"type": "remote",
+			"url": "https://mcp.context7.com/mcp",
+			"enabled": true
+		},
+		"qmd": {
+			"type": "local",
+			"command": ["qmd", "mcp"],
+			"enabled": true
+		},
+		"fff": {
+			"type": "local",
+			"command": ["fff-mcp"],
+			"enabled": true
+		},
+		"sequential-thinking": {
+			"type": "local",
+			"command": [
+				"npx",
+				"-y",
+				"@modelcontextprotocol/server-sequential-thinking"
+			],
+			"enabled": true
+		},
+		"logpilot": {
+			"type": "local",
+			"command": ["logpilot", "mcp-server"],
+			"enabled": true
+		}
+	}
 }
 ```
 
@@ -1311,10 +1327,10 @@ Located in [`configs/pi/`](configs/pi/):
 
 **Key Settings:**
 
-- **Default Model**: `accounts/fireworks/routers/kimi-k2p5-turbo` (via Fireworks)
-- **Default Provider**: `fireworks`
-- **Default Thinking Level**: `medium`
-- **Theme**: `dracula`
+- **Default Model**: `kimi-k2.6` (via crofai)
+- **Default Provider**: `crofai`
+- **Default Thinking Level**: `high`
+- **Theme**: `kanagawa`
 - **Permission Level**: `high`
 - **Quiet Startup**: Enabled (skips changelog on launch)
 - **Hide Thinking Block**: Disabled (shows thinking process)
@@ -1332,20 +1348,18 @@ Then register them in `.pi/settings.json`:
 
 ```json
 {
-  "packages": [
-    "npm:@plannotator/pi-extension",
-    "npm:pi-subagents",
-    "https://github.com/davebcn87/pi-autoresearch",
-    "git:github.com/jellydn/pi-fireworks-provider",
-    "npm:pi-hooks",
-    "git:github.com/SamuelLHuber/pi-fff",
-    "npm:pi-annotate",
-    "npm:pi-mcp-adapter",
-    "npm:pi-simplify",
-    "npm:@devkade/pi-plan",
-    "npm:pi-manage-todo-list",
-    "npm:pi-btw"
-  ]
+	"packages": [
+		"npm:@plannotator/pi-extension",
+		"npm:pi-subagents",
+		"https://github.com/davebcn87/pi-autoresearch",
+		"npm:pi-hooks",
+		"npm:@ff-labs/pi-fff",
+		"npm:pi-mcp-adapter",
+		"npm:pi-simplify",
+		"npm:pi-manage-todo-list",
+		"npm:pi-btw",
+		"npm:pi-crofai"
+	]
 }
 ```
 
@@ -1356,15 +1370,13 @@ Then register them in `.pi/settings.json`:
 | `@plannotator/pi-extension` | Interactive plan review with visual annotation                             |
 | `pi-subagents`              | Delegate tasks to subagents with chains, parallel execution, and TUI       |
 | `pi-autoresearch`           | Autonomous experiment loop for optimization targets                        |
-| `pi-fireworks-provider`     | Fireworks AI provider for Kimi and other models                            |
 | `pi-hooks`                  | Collection of extensions (checkpoint, lsp, permission, ralph-loop, repeat) |
 | `pi-fff`                    | FFF-powered fuzzy file and content search                                  |
-| `pi-annotate`               | Visual annotation tool with inline note cards                              |
 | `pi-mcp-adapter`            | MCP (Model Context Protocol) adapter for Pi                                |
 | `pi-simplify`               | Reviews changed code for clarity, consistency, and maintainability         |
-| `@devkade/pi-plan`          | Read-only planning mode with approval-based execution                      |
 | `pi-manage-todo-list`       | GitHub Copilot-style todo list management tool                             |
 | `pi-btw`                    | Parallel side conversations with `/btw` command                            |
+| `pi-crofai`                 | Crofai provider for Kimi, GLM, DeepSeek and other models                   |
 
 ### Usage
 
@@ -1408,40 +1420,40 @@ Copilot CLI configs are stored in [`configs/copilot/`](configs/copilot/) and ins
 
 ```json
 {
-  "mcpServers": {
-    "context7": {
-      "type": "local",
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"]
-    },
-    "sequential-thinking": {
-      "type": "local",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
-    "fff": {
-      "type": "local",
-      "command": "fff-mcp",
-      "args": []
-    },
-    "qmd": {
-      "type": "local",
-      "command": "qmd",
-      "args": ["mcp"]
-    },
-    "react-grab-mcp": {
-      "type": "local",
-      "command": "npx",
-      "args": ["-y", "@react-grab/mcp", "--stdio"],
-      "env": {},
-      "tools": ["*"]
-    },
-    "logpilot": {
-      "type": "local",
-      "command": "logpilot",
-      "args": ["mcp-server"]
-    }
-  }
+	"mcpServers": {
+		"context7": {
+			"type": "local",
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@latest"]
+		},
+		"sequential-thinking": {
+			"type": "local",
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"fff": {
+			"type": "local",
+			"command": "fff-mcp",
+			"args": []
+		},
+		"qmd": {
+			"type": "local",
+			"command": "qmd",
+			"args": ["mcp"]
+		},
+		"react-grab-mcp": {
+			"type": "local",
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"],
+			"env": {},
+			"tools": ["*"]
+		},
+		"logpilot": {
+			"type": "local",
+			"command": "logpilot",
+			"args": ["mcp-server"]
+		}
+	}
 }
 ```
 
@@ -1559,38 +1571,38 @@ Factory Droid configs are stored in `configs/factory/` and installed to `~/.fact
 
 ```json
 {
-  "mcpServers": {
-    "context7": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"]
-    },
-    "sequential-thinking": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
-    "fff": {
-      "type": "stdio",
-      "command": "fff-mcp",
-      "args": []
-    },
-    "qmd": {
-      "type": "stdio",
-      "command": "qmd",
-      "args": ["mcp"]
-    },
-    "react-grab-mcp": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@react-grab/mcp", "--stdio"]
-    },
-    "logpilot": {
-      "type": "stdio",
-      "command": "logpilot",
-      "args": ["mcp-server"]
-    }
-  }
+	"mcpServers": {
+		"context7": {
+			"type": "stdio",
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@latest"]
+		},
+		"sequential-thinking": {
+			"type": "stdio",
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"fff": {
+			"type": "stdio",
+			"command": "fff-mcp",
+			"args": []
+		},
+		"qmd": {
+			"type": "stdio",
+			"command": "qmd",
+			"args": ["mcp"]
+		},
+		"react-grab-mcp": {
+			"type": "stdio",
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
+		},
+		"logpilot": {
+			"type": "stdio",
+			"command": "logpilot",
+			"args": ["mcp-server"]
+		}
+	}
 }
 ```
 
@@ -1663,37 +1675,37 @@ Cline configs are stored in `configs/cline/` and installed to `~/.cline/`:
 
 ```json
 {
-  "mcpServers": {
-    "context7": {
-      "alwaysAllow": [],
-      "url": "https://mcp.context7.com/mcp"
-    },
-    "sequential-thinking": {
-      "alwaysAllow": [],
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
-    "qmd": {
-      "alwaysAllow": [],
-      "command": "qmd",
-      "args": ["mcp"]
-    },
-    "fff": {
-      "alwaysAllow": [],
-      "command": "fff-mcp",
-      "args": []
-    },
-    "react-grab-mcp": {
-      "alwaysAllow": [],
-      "command": "npx",
-      "args": ["-y", "@react-grab/mcp", "--stdio"]
-    },
-    "logpilot": {
-      "alwaysAllow": [],
-      "command": "logpilot",
-      "args": ["mcp-server"]
-    }
-  }
+	"mcpServers": {
+		"context7": {
+			"alwaysAllow": [],
+			"url": "https://mcp.context7.com/mcp"
+		},
+		"sequential-thinking": {
+			"alwaysAllow": [],
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"qmd": {
+			"alwaysAllow": [],
+			"command": "qmd",
+			"args": ["mcp"]
+		},
+		"fff": {
+			"alwaysAllow": [],
+			"command": "fff-mcp",
+			"args": []
+		},
+		"react-grab-mcp": {
+			"alwaysAllow": [],
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
+		},
+		"logpilot": {
+			"alwaysAllow": [],
+			"command": "logpilot",
+			"args": ["mcp-server"]
+		}
+	}
 }
 ```
 
