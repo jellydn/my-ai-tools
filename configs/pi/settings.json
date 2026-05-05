@@ -1,20 +1,18 @@
 {
 	"collapseChangelog": true,
 	"defaultModel": "kimi-k2.6",
-	"defaultProvider": "opencode-go",
+	"defaultProvider": "crofai",
 	"defaultThinkingLevel": "high",
 	"editorPaddingX": 1,
-	"lastChangelogVersion": "0.72.1",
+	"lastChangelogVersion": "0.73.0",
 	"packages": [
 		"npm:@plannotator/pi-extension",
 		"npm:pi-subagents",
 		"https://github.com/davebcn87/pi-autoresearch",
 		"npm:pi-hooks",
 		"npm:@ff-labs/pi-fff",
-		"npm:pi-annotate",
 		"npm:pi-mcp-adapter",
 		"npm:pi-simplify",
-		"npm:@devkade/pi-plan",
 		"npm:pi-manage-todo-list",
 		"npm:pi-btw",
 		"npm:pi-crofai"
