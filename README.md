@@ -614,6 +614,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Andrej Karpathy**  | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)                 | Community skills inspired by Andrej Karpathy's coding principles and practices for AI-focused development workflows.                                                          |
 | **Humanizer**        | [blader/humanizer](https://github.com/blader/humanizer)                                                       | Removes signs of AI-generated writing from text. Based on Wikipedia's AI writing detection guide, it detects 24 patterns to make text sound more natural and human.           |
 | **Claude Skills**    | [jezweb/claude-skills](https://github.com/jezweb/claude-skills)                                               | 97 production-ready skills for Claude Code CLI including Cloudflare, React, AI integrations, and more. Includes context-mate for project analysis and workflow management.    |
+| **OZ Skills**        | [warpdotdev/oz-skills](https://github.com/warpdotdev/oz-skills)                                               | 14 production-ready skills by Warp. Includes `docs-update` for automated documentation synchronization with code changes across all major platforms (Mintlify, Docusaurus, GitBook, Fumadocs). Other skills cover CI fix, PR creation, web testing, accessibility audits, and more. |
 | **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.                                           |
 | **Matt Pocock**      | [mattpocock/skills](https://github.com/mattpocock/skills)                                                     | Community skills by Matt Pocock. Includes `grill-me` for stress-testing plans via relentless Q&A, and more workflow-enhancing skills for AI-assisted development.             |
 | **Mitsuhiko**        | [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff)                                             | Skills and extensions by Armin Ronacher. Includes tmux session control, GitHub CLI, web browser automation, Sentry integration, mermaid diagrams, and more.                   |
@@ -630,6 +631,7 @@ npx skills add jezweb/claude-skills --global --agent claude-code
 npx skills add mattpocock/skills --skill grill-me --global --agent claude-code
 npx skills add mitsuhiko/agent-stuff --global --agent claude-code
 npx skills add github/gh-stack --global --agent claude-code
+npx skills add warpdotdev/oz-skills --skill docs-update --global --agent claude-code
 ```
 
 ### Configuration Files
