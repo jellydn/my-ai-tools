@@ -11,8 +11,10 @@
 		"https://github.com/davebcn87/pi-autoresearch",
 		"npm:pi-hooks",
 		"npm:@ff-labs/pi-fff",
+		"npm:pi-annotate",
 		"npm:pi-mcp-adapter",
 		"npm:pi-simplify",
+		"npm:@devkade/pi-plan",
 		"npm:pi-manage-todo-list",
 		"npm:pi-btw",
 		"npm:pi-crofai"
