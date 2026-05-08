@@ -97,19 +97,25 @@ enabled = true
 enabled = true
 
 [marketplaces.claude-plugins-official]
-last_updated = "2026-05-05T09:03:33Z"
-last_revision = "ac45fdae4b7af187b5624599ab054090dedadd94"
+last_updated = "2026-05-06T15:38:31Z"
+last_revision = "06f52cd3ac3e47ecb45228a86183ea2a86e9d6ff"
 source_type = "git"
 source = "https://github.com/anthropics/claude-plugins-official.git"
 
 [marketplaces.plannotator]
-last_updated = "2026-05-05T09:03:40Z"
-last_revision = "ff2759b553c1186c5a437869cf982a6431e4e415"
+last_updated = "2026-05-06T15:38:39Z"
+last_revision = "5ecf5be51eb925ccc43d689e2bb542428fdf1925"
 source_type = "git"
 source = "https://github.com/backnotprop/plannotator.git"
 
 [marketplaces.worktrunk]
-last_updated = "2026-05-05T09:03:48Z"
-last_revision = "3acce3231d8778421ea050ecaa4b0cc03533f58c"
+last_updated = "2026-05-06T15:38:46Z"
+last_revision = "431fc68a6a0d39d78ac338e231ccc45605ec1a40"
 source_type = "git"
 source = "https://github.com/max-sixty/worktrunk.git"
+
+[projects."/Users/huynhdung/src/tries/2026-02-26-aircarbon-ac-monorepo2"]
+trust_level = "trusted"
+
+[projects."/Users/huynhdung/src/tries/2026-04-06-echo-note"]
+trust_level = "trusted"
