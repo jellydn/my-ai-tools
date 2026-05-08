@@ -29,6 +29,11 @@
 		{
 			"repo": "jezweb/claude-skills",
 			"description": "97 production-ready skills for Claude Code"
+		},
+		{
+			"repo": "warpdotdev/oz-skills",
+			"skill": "docs-update",
+			"description": "Automated documentation synchronization with code changes"
 		}
 	]
 }
