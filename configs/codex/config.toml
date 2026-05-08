@@ -16,6 +16,9 @@ js_repl = true
 memories = true
 external_migration = true
 
+hooks = true
+terminal_resize_reflow = true
+goals = true
 [sandbox_workspace_write]
 network_access = true
 
@@ -63,8 +66,9 @@ args = ["mcp-server"]
 home_last_prompted_at = 1777953592
 
 [tui]
-status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "context-used"]
+status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "weekly-limit", "task-progress"]
 theme = "kanagawa"
+status_line_use_colors = true
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4
@@ -97,19 +101,22 @@ enabled = true
 enabled = true
 
 [marketplaces.claude-plugins-official]
-last_updated = "2026-05-05T09:03:33Z"
-last_revision = "ac45fdae4b7af187b5624599ab054090dedadd94"
+last_updated = "2026-05-08T03:04:22Z"
+last_revision = "76b35e91d1c99c090b1a08dade53bcc5e352c1b2"
 source_type = "git"
 source = "https://github.com/anthropics/claude-plugins-official.git"
 
 [marketplaces.plannotator]
-last_updated = "2026-05-05T09:03:40Z"
-last_revision = "ff2759b553c1186c5a437869cf982a6431e4e415"
+last_updated = "2026-05-08T03:04:29Z"
+last_revision = "69ef11bdfbbdff4cc1cebe4138a5237d40b83ea8"
 source_type = "git"
 source = "https://github.com/backnotprop/plannotator.git"
 
 [marketplaces.worktrunk]
-last_updated = "2026-05-05T09:03:48Z"
-last_revision = "3acce3231d8778421ea050ecaa4b0cc03533f58c"
+last_updated = "2026-05-08T03:04:36Z"
+last_revision = "2f8807eb368a6528303ce2fedb2765b848683973"
 source_type = "git"
 source = "https://github.com/max-sixty/worktrunk.git"
+
+
+[hooks.state]
