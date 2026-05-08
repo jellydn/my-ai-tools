@@ -16,6 +16,7 @@ js_repl = true
 memories = true
 external_migration = true
 
+codex_hooks = true
 [sandbox_workspace_write]
 network_access = true
 

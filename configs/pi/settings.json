@@ -4,7 +4,7 @@
 	"defaultProvider": "crofai",
 	"defaultThinkingLevel": "high",
 	"editorPaddingX": 1,
-	"lastChangelogVersion": "0.73.0",
+	"lastChangelogVersion": "0.74.0",
 	"packages": [
 		"npm:@plannotator/pi-extension",
 		"npm:pi-subagents",
