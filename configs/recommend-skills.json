@@ -11,8 +11,13 @@
 		},
 		{
 			"repo": "mattpocock/skills",
-			"skill": "grill-me",
-			"description": "Interview the user relentlessly about a plan or design until reaching shared understanding"
+			"skill": "grill-me-with-docs",
+			"description": "Stress-test plans with docs-grounded Q&A, ensuring decisions are backed by evidence"
+		},
+		{
+			"repo": "mattpocock/skills",
+			"skill": "improve-codebase-architecture",
+			"description": "Find deepening opportunities in a codebase, informed by the domain language in CONTEXT.md"
 		},
 		{
 			"repo": "github/gh-stack",
