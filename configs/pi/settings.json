@@ -20,7 +20,8 @@
 		"npm:@devkade/pi-plan",
 		"npm:pi-manage-todo-list",
 		"npm:pi-btw",
-		"npm:pi-crofai"
+		"npm:pi-crofai",
+		"npm:pi-code-previews"
 	],
 	"quietStartup": true,
 	"theme": "kanagawa",
