@@ -146,6 +146,7 @@ Be attentive to phrases that indicate valuable knowledge capture opportunities:
 - "Make sure to..."
 
 When you detect these patterns, suggest recording:
+
 > "That sounds like a useful learning. Would you like me to record it?"
 
 ### 🎨 Auto-Index Updates

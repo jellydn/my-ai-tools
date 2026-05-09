@@ -117,6 +117,7 @@ Your step-by-step process here...
 ## How to Customize Skill Rules
 
 Edit `.claude/hooks/skill-rules.json` to:
+
 - Adjust `minConfidenceScore` (3-7)
 - Add new skills with triggers
 - Update directory mappings
@@ -139,6 +140,7 @@ Before submitting a PR or commit:
 - Avoid over-engineering solutions or overcomplicating things unnecessarily
 
 Remember: **Software design is an exercise in human relationships.** Make your contributions clear, well-documented, and respectful of existing code.
+
 ## Questions?
 
 Open an issue or reach out via the support channels listed in README.md.

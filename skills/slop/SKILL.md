@@ -23,6 +23,7 @@ Check the diff against a branch and remove all AI-generated slop introduced in t
 ## What is AI Code Slop?
 
 This includes:
+
 - Extra comments that a human wouldn't add or is inconsistent with the rest of the file
 - Extra defensive checks or try/catch blocks that are abnormal for that area of the codebase
 - Casts to `any` to get around type issues
@@ -31,17 +32,22 @@ This includes:
 ## Core Principles
 
 ### 1. Preserve Functionality
+
 Never change what the code does - only how it does it. All original features, outputs, and behaviors must remain intact.
 
 ### 2. Apply Project Standards
+
 Follow the established coding standards from the project's CLAUDE.md or conventions:
+
 - Use proper import sorting and file organization
 - Follow language-specific patterns (ES modules, proper TypeScript types, etc.)
 - Maintain consistent naming conventions
 - Use proper error handling patterns
 
 ### 3. Enhance Clarity
+
 Simplify code structure by:
+
 - Reducing unnecessary complexity and nesting
 - Eliminating redundant code and abstractions
 - Improving readability through clear variable and function names
@@ -51,7 +57,9 @@ Simplify code structure by:
 - Choose clarity over brevity - explicit code is often better than overly compact code
 
 ### 4. Maintain Balance
+
 Avoid over-simplification that could:
+
 - Reduce code clarity or maintainability
 - Create overly clever solutions that are hard to understand
 - Combine too many concerns into single functions
@@ -73,6 +81,7 @@ git diff $1 --stat
 ### 2. Review each changed file
 
 For each changed file:
+
 - Read the current content
 - Compare with original (before changes)
 - Identify AI-generated slop patterns

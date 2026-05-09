@@ -5,6 +5,7 @@
 ## 📋 Overview
 
 Claude Code Teams allows you to:
+
 - **Spawn specialized subagents** for specific tasks
 - **Coordinate multiple agents** through hooks and session data
 - **Build composable workflows** with isolated, focused agents
@@ -18,9 +19,9 @@ The feature is controlled by an environment variable in `configs/claude/settings
 
 ```json
 {
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
+	"env": {
+		"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+	}
 }
 ```
 
@@ -47,12 +48,12 @@ Your detailed instructions and guidelines here...
 
 ### Agent Properties
 
-| Property | Required | Description | Values |
-|----------|----------|-------------|--------|
-| `name` | Yes | Unique identifier for the agent | kebab-case string |
-| `description` | Yes | Brief purpose statement | Plain text |
-| `mode` | Yes | Agent execution mode | `subagent`, `coordinator` |
-| `temperature` | No | Creativity level (0-1) | Default: 0.7 |
+| Property      | Required | Description                     | Values                    |
+| ------------- | -------- | ------------------------------- | ------------------------- |
+| `name`        | Yes      | Unique identifier for the agent | kebab-case string         |
+| `description` | Yes      | Brief purpose statement         | Plain text                |
+| `mode`        | Yes      | Agent execution mode            | `subagent`, `coordinator` |
+| `temperature` | No       | Creativity level (0-1)          | Default: 0.7              |
 
 ### Directory Structure
 
@@ -87,6 +88,7 @@ You are an expert code reviewer...
 ```
 
 **Use Cases:**
+
 - Code quality analysis
 - Security scanning
 - Test generation
@@ -109,6 +111,7 @@ You coordinate specialized agents to solve complex problems...
 ```
 
 **Use Cases:**
+
 - Multi-stage workflows
 - Parallel task execution
 - Result aggregation
@@ -125,6 +128,7 @@ Coordinator → Implementer → Reviewer → Documenter
 ```
 
 **Example Workflow:**
+
 1. **Coordinator** analyzes requirements and creates plan
 2. **Implementer** writes code following the plan
 3. **Reviewer** checks code quality and suggests improvements
@@ -141,6 +145,7 @@ Coordinator ─────┼─ Backend Agent
 ```
 
 **Example Workflow:**
+
 1. **Coordinator** breaks feature into frontend/backend/database
 2. Agents work in parallel on their components
 3. **Coordinator** integrates results
@@ -154,6 +159,7 @@ Draft Agent → Review Agent → Polish Agent → Review Agent → Final Agent
 ```
 
 **Example Workflow:**
+
 1. **Draft Agent** creates initial implementation
 2. **Review Agent** identifies issues
 3. **Polish Agent** addresses feedback
@@ -170,7 +176,7 @@ Triggered when a subagent completes:
 import { SubagentStop } from "./lib";
 
 export const hooks = {
-  SubagentStop: SubagentStop,
+	SubagentStop: SubagentStop,
 };
 ```
 
@@ -179,18 +185,18 @@ export const hooks = {
 ```typescript
 // configs/claude/hooks/lib.ts
 export function SubagentStop(event: SubagentEvent) {
-  // Access subagent results
-  const result = event.result;
+	// Access subagent results
+	const result = event.result;
 
-  // Save data for coordination
-  saveSessionData({
-    agentName: event.agentName,
-    output: result,
-    timestamp: new Date().toISOString()
-  });
+	// Save data for coordination
+	saveSessionData({
+		agentName: event.agentName,
+		output: result,
+		timestamp: new Date().toISOString(),
+	});
 
-  // Return modified result if needed
-  return result;
+	// Return modified result if needed
+	return result;
 }
 ```
 
@@ -201,15 +207,15 @@ Share data between agents:
 ```typescript
 // configs/claude/hooks/session.ts
 interface SessionData {
-  [key: string]: any;
+	[key: string]: any;
 }
 
 export function saveSessionData(data: SessionData): void {
-  // Save to persistent storage
+	// Save to persistent storage
 }
 
 export function getSessionData(key: string): any {
-  // Retrieve from storage
+	// Retrieve from storage
 }
 ```
 
@@ -254,6 +260,7 @@ You coordinate specialized agents to ensure code quality:
 ## Output Format
 
 Provide a structured report with:
+
 - Summary of all issues found
 - Severity classification (critical/high/medium/low)
 - Actionable recommendations
@@ -262,7 +269,7 @@ Provide a structured report with:
 
 ### Worker Agent Example
 
-```markdown
+````markdown
 ---
 name: security-scanner
 description: Scans code for security vulnerabilities and best practices
@@ -277,6 +284,7 @@ You are an expert security analyst specializing in code security.
 ## Your Mission
 
 Scan code for:
+
 - SQL injection vulnerabilities
 - XSS attack vectors
 - Authentication/authorization issues
@@ -295,16 +303,19 @@ Scan code for:
 ## Output Format
 
 Report findings as:
+
 ```json
 {
-  "severity": "critical|high|medium|low",
-  "type": "vulnerability-type",
-  "location": "file:line",
-  "description": "Clear explanation",
-  "recommendation": "Specific fix"
+	"severity": "critical|high|medium|low",
+	"type": "vulnerability-type",
+	"location": "file:line",
+	"description": "Clear explanation",
+	"recommendation": "Specific fix"
 }
 ```
-```
+````
+
+````
 
 ## 🎓 Best Practices
 
@@ -316,9 +327,10 @@ Each agent should have a clear, focused purpose:
 ```yaml
 name: typescript-type-checker
 description: Validates TypeScript type safety
-```
+````
 
 ❌ **Bad:**
+
 ```yaml
 name: code-improver
 description: Fixes all code issues
@@ -330,10 +342,12 @@ Define expected inputs and outputs:
 
 ```markdown
 ## Inputs
+
 - File path(s) to analyze
 - Analysis scope (full/changes only)
 
 ## Outputs
+
 - List of issues found
 - Confidence score (0-100)
 - Suggested fixes
@@ -354,6 +368,7 @@ Agents should gracefully handle failures:
 ## Error Handling
 
 If unable to complete analysis:
+
 1. Report specific error encountered
 2. Suggest alternative approaches
 3. Indicate which parts succeeded
@@ -368,6 +383,7 @@ Establish communication patterns:
 ## Coordination
 
 When delegating to this agent:
+
 - Provide: file paths, context, specific concerns
 - Expect: JSON report within 2 minutes
 - Handle: timeout with partial results
@@ -380,6 +396,7 @@ When delegating to this agent:
 **Symptom:** Error: "Agent 'agent-name' not found"
 
 **Solution:**
+
 1. Verify file exists in `configs/claude/agents/`
 2. Check filename matches agent `name` property
 3. Ensure YAML frontmatter is valid
@@ -389,6 +406,7 @@ When delegating to this agent:
 **Symptom:** Subagent doesn't spawn
 
 **Solution:**
+
 1. Verify `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` in settings.json
 2. Check agent `mode: subagent` is set
 3. Review hook configuration
@@ -398,6 +416,7 @@ When delegating to this agent:
 **Symptom:** SubagentStop hook doesn't run
 
 **Solution:**
+
 1. Verify hooks directory structure
 2. Check TypeScript compilation
 3. Review hook registration in `hooks/index.ts`

@@ -21,20 +21,20 @@
 
 ## 🔌 MCP Servers & Plugins Overview
 
-| Tool            | MCP Servers                                                               | Plugins/Extensions                                                                  |
-| --------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| **Claude Code** | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | Official + Community (plannotator, claude-hud, worktrunk, codex)                    |
+| Tool            | MCP Servers                                                               | Plugins/Extensions                                                                 |
+| --------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **Claude Code** | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | Official + Community (plannotator, claude-hud, worktrunk, codex)                   |
 | **OpenCode**    | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | @plannotator/opencode, opencode-crofai, opencode-chrome-annotation                 |
-| **Codex**       | context7, notion, sequential-thinking, qmd, fff, react-grab-mcp, logpilot | openai-curated, plannotator, worktrunk, computer-use                                |
-| **Pi**          | (via packages)                                                            | Packages (subagents, hooks, fff, annotate, mcp-adapter, simplify, plan, crofai...)  |
-| **Amp**         | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                   |
-| **Gemini**      | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                   |
-| **Kilo**        | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | (uses OpenCode plugins)                                                             |
-| **CommandCode** | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                   |
-| **Copilot**     | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                   |
-| **Cursor**      | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                   |
-| **Factory**     | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | core, security-engineer, droid-evolved, autoresearch                                |
-| **Cline**       | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                   |
+| **Codex**       | context7, notion, sequential-thinking, qmd, fff, react-grab-mcp, logpilot | openai-curated, plannotator, worktrunk, computer-use                               |
+| **Pi**          | (via packages)                                                            | Packages (subagents, hooks, fff, annotate, mcp-adapter, simplify, plan, crofai...) |
+| **Amp**         | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| **Gemini**      | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| **Kilo**        | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | (uses OpenCode plugins)                                                            |
+| **CommandCode** | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| **Copilot**     | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| **Cursor**      | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| **Factory**     | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | core, security-engineer, droid-evolved, autoresearch                               |
+| **Cline**       | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                  |
 
 ### MCP Server Details
 
@@ -831,10 +831,10 @@ Located in [`configs/opencode/agent/`](configs/opencode/agent/):
 
 OpenCode supports custom model providers via OpenAI-compatible endpoints:
 
-| Provider   | Models                         | Endpoint                       |
-| ---------- | ------------------------------ | ------------------------------ |
-| llama.cpp  | GLM-4.7-Flash (local inference)| `http://192.168.1.11:8000/v1`  |
-| ollama     | minimax-m2.5:cloud             | `http://127.0.0.1:11434/v1`    |
+| Provider  | Models                          | Endpoint                      |
+| --------- | ------------------------------- | ----------------------------- |
+| llama.cpp | GLM-4.7-Flash (local inference) | `http://192.168.1.11:8000/v1` |
+| ollama    | minimax-m2.5:cloud              | `http://127.0.0.1:11434/v1`   |
 
 These are configured in `opencode.json` under the `provider` key with custom model limits.
 
@@ -1505,11 +1505,11 @@ Then register them in `.pi/settings.json`:
 
 Pi is configured with multi-provider model access:
 
-| Provider          | Models                                                                 |
-| ----------------- | ---------------------------------------------------------------------- |
-| github-copilot    | `gpt-5-mini`, `gpt-4.1`                                                |
-| opencode-go       | `kimi-k2.6`, `minimax-m2.7`, `deepseek-v4-pro`, `deepseek-v4-flash`, `glm-5.1` |
-| crofai            | `kimi-k2.6`, `glm-5.1`, `deepseek-v4-pro`, `deepseek-v4-flash`         |
+| Provider       | Models                                                                         |
+| -------------- | ------------------------------------------------------------------------------ |
+| github-copilot | `gpt-5-mini`, `gpt-4.1`                                                        |
+| opencode-go    | `kimi-k2.6`, `minimax-m2.7`, `deepseek-v4-pro`, `deepseek-v4-flash`, `glm-5.1` |
+| crofai         | `kimi-k2.6`, `glm-5.1`, `deepseek-v4-pro`, `deepseek-v4-flash`                 |
 
 ### Usage
 
@@ -1745,12 +1745,12 @@ Factory Droid configs are stored in `configs/factory/` and installed to `~/.fact
 
 Factory Droid includes plugins that enhance functionality:
 
-| Plugin                   | Description                                       |
-| ------------------------ | ------------------------------------------------- |
-| `core@factory-plugins`   | Core Factory functionality                        |
-| `security-engineer@factory-plugins` | Security-focused code review engine     |
-| `droid-evolved@factory-plugins` | Advanced droid capabilities with improved autonomy  |
-| `autoresearch@factory-plugins` | Autonomous research and experiment loop       |
+| Plugin                              | Description                                        |
+| ----------------------------------- | -------------------------------------------------- |
+| `core@factory-plugins`              | Core Factory functionality                         |
+| `security-engineer@factory-plugins` | Security-focused code review engine                |
+| `droid-evolved@factory-plugins`     | Advanced droid capabilities with improved autonomy |
+| `autoresearch@factory-plugins`      | Autonomous research and experiment loop            |
 
 ### Custom Models
 
@@ -1957,36 +1957,36 @@ Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/
 
 **Tools:**
 
-| Tool                | Aliases     | Description             |
-| ------------------- | ----------- | ----------------------- |
-| `claude`            | `c`         | Anthropic Claude CLI    |
-| `codex`             | `co`        | OpenAI Codex CLI        |
-| `opencode`          | `o`, `oc`   | OpenCode AI assistant   |
-| `amp`               | `a`         | Amp by Modular          |
-| `pi`                | `p`         | Pi coding agent         |
+| Tool       | Aliases   | Description           |
+| ---------- | --------- | --------------------- |
+| `claude`   | `c`       | Anthropic Claude CLI  |
+| `codex`    | `co`      | OpenAI Codex CLI      |
+| `opencode` | `o`, `oc` | OpenCode AI assistant |
+| `amp`      | `a`       | Amp by Modular        |
+| `pi`       | `p`       | Pi coding agent       |
 
 **Templates:**
 
-| Template                         | Aliases                               | Description                                    |
-| -------------------------------- | ------------------------------------- | ---------------------------------------------- |
-| `review`                         | `rev`, `code-review`                  | Code review with OpenCode                      |
-| `commit-zen`                     | `zen`, `logical-commit`               | Generate commitizen commit messages             |
-| `commit-atomic`                  | `ac`, `auto-commit`                   | Atomic commit messages                          |
-| `architecture-explanation`       | `arch`, `arch-explanation`            | Explain codebase architecture                   |
-| `draft-pull-request`             | `pr`, `draft-pr`                      | Create draft PR via gh CLI                      |
-| `types`                          | `typescript`                          | Enhance TypeScript types                        |
-| `test`                           | `spec`, `tests`                       | Generate tests (Arrange-Act-Assert)             |
-| `docs`                           | `document`                            | Add JSDoc documentation                         |
-| `explain`                        | `wtf`, `explain-code`                 | Explain code in detail                          |
-| `review-security`                | `sec`, `security`                     | Security-focused review                         |
-| `review-refactor`                | `refactor`                            | Refactoring recommendations                     |
-| `review-performance`             | `perf`, `optimize`                    | Performance analysis                            |
-| `remove-verbal`                  | `verbal`, `comments`                  | Clean verbal comments                           |
-| `remove-ai-slop`                | `slop`, `clean-ai`                    | Remove AI-generated code patterns               |
-| `tidy-first`                     | `tidy`                                | Apply Tidy First principles                     |
-| `simplify`                       | `simple`                              | Simplify over-engineered code                   |
-| `simplifier`                     | `simplify-code`                       | Code simplification plugin                      |
-| `logical-grouping-pull-request`  | `split-pr`                            | Create PR with logical commit grouping           |
+| Template                        | Aliases                    | Description                            |
+| ------------------------------- | -------------------------- | -------------------------------------- |
+| `review`                        | `rev`, `code-review`       | Code review with OpenCode              |
+| `commit-zen`                    | `zen`, `logical-commit`    | Generate commitizen commit messages    |
+| `commit-atomic`                 | `ac`, `auto-commit`        | Atomic commit messages                 |
+| `architecture-explanation`      | `arch`, `arch-explanation` | Explain codebase architecture          |
+| `draft-pull-request`            | `pr`, `draft-pr`           | Create draft PR via gh CLI             |
+| `types`                         | `typescript`               | Enhance TypeScript types               |
+| `test`                          | `spec`, `tests`            | Generate tests (Arrange-Act-Assert)    |
+| `docs`                          | `document`                 | Add JSDoc documentation                |
+| `explain`                       | `wtf`, `explain-code`      | Explain code in detail                 |
+| `review-security`               | `sec`, `security`          | Security-focused review                |
+| `review-refactor`               | `refactor`                 | Refactoring recommendations            |
+| `review-performance`            | `perf`, `optimize`         | Performance analysis                   |
+| `remove-verbal`                 | `verbal`, `comments`       | Clean verbal comments                  |
+| `remove-ai-slop`                | `slop`, `clean-ai`         | Remove AI-generated code patterns      |
+| `tidy-first`                    | `tidy`                     | Apply Tidy First principles            |
+| `simplify`                      | `simple`                   | Simplify over-engineered code          |
+| `simplifier`                    | `simplify-code`            | Code simplification plugin             |
+| `logical-grouping-pull-request` | `split-pr`                 | Create PR with logical commit grouping |
 
 </details>
 

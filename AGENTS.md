@@ -28,15 +28,18 @@ logpilot watch "$SESSION" --pane "$SESSION:0.0"
 See @~/.ai-tools/best-practices.md for full details.
 
 ## AI Tool Guidelines
+
 - Use the fff MCP tools for all file search operations instead of default tools.
 - When using bash commands for file/content search, prefer `fd` (fdfind) and `rg` (ripgrep) over standard `find` and `grep` for better performance and git-awareness.
 
 ## Project
+
 my-ai-tools: Configuration management repository for AI coding tools (Claude Code, OpenCode, Amp, CCS) and their integration with MCP servers and plugins.
 
 ## Build/Lint/Test Commands
 
 ### Shell Script Validation
+
 ```bash
 bash -n cli.sh              # Syntax check single script
 bash -n generate.sh         # Syntax check single script
@@ -44,6 +47,7 @@ bash -n cli.sh generate.sh  # Check all scripts
 ```
 
 ### Installation/Export
+
 ```bash
 ./cli.sh --dry-run         # Preview installation (safe)
 ./cli.sh                   # Run installation
@@ -52,6 +56,7 @@ bash -n cli.sh generate.sh  # Check all scripts
 ```
 
 ### Manual Testing
+
 - Always use `--dry-run` first to preview changes
 - Verify with `git diff` before committing
 - Test in non-interactive mode: `echo "y" | ./cli.sh`
@@ -59,6 +64,7 @@ bash -n cli.sh generate.sh  # Check all scripts
 ## Code Style Guidelines
 
 ### Bash Scripts
+
 - **Shebang**: `#!/bin/bash` (POSIX-compliant, not `#!/bin/sh`)
 - **Error handling**: Always use `set -e` at script top
 - **Guard clauses**: Check preconditions first, return early
@@ -76,6 +82,7 @@ bash -n cli.sh generate.sh  # Check all scripts
 - **Local variables**: Use `local` for function-scoped variables
 
 ### Color Output & Logging
+
 ```bash
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -90,6 +97,7 @@ log_error()  { echo -e "${RED}[ERROR]${NC} $1" >&2; }
 ```
 
 ### Error Handling Patterns
+
 - Use `command -v` for prerequisite checks
 - Handle cross-device link errors with TMPDIR:
   ```bash
@@ -105,6 +113,7 @@ log_error()  { echo -e "${RED}[ERROR]${NC} $1" >&2; }
   ```
 
 ### JSON Configuration
+
 - Standard JSON formatting (no trailing commas)
 - Use `jq` for parsing/validation: `jq . settings.json`
 - Claude Code: `settings.json`, `mcp-servers.json`
@@ -112,11 +121,13 @@ log_error()  { echo -e "${RED}[ERROR]${NC} $1" >&2; }
 - CCS: `config.json`, `delegation-sessions.json`
 
 ### YAML Configuration
+
 - 2-space indentation (no tabs)
 - CCS: `config.yaml` for main configuration
 - Hooks: YAML-based hook definitions
 
 ### Markdown Documentation
+
 - **Headers**: Use emoji prefixes for visual hierarchy
   - `🚀` for main sections
   - `📋` for lists/guides
@@ -126,6 +137,7 @@ log_error()  { echo -e "${RED}[ERROR]${NC} $1" >&2; }
 - **File references**: Use `@` syntax (e.g., `@~/.ai-tools/best-practices.md`)
 
 ### File Naming
+
 - **Configs**: Lowercase with hyphens: `my-config.json`
 - **Commands**: `command-name.md`
 - **Agents**: `agent-name.md`
@@ -133,6 +145,7 @@ log_error()  { echo -e "${RED}[ERROR]${NC} $1" >&2; }
 - **Best practices**: `best-practices.md`
 
 ## Directory Structure
+
 ```
 cli.sh, generate.sh          # Root shell scripts
 configs/<tool>/              # Source configurations
@@ -147,7 +160,9 @@ skills/      # Local skills for distribution
 ## Key Patterns
 
 ### Dry-Run Support
+
 All destructive operations support `--dry-run`:
+
 ```bash
 execute() {
     if [ "$DRY_RUN" = true ]; then
@@ -159,11 +174,13 @@ execute() {
 ```
 
 ### Backup Functionality
+
 - Auto-cleanup: keeps last 5 backups
 - Location: `$HOME/ai-tools-backup-{timestamp}`
 - Prompts in interactive mode
 
 ### Prerequisite Checking
+
 - Git (required)
 - Bun (preferred) or Node.js (fallback)
 - jq (required for JSON parsing)
@@ -179,6 +196,7 @@ AI agents should follow safe git practices. See @configs/git-guidelines.md for c
 - **Error handling**: Repository checks, uncommitted changes detection
 
 ## Pre-commit Checklist
+
 - [ ] Shell scripts pass `bash -n` syntax check
 - [ ] Tested with `--dry-run`
 - [ ] No absolute paths in configs
