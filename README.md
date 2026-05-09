@@ -21,20 +21,20 @@
 
 ## 🔌 MCP Servers & Plugins Overview
 
-| Tool            | MCP Servers                                                               | Plugins/Extensions                                           |
-| --------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| **Claude Code** | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | Official + Community (plannotator, worktrunk, codex)         |
-| **OpenCode**    | context7, qmd, fff, sequential-thinking                                   | @plannotator/opencode, @mohak34/opencode-notifier            |
-| **Codex**       | context7, notion, sequential-thinking, qmd, fff, react-grab-mcp, logpilot | openai-curated, plannotator, worktrunk                       |
-| **Pi**          | (via packages)                                                            | @plannotator/pi-extension, pi-subagents, pi-hooks, pi-crofai |
-| **Amp**         | context7, sequential-thinking, qmd, fff, react-grab-mcp                   | -                                                            |
-| **Gemini**      | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                            |
-| **Kilo**        | context7, qmd, fff, sequential-thinking, logpilot                         | (uses OpenCode plugins)                                      |
-| **CommandCode** | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                            |
-| **Copilot**     | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                            |
-| **Cursor**      | context7, sequential-thinking, qmd, fff                                   | -                                                            |
-| **Factory**     | context7, sequential-thinking                                             | -                                                            |
-| **Cline**       | context7, sequential-thinking, qmd, fff                                   | -                                                            |
+| Tool            | MCP Servers                                                               | Plugins/Extensions                                                                  |
+| --------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| **Claude Code** | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | Official + Community (plannotator, claude-hud, worktrunk, codex)                    |
+| **OpenCode**    | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | @plannotator/opencode, opencode-crofai, opencode-chrome-annotation                 |
+| **Codex**       | context7, notion, sequential-thinking, qmd, fff, react-grab-mcp, logpilot | openai-curated, plannotator, worktrunk, computer-use                                |
+| **Pi**          | (via packages)                                                            | Packages (subagents, hooks, fff, annotate, mcp-adapter, simplify, plan, crofai...)  |
+| **Amp**         | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                   |
+| **Gemini**      | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                   |
+| **Kilo**        | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | (uses OpenCode plugins)                                                             |
+| **CommandCode** | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                   |
+| **Copilot**     | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                   |
+| **Cursor**      | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                   |
+| **Factory**     | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | core, security-engineer, droid-evolved, autoresearch                                |
+| **Cline**       | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                   |
 
 ### MCP Server Details
 
@@ -731,6 +731,16 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
 				"@modelcontextprotocol/server-sequential-thinking"
 			],
 			"enabled": true
+		},
+		"react-grab-mcp": {
+			"type": "local",
+			"command": ["npx", "-y", "@react-grab/mcp", "--stdio"],
+			"enabled": true
+		},
+		"logpilot": {
+			"type": "local",
+			"command": ["logpilot", "mcp-server"],
+			"enabled": true
 		}
 	},
 	"agent": {
@@ -750,7 +760,8 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
 	},
 	"plugin": [
 		"@plannotator/opencode@latest",
-		"@mohak34/opencode-notifier@latest"
+		"opencode-crofai@latest",
+		"opencode-chrome-annotation@latest"
 	],
 	"formatter": {
 		"biome": {
@@ -802,9 +813,10 @@ Similar to Claude Code's PostToolUse hooks, formatters run automatically after w
 OpenCode supports community plugins that enhance functionality:
 
 - **[@plannotator/opencode](https://github.com/backnotprop/plannotator)** - Interactive code planning and annotation
-- **[@mohak34/opencode-notifier](https://github.com/mohak34/opencode-notifier)** - Sound and system notifications for events (permission requests, completion, errors, questions)
+- **[opencode-crofai](https://www.npmjs.com/package/opencode-crofai)** - Alternative model provider integration (Kimi, GLM, DeepSeek)
+- **[opencode-chrome-annotation](https://www.npmjs.com/package/opencode-chrome-annotation)** - Chrome-based annotation for plan reviews
 
-Plugins are automatically installed on next OpenCode launch. Configure notification behavior via `~/.config/opencode/opencode-notifier.json` if desired.
+Plugins are automatically installed on next OpenCode launch.
 
 ### Custom Agents
 
@@ -814,6 +826,17 @@ Located in [`configs/opencode/agent/`](configs/opencode/agent/):
 - `docs-writer` - Generate documentation
 - `review` - Code review
 - `security-audit` - Security auditing
+
+### Custom Providers
+
+OpenCode supports custom model providers via OpenAI-compatible endpoints:
+
+| Provider   | Models                         | Endpoint                       |
+| ---------- | ------------------------------ | ------------------------------ |
+| llama.cpp  | GLM-4.7-Flash (local inference)| `http://192.168.1.11:8000/v1`  |
+| ollama     | minimax-m2.5:cloud             | `http://127.0.0.1:11434/v1`    |
+
+These are configured in `opencode.json` under the `provider` key with custom model limits.
 
 ### Custom Commands
 
@@ -959,6 +982,10 @@ Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/
 		"react-grab-mcp": {
 			"command": "npx",
 			"args": ["-y", "@react-grab/mcp", "--stdio"]
+		},
+		"logpilot": {
+			"command": "logpilot",
+			"args": ["mcp-server"]
 		}
 	},
 	"amp.terminal.theme": "kanagawa"
@@ -991,8 +1018,8 @@ CCS lets you run Claude, Gemini, GLM, and any Anthropic-compatible API - concurr
 **Three Main Capabilities:**
 
 1. **Multiple Claude Accounts** - Run work + personal Claude subscriptions simultaneously
-2. **OAuth Providers** - Gemini, Codex, Antigravity, GitHub Copilot (zero API keys needed)
-3. **API Profiles** - GLM, Kimi, OpenRouter, or any Anthropic-compatible API
+2. **OAuth Providers** - Gemini, Codex, Antigravity, Qwen, iFLY, Kiro, GitHub Copilot (zero API keys needed)
+3. **API Profiles** - GLM, Ollama, or any Anthropic-compatible API
 
 ### Quick Start
 
@@ -1014,17 +1041,32 @@ CCS lets you run Claude, Gemini, GLM, and any Anthropic-compatible API - concurr
    ccs           # Default Claude session
    ccs gemini    # Gemini (OAuth)
    ccs codex     # OpenAI Codex (OAuth)
+   ccs agy       # Antigravity (OAuth)
+   ccs qwen      # Qwen (OAuth)
+   ccs iflow     # iFLY (OAuth)
+   ccs kiro      # Kiro (OAuth)
+   ccs ghcp      # GitHub Copilot (OAuth)
    ccs glm       # GLM (API key)
    ccs ollama    # Local Ollama
    ```
 
 ### Configuration
 
-CCS auto-creates config on install. Dashboard is the recommended way to manage settings.
+CCS auto-creates config on install (currently version 8). Dashboard is the recommended way to manage settings.
 
 **Config location**: [`~/.ccs/config.yaml`](configs/ccs/config.yaml)
 
-See [`configs/ccs/config.yaml`](configs/ccs/config.yaml) for example configuration.
+Key features from the current config:
+
+- **CLIProxy OAuth providers**: gemini, codex, agy, qwen, iflow, kiro, ghcp
+- **API Profiles**: glm, ollama-cloud (cloud-hosted), ollama (local)
+- **WebSearch fallback chain**: Gemini → OpenCode → Grok (automatic fallback for third-party providers)
+- **Copilot API proxy**: Optional GitHub Copilot integration via `npx copilot-api auth` (disabled by default)
+- **Thinking modes**: auto, off, manual with tier defaults (opus=high, sonnet=medium, haiku=low)
+
+See [`configs/ccs/config.yaml`](configs/ccs/config.yaml) for the full configuration.
+
+**Advanced**: The `websearch` section enables CLI-based web search for third-party profiles that don't have Anthropic's WebSearch tool. Fallback chain tries providers in order until one succeeds.
 
 </details>
 
@@ -1085,15 +1127,16 @@ args = ["mcp-server"]
 
 Codex supports plugins from multiple marketplaces:
 
-**Official Marketplace** (`claude-plugins-official`):
+**Official Plugins (`openai-curated`):**
 
 ```toml
 [plugins."github@openai-curated"]
 enabled = true
+```
 
-[plugins."computer-use@openai-bundled"]
-enabled = true
+**Claude Plugins Marketplace (`claude-plugins-official`):**
 
+```toml
 [plugins."claude-md-management@claude-plugins-official"]
 enabled = true
 
@@ -1107,6 +1150,9 @@ enabled = true
 enabled = true
 
 [plugins."learning-output-style@claude-plugins-official"]
+enabled = true
+
+[plugins."computer-use@openai-bundled"]
 enabled = true
 ```
 
@@ -1329,6 +1375,11 @@ Configuration is managed through:
 			],
 			"enabled": true
 		},
+		"react-grab-mcp": {
+			"type": "local",
+			"command": ["npx", "-y", "@react-grab/mcp", "--stdio"],
+			"enabled": true
+		},
 		"logpilot": {
 			"type": "local",
 			"command": ["logpilot", "mcp-server"],
@@ -1412,16 +1463,22 @@ Then register them in `.pi/settings.json`:
 ```json
 {
 	"packages": [
-		"npm:@plannotator/pi-extension",
+		{
+			"source": "npm:@plannotator/pi-extension",
+			"skills": []
+		},
 		"npm:pi-subagents",
 		"https://github.com/davebcn87/pi-autoresearch",
 		"npm:pi-hooks",
 		"npm:@ff-labs/pi-fff",
+		"npm:pi-annotate",
 		"npm:pi-mcp-adapter",
 		"npm:pi-simplify",
+		"npm:@devkade/pi-plan",
 		"npm:pi-manage-todo-list",
 		"npm:pi-btw",
-		"npm:pi-crofai"
+		"npm:pi-crofai",
+		"npm:pi-code-previews"
 	]
 }
 ```
@@ -1434,12 +1491,25 @@ Then register them in `.pi/settings.json`:
 | `pi-subagents`              | Delegate tasks to subagents with chains, parallel execution, and TUI       |
 | `pi-autoresearch`           | Autonomous experiment loop for optimization targets                        |
 | `pi-hooks`                  | Collection of extensions (checkpoint, lsp, permission, ralph-loop, repeat) |
-| `pi-fff`                    | FFF-powered fuzzy file and content search                                  |
+| `@ff-labs/pi-fff`           | FFF-powered fuzzy file and content search                                  |
+| `pi-annotate`               | Visual annotation and element selection for plan reviews                   |
 | `pi-mcp-adapter`            | MCP (Model Context Protocol) adapter for Pi                                |
 | `pi-simplify`               | Reviews changed code for clarity, consistency, and maintainability         |
+| `@devkade/pi-plan`          | Plan mode agent for structured task decomposition                          |
 | `pi-manage-todo-list`       | GitHub Copilot-style todo list management tool                             |
 | `pi-btw`                    | Parallel side conversations with `/btw` command                            |
 | `pi-crofai`                 | Crofai provider for Kimi, GLM, DeepSeek and other models                   |
+| `pi-code-previews`          | Live previews of code changes during editing                               |
+
+### Enabled Models
+
+Pi is configured with multi-provider model access:
+
+| Provider          | Models                                                                 |
+| ----------------- | ---------------------------------------------------------------------- |
+| github-copilot    | `gpt-5-mini`, `gpt-4.1`                                                |
+| opencode-go       | `kimi-k2.6`, `minimax-m2.7`, `deepseek-v4-pro`, `deepseek-v4-flash`, `glm-5.1` |
+| crofai            | `kimi-k2.6`, `glm-5.1`, `deepseek-v4-pro`, `deepseek-v4-flash`         |
 
 ### Usage
 
@@ -1568,6 +1638,47 @@ Cursor Agent CLI configs are stored in [`configs/cursor/`](configs/cursor/) and 
 
 - [`AGENTS.md`](configs/cursor/AGENTS.md) - Agent guidelines and best practices, installed to `~/.cursor/rules/general.mdc`
 
+### MCP Servers
+
+Cursor supports MCP servers via `~/.cursor/mcp.json`:
+
+```json
+{
+	"mcpServers": {
+		"context7": {
+			"command": "bunx",
+			"args": ["-y", "@upstash/context7-mcp@latest"]
+		},
+		"fff": {
+			"command": "fff-mcp",
+			"args": []
+		},
+		"sequential-thinking": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
+		},
+		"react-grab-mcp": {
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
+		},
+		"logpilot": {
+			"command": "logpilot",
+			"args": ["mcp-server"]
+		}
+	}
+}
+```
+
+### Custom Commands
+
+Located in [`configs/cursor/commands/`](configs/cursor/commands/):
+
+- `deslop` - Remove AI-generated boilerplate and improve code quality
+
 ### Usage
 
 ```bash
@@ -1629,6 +1740,37 @@ Factory Droid configs are stored in `configs/factory/` and installed to `~/.fact
 - [`mcp.json`](configs/factory/mcp.json) - MCP server configurations
 - [`settings.json`](configs/factory/settings.json) - Factory Droid settings
 - `droids/` - Optional user-created directory for custom droid definitions
+
+### Plugins
+
+Factory Droid includes plugins that enhance functionality:
+
+| Plugin                   | Description                                       |
+| ------------------------ | ------------------------------------------------- |
+| `core@factory-plugins`   | Core Factory functionality                        |
+| `security-engineer@factory-plugins` | Security-focused code review engine     |
+| `droid-evolved@factory-plugins` | Advanced droid capabilities with improved autonomy  |
+| `autoresearch@factory-plugins` | Autonomous research and experiment loop       |
+
+### Custom Models
+
+Factory Droid supports custom models via any OpenAI-compatible endpoint:
+
+```json
+{
+	"customModels": [
+		{
+			"model": "minimax-m2.5:cloud",
+			"id": "custom:minimax-m2.5:cloud-0",
+			"baseUrl": "http://127.0.0.1:11434/v1",
+			"apiKey": "ollama",
+			"displayName": "minimax-m2.5:cloud",
+			"maxOutputTokens": 128000,
+			"provider": "generic-chat-completion-api"
+		}
+	]
+}
+```
 
 ### MCP Servers
 
@@ -1815,20 +1957,36 @@ Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/
 
 **Tools:**
 
-- `claude` / `c` - Claude CLI
-- `opencode` / `o`, `oc` - OpenCode
-- `amp` / `a` - Amp
+| Tool                | Aliases     | Description             |
+| ------------------- | ----------- | ----------------------- |
+| `claude`            | `c`         | Anthropic Claude CLI    |
+| `codex`             | `co`        | OpenAI Codex CLI        |
+| `opencode`          | `o`, `oc`   | OpenCode AI assistant   |
+| `amp`               | `a`         | Amp by Modular          |
+| `pi`                | `p`         | Pi coding agent         |
 
 **Templates:**
 
-- `review` - Code review
-- `commit` / `commit-zen` - Commit messages
-- `ac` / `commit-atomic` - Atomic commits
-- `pr` / `draft-pr` - Pull requests
-- `types` - Type safety
-- `test` - Tests
-- `docs` - Documentation
-- `simplify` - Code simplification
+| Template                         | Aliases                               | Description                                    |
+| -------------------------------- | ------------------------------------- | ---------------------------------------------- |
+| `review`                         | `rev`, `code-review`                  | Code review with OpenCode                      |
+| `commit-zen`                     | `zen`, `logical-commit`               | Generate commitizen commit messages             |
+| `commit-atomic`                  | `ac`, `auto-commit`                   | Atomic commit messages                          |
+| `architecture-explanation`       | `arch`, `arch-explanation`            | Explain codebase architecture                   |
+| `draft-pull-request`             | `pr`, `draft-pr`                      | Create draft PR via gh CLI                      |
+| `types`                          | `typescript`                          | Enhance TypeScript types                        |
+| `test`                           | `spec`, `tests`                       | Generate tests (Arrange-Act-Assert)             |
+| `docs`                           | `document`                            | Add JSDoc documentation                         |
+| `explain`                        | `wtf`, `explain-code`                 | Explain code in detail                          |
+| `review-security`                | `sec`, `security`                     | Security-focused review                         |
+| `review-refactor`                | `refactor`                            | Refactoring recommendations                     |
+| `review-performance`             | `perf`, `optimize`                    | Performance analysis                            |
+| `remove-verbal`                  | `verbal`, `comments`                  | Clean verbal comments                           |
+| `remove-ai-slop`                | `slop`, `clean-ai`                    | Remove AI-generated code patterns               |
+| `tidy-first`                     | `tidy`                                | Apply Tidy First principles                     |
+| `simplify`                       | `simple`                              | Simplify over-engineered code                   |
+| `simplifier`                     | `simplify-code`                       | Code simplification plugin                      |
+| `logical-grouping-pull-request`  | `split-pr`                            | Create PR with logical commit grouping           |
 
 </details>
 
