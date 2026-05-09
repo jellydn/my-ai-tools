@@ -1,12 +1,15 @@
 {
 	"collapseChangelog": true,
-	"defaultModel": "kimi-k2.6",
-	"defaultProvider": "crofai",
+	"defaultModel": "deepseek-v4-flash",
+	"defaultProvider": "opencode-go",
 	"defaultThinkingLevel": "high",
 	"editorPaddingX": 1,
 	"lastChangelogVersion": "0.74.0",
 	"packages": [
-		"npm:@plannotator/pi-extension",
+		{
+			"source": "npm:@plannotator/pi-extension",
+			"skills": []
+		},
 		"npm:pi-subagents",
 		"https://github.com/davebcn87/pi-autoresearch",
 		"npm:pi-hooks",
