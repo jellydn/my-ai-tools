@@ -21,10 +21,12 @@ tmux capture-pane -p -t "$SESSION" -S -20  # check output
 See @~/.ai-tools/best-practices.md for full details.
 
 ## AI Tool Guidelines
+
 - Use the fff MCP tools for all file search operations instead of default tools.
 - When using bash commands for file/content search, prefer `fd` (fdfind) and `rg` (ripgrep) over standard `find` and `grep` for better performance and git-awareness.
 
 ## General Practices
+
 - Follow my software development practice @~/.ai-tools/best-practices.md
 - Read @~/.ai-tools/MEMORY.md first - Understand when and how to use qmd for knowledge management
 - Follow git safety guidelines @~/.ai-tools/git-guidelines.md
@@ -40,6 +42,7 @@ See @~/.ai-tools/best-practices.md for full details.
 - Prefer to use Bun to run scripts if possible, otherwise use tsx to run ts files.
 
 ## Code Quality
+
 - Keep your code clean and organized. Do not over-engineer solutions or overcomplicate things unnecessarily.
 - Write clear and concise code. Avoid unnecessary complexity and redundancy.
 - Use meaningful variable and function names.
