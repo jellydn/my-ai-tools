@@ -17,6 +17,7 @@ tmux capture-pane -p -t "$SESSION" -S -20
 ```
 
 **For AI-enhanced monitoring**, use LogPilot to capture and analyze output:
+
 ```bash
 logpilot watch "$SESSION" --pane "$SESSION:0.0"
 ```
@@ -24,10 +25,12 @@ logpilot watch "$SESSION" --pane "$SESSION:0.0"
 See @~/.ai-tools/best-practices.md for full details.
 
 ## AI Tool Guidelines
+
 - Use the fff MCP tools for all file search operations instead of default tools.
 - When using bash commands for file/content search, prefer `fd` (fdfind) and `rg` (ripgrep) over standard `find` and `grep` for better performance and git-awareness.
 
 ## General Practices
+
 - Follow my software development practice @~/.ai-tools/best-practices.md
 - Read @~/.ai-tools/MEMORY.md first - Understand when and how to use qmd for knowledge management
 - Keep responses concise and actionable.

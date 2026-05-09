@@ -42,9 +42,9 @@ logpilot watch "$SESSION" --pane "$SESSION:0.0"
 
 ```json
 {
-  "scripts": {
-    "dev": "portless run next dev"
-  }
+	"scripts": {
+		"dev": "portless run next dev"
+	}
 }
 ```
 
@@ -111,22 +111,22 @@ Move preconditions to the top and return early:
 ```javascript
 // ❌ Nested conditions
 function processUser(user) {
-  if (user) {
-    if (user.isActive) {
-      if (user.hasPermission) {
-        // main logic
-      }
-    }
-  }
+	if (user) {
+		if (user.isActive) {
+			if (user.hasPermission) {
+				// main logic
+			}
+		}
+	}
 }
 
 // ✅ Guard clauses
 function processUser(user) {
-  if (!user) return;
-  if (!user.isActive) return;
-  if (!user.hasPermission) return;
+	if (!user) return;
+	if (!user.isActive) return;
+	if (!user.hasPermission) return;
 
-  // main logic
+	// main logic
 }
 ```
 
@@ -145,21 +145,21 @@ Extract complex expressions into well-named variables:
 ```javascript
 // ❌ Complex expression
 if (
-  user.subscription.plan.tier === "premium" &&
-  user.subscription.status === "active" &&
-  user.subscription.expiresAt > new Date()
+	user.subscription.plan.tier === "premium" &&
+	user.subscription.status === "active" &&
+	user.subscription.expiresAt > new Date()
 ) {
-  // logic
+	// logic
 }
 
 // ✅ Helper variable
 const hasActivePremiumSubscription =
-  user.subscription.plan.tier === "premium" &&
-  user.subscription.status === "active" &&
-  user.subscription.expiresAt > new Date();
+	user.subscription.plan.tier === "premium" &&
+	user.subscription.status === "active" &&
+	user.subscription.expiresAt > new Date();
 
 if (hasActivePremiumSubscription) {
-  // logic
+	// logic
 }
 ```
 
@@ -192,17 +192,17 @@ Based on Kent C. Dodds' testing philosophy:
 ```javascript
 // ✅ Clear test structure
 test("should increment counter when button is clicked", () => {
-  // Arrange
-  render(<Counter />);
-  const button = screen.getByRole("button", { name: /increment/i });
-  const counter = screen.getByTestId("counter-value");
+	// Arrange
+	render(<Counter />);
+	const button = screen.getByRole("button", { name: /increment/i });
+	const counter = screen.getByTestId("counter-value");
 
-  // Act
-  expect(counter).toHaveTextContent("0");
-  fireEvent.click(button);
+	// Act
+	expect(counter).toHaveTextContent("0");
+	fireEvent.click(button);
 
-  // Assert
-  expect(counter).toHaveTextContent("1");
+	// Assert
+	expect(counter).toHaveTextContent("1");
 });
 ```
 
@@ -233,11 +233,11 @@ test("should increment counter when button is clicked", () => {
 const HeavyComponent = lazy(() => import("./heavy-component"));
 
 function App() {
-  return (
-    <Suspense fallback={<Skeleton />}>
-      <HeavyComponent />
-    </Suspense>
-  );
+	return (
+		<Suspense fallback={<Skeleton />}>
+			<HeavyComponent />
+		</Suspense>
+	);
 }
 ```
 

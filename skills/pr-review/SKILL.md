@@ -31,12 +31,15 @@ The command accepts the PR identifier from `$ARGUMENTS`:
 3. **No Arguments**: Auto-detect the PR associated with the current Git branch
 
 If `$ARGUMENTS` is provided, use it as the PR identifier. Otherwise, auto-detect the current branch's PR using:
+
 ```bash
 gh pr view --json number,url -q '.number'
 ```
+
 This extracts the PR number from the current branch's open PR for use in subsequent commands.
 
 If no open PR is found for the current branch, show this error:
+
 ```text
 Error: No open pull request found for the current branch.
 
@@ -75,6 +78,7 @@ node $SKILL_PATH/scripts/extract-pr-comments.js \
 ```
 
 **What it does:**
+
 - Filters out comments with replies (likely resolved)
 - Classifies comments by severity (critical, high, medium, low)
 - Categorizes comments (security, performance, maintainability, etc.)
@@ -84,12 +88,14 @@ node $SKILL_PATH/scripts/extract-pr-comments.js \
   - `-summary.md` - Analysis summary with emojis
 
 **Severity classification:**
+
 - 🔴 **Critical**: security, vulnerability, exploit
 - 🟠 **High**: bug, error, breaking, crash, fail
 - 🟡 **Medium**: performance, improvement, refactor, optimize
 - 🟢 **Low**: everything else
 
 **Categories:**
+
 - 🔒 Security
 - ⚡ Performance
 - 🔧 Maintainability
