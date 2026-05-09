@@ -19,6 +19,34 @@
 - 📦 **Plugin support** - Official and community plugins
 - 🛡️ **Git Guard Hook** - Prevents dangerous git commands (force push, hard reset, etc.)
 
+## 🔌 MCP Servers & Plugins Overview
+
+| Tool            | MCP Servers                                                               | Plugins/Extensions                                           |
+| --------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **Claude Code** | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | Official + Community (plannotator, worktrunk, codex)         |
+| **OpenCode**    | context7, qmd, fff, sequential-thinking                                   | @plannotator/opencode, @mohak34/opencode-notifier            |
+| **Codex**       | context7, notion, sequential-thinking, qmd, fff, react-grab-mcp, logpilot | openai-curated, plannotator, worktrunk                       |
+| **Pi**          | (via packages)                                                            | @plannotator/pi-extension, pi-subagents, pi-hooks, pi-crofai |
+| **Amp**         | context7, sequential-thinking, qmd, fff, react-grab-mcp                   | -                                                            |
+| **Gemini**      | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                            |
+| **Kilo**        | context7, qmd, fff, sequential-thinking, logpilot                         | (uses OpenCode plugins)                                      |
+| **CommandCode** | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                            |
+| **Copilot**     | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                            |
+| **Cursor**      | context7, sequential-thinking, qmd, fff                                   | -                                                            |
+| **Factory**     | context7, sequential-thinking                                             | -                                                            |
+| **Cline**       | context7, sequential-thinking, qmd, fff                                   | -                                                            |
+
+### MCP Server Details
+
+| Server                | Purpose                                     | Package                                            |
+| --------------------- | ------------------------------------------- | -------------------------------------------------- |
+| `context7`            | Documentation lookup for any library        | `@upstash/context7-mcp`                            |
+| `sequential-thinking` | Multi-step reasoning for complex analysis   | `@modelcontextprotocol/server-sequential-thinking` |
+| `qmd`                 | Knowledge management with AI-powered search | `qmd`                                              |
+| `fff`                 | Fast file search with frecency ranking      | `fff-mcp`                                          |
+| `react-grab-mcp`      | React component capture and inspection      | `@react-grab/mcp`                                  |
+| `logpilot`            | AI-powered log analysis and tmux monitoring | `logpilot`                                         |
+
 ## 🎬 Demo
 
 [![IT Man Channel](https://img.shields.io/badge/YouTube-IT%20Man%20Channel-red?logo=youtube)](https://github.com/jellydn/itman-channel)
@@ -605,20 +633,20 @@ Real-world projects built using these AI tools:
 
 Official and community-maintained skill collections for specific frameworks:
 
-| Framework            | Skills Repository                                                                                             | Description                                                                                                                                                                   |
-| -------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **UI/UX Design**     | [Interface Design](https://interface-design.dev/)                                                             | Comprehensive guide to interface design patterns and best practices for anyone working with UI/UX development.                                                                |
-| **Expo**             | [expo/skills](https://github.com/expo/skills)                                                                 | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows.                                  |
-| **Next.js**          | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)                                       | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.                                           |
-| **React Patterns**   | [factory-ai/factory-plugins](https://skills.sh/factory-ai/factory-plugins/no-use-effect)                      | No-use-effect skill: 5 patterns to replace useEffect with better alternatives - derived state, data-fetching libraries, event handlers, useMountEffect, and key prop resets.  |
-| **Andrej Karpathy**  | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)                 | Community skills inspired by Andrej Karpathy's coding principles and practices for AI-focused development workflows.                                                          |
-| **Humanizer**        | [blader/humanizer](https://github.com/blader/humanizer)                                                       | Removes signs of AI-generated writing from text. Based on Wikipedia's AI writing detection guide, it detects 24 patterns to make text sound more natural and human.           |
-| **Claude Skills**    | [jezweb/claude-skills](https://github.com/jezweb/claude-skills)                                               | 97 production-ready skills for Claude Code CLI including Cloudflare, React, AI integrations, and more. Includes context-mate for project analysis and workflow management.    |
+| Framework            | Skills Repository                                                                                             | Description                                                                                                                                                                                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **UI/UX Design**     | [Interface Design](https://interface-design.dev/)                                                             | Comprehensive guide to interface design patterns and best practices for anyone working with UI/UX development.                                                                                                                                                                      |
+| **Expo**             | [expo/skills](https://github.com/expo/skills)                                                                 | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows.                                                                                                                                        |
+| **Next.js**          | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)                                       | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.                                                                                                                                                 |
+| **React Patterns**   | [factory-ai/factory-plugins](https://skills.sh/factory-ai/factory-plugins/no-use-effect)                      | No-use-effect skill: 5 patterns to replace useEffect with better alternatives - derived state, data-fetching libraries, event handlers, useMountEffect, and key prop resets.                                                                                                        |
+| **Andrej Karpathy**  | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)                 | Community skills inspired by Andrej Karpathy's coding principles and practices for AI-focused development workflows.                                                                                                                                                                |
+| **Humanizer**        | [blader/humanizer](https://github.com/blader/humanizer)                                                       | Removes signs of AI-generated writing from text. Based on Wikipedia's AI writing detection guide, it detects 24 patterns to make text sound more natural and human.                                                                                                                 |
+| **Claude Skills**    | [jezweb/claude-skills](https://github.com/jezweb/claude-skills)                                               | 97 production-ready skills for Claude Code CLI including Cloudflare, React, AI integrations, and more. Includes context-mate for project analysis and workflow management.                                                                                                          |
 | **OZ Skills**        | [warpdotdev/oz-skills](https://github.com/warpdotdev/oz-skills)                                               | 14 production-ready skills by Warp. Includes `docs-update` for automated documentation synchronization with code changes across all major platforms (Mintlify, Docusaurus, GitBook, Fumadocs). Other skills cover CI fix, PR creation, web testing, accessibility audits, and more. |
-| **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.                                           |
-| **Matt Pocock**      | [mattpocock/skills](https://github.com/mattpocock/skills)                                                     | Community skills by Matt Pocock. Includes `grill-me-with-docs` for docs-grounded plan stress-testing, `improve-codebase-architecture` for finding deepening opportunities, and more. |
-| **Mitsuhiko**        | [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff)                                             | Skills and extensions by Armin Ronacher. Includes tmux session control, GitHub CLI, web browser automation, Sentry integration, mermaid diagrams, and more.                   |
-| **Git Stacked PRs**  | [github/gh-stack](https://github.com/github/gh-stack)                                                         | GitHub CLI extension for managing stacked branches and pull requests. Create, push, rebase, sync, and navigate stacks of dependent PRs for incremental code review workflows. |
+| **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.                                                                                                                                                 |
+| **Matt Pocock**      | [mattpocock/skills](https://github.com/mattpocock/skills)                                                     | Community skills by Matt Pocock. Includes `grill-me-with-docs` for docs-grounded plan stress-testing, `improve-codebase-architecture` for finding deepening opportunities, and more.                                                                                                |
+| **Mitsuhiko**        | [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff)                                             | Skills and extensions by Armin Ronacher. Includes tmux session control, GitHub CLI, web browser automation, Sentry integration, mermaid diagrams, and more.                                                                                                                         |
+| **Git Stacked PRs**  | [github/gh-stack](https://github.com/github/gh-stack)                                                         | GitHub CLI extension for managing stacked branches and pull requests. Create, push, rebase, sync, and navigate stacks of dependent PRs for incremental code review workflows.                                                                                                       |
 
 **Installation:**
 
@@ -1055,6 +1083,10 @@ args = ["mcp-server"]
 
 ### Plugins
 
+Codex supports plugins from multiple marketplaces:
+
+**Official Marketplace** (`claude-plugins-official`):
+
 ```toml
 [plugins."github@openai-curated"]
 enabled = true
@@ -1062,9 +1094,37 @@ enabled = true
 [plugins."computer-use@openai-bundled"]
 enabled = true
 
-[plugins."plannotator@plannotator"]
+[plugins."claude-md-management@claude-plugins-official"]
+enabled = true
+
+[plugins."code-simplifier@claude-plugins-official"]
+enabled = true
+
+[plugins."context7@claude-plugins-official"]
+enabled = true
+
+[plugins."frontend-design@claude-plugins-official"]
+enabled = true
+
+[plugins."learning-output-style@claude-plugins-official"]
 enabled = true
 ```
+
+**Community Marketplaces**:
+
+```toml
+[plugins."plannotator@plannotator"]
+enabled = true
+
+[plugins."codex@openai-codex"]
+enabled = true
+```
+
+**Marketplace Repositories**:
+
+- `claude-plugins-official` - https://github.com/anthropics/claude-plugins-official.git
+- `plannotator` - https://github.com/backnotprop/plannotator.git
+- `worktrunk` - https://github.com/max-sixty/worktrunk.git
 
 ### Usage
 
@@ -1330,8 +1390,8 @@ Located in [`configs/pi/`](configs/pi/):
 
 **Key Settings:**
 
-- **Default Model**: `kimi-k2.6` (via crofai)
-- **Default Provider**: `crofai`
+- **Default Model**: `deepseek-v4-flash` (via opencode-go)
+- **Default Provider**: `opencode-go`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
