@@ -1383,7 +1383,8 @@ install_mcp_servers_from_registry() {
 
 	# Extract all server data in a single jq call for efficiency
 	# Fields: server_name, name, description, command, args_delimited, requires_delimited, category
-	while IFS=$'\t' read -r server_name name description command args_delimited requires_delimited category; do
+	# Read from FD 3 so stdin stays attached to the terminal for prompt_yn.
+	while IFS=$'\t' read -r server_name name description command args_delimited requires_delimited category <&3; do
 		# Substitute {{SCRIPT_RUNNER}} placeholder
 		command="${command//\{\{SCRIPT_RUNNER\}\}/$script_runner}"
 
@@ -1480,7 +1481,7 @@ install_mcp_servers_from_registry() {
 			failed_count=$((failed_count + 1))
 		fi
 		rm -f "$err_file"
-	done < <(jq -r '
+	done 3< <(jq -r '
 		.mcpServers | to_entries[] |
 		[
 			.key,
@@ -2034,12 +2035,16 @@ install_recommended_skills() {
 	skill_count=$(jq '.recommended_skills | length' "$SCRIPT_DIR/configs/recommend-skills.json")
 	log_info "Found $skill_count recommended skill(s)"
 
-	# When -y is used, limit to 1 skill
-	local max_installs=3
-	[ "$YES_TO_ALL" = true ] && max_installs=1
+	# In interactive mode: prompt for all skills.
+	# In -y mode: limit to top 3 to avoid installing too much by default.
+	local max_installs="$skill_count"
+	[ "$YES_TO_ALL" = true ] && max_installs=3
 
 	local install_count=0
-	while IFS=$'\t' read -r repo description skill; do
+	# Use FD 3 to feed the loop so stdin stays attached to the terminal.
+	# Otherwise interactive prompts inside the loop (prompt_yn, `skills add`
+	# selection menu) would read from the heredoc instead of the user.
+	while IFS=$'\t' read -r repo description skill <&3; do
 		if [ "$install_count" -ge "$max_installs" ]; then
 			[ "$YES_TO_ALL" = true ] && log_info "Reached maximum recommended skills for -y mode ($max_installs), skipping remaining"
 			break
@@ -2051,7 +2056,7 @@ install_recommended_skills() {
 		log_info "  - $repo${skill_suffix}: $description"
 		install_single_recommended_skill "$repo" "$skill" "$skill_suffix"
 		install_count=$((install_count + 1))
-	done <<<"$skills_data"
+	done 3<<<"$skills_data"
 
 	log_success "Recommended skills check complete"
 }
