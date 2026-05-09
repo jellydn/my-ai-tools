@@ -58,6 +58,9 @@ args = ["-y", "@react-grab/mcp", "--stdio"]
 command = "logpilot"
 args = ["mcp-server"]
 
+[notice]
+fast_default_opt_out = true
+
 [notice.model_migrations]
 "gpt-5.2-codex" = "gpt-5.3-codex"
 "gpt-5.3-codex" = "gpt-5.4"
