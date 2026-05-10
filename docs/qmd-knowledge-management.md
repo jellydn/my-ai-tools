@@ -223,13 +223,13 @@ qmd embed
 
 **Claude uses qmd MCP server:**
 
-```
+```bash
 qmd query "MCP servers"
 ```
 
 Or with collection filter:
 
-```
+```bash
 qmd search "MCP servers" -c my-ai-tools
 ```
 

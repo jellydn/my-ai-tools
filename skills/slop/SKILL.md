@@ -37,7 +37,7 @@ Never change what the code does - only how it does it. All original features, ou
 
 ### 2. Apply Project Standards
 
-Follow the established coding standards from the project's CLAUDE.md or conventions:
+Follow the established coding standards from `@CLAUDE.md` or conventions:
 
 - Use proper import sorting and file organization
 - Follow language-specific patterns (ES modules, proper TypeScript types, etc.)

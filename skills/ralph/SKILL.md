@@ -107,19 +107,19 @@ Each criterion must be something Ralph can CHECK, not something vague.
 
 ### Always include as final criterion:
 
-```
+```text
 "Typecheck passes"
 ```
 
 For stories with testable logic, also include:
 
-```
+```text
 "Tests pass"
 ```
 
 ### For stories that change UI, also include:
 
-```
+```text
 "Verify in browser using dev-browser skill"
 ```
 
