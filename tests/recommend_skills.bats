@@ -54,41 +54,41 @@ README_FILE="$REPO_ROOT/README.md"
 }
 
 # ---------------------------------------------------------------------------
-# grill-me-with-docs entry (renamed from grill-me)
+# grill-with-docs entry (renamed from grill-me)
 # ---------------------------------------------------------------------------
 
-@test "recommend-skills.json contains grill-me-with-docs skill entry" {
+@test "recommend-skills.json contains grill-with-docs skill entry" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
     fi
-    run jq -e '[.recommended_skills[] | select(.skill == "grill-me-with-docs")] | length > 0' "$RECOMMEND_SKILLS_JSON"
+    run jq -e '[.recommended_skills[] | select(.skill == "grill-with-docs")] | length > 0' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
 
-@test "grill-me-with-docs entry has correct repo mattpocock/skills" {
+@test "grill-with-docs entry has correct repo mattpocock/skills" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
     fi
-    run jq -r '[.recommended_skills[] | select(.skill == "grill-me-with-docs")][0].repo' "$RECOMMEND_SKILLS_JSON"
+    run jq -r '[.recommended_skills[] | select(.skill == "grill-with-docs")][0].repo' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
     [ "$output" = "mattpocock/skills" ]
 }
 
-@test "grill-me-with-docs entry has non-empty description" {
+@test "grill-with-docs entry has non-empty description" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
     fi
-    run jq -r '[.recommended_skills[] | select(.skill == "grill-me-with-docs")][0].description' "$RECOMMEND_SKILLS_JSON"
+    run jq -r '[.recommended_skills[] | select(.skill == "grill-with-docs")][0].description' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
     [ -n "$output" ]
 }
 
-@test "grill-me-with-docs description mentions docs-grounded or stress-test" {
+@test "grill-with-docs description mentions docs-grounded or stress-test" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
     fi
-    run jq -r '[.recommended_skills[] | select(.skill == "grill-me-with-docs")][0].description' "$RECOMMEND_SKILLS_JSON"
+    run jq -r '[.recommended_skills[] | select(.skill == "grill-with-docs")][0].description' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
     [[ "$output" == *"docs"* ]] || [[ "$output" == *"stress"* ]]
 }
@@ -172,8 +172,8 @@ README_FILE="$REPO_ROOT/README.md"
 # README.md – install command content tests
 # ---------------------------------------------------------------------------
 
-@test "README.md install block contains grill-me-with-docs install command" {
-    run grep -F 'npx skills add mattpocock/skills --skill grill-me-with-docs' "$README_FILE"
+@test "README.md install block contains grill-with-docs install command" {
+    run grep -F 'npx skills add mattpocock/skills --skill grill-with-docs' "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
@@ -188,14 +188,14 @@ README_FILE="$REPO_ROOT/README.md"
     run grep -F 'mattpocock/skills --skill grill-me' "$README_FILE"
     # grep should find the lines – verify they only reference the new skill names
     if [ "$status" -eq 0 ]; then
-        # output must not contain a line ending exactly in 'grill-me' (not grill-me-with-docs)
+        # output must not contain a line ending exactly in 'grill-me' (not grill-with-docs)
         echo "$output" | grep -qP '\bgrill-me\b(?!-)' && return 1 || return 0
     fi
     return 0
 }
 
-@test "README.md Matt Pocock table row references grill-me-with-docs" {
-    run grep -F 'grill-me-with-docs' "$README_FILE"
+@test "README.md Matt Pocock table row references grill-with-docs" {
+    run grep -F 'grill-with-docs' "$README_FILE"
     [ "$status" -eq 0 ]
     [[ "$output" == *"mattpocock"* ]]
 }
