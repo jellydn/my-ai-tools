@@ -59,14 +59,14 @@ tmux -S "$SOCKET" kill-session -t "$SESSION"
 
 ### 📋 Core Commands
 
-| Action | Command |
-|--------|---------|
-| New session | `tmux -S "$SOCKET" new -d -s NAME` |
-| Send keys | `tmux -S "$SOCKET" send-keys -t NAME 'cmd' Enter` |
-| Send literal | `tmux -S "$SOCKET" send-keys -t NAME -l 'text'` |
+| Action         | Command                                              |
+| -------------- | ---------------------------------------------------- |
+| New session    | `tmux -S "$SOCKET" new -d -s NAME`                   |
+| Send keys      | `tmux -S "$SOCKET" send-keys -t NAME 'cmd' Enter`    |
+| Send literal   | `tmux -S "$SOCKET" send-keys -t NAME -l 'text'`      |
 | Capture output | `tmux -S "$SOCKET" capture-pane -p -J -t NAME -S -N` |
-| List sessions | `tmux -S "$SOCKET" list-sessions` |
-| Kill session | `tmux -S "$SOCKET" kill-session -t NAME` |
+| List sessions  | `tmux -S "$SOCKET" list-sessions`                    |
+| Kill session   | `tmux -S "$SOCKET" kill-session -t NAME`             |
 
 **Control keys**: `C-c` (SIGINT), `C-d` (EOF), `C-z` (suspend), `Escape`
 
@@ -111,25 +111,25 @@ Same pattern: `new` → `send-keys` → `capture-pane` → `kill-session`
 
 ## 📋 LogPilot Reference
 
-| Task | Command |
-|------|---------|
-| Watch session | `logpilot watch SESSION` |
-| Watch pane | `logpilot watch SESSION --pane TARGET` |
-| AI summary | `logpilot summarize --last 10m` |
-| Ask question | `logpilot ask "Why is it failing?"` |
-| With logs | `logpilot ask "Explain" --include-logs` |
-| Status | `logpilot status` |
+| Task          | Command                                 |
+| ------------- | --------------------------------------- |
+| Watch session | `logpilot watch SESSION`                |
+| Watch pane    | `logpilot watch SESSION --pane TARGET`  |
+| AI summary    | `logpilot summarize --last 10m`         |
+| Ask question  | `logpilot ask "Why is it failing?"`     |
+| With logs     | `logpilot ask "Explain" --include-logs` |
+| Status        | `logpilot status`                       |
 
 ### MCP Setup
 
 ```json
 {
-  "mcpServers": {
-    "logpilot": {
-      "command": "logpilot",
-      "args": ["mcp-server"]
-    }
-  }
+	"mcpServers": {
+		"logpilot": {
+			"command": "logpilot",
+			"args": ["mcp-server"]
+		}
+	}
 }
 ```
 

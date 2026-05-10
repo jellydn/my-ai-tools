@@ -7,6 +7,7 @@ This directory contains project learnings and insights.
 Files follow the naming convention: `YYYY-MM-DD-topic-slug.md`
 
 Each learning should include:
+
 - Context about when/how it was discovered
 - The actual learning or insight
 - How it can be applied in the future

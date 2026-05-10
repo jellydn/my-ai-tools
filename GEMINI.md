@@ -20,6 +20,7 @@ This repository manages configurations, MCP servers, skills, and agents for a su
 ## 🛠️ Key Commands
 
 ### Installation & Sync
+
 - **Install/Sync to System**: `./cli.sh`
   - `--dry-run`: Preview changes.
   - `--backup`: Backup current configs before overwrite.
@@ -28,12 +29,14 @@ This repository manages configurations, MCP servers, skills, and agents for a su
   - `./generate.sh --dry-run`: Preview export.
 
 ### Development & Testing
+
 - **Test Scripts**: `bats tests/` (Uses the BATS framework for shell testing).
 - **Format Code**: Handled via hooks (e.g., `biome check --write` for JS/TS).
 
 ## 🎨 Development Conventions
 
 ### Bash Scripting Standards
+
 - **POSIX Compliance**: Use `#!/bin/bash` and keep scripts portable.
 - **Error Handling**: Always use `set -e`.
 - **Preconditions**: Use guard clauses at the top of functions.
@@ -41,6 +44,7 @@ This repository manages configurations, MCP servers, skills, and agents for a su
 - **Local Scope**: Use `local` for all function variables.
 
 ### AI Interaction Standards
+
 - **Tidy First**: Separate refactoring (tidying) from behavioral changes.
 - **Session Management**: Use `tmux` for long-running processes (named after the directory).
 - **Atomic Commits**: Prefer small, focused commits over large changes.
@@ -60,4 +64,5 @@ This repository manages configurations, MCP servers, skills, and agents for a su
 - `lib/common.sh`: Central library for logging, prompt handling, and command execution.
 
 ## 🛡️ Git Safety
+
 - **Git Guard**: A `PreToolUse` hook (`configs/claude/hooks/git-guard.ts`) blocks dangerous commands like `git push --force` or `git reset --hard` when triggered by agents.

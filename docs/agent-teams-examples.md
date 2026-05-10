@@ -10,12 +10,14 @@ When building a new feature, use the `feature-team-coordinator` to orchestrate t
 @feature-team-coordinator
 
 Implement a new user authentication endpoint:
+
 - POST /api/auth/login
 - Accept email and password
 - Return JWT token
 - Include proper error handling
 
 Requirements:
+
 - Validate inputs
 - Hash password comparison
 - Rate limiting
@@ -24,6 +26,7 @@ Requirements:
 ```
 
 The coordinator will:
+
 1. Implement the endpoint
 2. Delegate to `code-reviewer` for security review
 3. Delegate to `test-generator` for test coverage
@@ -38,10 +41,12 @@ For quick code reviews without full feature development:
 @code-reviewer
 
 Review the authentication middleware in:
+
 - src/middleware/auth.ts
 - src/utils/jwt.ts
 
 Focus on:
+
 - Security vulnerabilities
 - Error handling completeness
 - Token validation logic
@@ -57,6 +62,7 @@ Generate tests for existing code:
 Create comprehensive tests for the UserService class in src/services/UserService.ts
 
 Include:
+
 - Unit tests for all public methods
 - Edge cases (null/undefined inputs)
 - Error scenarios
@@ -73,11 +79,13 @@ Create or update documentation:
 @documentation-writer
 
 Document the new payment processing API:
+
 - POST /api/payments/process
 - GET /api/payments/:id
 - POST /api/payments/refund
 
 Include:
+
 - Request/response examples
 - Error responses
 - Authentication requirements
@@ -92,6 +100,7 @@ After making changes, clean up AI-generated patterns:
 @ai-slop-remover
 
 Review all changes in the current branch and remove:
+
 - Unnecessary comments
 - Excessive defensive checks
 - Over-engineered abstractions
@@ -133,12 +142,14 @@ I've implemented a new caching layer. I need parallel reviews:
 
 @code-reviewer
 Review src/cache/RedisCache.ts for:
+
 - Performance implications
 - Error handling
 - Resource cleanup
 
 @test-generator
 Create tests for src/cache/RedisCache.ts covering:
+
 - Cache hits/misses
 - Connection failures
 - TTL expiration
@@ -150,17 +161,21 @@ Document the caching API in docs/caching.md
 ## Tips for Effective Team Usage
 
 ### Be Specific
+
 ❌ "Review this code"
 ✅ "Review auth.ts focusing on security vulnerabilities and session management"
 
 ### Provide Context
+
 Include:
+
 - Which files to examine
 - Specific concerns or requirements
 - Related code locations
 - Expected patterns or conventions
 
 ### Use Appropriate Agent
+
 - Security review → `code-reviewer`
 - Test creation → `test-generator`
 - API docs → `documentation-writer`
@@ -168,7 +183,9 @@ Include:
 - Full feature → `feature-team-coordinator`
 
 ### Iterate When Needed
+
 If results aren't satisfactory:
+
 1. Provide more specific feedback
 2. Reference existing examples
 3. Clarify expectations
@@ -177,6 +194,7 @@ If results aren't satisfactory:
 ## Advanced Patterns
 
 ### Custom Workflow
+
 Create your own orchestration:
 
 ```markdown
@@ -185,6 +203,7 @@ Phase 1: Implementation
 
 Phase 2: Quality Gates
 Parallel execution:
+
 - @code-reviewer: Security and quality
 - @test-generator: Test coverage
 
@@ -192,6 +211,7 @@ Phase 3: Address Feedback
 [Fix issues from reviews]
 
 Phase 4: Polish
+
 - @ai-slop-remover: Style cleanup
 - @documentation-writer: Documentation
 
@@ -200,12 +220,14 @@ Run tests and verify all checks pass
 ```
 
 ### Specialized Focus
+
 Target specific aspects:
 
 ```markdown
 @code-reviewer
 
 Quick security audit only:
+
 - SQL injection risks
 - XSS vulnerabilities
 - Authentication bypass potential
@@ -216,6 +238,7 @@ Skip style and minor issues - focus on critical security only.
 ## Common Workflows
 
 ### Bug Fix
+
 ```markdown
 1. Identify and fix bug
 2. @test-generator: Add regression test
@@ -223,6 +246,7 @@ Skip style and minor issues - focus on critical security only.
 ```
 
 ### Refactoring
+
 ```markdown
 1. Refactor code
 2. @code-reviewer: Verify logic preservation
@@ -231,6 +255,7 @@ Skip style and minor issues - focus on critical security only.
 ```
 
 ### New API Endpoint
+
 ```markdown
 1. @feature-team-coordinator: Implement complete endpoint
    - Code implementation
@@ -240,10 +265,12 @@ Skip style and minor issues - focus on critical security only.
 ```
 
 ### Documentation Update
+
 ```markdown
 @documentation-writer
 
 Update docs for the new webhook system:
+
 - Architecture changes
 - API modifications
 - Migration guide
@@ -252,17 +279,20 @@ Update docs for the new webhook system:
 ## Troubleshooting
 
 ### Agent Not Responding
+
 - Verify agent file exists in `configs/claude/agents/`
 - Check YAML frontmatter is valid
 - Ensure `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` is set
 
 ### Unexpected Results
+
 - Provide more context and examples
 - Reference specific files and line numbers
 - Clarify expected output format
 - Show examples of desired patterns
 
 ### Agent Conflicts
+
 - Prioritize critical feedback
 - Consider trade-offs
 - Document decisions

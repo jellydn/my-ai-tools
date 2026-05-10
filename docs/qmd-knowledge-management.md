@@ -59,26 +59,28 @@ bun install -g @tobilu/qmd
 The MCP server configuration is already included in this repository.
 
 **For Claude Code** (`~/.claude/mcp-servers.json`):
+
 ```json
 {
-  "mcpServers": {
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"]
-    }
-  }
+	"mcpServers": {
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
+		}
+	}
 }
 ```
 
 **For Amp** (`~/.config/amp/settings.json`):
+
 ```json
 {
-  "amp.mcpServers": {
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"]
-    }
-  }
+	"amp.mcpServers": {
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
+		}
+	}
 }
 ```
 
@@ -103,6 +105,7 @@ The `qmd-knowledge` skill now automatically sets up the knowledge base when you 
 ```
 
 The script will:
+
 - Auto-detect your project name from git remote URL (most reliable)
 - Create necessary directories
 - Add qmd collection (or verify if already exists - no errors!)
@@ -129,6 +132,7 @@ qmd embed
 ```
 
 **Note**:
+
 - The skill is installed once and manages knowledge for all your projects
 - Each project gets its own qmd collection for storing knowledge
 - The script handles existing collections gracefully (no errors if collection already exists)
@@ -202,9 +206,11 @@ qmd embed
 ### 1. Capture Learning During Development
 
 **You (in Claude):**
+
 > "I just learned that qmd MCP server allows Claude to use tools autonomously for knowledge management."
 
 **Claude recognizes the skill and executes:**
+
 ```bash
 ~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "qmd MCP autonomous tool use"
 ```
@@ -212,15 +218,18 @@ qmd embed
 ### 2. Query Knowledge Later
 
 **You (in Claude):**
+
 > "What have I learned about MCP servers in this project?"
 
 **Claude uses qmd MCP server:**
-```
+
+```bash
 qmd query "MCP servers"
 ```
 
 Or with collection filter:
-```
+
+```bash
 qmd search "MCP servers" -c my-ai-tools
 ```
 
@@ -229,9 +238,11 @@ qmd search "MCP servers" -c my-ai-tools
 ### 3. Track Issue Resolution
 
 **You (in Claude):**
+
 > "Add a note to issue #123 that it was fixed by updating the qmd dependency."
 
 **Claude executes:**
+
 ```bash
 ~/.config/opencode/skill/qmd-knowledge/scripts/record.sh issue 123 "Fixed by updating qmd dependency to latest version"
 ```
@@ -321,6 +332,7 @@ qmd embed
 ### qmd not found
 
 Install qmd:
+
 ```bash
 bun install -g @tobilu/qmd
 ```
@@ -328,6 +340,7 @@ bun install -g @tobilu/qmd
 ### Knowledge collection not found
 
 Create the collection for your project:
+
 ```bash
 mkdir -p ~/.ai-knowledges/my-ai-tools/learnings
 mkdir -p ~/.ai-knowledges/my-ai-tools/issues
@@ -345,6 +358,7 @@ qmd embed
 ### Embeddings not updating
 
 Manually regenerate embeddings:
+
 ```bash
 qmd embed
 ```

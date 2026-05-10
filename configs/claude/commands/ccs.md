@@ -8,6 +8,7 @@ Activate `ccs-delegation` skill. The skill contains all execution logic.
 Task: Parse `$ARGUMENTS`, select optimal profile from `~/.ccs/config.json`, enhance prompt, execute delegation via CCS CLI.
 
 **Examples:**
+
 ```
 /ccs "refactor auth.js to use async/await"    # Simple task
 /ccs "analyze entire architecture"            # Long-context task

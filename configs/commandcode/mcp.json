@@ -4,27 +4,19 @@
 			"transport": "stdio",
 			"enabled": true,
 			"command": "npx",
-			"args": [
-				"-y",
-				"@upstash/context7-mcp@latest"
-			]
+			"args": ["-y", "@upstash/context7-mcp@latest"]
 		},
 		"sequential-thinking": {
 			"transport": "stdio",
 			"enabled": true,
 			"command": "npx",
-			"args": [
-				"-y",
-				"@modelcontextprotocol/server-sequential-thinking"
-			]
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 		},
 		"qmd": {
 			"transport": "stdio",
 			"enabled": true,
 			"command": "qmd",
-			"args": [
-				"mcp"
-			]
+			"args": ["mcp"]
 		},
 		"fff": {
 			"transport": "stdio",
@@ -36,19 +28,13 @@
 			"transport": "stdio",
 			"enabled": true,
 			"command": "npx",
-			"args": [
-				"-y",
-				"@react-grab/mcp",
-				"--stdio"
-			]
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
 		},
 		"logpilot": {
 			"transport": "stdio",
 			"enabled": true,
 			"command": "logpilot",
-			"args": [
-				"mcp-server"
-			]
+			"args": ["mcp-server"]
 		}
 	}
 }

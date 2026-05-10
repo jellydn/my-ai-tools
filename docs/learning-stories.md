@@ -92,12 +92,12 @@ Lightweight agent with minimal dependencies. Response to heavy frameworks that w
 
 ## Key Takeaways
 
-| Tool Combination | Best For |
-| ---------------- | -------------------------------------------------------- |
-| **Claude + spec-kit** | Greenfield projects requiring structured planning |
-| **Amp + Ralph** | Autonomous development with PRD-to-implementation pipelines |
-| **AI CLI Switcher** | Developers working with multiple AI tools |
-| **Tiny Agent** | Cost-conscious development with minimal overhead |
+| Tool Combination      | Best For                                                    |
+| --------------------- | ----------------------------------------------------------- |
+| **Claude + spec-kit** | Greenfield projects requiring structured planning           |
+| **Amp + Ralph**       | Autonomous development with PRD-to-implementation pipelines |
+| **AI CLI Switcher**   | Developers working with multiple AI tools                   |
+| **Tiny Agent**        | Cost-conscious development with minimal overhead            |
 
 Focused, single-purpose solutions > heavy, all-in-one frameworks.
 
@@ -180,11 +180,11 @@ A complete software development workflow for coding agents with composable "skil
 
 Instead of adopting heavy frameworks, I prefer:
 
-| Approach | Why |
-| ---------------------- | --------------------------------------------------- |
-| **Minimal tooling** | Less context usage, more tokens for actual work |
-| **AGENTS.md** | Simple, portable project guidance |
-| **Native AI features** | Use built-in Claude/Amp capabilities first |
-| **Add incrementally** | Only add tools when there's clear friction |
+| Approach               | Why                                             |
+| ---------------------- | ----------------------------------------------- |
+| **Minimal tooling**    | Less context usage, more tokens for actual work |
+| **AGENTS.md**          | Simple, portable project guidance               |
+| **Native AI features** | Use built-in Claude/Amp capabilities first      |
+| **Add incrementally**  | Only add tools when there's clear friction      |
 
 The best tool is the one you don't have to think about.

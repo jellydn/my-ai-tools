@@ -58,6 +58,9 @@ args = ["-y", "@react-grab/mcp", "--stdio"]
 command = "logpilot"
 args = ["mcp-server"]
 
+[notice]
+fast_default_opt_out = true
+
 [notice.model_migrations]
 "gpt-5.2-codex" = "gpt-5.3-codex"
 "gpt-5.3-codex" = "gpt-5.4"
@@ -66,7 +69,7 @@ args = ["mcp-server"]
 home_last_prompted_at = 1777953592
 
 [tui]
-status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "weekly-limit", "task-progress"]
+status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "weekly-limit", "task-progress", "pull-request-number", "fast-mode"]
 theme = "kanagawa"
 status_line_use_colors = true
 
@@ -101,20 +104,20 @@ enabled = true
 enabled = true
 
 [marketplaces.claude-plugins-official]
-last_updated = "2026-05-08T03:04:22Z"
+last_updated = "2026-05-08T23:15:10Z"
 last_revision = "76b35e91d1c99c090b1a08dade53bcc5e352c1b2"
 source_type = "git"
 source = "https://github.com/anthropics/claude-plugins-official.git"
 
 [marketplaces.plannotator]
-last_updated = "2026-05-08T03:04:29Z"
-last_revision = "69ef11bdfbbdff4cc1cebe4138a5237d40b83ea8"
+last_updated = "2026-05-08T23:15:17Z"
+last_revision = "7329efb98051ef163ffb0fe1a58e3f4e0efffb39"
 source_type = "git"
 source = "https://github.com/backnotprop/plannotator.git"
 
 [marketplaces.worktrunk]
-last_updated = "2026-05-08T03:04:36Z"
-last_revision = "2f8807eb368a6528303ce2fedb2765b848683973"
+last_updated = "2026-05-08T23:15:25Z"
+last_revision = "e93be0e125499f8ddbdb56e3632c31407402731f"
 source_type = "git"
 source = "https://github.com/max-sixty/worktrunk.git"
 

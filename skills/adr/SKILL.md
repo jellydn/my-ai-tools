@@ -40,6 +40,7 @@ Architecture Decision Records (ADRs) are short documents that capture important 
 ## ADR Structure
 
 Each ADR typically contains:
+
 - **Title**: Brief description of the decision
 - **Status**: Proposed, Accepted, Deprecated, Superseded
 - **Context**: The situation requiring a decision
@@ -70,10 +71,12 @@ Date: [DATE]
 ## Consequences
 
 ### Positive
+
 - [Positive outcome 1]
 - [Positive outcome 2]
 
 ### Negative
+
 - [Negative outcome 1]
 - [Risk or trade-off]
 ```
@@ -81,6 +84,7 @@ Date: [DATE]
 ## ADR Directory Detection
 
 Common ADR locations to check:
+
 - `doc/adr/` (default)
 - `docs/adr/`
 - `docs/architecture/decisions/`
@@ -89,21 +93,25 @@ Common ADR locations to check:
 ## Process Examples
 
 ### Create new ADR:
+
 ```bash
 /adr new "Use PostgreSQL for primary database"
 ```
 
 ### List all ADRs:
+
 ```bash
 /adr list
 ```
 
 ### Search ADRs:
+
 ```bash
 /adr search "database"
 ```
 
 ### View specific ADR:
+
 ```bash
 /adr view 5
 ```

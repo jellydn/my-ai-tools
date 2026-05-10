@@ -16,10 +16,12 @@ Date: [DATE]
 
 ## Consequences
 
-### Positive
+### 📋 Positive
+
 - [Positive outcome 1]
 - [Positive outcome 2]
 
-### Negative
+### 📋 Negative
+
 - [Negative outcome 1]
 - [Risk or trade-off]

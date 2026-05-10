@@ -82,22 +82,22 @@ Guides you through the complete TDD workflow with Red-Green-Refactor cycle.
 A test template is available at `$SKILL_PATH/templates/test-template.md`:
 
 ```typescript
-import { describe, it, expect } from 'vitest'
-import { functionName } from './module'
+import { describe, it, expect } from "vitest";
+import { functionName } from "./module";
 
-describe('functionName', () => {
-  it('should return formatted output when given valid input', () => {
-    // Arrange - Setup test scenario
-    const input = 'test input'
-    const expectedOutput = 'expected output'
+describe("functionName", () => {
+	it("should return formatted output when given valid input", () => {
+		// Arrange - Setup test scenario
+		const input = "test input";
+		const expectedOutput = "expected output";
 
-    // Act - Execute the unit under test
-    const result = functionName(input)
+		// Act - Execute the unit under test
+		const result = functionName(input);
 
-    // Assert - Verify expected outcome
-    expect(result).toBe(expectedOutput)
-  })
-})
+		// Assert - Verify expected outcome
+		expect(result).toBe(expectedOutput);
+	});
+});
 ```
 
 ## Common Commands
