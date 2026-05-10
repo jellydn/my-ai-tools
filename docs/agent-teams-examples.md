@@ -264,6 +264,31 @@ Skip style and minor issues - focus on critical security only.
    - Security review
 ```
 
+### Pull Request Review & Fixes
+
+Use the `pr-review` skill to efficiently address review feedback. The skill supports auto-detection from your current branch, specific PR numbers, or full URLs.
+
+```markdown
+# Method 1: Auto-detect from current branch
+
+/pr-review
+
+# Method 2: Use a specific PR number
+
+/pr-review 123
+
+# Method 3: Use a full GitHub PR URL
+
+/pr-review https://github.com/owner/repo/pull/123
+```
+
+**What happens:**
+
+1. The agent fetches all review comments and issue comments for the PR.
+2. It analyzes which comments are still open (unresolved).
+3. It creates a prioritized TODO list based on severity (Critical → High → Medium → Low).
+4. It implements fixes for each comment, runs tests, and commits the changes.
+
 ### Documentation Update
 
 ```markdown

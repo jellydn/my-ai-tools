@@ -2077,6 +2077,14 @@ For React developers:
 - [**React Grab**](https://www.react-grab.com/) - MCP server for extracting and analyzing React components (`@react-grab/mcp`)
 - [**React Scan**](https://react-scan.com/) - Detect performance issues in your React app automatically
 
+### Orca
+
+[**Orca**](https://onOrca.dev) - Next-gen desktop IDE for orchestrating AI coding agents with worktree isolation, multi-agent terminals, and built-in source control. ([GitHub](https://github.com/stablyai/orca))
+
+```bash
+brew install --cask stablyai/orca/orca
+```
+
 </details>
 
 ---
