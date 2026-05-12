@@ -41,6 +41,13 @@
 			"args": ["mcp-server"],
 			"env": {},
 			"tools": ["*"]
+		},
+		"agentmemory": {
+			"type": "local",
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"],
+			"env": {},
+			"tools": ["*"]
 		}
 	}
 }

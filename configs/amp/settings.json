@@ -26,6 +26,10 @@
 		"logpilot": {
 			"command": "logpilot",
 			"args": ["mcp-server"]
+		},
+		"agentmemory": {
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"]
 		}
 	},
 	"amp.terminal.theme": "kanagawa",

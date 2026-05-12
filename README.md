@@ -13,7 +13,7 @@
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
 - 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, and more
-- 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd
+- 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, agentmemory
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
 - 📦 **Plugin support** - Official and community plugins
@@ -23,18 +23,18 @@
 
 | Tool            | MCP Servers                                                               | Plugins/Extensions                                                                 |
 | --------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| **Claude Code** | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | Official + Community (plannotator, claude-hud, worktrunk, codex)                   |
-| **OpenCode**    | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | @plannotator/opencode, opencode-crofai, opencode-chrome-annotation                 |
-| **Codex**       | context7, notion, sequential-thinking, qmd, fff, react-grab-mcp, logpilot | openai-curated, plannotator, worktrunk, computer-use                               |
+| **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | Official + Community (plannotator, claude-hud, worktrunk, codex)                   |
+| **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | @plannotator/opencode, opencode-crofai, opencode-chrome-annotation                 |
+| **Codex**       | context7, notion, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot | openai-curated, plannotator, worktrunk, computer-use                               |
 | **Pi**          | (via packages)                                                            | Packages (subagents, hooks, fff, annotate, mcp-adapter, simplify, plan, crofai...) |
-| **Amp**         | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                  |
-| **Gemini**      | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                  |
-| **Kilo**        | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | (uses OpenCode plugins)                                                            |
-| **CommandCode** | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                  |
-| **Copilot**     | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                  |
-| **Cursor**      | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                  |
-| **Factory**     | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | core, security-engineer, droid-evolved, autoresearch                               |
-| **Cline**       | context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| **Kilo**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | (uses OpenCode plugins)                                                            |
+| **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| **Cursor**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | core, security-engineer, droid-evolved, autoresearch                               |
+| **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
 
 ### 📋 MCP Server Details
 
@@ -43,6 +43,7 @@
 | `context7`            | Documentation lookup for any library        | `@upstash/context7-mcp`                            |
 | `sequential-thinking` | Multi-step reasoning for complex analysis   | `@modelcontextprotocol/server-sequential-thinking` |
 | `qmd`                 | Knowledge management with AI-powered search | `qmd`                                              |
+| `agentmemory`         | Persistent memory for AI coding agents      | `@agentmemory/mcp`                                |
 | `fff`                 | Fast file search with frecency ranking      | `fff-mcp`                                          |
 | `react-grab-mcp`      | React component capture and inspection      | `@react-grab/mcp`                                  |
 | `logpilot`            | AI-powered log analysis and tmux monitoring | `logpilot`                                         |
@@ -209,6 +210,7 @@ The script will prompt you to install each MCP server:
 - [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
 - [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
 - [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
+- [`agentmemory`](https://github.com/rohitg00/agentmemory) - Persistent memory for AI coding agents
 - [`fff`](https://github.com/dmtrKovalenko/fff.nvim) - Fast file search with built-in memory for AI agents
 - [`react-grab-mcp`](https://github.com/nyan-left/react-grab-mcp) - React component extraction and analysis
 - [`logpilot`](https://github.com/jellydn/logpilot) - AI-powered log analysis and tmux session monitoring
@@ -234,6 +236,10 @@ Configuration in [`~/.claude/mcp-servers.json`](configs/claude/mcp-servers.json)
 			"command": "qmd",
 			"args": ["mcp"]
 		},
+		"agentmemory": {
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"]
+		},
 		"fff": {
 			"type": "stdio",
 			"command": "fff-mcp",
@@ -257,6 +263,7 @@ Or use the CLI (installed globally for all projects):
 claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest
 claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
 claude mcp add --scope user --transport stdio qmd -- qmd mcp
+claude mcp add --scope user --transport stdio agentmemory -- npx -y @agentmemory/mcp
 claude mcp add --scope user --transport stdio fff -- fff-mcp  # Requires: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
 claude mcp add --scope user --transport stdio logpilot -- logpilot mcp-server  # Requires: cargo install logpilot
 ```
