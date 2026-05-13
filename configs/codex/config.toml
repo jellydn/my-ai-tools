@@ -58,6 +58,10 @@ args = ["-y", "@react-grab/mcp", "--stdio"]
 command = "logpilot"
 args = ["mcp-server"]
 
+[mcp_servers.agentmemory]
+command = "npx"
+args = ["-y", "@agentmemory/mcp"]
+
 [notice]
 fast_default_opt_out = true
 
