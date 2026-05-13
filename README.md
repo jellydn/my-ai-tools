@@ -21,12 +21,12 @@
 
 ## 🔌 MCP Servers & Plugins Overview
 
-| Tool            | MCP Servers                                                               | Plugins/Extensions                                                                 |
-| --------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Tool            | MCP Servers                                                                            | Plugins/Extensions                                                                 |
+| --------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | Official + Community (plannotator, claude-hud, worktrunk, codex)                   |
 | **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | @plannotator/opencode, opencode-crofai, opencode-chrome-annotation                 |
 | **Codex**       | context7, notion, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot | openai-curated, plannotator, worktrunk, computer-use                               |
-| **Pi**          | (via packages)                                                            | Packages (subagents, hooks, fff, annotate, mcp-adapter, simplify, plan, crofai...) |
+| **Pi**          | (via packages)                                                                         | Packages (subagents, hooks, fff, annotate, mcp-adapter, simplify, plan, crofai...) |
 | **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
 | **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
 | **Kilo**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | (uses OpenCode plugins)                                                            |
@@ -43,7 +43,7 @@
 | `context7`            | Documentation lookup for any library        | `@upstash/context7-mcp`                            |
 | `sequential-thinking` | Multi-step reasoning for complex analysis   | `@modelcontextprotocol/server-sequential-thinking` |
 | `qmd`                 | Knowledge management with AI-powered search | `qmd`                                              |
-| `agentmemory`         | Persistent memory for AI coding agents      | `@agentmemory/mcp`                                |
+| `agentmemory`         | Persistent memory for AI coding agents      | `@agentmemory/mcp`                                 |
 | `fff`                 | Fast file search with frecency ranking      | `fff-mcp`                                          |
 | `react-grab-mcp`      | React component capture and inspection      | `@react-grab/mcp`                                  |
 | `logpilot`            | AI-powered log analysis and tmux monitoring | `logpilot`                                         |
