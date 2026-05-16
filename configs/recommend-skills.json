@@ -43,11 +43,6 @@
 		{
 			"repo": "av/facts",
 			"description": "Track project specs and facts in a .facts file with lifecycle stages (draft, spec, implemented) and shell-command verification"
-		},
-		{
-			"repo": "backnotprop/plannotator",
-			"skill": "plannotator-setup-goal",
-			"description": "Turn an idea into a structured goal package with fact sheet and execution plan, gated by Plannotator annotation"
 		}
 	]
 }
