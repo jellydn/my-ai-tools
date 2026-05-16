@@ -654,6 +654,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Matt Pocock**      | [mattpocock/skills](https://github.com/mattpocock/skills)                                                     | Community skills by Matt Pocock. Includes `grill-with-docs` for docs-grounded plan stress-testing, `improve-codebase-architecture` for finding deepening opportunities, and more.                                                                                                   |
 | **Mitsuhiko**        | [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff)                                             | Skills and extensions by Armin Ronacher. Includes tmux session control, GitHub CLI, web browser automation, Sentry integration, mermaid diagrams, and more.                                                                                                                         |
 | **Git Stacked PRs**  | [github/gh-stack](https://github.com/github/gh-stack)                                                         | GitHub CLI extension for managing stacked branches and pull requests. Create, push, rebase, sync, and navigate stacks of dependent PRs for incremental code review workflows.                                                                                                       |
+| **Facts**            | [av/facts](https://github.com/av/facts)                                                                        | Track project specs and facts in a `.facts` file. Lifecycle stages (`@draft` → `@spec` → `@implemented`) with shell-command verification. Ships four skills: `facts`, `facts-discover`, `facts-refine`, and `facts-implement`.                                                     |
 
 **Installation:**
 
@@ -668,6 +669,7 @@ npx skills add mattpocock/skills --skill improve-codebase-architecture --global 
 npx skills add mitsuhiko/agent-stuff --global --agent claude-code
 npx skills add github/gh-stack --global --agent claude-code
 npx skills add warpdotdev/oz-skills --skill docs-update --global --agent claude-code
+npx skills add av/facts --global --agent claude-code
 ```
 
 ### Configuration Files

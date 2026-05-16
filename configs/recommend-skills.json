@@ -39,6 +39,10 @@
 			"repo": "warpdotdev/oz-skills",
 			"skill": "docs-update",
 			"description": "Automated documentation synchronization with code changes"
+		},
+		{
+			"repo": "av/facts",
+			"description": "Track project specs and facts in a .facts file with lifecycle stages (draft, spec, implemented) and shell-command verification"
 		}
 	]
 }
