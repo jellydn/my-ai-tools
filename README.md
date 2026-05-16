@@ -389,26 +389,27 @@ If you encounter issues:
 
 #### Plugin List
 
-| Plugin                  | Description                         | Source            |
-| ----------------------- | ----------------------------------- | ----------------- |
-| `typescript-lsp`        | TypeScript language server          | Official          |
-| `pyright-lsp`           | Python language server              | Official          |
-| `context7`              | Documentation lookup                | Official          |
-| `frontend-design`       | UI/UX design assistance             | Official          |
-| `learning-output-style` | Interactive learning mode           | Official          |
-| `swift-lsp`             | Swift language support              | Official          |
-| `lua-lsp`               | Lua language support                | Official          |
-| `code-simplifier`       | Code simplification                 | Official          |
-| `rust-analyzer-lsp`     | Rust language support               | Official          |
-| `claude-md-management`  | Markdown management                 | Official          |
-| `plannotator`           | Plan annotation tool                | Community         |
-| `prd`                   | Product Requirements Documents      | Local Marketplace |
-| `ralph`                 | PRD to JSON converter               | Local Marketplace |
-| `qmd-knowledge`         | Project knowledge management        | Local Marketplace |
-| `codemap`               | Parallel codebase analysis          | Local Marketplace |
-| `claude-hud`            | Status line with usage monitoring   | Community         |
-| `worktrunk`             | Work management                     | Community         |
-| `codex`                 | Codex code review & task delegation | Community         |
+| Plugin                   | Description                         | Source            |
+| ------------------------ | ----------------------------------- | ----------------- |
+| `typescript-lsp`         | TypeScript language server          | Official          |
+| `pyright-lsp`            | Python language server              | Official          |
+| `context7`               | Documentation lookup                | Official          |
+| `frontend-design`        | UI/UX design assistance             | Official          |
+| `learning-output-style`  | Interactive learning mode           | Official          |
+| `swift-lsp`              | Swift language support              | Official          |
+| `lua-lsp`                | Lua language support                | Official          |
+| `code-simplifier`        | Code simplification                 | Official          |
+| `rust-analyzer-lsp`      | Rust language support               | Official          |
+| `claude-md-management`   | Markdown management                 | Official          |
+| `plannotator`            | Plan annotation tool                | Community         |
+| `plannotator-setup-goal` | Turn ideas into goal packages       | Local Marketplace |
+| `prd`                    | Product Requirements Documents      | Local Marketplace |
+| `ralph`                  | PRD to JSON converter               | Local Marketplace |
+| `qmd-knowledge`          | Project knowledge management        | Local Marketplace |
+| `codemap`                | Parallel codebase analysis          | Local Marketplace |
+| `claude-hud`             | Status line with usage monitoring   | Community         |
+| `worktrunk`              | Work management                     | Community         |
+| `codex`                  | Codex code review & task delegation | Community         |
 
 #### Key Marketplace Plugins
 
@@ -605,6 +606,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `codemap` - Parallel codebase analysis producing structured documentation
 - `handoffs` - Create handoff plans for continuing work (provides `/handoffs` command)
 - `pickup` - Resume work from previous handoff sessions (provides `/pickup` command)
+- `plannotator-setup-goal` - Turn an idea into a structured goal package via Plannotator-gated discovery, fact sheet, and plan
 - `portless-local` - Named .localhost URLs for local development - replaces port numbers with stable URLs
 - `pr-review` - Pull request review workflows
 - `prd` - Generate Product Requirements Documents
@@ -671,7 +673,6 @@ npx skills add mitsuhiko/agent-stuff --global --agent claude-code
 npx skills add github/gh-stack --global --agent claude-code
 npx skills add warpdotdev/oz-skills --skill docs-update --global --agent claude-code
 npx skills add av/facts --global --agent claude-code
-npx skills add backnotprop/plannotator --skill plannotator-setup-goal --global --agent claude-code
 ```
 
 ### Configuration Files

@@ -2096,7 +2096,7 @@ install_single_recommended_skill() {
 # Helper: Check if a skill is in the remote/universal skills list
 is_remote_skill() {
 	case "$1" in
-	prd | ralph | qmd-knowledge | codemap | adr | handoffs | pickup | pr-review | slop | tdd)
+	plannotator-setup-goal | prd | ralph | qmd-knowledge | codemap | adr | handoffs | pickup | pr-review | slop | tdd)
 		return 0
 		;;
 	*)
@@ -2168,6 +2168,7 @@ enable_plugins() {
 	community_plugins=(
 		"plannotator|plannotator@plannotator|backnotprop/plannotator|claude"
 		"plannotator-copilot|plannotator-copilot@plannotator|backnotprop/plannotator|copilot"
+		"plannotator-setup-goal|plannotator-setup-goal@my-ai-tools|$SCRIPT_DIR|claude"
 		"prd|prd@my-ai-tools|$SCRIPT_DIR|claude"
 		"ralph|ralph@my-ai-tools|$SCRIPT_DIR|claude"
 		"qmd-knowledge|qmd-knowledge@my-ai-tools|$SCRIPT_DIR|claude"
