@@ -76,6 +76,17 @@
 			"category": "productivity"
 		},
 		{
+			"name": "plannotator-setup-goal",
+			"description": "Turn an idea into a structured goal package via Plannotator-gated discovery, fact sheet, and plan.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/plannotator-setup-goal",
+			"category": "productivity"
+		},
+		{
 			"name": "pickup",
 			"description": "Resumes work from a previous handoff session stored in .claude/handoffs/. Load and continue from where you left off in prior sessions.",
 			"version": "1.0.0",
