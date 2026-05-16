@@ -70,7 +70,8 @@ fast_default_opt_out = true
 "gpt-5.3-codex" = "gpt-5.4"
 
 [notice.external_config_migration_prompts]
-home_last_prompted_at = 1777953592
+home_last_prompted_at = 1778646274
+home = true
 
 [tui]
 status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "weekly-limit", "task-progress", "pull-request-number", "fast-mode"]
@@ -81,7 +82,7 @@ status_line_use_colors = true
 "gpt-5.5" = 4
 
 [plugins."github@openai-curated"]
-enabled = true
+enabled = false
 
 [plugins."claude-md-management@claude-plugins-official"]
 enabled = true
@@ -108,20 +109,20 @@ enabled = true
 enabled = true
 
 [marketplaces.claude-plugins-official]
-last_updated = "2026-05-08T23:15:10Z"
-last_revision = "76b35e91d1c99c090b1a08dade53bcc5e352c1b2"
+last_updated = "2026-05-15T09:32:17Z"
+last_revision = "1a2f18b05cf5652fd25403e8d229fc884fb84103"
 source_type = "git"
 source = "https://github.com/anthropics/claude-plugins-official.git"
 
 [marketplaces.plannotator]
-last_updated = "2026-05-08T23:15:17Z"
-last_revision = "7329efb98051ef163ffb0fe1a58e3f4e0efffb39"
+last_updated = "2026-05-15T09:32:32Z"
+last_revision = "9fed7851410555241e0362b76db92424b8c2c07a"
 source_type = "git"
 source = "https://github.com/backnotprop/plannotator.git"
 
 [marketplaces.worktrunk]
-last_updated = "2026-05-08T23:15:25Z"
-last_revision = "e93be0e125499f8ddbdb56e3632c31407402731f"
+last_updated = "2026-05-15T09:32:39Z"
+last_revision = "e53379fd8c04068d98879e71d67380a478bfa43b"
 source_type = "git"
 source = "https://github.com/max-sixty/worktrunk.git"
 

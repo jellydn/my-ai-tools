@@ -245,6 +245,7 @@
   },
   "skipDangerousModePermissionPrompt": true,
   "theme": "auto",
+  "editorMode": "normal",
   "verbose": true,
   "teammateMode": "tmux"
 }
