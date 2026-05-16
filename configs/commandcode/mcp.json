@@ -35,6 +35,12 @@
 			"enabled": true,
 			"command": "logpilot",
 			"args": ["mcp-server"]
+		},
+		"agentmemory": {
+			"transport": "stdio",
+			"enabled": true,
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"]
 		}
 	}
 }

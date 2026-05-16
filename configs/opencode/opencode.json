@@ -80,6 +80,11 @@
 			"type": "local",
 			"command": ["logpilot", "mcp-server"],
 			"enabled": true
+		},
+		"agentmemory": {
+			"type": "local",
+			"command": ["npx", "-y", "@agentmemory/mcp"],
+			"enabled": true
 		}
 	},
 	"plugin": [

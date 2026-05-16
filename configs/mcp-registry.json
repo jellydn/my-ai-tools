@@ -47,6 +47,14 @@
 			"args": ["mcp-server"],
 			"requires": ["logpilot"],
 			"category": "monitoring"
+		},
+		"agentmemory": {
+			"name": "agentmemory",
+			"description": "persistent memory for AI coding agents",
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"],
+			"requires": [],
+			"category": "knowledge"
 		}
 	}
 }
