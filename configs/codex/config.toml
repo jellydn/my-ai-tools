@@ -109,20 +109,20 @@ enabled = true
 enabled = true
 
 [marketplaces.claude-plugins-official]
-last_updated = "2026-05-15T09:32:17Z"
-last_revision = "1a2f18b05cf5652fd25403e8d229fc884fb84103"
+last_updated = "2026-05-16T10:16:15Z"
+last_revision = "5dbfa0fade3058791bf8134b2bd441cb9d5f9a10"
 source_type = "git"
 source = "https://github.com/anthropics/claude-plugins-official.git"
 
 [marketplaces.plannotator]
-last_updated = "2026-05-15T09:32:32Z"
-last_revision = "9fed7851410555241e0362b76db92424b8c2c07a"
+last_updated = "2026-05-16T10:16:25Z"
+last_revision = "807cc5f09be92baa4546be9d85188417fe467fe3"
 source_type = "git"
 source = "https://github.com/backnotprop/plannotator.git"
 
 [marketplaces.worktrunk]
-last_updated = "2026-05-15T09:32:39Z"
-last_revision = "e53379fd8c04068d98879e71d67380a478bfa43b"
+last_updated = "2026-05-16T10:16:31Z"
+last_revision = "d25e87c350c8ba6df8517dfd748435cf54583a77"
 source_type = "git"
 source = "https://github.com/max-sixty/worktrunk.git"
 
