@@ -1769,6 +1769,8 @@ copy_pi_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/pi/AGENTS.md" "$HOME/.pi/agent/" || true
 
+	copy_config_file "$SCRIPT_DIR/configs/pi/mcp.json" "$HOME/.pi/agent/" || true
+
 	log_success "Pi configs copied"
 }
 
