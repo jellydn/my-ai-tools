@@ -79,7 +79,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x "$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh" ]; then /bin/sh "$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh"; fi"
+            "command": "if [ -x \"$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh\" ]; then /bin/sh \"$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh\"; fi"
           }
         ]
       }
@@ -123,7 +123,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x "$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh" ]; then /bin/sh "$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh"; fi"
+            "command": "if [ -x \"$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh\" ]; then /bin/sh \"$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh\"; fi"
           }
         ]
       }
@@ -133,7 +133,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x "$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh" ]; then /bin/sh "$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh"; fi"
+            "command": "if [ -x \"$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh\" ]; then /bin/sh \"$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh\"; fi"
           }
         ]
       }
@@ -163,7 +163,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x "$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh" ]; then /bin/sh "$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh"; fi"
+            "command": "if [ -x \"$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh\" ]; then /bin/sh \"$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh\"; fi"
           }
         ]
       }
@@ -174,7 +174,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x "$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh" ]; then /bin/sh "$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh"; fi"
+            "command": "if [ -x \"$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh\" ]; then /bin/sh \"$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh\"; fi"
           }
         ]
       }
@@ -185,7 +185,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x "$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh" ]; then /bin/sh "$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh"; fi"
+            "command": "if [ -x \"$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh\" ]; then /bin/sh \"$HOME/Library/Application Support/orca/agent-hooks/claude-hook.sh\"; fi"
           }
         ]
       }
