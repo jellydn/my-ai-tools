@@ -2097,6 +2097,10 @@ For React developers:
 brew install --cask stablyai/orca/orca
 ```
 
+### herdr
+
+[**herdr**](https://herdr.dev/) - Terminal-native workspace manager and multiplexer for supervising multiple AI coding agents (Claude Code, Codex, pi, and more) side by side. Run, monitor, and orchestrate agents in parallel with real terminal panes, status tracking, and a local socket API. ([GitHub](https://github.com/ogulcancelik/herdr))
+
 </details>
 
 ---
