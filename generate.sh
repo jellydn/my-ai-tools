@@ -433,6 +433,12 @@ generate_cursor_configs() {
 		log_warning "Cursor skills directory not found: $HOME/.cursor/skills"
 	fi
 
+	if [ -d "$HOME/.cursor/agents" ]; then
+		copy_claude_subdirectory "$HOME/.cursor/agents" "$SCRIPT_DIR/configs/cursor/agents" "Cursor agents"
+	else
+		log_warning "Cursor agents directory not found: $HOME/.cursor/agents"
+	fi
+
 	if [ -d "$HOME/.cursor/commands" ]; then
 		copy_claude_subdirectory "$HOME/.cursor/commands" "$SCRIPT_DIR/configs/cursor/commands" "Cursor commands"
 	else

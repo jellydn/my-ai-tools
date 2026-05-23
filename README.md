@@ -1646,9 +1646,10 @@ Shell Command: Install 'cursor' command in PATH
 
 ### Configuration
 
-Cursor Agent CLI configs are stored in [`configs/cursor/`](configs/cursor/) and installed to `~/.cursor/rules/`.
+Cursor Agent CLI configs are stored in [`configs/cursor/`](configs/cursor/) and installed to the official paths under `~/.cursor/`.
 
 - [`AGENTS.md`](configs/cursor/AGENTS.md) - Agent guidelines and best practices, installed to `~/.cursor/rules/general.mdc`
+- [`agents/`](configs/cursor/agents/) - Custom agents, installed to `~/.cursor/agents/`
 
 ### 📋 MCP Servers
 
@@ -1690,6 +1691,12 @@ Cursor supports MCP servers via `@~/.cursor/mcp.json`:
 Located in [`configs/cursor/commands/`](configs/cursor/commands/):
 
 - `deslop` - Remove AI-generated boilerplate and improve code quality
+
+### Custom Agents
+
+Located in [`configs/cursor/agents/`](configs/cursor/agents/):
+
+- `thermo-nuclear-code-quality-review` - Run a strict maintainability and structural quality audit
 
 ### Usage
 
