@@ -2126,6 +2126,7 @@ Copy the file to your preferred location and reference it in your AI tools.
 - [Claude Code Best Practice](https://github.com/shanraisshan/claude-code-best-practice) - Best practices and tips for Claude Code
 - [Why I switched to Claude Code 2.0](https://blog.silennai.com/claude-code)
 - [Llama.cpp Setup with Claude/Codex CLI](https://tammam.io/blog/llama-cpp-setup-with-claude-codex-cli/) - Local model setup guide
+- [Modern Web Guidance](https://developer.chrome.com/docs/modern-web-guidance) - Chrome's best practices for modern web development
 
 ---
 
