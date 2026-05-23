@@ -366,7 +366,7 @@ npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
 
-# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd
+# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, thermo-nuclear-code-quality-review
 # Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
@@ -407,6 +407,7 @@ If you encounter issues:
 | `ralph`                  | PRD to JSON converter               | Local Marketplace |
 | `qmd-knowledge`          | Project knowledge management        | Local Marketplace |
 | `codemap`                | Parallel codebase analysis          | Local Marketplace |
+| `thermo-nuclear-code-quality-review` | Extremely strict maintainability review | Local Marketplace |
 | `claude-hud`             | Status line with usage monitoring   | Community         |
 | `worktrunk`              | Work management                     | Community         |
 | `codex`                  | Codex code review & task delegation | Community         |
@@ -614,6 +615,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `ralph` - Convert PRDs to JSON for autonomous agent execution
 - `slop` - AI slop detection and removal
 - `tdd` - Test-Driven Development workflows
+- `thermo-nuclear-code-quality-review` - Extremely strict maintainability and structural code quality reviews
 
 #### Projects Built with AI
 
@@ -1646,9 +1648,10 @@ Shell Command: Install 'cursor' command in PATH
 
 ### Configuration
 
-Cursor Agent CLI configs are stored in [`configs/cursor/`](configs/cursor/) and installed to `~/.cursor/rules/`.
+Cursor Agent CLI configs are stored in [`configs/cursor/`](configs/cursor/) and installed to the official paths under `~/.cursor/`.
 
 - [`AGENTS.md`](configs/cursor/AGENTS.md) - Agent guidelines and best practices, installed to `~/.cursor/rules/general.mdc`
+- [`agents/`](configs/cursor/agents/) - Custom agents, installed to `~/.cursor/agents/`
 
 ### 📋 MCP Servers
 
@@ -1690,6 +1693,12 @@ Cursor supports MCP servers via `@~/.cursor/mcp.json`:
 Located in [`configs/cursor/commands/`](configs/cursor/commands/):
 
 - `deslop` - Remove AI-generated boilerplate and improve code quality
+
+### Custom Agents
+
+Located in [`configs/cursor/agents/`](configs/cursor/agents/):
+
+- `thermo-nuclear-code-quality-review` - Run a strict maintainability and structural quality audit
 
 ### Usage
 

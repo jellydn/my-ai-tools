@@ -1861,6 +1861,11 @@ copy_cursor_configs() {
 		log_success "Cursor MCP config copied"
 	fi
 
+	if [ -d "$SCRIPT_DIR/configs/cursor/agents" ]; then
+		execute_quoted rm -rf "$HOME/.cursor/agents"
+		safe_copy_dir "$SCRIPT_DIR/configs/cursor/agents" "$HOME/.cursor/agents"
+	fi
+
 	execute_quoted rm -rf "$HOME/.cursor/commands"
 	safe_copy_dir "$SCRIPT_DIR/configs/cursor/commands" "$HOME/.cursor/commands"
 
