@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -1336,6 +1336,29 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
 
 ---
 
+## 🛸 Antigravity CLI (Optional)
+
+Google's Antigravity CLI for terminal-based AI workflows. [Getting Started](https://antigravity.google/docs/cli-getting-started)
+
+<details>
+<summary><strong>Getting Started</strong></summary>
+
+Use the official getting-started guide for installation and authentication:
+
+- [https://antigravity.google/docs/cli-getting-started](https://antigravity.google/docs/cli-getting-started)
+
+### Usage with CCS
+
+If you already use CCS in this repository, you can launch the Antigravity profile directly:
+
+```bash
+ccs agy
+```
+
+</details>
+
+---
+
 ## 🎯 Kilo CLI (Optional)
 
 AI coding assistant built on top of OpenCode with powerful productivity features. [Homepage](https://kilo.ai)
@@ -2130,6 +2153,7 @@ Copy the file to your preferred location and reference it in your AI tools.
 
 - [Claude Code Documentation](https://claude.com/claude-code) - Official docs
 - [OpenCode Documentation](https://opencode.ai/docs) - Guide with agents and skills
+- [Antigravity CLI Getting Started](https://antigravity.google/docs/cli-getting-started) - Official guide
 - [MCP Servers Directory](https://mcp.so) - Model Context Protocol servers
 - [Context7 Documentation](https://context7.com/docs) - Library documentation lookup
 - [CCS Documentation](https://github.com/kaitranntt/ccs) - Claude Code Switch
