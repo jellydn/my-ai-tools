@@ -26,13 +26,13 @@ README_FILE="$REPO_ROOT/README.md"
     [ "$output" = "true" ]
 }
 
-@test "recommend-skills.json has 9 entries in recommended_skills" {
+@test "recommend-skills.json has 10 entries in recommended_skills" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
     fi
     run jq -r '.recommended_skills | length' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
-    [ "$output" = "9" ]
+    [ "$output" = "10" ]
 }
 
 @test "every entry in recommended-skills.json has a non-empty repo field" {
