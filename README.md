@@ -1341,11 +1341,19 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
 Google's Antigravity CLI for terminal-based AI workflows. [Getting Started](https://antigravity.google/docs/cli-getting-started)
 
 <details>
-<summary><strong>Getting Started</strong></summary>
+<summary><strong>Documentation</strong></summary>
 
-Use the official getting-started guide for installation and authentication:
+Use the official Antigravity CLI docs:
 
 - [https://antigravity.google/docs/cli-getting-started](https://antigravity.google/docs/cli-getting-started)
+- [https://antigravity.google/docs/cli-using](https://antigravity.google/docs/cli-using)
+- [https://antigravity.google/docs/cli-features](https://antigravity.google/docs/cli-features)
+
+### Migration from Google CLI
+
+If you're moving from Google CLI (gcli), follow:
+
+- [https://antigravity.google/docs/gcli-migration](https://antigravity.google/docs/gcli-migration)
 
 ### Usage with CCS
 
@@ -2154,6 +2162,9 @@ Copy the file to your preferred location and reference it in your AI tools.
 - [Claude Code Documentation](https://claude.com/claude-code) - Official docs
 - [OpenCode Documentation](https://opencode.ai/docs) - Guide with agents and skills
 - [Antigravity CLI Getting Started](https://antigravity.google/docs/cli-getting-started) - Official guide
+- [Antigravity CLI Using Guide](https://antigravity.google/docs/cli-using) - Commands and usage
+- [Antigravity CLI Features](https://antigravity.google/docs/cli-features) - Feature overview
+- [Antigravity gcli Migration](https://antigravity.google/docs/gcli-migration) - Migration guide
 - [MCP Servers Directory](https://mcp.so) - Model Context Protocol servers
 - [Context7 Documentation](https://context7.com/docs) - Library documentation lookup
 - [CCS Documentation](https://github.com/kaitranntt/ccs) - Claude Code Switch
