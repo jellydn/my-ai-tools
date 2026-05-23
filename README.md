@@ -657,6 +657,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Mitsuhiko**              | [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff)                                             | Skills and extensions by Armin Ronacher. Includes tmux session control, GitHub CLI, web browser automation, Sentry integration, mermaid diagrams, and more.                                                                                                                         |
 | **Git Stacked PRs**        | [github/gh-stack](https://github.com/github/gh-stack)                                                         | GitHub CLI extension for managing stacked branches and pull requests. Create, push, rebase, sync, and navigate stacks of dependent PRs for incremental code review workflows.                                                                                                       |
 | **Facts**                  | [av/facts](https://github.com/av/facts)                                                                       | Track project specs and facts in a `.facts` file. Lifecycle stages (`@draft` → `@spec` → `@implemented`) with shell-command verification. Ships four skills: `facts`, `facts-discover`, `facts-refine`, and `facts-implement`.                                                      |
+| **Modern Web Guidance**    | [GoogleChrome/modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance)                       | Search tool for modern web development best practices (HTML, CSS, accessibility, and client-side JS APIs).                                                                                                                                                                          |
 | **Plannotator Setup Goal** | [backnotprop/plannotator](https://github.com/backnotprop/plannotator)                                         | Turn ideas into structured goal packages with fact sheets and execution plans, gated by Plannotator annotation                                                                                                                                                                      |
 
 **Installation:**
@@ -665,6 +666,7 @@ Official and community-maintained skill collections for specific frameworks:
 # Install skills using npx skills add
 npx skills add expo/skills --global --agent claude-code
 npx skills add vercel-labs/agent-skills --global --agent claude-code
+npx skills add factory-ai/factory-plugins --skill no-use-effect --global --agent claude-code
 npx skills add blader/humanizer --global --agent claude-code
 npx skills add jezweb/claude-skills --global --agent claude-code
 npx skills add mattpocock/skills --skill grill-with-docs --global --agent claude-code
@@ -673,6 +675,7 @@ npx skills add mitsuhiko/agent-stuff --global --agent claude-code
 npx skills add github/gh-stack --global --agent claude-code
 npx skills add warpdotdev/oz-skills --skill docs-update --global --agent claude-code
 npx skills add av/facts --global --agent claude-code
+npx skills add GoogleChrome/modern-web-guidance --skill modern-web-guidance --global --agent claude-code
 ```
 
 ### Configuration Files
