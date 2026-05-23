@@ -43,6 +43,11 @@
 		{
 			"repo": "av/facts",
 			"description": "Track project specs and facts in a .facts file with lifecycle stages (draft, spec, implemented) and shell-command verification"
+		},
+		{
+			"repo": "GoogleChrome/modern-web-guidance",
+			"skill": "modern-web-guidance",
+			"description": "Search tool for modern web development best practices"
 		}
 	]
 }

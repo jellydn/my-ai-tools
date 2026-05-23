@@ -26,13 +26,13 @@ README_FILE="$REPO_ROOT/README.md"
     [ "$output" = "true" ]
 }
 
-@test "recommend-skills.json has 9 entries in recommended_skills" {
+@test "recommend-skills.json has 11 entries in recommended_skills" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
     fi
     run jq -r '.recommended_skills | length' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
-    [ "$output" = "9" ]
+    [ "$output" = "11" ]
 }
 
 @test "every entry in recommended-skills.json has a non-empty repo field" {
@@ -210,4 +210,19 @@ README_FILE="$REPO_ROOT/README.md"
     run grep -c 'npx skills add mattpocock/skills --skill' "$README_FILE"
     [ "$status" -eq 0 ]
     [ "$output" -ge 2 ]
+}
+
+@test "README.md install block contains no-use-effect install command" {
+    run grep -F 'npx skills add factory-ai/factory-plugins --skill no-use-effect' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md install block contains modern-web-guidance install command" {
+    run grep -F 'npx skills add GoogleChrome/modern-web-guidance --skill modern-web-guidance' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md table row references GoogleChrome/modern-web-guidance" {
+    run grep -F 'GoogleChrome/modern-web-guidance' "$README_FILE"
+    [ "$status" -eq 0 ]
 }
