@@ -1,5 +1,6 @@
 {
 	"allowNonWorkspaceAccess": true,
+	"artifactReviewPolicy": "agent-decides",
 	"enableTelemetry": false,
 	"enableTerminalSandbox": true,
 	"notifications": true,
@@ -22,6 +23,7 @@
 			"command(rm -rf)"
 		]
 	},
+	"runningLightSpeed": "off",
 	"showFeedbackSurvey": false,
 	"statusLine": {
 		"type": "",
@@ -29,5 +31,6 @@
 		"enabled": true
 	},
 	"toolPermission": "proceed-in-sandbox",
-	"trustedWorkspaces": []
+	"trustedWorkspaces": [],
+	"verbosity": "low"
 }
