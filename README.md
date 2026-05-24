@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, agentmemory
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -29,6 +29,7 @@
 | **Pi**          | (via packages)                                                                         | Packages (subagents, hooks, fff, annotate, mcp-adapter, simplify, plan, crofai...) |
 | **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
 | **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | my-ai-tools-gemini-migration                                                       |
 | **Kilo**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | (uses OpenCode plugins)                                                            |
 | **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
 | **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
@@ -389,28 +390,28 @@ If you encounter issues:
 
 #### Plugin List
 
-| Plugin                   | Description                         | Source            |
-| ------------------------ | ----------------------------------- | ----------------- |
-| `typescript-lsp`         | TypeScript language server          | Official          |
-| `pyright-lsp`            | Python language server              | Official          |
-| `context7`               | Documentation lookup                | Official          |
-| `frontend-design`        | UI/UX design assistance             | Official          |
-| `learning-output-style`  | Interactive learning mode           | Official          |
-| `swift-lsp`              | Swift language support              | Official          |
-| `lua-lsp`                | Lua language support                | Official          |
-| `code-simplifier`        | Code simplification                 | Official          |
-| `rust-analyzer-lsp`      | Rust language support               | Official          |
-| `claude-md-management`   | Markdown management                 | Official          |
-| `plannotator`            | Plan annotation tool                | Community         |
-| `plannotator-setup-goal` | Turn ideas into goal packages       | Local Marketplace |
-| `prd`                    | Product Requirements Documents      | Local Marketplace |
-| `ralph`                  | PRD to JSON converter               | Local Marketplace |
-| `qmd-knowledge`          | Project knowledge management        | Local Marketplace |
-| `codemap`                | Parallel codebase analysis          | Local Marketplace |
+| Plugin                               | Description                             | Source            |
+| ------------------------------------ | --------------------------------------- | ----------------- |
+| `typescript-lsp`                     | TypeScript language server              | Official          |
+| `pyright-lsp`                        | Python language server                  | Official          |
+| `context7`                           | Documentation lookup                    | Official          |
+| `frontend-design`                    | UI/UX design assistance                 | Official          |
+| `learning-output-style`              | Interactive learning mode               | Official          |
+| `swift-lsp`                          | Swift language support                  | Official          |
+| `lua-lsp`                            | Lua language support                    | Official          |
+| `code-simplifier`                    | Code simplification                     | Official          |
+| `rust-analyzer-lsp`                  | Rust language support                   | Official          |
+| `claude-md-management`               | Markdown management                     | Official          |
+| `plannotator`                        | Plan annotation tool                    | Community         |
+| `plannotator-setup-goal`             | Turn ideas into goal packages           | Local Marketplace |
+| `prd`                                | Product Requirements Documents          | Local Marketplace |
+| `ralph`                              | PRD to JSON converter                   | Local Marketplace |
+| `qmd-knowledge`                      | Project knowledge management            | Local Marketplace |
+| `codemap`                            | Parallel codebase analysis              | Local Marketplace |
 | `thermo-nuclear-code-quality-review` | Extremely strict maintainability review | Local Marketplace |
-| `claude-hud`             | Status line with usage monitoring   | Community         |
-| `worktrunk`              | Work management                     | Community         |
-| `codex`                  | Codex code review & task delegation | Community         |
+| `claude-hud`                         | Status line with usage monitoring       | Community         |
+| `worktrunk`                          | Work management                         | Community         |
+| `codex`                              | Codex code review & task delegation     | Community         |
 
 #### Key Marketplace Plugins
 
@@ -1338,24 +1339,64 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
 
 ## 🛸 Antigravity CLI (Optional)
 
-Google's Antigravity CLI for terminal-based AI workflows. [Getting Started](https://antigravity.google/docs/cli-getting-started)
+Google's Antigravity CLI for terminal-first agent workflows. This repository installs Antigravity as a first-class tool and stages migrated Gemini CLI configuration under `~/.gemini/antigravity-cli/`.
 
 <details>
-<summary><strong>Documentation</strong></summary>
+<summary><strong>Installation, Migration & Configuration</strong></summary>
 
-Use the official Antigravity CLI docs:
+### Installation
 
-- [https://antigravity.google/docs/cli-getting-started](https://antigravity.google/docs/cli-getting-started)
+```bash
+# Mac/Linux
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+
+# Windows PowerShell
+irm https://antigravity.google/cli/install.ps1 | iex
+```
+
+Or run this repo's installer:
+
+```bash
+./cli.sh
+```
+
+### Gemini CLI Migration
+
+Antigravity CLI stores its config in `~/.gemini/antigravity-cli/` and can import existing Gemini CLI extensions as Antigravity plugins:
+
+```bash
+agy plugin import gemini
+```
+
+This repository also ships a source-controlled migrated plugin at `configs/antigravity-cli/plugins/my-ai-tools-gemini-migration/` with:
+
+- Gemini MCP servers converted to Antigravity `mcp_config.json`
+- Gemini agents staged as Antigravity plugin agents
+- Gemini `AGENTS.md` and `GEMINI.md` staged as plugin rules
+
+Global Gemini skills in `~/.gemini/skills/` are shared with Antigravity CLI, so no separate skill copy is required.
+
+### Usage
+
 - [https://antigravity.google/docs/cli-using](https://antigravity.google/docs/cli-using)
 - [https://antigravity.google/docs/cli-features](https://antigravity.google/docs/cli-features)
-
-### Migration from Google CLI
-
-If you're moving from Google CLI (gcli), follow:
-
 - [https://antigravity.google/docs/gcli-migration](https://antigravity.google/docs/gcli-migration)
 
-### Usage with CCS
+```bash
+# Start Antigravity CLI
+agy
+
+# Manage plugins, MCP, skills, and settings from inside the TUI
+/mcp
+/skills
+/config
+```
+
+### Configuration Files
+
+- `~/.gemini/antigravity-cli/settings.json` - CLI settings, sandbox, permissions
+- `~/.gemini/antigravity-cli/keybindings.json` - optional keybindings
+- `~/.gemini/antigravity-cli/plugins/<plugin_name>/` - plugins with `plugin.json`, `mcp_config.json`, agents, skills, hooks, and rules
 
 If you already use CCS in this repository, you can launch the Antigravity profile directly:
 

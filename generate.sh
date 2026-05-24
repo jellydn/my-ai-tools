@@ -283,6 +283,29 @@ generate_gemini_configs() {
 	log_success "Gemini CLI configs generated"
 }
 
+generate_antigravity_configs() {
+	log_info "Generating Antigravity CLI configs..."
+
+	local antigravity_home="$HOME/.gemini/antigravity-cli"
+	if [ ! -d "$antigravity_home" ]; then
+		log_warning "Antigravity CLI config directory not found: $antigravity_home"
+		return 0
+	fi
+
+	execute "mkdir -p $SCRIPT_DIR/configs/antigravity-cli"
+
+	copy_single "$antigravity_home/settings.json" "$SCRIPT_DIR/configs/antigravity-cli/settings.json"
+	copy_single "$antigravity_home/keybindings.json" "$SCRIPT_DIR/configs/antigravity-cli/keybindings.json"
+
+	if [ -d "$antigravity_home/plugins" ]; then
+		copy_directory "$antigravity_home/plugins" "$SCRIPT_DIR/configs/antigravity-cli/plugins"
+	else
+		log_warning "Antigravity plugins directory not found: $antigravity_home/plugins"
+	fi
+
+	log_success "Antigravity CLI configs generated"
+}
+
 generate_kilo_configs() {
 	log_info "Generating Kilo CLI configs..."
 
@@ -563,6 +586,9 @@ main() {
 	echo
 
 	generate_gemini_configs
+	echo
+
+	generate_antigravity_configs
 	echo
 
 	generate_kilo_configs
