@@ -296,6 +296,7 @@ generate_antigravity_configs() {
 
 	copy_single "$antigravity_home/settings.json" "$SCRIPT_DIR/configs/antigravity-cli/settings.json"
 	copy_single "$antigravity_home/keybindings.json" "$SCRIPT_DIR/configs/antigravity-cli/keybindings.json"
+	copy_single "$antigravity_home/statusline.sh" "$SCRIPT_DIR/configs/antigravity-cli/statusline.sh"
 
 	if [ -d "$antigravity_home/plugins" ]; then
 		copy_directory "$antigravity_home/plugins" "$SCRIPT_DIR/configs/antigravity-cli/plugins"

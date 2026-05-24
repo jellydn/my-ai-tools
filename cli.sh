@@ -1785,6 +1785,9 @@ copy_antigravity_configs() {
 	execute_quoted mkdir -p "$antigravity_home"
 
 	copy_config_file "$SCRIPT_DIR/configs/antigravity-cli/settings.json" "$antigravity_home/" || true
+	copy_config_file "$SCRIPT_DIR/configs/antigravity-cli/statusline.sh" "$antigravity_home/" || true
+	execute_quoted chmod +x "$antigravity_home/statusline.sh"
+	configure_antigravity_statusline "$antigravity_home"
 
 	if [ -d "$SCRIPT_DIR/configs/antigravity-cli/plugins" ]; then
 		execute_quoted mkdir -p "$antigravity_home/plugins"
@@ -1800,6 +1803,35 @@ copy_antigravity_configs() {
 	normalize_antigravity_mcp_configs "$antigravity_home"
 
 	log_success "Antigravity CLI configs copied"
+}
+
+configure_antigravity_statusline() {
+	local antigravity_home="$1"
+	local settings_file="$antigravity_home/settings.json"
+
+	if ! command -v jq &>/dev/null; then
+		log_warning "jq not found - skipping Antigravity status line setup"
+		return 0
+	fi
+
+	if [ ! -f "$settings_file" ]; then
+		execute_quoted mkdir -p "$antigravity_home"
+		if [ "$DRY_RUN" = true ]; then
+			log_info "[DRY RUN] Would create $settings_file"
+		else
+			printf '{}\n' >"$settings_file"
+		fi
+	fi
+
+	local updated_file
+	updated_file=$(make_temp_file "antigravity-settings" "json")
+	if jq '.statusLine = {"type": "command", "command": "bash ~/.gemini/antigravity-cli/statusline.sh", "enabled": true}' "$settings_file" >"$updated_file"; then
+		execute_quoted cp -p "$updated_file" "$settings_file"
+		log_success "Antigravity status line configured"
+	else
+		log_warning "Failed to configure Antigravity status line"
+	fi
+	rm -f "$updated_file"
 }
 
 migrate_gemini_plugins_to_antigravity() {
