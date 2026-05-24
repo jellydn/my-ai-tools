@@ -1797,6 +1797,7 @@ copy_antigravity_configs() {
 	fi
 
 	migrate_gemini_plugins_to_antigravity "$antigravity_home"
+	normalize_antigravity_mcp_configs "$antigravity_home"
 
 	log_success "Antigravity CLI configs copied"
 }
@@ -1824,6 +1825,42 @@ migrate_gemini_plugins_to_antigravity() {
 	else
 		log_warning "Gemini extension import failed; source-controlled Antigravity plugin was still installed"
 	fi
+}
+
+normalize_antigravity_mcp_configs() {
+	local antigravity_home="$1"
+
+	if ! command -v jq &>/dev/null; then
+		log_warning "jq not found - skipping Antigravity MCP config normalization"
+		return 0
+	fi
+
+	local config_files=()
+	[ -f "$antigravity_home/mcp_config.json" ] && config_files+=("$antigravity_home/mcp_config.json")
+	if [ -d "$antigravity_home/plugins" ]; then
+		while IFS= read -r config_file; do
+			config_files+=("$config_file")
+		done < <(find "$antigravity_home/plugins" -mindepth 2 -maxdepth 2 -name mcp_config.json -type f 2>/dev/null)
+	fi
+
+	for config_file in "${config_files[@]}"; do
+		local normalized_file
+		normalized_file=$(make_temp_file "antigravity-mcp" "json")
+		if jq '
+			.mcpServers |= with_entries(
+				if (.value.url? != null and .value.serverUrl? == null) then
+					.value.serverUrl = .value.url | del(.value.url)
+				else
+					.
+				end
+			)
+		' "$config_file" >"$normalized_file"; then
+			execute_quoted cp -p "$normalized_file" "$config_file"
+		else
+			log_warning "Failed to normalize Antigravity MCP config: $config_file"
+		fi
+		rm -f "$normalized_file"
+	done
 }
 
 copy_kilo_configs() {
