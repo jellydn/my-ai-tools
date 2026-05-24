@@ -26,8 +26,8 @@
 	"runningLightSpeed": "off",
 	"showFeedbackSurvey": false,
 	"statusLine": {
-		"type": "",
-		"command": "",
+		"type": "command",
+		"command": "bash ~/.gemini/antigravity-cli/statusline.sh",
 		"enabled": true
 	},
 	"toolPermission": "proceed-in-sandbox",

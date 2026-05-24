@@ -21,5 +21,9 @@
   "navigation.right": ["right"],
   "navigation.tab": ["tab"],
   "navigation.up": ["up"],
-  "prompt.insert_newline": ["alt+enter", "ctrl+j", "shift+enter"]
+  "prompt.insert_newline": ["alt+enter", "ctrl+j", "shift+enter"],
+  "subagent.approve_fast": ["ctrl+k"],
+  "subagent.jump_to_waiting": ["alt+j"],
+  "view.review_artifact": ["ctrl+r"],
+  "view.toggle_trajectory": ["ctrl+o"]
 }
