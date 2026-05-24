@@ -1,10 +1,33 @@
 {
-  "enableTerminalSandbox": true,
-  "permissions": {
-    "deny": [
-      "command(git reset --hard)",
-      "command(git push --force)",
-      "command(rm -rf)"
-    ]
-  }
+	"allowNonWorkspaceAccess": true,
+	"enableTelemetry": false,
+	"enableTerminalSandbox": true,
+	"notifications": true,
+	"permissions": {
+		"allow": [
+			"unsandboxed(gh)",
+			"unsandboxed(mkdir)",
+			"unsandboxed(git status)",
+			"unsandboxed(git diff)",
+			"unsandboxed(git log)",
+			"unsandboxed(find)",
+			"unsandboxed(bats)",
+			"unsandboxed(git add)",
+			"mcp(github/list_issues)",
+			"unsandboxed(git show)"
+		],
+		"deny": [
+			"command(git reset --hard)",
+			"command(git push --force)",
+			"command(rm -rf)"
+		]
+	},
+	"showFeedbackSurvey": false,
+	"statusLine": {
+		"type": "",
+		"command": "",
+		"enabled": true
+	},
+	"toolPermission": "proceed-in-sandbox",
+	"trustedWorkspaces": []
 }
