@@ -28,7 +28,7 @@
 | **Codex**       | context7, notion, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot | openai-curated, plannotator, worktrunk, computer-use                               |
 | **Pi**          | (via packages)                                                                         | Packages (subagents, hooks, fff, annotate, mcp-adapter, simplify, plan, crofai...) |
 | **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
-| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | Deprecated for Google One/unpaid tiers; migrate to Antigravity                     |
 | **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | my-ai-tools-gemini-migration                                                       |
 | **Kilo**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | (uses OpenCode plugins)                                                            |
 | **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
@@ -1208,9 +1208,11 @@ codex "Explain this code"
 
 ---
 
-## 🔷 Google Gemini CLI (Optional)
+## 🔷 Google Gemini CLI (Deprecated for Google One / unpaid tiers)
 
 Google's AI agent that brings the power of Gemini directly into your terminal. [Homepage](https://github.com/google-gemini/gemini-cli)
+
+> **Migration notice:** Google is transitioning Google One and unpaid-tier Gemini CLI users to Antigravity CLI. Gemini CLI will stop serving those tiers starting June 18, so use the Antigravity CLI setup below for those accounts. This repository still keeps Gemini CLI configs for existing installations, API-key workflows, and migration/export compatibility.
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
@@ -1340,7 +1342,7 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
 
 ## 🛸 Antigravity CLI (Optional)
 
-Google's Antigravity CLI for terminal-first agent workflows. This repository installs Antigravity as a first-class tool and stages migrated Gemini CLI configuration under `~/.gemini/antigravity-cli/`.
+Google's Antigravity CLI for terminal-first agent workflows. This repository installs Antigravity as a first-class tool and stages migrated Gemini CLI configuration under `~/.gemini/antigravity-cli/`. Antigravity is the migration target for Google One and unpaid-tier Gemini CLI users.
 
 <details>
 <summary><strong>Installation, Migration & Configuration</strong></summary>
