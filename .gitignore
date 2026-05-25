@@ -24,6 +24,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .idea
 
 .DS_Store
+.antigravitycli/
 .claude/settings.local.json
 configs/ccs/cliproxy/accounts.json
 configs/ccs/cliproxy/config.yaml
