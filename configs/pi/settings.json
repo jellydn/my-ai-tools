@@ -1,43 +1,42 @@
 {
-  "collapseChangelog": true,
-  "defaultModel": "deepseek-v4-flash",
-  "defaultProvider": "opencode-go",
-  "defaultThinkingLevel": "high",
-  "editorPaddingX": 1,
-  "lastChangelogVersion": "0.74.0",
-  "packages": [
-    {
-      "source": "npm:@plannotator/pi-extension",
-      "skills": []
-    },
-    "npm:pi-subagents",
-    "https://github.com/davebcn87/pi-autoresearch",
-    "npm:pi-hooks",
-    "npm:@ff-labs/pi-fff",
-    "npm:pi-mcp-adapter",
-    "npm:pi-simplify",
-    "npm:pi-manage-todo-list",
-    "npm:pi-btw",
-    "npm:pi-crofai",
-    "npm:pi-code-previews",
-    "npm:pi-codex-goal"
-  ],
-  "quietStartup": true,
-  "theme": "kanagawa",
-  "hideThinkingBlock": false,
-  "permissionLevel": "high",
-  "treeFilterMode": "default",
-  "enabledModels": [
-    "github-copilot/gpt-5-mini",
-    "github-copilot/gpt-4.1",
-    "opencode-go/kimi-k2.6",
-    "opencode-go/minimax-m2.7",
-    "opencode-go/deepseek-v4-pro",
-    "opencode-go/deepseek-v4-flash",
-    "opencode-go/glm-5.1",
-    "crofai/kimi-k2.6",
-    "crofai/glm-5.1",
-    "crofai/deepseek-v4-pro",
-    "crofai/deepseek-v4-flash"
-  ]
+	"collapseChangelog": true,
+	"defaultModel": "glm-5.1",
+	"defaultProvider": "crofai",
+	"defaultThinkingLevel": "high",
+	"editorPaddingX": 1,
+	"lastChangelogVersion": "0.75.5",
+	"packages": [
+		{
+			"source": "npm:@plannotator/pi-extension",
+			"skills": []
+		},
+		"https://github.com/davebcn87/pi-autoresearch",
+		"npm:pi-hooks",
+		"npm:@ff-labs/pi-fff",
+		"npm:pi-mcp-adapter",
+		"npm:pi-simplify",
+		"npm:pi-manage-todo-list",
+		"npm:pi-btw",
+		"npm:pi-crofai",
+		"npm:pi-code-previews",
+		"npm:pi-codex-goal"
+	],
+	"quietStartup": true,
+	"theme": "kanagawa",
+	"hideThinkingBlock": false,
+	"permissionLevel": "high",
+	"treeFilterMode": "default",
+	"enabledModels": [
+		"github-copilot/gpt-5-mini",
+		"github-copilot/gpt-4.1",
+		"opencode-go/kimi-k2.6",
+		"opencode-go/minimax-m2.7",
+		"opencode-go/deepseek-v4-pro",
+		"opencode-go/deepseek-v4-flash",
+		"opencode-go/glm-5.1",
+		"crofai/kimi-k2.6",
+		"crofai/glm-5.1",
+		"crofai/deepseek-v4-pro",
+		"crofai/deepseek-v4-flash"
+	]
 }

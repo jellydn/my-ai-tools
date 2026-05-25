@@ -283,6 +283,30 @@ generate_gemini_configs() {
 	log_success "Gemini CLI configs generated"
 }
 
+generate_antigravity_configs() {
+	log_info "Generating Antigravity CLI configs..."
+
+	local antigravity_home="$HOME/.gemini/antigravity-cli"
+	if [ ! -d "$antigravity_home" ]; then
+		log_warning "Antigravity CLI config directory not found: $antigravity_home"
+		return 0
+	fi
+
+	execute_quoted mkdir -p "$SCRIPT_DIR/configs/antigravity-cli"
+
+	copy_single "$antigravity_home/settings.json" "$SCRIPT_DIR/configs/antigravity-cli/settings.json"
+	copy_single "$antigravity_home/keybindings.json" "$SCRIPT_DIR/configs/antigravity-cli/keybindings.json"
+	copy_single "$antigravity_home/statusline.sh" "$SCRIPT_DIR/configs/antigravity-cli/statusline.sh"
+
+	if [ -d "$antigravity_home/plugins" ]; then
+		copy_directory "$antigravity_home/plugins" "$SCRIPT_DIR/configs/antigravity-cli/plugins"
+	else
+		log_warning "Antigravity plugins directory not found: $antigravity_home/plugins"
+	fi
+
+	log_success "Antigravity CLI configs generated"
+}
+
 generate_kilo_configs() {
 	log_info "Generating Kilo CLI configs..."
 
@@ -482,6 +506,29 @@ generate_factory_configs() {
 	log_success "Factory Droid configs generated"
 }
 
+generate_orca_configs() {
+	log_info "Generating Orca configs..."
+
+	local orca_home="$HOME/Library/Application Support/orca"
+	local hooks_dir="$orca_home/agent-hooks"
+
+	if [ ! -d "$hooks_dir" ]; then
+		log_warning "Orca agent hooks directory not found: $hooks_dir"
+		return 0
+	fi
+
+	execute_quoted mkdir -p "$SCRIPT_DIR/configs/orca/agent-hooks"
+	for hook_file in "$hooks_dir"/*.sh; do
+		if [ -f "$hook_file" ]; then
+			local hook_name
+			hook_name="$(basename "$hook_file")"
+			copy_single "$hook_file" "$SCRIPT_DIR/configs/orca/agent-hooks/$hook_name"
+		fi
+	done
+
+	log_success "Orca configs generated"
+}
+
 generate_cline_configs() {
 	log_info "Generating Cline configs..."
 
@@ -565,6 +612,9 @@ main() {
 	generate_gemini_configs
 	echo
 
+	generate_antigravity_configs
+	echo
+
 	generate_kilo_configs
 	echo
 
@@ -581,6 +631,9 @@ main() {
 	echo
 
 	generate_factory_configs
+	echo
+
+	generate_orca_configs
 	echo
 
 	generate_cline_configs

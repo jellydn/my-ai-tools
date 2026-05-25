@@ -1,94 +1,70 @@
-# Agents Guide
+# 🤖 Agent Instructions
 
-## Session Management with tmux
+## 🏗️ What This Is
 
-### Run Commands in tmux for Easy Debugging
+Monorepo for **my-ai-tools** — configuration management for AI coding assistants: Claude Code, OpenCode, Amp, CCS, Gemini CLI, Antigravity CLI, Pi, Codex CLI, Kilo CLI, CommandCode, Cursor, Factory Droid, Cline.
 
-Always run dev servers, tests, and interactive CLIs inside tmux with the **current directory name as the session name** for easy debugging:
+Exports configurations to `~/.claude/`, `~/.config/opencode/`, `~/.npm-global/`, `~/.factory/`, `~/.pi/`, etc.
+
+**Reference**: [docs website](https://ai-tools.itman.fyi) | [Testing Guide](./TESTING.md)
+
+## 🔧 Essential Commands
 
 ```bash
-# Quick pattern - use directory name as session name
-SESSION=$(basename "$PWD")
-tmux new -d -s "$SESSION" 2>/dev/null || true
+# Shell scripts (root)
+bash -n cli.sh generate.sh       # Validate syntax
 
-# Run dev server with portless if available, otherwise fallback to npm
-if command -v portless &>/dev/null; then
-    tmux send-keys -t "$SESSION" 'portless run npm run dev' Enter
-else
-    tmux send-keys -t "$SESSION" 'npm run dev' Enter
-fi
+# Docker/ci would run these:
+./cli.sh --dry-run               # Preview install
+./cli.sh                        # Install to home
+./generate.sh --dry-run          # Preview export
+./generate.sh                    # Export changes
 
-# Check output without attaching
-tmux capture-pane -p -t "$SESSION" -S -20
-
-# For AI-enhanced log analysis, use LogPilot:
-logpilot watch "$SESSION" --pane "$SESSION:0.0"
+# Testing
+bash -n cli.sh generate.sh
 ```
 
-See @~/.ai-tools/best-practices.md for full details.
+## 👤 Agent Guidelines
 
-## AI Tool Guidelines
-
-- Use the fff MCP tools for all file search operations instead of default tools.
-- When using bash commands for file/content search, prefer `fd` (fdfind) and `rg` (ripgrep) over standard `find` and `grep` for better performance and git-awareness.
-
-## Project
-
-my-ai-tools: Configuration management repository for AI coding tools (Claude Code, OpenCode, Amp, CCS) and their integration with MCP servers and plugins.
-
-## Build/Lint/Test Commands
-
-### Shell Script Validation
+### Workflow Order
 
 ```bash
-bash -n cli.sh              # Syntax check single script
-bash -n generate.sh         # Syntax check single script
-bash -n cli.sh generate.sh  # Check all scripts
+./cli.sh --dry-run   → Review changes
+git diff            → Verify modifications
+./cli.sh            # Install if approved
+git diff            # Final check before committing
 ```
 
-### Installation/Export
+### Test Pattern Checklist
+
+- ✅ Shell scripts pass `bash -n` syntax check
+- ✅ Tested with `--dry-run` first
+- ✅ No absolute paths in configs
+- ✅ Colors/logging functions used consistently
+- ✅ Error handling (`set -e` and guard clauses)
+- ✅ Documentation updated if workflow changed
+- ✅ Git operations follow safety guidelines
+
+## 🎨 Style Patterns
+
+### Shell Scripts
+
+| Pattern           | Convention                                    |
+| ----------------- | --------------------------------------------- |
+| Shebang           | `#!/bin/bash`                                 |
+| Error handling    | `set -e` at top                               |
+| Guard clauses     | Return early on preconditions                 |
+| Variable quoting  | Always quote: `"$variable"`                   |
+| Paths             | Use `$HOME`, relative - **no absolute paths** |
+| Command execution | Use `execute()` wrapper for dry-run support   |
+| Local variables   | Use `local` for function-scoped               |
+
+### Color Output
 
 ```bash
-./cli.sh --dry-run         # Preview installation (safe)
-./cli.sh                   # Run installation
-./generate.sh --dry-run    # Preview export (safe)
-./generate.sh              # Run export
-```
-
-### Manual Testing
-
-- Always use `--dry-run` first to preview changes
-- Verify with `git diff` before committing
-- Test in non-interactive mode: `echo "y" | ./cli.sh`
-
-## Code Style Guidelines
-
-### Bash Scripts
-
-- **Shebang**: `#!/bin/bash` (POSIX-compliant, not `#!/bin/sh`)
-- **Error handling**: Always use `set -e` at script top
-- **Guard clauses**: Check preconditions first, return early
-  ```bash
-  check_prerequisites() {
-      if ! command -v git &>/dev/null; then
-          log_error "Git is not installed"
-          exit 1
-      fi
-  }
-  ```
-- **Variable quoting**: Always quote: `"$variable"`, never unquoted
-- **No absolute paths**: Use `$HOME` and relative paths for portability
-- **Command execution**: Use `execute()` wrapper for dry-run support
-- **Local variables**: Use `local` for function-scoped variables
-
-### Color Output & Logging
-
-```bash
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'  # No Color
+RED='\033[0;31m'; GREEN='\033[0;32m'
+YELLOW='\033[1;33m'; BLUE='\033[0;34m'
+NC='\033[0m'
 
 log_info()   { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[OK]${NC} $1"; }
@@ -96,72 +72,47 @@ log_warning() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error()  { echo -e "${RED}[ERROR]${NC} $1" >&2; }
 ```
 
-### Error Handling Patterns
-
-- Use `command -v` for prerequisite checks
-- Handle cross-device link errors with TMPDIR:
-  ```bash
-  setup_tmpdir() {
-      local tmp_dir="$HOME/.claude/tmp"
-      mkdir -p "$tmp_dir" 2>/dev/null || true
-      export TMPDIR="$tmp_dir"
-  }
-  ```
-- Use temporary files for error capture:
-  ```bash
-  local err_file="/tmp/claude-${server_name}.err"
-  ```
-
 ### JSON Configuration
 
-- Standard JSON formatting (no trailing commas)
-- Use `jq` for parsing/validation: `jq . settings.json`
+- Standard formatting (no trailing commas)
+- Use `jq` for validation: `jq . settings.json`
 - Claude Code: `settings.json`, `mcp-servers.json`
 - OpenCode/Amp: `settings.json`
-- CCS: `config.json`, `delegation-sessions.json`
+- CCS: `config.yaml`, `delegation-sessions.json`
 
 ### YAML Configuration
 
 - 2-space indentation (no tabs)
-- CCS: `config.yaml` for main configuration
-- Hooks: YAML-based hook definitions
+- CCS: `config.yaml` for main config
+- Hooks: YAML-based definition files
 
-### Markdown Documentation
+## 📂 Directory Structure
 
-- **Headers**: Use emoji prefixes for visual hierarchy
-  - `🚀` for main sections
-  - `📋` for lists/guides
-  - `🎨` for style/formatting
-  - `🔁` for CI/repetition
-- **Code blocks**: Include language tags for syntax highlighting
-- **File references**: Use `@` syntax (e.g., `@~/.ai-tools/best-practices.md`)
-
-### File Naming
-
-- **Configs**: Lowercase with hyphens: `my-config.json`
-- **Commands**: `command-name.md`
-- **Agents**: `agent-name.md`
-- **Skills**: `skill-name/` (directory with SKILL.md)
-- **Best practices**: `best-practices.md`
-
-## Directory Structure
-
-```
-cli.sh, generate.sh          # Root shell scripts
-configs/<tool>/              # Source configurations
-  claude/                    # Claude Code settings, MCP, commands, agents, skills
-  opencode/                  # OpenCode agents, commands, skills
-  amp/                       # Amp settings, skills
-  ccs/                       # CCS configuration, hooks, cliproxy
-  ai-launcher/               # AI Launcher config
-skills/      # Local skills for distribution
+```text
+cli.sh, generate.sh              # Root scripts
+configs/<tool>/                 # Source configs
+  claude/                      # Claude Code configs
+  opencode/                    # OpenCode configs
+  amp/                         # Amp configs
+  ccs/                         # CCS configs
+  ai-launcher/                 # AI Launcher config
+  gemini/
+  antigravity-cli/             # Staged from cli.sh migration
+  pi/
+  codex/                       # Codex configs
+  commandcode/
+  cursor/
+  kilo/
+  cline/
+  factory/
+  orca/
+  copilot/                     # Copilot configs
+skills/                         # Local marketplace plugins
 ```
 
-## Key Patterns
+## 🔑 Key Conventions
 
 ### Dry-Run Support
-
-All destructive operations support `--dry-run`:
 
 ```bash
 execute() {
@@ -173,29 +124,44 @@ execute() {
 }
 ```
 
-### Backup Functionality
+### Backup (cli.sh only)
 
-- Auto-cleanup: keeps last 5 backups
+- Auto-cleanup keeps last 5 backups
 - Location: `$HOME/ai-tools-backup-{timestamp}`
-- Prompts in interactive mode
+- Interactive prompts in non-dry-run mode
 
-### Prerequisite Checking
+### Prerequisites
 
-- Git (required)
-- Bun (preferred) or Node.js (fallback)
-- jq (required for JSON parsing)
-- biome (optional, for JS/TS formatting)
+- **Required**: Git, Bun (preferred over Node.js)
+- **Required**: `jq` for JSON parsing
+- **Optional**: biome for JS/TS formatting
 
-## Git Guidelines
+### Git Guidelines
 
-AI agents should follow safe git practices. See @configs/git-guidelines.md for comprehensive guidelines including:
+- Refer to [`configs/git-guidelines.md`](./configs/git-guidelines.md)
+- Safe operations: Read, safe commits, branch management
+- Avoid: Force push, history rewriting, destructive resets
 
-- **Allowed operations**: Read operations, safe commits, branch management
-- **Operations to avoid**: Force push, history rewriting, destructive resets
-- **Best practices**: Pager handling, version compatibility, commit hygiene
-- **Error handling**: Repository checks, uncommitted changes detection
+## 📝 README Sections to Reference
 
-## Pre-commit Checklist
+### Bash Scripts
+
+- Root tools: [`cli.sh`](./cli.sh), [`generate.sh`](./generate.sh)
+
+### Platform/Tool Details
+
+When any CLI features prominently, reference:
+
+- Installation commands
+- Configuration files (`~/.toolname/`)
+- MCP servers (`mcp.json`)
+- Custom agents/commands
+
+### Pre-commit Checklist
+
+(Based on patterns above, with Git safety)
+
+## ✅ Pre-commit Checklist
 
 - [ ] Shell scripts pass `bash -n` syntax check
 - [ ] Tested with `--dry-run`

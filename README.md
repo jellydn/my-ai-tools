@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, agentmemory
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -28,12 +28,14 @@
 | **Codex**       | context7, notion, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot | openai-curated, plannotator, worktrunk, computer-use                               |
 | **Pi**          | (via packages)                                                                         | Packages (subagents, hooks, fff, annotate, mcp-adapter, simplify, plan, crofai...) |
 | **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
-| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | Deprecated for Google One/unpaid tiers; migrate to Antigravity                     |
+| **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | my-ai-tools-gemini-migration                                                       |
 | **Kilo**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | (uses OpenCode plugins)                                                            |
 | **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
 | **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
 | **Cursor**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
 | **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | core, security-engineer, droid-evolved, autoresearch                               |
+| **Orca**        | -                                                                                      | Agent hooks                                                                        |
 | **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
 
 ### 📋 MCP Server Details
@@ -389,28 +391,28 @@ If you encounter issues:
 
 #### Plugin List
 
-| Plugin                   | Description                         | Source            |
-| ------------------------ | ----------------------------------- | ----------------- |
-| `typescript-lsp`         | TypeScript language server          | Official          |
-| `pyright-lsp`            | Python language server              | Official          |
-| `context7`               | Documentation lookup                | Official          |
-| `frontend-design`        | UI/UX design assistance             | Official          |
-| `learning-output-style`  | Interactive learning mode           | Official          |
-| `swift-lsp`              | Swift language support              | Official          |
-| `lua-lsp`                | Lua language support                | Official          |
-| `code-simplifier`        | Code simplification                 | Official          |
-| `rust-analyzer-lsp`      | Rust language support               | Official          |
-| `claude-md-management`   | Markdown management                 | Official          |
-| `plannotator`            | Plan annotation tool                | Community         |
-| `plannotator-setup-goal` | Turn ideas into goal packages       | Local Marketplace |
-| `prd`                    | Product Requirements Documents      | Local Marketplace |
-| `ralph`                  | PRD to JSON converter               | Local Marketplace |
-| `qmd-knowledge`          | Project knowledge management        | Local Marketplace |
-| `codemap`                | Parallel codebase analysis          | Local Marketplace |
+| Plugin                               | Description                             | Source            |
+| ------------------------------------ | --------------------------------------- | ----------------- |
+| `typescript-lsp`                     | TypeScript language server              | Official          |
+| `pyright-lsp`                        | Python language server                  | Official          |
+| `context7`                           | Documentation lookup                    | Official          |
+| `frontend-design`                    | UI/UX design assistance                 | Official          |
+| `learning-output-style`              | Interactive learning mode               | Official          |
+| `swift-lsp`                          | Swift language support                  | Official          |
+| `lua-lsp`                            | Lua language support                    | Official          |
+| `code-simplifier`                    | Code simplification                     | Official          |
+| `rust-analyzer-lsp`                  | Rust language support                   | Official          |
+| `claude-md-management`               | Markdown management                     | Official          |
+| `plannotator`                        | Plan annotation tool                    | Community         |
+| `plannotator-setup-goal`             | Turn ideas into goal packages           | Local Marketplace |
+| `prd`                                | Product Requirements Documents          | Local Marketplace |
+| `ralph`                              | PRD to JSON converter                   | Local Marketplace |
+| `qmd-knowledge`                      | Project knowledge management            | Local Marketplace |
+| `codemap`                            | Parallel codebase analysis              | Local Marketplace |
 | `thermo-nuclear-code-quality-review` | Extremely strict maintainability review | Local Marketplace |
-| `claude-hud`             | Status line with usage monitoring   | Community         |
-| `worktrunk`              | Work management                     | Community         |
-| `codex`                  | Codex code review & task delegation | Community         |
+| `claude-hud`                         | Status line with usage monitoring       | Community         |
+| `worktrunk`                          | Work management                         | Community         |
+| `codex`                              | Codex code review & task delegation     | Community         |
 
 #### Key Marketplace Plugins
 
@@ -1206,9 +1208,11 @@ codex "Explain this code"
 
 ---
 
-## 🔷 Google Gemini CLI (Optional)
+## 🔷 Google Gemini CLI (Deprecated for Google One / unpaid tiers)
 
 Google's AI agent that brings the power of Gemini directly into your terminal. [Homepage](https://github.com/google-gemini/gemini-cli)
+
+> **Migration notice:** Google is transitioning Google One and unpaid-tier Gemini CLI users to Antigravity CLI. Gemini CLI will stop serving those tiers starting June 18, so use the Antigravity CLI setup below for those accounts. This repository still keeps Gemini CLI configs for existing installations, API-key workflows, and migration/export compatibility.
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
@@ -1331,6 +1335,77 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
 ```
 
 > **Note:** Custom agents in `~/.gemini/agents/` are automatically discovered when `experimental.enableAgents` is set to `true`.
+
+</details>
+
+---
+
+## 🛸 Antigravity CLI (Optional)
+
+Google's Antigravity CLI for terminal-first agent workflows. This repository installs Antigravity as a first-class tool and stages migrated Gemini CLI configuration under `~/.gemini/antigravity-cli/`. Antigravity is the migration target for Google One and unpaid-tier Gemini CLI users.
+
+<details>
+<summary><strong>Installation, Migration & Configuration</strong></summary>
+
+### Installation
+
+```bash
+# Mac/Linux
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+
+# Windows PowerShell
+irm https://antigravity.google/cli/install.ps1 | iex
+```
+
+Or run this repo's installer:
+
+```bash
+./cli.sh
+```
+
+### Gemini CLI / gcli Migration
+
+Antigravity CLI stores its config in `~/.gemini/antigravity-cli/` and can import existing Gemini CLI extensions as Antigravity plugins:
+
+```bash
+agy plugin import gemini
+```
+
+This repository also ships a source-controlled migrated plugin at `configs/antigravity-cli/plugins/my-ai-tools-gemini-migration/` with:
+
+- Gemini MCP servers converted to Antigravity `mcp_config.json`
+- Gemini agents staged as Antigravity plugin agents
+- Gemini `AGENTS.md` and `GEMINI.md` staged as plugin rules
+
+Global Gemini skills in `~/.gemini/skills/` are shared with Antigravity CLI, so no separate skill copy is required.
+
+### Usage
+
+- [https://antigravity.google/docs/cli-using](https://antigravity.google/docs/cli-using)
+- [https://antigravity.google/docs/cli-features](https://antigravity.google/docs/cli-features)
+- [https://antigravity.google/docs/gcli-migration](https://antigravity.google/docs/gcli-migration)
+
+```bash
+# Start Antigravity CLI
+agy
+
+# Manage plugins, MCP, skills, and settings from inside the TUI
+/mcp
+/skills
+/config
+```
+
+### Configuration Files
+
+- `~/.gemini/antigravity-cli/settings.json` - CLI settings, sandbox, permissions
+- `~/.gemini/antigravity-cli/keybindings.json` - optional keybindings
+- `~/.gemini/antigravity-cli/plugins/<plugin_name>/` - plugins with `plugin.json`, `mcp_config.json`, agents, skills, hooks, and rules
+
+If you already use CCS in this repository, you can launch the Antigravity profile directly:
+
+```bash
+ccs agy
+```
 
 </details>
 
@@ -2109,6 +2184,8 @@ For React developers:
 brew install --cask stablyai/orca/orca
 ```
 
+This repository backs up Orca agent hook scripts under `configs/orca/agent-hooks/` and restores them to `~/Library/Application Support/orca/agent-hooks/` during `./cli.sh`.
+
 </details>
 
 ---
@@ -2130,6 +2207,10 @@ Copy the file to your preferred location and reference it in your AI tools.
 
 - [Claude Code Documentation](https://claude.com/claude-code) - Official docs
 - [OpenCode Documentation](https://opencode.ai/docs) - Guide with agents and skills
+- [Antigravity CLI Getting Started](https://antigravity.google/docs/cli-getting-started) - Official guide
+- [Antigravity CLI Using Guide](https://antigravity.google/docs/cli-using) - Commands and usage
+- [Antigravity CLI Features](https://antigravity.google/docs/cli-features) - Feature overview
+- [Antigravity gcli Migration](https://antigravity.google/docs/gcli-migration) - Migration guide
 - [MCP Servers Directory](https://mcp.so) - Model Context Protocol servers
 - [Context7 Documentation](https://context7.com/docs) - Library documentation lookup
 - [CCS Documentation](https://github.com/kaitranntt/ccs) - Claude Code Switch

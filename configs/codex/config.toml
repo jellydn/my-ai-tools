@@ -125,6 +125,3 @@ last_updated = "2026-05-16T10:16:31Z"
 last_revision = "d25e87c350c8ba6df8517dfd748435cf54583a77"
 source_type = "git"
 source = "https://github.com/max-sixty/worktrunk.git"
-
-
-[hooks.state]
