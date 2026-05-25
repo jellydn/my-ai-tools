@@ -292,7 +292,7 @@ generate_antigravity_configs() {
 		return 0
 	fi
 
-	execute "mkdir -p $SCRIPT_DIR/configs/antigravity-cli"
+	execute_quoted mkdir -p "$SCRIPT_DIR/configs/antigravity-cli"
 
 	copy_single "$antigravity_home/settings.json" "$SCRIPT_DIR/configs/antigravity-cli/settings.json"
 	copy_single "$antigravity_home/keybindings.json" "$SCRIPT_DIR/configs/antigravity-cli/keybindings.json"
@@ -506,6 +506,29 @@ generate_factory_configs() {
 	log_success "Factory Droid configs generated"
 }
 
+generate_orca_configs() {
+	log_info "Generating Orca configs..."
+
+	local orca_home="$HOME/Library/Application Support/orca"
+	local hooks_dir="$orca_home/agent-hooks"
+
+	if [ ! -d "$hooks_dir" ]; then
+		log_warning "Orca agent hooks directory not found: $hooks_dir"
+		return 0
+	fi
+
+	execute_quoted mkdir -p "$SCRIPT_DIR/configs/orca/agent-hooks"
+	for hook_file in "$hooks_dir"/*.sh; do
+		if [ -f "$hook_file" ]; then
+			local hook_name
+			hook_name="$(basename "$hook_file")"
+			copy_single "$hook_file" "$SCRIPT_DIR/configs/orca/agent-hooks/$hook_name"
+		fi
+	done
+
+	log_success "Orca configs generated"
+}
+
 generate_cline_configs() {
 	log_info "Generating Cline configs..."
 
@@ -608,6 +631,9 @@ main() {
 	echo
 
 	generate_factory_configs
+	echo
+
+	generate_orca_configs
 	echo
 
 	generate_cline_configs

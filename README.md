@@ -35,6 +35,7 @@
 | **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
 | **Cursor**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
 | **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | core, security-engineer, droid-evolved, autoresearch                               |
+| **Orca**        | -                                                                                      | Agent hooks                                                                        |
 | **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
 
 ### 📋 MCP Server Details
@@ -1360,7 +1361,7 @@ Or run this repo's installer:
 ./cli.sh
 ```
 
-### Gemini CLI Migration
+### Gemini CLI / gcli Migration
 
 Antigravity CLI stores its config in `~/.gemini/antigravity-cli/` and can import existing Gemini CLI extensions as Antigravity plugins:
 
@@ -2180,6 +2181,8 @@ For React developers:
 ```bash
 brew install --cask stablyai/orca/orca
 ```
+
+This repository backs up Orca agent hook scripts under `configs/orca/agent-hooks/` and restores them to `~/Library/Application Support/orca/agent-hooks/` during `./cli.sh`.
 
 </details>
 

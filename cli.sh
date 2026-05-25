@@ -756,6 +756,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.pi" "$BACKUP_DIR" "pi"
 		copy_config_dir "$HOME/.cursor" "$BACKUP_DIR" "cursor"
 		copy_config_dir "$HOME/.factory" "$BACKUP_DIR" "factory"
+		copy_config_dir "$HOME/Library/Application Support/orca/agent-hooks" "$BACKUP_DIR/orca" "agent-hooks"
 		copy_config_dir "$HOME/.cline" "$BACKUP_DIR" "cline"
 		copy_config_dir "$HOME/.commandcode" "$BACKUP_DIR" "commandcode"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
@@ -1289,6 +1290,7 @@ copy_configurations() {
 	copy_copilot_configs
 	copy_cursor_configs
 	copy_factory_configs
+	copy_orca_configs
 	copy_cline_configs
 	copy_best_practices
 }
@@ -1785,6 +1787,7 @@ copy_antigravity_configs() {
 	execute_quoted mkdir -p "$antigravity_home"
 
 	copy_config_file "$SCRIPT_DIR/configs/antigravity-cli/settings.json" "$antigravity_home/" || true
+	copy_config_file "$SCRIPT_DIR/configs/antigravity-cli/keybindings.json" "$antigravity_home/" || true
 	copy_config_file "$SCRIPT_DIR/configs/antigravity-cli/statusline.sh" "$antigravity_home/" || true
 	execute_quoted chmod +x "$antigravity_home/statusline.sh"
 	configure_antigravity_statusline "$antigravity_home"
@@ -1879,11 +1882,18 @@ normalize_antigravity_mcp_configs() {
 		local normalized_file
 		normalized_file=$(make_temp_file "antigravity-mcp" "json")
 		if jq '
-			.mcpServers |= with_entries(
-				if (.value.url? != null and .value.serverUrl? == null) then
-					.value.serverUrl = .value.url | del(.value.url)
+			.mcpServers = (
+				(.mcpServers // {})
+				| if type == "object" then
+					with_entries(
+						if ((.value | type) == "object" and .value.url? != null and .value.serverUrl? == null) then
+							.value.serverUrl = .value.url | del(.value.url)
+						else
+							.
+						end
+					)
 				else
-					.
+					{}
 				end
 			)
 		' "$config_file" >"$normalized_file"; then
@@ -2057,6 +2067,30 @@ copy_factory_configs() {
 	fi
 
 	log_success "Factory Droid configs copied"
+}
+
+copy_orca_configs() {
+	local orca_home="$HOME/Library/Application Support/orca"
+	local source_hooks="$SCRIPT_DIR/configs/orca/agent-hooks"
+
+	if [ ! -d "$source_hooks" ]; then
+		return 0
+	fi
+
+	if [ ! -d "$orca_home" ]; then
+		log_info "Orca config directory not found - skipping Orca hook installation"
+		return 0
+	fi
+
+	log_info "Detected Orca config directory"
+	execute_quoted mkdir -p "$orca_home/agent-hooks"
+	safe_copy_dir "$source_hooks" "$orca_home/agent-hooks"
+	for hook_file in "$orca_home/agent-hooks"/*.sh; do
+		[ -f "$hook_file" ] || continue
+		execute_quoted chmod +x "$hook_file"
+	done
+
+	log_success "Orca agent hooks copied"
 }
 
 copy_cline_configs() {
@@ -2770,7 +2804,7 @@ main() {
 	echo
 	echo "Next steps:"
 	echo "  1. Restart your terminal"
-	echo "  2. Run 'claude' to start Claude Code (or 'agy' for Antigravity CLI)"
+	echo "  2. Run 'claude' to start Claude Code (or 'agy' for Antigravity CLI, 'cmd' for Command Code)"
 	echo "  3. Enable plugins with 'claude plugin enable <plugin-name>'"
 	echo "  4. Check out the README.md for more information"
 	echo

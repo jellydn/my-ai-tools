@@ -28,7 +28,7 @@ bash -n cli.sh generate.sh
 
 ### Workflow Order
 
-```
+```bash
 ./cli.sh --dry-run   → Review changes
 git diff            → Verify modifications
 ./cli.sh            # Install if approved
@@ -88,7 +88,7 @@ log_error()  { echo -e "${RED}[ERROR]${NC} $1" >&2; }
 
 ## 📂 Directory Structure
 
-```
+```text
 cli.sh, generate.sh              # Root scripts
 configs/<tool>/                 # Source configs
   claude/                      # Claude Code configs
@@ -105,6 +105,7 @@ configs/<tool>/                 # Source configs
   kilo/
   cline/
   factory/
+  orca/
   copilot/                     # Copilot configs
 skills/                         # Local marketplace plugins
 ```
