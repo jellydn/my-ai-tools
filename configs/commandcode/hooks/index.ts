@@ -1,10 +1,7 @@
 #!/usr/bin/env bun
 
 import { checkGitCommand } from "./git-guard";
-import type {
-	PostToolUseHandler,
-	PreToolUseHandler,
-} from "./lib";
+import type { PostToolUseHandler, PreToolUseHandler } from "./lib";
 import { runHook } from "./lib";
 
 const preToolUse: PreToolUseHandler = async (payload) => {

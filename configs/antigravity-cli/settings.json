@@ -27,7 +27,7 @@
 	"showFeedbackSurvey": false,
 	"statusLine": {
 		"type": "command",
-		"command": "bash ~/.gemini/antigravity-cli/statusline.sh",
+		"command": "bash \"$HOME/.gemini/antigravity-cli/statusline.sh\"",
 		"enabled": true
 	},
 	"toolPermission": "proceed-in-sandbox",

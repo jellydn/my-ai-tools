@@ -1060,7 +1060,7 @@ install_pi() {
 }
 
 is_commandcode_installed() {
-	command -v cmd &>/dev/null && cmd --version 2>/dev/null | grep -q "Command Code"
+	command -v cmd &>/dev/null
 }
 
 install_commandcode() {
@@ -2302,7 +2302,7 @@ install_single_recommended_skill() {
 # Helper: Check if a skill is in the remote/universal skills list
 is_remote_skill() {
 	case "$1" in
-	plannotator-setup-goal | prd | ralph | qmd-knowledge | codemap | adr | handoffs | pickup | pr-review | slop | tdd)
+	plannotator-setup-goal | prd | ralph | qmd-knowledge | codemap | adr | handoffs | pickup | pr-review | slop | tdd | commit-atomic | draft-pull-request)
 		return 0
 		;;
 	*)
@@ -2379,6 +2379,8 @@ enable_plugins() {
 		"ralph|ralph@my-ai-tools|$SCRIPT_DIR|claude"
 		"qmd-knowledge|qmd-knowledge@my-ai-tools|$SCRIPT_DIR|claude"
 		"codemap|codemap@my-ai-tools|$SCRIPT_DIR|claude"
+		"commit-atomic|commit-atomic@my-ai-tools|$SCRIPT_DIR|claude"
+		"draft-pull-request|draft-pull-request@my-ai-tools|$SCRIPT_DIR|claude"
 		"claude-hud|claude-hud@claude-hud|jarrodwatts/claude-hud|claude"
 		"worktrunk|worktrunk@worktrunk|max-sixty/worktrunk|claude"
 		"openai-codex|codex@openai-codex|openai/codex-plugin-cc|claude"

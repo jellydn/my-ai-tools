@@ -1,7 +1,7 @@
 {
 	"collapseChangelog": true,
-	"defaultModel": "glm-5.1",
-	"defaultProvider": "crofai",
+	"defaultModel": "deepseek-v4-flash",
+	"defaultProvider": "opencode-go",
 	"defaultThinkingLevel": "high",
 	"editorPaddingX": 1,
 	"lastChangelogVersion": "0.75.5",

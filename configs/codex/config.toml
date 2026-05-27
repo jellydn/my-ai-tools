@@ -4,6 +4,10 @@ model_reasoning_effort = "medium"
 approvals_reviewer = "guardian_subagent"
 personality = "pragmatic"
 
+notify = [
+  "turn-ended",
+]
+
 [features]
 unified_exec = true
 shell_snapshot = true
@@ -12,7 +16,7 @@ steer = true
 personality = true
 multi_agent = true
 prevent_idle_sleep = true
-js_repl = true
+js_repl = false
 memories = true
 external_migration = true
 
@@ -25,9 +29,6 @@ network_access = true
 [mcp_servers.context7]
 command = "npx"
 args = ["-y", "@upstash/context7-mcp"]
-
-[mcp_servers.notion]
-url = "https://mcp.notion.com/mcp"
 
 [mcp_servers.sequential-thinking]
 command = "npx"
@@ -62,6 +63,24 @@ args = ["mcp-server"]
 command = "npx"
 args = ["-y", "@agentmemory/mcp"]
 
+[mcp_servers.node_repl]
+args = []
+command = "/Applications/Codex.app/Contents/Resources/node_repl"
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+BROWSER_USE_MARKETPLACE_NAME = "openai-bundled"
+CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
+CODEX_HOME = "$HOME/.codex"
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = ""
+NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/node"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "167fdf579477181fba1773c1efb067b00c5a64fe85dafb50a2001bde198dc739"
+NODE_REPL_TRUSTED_CODE_PATHS = "$HOME/.codex"
+NODE_REPL_UNTRUSTED_ENV_ALLOWLIST = "BROWSER_USE_MARKETPLACE_NAME"
+SKY_CUA_SERVICE_PATH = "$HOME/.codex/.tmp/bundled-marketplaces/openai-bundled/plugins/computer-use/Codex Computer Use.app"
+
 [notice]
 fast_default_opt_out = true
 
@@ -70,58 +89,71 @@ fast_default_opt_out = true
 "gpt-5.3-codex" = "gpt-5.4"
 
 [notice.external_config_migration_prompts]
-home_last_prompted_at = 1778646274
+home_last_prompted_at = 0
 home = true
 
 [tui]
-status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "weekly-limit", "task-progress", "pull-request-number", "fast-mode"]
+status_line = [
+  "model-with-reasoning",
+  "context-remaining",
+  "five-hour-limit",
+  "weekly-limit",
+  "task-progress",
+  "pull-request-number",
+  "fast-mode",
+]
 theme = "kanagawa"
 status_line_use_colors = true
 
-[tui.model_availability_nux]
-"gpt-5.5" = 4
+[memories]
+disable_on_external_context = true
 
-[plugins."github@openai-curated"]
-enabled = false
+[desktop]
+ambient-suggestions-enabled = true
+appearanceLightCodeThemeId = "rose-pine"
+appearanceDarkCodeThemeId = "dracula"
+sansFontSize = 14
+codeFontSize = 13
+usePointerCursors = true
+dictationDictionary = []
+followUpQueueMode = "steer"
+reviewDelivery = "detached"
+preventSleepWhileRunning = true
+keepRemoteControlAwakeWhilePluggedIn = true
+git-branch-prefix = "jellydn/"
+git-pull-request-merge-method = "squash"
+git-show-sidebar-pr-icons = true
+git-commit-instructions = "Write clear, informative commit messages that explain the what and why behind changes, not just the how. Follow the Commitizen-style format: type(scope): subject."
+git-pr-instructions = "Draft PR first with What Why How on PR description"
+conversationDetailMode = "STEPS_COMMANDS"
 
-[plugins."claude-md-management@claude-plugins-official"]
-enabled = true
+[desktop.appearanceLightChromeTheme]
+accent = "#d7827e"
+contrast = 45
+ink = "#575279"
+opaqueWindows = false
+surface = "#faf4ed"
 
-[plugins."code-simplifier@claude-plugins-official"]
-enabled = true
+[desktop.appearanceLightChromeTheme.fonts]
 
-[plugins."context7@claude-plugins-official"]
-enabled = true
+[desktop.appearanceLightChromeTheme.semanticColors]
+diffAdded = "#56949f"
+diffRemoved = "#797593"
+skill = "#907aa9"
 
-[plugins."frontend-design@claude-plugins-official"]
-enabled = true
+[desktop.appearanceDarkChromeTheme]
+accent = "#ff79c6"
+contrast = 60
+ink = "#f8f8f2"
+opaqueWindows = false
+surface = "#282a36"
 
-[plugins."learning-output-style@claude-plugins-official"]
-enabled = true
+[desktop.appearanceDarkChromeTheme.fonts]
 
-[plugins."codex@openai-codex"]
-enabled = true
+[desktop.appearanceDarkChromeTheme.semanticColors]
+diffAdded = "#50fa7b"
+diffRemoved = "#ff5555"
+skill = "#ff79c6"
 
-[plugins."plannotator@plannotator"]
-enabled = true
-
-[plugins."computer-use@openai-bundled"]
-enabled = true
-
-[marketplaces.claude-plugins-official]
-last_updated = "2026-05-16T10:16:15Z"
-last_revision = "5dbfa0fade3058791bf8134b2bd441cb9d5f9a10"
-source_type = "git"
-source = "https://github.com/anthropics/claude-plugins-official.git"
-
-[marketplaces.plannotator]
-last_updated = "2026-05-16T10:16:25Z"
-last_revision = "807cc5f09be92baa4546be9d85188417fe467fe3"
-source_type = "git"
-source = "https://github.com/backnotprop/plannotator.git"
-
-[marketplaces.worktrunk]
-last_updated = "2026-05-16T10:16:31Z"
-last_revision = "d25e87c350c8ba6df8517dfd748435cf54583a77"
-source_type = "git"
-source = "https://github.com/max-sixty/worktrunk.git"
+[desktop.open-in-target-preferences]
+global = "vscodeInsiders"
