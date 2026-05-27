@@ -53,6 +53,12 @@
 			"aliases": ["zen", "logical-commit"]
 		},
 		{
+			"name": "commit-staged",
+			"command": "opencode run --model opencode/deepseek-v4-flash-free --agent build 'Run git diff --staged then do atomic commit message for the change with commitizen convention. Write clear, informative commit messages that explain the what and why behind changes, not just the how.'",
+			"description": "Atomic commit message with staged changes",
+			"aliases": ["gd", "git-diff"]
+		},
+		{
 			"name": "commit-atomic",
 			"command": "opencode run --model opencode/deepseek-v4-flash-free --agent build 'Run git status and git diff to review all changes. Group changes into logical, independent units. Stage each group intentionally using git add with specific files or git add -p -- never use git add -A or git add --all. Commit each group with a commitizen conventional commits message (type(scope): subject) that explains the what and why. Verify staged changes with git diff --staged before each commit.'",
 			"description": "Atomic commit messages with logical grouping and commitizen convention",
@@ -92,7 +98,7 @@
 			"name": "explain",
 			"command": "ccs ghcp --permission-mode plan -p 'Explain this code in detail: 1) What it does 2) How it works 3) Design decisions: $@'",
 			"description": "Code explanation",
-			"aliases": ["wtf", "explain-code"]
+			"aliases": ["explain-code"]
 		},
 		{
 			"name": "review-security",
