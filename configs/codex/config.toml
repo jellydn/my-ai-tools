@@ -123,7 +123,7 @@ keepRemoteControlAwakeWhilePluggedIn = true
 git-branch-prefix = "jellydn/"
 git-pull-request-merge-method = "squash"
 git-show-sidebar-pr-icons = true
-git-commit-instructions = "Write clear, informative commit messages that explain the what and why behind changes, not just the how. Follow the commit-zen convention"
+git-commit-instructions = "Write clear, informative commit messages that explain the what and why behind changes, not just the how. Follow the Commitizen-style format: type(scope): subject."
 git-pr-instructions = "Draft PR first with What Why How on PR description"
 conversationDetailMode = "STEPS_COMMANDS"
 
