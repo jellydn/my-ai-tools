@@ -62,7 +62,7 @@ git add -p <file>
 git diff --staged
 ```
 
-### 4. Commit each group with a zen message
+### 4. Commit each group with a commitizen message
 
 Follow the **commitizen conventional commits** format:
 
@@ -76,19 +76,19 @@ Follow the **commitizen conventional commits** format:
 
 **Types:**
 
-| Type       | When to use                                              |
-| ---------- | -------------------------------------------------------- |
-| `feat`     | A new feature                                            |
-| `fix`      | A bug fix                                                |
-| `docs`     | Documentation only changes                               |
-| `style`    | Formatting, missing semicolons (no code logic change)    |
-| `refactor` | Code change that is neither a fix nor a feature          |
-| `perf`     | A code change that improves performance                  |
-| `test`     | Adding or fixing tests                                   |
-| `chore`    | Build process or auxiliary tool changes                  |
-| `ci`       | CI configuration changes                                 |
-| `build`    | Changes that affect the build system or dependencies     |
-| `revert`   | Reverts a previous commit                                |
+| Type       | When to use                                           |
+| ---------- | ----------------------------------------------------- |
+| `feat`     | A new feature                                         |
+| `fix`      | A bug fix                                             |
+| `docs`     | Documentation only changes                            |
+| `style`    | Formatting, missing semicolons (no code logic change) |
+| `refactor` | Code change that is neither a fix nor a feature       |
+| `perf`     | A code change that improves performance               |
+| `test`     | Adding or fixing tests                                |
+| `chore`    | Build process or auxiliary tool changes               |
+| `ci`       | CI configuration changes                              |
+| `build`    | Changes that affect the build system or dependencies  |
+| `revert`   | Reverts a previous commit                             |
 
 **Writing good commit messages:**
 
