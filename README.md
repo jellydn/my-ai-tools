@@ -21,22 +21,22 @@
 
 ## 🔌 MCP Servers & Plugins Overview
 
-| Tool            | MCP Servers                                                                            | Plugins/Extensions                                                                 |
-| --------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | Official + Community (plannotator, claude-hud, worktrunk, codex)                   |
-| **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | @plannotator/opencode, opencode-crofai, opencode-chrome-annotation                 |
-| **Codex**       | context7, notion, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot | openai-curated, plannotator, worktrunk, computer-use                               |
-| **Pi**          | (via packages)                                                                         | Packages (subagents, hooks, fff, annotate, mcp-adapter, simplify, plan, crofai...) |
-| **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
-| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | Deprecated for Google One/unpaid tiers; migrate to Antigravity                     |
-| **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | my-ai-tools-gemini-migration                                                       |
-| **Kilo**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | (uses OpenCode plugins)                                                            |
-| **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
-| **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
-| **Cursor**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
-| **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | core, security-engineer, droid-evolved, autoresearch                               |
-| **Orca**        | -                                                                                      | Agent hooks                                                                        |
-| **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot         | -                                                                                  |
+| Tool            | MCP Servers                                                                                 | Plugins/Extensions                                                    |
+| --------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Official + Community (plannotator, claude-hud, worktrunk, codex)      |
+| **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | @plannotator/opencode, opencode-crofai, opencode-chrome-annotation    |
+| **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, node_repl   | -                                                                     |
+| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, notion, agentmemory                | Packages (pi-extension, hooks, fff, mcp-adapter, simplify, crofai...) |
+| **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                     |
+| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Deprecated for Google One/unpaid tiers; migrate to Antigravity        |
+| **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot (via plugin) | my-ai-tools-gemini-migration                                          |
+| **Kilo**        | (uses OpenCode config)                                                                      | (uses OpenCode plugins)                                               |
+| **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                     |
+| **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                     |
+| **Cursor**      | context7 (via bunx), sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot   | -                                                                     |
+| **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | core, security-engineer, droid-evolved, autoresearch                  |
+| **Orca**        | -                                                                                           | Agent hooks (claude, gemini, codex, cursor, droid)                    |
+| **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                     |
 
 ### 📋 MCP Server Details
 
@@ -762,6 +762,11 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
 			"type": "local",
 			"command": ["logpilot", "mcp-server"],
 			"enabled": true
+		},
+		"agentmemory": {
+			"type": "local",
+			"command": ["npx", "-y", "@agentmemory/mcp"],
+			"enabled": true
 		}
 	},
 	"agent": {
@@ -904,7 +909,7 @@ The setup script automatically configures MCP servers and copies agent guideline
 
 Configuration in @configs/commandcode/mcp.json:
 
-```json
+````json
 {
 	"mcpServers": {
 		"context7": {
@@ -930,12 +935,13 @@ Configuration in @configs/commandcode/mcp.json:
 		"logpilot": {
 			"command": "logpilot",
 			"args": ["mcp-server"]
+		},
+		"agentmemory": {
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"]
 		}
 	}
 }
-```
-
-### 🤖 Custom Agents
 
 Located in @configs/commandcode/agents/:
 
@@ -974,7 +980,7 @@ AI coding assistant by Modular. [Homepage](https://ampcode.com)
 
 ```bash
 curl -fsSL https://ampcode.com/install.sh | bash
-```
+````
 
 ### Configuration
 
@@ -1007,6 +1013,10 @@ Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/
 		"logpilot": {
 			"command": "logpilot",
 			"args": ["mcp-server"]
+		},
+		"agentmemory": {
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"]
 		}
 	},
 	"amp.terminal.theme": "kanagawa"
@@ -1120,9 +1130,6 @@ Located in [`configs/codex/`](configs/codex/):
 command = "npx"
 args = [ "-y", "@upstash/context7-mcp" ]
 
-[mcp_servers.notion]
-url = "https://mcp.notion.com/mcp"
-
 [mcp_servers.sequential-thinking]
 command = "npx"
 args = [ "-y", "@modelcontextprotocol/server-sequential-thinking" ]
@@ -1142,56 +1149,16 @@ args = [ "-y", "@react-grab/mcp", "--stdio" ]
 [mcp_servers.logpilot]
 command = "logpilot"
 args = ["mcp-server"]
+
+[mcp_servers.node_repl]
+args = []
+command = "/Applications/Codex.app/Contents/Resources/node_repl"
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+CODEX_HOME = "$HOME/.codex"
+NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/node"
 ```
-
-### Plugins
-
-Codex supports plugins from multiple marketplaces:
-
-**Official Plugins (`openai-curated`):**
-
-```toml
-[plugins."github@openai-curated"]
-enabled = true
-```
-
-**Claude Plugins Marketplace (`claude-plugins-official`):**
-
-```toml
-[plugins."claude-md-management@claude-plugins-official"]
-enabled = true
-
-[plugins."code-simplifier@claude-plugins-official"]
-enabled = true
-
-[plugins."context7@claude-plugins-official"]
-enabled = true
-
-[plugins."frontend-design@claude-plugins-official"]
-enabled = true
-
-[plugins."learning-output-style@claude-plugins-official"]
-enabled = true
-
-[plugins."computer-use@openai-bundled"]
-enabled = true
-```
-
-**Community Marketplaces**:
-
-```toml
-[plugins."plannotator@plannotator"]
-enabled = true
-
-[plugins."codex@openai-codex"]
-enabled = true
-```
-
-**Marketplace Repositories**:
-
-- `claude-plugins-official` - https://github.com/anthropics/claude-plugins-official.git
-- `plannotator` - https://github.com/backnotprop/plannotator.git
-- `worktrunk` - https://github.com/max-sixty/worktrunk.git
 
 ### Usage
 
@@ -1328,6 +1295,10 @@ Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
 		"logpilot": {
 			"command": "logpilot",
 			"args": ["mcp-server"]
+		},
+		"agentmemory": {
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"]
 		}
 	},
 	"experimental": {
@@ -1442,46 +1413,7 @@ Configuration is managed through:
 
 ### MCP Servers
 
-```json
-{
-	"mcp": {
-		"context7": {
-			"type": "remote",
-			"url": "https://mcp.context7.com/mcp",
-			"enabled": true
-		},
-		"qmd": {
-			"type": "local",
-			"command": ["qmd", "mcp"],
-			"enabled": true
-		},
-		"fff": {
-			"type": "local",
-			"command": ["fff-mcp"],
-			"enabled": true
-		},
-		"sequential-thinking": {
-			"type": "local",
-			"command": [
-				"npx",
-				"-y",
-				"@modelcontextprotocol/server-sequential-thinking"
-			],
-			"enabled": true
-		},
-		"react-grab-mcp": {
-			"type": "local",
-			"command": ["npx", "-y", "@react-grab/mcp", "--stdio"],
-			"enabled": true
-		},
-		"logpilot": {
-			"type": "local",
-			"command": ["logpilot", "mcp-server"],
-			"enabled": true
-		}
-	}
-}
-```
+Kilo delegates to OpenCode's MCP configuration. See [OpenCode MCP Servers](#mcp-servers-1) for the full list (context7, sequential-thinking, qmd, fff, react-grab-mcp, logpilot, agentmemory).
 
 ### Key Features
 
@@ -1561,18 +1493,16 @@ Then register them in `.pi/settings.json`:
 			"source": "npm:@plannotator/pi-extension",
 			"skills": []
 		},
-		"npm:pi-subagents",
 		"https://github.com/davebcn87/pi-autoresearch",
 		"npm:pi-hooks",
 		"npm:@ff-labs/pi-fff",
-		"npm:pi-annotate",
 		"npm:pi-mcp-adapter",
 		"npm:pi-simplify",
-		"npm:@devkade/pi-plan",
 		"npm:pi-manage-todo-list",
 		"npm:pi-btw",
 		"npm:pi-crofai",
-		"npm:pi-code-previews"
+		"npm:pi-code-previews",
+		"npm:pi-codex-goal"
 	]
 }
 ```
@@ -1582,18 +1512,16 @@ Then register them in `.pi/settings.json`:
 | Package                     | Description                                                                |
 | --------------------------- | -------------------------------------------------------------------------- |
 | `@plannotator/pi-extension` | Interactive plan review with visual annotation                             |
-| `pi-subagents`              | Delegate tasks to subagents with chains, parallel execution, and TUI       |
 | `pi-autoresearch`           | Autonomous experiment loop for optimization targets                        |
 | `pi-hooks`                  | Collection of extensions (checkpoint, lsp, permission, ralph-loop, repeat) |
 | `@ff-labs/pi-fff`           | FFF-powered fuzzy file and content search                                  |
-| `pi-annotate`               | Visual annotation and element selection for plan reviews                   |
 | `pi-mcp-adapter`            | MCP (Model Context Protocol) adapter for Pi                                |
 | `pi-simplify`               | Reviews changed code for clarity, consistency, and maintainability         |
-| `@devkade/pi-plan`          | Plan mode agent for structured task decomposition                          |
 | `pi-manage-todo-list`       | GitHub Copilot-style todo list management tool                             |
 | `pi-btw`                    | Parallel side conversations with `/btw` command                            |
 | `pi-crofai`                 | Crofai provider for Kimi, GLM, DeepSeek and other models                   |
 | `pi-code-previews`          | Live previews of code changes during editing                               |
+| `pi-codex-goal`             | Codex-style goal management integration                                    |
 
 ### Enabled Models
 
@@ -1679,6 +1607,11 @@ Copilot CLI configs are stored in [`configs/copilot/`](configs/copilot/) and ins
 			"type": "local",
 			"command": "logpilot",
 			"args": ["mcp-server"]
+		},
+		"agentmemory": {
+			"type": "local",
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"]
 		}
 	}
 }
@@ -1763,6 +1696,10 @@ Cursor supports MCP servers via `@~/.cursor/mcp.json`:
 		"logpilot": {
 			"command": "logpilot",
 			"args": ["mcp-server"]
+		},
+		"agentmemory": {
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"]
 		}
 	}
 }
@@ -1868,6 +1805,14 @@ Factory Droid supports custom models via any OpenAI-compatible endpoint:
 			"displayName": "minimax-m2.5:cloud",
 			"maxOutputTokens": 128000,
 			"provider": "generic-chat-completion-api"
+		},
+		{
+			"model": "glm-4.7",
+			"id": "custom:GLM-4.7-[Z.AI-Coding-Plan]-0",
+			"baseUrl": "https://api.z.ai/api/coding/paas/v4",
+			"displayName": "GLM-4.7 [Z.AI Coding Plan]",
+			"maxOutputTokens": 131072,
+			"provider": "generic-chat-completion-api"
 		}
 	]
 }
@@ -1907,6 +1852,11 @@ Factory Droid supports custom models via any OpenAI-compatible endpoint:
 			"type": "stdio",
 			"command": "logpilot",
 			"args": ["mcp-server"]
+		},
+		"agentmemory": {
+			"type": "stdio",
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"]
 		}
 	}
 }
@@ -2010,6 +1960,11 @@ Cline configs are stored in `configs/cline/` and installed to `~/.cline/`:
 			"alwaysAllow": [],
 			"command": "logpilot",
 			"args": ["mcp-server"]
+		},
+		"agentmemory": {
+			"alwaysAllow": [],
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"]
 		}
 	}
 }
@@ -2186,7 +2141,7 @@ For React developers:
 brew install --cask stablyai/orca/orca
 ```
 
-This repository backs up Orca agent hook scripts under `configs/orca/agent-hooks/` and restores them to `~/Library/Application Support/orca/agent-hooks/` during `./cli.sh`.
+This repository backs up Orca agent hook scripts under `configs/orca/agent-hooks/` and restores them to `~/Library/Application Support/orca/agent-hooks/` during `./cli.sh`. Hook scripts are available for Claude Code, Gemini CLI, Codex CLI, Cursor, and Factory Droid — each sends lifecycle events to Orca's hook endpoint for session tracking.
 
 </details>
 
