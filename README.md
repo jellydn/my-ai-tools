@@ -368,7 +368,7 @@ npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
 
-# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, thermo-nuclear-code-quality-review
+# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, thermo-nuclear-code-quality-review, commit-atomic, draft-pull-request
 # Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
@@ -607,6 +607,8 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 
 - `adr` - Architecture Decision Records
 - `codemap` - Parallel codebase analysis producing structured documentation
+- `commit-atomic` - Atomic commits by logically grouping changes with commitizen convention (no `git add -A`)
+- `draft-pull-request` - Create draft pull requests using gh CLI with what/why/how template
 - `handoffs` - Create handoff plans for continuing work (provides `/handoffs` command)
 - `pickup` - Resume work from previous handoff sessions (provides `/pickup` command)
 - `plannotator-setup-goal` - Turn an idea into a structured goal package via Plannotator-gated discovery, fact sheet, and plan
