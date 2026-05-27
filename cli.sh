@@ -1060,7 +1060,7 @@ install_pi() {
 }
 
 is_commandcode_installed() {
-	command -v cmd &>/dev/null && cmd --version 2>/dev/null | grep -q "Command Code"
+	command -v cmd &>/dev/null
 }
 
 install_commandcode() {
