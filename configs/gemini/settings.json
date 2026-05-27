@@ -1,190 +1,172 @@
 {
-  "$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
-  "mcpServers": {
-    "context7": {
-      "url": "https://mcp.context7.com/mcp"
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
-    },
-    "qmd": {
-      "command": "qmd",
-      "args": [
-        "mcp"
-      ]
-    },
-    "fff": {
-      "command": "fff-mcp",
-      "args": []
-    },
-    "react-grab-mcp": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@react-grab/mcp",
-        "--stdio"
-      ]
-    },
-    "logpilot": {
-      "command": "logpilot",
-      "args": [
-        "mcp-server"
-      ]
-    },
-    "agentmemory": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@agentmemory/mcp"
-      ]
-    }
-  },
-  "security": {
-    "auth": {
-      "selectedType": "oauth-personal"
-    },
-    "enablePermanentToolApproval": true,
-    "folderTrust": {
-      "enabled": true
-    },
-    "environmentVariableRedaction": {
-      "enabled": true
-    },
-    "toolSandboxing": true,
-    "autoAddToPolicyByDefault": true,
-    "enableConseca": true
-  },
-  "ui": {
-    "theme": "Dracula",
-    "showStatusInTitle": true,
-    "hideBanner": true,
-    "footer": {
-      "hideContextPercentage": false,
-      "items": [
-        "workspace",
-        "git-branch",
-        "sandbox",
-        "model-name",
-        "context-used",
-        "quota",
-        "code-changes"
-      ],
-      "showLabels": true,
-      "hideCWD": true,
-      "hideSandboxStatus": true
-    },
-    "showMemoryUsage": true,
-    "showCitations": true,
-    "showModelInfoInChat": true,
-    "autoThemeSwitching": true,
-    "inlineThinkingMode": "off",
-    "hideTips": true,
-    "terminalBuffer": true,
-    "loadingPhrases": "all"
-  },
-  "general": {
-    "previewFeatures": true,
-    "sessionRetention": {
-      "enabled": true,
-      "maxAge": "30d",
-      "warningAcknowledged": true
-    },
-    "plan": {
-      "enabled": true,
-      "directory": ""
-    },
-    "preferredEditor": "zed",
-    "defaultApprovalMode": "plan",
-    "enableNotifications": true
-  },
-  "context": {
-    "loadMemoryFromIncludeDirectories": true,
-    "fileName": [
-      "CLAUDE.md",
-      "GEMINI.md",
-      "AGENTS.md"
-    ]
-  },
-  "tools": {
-    "shell": {
-      "showColor": true
-    }
-  },
-  "ide": {
-    "enabled": true
-  },
-  "experimental": {
-    "enableAgents": true,
-    "worktrees": true,
-    "modelSteering": true,
-    "directWebFetch": true,
-    "memoryManager": true,
-    "generalistProfile": true,
-    "contextManagement": true,
-    "topicUpdateNarration": true
-  },
-  "hooks": {
-    "BeforeAgent": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/gemini-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/gemini-hook.sh\"; fi"
-          }
-        ]
-      }
-    ],
-    "AfterAgent": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/gemini-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/gemini-hook.sh\"; fi"
-          }
-        ]
-      }
-    ],
-    "AfterTool": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/gemini-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/gemini-hook.sh\"; fi"
-          }
-        ]
-      }
-    ],
-    "BeforeTool": [
-      {
-        "matcher": "exit_plan_mode",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "plannotator",
-            "timeout": 345600
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/gemini-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/gemini-hook.sh\"; fi"
-          }
-        ]
-      }
-    ]
-  },
-  "agents": {
-    "overrides": {}
-  },
-  "model": {
-    "name": ""
-  }
+	"$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
+	"mcpServers": {
+		"context7": {
+			"url": "https://mcp.context7.com/mcp"
+		},
+		"sequential-thinking": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
+		},
+		"fff": {
+			"command": "fff-mcp",
+			"args": []
+		},
+		"react-grab-mcp": {
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
+		},
+		"logpilot": {
+			"command": "logpilot",
+			"args": ["mcp-server"]
+		},
+		"agentmemory": {
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"]
+		}
+	},
+	"security": {
+		"auth": {
+			"selectedType": "oauth-personal"
+		},
+		"enablePermanentToolApproval": true,
+		"folderTrust": {
+			"enabled": true
+		},
+		"environmentVariableRedaction": {
+			"enabled": true
+		},
+		"toolSandboxing": true,
+		"autoAddToPolicyByDefault": true,
+		"enableConseca": true
+	},
+	"ui": {
+		"theme": "Dracula",
+		"showStatusInTitle": true,
+		"hideBanner": true,
+		"footer": {
+			"hideContextPercentage": false,
+			"items": [
+				"workspace",
+				"git-branch",
+				"sandbox",
+				"model-name",
+				"context-used",
+				"quota",
+				"code-changes"
+			],
+			"showLabels": true,
+			"hideCWD": true,
+			"hideSandboxStatus": true
+		},
+		"showMemoryUsage": true,
+		"showCitations": true,
+		"showModelInfoInChat": true,
+		"autoThemeSwitching": true,
+		"inlineThinkingMode": "off",
+		"hideTips": true,
+		"terminalBuffer": true,
+		"loadingPhrases": "all"
+	},
+	"general": {
+		"previewFeatures": true,
+		"sessionRetention": {
+			"enabled": true,
+			"maxAge": "30d",
+			"warningAcknowledged": true
+		},
+		"plan": {
+			"enabled": true,
+			"directory": ""
+		},
+		"preferredEditor": "zed",
+		"defaultApprovalMode": "plan",
+		"enableNotifications": true
+	},
+	"context": {
+		"loadMemoryFromIncludeDirectories": true,
+		"fileName": ["CLAUDE.md", "GEMINI.md", "AGENTS.md"]
+	},
+	"tools": {
+		"shell": {
+			"showColor": true
+		}
+	},
+	"ide": {
+		"enabled": true
+	},
+	"experimental": {
+		"enableAgents": true,
+		"worktrees": true,
+		"modelSteering": true,
+		"directWebFetch": true,
+		"memoryManager": true,
+		"generalistProfile": true,
+		"contextManagement": true,
+		"topicUpdateNarration": true
+	},
+	"hooks": {
+		"BeforeAgent": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/gemini-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/gemini-hook.sh\"; fi"
+					}
+				]
+			}
+		],
+		"AfterAgent": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/gemini-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/gemini-hook.sh\"; fi"
+					}
+				]
+			}
+		],
+		"AfterTool": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/gemini-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/gemini-hook.sh\"; fi"
+					}
+				]
+			}
+		],
+		"BeforeTool": [
+			{
+				"matcher": "exit_plan_mode",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "plannotator",
+						"timeout": 345600
+					}
+				]
+			}
+		],
+		"PreToolUse": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/gemini-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/gemini-hook.sh\"; fi"
+					}
+				]
+			}
+		]
+	},
+	"agents": {
+		"overrides": {}
+	},
+	"model": {
+		"name": ""
+	}
 }
