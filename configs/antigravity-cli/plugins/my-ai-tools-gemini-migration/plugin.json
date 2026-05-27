@@ -1,6 +1,6 @@
 {
-  "name": "my-ai-tools-gemini-migration",
-  "version": "1.0.0",
-  "description": "Migrated Gemini CLI configuration for Antigravity CLI.",
-  "author": "jellydn"
+	"name": "my-ai-tools-gemini-migration",
+	"version": "1.0.0",
+	"description": "Migrated Gemini CLI configuration for Antigravity CLI.",
+	"author": "jellydn"
 }
