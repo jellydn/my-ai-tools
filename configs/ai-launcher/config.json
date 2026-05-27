@@ -54,7 +54,7 @@
 		},
 		{
 			"name": "commit-atomic",
-			"command": "opencode run --model opencode/deepseek-v4-flash-free --agent build 'Run git status and git diff to review all changes. Group changes into logical, independent units. Stage each group intentionally using git add <specific-files> or git add -p — never use git add -A or git add --all. Commit each group with a commitizen conventional commits message (type(scope): subject) that explains the what and why. Verify staged changes with git diff --staged before each commit.'",
+			"command": "opencode run --model opencode/deepseek-v4-flash-free --agent build 'Run git status and git diff to review all changes. Group changes into logical, independent units. Stage each group intentionally using git add with specific files or git add -p -- never use git add -A or git add --all. Commit each group with a commitizen conventional commits message (type(scope): subject) that explains the what and why. Verify staged changes with git diff --staged before each commit.'",
 			"description": "Atomic commit messages with logical grouping and commitizen convention",
 			"aliases": ["ac", "auto-commit"]
 		},
@@ -66,7 +66,7 @@
 		},
 		{
 			"name": "draft-pull-request",
-			"command": "opencode run --model opencode/deepseek-v4-flash-free --agent build 'Create a draft pull request using gh CLI. First review the git log and diff since the base branch. Then compose a structured PR description with three sections: ## What (what was changed), ## Why (the motivation and problem solved), ## How (the technical approach and key decisions). Run: gh pr create --draft --title \"<concise imperative title>\" --body \"<what/why/how description>\"'",
+			"command": "opencode run --model opencode/deepseek-v4-flash-free --agent build 'Create a draft pull request using gh CLI. First review the git log and diff since the base branch. Then compose a structured PR description with three sections: What (what was changed), Why (the motivation and problem solved), How (the technical approach and key decisions). Run: gh pr create --draft --title \"[concise imperative title]\" --body \"[what/why/how description]\"'",
 			"description": "Create draft pull request with what/why/how template via gh CLI",
 			"aliases": ["pr", "draft-pr"]
 		},
