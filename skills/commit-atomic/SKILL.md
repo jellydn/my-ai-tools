@@ -66,7 +66,7 @@ git diff --staged
 
 Follow the **commitizen conventional commits** format:
 
-```
+```text
 <type>(<scope>): <subject>
 
 [optional body]
@@ -114,7 +114,7 @@ The external API occasionally returns null for optional fields.
 Previously this caused an unhandled TypeError at runtime.
 ```
 
-```
+```text
 refactor(utils): extract date formatting into shared helper
 
 Consolidates duplicate date formatting logic spread across three

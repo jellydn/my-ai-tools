@@ -28,25 +28,21 @@ Create a draft pull request using `gh` CLI with a structured **What / Why / How*
 ### 1. Gather context
 
 ```bash
+# Detect the repository's default branch
+BASE_BRANCH=$(gh repo view --json defaultBranchRef -q '.defaultBranchRef.name')
+
 # Check current branch
 git branch --show-current
 
 # Review commit history since branching from base
-git log main..HEAD --oneline
+git log "$BASE_BRANCH"..HEAD --oneline
 
 # Review the full diff
-git diff main..HEAD --stat
-git diff main..HEAD
+git diff "$BASE_BRANCH"..HEAD --stat
+git diff "$BASE_BRANCH"..HEAD
 ```
 
-### 2. Identify the base branch
-
-```bash
-# Detect the default branch (usually main or master)
-gh repo view --json defaultBranchRef -q '.defaultBranchRef.name'
-```
-
-### 3. Compose the PR description
+### 2. Compose the PR description
 
 Write a structured description following the **What / Why / How** template:
 
@@ -81,7 +77,7 @@ gh pr create \
 
 Use `--draft` to signal the PR is not yet ready for review.
 
-### 5. Output the PR URL
+### 4. Output the PR URL
 
 After creation, display the PR URL:
 

@@ -4,6 +4,10 @@ model_reasoning_effort = "medium"
 approvals_reviewer = "guardian_subagent"
 personality = "pragmatic"
 
+notify = [
+  "turn-ended",
+]
+
 [features]
 unified_exec = true
 shell_snapshot = true
@@ -12,7 +16,7 @@ steer = true
 personality = true
 multi_agent = true
 prevent_idle_sleep = true
-js_repl = true
+js_repl = false
 memories = true
 external_migration = true
 
@@ -59,6 +63,24 @@ args = ["mcp-server"]
 command = "npx"
 args = ["-y", "@agentmemory/mcp"]
 
+[mcp_servers.node_repl]
+args = []
+command = "/Applications/Codex.app/Contents/Resources/node_repl"
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+BROWSER_USE_MARKETPLACE_NAME = "openai-bundled"
+CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
+CODEX_HOME = "$HOME/.codex"
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = ""
+NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/node"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "167fdf579477181fba1773c1efb067b00c5a64fe85dafb50a2001bde198dc739"
+NODE_REPL_TRUSTED_CODE_PATHS = "$HOME/.codex"
+NODE_REPL_UNTRUSTED_ENV_ALLOWLIST = "BROWSER_USE_MARKETPLACE_NAME"
+SKY_CUA_SERVICE_PATH = "$HOME/.codex/.tmp/bundled-marketplaces/openai-bundled/plugins/computer-use/Codex Computer Use.app"
+
 [notice]
 fast_default_opt_out = true
 
@@ -67,7 +89,7 @@ fast_default_opt_out = true
 "gpt-5.3-codex" = "gpt-5.4"
 
 [notice.external_config_migration_prompts]
-home_last_prompted_at = 1778646274
+home_last_prompted_at = 0
 home = true
 
 [tui]
@@ -82,56 +104,6 @@ status_line = [
 ]
 theme = "kanagawa"
 status_line_use_colors = true
-
-[tui.model_availability_nux]
-"gpt-5.5" = 4
-
-[plugins."github@openai-curated"]
-enabled = false
-
-[hooks.state."/Users/huynhdung/.codex/hooks.json:session_start:1:0"]
-enabled = true
-trusted_hash = "sha256:fc3174ae2bb7406af71a4bb207d2ed311875d230e9d5e5bb3706b23419caeb3e"
-[hooks.state."/Users/huynhdung/.codex/hooks.json:stop:0:0"]
-trusted_hash = "sha256:f0f840070daee63b7b597ff9fba314db652a4c8084ea055abde4cd2f65c2bd12"
-
-[hooks.state."/Users/huynhdung/.codex/hooks.json:stop:1:0"]
-trusted_hash = "sha256:92c2692bb315148c26b738a5312e07f6986b0e9d2cd01b202542856bcd69ddf0"
-
-[hooks.state."/Users/huynhdung/.codex/hooks.json:stop:2:0"]
-enabled = true
-trusted_hash = "sha256:dbf36d2aa4d8329e6360529410034e79d648235ae00c380e7c077b5ebc93ceee"
-[hooks.state."/Users/huynhdung/.codex/hooks.json:user_prompt_submit:0:0"]
-enabled = true
-trusted_hash = "sha256:b5a7fce0b155f287d0ddd90eea1adc42c23a17f8d1105025ec7bd0dda57823cd"
-
-[marketplaces.openai-bundled]
-last_updated = "2026-05-26T01:54:36Z"
-source_type = "local"
-source = "/Users/huynhdung/.codex/.tmp/bundled-marketplaces/openai-bundled"
-
-[marketplaces.openai-primary-runtime]
-last_updated = "2026-05-26T02:29:40Z"
-source_type = "local"
-source = "/Users/huynhdung/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
-
-[plugins."chrome@openai-bundled"]
-enabled = true
-
-[plugins."computer-use@openai-bundled"]
-enabled = true
-
-[plugins."browser@openai-bundled"]
-enabled = true
-
-[plugins."documents@openai-primary-runtime"]
-enabled = true
-
-[plugins."spreadsheets@openai-primary-runtime"]
-enabled = true
-
-[plugins."presentations@openai-primary-runtime"]
-enabled = true
 
 [memories]
 disable_on_external_context = true
@@ -185,6 +157,3 @@ skill = "#ff79c6"
 
 [desktop.open-in-target-preferences]
 global = "vscodeInsiders"
-
-[desktop.open-in-target-preferences.perPath]
-"/Users/huynhdung/src/tries/2026-02-01-jellydn-ai-launcher" = "vscodeInsiders"

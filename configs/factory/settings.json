@@ -52,6 +52,17 @@
       "maxOutputTokens": 128000,
       "noImageSupport": true,
       "provider": "generic-chat-completion-api"
+    },
+    {
+      "model": "glm-4.7",
+      "id": "custom:GLM-4.7-[Z.AI-Coding-Plan]-0",
+      "index": 0,
+      "baseUrl": "https://api.z.ai/api/coding/paas/v4",
+      "apiKey": "0a43a197f367426eb11fe988845a6039.83zhEONbH1OrbW0j",
+      "displayName": "GLM-4.7 [Z.AI Coding Plan]",
+      "maxOutputTokens": 131072,
+      "noImageSupport": true,
+      "provider": "generic-chat-completion-api"
     }
   ],
   "diffMode": "github",
@@ -65,7 +76,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh'; fi"
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
           }
         ]
       }
@@ -93,7 +104,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh'; fi"
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
           }
         ]
       }
@@ -114,7 +125,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh'; fi"
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
           }
         ]
       }
@@ -124,7 +135,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh'; fi"
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
           }
         ]
       }
@@ -138,7 +149,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh'; fi"
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
           }
         ]
       }
@@ -148,7 +159,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh'; fi"
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
           }
         ]
       }
@@ -159,7 +170,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh'; fi"
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
           }
         ]
       }
