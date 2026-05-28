@@ -67,16 +67,7 @@
 	"enableDroidShield": true,
 	"enableReadinessReport": false,
 	"hooks": {
-		"Notification": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
-					}
-				]
-			}
-		],
+		"Notification": [],
 		"PostToolUse": [
 			{
 				"hooks": [
@@ -94,15 +85,6 @@
 					}
 				],
 				"matcher": "Write|Edit|MultiEdit"
-			},
-			{
-				"matcher": "*",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
-					}
-				]
 			}
 		],
 		"PreToolUse": [
@@ -115,62 +97,16 @@
 					}
 				],
 				"matcher": "WebSearch"
-			},
-			{
-				"matcher": "*",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
-					}
-				]
 			}
 		],
-		"Stop": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
-					}
-				]
-			}
-		],
+		"Stop": [],
 		"claudeHooksImported": true,
 		"importedClaudeHooks": [
 			"node \"$HOME/.ccs/hooks/websearch-transformer.cjs\""
 		],
-		"UserPromptSubmit": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
-					}
-				]
-			}
-		],
-		"SessionStart": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
-					}
-				]
-			}
-		],
-		"PermissionRequest": [
-			{
-				"matcher": "*",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
-					}
-				]
-			}
-		]
+		"UserPromptSubmit": [],
+		"SessionStart": [],
+		"PermissionRequest": []
 	},
 	"ideActivationNudgedForVersion": {},
 	"ideExtensionPromptedAt": {
