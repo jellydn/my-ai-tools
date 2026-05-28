@@ -50,15 +50,154 @@
 			"provider": "generic-chat-completion-api"
 		},
 		{
-			"model": "glm-4.7",
-			"id": "custom:GLM-4.7-[Z.AI-Coding-Plan]-0",
-			"index": 0,
-			"baseUrl": "https://api.z.ai/api/coding/paas/v4",
-			"apiKey": "",
-			"displayName": "GLM-4.7 [Z.AI Coding Plan]",
-			"maxOutputTokens": 131072,
-			"noImageSupport": true,
-			"provider": "generic-chat-completion-api"
+			"model": "gpt-5.4",
+			"id": "custom:GH:-GPT-5.4-(via-Copilot)-0",
+			"index": 1,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GH: GPT-5.4 (via Copilot)",
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "claude-sonnet-4.6",
+			"id": "custom:GH:-Sonnet-4.6-(via-Copilot)-0",
+			"index": 2,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GH: Sonnet 4.6 (via Copilot)",
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "claude-haiku-4.5",
+			"id": "custom:GH:-Haiku-4.5-(via-Copilot)-0",
+			"index": 3,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GH: Haiku 4.5 (via Copilot)",
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "gpt-5.3-codex",
+			"id": "custom:GH:-GPT-5.3-Codex-(via-Copilot)-0",
+			"index": 4,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GH: GPT-5.3-Codex (via Copilot)",
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "gpt-5.4-mini",
+			"id": "custom:GH:-GPT-5-mini-(via-Copilot)-0",
+			"index": 5,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GH: GPT-5 mini (via Copilot)",
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "gpt-5.3-codex",
+			"id": "custom:GPT-5.3-Codex-0",
+			"index": 6,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GPT-5.3 Codex",
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "gpt-5.3-codex(high)",
+			"id": "custom:GPT-5.3-Codex-(High)-0",
+			"index": 7,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GPT-5.3 Codex (High)",
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "gpt-5.3-codex-spark",
+			"id": "custom:GPT-5.3-Codex-Spark-0",
+			"index": 8,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GPT-5.3 Codex Spark",
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "gpt-5.5",
+			"id": "custom:GPT-5.5-0",
+			"index": 9,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GPT-5.5",
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "gpt-5.5(low)",
+			"id": "custom:GPT-5.5-(Low)-0",
+			"index": 10,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GPT-5.5 (Low)",
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "gpt-5.5(high)",
+			"id": "custom:GPT-5.5-(High)-0",
+			"index": 11,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GPT-5.5 (High)",
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "gpt-5.4",
+			"id": "custom:GPT-5.4-0",
+			"index": 12,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GPT-5.4",
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "gpt-5.4(high)",
+			"id": "custom:GPT-5.4-(High)-0",
+			"index": 13,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GPT-5.4 (High)",
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "gpt-5.4-mini",
+			"id": "custom:GPT-5.4-Mini-0",
+			"index": 14,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GPT-5.4 Mini",
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "gpt-5.4-mini(high)",
+			"id": "custom:GPT-5.4-Mini-(High)-0",
+			"index": 15,
+			"baseUrl": "http://localhost:8317/v1",
+			"apiKey": "dummy-not-used",
+			"displayName": "GPT-5.4 Mini (High)",
+			"noImageSupport": false,
+			"provider": "openai"
 		}
 	],
 	"diffMode": "github",
@@ -121,8 +260,8 @@
 	"includeCoAuthoredByDroid": true,
 	"sessionDefaultSettings": {
 		"autonomyMode": "auto-medium",
-		"model": "custom:minimax-m2.5:cloud-0",
-		"reasoningEffort": "none"
+		"model": "custom:GH:-GPT-5.4-(via-Copilot)-0",
+		"reasoningEffort": "high"
 	},
 	"showThinkingInMainView": false,
 	"soundFocusMode": "always",
