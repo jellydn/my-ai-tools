@@ -105,6 +105,9 @@ status_line = [
 theme = "kanagawa"
 status_line_use_colors = true
 
+[tui.model_availability_nux]
+"gpt-5.5" = 2
+
 [memories]
 disable_on_external_context = true
 
