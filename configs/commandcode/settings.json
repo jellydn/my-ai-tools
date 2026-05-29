@@ -38,7 +38,7 @@
 					{
 						"type": "command",
 						"command": "bun ~/.commandcode/hooks/index.ts PreToolUse",
-				"timeout": 10
+						"timeout": 10
 					}
 				]
 			}

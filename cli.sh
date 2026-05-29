@@ -756,6 +756,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.pi" "$BACKUP_DIR" "pi"
 		copy_config_dir "$HOME/.cursor" "$BACKUP_DIR" "cursor"
 		copy_config_dir "$HOME/.factory" "$BACKUP_DIR" "factory"
+		copy_config_dir "$HOME/Library/Application Support/orca/agent-hooks" "$BACKUP_DIR/orca" "agent-hooks"
 		copy_config_dir "$HOME/.cline" "$BACKUP_DIR" "cline"
 		copy_config_dir "$HOME/.commandcode" "$BACKUP_DIR" "commandcode"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
@@ -982,6 +983,30 @@ install_gemini() {
 	run_installer "Google Gemini CLI" "_run_gemini_install" "command -v gemini" ""
 }
 
+install_antigravity() {
+	_run_antigravity_install() {
+		if command -v agy &>/dev/null; then
+			log_warning "Antigravity CLI is already installed"
+			return 0
+		fi
+
+		if [ "$IS_WINDOWS" = true ]; then
+			if command -v powershell.exe &>/dev/null; then
+				execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://antigravity.google/cli/install.ps1 | iex\""
+			else
+				log_error "PowerShell is required to install Antigravity CLI on Windows."
+				log_info "Install manually: https://antigravity.google/docs/cli-getting-started"
+				return 1
+			fi
+		else
+			execute_installer "https://antigravity.google/cli/install.sh" "" "Antigravity CLI"
+		fi
+
+		log_success "Antigravity CLI installed"
+	}
+	run_installer "Google Antigravity CLI" "_run_antigravity_install" "command -v agy" "agy --version"
+}
+
 install_kilo() {
 	_run_kilo_install() {
 		if command -v kilo &>/dev/null; then
@@ -1035,7 +1060,7 @@ install_pi() {
 }
 
 is_commandcode_installed() {
-	command -v cmd &>/dev/null && cmd --version 2>/dev/null | grep -q "Command Code"
+	command -v cmd &>/dev/null
 }
 
 install_commandcode() {
@@ -1258,12 +1283,14 @@ copy_configurations() {
 	copy_ai_launcher_configs
 	copy_codex_configs
 	copy_gemini_configs
+	copy_antigravity_configs
 	copy_kilo_configs
 	copy_pi_configs
 	copy_commandcode_configs
 	copy_copilot_configs
 	copy_cursor_configs
 	copy_factory_configs
+	copy_orca_configs
 	copy_cline_configs
 	copy_best_practices
 }
@@ -1296,11 +1323,20 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/ai-launcher/config.json" \
 		"$SCRIPT_DIR/configs/codex/config.json" \
 		"$SCRIPT_DIR/configs/gemini/settings.json" \
+		"$SCRIPT_DIR/configs/antigravity-cli/settings.json" \
 		"$SCRIPT_DIR/configs/kilo/config.json" \
 		"$SCRIPT_DIR/configs/pi/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/mcp.json" \
 		"$SCRIPT_DIR/configs/factory/settings.json"; do
+		if [ -f "$config_file" ] && ! validate_config "$config_file"; then
+			log_error "Config validation failed: $config_file"
+			config_validation_failed=true
+		fi
+	done
+
+	for config_file in "$SCRIPT_DIR"/configs/antigravity-cli/plugins/*/plugin.json \
+		"$SCRIPT_DIR"/configs/antigravity-cli/plugins/*/mcp_config.json; do
 		if [ -f "$config_file" ] && ! validate_config "$config_file"; then
 			log_error "Config validation failed: $config_file"
 			config_validation_failed=true
@@ -1587,7 +1623,7 @@ setup_commandcode_mcp_servers() {
 				(.[1] // {}) as $repo |
 				($existing * $repo)
 				| .mcpServers = (($existing.mcpServers // {}) + ($repo.mcpServers // {}))
-			' "$dest_file" "$mcp_file" > "$merged_file"; then
+			' "$dest_file" "$mcp_file" >"$merged_file"; then
 				execute_quoted cp -p "$merged_file" "$dest_file" || return 1
 				rm -f "$merged_file"
 				log_success "Command Code MCP servers configured (merged)"
@@ -1730,6 +1766,145 @@ copy_gemini_configs() {
 	log_success "Gemini CLI configs copied"
 }
 
+copy_antigravity_configs() {
+	local antigravity_home="$HOME/.gemini/antigravity-cli"
+	local antigravity_status="missing"
+
+	if command -v agy &>/dev/null; then
+		antigravity_status="command"
+	elif [ -d "$antigravity_home" ]; then
+		antigravity_status="config-dir"
+	elif [ -d "$HOME/.gemini" ] || command -v gemini &>/dev/null; then
+		antigravity_status="gemini-migration"
+	fi
+
+	if [ "$antigravity_status" = "missing" ]; then
+		log_info "Antigravity CLI not detected - skipping Antigravity config installation"
+		return 0
+	fi
+
+	log_info "Detected Antigravity CLI setup path (via $antigravity_status)"
+	execute_quoted mkdir -p "$antigravity_home"
+
+	copy_config_file "$SCRIPT_DIR/configs/antigravity-cli/settings.json" "$antigravity_home/" || true
+	copy_config_file "$SCRIPT_DIR/configs/antigravity-cli/keybindings.json" "$antigravity_home/" || true
+	copy_config_file "$SCRIPT_DIR/configs/antigravity-cli/statusline.sh" "$antigravity_home/" || true
+	execute_quoted chmod +x "$antigravity_home/statusline.sh"
+	configure_antigravity_statusline "$antigravity_home"
+
+	if [ -d "$SCRIPT_DIR/configs/antigravity-cli/plugins" ]; then
+		execute_quoted mkdir -p "$antigravity_home/plugins"
+		for plugin_dir in "$SCRIPT_DIR/configs/antigravity-cli/plugins"/*; do
+			[ -d "$plugin_dir" ] || continue
+			local plugin_name
+			plugin_name="$(basename "$plugin_dir")"
+			safe_copy_dir "$plugin_dir" "$antigravity_home/plugins/$plugin_name"
+		done
+	fi
+
+	migrate_gemini_plugins_to_antigravity "$antigravity_home"
+	normalize_antigravity_mcp_configs "$antigravity_home"
+
+	log_success "Antigravity CLI configs copied"
+}
+
+configure_antigravity_statusline() {
+	local antigravity_home="$1"
+	local settings_file="$antigravity_home/settings.json"
+
+	if ! command -v jq &>/dev/null; then
+		log_warning "jq not found - skipping Antigravity status line setup"
+		return 0
+	fi
+
+	if [ ! -f "$settings_file" ]; then
+		execute_quoted mkdir -p "$antigravity_home"
+		if [ "$DRY_RUN" = true ]; then
+			log_info "[DRY RUN] Would create $settings_file"
+		else
+			printf '{}\n' >"$settings_file"
+		fi
+	fi
+
+	local updated_file
+	updated_file=$(make_temp_file "antigravity-settings" "json")
+	if jq '.statusLine = {"type": "command", "command": "bash ~/.gemini/antigravity-cli/statusline.sh", "enabled": true}' "$settings_file" >"$updated_file"; then
+		execute_quoted cp -p "$updated_file" "$settings_file"
+		log_success "Antigravity status line configured"
+	else
+		log_warning "Failed to configure Antigravity status line"
+	fi
+	rm -f "$updated_file"
+}
+
+migrate_gemini_plugins_to_antigravity() {
+	local antigravity_home="$1"
+
+	if ! command -v agy &>/dev/null; then
+		log_info "agy not found - skipping Gemini extension import"
+		return 0
+	fi
+
+	if [ ! -d "$HOME/.gemini" ]; then
+		return 0
+	fi
+
+	if [ -f "$antigravity_home/import_manifest.json" ]; then
+		log_info "Antigravity Gemini import manifest already exists - skipping extension import"
+		return 0
+	fi
+
+	log_info "Importing Gemini CLI extensions into Antigravity plugins..."
+	if execute "agy plugin import gemini"; then
+		log_success "Gemini CLI extensions imported into Antigravity plugins"
+	else
+		log_warning "Gemini extension import failed; source-controlled Antigravity plugin was still installed"
+	fi
+}
+
+normalize_antigravity_mcp_configs() {
+	local antigravity_home="$1"
+
+	if ! command -v jq &>/dev/null; then
+		log_warning "jq not found - skipping Antigravity MCP config normalization"
+		return 0
+	fi
+
+	local config_files=()
+	[ -f "$antigravity_home/mcp_config.json" ] && config_files+=("$antigravity_home/mcp_config.json")
+	if [ -d "$antigravity_home/plugins" ]; then
+		while IFS= read -r config_file; do
+			config_files+=("$config_file")
+		done < <(find "$antigravity_home/plugins" -mindepth 2 -maxdepth 2 -name mcp_config.json -type f 2>/dev/null)
+	fi
+
+	for config_file in "${config_files[@]}"; do
+		local normalized_file
+		normalized_file=$(make_temp_file "antigravity-mcp" "json")
+		if jq '
+			.mcpServers = (
+				(.mcpServers // {})
+				| if type == "object" then
+					with_entries(
+						if ((.value | type) == "object" and .value.url? != null and .value.serverUrl? == null) then
+							.value.serverUrl = .value.url | del(.value.url)
+						else
+							.
+						end
+					)
+				else
+					{}
+				end
+			)
+		' "$config_file" >"$normalized_file"; then
+			execute_quoted cp -p "$normalized_file" "$config_file"
+		else
+			log_warning "Failed to normalize Antigravity MCP config: $config_file"
+		fi
+		rm -f "$normalized_file"
+	done
+}
+
 copy_kilo_configs() {
 	local kilo_status
 	kilo_status=$(detect_tool --detailed "kilo" "$HOME/.config/kilo") || kilo_status="missing"
@@ -1861,6 +2036,11 @@ copy_cursor_configs() {
 		log_success "Cursor MCP config copied"
 	fi
 
+	if [ -d "$SCRIPT_DIR/configs/cursor/agents" ]; then
+		execute_quoted rm -rf "$HOME/.cursor/agents"
+		safe_copy_dir "$SCRIPT_DIR/configs/cursor/agents" "$HOME/.cursor/agents"
+	fi
+
 	execute_quoted rm -rf "$HOME/.cursor/commands"
 	safe_copy_dir "$SCRIPT_DIR/configs/cursor/commands" "$HOME/.cursor/commands"
 
@@ -1887,6 +2067,30 @@ copy_factory_configs() {
 	fi
 
 	log_success "Factory Droid configs copied"
+}
+
+copy_orca_configs() {
+	local orca_home="$HOME/Library/Application Support/orca"
+	local source_hooks="$SCRIPT_DIR/configs/orca/agent-hooks"
+
+	if [ ! -d "$source_hooks" ]; then
+		return 0
+	fi
+
+	if [ ! -d "$orca_home" ]; then
+		log_info "Orca config directory not found - skipping Orca hook installation"
+		return 0
+	fi
+
+	log_info "Detected Orca config directory"
+	execute_quoted mkdir -p "$orca_home/agent-hooks"
+	safe_copy_dir "$source_hooks" "$orca_home/agent-hooks"
+	for hook_file in "$orca_home/agent-hooks"/*.sh; do
+		[ -f "$hook_file" ] || continue
+		execute_quoted chmod +x "$hook_file"
+	done
+
+	log_success "Orca agent hooks copied"
 }
 
 copy_cline_configs() {
@@ -2098,7 +2302,7 @@ install_single_recommended_skill() {
 # Helper: Check if a skill is in the remote/universal skills list
 is_remote_skill() {
 	case "$1" in
-	plannotator-setup-goal | prd | ralph | qmd-knowledge | codemap | adr | handoffs | pickup | pr-review | slop | tdd)
+	plannotator-setup-goal | prd | ralph | qmd-knowledge | codemap | adr | handoffs | pickup | pr-review | slop | tdd | commit-atomic | draft-pull-request)
 		return 0
 		;;
 	*)
@@ -2175,6 +2379,8 @@ enable_plugins() {
 		"ralph|ralph@my-ai-tools|$SCRIPT_DIR|claude"
 		"qmd-knowledge|qmd-knowledge@my-ai-tools|$SCRIPT_DIR|claude"
 		"codemap|codemap@my-ai-tools|$SCRIPT_DIR|claude"
+		"commit-atomic|commit-atomic@my-ai-tools|$SCRIPT_DIR|claude"
+		"draft-pull-request|draft-pull-request@my-ai-tools|$SCRIPT_DIR|claude"
 		"claude-hud|claude-hud@claude-hud|jarrodwatts/claude-hud|claude"
 		"worktrunk|worktrunk@worktrunk|max-sixty/worktrunk|claude"
 		"openai-codex|codex@openai-codex|openai/codex-plugin-cc|claude"
@@ -2418,7 +2624,7 @@ install_local_skills() {
 	done
 
 	log_success "Skills installed to universal directory: $UNIVERSAL_SKILLS_DIR"
-	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Gemini, Cursor, Pi, Command Code, and more"
+	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Gemini, Antigravity, Cursor, Pi, Command Code, and more"
 
 	# Create symlinks from tool-specific directories to universal directory
 	create_tool_skills_symlinks "$UNIVERSAL_SKILLS_DIR"
@@ -2523,8 +2729,8 @@ copy_skill_to_universal() {
 main() {
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
-	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo          ║"
-	echo "║  Copilot • Cursor • Factory Droid • Cline • Command Code              ║"
+	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Antigravity         ║"
+	echo "║  Pi • Kilo • Copilot • Cursor • Factory Droid • Cline • Command Code  ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -2566,6 +2772,9 @@ main() {
 	install_gemini
 	echo
 
+	install_antigravity
+	echo
+
 	install_kilo
 	echo
 
@@ -2597,7 +2806,7 @@ main() {
 	echo
 	echo "Next steps:"
 	echo "  1. Restart your terminal"
-	echo "  2. Run 'claude' to start Claude Code (or 'cmd' for Command Code)"
+	echo "  2. Run 'claude' to start Claude Code (or 'agy' for Antigravity CLI, 'cmd' for Command Code)"
 	echo "  3. Enable plugins with 'claude plugin enable <plugin-name>'"
 	echo "  4. Check out the README.md for more information"
 	echo
