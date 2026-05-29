@@ -3,6 +3,7 @@
 	"artifactReviewPolicy": "agent-decides",
 	"enableTelemetry": false,
 	"enableTerminalSandbox": true,
+	"model": "Gemini 3.5 Flash (High)",
 	"notifications": true,
 	"permissions": {
 		"allow": [
@@ -15,7 +16,15 @@
 			"unsandboxed(bats)",
 			"unsandboxed(git add)",
 			"mcp(github/list_issues)",
-			"unsandboxed(git show)"
+			"unsandboxed(git show)",
+			"unsandboxed(git clone)",
+			"unsandboxed(cp)",
+			"unsandboxed(ls)",
+			"unsandboxed(touch)",
+			"unsandboxed(xattr)",
+			"unsandboxed(ps)",
+			"unsandboxed(grep)",
+			"unsandboxed(mv)"
 		],
 		"deny": [
 			"command(git reset --hard)",
@@ -27,7 +36,7 @@
 	"showFeedbackSurvey": false,
 	"statusLine": {
 		"type": "command",
-		"command": "bash \"$HOME/.gemini/antigravity-cli/statusline.sh\"",
+		"command": "bash ~/.gemini/antigravity-cli/statusline.sh",
 		"enabled": true
 	},
 	"toolPermission": "proceed-in-sandbox",

@@ -41,6 +41,11 @@
 			"description": "Automated documentation synchronization with code changes"
 		},
 		{
+			"repo": "openclaw/agent-skills",
+			"skill": "autoreview",
+			"description": "Automatic code review skill for structured pull request feedback"
+		},
+		{
 			"repo": "av/facts",
 			"description": "Track project specs and facts in a .facts file with lifecycle stages (draft, spec, implemented) and shell-command verification"
 		},

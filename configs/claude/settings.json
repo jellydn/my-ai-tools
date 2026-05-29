@@ -74,16 +74,7 @@
 	"model": "opus[1m]",
 	"hooks": {
 		"Notification": [],
-		"Stop": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/claude-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/claude-hook.sh\"; fi"
-					}
-				]
-			}
-		],
+		"Stop": [],
 		"PostToolUse": [
 			{
 				"matcher": "Write|Edit|MultiEdit",
@@ -117,37 +108,10 @@
 						"command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.lua$ ]]; then stylua \"$( jq -r .tool_input.file_path )\"; fi"
 					}
 				]
-			},
-			{
-				"matcher": "*",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/claude-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/claude-hook.sh\"; fi"
-					}
-				]
 			}
 		],
-		"UserPromptSubmit": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/claude-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/claude-hook.sh\"; fi"
-					}
-				]
-			}
-		],
+		"UserPromptSubmit": [],
 		"PreToolUse": [
-			{
-				"matcher": "Bash",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bun ~/.claude/hooks/index.ts PreToolUse"
-					}
-				]
-			},
 			{
 				"matcher": "WebSearch",
 				"hooks": [
@@ -157,39 +121,10 @@
 						"timeout": 120
 					}
 				]
-			},
-			{
-				"matcher": "*",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/claude-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/claude-hook.sh\"; fi"
-					}
-				]
 			}
 		],
-		"PostToolUseFailure": [
-			{
-				"matcher": "*",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/claude-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/claude-hook.sh\"; fi"
-					}
-				]
-			}
-		],
-		"PermissionRequest": [
-			{
-				"matcher": "*",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/claude-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/claude-hook.sh\"; fi"
-					}
-				]
-			}
-		]
+		"PostToolUseFailure": [],
+		"PermissionRequest": []
 	},
 	"statusLine": {
 		"type": "command",

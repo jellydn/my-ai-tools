@@ -1,10 +1,10 @@
 {
 	"collapseChangelog": true,
-	"defaultModel": "deepseek-v4-flash",
-	"defaultProvider": "opencode-go",
+	"defaultModel": "moonshotai/kimi-k2.6:free",
+	"defaultProvider": "openrouter",
 	"defaultThinkingLevel": "high",
 	"editorPaddingX": 1,
-	"lastChangelogVersion": "0.75.5",
+	"lastChangelogVersion": "0.76.0",
 	"packages": [
 		{
 			"source": "npm:@plannotator/pi-extension",
@@ -27,16 +27,17 @@
 	"permissionLevel": "high",
 	"treeFilterMode": "default",
 	"enabledModels": [
+		"github-copilot/gpt-5.4",
 		"github-copilot/gpt-5-mini",
 		"github-copilot/gpt-4.1",
-		"opencode-go/kimi-k2.6",
-		"opencode-go/minimax-m2.7",
-		"opencode-go/deepseek-v4-pro",
-		"opencode-go/deepseek-v4-flash",
-		"opencode-go/glm-5.1",
+		"crofai/deepseek-v4-flash",
 		"crofai/kimi-k2.6",
 		"crofai/glm-5.1",
 		"crofai/deepseek-v4-pro",
-		"crofai/deepseek-v4-flash"
+		"opencode-go/glm-5.1",
+		"opencode-go/kimi-k2.6",
+		"opencode-go/deepseek-v4-flash",
+		"opencode-go/deepseek-v4-pro",
+		"openrouter/moonshotai/kimi-k2.6:free"
 	]
 }
