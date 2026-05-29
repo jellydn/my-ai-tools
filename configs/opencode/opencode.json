@@ -89,7 +89,6 @@
 	},
 	"plugin": [
 		"@plannotator/opencode@latest",
-		"opencode-crofai@latest",
 		"opencode-chrome-annotation@latest"
 	],
 	"provider": {
