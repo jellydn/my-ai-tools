@@ -2142,6 +2142,10 @@ brew install --cask stablyai/orca/orca
 
 This repository backs up Orca agent hook scripts under `configs/orca/agent-hooks/` and restores them to `~/Library/Application Support/orca/agent-hooks/` during `./cli.sh`. Hook scripts are available for Claude Code, Gemini CLI, Codex CLI, Cursor, and Factory Droid — each sends lifecycle events to Orca's hook endpoint for session tracking.
 
+### herdr
+
+[**herdr**](https://herdr.dev/) - Terminal-native workspace manager and multiplexer for supervising multiple AI coding agents (Claude Code, Codex, pi, and more) side by side. Run, monitor, and orchestrate agents in parallel with real terminal panes, status tracking, and a local socket API. ([GitHub](https://github.com/ogulcancelik/herdr))
+
 </details>
 
 ---
