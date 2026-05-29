@@ -21,22 +21,22 @@
 
 ## 🔌 MCP Servers & Plugins Overview
 
-| Tool            | MCP Servers                                                                                 | Plugins/Extensions                                                    |
-| --------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Official + Community (plannotator, claude-hud, worktrunk, codex)      |
-| **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | @plannotator/opencode, opencode-crofai, opencode-chrome-annotation    |
-| **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, node_repl   | -                                                                     |
-| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, notion, agentmemory                | Packages (pi-extension, hooks, fff, mcp-adapter, simplify, crofai...) |
-| **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                     |
-| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Deprecated for Google One/unpaid tiers; migrate to Antigravity        |
-| **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot (via plugin) | my-ai-tools-gemini-migration                                          |
-| **Kilo**        | (uses OpenCode config)                                                                      | (uses OpenCode plugins)                                               |
-| **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                     |
-| **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                     |
-| **Cursor**      | context7 (via bunx), sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot   | -                                                                     |
-| **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | core, security-engineer, droid-evolved, autoresearch                  |
-| **Orca**        | -                                                                                           | Agent hooks (claude, gemini, codex, cursor, droid)                    |
-| **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                     |
+| Tool            | MCP Servers                                                                                 | Plugins/Extensions                                               |
+| --------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Official + Community (plannotator, claude-hud, worktrunk, codex) |
+| **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | @plannotator/opencode, opencode-chrome-annotation                |
+| **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, node_repl   | -                                                                |
+| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, notion, agentmemory                | Packages (pi-extension, hooks, fff, mcp-adapter, simplify)       |
+| **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                |
+| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Deprecated for Google One/unpaid tiers; migrate to Antigravity   |
+| **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot (via plugin) | my-ai-tools-gemini-migration                                     |
+| **Kilo**        | (uses OpenCode config)                                                                      | (uses OpenCode plugins)                                          |
+| **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                |
+| **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                |
+| **Cursor**      | context7 (via bunx), sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot   | -                                                                |
+| **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | core, security-engineer, droid-evolved, autoresearch             |
+| **Orca**        | -                                                                                           | Agent hooks (claude, gemini, codex, cursor, droid)               |
+| **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                |
 
 ### 📋 MCP Server Details
 
@@ -658,7 +658,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Humanizer**              | [blader/humanizer](https://github.com/blader/humanizer)                                                       | Removes signs of AI-generated writing from text. Based on Wikipedia's AI writing detection guide, it detects 24 patterns to make text sound more natural and human.                                                                                                                 |
 | **Claude Skills**          | [jezweb/claude-skills](https://github.com/jezweb/claude-skills)                                               | 97 production-ready skills for Claude Code CLI including Cloudflare, React, AI integrations, and more. Includes context-mate for project analysis and workflow management.                                                                                                          |
 | **OZ Skills**              | [warpdotdev/oz-skills](https://github.com/warpdotdev/oz-skills)                                               | 14 production-ready skills by Warp. Includes `docs-update` for automated documentation synchronization with code changes across all major platforms (Mintlify, Docusaurus, GitBook, Fumadocs). Other skills cover CI fix, PR creation, web testing, accessibility audits, and more. |
-| **Auto-Review**            | [openclaw/agent-skills](https://github.com/openclaw/agent-skills/blob/main/skills/autoreview/SKILL.md)        | Auto-review skill for structured and actionable pull request feedback workflows.                                                                                                                                                                                                       |
+| **Auto-Review**            | [openclaw/agent-skills](https://github.com/openclaw/agent-skills/blob/main/skills/autoreview/SKILL.md)        | Auto-review skill for structured and actionable pull request feedback workflows.                                                                                                                                                                                                    |
 | **Skills Discovery**       | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.                                                                                                                                                 |
 | **Matt Pocock**            | [mattpocock/skills](https://github.com/mattpocock/skills)                                                     | Community skills by Matt Pocock. Includes `grill-with-docs` for docs-grounded plan stress-testing, `improve-codebase-architecture` for finding deepening opportunities, and more.                                                                                                   |
 | **Mitsuhiko**              | [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff)                                             | Skills and extensions by Armin Ronacher. Includes tmux session control, GitHub CLI, web browser automation, Sentry integration, mermaid diagrams, and more.                                                                                                                         |
@@ -788,7 +788,6 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
 	},
 	"plugin": [
 		"@plannotator/opencode@latest",
-		"opencode-crofai@latest",
 		"opencode-chrome-annotation@latest"
 	],
 	"formatter": {
@@ -841,7 +840,7 @@ Similar to Claude Code's PostToolUse hooks, formatters run automatically after w
 OpenCode supports community plugins that enhance functionality:
 
 - **[@plannotator/opencode](https://github.com/backnotprop/plannotator)** - Interactive code planning and annotation
-- **[opencode-crofai](https://www.npmjs.com/package/opencode-crofai)** - Alternative model provider integration (Kimi, GLM, DeepSeek)
+
 - **[opencode-chrome-annotation](https://www.npmjs.com/package/opencode-chrome-annotation)** - Chrome-based annotation for plan reviews
 
 Plugins are automatically installed on next OpenCode launch.
@@ -1502,7 +1501,6 @@ Then register them in `.pi/settings.json`:
 		"npm:pi-simplify",
 		"npm:pi-manage-todo-list",
 		"npm:pi-btw",
-		"npm:pi-crofai",
 		"npm:pi-code-previews",
 		"npm:pi-codex-goal"
 	]
@@ -1521,9 +1519,9 @@ Then register them in `.pi/settings.json`:
 | `pi-simplify`               | Reviews changed code for clarity, consistency, and maintainability         |
 | `pi-manage-todo-list`       | GitHub Copilot-style todo list management tool                             |
 | `pi-btw`                    | Parallel side conversations with `/btw` command                            |
-| `pi-crofai`                 | Crofai provider for Kimi, GLM, DeepSeek and other models                   |
-| `pi-code-previews`          | Live previews of code changes during editing                               |
-| `pi-codex-goal`             | Codex-style goal management integration                                    |
+
+| `pi-code-previews` | Live previews of code changes during editing |
+| `pi-codex-goal` | Codex-style goal management integration |
 
 ### Enabled Models
 
@@ -1533,7 +1531,6 @@ Pi is configured with multi-provider model access:
 | -------------- | ------------------------------------------------------------------------------ |
 | github-copilot | `gpt-5-mini`, `gpt-4.1`                                                        |
 | opencode-go    | `kimi-k2.6`, `minimax-m2.7`, `deepseek-v4-pro`, `deepseek-v4-flash`, `glm-5.1` |
-| crofai         | `kimi-k2.6`, `glm-5.1`, `deepseek-v4-pro`, `deepseek-v4-flash`                 |
 
 ### Usage
 
