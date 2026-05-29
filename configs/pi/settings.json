@@ -1,7 +1,7 @@
 {
 	"collapseChangelog": true,
-	"defaultModel": "moonshotai/kimi-k2.6:free",
-	"defaultProvider": "openrouter",
+	"defaultModel": "github-copilot/gpt-4.1",
+	"defaultProvider": "github-copilot",
 	"defaultThinkingLevel": "high",
 	"editorPaddingX": 1,
 	"lastChangelogVersion": "0.76.0",
@@ -17,7 +17,6 @@
 		"npm:pi-simplify",
 		"npm:pi-manage-todo-list",
 		"npm:pi-btw",
-		"npm:pi-crofai",
 		"npm:pi-code-previews",
 		"npm:pi-codex-goal"
 	],
@@ -30,14 +29,9 @@
 		"github-copilot/gpt-5.4",
 		"github-copilot/gpt-5-mini",
 		"github-copilot/gpt-4.1",
-		"crofai/deepseek-v4-flash",
-		"crofai/kimi-k2.6",
-		"crofai/glm-5.1",
-		"crofai/deepseek-v4-pro",
 		"opencode-go/glm-5.1",
 		"opencode-go/kimi-k2.6",
 		"opencode-go/deepseek-v4-flash",
-		"opencode-go/deepseek-v4-pro",
-		"openrouter/moonshotai/kimi-k2.6:free"
+		"opencode-go/deepseek-v4-pro"
 	]
 }
