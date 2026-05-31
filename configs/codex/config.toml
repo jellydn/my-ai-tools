@@ -160,3 +160,15 @@ skill = "#ff79c6"
 
 [desktop.open-in-target-preferences]
 global = "vscodeInsiders"
+
+[projects."/Users/huynhdung/src/tries/2026-05-26-hermes-hub"]
+trust_level = "trusted"
+
+[projects."/Users/huynhdung/Library/Application Support/com.conductor.app/bin"]
+trust_level = "trusted"
+
+[plugins."gmail@openai-curated"]
+enabled = true
+
+[plugins."github@openai-curated"]
+enabled = true
