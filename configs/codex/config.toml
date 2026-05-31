@@ -160,3 +160,9 @@ skill = "#ff79c6"
 
 [desktop.open-in-target-preferences]
 global = "vscodeInsiders"
+
+[plugins."gmail@openai-curated"]
+enabled = true
+
+[plugins."github@openai-curated"]
+enabled = true

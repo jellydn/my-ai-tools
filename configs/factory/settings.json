@@ -1,276 +1,355 @@
 {
-	"allowBackgroundProcesses": false,
-	"awaitingInputSound": "fx-ack01",
-	"claudeHooksImported": true,
-	"cloudSessionSync": true,
-	"commandAllowlist": ["ls", "pwd", "dir"],
-	"commandDenylist": [
-		"rm -rf /",
-		"rm -rf /*",
-		"rm -rf .",
-		"rm -rf ~",
-		"rm -rf ~/*",
-		"rm -rf $HOME",
-		"rm -r /",
-		"rm -r /*",
-		"rm -r ~",
-		"rm -r ~/*",
-		"mkfs",
-		"mkfs.ext4",
-		"mkfs.ext3",
-		"mkfs.vfat",
-		"mkfs.ntfs",
-		"dd if=/dev/zero of=/dev",
-		"dd of=/dev",
-		"shutdown",
-		"reboot",
-		"halt",
-		"poweroff",
-		"init 0",
-		"init 6",
-		":(){ :|: & };:",
-		":() { :|:& };:",
-		"chmod -R 777 /",
-		"chmod -R 000 /",
-		"chown -R",
-		"format",
-		"powershell Remove-Item -Recurse -Force"
-	],
-	"completionSound": "fx-ok01",
-	"customModels": [
-		{
-			"model": "minimax-m2.5:cloud",
-			"id": "custom:minimax-m2.5:cloud-0",
-			"index": 0,
-			"baseUrl": "http://127.0.0.1:11434/v1",
-			"apiKey": "ollama",
-			"displayName": "minimax-m2.5:cloud",
-			"maxOutputTokens": 128000,
-			"noImageSupport": true,
-			"provider": "generic-chat-completion-api"
-		},
-		{
-			"model": "gpt-5.4",
-			"id": "custom:GH:-GPT-5.4-(via-Copilot)-0",
-			"index": 1,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GH: GPT-5.4 (via Copilot)",
-			"noImageSupport": false,
-			"provider": "openai"
-		},
-		{
-			"model": "claude-sonnet-4.6",
-			"id": "custom:GH:-Sonnet-4.6-(via-Copilot)-0",
-			"index": 2,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GH: Sonnet 4.6 (via Copilot)",
-			"noImageSupport": false,
-			"provider": "openai"
-		},
-		{
-			"model": "claude-haiku-4.5",
-			"id": "custom:GH:-Haiku-4.5-(via-Copilot)-0",
-			"index": 3,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GH: Haiku 4.5 (via Copilot)",
-			"noImageSupport": false,
-			"provider": "openai"
-		},
-		{
-			"model": "gpt-5.3-codex",
-			"id": "custom:GH:-GPT-5.3-Codex-(via-Copilot)-0",
-			"index": 4,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GH: GPT-5.3-Codex (via Copilot)",
-			"noImageSupport": false,
-			"provider": "openai"
-		},
-		{
-			"model": "gpt-5.4-mini",
-			"id": "custom:GH:-GPT-5-mini-(via-Copilot)-0",
-			"index": 5,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GH: GPT-5 mini (via Copilot)",
-			"noImageSupport": false,
-			"provider": "openai"
-		},
-		{
-			"model": "gpt-5.3-codex",
-			"id": "custom:GPT-5.3-Codex-0",
-			"index": 6,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GPT-5.3 Codex",
-			"noImageSupport": false,
-			"provider": "openai"
-		},
-		{
-			"model": "gpt-5.3-codex(high)",
-			"id": "custom:GPT-5.3-Codex-(High)-0",
-			"index": 7,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GPT-5.3 Codex (High)",
-			"noImageSupport": false,
-			"provider": "openai"
-		},
-		{
-			"model": "gpt-5.3-codex-spark",
-			"id": "custom:GPT-5.3-Codex-Spark-0",
-			"index": 8,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GPT-5.3 Codex Spark",
-			"noImageSupport": false,
-			"provider": "openai"
-		},
-		{
-			"model": "gpt-5.5",
-			"id": "custom:GPT-5.5-0",
-			"index": 9,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GPT-5.5",
-			"noImageSupport": false,
-			"provider": "openai"
-		},
-		{
-			"model": "gpt-5.5(low)",
-			"id": "custom:GPT-5.5-(Low)-0",
-			"index": 10,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GPT-5.5 (Low)",
-			"noImageSupport": false,
-			"provider": "openai"
-		},
-		{
-			"model": "gpt-5.5(high)",
-			"id": "custom:GPT-5.5-(High)-0",
-			"index": 11,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GPT-5.5 (High)",
-			"noImageSupport": false,
-			"provider": "openai"
-		},
-		{
-			"model": "gpt-5.4",
-			"id": "custom:GPT-5.4-0",
-			"index": 12,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GPT-5.4",
-			"noImageSupport": false,
-			"provider": "openai"
-		},
-		{
-			"model": "gpt-5.4(high)",
-			"id": "custom:GPT-5.4-(High)-0",
-			"index": 13,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GPT-5.4 (High)",
-			"noImageSupport": false,
-			"provider": "openai"
-		},
-		{
-			"model": "gpt-5.4-mini",
-			"id": "custom:GPT-5.4-Mini-0",
-			"index": 14,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GPT-5.4 Mini",
-			"noImageSupport": false,
-			"provider": "openai"
-		},
-		{
-			"model": "gpt-5.4-mini(high)",
-			"id": "custom:GPT-5.4-Mini-(High)-0",
-			"index": 15,
-			"baseUrl": "http://localhost:8317/v1",
-			"apiKey": "dummy-not-used",
-			"displayName": "GPT-5.4 Mini (High)",
-			"noImageSupport": false,
-			"provider": "openai"
-		}
-	],
-	"diffMode": "github",
-	"enableCompletionBell": false,
-	"enableCustomDroids": true,
-	"enableDroidShield": true,
-	"enableReadinessReport": false,
-	"hooks": {
-		"Notification": [],
-		"PostToolUse": [
-			{
-				"hooks": [
-					{
-						"command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(ts|tsx|js|jsx)$'; then biome check --write \"$file_path\"; fi; }",
-						"type": "command"
-					},
-					{
-						"command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.go$ ]]; then gofmt -w \"$( jq -r .tool_input.file_path )\"; fi",
-						"type": "command"
-					},
-					{
-						"command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(md|mdx)$'; then npx prettier --write \"$file_path\"; fi; }",
-						"type": "command"
-					}
-				],
-				"matcher": "Write|Edit|MultiEdit"
-			}
-		],
-		"PreToolUse": [
-			{
-				"hooks": [
-					{
-						"command": "node \"$HOME/.ccs/hooks/websearch-transformer.cjs\"",
-						"timeout": 85,
-						"type": "command"
-					}
-				],
-				"matcher": "WebSearch"
-			}
-		],
-		"Stop": [],
-		"claudeHooksImported": true,
-		"importedClaudeHooks": [
-			"node \"$HOME/.ccs/hooks/websearch-transformer.cjs\""
-		],
-		"UserPromptSubmit": [],
-		"SessionStart": [],
-		"PermissionRequest": []
-	},
-	"ideActivationNudgedForVersion": {},
-	"ideExtensionPromptedAt": {
-		"cursor": 1764649301074,
-		"vscode": 1764668205907
-	},
-	"importedClaudeHooks": [
-		"jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(ts|tsx|js|jsx)$'; then biome check --write \"$file_path\"; fi; }",
-		"if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.go$ ]]; then gofmt -w \"$( jq -r .tool_input.file_path )\"; fi",
-		"jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(md|mdx)$'; then npx prettier --write \"$file_path\"; fi; }"
-	],
-	"includeCoAuthoredByDroid": true,
-	"sessionDefaultSettings": {
-		"autonomyMode": "auto-medium",
-		"model": "custom:GH:-GPT-5.4-(via-Copilot)-0",
-		"reasoningEffort": "high"
-	},
-	"showThinkingInMainView": false,
-	"soundFocusMode": "always",
-	"todoDisplayMode": "pinned",
-	"enabledPlugins": {
-		"core@factory-plugins": true,
-		"security-engineer@factory-plugins": true,
-		"droid-evolved@factory-plugins": true,
-		"autoresearch@factory-plugins": true
-	},
-	"logoAnimation": "off"
+  "allowBackgroundProcesses": false,
+  "awaitingInputSound": "fx-ack01",
+  "claudeHooksImported": true,
+  "cloudSessionSync": true,
+  "commandAllowlist": [
+    "ls",
+    "pwd",
+    "dir"
+  ],
+  "commandDenylist": [
+    "rm -rf /",
+    "rm -rf /*",
+    "rm -rf .",
+    "rm -rf ~",
+    "rm -rf ~/*",
+    "rm -rf $HOME",
+    "rm -r /",
+    "rm -r /*",
+    "rm -r ~",
+    "rm -r ~/*",
+    "mkfs",
+    "mkfs.ext4",
+    "mkfs.ext3",
+    "mkfs.vfat",
+    "mkfs.ntfs",
+    "dd if=/dev/zero of=/dev",
+    "dd of=/dev",
+    "shutdown",
+    "reboot",
+    "halt",
+    "poweroff",
+    "init 0",
+    "init 6",
+    ":(){ :|: \u0026 };:",
+    ":() { :|:\u0026 };:",
+    "chmod -R 777 /",
+    "chmod -R 000 /",
+    "chown -R",
+    "format",
+    "powershell Remove-Item -Recurse -Force"
+  ],
+  "completionSound": "fx-ok01",
+  "customModels": [
+    {
+      "model": "qwen3-coder-next:cloud",
+      "displayName": "qwen3-coder-next:cloud",
+      "baseUrl": "http://127.0.0.1:11434/v1",
+      "apiKey": "ollama",
+      "provider": "generic-chat-completion-api",
+      "maxOutputTokens": 32768,
+      "supportsImages": false,
+      "id": "custom:qwen3-coder-next:cloud-0",
+      "index": 0
+    },
+    {
+      "model": "minimax-m2.5:cloud",
+      "displayName": "minimax-m2.5:cloud",
+      "baseUrl": "http://127.0.0.1:11434/v1",
+      "apiKey": "ollama",
+      "provider": "generic-chat-completion-api",
+      "maxOutputTokens": 64000,
+      "supportsImages": false,
+      "id": "custom:minimax-m2.5:cloud-1",
+      "index": 1
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GH: GPT-5.4 (via Copilot)",
+      "id": "custom:GH:-GPT-5.4-(via-Copilot)-0",
+      "index": 1,
+      "model": "gpt-5.4",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GH: Sonnet 4.6 (via Copilot)",
+      "id": "custom:GH:-Sonnet-4.6-(via-Copilot)-0",
+      "index": 2,
+      "model": "claude-sonnet-4.6",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GH: Haiku 4.5 (via Copilot)",
+      "id": "custom:GH:-Haiku-4.5-(via-Copilot)-0",
+      "index": 3,
+      "model": "claude-haiku-4.5",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GH: GPT-5.3-Codex (via Copilot)",
+      "id": "custom:GH:-GPT-5.3-Codex-(via-Copilot)-0",
+      "index": 4,
+      "model": "gpt-5.3-codex",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GH: GPT-5 mini (via Copilot)",
+      "id": "custom:GH:-GPT-5-mini-(via-Copilot)-0",
+      "index": 5,
+      "model": "gpt-5.4-mini",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GPT-5.3 Codex",
+      "id": "custom:GPT-5.3-Codex-0",
+      "index": 6,
+      "model": "gpt-5.3-codex",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GPT-5.3 Codex (High)",
+      "id": "custom:GPT-5.3-Codex-(High)-0",
+      "index": 7,
+      "model": "gpt-5.3-codex(high)",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GPT-5.3 Codex Spark",
+      "id": "custom:GPT-5.3-Codex-Spark-0",
+      "index": 8,
+      "model": "gpt-5.3-codex-spark",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GPT-5.5",
+      "id": "custom:GPT-5.5-0",
+      "index": 9,
+      "model": "gpt-5.5",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GPT-5.5 (Low)",
+      "id": "custom:GPT-5.5-(Low)-0",
+      "index": 10,
+      "model": "gpt-5.5(low)",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GPT-5.5 (High)",
+      "id": "custom:GPT-5.5-(High)-0",
+      "index": 11,
+      "model": "gpt-5.5(high)",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GPT-5.4",
+      "id": "custom:GPT-5.4-0",
+      "index": 12,
+      "model": "gpt-5.4",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GPT-5.4 (High)",
+      "id": "custom:GPT-5.4-(High)-0",
+      "index": 13,
+      "model": "gpt-5.4(high)",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GPT-5.4 Mini",
+      "id": "custom:GPT-5.4-Mini-0",
+      "index": 14,
+      "model": "gpt-5.4-mini",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "apiKey": "dummy-not-used",
+      "baseUrl": "http://localhost:8317/v1",
+      "displayName": "GPT-5.4 Mini (High)",
+      "id": "custom:GPT-5.4-Mini-(High)-0",
+      "index": 15,
+      "model": "gpt-5.4-mini(high)",
+      "noImageSupport": false,
+      "provider": "openai"
+    }
+  ],
+  "diffMode": "github",
+  "enableCompletionBell": false,
+  "enableCustomDroids": true,
+  "enableDroidShield": true,
+  "enableReadinessReport": false,
+  "enabledPlugins": {
+    "autoresearch@factory-plugins": true,
+    "core@factory-plugins": true,
+    "droid-evolved@factory-plugins": true,
+    "security-engineer@factory-plugins": true
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
+            "type": "command"
+          }
+        ],
+        "matcher": "*"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(ts|tsx|js|jsx)$'; then biome check --write \"$file_path\"; fi; }",
+            "type": "command"
+          },
+          {
+            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.go$ ]]; then gofmt -w \"$( jq -r .tool_input.file_path )\"; fi",
+            "type": "command"
+          },
+          {
+            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(md|mdx)$'; then npx prettier --write \"$file_path\"; fi; }",
+            "type": "command"
+          }
+        ],
+        "matcher": "Write|Edit|MultiEdit"
+      },
+      {
+        "hooks": [
+          {
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
+            "type": "command"
+          }
+        ],
+        "matcher": "*"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "node \"$HOME/.ccs/hooks/websearch-transformer.cjs\"",
+            "timeout": 85,
+            "type": "command"
+          }
+        ],
+        "matcher": "WebSearch"
+      },
+      {
+        "hooks": [
+          {
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
+            "type": "command"
+          }
+        ],
+        "matcher": "*"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "claudeHooksImported": true,
+    "importedClaudeHooks": [
+      "node \"$HOME/.ccs/hooks/websearch-transformer.cjs\""
+    ]
+  },
+  "ideActivationNudgedForVersion": {},
+  "ideExtensionPromptedAt": {
+    "cursor": 1764649301074,
+    "vscode": 1764668205907
+  },
+  "importedClaudeHooks": [
+    "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(ts|tsx|js|jsx)$'; then biome check --write \"$file_path\"; fi; }",
+    "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.go$ ]]; then gofmt -w \"$( jq -r .tool_input.file_path )\"; fi",
+    "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(md|mdx)$'; then npx prettier --write \"$file_path\"; fi; }"
+  ],
+  "includeCoAuthoredByDroid": true,
+  "logoAnimation": "off",
+  "sessionDefaultSettings": {
+    "autonomyMode": "auto-medium",
+    "model": "custom:qwen3-coder-next:cloud-0",
+    "reasoningEffort": "high"
+  },
+  "showThinkingInMainView": false,
+  "soundFocusMode": "always",
+  "todoDisplayMode": "pinned"
 }

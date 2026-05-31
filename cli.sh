@@ -1946,6 +1946,12 @@ copy_pi_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/pi/mcp.json" "$HOME/.pi/agent/" || true
 
+	if [ -f "$HOME/.pi/agent/models.json" ]; then
+		execute_quoted cp "$HOME/.pi/agent/models.json" "$HOME/.pi/agent/models.json.bak"
+		log_success "Backed up existing models.json to models.json.bak"
+	fi
+	copy_config_file "$SCRIPT_DIR/configs/pi/models.json" "$HOME/.pi/agent/" || true
+
 	log_success "Pi configs copied"
 }
 
@@ -2061,6 +2067,12 @@ copy_factory_configs() {
 	copy_config_file "$SCRIPT_DIR/configs/factory/AGENTS.md" "$HOME/.factory/" || true
 	copy_config_file "$SCRIPT_DIR/configs/factory/mcp.json" "$HOME/.factory/" || true
 	copy_config_file "$SCRIPT_DIR/configs/factory/settings.json" "$HOME/.factory/" || true
+
+	if [ -f "$HOME/.factory/config.json" ]; then
+		execute_quoted cp "$HOME/.factory/config.json" "$HOME/.factory/config.json.bak"
+		log_success "Backed up existing config.json to config.json.bak"
+	fi
+	copy_config_file "$SCRIPT_DIR/configs/factory/config.json" "$HOME/.factory/" || true
 
 	if [ -d "$SCRIPT_DIR/configs/factory/droids" ] && [ -n "$(ls -A "$SCRIPT_DIR/configs/factory/droids" 2>/dev/null)" ]; then
 		safe_copy_dir "$SCRIPT_DIR/configs/factory/droids" "$HOME/.factory/droids"

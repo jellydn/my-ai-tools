@@ -26,7 +26,7 @@
 | **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Official + Community (plannotator, claude-hud, worktrunk, codex) |
 | **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | @plannotator/opencode, opencode-chrome-annotation                |
 | **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, node_repl   | -                                                                |
-| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, notion, agentmemory                | Packages (pi-extension, hooks, fff, mcp-adapter, simplify)       |
+| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, notion, agentmemory                | Packages (pi-extension, hooks, fff, crofai, web-search)          |
 | **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                |
 | **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Deprecated for Google One/unpaid tiers; migrate to Antigravity   |
 | **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot (via plugin) | my-ai-tools-gemini-migration                                     |
@@ -1465,11 +1465,12 @@ Pi uses `~/.pi/settings.json` for global user settings and `.pi/settings.json` i
 Located in [`configs/pi/`](configs/pi/):
 
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
+- [`models.json`](configs/pi/models.json) - Provider and model definitions (antigravity proxy, ollama)
 
 **Key Settings:**
 
-- **Default Model**: `deepseek-v4-flash` (via opencode-go)
-- **Default Provider**: `opencode-go`
+- **Default Model**: `gemini-3.5-flash` (via google-antigravity)
+- **Default Provider**: `google-antigravity`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
@@ -1502,7 +1503,9 @@ Then register them in `.pi/settings.json`:
 		"npm:pi-manage-todo-list",
 		"npm:pi-btw",
 		"npm:pi-code-previews",
-		"npm:pi-codex-goal"
+		"npm:pi-codex-goal",
+		"https://github.com/monotykamary/pi-crofai-provider",
+		"npm:@ollama/pi-web-search"
 	]
 }
 ```
@@ -1522,15 +1525,40 @@ Then register them in `.pi/settings.json`:
 
 | `pi-code-previews` | Live previews of code changes during editing |
 | `pi-codex-goal` | Codex-style goal management integration |
+| `pi-crofai-provider` | CrofAI provider for models (GLM, Kimi, DeepSeek) |
+| `@ollama/pi-web-search` | Web search integration for Ollama models |
 
 ### Enabled Models
 
 Pi is configured with multi-provider model access:
 
-| Provider       | Models                                                                         |
-| -------------- | ------------------------------------------------------------------------------ |
-| github-copilot | `gpt-5-mini`, `gpt-4.1`                                                        |
-| opencode-go    | `kimi-k2.6`, `minimax-m2.7`, `deepseek-v4-pro`, `deepseek-v4-flash`, `glm-5.1` |
+| Provider           | Models                                                                                          |
+| ------------------ | ----------------------------------------------------------------------------------------------- |
+| github-copilot     | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                                                              |
+| opencode-go        | `glm-5.1`, `kimi-k2.6`, `deepseek-v4-flash`, `deepseek-v4-pro`                                  |
+| google-antigravity | `claude`, `gemini-3.5-flash`, `gemini-3.1-pro`, `claude-sonnet-4-6`, `claude-opus-4-6-thinking` |
+|                    | `gemini-3.5-flash-low`, `gemini-3.5-flash-high`, `gemini-3.1-pro-low`, `gemini-3.1-pro-high`    |
+|                    | `gemini-pro-agent`, `gemini-2.5-pro`, `gemini-2.5-flash`, `gpt-oss-120b` (via rotator)          |
+| openrouter         | `moonshotai/kimi-k2.6:free`                                                                     |
+| crofai             | `glm-5.1`, `kimi-k2.6`, `deepseek-v4-flash`, `deepseek-v4-pro`                                  |
+| ollama             | `minimax-m2.5:cloud`                                                                            |
+
+### Pi Antigravity Rotator
+
+For multi-account rotation and quota management across Google Antigravity accounts, use [pi-antigravity-rotator](https://github.com/tuxevil/pi-antigravity-rotator). It runs as a local proxy on port `51200` and supports per-model routing, real-time quota tracking, and automatic token management.
+
+```bash
+# Install
+npm install -g pi-antigravity-rotator
+
+# Add accounts
+pi-antigravity-rotator login
+
+# Start proxy
+pi-antigravity-rotator start
+```
+
+Once running, Pi connects automatically via the `google-antigravity` provider in [`configs/pi/models.json`](configs/pi/models.json), which exposes all rotator-managed models.
 
 ### Usage
 
@@ -1776,6 +1804,7 @@ Factory Droid configs are stored in `configs/factory/` and installed to `~/.fact
 - [`AGENTS.md`](configs/factory/AGENTS.md) - Global agent guidelines
 - [`mcp.json`](configs/factory/mcp.json) - MCP server configurations
 - [`settings.json`](configs/factory/settings.json) - Factory Droid settings
+- [`config.json`](configs/factory/config.json) - Custom model definitions
 - `droids/` - Optional user-created directory for custom droid definitions
 
 ### Plugins

@@ -1,37 +1,48 @@
 {
-	"collapseChangelog": true,
-	"defaultModel": "github-copilot/gpt-4.1",
-	"defaultProvider": "github-copilot",
-	"defaultThinkingLevel": "high",
-	"editorPaddingX": 1,
-	"lastChangelogVersion": "0.76.0",
-	"packages": [
-		{
-			"source": "npm:@plannotator/pi-extension",
-			"skills": []
-		},
-		"https://github.com/davebcn87/pi-autoresearch",
-		"npm:pi-hooks",
-		"npm:@ff-labs/pi-fff",
-		"npm:pi-mcp-adapter",
-		"npm:pi-simplify",
-		"npm:pi-manage-todo-list",
-		"npm:pi-btw",
-		"npm:pi-code-previews",
-		"npm:pi-codex-goal"
-	],
-	"quietStartup": true,
-	"theme": "kanagawa",
-	"hideThinkingBlock": false,
-	"permissionLevel": "high",
-	"treeFilterMode": "default",
-	"enabledModels": [
-		"github-copilot/gpt-5.4",
-		"github-copilot/gpt-5-mini",
-		"github-copilot/gpt-4.1",
-		"opencode-go/glm-5.1",
-		"opencode-go/kimi-k2.6",
-		"opencode-go/deepseek-v4-flash",
-		"opencode-go/deepseek-v4-pro"
-	]
+  "collapseChangelog": true,
+  "defaultModel": "gemini-3.5-flash",
+  "defaultProvider": "google-antigravity",
+  "defaultThinkingLevel": "high",
+  "editorPaddingX": 1,
+  "enabledModels": [
+    "github-copilot/gpt-5-mini",
+    "github-copilot/gpt-4.1",
+    "opencode-go/glm-5.1",
+    "opencode-go/kimi-k2.6",
+    "github-copilot/gpt-5.4",
+    "opencode-go/deepseek-v4-flash",
+    "opencode-go/deepseek-v4-pro",
+    "openrouter/moonshotai/kimi-k2.6:free",
+    "google-antigravity/claude",
+    "google-antigravity/gemini-3.5-flash",
+    "google-antigravity/gemini-3.1-pro",
+    "crofai/glm-5.1",
+    "crofai/kimi-k2.6",
+    "crofai/deepseek-v4-flash",
+    "crofai/deepseek-v4-pro",
+    "ollama/minimax-m2.5:cloud"
+  ],
+  "hideThinkingBlock": false,
+  "lastChangelogVersion": "0.78.0",
+  "packages": [
+    {
+      "skills": [],
+      "source": "npm:@plannotator/pi-extension"
+    },
+    "https://github.com/davebcn87/pi-autoresearch",
+    "npm:pi-hooks",
+    "npm:@ff-labs/pi-fff",
+    "npm:pi-mcp-adapter",
+    "npm:pi-simplify",
+    "npm:pi-manage-todo-list",
+    "npm:pi-btw",
+    "npm:pi-code-previews",
+    "npm:pi-codex-goal",
+    "https://github.com/monotykamary/pi-crofai-provider",
+    "npm:@ollama/pi-web-search"
+  ],
+  "permissionLevel": "high",
+  "quietStartup": true,
+  "theme": "kanagawa",
+  "treeFilterMode": "default"
 }
