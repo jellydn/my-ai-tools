@@ -1946,6 +1946,12 @@ copy_pi_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/pi/mcp.json" "$HOME/.pi/agent/" || true
 
+	if [ -f "$HOME/.pi/agent/models.json" ]; then
+		execute_quoted cp "$HOME/.pi/agent/models.json" "$HOME/.pi/agent/models.json.bak"
+		log_success "Backed up existing models.json to models.json.bak"
+	fi
+	copy_config_file "$SCRIPT_DIR/configs/pi/models.json" "$HOME/.pi/agent/" || true
+
 	log_success "Pi configs copied"
 }
 
