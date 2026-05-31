@@ -1804,6 +1804,7 @@ Factory Droid configs are stored in `configs/factory/` and installed to `~/.fact
 - [`AGENTS.md`](configs/factory/AGENTS.md) - Global agent guidelines
 - [`mcp.json`](configs/factory/mcp.json) - MCP server configurations
 - [`settings.json`](configs/factory/settings.json) - Factory Droid settings
+- [`config.json`](configs/factory/config.json) - Custom model definitions
 - `droids/` - Optional user-created directory for custom droid definitions
 
 ### Plugins
