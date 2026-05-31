@@ -45,8 +45,6 @@
     "enabled": true
   },
   "toolPermission": "proceed-in-sandbox",
-  "trustedWorkspaces": [
-    "/Users/huynhdung/src/tries/2026-05-29-jellydn-hermes-hub"
-  ],
+  "trustedWorkspaces": [],
   "verbosity": "low"
 }

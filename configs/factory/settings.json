@@ -231,7 +231,7 @@
       {
         "hooks": [
           {
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh'; fi",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
             "type": "command"
           }
         ]
@@ -241,7 +241,7 @@
       {
         "hooks": [
           {
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh'; fi",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
             "type": "command"
           }
         ],
@@ -269,7 +269,7 @@
       {
         "hooks": [
           {
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh'; fi",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
             "type": "command"
           }
         ],
@@ -290,7 +290,7 @@
       {
         "hooks": [
           {
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh'; fi",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
             "type": "command"
           }
         ],
@@ -301,7 +301,7 @@
       {
         "hooks": [
           {
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh'; fi",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
             "type": "command"
           }
         ]
@@ -311,7 +311,7 @@
       {
         "hooks": [
           {
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh'; fi",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
             "type": "command"
           }
         ]
@@ -321,7 +321,7 @@
       {
         "hooks": [
           {
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/droid-hook.sh'; fi",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
             "type": "command"
           }
         ]
