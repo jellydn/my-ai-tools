@@ -88,6 +88,45 @@ echo "  Storage: ~/.ai-knowledges/$PROJECT_NAME"
 
 ---
 
+## 🧠 Agentmemory (session memory MCP)
+
+`agentmemory` is a per-session, per-project memory MCP for **short-lived learnings that the agent itself discovered during the current run**. It complements qmd — do not use it as a duplicate knowledge store.
+
+### Use `agentmemory` for
+
+- Discoveries made in _this_ session: "I learned that…", "The fix was…", "Don't forget to…"
+- Project-local facts the next agent on this project should know
+- Recurring gotchas worth surfacing when similar code or errors appear
+- Pre-commit/post-commit style findings, code review notes, architecture smells
+
+### Do NOT use `agentmemory` for
+
+- Anything already covered by qmd (durable project KB at `~/.ai-knowledges/<project>/`)
+- Long-form docs, ADRs, runbooks — write those to disk and let qmd index them
+- Cross-project or cross-machine knowledge — qmd collections are the canonical layer
+- Secrets, tokens, or anything user-private (memory is per-project, not encrypted)
+
+### Quick reference
+
+| Task                     | Tool                                               |
+| ------------------------ | -------------------------------------------------- |
+| Save a finding           | `mcp__agentmemory__memory_save`                    |
+| Recall past findings     | `mcp__agentmemory__memory_recall`                  |
+| Hybrid recall + rerank   | `mcp__agentmemory__memory_smart_search`            |
+| List recent sessions     | `mcp__agentmemory__memory_sessions`                |
+| Export / audit memory    | `mcp__agentmemory__memory_export` / `memory_audit` |
+| Delete a specific memory | `mcp__agentmemory__memory_governance_delete`       |
+
+### Decision rule
+
+> "Will the next agent working on this project benefit from this in 3 months?"
+>
+> - **Yes** → qmd (`/qmd-knowledge` skill)
+> - **No, but the next session today might** → `agentmemory.memory_save`
+> - **No at all** → don't record
+
+---
+
 ## 🛠️ How to Use qmd (via MCP Server)
 
 When qmd MCP server is configured, you can autonomously:
