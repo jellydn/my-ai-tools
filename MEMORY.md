@@ -1,6 +1,6 @@
 # 🚀 MEMORY.md - AI Agent Knowledge Management
 
-**Purpose**: Tell agents when and how to use qmd for persistent knowledge capture.
+**Purpose**: Tell agents when to use **qmd** (durable project KB), when to use **agentmemory** (session-only learnings), and when to skip recording entirely. Cross-session task continuity goes through `/handoffs` + `/pickup`, not these stores.
 
 ---
 
@@ -90,40 +90,41 @@ echo "  Storage: ~/.ai-knowledges/$PROJECT_NAME"
 
 ## 🧠 Agentmemory (session memory MCP)
 
-`agentmemory` is a per-session, per-project memory MCP for **short-lived learnings that the agent itself discovered during the current run**. It complements qmd — do not use it as a duplicate knowledge store.
+`agentmemory` is a per-session, per-project memory MCP for **short-lived learnings that the agent itself discovered during the current run**. It is _not_ durable storage and _not_ a substitute for qmd.
 
-### Use `agentmemory` for
+### Use `agentmemory` for (session-only, not durable)
 
-- Discoveries made in _this_ session: "I learned that…", "The fix was…", "Don't forget to…"
-- Project-local facts the next agent on this project should know
-- Recurring gotchas worth surfacing when similar code or errors appear
-- Pre-commit/post-commit style findings, code review notes, architecture smells
+- Discoveries made in _this_ run: "the build is blocked on env var `X`", "branch Y has a WIP constraint", "the failing test depends on fixture Z"
+- Pre-commit / post-commit style findings the _current_ agent wants to surface to itself on the next pass
+- Hints the next session today will need but no one will need in a month
 
 ### Do NOT use `agentmemory` for
 
-- Anything already covered by qmd (durable project KB at `~/.ai-knowledges/<project>/`)
-- Long-form docs, ADRs, runbooks — write those to disk and let qmd index them
+- Anything that survives a session boundary with value — that is qmd
+- Recurring gotchas, project-local facts, architecture smells, code review notes — these are durable and belong in qmd
+- Long-form docs, ADRs, runbooks — write to disk and let qmd index them
 - Cross-project or cross-machine knowledge — qmd collections are the canonical layer
+- Cross-session task continuity — use `/handoffs` (write) and `/pickup` (resume), not agentmemory
 - Secrets, tokens, or anything user-private (memory is per-project, not encrypted)
 
-### Quick reference
-
-| Task                     | Tool                                               |
-| ------------------------ | -------------------------------------------------- |
-| Save a finding           | `mcp__agentmemory__memory_save`                    |
-| Recall past findings     | `mcp__agentmemory__memory_recall`                  |
-| Hybrid recall + rerank   | `mcp__agentmemory__memory_smart_search`            |
-| List recent sessions     | `mcp__agentmemory__memory_sessions`                |
-| Export / audit memory    | `mcp__agentmemory__memory_export` / `memory_audit` |
-| Delete a specific memory | `mcp__agentmemory__memory_governance_delete`       |
-
-### Decision rule
+### Decision rule (apply before every record)
 
 > "Will the next agent working on this project benefit from this in 3 months?"
 >
-> - **Yes** → qmd (`/qmd-knowledge` skill)
-> - **No, but the next session today might** → `agentmemory.memory_save`
+> - **Yes** → `mcp__qmd__*` (`/qmd-knowledge` skill)
+> - **No, but the next session today might** → `mcp__agentmemory__memory_save`
 > - **No at all** → don't record
+> - **"I need to keep working on this tomorrow"** → write a `/handoffs` plan, not a memory note
+
+### Three memory lanes
+
+| Lane          | Horizon             | Tool                                              |
+| ------------- | ------------------- | ------------------------------------------------- |
+| `qmd`         | Months              | `mcp__qmd__save` via `/qmd-knowledge` skill       |
+| `agentmemory` | Today, same project | `mcp__agentmemory__memory_save`                   |
+| `/handoffs`   | Cross-session task  | `/handoffs` slash command → resume with `/pickup` |
+
+If you find yourself wanting both "remember this for me next time" and "let me continue this tomorrow" — that is two separate stores; pick the lane that matches the actual horizon.
 
 ---
 
@@ -171,22 +172,22 @@ Instead, use the `qmd-knowledge` skill:
 
 At the end of a work session, consider prompting the user about key learnings:
 
-> "What were the main discoveries or decisions from this session? Would you like me to record any learnings?"
+> "What were the main discoveries or decisions from this session? Would you like me to record any learnings — and if so, into qmd (durable) or agentmemory (session)?"
 
-### 🎨 Pattern Detection
+### 🎨 Pattern Detection → Decision Rule
 
-Be attentive to phrases that indicate valuable knowledge capture opportunities:
+When you spot a knowledge-capture trigger, **apply the 3-month rule first**, then choose a lane.
 
-- "I discovered that..."
-- "I learned that..."
-- "The solution was..."
-- "The key insight is..."
-- "Don't forget to..."
-- "Make sure to..."
+| Phrase                                       | Lane                                    |
+| -------------------------------------------- | --------------------------------------- |
+| "I learned that…" / "The fix was…" (general) | Usually qmd — unless it is session-only |
+| "Blocked on X until env var Y"               | `agentmemory` (session)                 |
+| "Branch W has a WIP constraint"              | `agentmemory` (session)                 |
+| "Don't forget to…" / recurring gotcha        | qmd (durable)                           |
+| "This project uses pattern P"                | qmd (durable, project-local)            |
+| "Continue debugging tomorrow" / "resume X"   | `/handoffs` + `/pickup` (not memory)    |
 
-When you detect these patterns, suggest recording:
-
-> "That sounds like a useful learning. Would you like me to record it?"
+If unsure, ask the user which lane — never record into both.
 
 ### 🎨 Auto-Index Updates
 
@@ -196,12 +197,28 @@ The record script automatically runs `qmd embed` after each write, ensuring the 
 
 ## 📖 Quick Reference
 
+All tools are MCP-style names so agents can call them by exact string.
+
+### qmd (durable)
+
 | Task             | Tool/Command           |
 | ---------------- | ---------------------- |
 | Search knowledge | `mcp__qmd__query`      |
 | Get document     | `mcp__qmd__get`        |
 | Record learning  | `/qmd-knowledge` skill |
 | Check status     | `mcp__qmd__status`     |
+
+### agentmemory (session)
+
+| Task                     | Tool                                         |
+| ------------------------ | -------------------------------------------- |
+| Save a finding           | `mcp__agentmemory__memory_save`              |
+| Recall past findings     | `mcp__agentmemory__memory_recall`            |
+| Hybrid recall + rerank   | `mcp__agentmemory__memory_smart_search`      |
+| List recent sessions     | `mcp__agentmemory__memory_sessions`          |
+| Export memory            | `mcp__agentmemory__memory_export`            |
+| Audit memory             | `mcp__agentmemory__memory_audit`             |
+| Delete a specific memory | `mcp__agentmemory__memory_governance_delete` |
 
 ---
 
