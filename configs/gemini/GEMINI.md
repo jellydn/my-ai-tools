@@ -3,12 +3,11 @@
 ## AI Tool Guidelines
 
 - Use the fff MCP tools for all file search operations instead of default tools.
-- For persistent memory (qmd + agentmemory), follow @~/.ai-tools/MEMORY.md
 
 ## General Practices
 
 - Follow my software development practice @~/.ai-tools/best-practices.md
-- Read @~/.ai-tools/MEMORY.md first - Understand when and how to use qmd for knowledge management
+- Read @~/.ai-tools/MEMORY.md first — qmd (durable) vs agentmemory (session); follow the decision rule there
 - Keep responses concise and actionable.
 - Always propose a plan before edits. Use phases to break down tasks into manageable steps.
 - Run typecheck, lint and biome on js/ts file changes after finish
