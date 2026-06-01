@@ -3,6 +3,7 @@
 ## AI Tool Guidelines
 
 - Use the fff MCP tools for all file search operations instead of default tools.
+- For persistent memory (qmd + agentmemory), follow @~/.ai-tools/MEMORY.md
 
 ## General Practices
 

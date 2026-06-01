@@ -23,6 +23,7 @@ See @~/.ai-tools/best-practices.md for full details.
 ## AI Tool Guidelines
 
 - Use the fff MCP tools for all file search operations instead of default tools.
+- For persistent memory (qmd + agentmemory), follow @~/.ai-tools/MEMORY.md
 - When using bash commands for file/content search, prefer `fd` (fdfind) and `rg` (ripgrep) over standard `find` and `grep` for better performance and git-awareness.
 
 ## General Practices
