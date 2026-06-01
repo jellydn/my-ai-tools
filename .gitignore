@@ -27,6 +27,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .antigravitycli/
 .claude/settings.local.json
 configs/ccs/cliproxy/accounts.json
+
+# agentmemory runtime state (created by `npx @agentmemory/agentmemory` at the repo root)
+data/
 configs/ccs/cliproxy/config.yaml
 configs/ccs/cliproxy/sessions.json
 configs/ccs/cliproxy/auth/antigravity-dunghd_it_gmail_com.json

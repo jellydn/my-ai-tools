@@ -40,15 +40,15 @@
 
 ### 📋 MCP Server Details
 
-| Server                | Purpose                                     | Package                                            |
-| --------------------- | ------------------------------------------- | -------------------------------------------------- |
-| `context7`            | Documentation lookup for any library        | `@upstash/context7-mcp`                            |
-| `sequential-thinking` | Multi-step reasoning for complex analysis   | `@modelcontextprotocol/server-sequential-thinking` |
-| `qmd`                 | Knowledge management with AI-powered search | `qmd`                                              |
-| `agentmemory`         | Persistent memory for AI coding agents      | `@agentmemory/mcp`                                 |
-| `fff`                 | Fast file search with frecency ranking      | `fff-mcp`                                          |
-| `react-grab-mcp`      | React component capture and inspection      | `@react-grab/mcp`                                  |
-| `logpilot`            | AI-powered log analysis and tmux monitoring | `logpilot`                                         |
+| Server                | Purpose                                                                                   | Package                                            |
+| --------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `context7`            | Documentation lookup for any library                                                      | `@upstash/context7-mcp`                            |
+| `sequential-thinking` | Multi-step reasoning for complex analysis                                                 | `@modelcontextprotocol/server-sequential-thinking` |
+| `qmd`                 | Knowledge management with AI-powered search                                               | `qmd`                                              |
+| `agentmemory`         | "Persistent memory" per the tool; we use it session-only (qmd = durable; see `MEMORY.md`) | `@agentmemory/mcp`                                 |
+| `fff`                 | Fast file search with frecency ranking                                                    | `fff-mcp`                                          |
+| `react-grab-mcp`      | React component capture and inspection                                                    | `@react-grab/mcp`                                  |
+| `logpilot`            | AI-powered log analysis and tmux monitoring                                               | `logpilot`                                         |
 
 ## 🎬 Demo
 
@@ -212,7 +212,7 @@ The script will prompt you to install each MCP server:
 - [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
 - [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
 - [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
-- [`agentmemory`](https://github.com/rohitg00/agentmemory) - Persistent memory for AI coding agents
+- [`agentmemory`](https://github.com/rohitg00/agentmemory) - "Persistent memory" per the tool's branding; we use it session-only (qmd is the durable KB; see `~/.ai-tools/MEMORY.md`)
 - [`fff`](https://github.com/dmtrKovalenko/fff.nvim) - Fast file search with built-in memory for AI agents
 - [`react-grab-mcp`](https://github.com/nyan-left/react-grab-mcp) - React component extraction and analysis
 - [`logpilot`](https://github.com/jellydn/logpilot) - AI-powered log analysis and tmux session monitoring

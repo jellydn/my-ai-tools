@@ -28,7 +28,7 @@ See @~/.ai-tools/best-practices.md for full details.
 ## 📋 General Practices
 
 - Follow my software development practice @~/.ai-tools/best-practices.md
-- Read @~/.ai-tools/MEMORY.md first - Understand when and how to use qmd for knowledge management
+- Read @~/.ai-tools/MEMORY.md first — qmd (durable) vs agentmemory (session); follow the decision rule there
 - Follow git safety guidelines @~/.ai-tools/git-guidelines.md
 - Keep responses concise and actionable.
 - Never run destructive commands.
