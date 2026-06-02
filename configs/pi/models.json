@@ -1,5 +1,80 @@
 {
   "providers": {
+    "vibeproxy": {
+      "api": "openai-completions",
+      "apiKey": "vibeproxy",
+      "baseUrl": "http://127.0.0.1:51200/v1",
+      "models": [
+        {
+          "contextWindow": 250000,
+          "id": "claude-opus-4-6-thinking",
+          "input": [
+            "text",
+            "image"
+          ],
+          "toolCalling": true,
+          "reasoning": true
+        },
+        {
+          "contextWindow": 250000,
+          "id": "claude-sonnet-4-6",
+          "input": [
+            "text",
+            "image"
+          ],
+          "toolCalling": true
+        },
+        {
+          "contextWindow": 1048576,
+          "id": "gemini-3-flash-agent",
+          "input": [
+            "text",
+            "image"
+          ],
+          "toolCalling": true,
+          "reasoning": true
+        },
+        {
+          "contextWindow": 1048576,
+          "id": "gemini-3-pro-high",
+          "input": [
+            "text",
+            "image"
+          ],
+          "toolCalling": true,
+          "reasoning": true
+        },
+        {
+          "contextWindow": 1048576,
+          "id": "gemini-pro-agent",
+          "input": [
+            "text",
+            "image"
+          ],
+          "toolCalling": true,
+          "reasoning": true
+        },
+        {
+          "contextWindow": 1048576,
+          "id": "gemini-3-flash",
+          "input": [
+            "text",
+            "image"
+          ],
+          "toolCalling": true
+        },
+        {
+          "contextWindow": 1048576,
+          "id": "gemini-3.5-flash-low",
+          "input": [
+            "text",
+            "image"
+          ],
+          "toolCalling": true,
+          "reasoning": true
+        }
+      ]
+    },
     "google-antigravity": {
       "api": "openai-completions",
       "apiKey": "antigravity",

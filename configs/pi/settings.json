@@ -26,9 +26,7 @@
     "vibeproxy/claude-sonnet-4-6",
     "vibeproxy/gemini-3-flash-agent",
     "vibeproxy/gemini-3-pro-high",
-    "vibeproxy/gemini-pro-agent",
-    "vibeproxy/gemini-3-flash",
-    "vibeproxy/gemini-3.5-flash-low"
+    "vibeproxy/gemini-pro-agent"
   ],
   "hideThinkingBlock": false,
   "lastChangelogVersion": "0.78.0",
