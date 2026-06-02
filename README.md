@@ -1552,8 +1552,8 @@ For multi-account rotation, local model routing, and quota management across Goo
 Both run as a local proxy on port `51200` and support per-model routing, real-time quota tracking, and automatic token management.
 
 ```bash
-# Install Vibeproxy
-npm install -g @automazeio/vibeproxy
+# Install Vibeproxy (macOS Menu Bar App)
+brew install --cask vibeproxy
 
 # Or install Antigravity Rotator
 npm install -g pi-antigravity-rotator
