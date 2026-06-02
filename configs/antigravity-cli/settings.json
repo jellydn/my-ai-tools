@@ -3,7 +3,7 @@
   "artifactReviewPolicy": "agent-decides",
   "enableTelemetry": false,
   "enableTerminalSandbox": true,
-  "model": "Claude Opus 4.6 (Thinking)",
+  "model": "Gemini 3.5 Flash (High)",
   "notifications": true,
   "permissions": {
     "allow": [
@@ -29,7 +29,10 @@
       "unsandboxed(bunx)",
       "mcp(github/list_pull_requests)",
       "mcp(github/get_pull_request_status)",
-      "mcp(github/get_pull_request_comments)"
+      "mcp(github/get_pull_request_comments)",
+      "unsandboxed(~/.gemini/skills/autoreview/scripts/autoreview)",
+      "unsandboxed(tail)",
+      "unsandboxed(bun add)"
     ],
     "deny": [
       "command(git reset --hard)",
