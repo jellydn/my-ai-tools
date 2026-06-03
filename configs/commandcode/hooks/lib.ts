@@ -82,9 +82,7 @@ export type TranscriptMessage =
 	| TranscriptAssistantMessage;
 
 // Helper function to load the initial user message from a transcript
-export async function getInitialMessage(
-	transcriptPath: string,
-): Promise<string | null> {
+export async function getInitialMessage(transcriptPath: string): Promise<string | null> {
 	try {
 		const fileStream = fs.createReadStream(transcriptPath);
 		const rl = readline.createInterface({
@@ -129,9 +127,7 @@ export async function getInitialMessage(
 }
 
 // Additional helper functions for transcript operations
-export async function getAllMessages(
-	transcriptPath: string,
-): Promise<TranscriptMessage[]> {
+export async function getAllMessages(transcriptPath: string): Promise<TranscriptMessage[]> {
 	const messages: TranscriptMessage[] = [];
 
 	try {
@@ -160,8 +156,7 @@ export async function getConversationHistory(
 	transcriptPath: string,
 ): Promise<Array<{ role: "user" | "assistant"; content: string }>> {
 	const messages = await getAllMessages(transcriptPath);
-	const conversation: Array<{ role: "user" | "assistant"; content: string }> =
-		[];
+	const conversation: Array<{ role: "user" | "assistant"; content: string }> = [];
 
 	for (const message of messages) {
 		if (message.type === "summary") continue;
@@ -198,9 +193,7 @@ export async function getConversationHistory(
 
 export async function getToolUsage(
 	transcriptPath: string,
-): Promise<
-	Array<{ tool: string; input: Record<string, unknown>; timestamp: string }>
-> {
+): Promise<Array<{ tool: string; input: Record<string, unknown>; timestamp: string }>> {
 	const messages = await getAllMessages(transcriptPath);
 	const toolUsage: Array<{
 		tool: string;
@@ -210,9 +203,7 @@ export async function getToolUsage(
 
 	for (const message of messages) {
 		if (message.type === "assistant") {
-			const toolUses = message.message.content.filter(
-				(item) => item.type === "tool_use",
-			);
+			const toolUses = message.message.content.filter((item) => item.type === "tool_use");
 
 			for (const toolUse of toolUses) {
 				if (toolUse.name && toolUse.input) {

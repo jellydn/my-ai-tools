@@ -11,9 +11,7 @@ const preToolUse: PreToolUseHandler = async (payload) => {
 	}
 
 	if (payload.tool_input) {
-		const command = String(
-			(payload.tool_input as { command?: string }).command ?? "",
-		);
+		const command = String((payload.tool_input as { command?: string }).command ?? "");
 
 		const gitCheck = checkGitCommand(command);
 		if (!gitCheck.allowed) {

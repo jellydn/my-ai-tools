@@ -26,7 +26,7 @@
 | **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Official + Community (plannotator, claude-hud, worktrunk, codex) |
 | **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | @plannotator/opencode, opencode-chrome-annotation                |
 | **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, node_repl   | -                                                                |
-| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, notion, agentmemory                | Packages (pi-extension, hooks, fff, crofai, web-search)          |
+| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, notion, agentmemory                | Packages (pi-extension, hooks, fff, web-access)                  |
 | **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                |
 | **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Deprecated for Google One/unpaid tiers; migrate to Antigravity   |
 | **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot (via plugin) | my-ai-tools-gemini-migration                                     |
@@ -1460,16 +1460,18 @@ curl -fsSL https://pi.dev/install.sh | sh
 
 ### Configuration
 
-Pi uses `~/.pi/settings.json` for global user settings and `.pi/settings.json` in project roots for project-level configuration.
+Pi uses `~/.pi/agent/settings.json` for global user settings and `.pi/settings.json` in project roots for project-level configuration.
 
 Located in [`configs/pi/`](configs/pi/):
 
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
-- [`models.json`](configs/pi/models.json) - Provider and model definitions (antigravity proxy, ollama)
+- [`models.json`](configs/pi/models.json) - Provider and model definitions (vibeproxy, antigravity proxy, ollama)
+
+Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `vibeproxy` as the default provider with `claude-opus-4-6-thinking` default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `gemini-3-flash-agent` (via vibeproxy)
+- **Default Model**: `claude-opus-4-6-thinking` (via vibeproxy)
 - **Default Provider**: `vibeproxy`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
@@ -1486,7 +1488,7 @@ pi install pi-flow-enforcer
 pi install pi-agent-pack
 ```
 
-Then register them in `.pi/settings.json`:
+Then register them in `~/.pi/agent/settings.json`:
 
 ```json
 {
@@ -1504,8 +1506,9 @@ Then register them in `.pi/settings.json`:
 		"npm:pi-btw",
 		"npm:pi-code-previews",
 		"npm:pi-codex-goal",
-		"https://github.com/monotykamary/pi-crofai-provider",
-		"npm:@ollama/pi-web-search"
+		"npm:pi-dynamic-workflows",
+		"npm:pi-commandcode-provider",
+		"npm:pi-web-access"
 	]
 }
 ```
@@ -1525,8 +1528,7 @@ Then register them in `.pi/settings.json`:
 
 | `pi-code-previews` | Live previews of code changes during editing |
 | `pi-codex-goal` | Codex-style goal management integration |
-| `pi-crofai-provider` | CrofAI provider for models (GLM, Kimi, DeepSeek) |
-| `@ollama/pi-web-search` | Web search integration for Ollama models |
+| `pi-web-access` | Web search and content fetching for AI models |
 
 ### Enabled Models
 
@@ -1537,12 +1539,11 @@ Pi is configured with multi-provider model access:
 | github-copilot     | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                                                              |
 | opencode-go        | `glm-5.1`, `kimi-k2.6`, `deepseek-v4-flash`, `deepseek-v4-pro`                                  |
 | vibeproxy          | `claude-opus-4-6-thinking`, `claude-sonnet-4-6`, `gemini-3-flash-agent`, `gemini-3-pro-high`    |
-|                    | `gemini-pro-agent`, `gemini-3-flash`, `gemini-3.5-flash-low`                                    |
+|                    | `gemini-pro-agent`                                                                              |
 | google-antigravity | `claude`, `gemini-3.5-flash`, `gemini-3.1-pro`, `claude-sonnet-4-6`, `claude-opus-4-6-thinking` |
 |                    | `gemini-3.5-flash-low`, `gemini-3.5-flash-high`, `gemini-3.1-pro-low`, `gemini-3.1-pro-high`    |
 |                    | `gemini-pro-agent`, `gemini-2.5-pro`, `gemini-2.5-flash`, `gpt-oss-120b` (via rotator)          |
 | openrouter         | `moonshotai/kimi-k2.6:free`                                                                     |
-| crofai             | `glm-5.1`, `kimi-k2.6`, `deepseek-v4-flash`, `deepseek-v4-pro`                                  |
 | ollama             | `minimax-m2.5:cloud`                                                                            |
 
 ### Pi Vibeproxy & Antigravity Rotator

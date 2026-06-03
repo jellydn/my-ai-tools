@@ -71,7 +71,7 @@
     ],
     "defaultMode": "plan"
   },
-  "model": "opus",
+  "model": "opus[1m]",
   "hooks": {
     "Notification": [],
     "Stop": [
