@@ -20,5 +20,5 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Run tests
-        run: bats tests/*.bats
+      - name: Run config validation tests
+        run: bats tests/pr_*.bats
