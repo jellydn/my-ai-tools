@@ -5,10 +5,7 @@ import type { HookPayload } from "./lib";
 
 const SESSIONS_DIR = path.join(tmpdir(), "claude-hooks-sessions");
 
-export async function saveSessionData(
-	hookType: string,
-	payload: HookPayload,
-): Promise<void> {
+export async function saveSessionData(hookType: string, payload: HookPayload): Promise<void> {
 	try {
 		// Ensure sessions directory exists
 		await mkdir(SESSIONS_DIR, { recursive: true });

@@ -29,9 +29,7 @@ function extractPrComments(reviewCommentsFile, issueCommentsFile, outputFile) {
 
 	const comments = allComments;
 	const commentIdsWithReplies = new Set(
-		comments
-			.filter((comment) => comment.in_reply_to_id)
-			.map((comment) => comment.in_reply_to_id),
+		comments.filter((comment) => comment.in_reply_to_id).map((comment) => comment.in_reply_to_id),
 	);
 
 	const relevantComments = comments
@@ -40,8 +38,7 @@ function extractPrComments(reviewCommentsFile, issueCommentsFile, outputFile) {
 			if (commentIdsWithReplies.has(comment.id)) return false;
 			if (!comment.body || comment.body.trim() === "") return false;
 
-			const isBot =
-				comment.user?.type === "Bot" || comment.user?.login?.includes("[bot]");
+			const isBot = comment.user?.type === "Bot" || comment.user?.login?.includes("[bot]");
 			if (isBot) {
 				const body = comment.body.toLowerCase();
 				const hasActionableContent =
@@ -51,8 +48,7 @@ function extractPrComments(reviewCommentsFile, issueCommentsFile, outputFile) {
 					body.includes("suggestion") ||
 					body.includes("improvement") ||
 					body.includes("bug") ||
-					(body.includes("review") &&
-						(body.includes("feedback") || body.includes("found")));
+					(body.includes("review") && (body.includes("feedback") || body.includes("found")));
 				if (!hasActionableContent) return false;
 			}
 
@@ -79,28 +75,19 @@ function extractPrComments(reviewCommentsFile, issueCommentsFile, outputFile) {
 	fs.writeFileSync(outputFile, ndjsonOutput, "utf8");
 
 	const todoFile = outputFile.replace(".ndjson", "-todo.md");
-	const todoContent = createTodoFile(
-		relevantComments,
-		reviewCommentsFile || issueCommentsFile,
-	);
+	const todoContent = createTodoFile(relevantComments, reviewCommentsFile || issueCommentsFile);
 	fs.writeFileSync(todoFile, todoContent, "utf8");
 
 	const summaryStats = generateSummaryStats(relevantComments);
 	const summaryFile = outputFile.replace(".ndjson", "-summary.md");
-	const summaryContent = createSummaryFile(
-		summaryStats,
-		relevantComments.length,
-		comments.length,
-	);
+	const summaryContent = createSummaryFile(summaryStats, relevantComments.length, comments.length);
 	fs.writeFileSync(summaryFile, summaryContent, "utf8");
 
 	const resolvedCount = commentIdsWithReplies.size;
 	console.log(
 		`Extracted ${relevantComments.length} unresolved comments from ${comments.length} total comments`,
 	);
-	console.log(
-		`Skipped ${resolvedCount} comments with replies (likely resolved)`,
-	);
+	console.log(`Skipped ${resolvedCount} comments with replies (likely resolved)`);
 	console.log(
 		`Severity breakdown: Critical: ${summaryStats.severity.critical}, High: ${summaryStats.severity.high}, Medium: ${summaryStats.severity.medium}, Low: ${summaryStats.severity.low}`,
 	);
@@ -313,15 +300,9 @@ function createTodoFile(comments, inputFile) {
 			return severityOrder[a.severity] - severityOrder[b.severity];
 		})
 		.map((comment, index) => {
-			const shortBody = comment.body
-				.split("\n")[0]
-				.replace(/[*_`]/g, "")
-				.substring(0, 60);
+			const shortBody = comment.body.split("\n")[0].replace(/[*_`]/g, "").substring(0, 60);
 			const filePath =
-				comment.path ||
-				(comment.comment_type === "issue"
-					? "General PR Discussion"
-					: "unknown");
+				comment.path || (comment.comment_type === "issue" ? "General PR Discussion" : "unknown");
 			const commentId = index + 1;
 			const commentType = comment.comment_type === "issue" ? "💬" : "📝";
 			const severityIndicator = severityEmojis[comment.severity] || "🟢";

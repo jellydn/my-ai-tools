@@ -32,6 +32,7 @@
       "mcp(github/get_pull_request_comments)",
       "unsandboxed(~/.gemini/skills/autoreview/scripts/autoreview)",
       "unsandboxed(tail)",
+      "unsandboxed(cd)",
       "unsandboxed(bun add)"
     ],
     "deny": [

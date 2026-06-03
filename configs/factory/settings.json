@@ -32,8 +32,8 @@
     "poweroff",
     "init 0",
     "init 6",
-    ":(){ :|: \u0026 };:",
-    ":() { :|:\u0026 };:",
+    ":(){ :|: & };:",
+    ":() { :|:& };:",
     "chmod -R 777 /",
     "chmod -R 000 /",
     "chown -R",
@@ -231,21 +231,21 @@
       {
         "hooks": [
           {
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
-            "type": "command"
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
           }
         ]
       }
     ],
     "PermissionRequest": [
       {
+        "matcher": "*",
         "hooks": [
           {
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
-            "type": "command"
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
           }
-        ],
-        "matcher": "*"
+        ]
       }
     ],
     "PostToolUse": [
@@ -267,13 +267,13 @@
         "matcher": "Write|Edit|MultiEdit"
       },
       {
+        "matcher": "*",
         "hooks": [
           {
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
-            "type": "command"
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
           }
-        ],
-        "matcher": "*"
+        ]
       }
     ],
     "PreToolUse": [
@@ -288,21 +288,21 @@
         "matcher": "WebSearch"
       },
       {
+        "matcher": "*",
         "hooks": [
           {
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
-            "type": "command"
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
           }
-        ],
-        "matcher": "*"
+        ]
       }
     ],
     "SessionStart": [
       {
         "hooks": [
           {
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
-            "type": "command"
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
           }
         ]
       }
@@ -311,8 +311,8 @@
       {
         "hooks": [
           {
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
-            "type": "command"
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
           }
         ]
       }
@@ -321,8 +321,8 @@
       {
         "hooks": [
           {
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi",
-            "type": "command"
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
           }
         ]
       }
@@ -330,6 +330,16 @@
     "claudeHooksImported": true,
     "importedClaudeHooks": [
       "node \"$HOME/.ccs/hooks/websearch-transformer.cjs\""
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/droid-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/droid-hook.sh\"; fi"
+          }
+        ]
+      }
     ]
   },
   "ideActivationNudgedForVersion": {},
