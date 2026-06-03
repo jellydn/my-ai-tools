@@ -1469,8 +1469,8 @@ Located in [`configs/pi/`](configs/pi/):
 
 **Key Settings:**
 
-- **Default Model**: `gemini-3.5-flash` (via google-antigravity)
-- **Default Provider**: `google-antigravity`
+- **Default Model**: `gemini-3-flash-agent` (via vibeproxy)
+- **Default Provider**: `vibeproxy`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
@@ -1536,6 +1536,8 @@ Pi is configured with multi-provider model access:
 | ------------------ | ----------------------------------------------------------------------------------------------- |
 | github-copilot     | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                                                              |
 | opencode-go        | `glm-5.1`, `kimi-k2.6`, `deepseek-v4-flash`, `deepseek-v4-pro`                                  |
+| vibeproxy          | `claude-opus-4-6-thinking`, `claude-sonnet-4-6`, `gemini-3-flash-agent`, `gemini-3-pro-high`    |
+|                    | `gemini-pro-agent`, `gemini-3-flash`, `gemini-3.5-flash-low`                                    |
 | google-antigravity | `claude`, `gemini-3.5-flash`, `gemini-3.1-pro`, `claude-sonnet-4-6`, `claude-opus-4-6-thinking` |
 |                    | `gemini-3.5-flash-low`, `gemini-3.5-flash-high`, `gemini-3.1-pro-low`, `gemini-3.1-pro-high`    |
 |                    | `gemini-pro-agent`, `gemini-2.5-pro`, `gemini-2.5-flash`, `gpt-oss-120b` (via rotator)          |
@@ -1543,22 +1545,23 @@ Pi is configured with multi-provider model access:
 | crofai             | `glm-5.1`, `kimi-k2.6`, `deepseek-v4-flash`, `deepseek-v4-pro`                                  |
 | ollama             | `minimax-m2.5:cloud`                                                                            |
 
-### Pi Antigravity Rotator
+### Pi Vibeproxy & Antigravity Rotator
 
-For multi-account rotation and quota management across Google Antigravity accounts, use [pi-antigravity-rotator](https://github.com/tuxevil/pi-antigravity-rotator). It runs as a local proxy on port `51200` and supports per-model routing, real-time quota tracking, and automatic token management.
+For multi-account rotation, local model routing, and quota management across Google Antigravity and Anthropic accounts, use [vibeproxy](https://github.com/automazeio/vibeproxy) or [pi-antigravity-rotator](https://github.com/tuxevil/pi-antigravity-rotator).
+
+Both run as a local proxy on port `51200` and support per-model routing, real-time quota tracking, and automatic token management.
 
 ```bash
-# Install
+# Install Vibeproxy (macOS Menu Bar App)
+brew install --cask vibeproxy
+
+# Or install Antigravity Rotator
 npm install -g pi-antigravity-rotator
-
-# Add accounts
 pi-antigravity-rotator login
-
-# Start proxy
 pi-antigravity-rotator start
 ```
 
-Once running, Pi connects automatically via the `google-antigravity` provider in [`configs/pi/models.json`](configs/pi/models.json), which exposes all rotator-managed models.
+Once running, Pi connects automatically via the configured provider (`vibeproxy` or `google-antigravity` respectively) in [`configs/pi/models.json`](configs/pi/models.json).
 
 ### Usage
 
