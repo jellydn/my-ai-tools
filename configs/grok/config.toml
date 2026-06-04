@@ -51,6 +51,6 @@ fork_secondary_model = "grok-build"
 yolo = false
 compact_mode = false
 permission_mode = "ask"
-simple_mode = false
+simple_mode = true
 vim_mode = true
 show_timestamps = true
