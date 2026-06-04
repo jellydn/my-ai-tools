@@ -97,3 +97,39 @@ GROK_CONFIG_DIR="$REPO_ROOT/configs/grok"
 	run grep -F "Grok" "$REPO_ROOT/AGENTS.md"
 	[ "$status" -eq 0 ]
 }
+
+@test "configs/grok/config.toml configures kanagawa-aligned ui theme" {
+	run grep -F "[ui]" "$GROK_CONFIG_DIR/config.toml"
+	[ "$status" -eq 0 ]
+	run grep -F 'theme = "auto"' "$GROK_CONFIG_DIR/config.toml"
+	[ "$status" -eq 0 ]
+	run grep -F 'auto_dark_theme = "tokyonight"' "$GROK_CONFIG_DIR/config.toml"
+	[ "$status" -eq 0 ]
+}
+
+@test "configs/grok/themes/kanagawa.toml exists" {
+	[ -f "$GROK_CONFIG_DIR/themes/kanagawa.toml" ]
+}
+
+@test "configs/grok/themes/kanagawa.tmTheme exists" {
+	[ -f "$GROK_CONFIG_DIR/themes/kanagawa.tmTheme" ]
+}
+
+@test "configs/grok/themes/kanagawa.toml uses Kanagawa Wave palette" {
+	run grep -F "#1F1F28" "$GROK_CONFIG_DIR/themes/kanagawa.toml"
+	[ "$status" -eq 0 ]
+	run grep -F "#DCD7BA" "$GROK_CONFIG_DIR/themes/kanagawa.toml"
+	[ "$status" -eq 0 ]
+}
+
+@test "cli.sh copies grok themes directory" {
+	run grep -F 'configs/grok/themes' "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+	run grep -F '$HOME/.grok/themes' "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+}
+
+@test "generate.sh exports grok themes" {
+	run grep -F '$HOME/.grok/themes' "$REPO_ROOT/generate.sh"
+	[ "$status" -eq 0 ]
+}
