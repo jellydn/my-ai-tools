@@ -1,1 +1,46 @@
+{
+	"collapseChangelog": true,
+	"defaultModel": "grok-4.3",
+	"defaultProvider": "xai-auth",
+	"defaultThinkingLevel": "high",
+	"editorPaddingX": 1,
+	"enabledModels": [
+		"github-copilot/gpt-5-mini",
+		"github-copilot/gpt-4.1",
+		"github-copilot/gpt-5.4",
+		"commandcode/moonshotai/Kimi-K2.6",
+		"commandcode/MiniMaxAI/MiniMax-M2.7",
+		"commandcode/xiaomi/mimo-v2.5-pro",
+		"commandcode/deepseek/deepseek-v4-pro",
+		"commandcode/deepseek/deepseek-v4-flash",
+		"vibeproxy/claude-opus-4-6-thinking",
+		"vibeproxy/claude-sonnet-4-6",
+		"vibeproxy/gemini-3-flash-agent",
+		"vibeproxy/gemini-pro-agent",
+		"xai-auth/grok-4.3"
+	],
+	"hideThinkingBlock": false,
+	"lastChangelogVersion": "0.78.0",
+	"packages": [
+		{
+			"skills": [],
+			"source": "npm:@plannotator/pi-extension"
+		},
+		"https://github.com/davebcn87/pi-autoresearch",
+		"npm:@ff-labs/pi-fff",
+		"npm:pi-mcp-adapter",
+		"npm:pi-simplify",
+		"npm:pi-manage-todo-list",
+		"npm:pi-btw",
+		"npm:pi-code-previews",
+		"npm:pi-codex-goal",
+		"npm:pi-dynamic-workflows",
+		"npm:pi-commandcode-provider",
+		"npm:pi-web-access",
+		"npm:pi-xai-oauth"
+	],
+	"permissionLevel": "high",
+	"quietStartup": true,
+	"theme": "kanagawa",
+	"treeFilterMode": "default"
 }
