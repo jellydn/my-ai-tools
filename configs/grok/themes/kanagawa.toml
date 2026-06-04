@@ -1,0 +1,61 @@
+# Kanagawa Wave — palette from https://github.com/rebelot/kanagawa.nvim
+# Aligned with configs/pi/themes/kanagawa.json and configs/codex/themes/kanagawa.tmTheme
+#
+# Grok Build 0.2.22 ships: groknight, grokday, tokyonight, rosepine-moon, oscura-midnight.
+# Set [ui].theme = "kanagawa" in config.toml once Grok loads ~/.grok/themes/*.toml (or adds a built-in).
+
+name = "kanagawa"
+aliases = ["kanagawa-wave", "kanagawa-wave-dark", "wave"]
+requires_truecolor = true
+
+[colors]
+bg_base = "#1F1F28"
+bg_light = "#2A2A37"
+bg_dark = "#16161D"
+bg_highlight = "#363646"
+bg_hover = "#363646"
+bg_terminal = "#16161D"
+
+accent_user = "#7FB4CA"
+accent_assistant = "#7E9CD8"
+accent_thinking = "#957FB8"
+accent_tool = "#98BB6C"
+accent_system = "#727169"
+accent_error = "#FF5D62"
+accent_success = "#98BB6C"
+accent_running = "#7FB4CA"
+accent_skill = "#957FB8"
+accent_plan = "#FFA066"
+accent_feedback = "#D27E99"
+accent_model = "#E6C384"
+
+text_primary = "#DCD7BA"
+text_secondary = "#727169"
+
+gray_dim = "#54546D"
+gray = "#727169"
+gray_bright = "#C8C093"
+
+command = "#98BB6C"
+path = "#7FB4CA"
+running = "#7FB4CA"
+warning = "#FFA066"
+fuzzy_accent = "#957FB8"
+
+diff_delete_bg = "#2E2626"
+diff_delete_fg = "#FF5D62"
+diff_insert_bg = "#2A2E27"
+diff_insert_fg = "#98BB6C"
+diff_equal_fg = "#727169"
+diff_gutter_fg = "#54546D"
+
+md_h1 = "#FFA066"
+md_h2 = "#E6C384"
+md_h3 = "#98BB6C"
+md_h4 = "#7FB4CA"
+md_h5 = "#957FB8"
+md_h6 = "#D27E99"
+md_code = "#98BB6C"
+md_code_bg = "#2A2A37"
+md_text = "#DCD7BA"
+md_muted = "#727169"

@@ -542,6 +542,11 @@ generate_grok_configs() {
 	copy_single "$HOME/.grok/AGENTS.md" "$SCRIPT_DIR/configs/grok/AGENTS.md"
 	copy_single "$HOME/.grok/config.toml" "$SCRIPT_DIR/configs/grok/config.toml"
 
+	if [ -d "$HOME/.grok/themes" ]; then
+		copy_directory "$HOME/.grok/themes" "$SCRIPT_DIR/configs/grok/themes"
+		log_success "Grok themes generated"
+	fi
+
 	# Export optional subdirectories (skills/, plugins/, hooks/)
 	[ -d "$HOME/.grok/skills" ] && copy_directory "$HOME/.grok/skills" "$SCRIPT_DIR/configs/grok/skills"
 	[ -d "$HOME/.grok/plugins" ] && copy_directory "$HOME/.grok/plugins" "$SCRIPT_DIR/configs/grok/plugins"
