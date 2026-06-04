@@ -37,7 +37,7 @@
 | **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | core, security-engineer, droid-evolved, autoresearch                                                                                                                |
 | **Orca**        | -                                                                                           | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                  |
 | **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                   |
-| **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                   |
+| **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Kanagawa palette staged (`tokyonight` until built-in)                                                                                                               |
 
 ### 📋 MCP Server Details
 
@@ -2098,7 +2098,20 @@ args = ["mcp-server"]
 [mcp_servers.agentmemory]
 command = "npx"
 args = ["-y", "@agentmemory/mcp"]
+
+[ui]
+theme = "auto"
+auto_dark_theme = "tokyonight"
+auto_light_theme = "grokday"
 ```
+
+### 🎨 Theme (Kanagawa)
+
+Grok Build 0.2.22 ships five built-in dark themes (`groknight`, `tokyonight`, `rosepine-moon`, `oscura-midnight`, plus `grokday` for light). It does not include Kanagawa yet.
+
+This repo stages the **Kanagawa Wave** palette under [`configs/grok/themes/`](configs/grok/themes/) (`kanagawa.toml` + `kanagawa.tmTheme`, shared with Codex/Pi). `cli.sh` installs them to `~/.grok/themes/`.
+
+Until Grok adds a `kanagawa` built-in (or loads custom theme files), `[ui]` uses `theme = "auto"` with `auto_dark_theme = "tokyonight"` — the closest Japanese-inspired built-in. Switch themes in the TUI with `/theme` or set `theme = "tokyonight"` directly in `config.toml`.
 
 ### 📖 Agent Guidelines
 
