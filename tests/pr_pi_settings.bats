@@ -11,11 +11,11 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/pi/settings.json defaultModel is claude-opus-4-6-thinking" {
+@test "configs/pi/settings.json defaultModel is grok-4.3" {
     require_jq
     run jq -r '.defaultModel' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "claude-opus-4-6-thinking" ]
+    [ "$output" = "grok-4.3" ]
 }
 
 @test "configs/pi/settings.json defaultModel is not gemini-3.5-flash" {
@@ -25,11 +25,11 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" != "gemini-3.5-flash" ]
 }
 
-@test "configs/pi/settings.json defaultProvider is vibeproxy" {
+@test "configs/pi/settings.json defaultProvider is xai-auth" {
     require_jq
     run jq -r '.defaultProvider' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "vibeproxy" ]
+    [ "$output" = "xai-auth" ]
 }
 
 @test "configs/pi/settings.json defaultProvider is not google-antigravity" {
@@ -60,9 +60,9 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains vibeproxy/gemini-3-pro-high" {
+@test "configs/pi/settings.json enabledModels contains xai-auth/grok-4.3" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "vibeproxy/gemini-3-pro-high")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "xai-auth/grok-4.3")] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
@@ -123,6 +123,13 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
+@test "configs/pi/settings.json packages contains pi-xai-oauth" {
+    require_jq
+    run jq -e '[.packages[] | select(type == "string" and . == "npm:pi-xai-oauth")] | length > 0' "$PI_SETTINGS"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
 @test "configs/pi/settings.json enabledModels is a non-empty array" {
     require_jq
     run jq -e '.enabledModels | type == "array" and length > 0' "$PI_SETTINGS"
@@ -137,8 +144,8 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "high" ]
 }
 
-# Boundary: defaultModel must match a model that vibeproxy exposes
-@test "configs/pi/settings.json defaultModel is listed in enabledModels as vibeproxy entry" {
+# Boundary: defaultModel must match a provider/model pair in enabledModels
+@test "configs/pi/settings.json defaultModel is listed in enabledModels as provider entry" {
     require_jq
     local default_model
     default_model=$(jq -r '.defaultModel' "$PI_SETTINGS")
