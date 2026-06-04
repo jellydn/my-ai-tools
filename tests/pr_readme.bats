@@ -50,3 +50,45 @@ README_FILE="$REPO_ROOT/README.md"
     run grep -F "**Default Model**: \`gemini-3.5-flash\`" "$README_FILE"
     [ "$status" -ne 0 ]
 }
+
+# Grok CLI README tests
+
+@test "README.md references Grok in features table" {
+    run grep -F "Grok" "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md has Grok section heading" {
+    run grep -E "##.*Grok.*CLI" "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md mentions @xai-official/grok npm package" {
+    run grep -F "@xai-official/grok" "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md Grok section references x.ai/cli homepage" {
+    run grep -F "x.ai/cli" "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md Grok section references docs.x.ai for overview" {
+    run grep -F "docs.x.ai/build/overview" "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md Resources section has x.ai/cli link" {
+    run grep -F "x.ai/cli" "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md Resources section has docs.x.ai/build/overview link" {
+    run grep -F "docs.x.ai/build/overview" "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md Grok section mentions AGENTS.md compatibility" {
+    run grep -c "AGENTS.md" "$README_FILE"
+    [ "$output" -gt 0 ]
+}

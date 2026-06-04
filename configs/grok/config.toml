@@ -1,0 +1,56 @@
+[mcp_servers.context7]
+command = "npx"
+args = [
+    "-y",
+    "@upstash/context7-mcp",
+]
+
+[mcp_servers.sequential-thinking]
+command = "npx"
+args = [
+    "-y",
+    "@modelcontextprotocol/server-sequential-thinking",
+]
+
+[mcp_servers.qmd]
+command = "qmd"
+args = ["mcp"]
+
+[mcp_servers.fff]
+command = "fff-mcp"
+args = []
+
+[mcp_servers.react-grab-mcp]
+command = "npx"
+args = [
+    "-y",
+    "@react-grab/mcp",
+    "--stdio",
+]
+
+[mcp_servers.logpilot]
+command = "logpilot"
+args = ["mcp-server"]
+
+[mcp_servers.agentmemory]
+command = "npx"
+args = [
+    "-y",
+    "@agentmemory/mcp",
+]
+
+[models]
+default = "grok-composer-2.5-fast"
+
+[ui]
+theme = "auto"
+auto_dark_theme = "tokyonight"
+auto_light_theme = "grokday"
+max_thoughts_width = 120
+fork_secondary_model = "grok-build"
+yolo = false
+compact_mode = false
+permission_mode = "ask"
+simple_mode = true
+vim_mode = true
+show_timestamps = true

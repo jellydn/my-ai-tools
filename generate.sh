@@ -529,6 +529,32 @@ generate_orca_configs() {
 	log_success "Orca configs generated"
 }
 
+generate_grok_configs() {
+	log_info "Generating Grok CLI configs..."
+
+	if [ ! -d "$HOME/.grok" ]; then
+		log_warning "Grok CLI config directory not found: $HOME/.grok"
+		return 0
+	fi
+
+	execute "mkdir -p $SCRIPT_DIR/configs/grok"
+
+	copy_single "$HOME/.grok/AGENTS.md" "$SCRIPT_DIR/configs/grok/AGENTS.md"
+	copy_single "$HOME/.grok/config.toml" "$SCRIPT_DIR/configs/grok/config.toml"
+
+	if [ -d "$HOME/.grok/themes" ]; then
+		copy_directory "$HOME/.grok/themes" "$SCRIPT_DIR/configs/grok/themes"
+		log_success "Grok themes generated"
+	fi
+
+	# Export optional subdirectories (skills/, plugins/, hooks/)
+	[ -d "$HOME/.grok/skills" ] && copy_directory "$HOME/.grok/skills" "$SCRIPT_DIR/configs/grok/skills"
+	[ -d "$HOME/.grok/plugins" ] && copy_directory "$HOME/.grok/plugins" "$SCRIPT_DIR/configs/grok/plugins"
+	[ -d "$HOME/.grok/hooks" ] && copy_directory "$HOME/.grok/hooks" "$SCRIPT_DIR/configs/grok/hooks"
+
+	log_success "Grok CLI configs generated"
+}
+
 generate_cline_configs() {
 	log_info "Generating Cline configs..."
 
@@ -637,6 +663,9 @@ main() {
 	echo
 
 	generate_cline_configs
+	echo
+
+	generate_grok_configs
 	echo
 
 	generate_best_practices

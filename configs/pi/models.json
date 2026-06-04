@@ -1,255 +1,186 @@
 {
-  "providers": {
-    "vibeproxy": {
-      "api": "openai-completions",
-      "apiKey": "vibeproxy",
-      "baseUrl": "http://127.0.0.1:51200/v1",
-      "models": [
-        {
-          "contextWindow": 250000,
-          "id": "claude-opus-4-6-thinking",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        },
-        {
-          "contextWindow": 250000,
-          "id": "claude-sonnet-4-6",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-3-flash-agent",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-3-pro-high",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-pro-agent",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-3-flash",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-3.5-flash-low",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        }
-      ]
-    },
-    "google-antigravity": {
-      "api": "openai-completions",
-      "apiKey": "antigravity",
-      "baseUrl": "http://127.0.0.1:51200/v1",
-      "models": [
-        {
-          "contextWindow": 500000,
-          "id": "claude",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-3.5-flash",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-3.5-flash-low",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-3.5-flash-high",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-3.1-pro",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-3.1-pro-low",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-3.1-pro-high",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-pro-agent",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-3.1-flash-lite",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-2.5-pro",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        },
-        {
-          "contextWindow": 1048576,
-          "id": "gemini-2.5-flash",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true
-        },
-        {
-          "contextWindow": 250000,
-          "id": "claude-sonnet-4-6",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        },
-        {
-          "contextWindow": 250000,
-          "id": "claude-opus-4-6-thinking",
-          "input": [
-            "text",
-            "image"
-          ],
-          "toolCalling": true,
-          "reasoning": true
-        },
-        {
-          "contextWindow": 131072,
-          "id": "gpt-oss-120b",
-          "input": [
-            "text"
-          ],
-          "toolCalling": true
-        },
-        {
-          "contextWindow": 131072,
-          "id": "gpt-oss-120b-medium",
-          "input": [
-            "text"
-          ],
-          "toolCalling": true
-        }
-      ]
-    },
-    "ollama": {
-      "api": "openai-completions",
-      "apiKey": "ollama",
-      "baseUrl": "http://127.0.0.1:11434/v1",
-      "models": [
-        {
-          "_launch": true,
-          "contextWindow": 196608,
-          "id": "minimax-m2.5:cloud",
-          "input": [
-            "text"
-          ],
-          "reasoning": true
-        },
-        {
-          "_launch": true,
-          "contextWindow": 262144,
-          "id": "kimi-k2.5:cloud",
-          "input": [
-            "text",
-            "image"
-          ],
-          "reasoning": true
-        }
-      ]
-    }
-  }
+	"providers": {
+		"vibeproxy": {
+			"api": "openai-completions",
+			"apiKey": "vibeproxy",
+			"baseUrl": "http://127.0.0.1:51200/v1",
+			"models": [
+				{
+					"contextWindow": 250000,
+					"id": "claude-opus-4-6-thinking",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				},
+				{
+					"contextWindow": 250000,
+					"id": "claude-sonnet-4-6",
+					"input": ["text", "image"],
+					"toolCalling": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-3-flash-agent",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-3-pro-high",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-pro-agent",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-3-flash",
+					"input": ["text", "image"],
+					"toolCalling": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-3.5-flash-low",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				}
+			]
+		},
+		"google-antigravity": {
+			"api": "openai-completions",
+			"apiKey": "antigravity",
+			"baseUrl": "http://127.0.0.1:51200/v1",
+			"models": [
+				{
+					"contextWindow": 500000,
+					"id": "claude",
+					"input": ["text", "image"],
+					"toolCalling": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-3.5-flash",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-3.5-flash-low",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-3.5-flash-high",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-3.1-pro",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-3.1-pro-low",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-3.1-pro-high",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-pro-agent",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-3.1-flash-lite",
+					"input": ["text", "image"],
+					"toolCalling": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-2.5-pro",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				},
+				{
+					"contextWindow": 1048576,
+					"id": "gemini-2.5-flash",
+					"input": ["text", "image"],
+					"toolCalling": true
+				},
+				{
+					"contextWindow": 250000,
+					"id": "claude-sonnet-4-6",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				},
+				{
+					"contextWindow": 250000,
+					"id": "claude-opus-4-6-thinking",
+					"input": ["text", "image"],
+					"toolCalling": true,
+					"reasoning": true
+				},
+				{
+					"contextWindow": 131072,
+					"id": "gpt-oss-120b",
+					"input": ["text"],
+					"toolCalling": true
+				},
+				{
+					"contextWindow": 131072,
+					"id": "gpt-oss-120b-medium",
+					"input": ["text"],
+					"toolCalling": true
+				}
+			]
+		},
+		"ollama": {
+			"api": "openai-completions",
+			"apiKey": "ollama",
+			"baseUrl": "http://127.0.0.1:11434/v1",
+			"models": [
+				{
+					"_launch": true,
+					"contextWindow": 196608,
+					"id": "minimax-m2.5:cloud",
+					"input": ["text"],
+					"reasoning": true
+				},
+				{
+					"_launch": true,
+					"contextWindow": 262144,
+					"id": "kimi-k2.5:cloud",
+					"input": ["text", "image"],
+					"reasoning": true
+				}
+			]
+		}
+	}
 }

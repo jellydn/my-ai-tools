@@ -759,6 +759,7 @@ backup_configs() {
 		copy_config_dir "$HOME/Library/Application Support/orca/agent-hooks" "$BACKUP_DIR/orca" "agent-hooks"
 		copy_config_dir "$HOME/.cline" "$BACKUP_DIR" "cline"
 		copy_config_dir "$HOME/.commandcode" "$BACKUP_DIR" "commandcode"
+		copy_config_dir "$HOME/.grok" "$BACKUP_DIR" "grok"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -1206,6 +1207,33 @@ install_cline() {
 	run_installer "Cline" "_run_cline_install" "command -v cline" ""
 }
 
+install_grok() {
+	_run_grok_install() {
+		if command -v grok &>/dev/null; then
+			log_warning "Grok CLI is already installed"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "Grok CLI")
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Grok CLI."
+			return 1
+		fi
+
+		log_info "Installing Grok CLI with $pkg_manager..."
+		if execute "$pkg_manager install -g @xai-official/grok"; then
+			log_success "Grok CLI installed"
+		else
+			log_error "Failed to install Grok CLI"
+			log_info "You can install manually: curl -fsSL https://x.ai/cli/install.sh | bash"
+			return 1
+		fi
+	}
+	run_installer "xAI Grok CLI" "_run_grok_install" "command -v grok" "grok --version 2>/dev/null || grok version 2>/dev/null || true"
+}
+
 # Helper: Copy non-marketplace skills to universal directory only
 # Usage: copy_non_marketplace_skills "source_dir"
 copy_non_marketplace_skills() {
@@ -1272,6 +1300,35 @@ install_mcp_interactive() {
 	fi
 }
 
+copy_grok_configs() {
+	local grok_status
+	grok_status=$(detect_tool --detailed "grok" "$HOME/.grok") || grok_status="missing"
+	if [ "$grok_status" = "missing" ]; then
+		log_info "Grok CLI not detected - skipping Grok config installation"
+		return 0
+	fi
+
+	log_info "Detected Grok CLI (via $grok_status)"
+	execute_quoted mkdir -p "$HOME/.grok"
+
+	copy_config_file "$SCRIPT_DIR/configs/grok/AGENTS.md" "$HOME/.grok/" || true
+
+	if [ -f "$SCRIPT_DIR/configs/grok/config.toml" ]; then
+		if [ -f "$HOME/.grok/config.toml" ]; then
+			execute_quoted cp "$HOME/.grok/config.toml" "$HOME/.grok/config.toml.bak"
+			log_success "Backed up existing config.toml to config.toml.bak"
+		fi
+		execute_quoted cp "$SCRIPT_DIR/configs/grok/config.toml" "$HOME/.grok/"
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/grok/themes" ]; then
+		execute_quoted mkdir -p "$HOME/.grok/themes"
+		safe_copy_dir "$SCRIPT_DIR/configs/grok/themes" "$HOME/.grok/themes"
+	fi
+
+	log_success "Grok CLI configs copied"
+}
+
 copy_configurations() {
 	log_info "Copying configurations..."
 
@@ -1292,6 +1349,7 @@ copy_configurations() {
 	copy_factory_configs
 	copy_orca_configs
 	copy_cline_configs
+	copy_grok_configs
 	copy_best_practices
 }
 
@@ -2743,6 +2801,7 @@ main() {
 	echo "║                        AI Tools Setup                                ║"
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Antigravity         ║"
 	echo "║  Pi • Kilo • Copilot • Cursor • Factory Droid • Cline • Command Code  ║"
+	echo "║  Grok                                                                 ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -2808,6 +2867,9 @@ main() {
 	install_cline
 	echo
 
+	install_grok
+	echo
+
 	copy_configurations
 	echo
 
@@ -2818,7 +2880,7 @@ main() {
 	echo
 	echo "Next steps:"
 	echo "  1. Restart your terminal"
-	echo "  2. Run 'claude' to start Claude Code (or 'agy' for Antigravity CLI, 'cmd' for Command Code)"
+	echo "  2. Run 'claude' to start Claude Code (or 'agy' for Antigravity CLI, 'cmd' for Command Code, 'grok' for Grok CLI)"
 	echo "  3. Enable plugins with 'claude plugin enable <plugin-name>'"
 	echo "  4. Check out the README.md for more information"
 	echo

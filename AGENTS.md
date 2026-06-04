@@ -2,7 +2,7 @@
 
 ## 🏗️ What This Is
 
-Monorepo for **my-ai-tools** — configuration management for AI coding assistants: Claude Code, OpenCode, Amp, CCS, Gemini CLI, Antigravity CLI, Pi, Codex CLI, Kilo CLI, CommandCode, Cursor, Factory Droid, Cline.
+Monorepo for **my-ai-tools** — configuration management for AI coding assistants: Claude Code, OpenCode, Amp, CCS, Gemini CLI, Antigravity CLI, Pi, Codex CLI, Kilo CLI, CommandCode, Cursor, Factory Droid, Cline, Grok CLI.
 
 Exports configurations to `~/.claude/`, `~/.config/opencode/`, `~/.npm-global/`, `~/.factory/`, `~/.pi/`, etc.
 
@@ -106,6 +106,7 @@ configs/<tool>/                 # Source configs
   cline/
   factory/
   orca/
+  grok/                        # Grok CLI configs
   copilot/                     # Copilot configs
 skills/                         # Local marketplace plugins
 ```
