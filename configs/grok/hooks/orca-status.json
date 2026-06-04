@@ -1,0 +1,87 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
