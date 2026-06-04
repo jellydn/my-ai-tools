@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, agentmemory
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -37,6 +37,7 @@
 | **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | core, security-engineer, droid-evolved, autoresearch                                                                                                                |
 | **Orca**        | -                                                                                           | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                  |
 | **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                   |
+| **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                   |
 
 ### 📋 MCP Server Details
 
@@ -2028,6 +2029,104 @@ Cline uses the universal skills directory at `~/.agents/skills/`. The installer 
 
 ---
 
+## 🤖 Grok CLI (Optional)
+
+xAI's AI coding assistant for the terminal. [Homepage](https://x.ai/cli) | [Docs](https://docs.x.ai/build/overview)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### 📋 Installation
+
+```bash
+npm install -g @xai-official/grok
+```
+
+Alternatively, use the curl installer:
+
+```bash
+curl -fsSL https://x.ai/cli/install.sh | bash
+```
+
+### 🔧 Configuration
+
+Run the setup script to install configurations to `~/.grok/`:
+
+```bash
+./cli.sh
+```
+
+The setup script automatically deploys MCP servers and agent guidelines.
+
+### ✨ Key Features
+
+- **Claude Code / AGENTS.md compatible** — Grok respects the same `AGENTS.md` format used by Claude Code
+- **Universal skills** — Compatible with Claude Code AGENTS.md skills and `~/.agents/` conventions
+- **MCP Servers** — Extend functionality via Model Context Protocol using config.toml
+- **Headless scripting** — Run Grok non-interactively for CI/CD and automation pipelines
+- **Modes** — Multiple interaction modes via modes and commands system
+
+### 🔌 MCP Servers
+
+Configuration in `configs/grok/config.toml`:
+
+```toml
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+
+[mcp_servers.sequential-thinking]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+
+[mcp_servers.qmd]
+command = "qmd"
+args = ["mcp"]
+
+[mcp_servers.fff]
+command = "fff-mcp"
+args = []
+
+[mcp_servers.react-grab-mcp]
+command = "npx"
+args = ["-y", "@react-grab/mcp", "--stdio"]
+
+[mcp_servers.logpilot]
+command = "logpilot"
+args = ["mcp-server"]
+
+[mcp_servers.agentmemory]
+command = "npx"
+args = ["-y", "@agentmemory/mcp"]
+```
+
+### 📖 Agent Guidelines
+
+Installed to `~/.grok/AGENTS.md` with instructions for:
+
+- Session management with tmux
+- Using fff MCP for file search
+- Following best practices from `~/.ai-tools/best-practices.md`
+- qmd knowledge management integration
+- Git safety guidelines
+
+### Usage
+
+```bash
+# Start Grok CLI
+grok
+
+# Run non-interactively (headless mode)
+grok -p "Analyze the test coverage for this project"
+
+# Use with a specific task
+grok "Explain the architecture of this codebase"
+```
+
+</details>
+
+---
+
 ## 🔄 AI Launcher (Optional)
 
 Fast launcher for switching between AI coding assistants. [Homepage](https://github.com/jellydn/ai-launcher)
@@ -2215,6 +2314,8 @@ Copy the file to your preferred location and reference it in your AI tools.
 - [Why I switched to Claude Code 2.0](https://blog.silennai.com/claude-code)
 - [Llama.cpp Setup with Claude/Codex CLI](https://tammam.io/blog/llama-cpp-setup-with-claude-codex-cli/) - Local model setup guide
 - [Modern Web Guidance](https://developer.chrome.com/docs/modern-web-guidance) - Chrome's best practices for modern web development
+- [xAI CLI](https://x.ai/cli) - Grok CLI official page
+- [Grok Build Docs](https://docs.x.ai/build/overview) - Getting started and configuration
 
 ---
 
