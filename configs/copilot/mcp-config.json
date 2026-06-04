@@ -1,88 +1,57 @@
 {
-  "mcpServers": {
-    "context7": {
-      "type": "local",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp@latest"
-      ],
-      "env": {},
-      "tools": [
-        "*"
-      ]
-    },
-    "sequential-thinking": {
-      "type": "local",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ],
-      "env": {},
-      "tools": [
-        "*"
-      ]
-    },
-    "fff": {
-      "type": "local",
-      "command": "fff-mcp",
-      "args": [],
-      "env": {},
-      "tools": [
-        "*"
-      ]
-    },
-    "qmd": {
-      "type": "local",
-      "command": "qmd",
-      "args": [
-        "mcp"
-      ],
-      "env": {},
-      "tools": [
-        "*"
-      ]
-    },
-    "react-grab-mcp": {
-      "type": "local",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@react-grab/mcp",
-        "--stdio"
-      ],
-      "env": {},
-      "tools": [
-        "*"
-      ]
-    },
-    "logpilot": {
-      "type": "local",
-      "command": "logpilot",
-      "args": [
-        "mcp-server"
-      ],
-      "env": {},
-      "tools": [
-        "*"
-      ]
-    },
-    "agentmemory": {
-      "type": "local",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@agentmemory/mcp"
-      ],
-      "env": {
-        "AGENTMEMORY_URL": "${AGENTMEMORY_URL:-http://localhost:3111}",
-        "AGENTMEMORY_SECRET": "${AGENTMEMORY_SECRET:-}",
-        "AGENTMEMORY_TOOLS": "${AGENTMEMORY_TOOLS:-all}"
-      },
-      "tools": [
-        "*"
-      ]
-    }
-  }
+	"mcpServers": {
+		"context7": {
+			"type": "local",
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@latest"],
+			"env": {},
+			"tools": ["*"]
+		},
+		"sequential-thinking": {
+			"type": "local",
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+			"env": {},
+			"tools": ["*"]
+		},
+		"fff": {
+			"type": "local",
+			"command": "fff-mcp",
+			"args": [],
+			"env": {},
+			"tools": ["*"]
+		},
+		"qmd": {
+			"type": "local",
+			"command": "qmd",
+			"args": ["mcp"],
+			"env": {},
+			"tools": ["*"]
+		},
+		"react-grab-mcp": {
+			"type": "local",
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"],
+			"env": {},
+			"tools": ["*"]
+		},
+		"logpilot": {
+			"type": "local",
+			"command": "logpilot",
+			"args": ["mcp-server"],
+			"env": {},
+			"tools": ["*"]
+		},
+		"agentmemory": {
+			"type": "local",
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"],
+			"env": {
+				"AGENTMEMORY_URL": "${AGENTMEMORY_URL:-http://localhost:3111}",
+				"AGENTMEMORY_SECRET": "${AGENTMEMORY_SECRET:-}",
+				"AGENTMEMORY_TOOLS": "${AGENTMEMORY_TOOLS:-all}"
+			},
+			"tools": ["*"]
+		}
+	}
 }
