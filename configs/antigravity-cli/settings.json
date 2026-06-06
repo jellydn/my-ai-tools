@@ -33,7 +33,9 @@
       "unsandboxed(~/.gemini/skills/autoreview/scripts/autoreview)",
       "unsandboxed(tail)",
       "unsandboxed(cd)",
-      "unsandboxed(bun add)"
+      "unsandboxed(bun add)",
+      "mcp(github/list_commits)",
+      "mcp(github/get_pull_request_files)"
     ],
     "deny": [
       "command(git reset --hard)",
@@ -49,6 +51,5 @@
     "enabled": true
   },
   "toolPermission": "proceed-in-sandbox",
-  "trustedWorkspaces": [],
   "verbosity": "low"
 }
