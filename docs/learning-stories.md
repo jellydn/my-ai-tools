@@ -96,8 +96,8 @@ Lightweight agent with minimal dependencies. Response to heavy frameworks that w
 
 - **Repository:** [jellydn/hermes-hub](https://github.com/jellydn/hermes-hub)
 - **Website:** [hermes-hub.itman.fyi](https://hermes-hub.itman.fyi/)
-- **Built with:** GPT 5.5 (planning) + [Grok CLI](https://x.ai/cli) Composer 2.5 (implementation)
-- **Tech Stack:** TanStack Start, TailwindCSS v4, shadcn/ui, Hono, PostgreSQL, Drizzle ORM, Better Auth, Vitest
+- **Built with:** GPT-5.5 (planning) + [Grok CLI](https://x.ai/cli) Composer 2.5 (implementation)
+- **Tech Stack:** TanStack Start, Tailwind CSS v4, shadcn/ui, Hono, PostgreSQL, Drizzle ORM, Better Auth, Vitest
 
 ### Features
 
@@ -113,7 +113,7 @@ Lightweight agent with minimal dependencies. Response to heavy frameworks that w
 
 Split planning and implementation across two models:
 
-1. **GPT 5.5 for planning** — Architecture, API design, feature specs, and execution plans before writing code
+1. **GPT-5.5 for planning** — Architecture, API design, feature specs, and execution plans before writing code
 2. **Grok CLI Composer 2.5 for implementation** — Fast iteration on TanStack Start routes, Hono API handlers, SSH deploy pipelines, and Vitest coverage
 
 The planner produced bite-sized tasks with file paths and verification steps; Composer 2.5 executed them in focused sessions. Review and docs passes stayed in the same Grok CLI workflow.
@@ -125,7 +125,7 @@ The planner produced bite-sized tasks with file paths and verification steps; Co
 | Tool Combination                      | Best For                                                    |
 | ------------------------------------- | ----------------------------------------------------------- |
 | **Claude + spec-kit**                 | Greenfield projects requiring structured planning           |
-| **GPT 5.5 + Grok CLI Composer 2.5**   | Plan-heavy web apps with fast, tool-aware implementation    |
+| **GPT-5.5 + Grok CLI Composer 2.5**   | Plan-heavy web apps with fast, tool-aware implementation    |
 | **Amp + Ralph**                       | Autonomous development with PRD-to-implementation pipelines |
 | **AI CLI Switcher**                   | Developers working with multiple AI tools                   |
 | **Tiny Agent**                        | Cost-conscious development with minimal overhead            |
