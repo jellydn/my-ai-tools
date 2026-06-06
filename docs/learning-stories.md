@@ -90,14 +90,45 @@ Lightweight agent with minimal dependencies. Response to heavy frameworks that w
 
 ---
 
+## HermesHub
+
+**Web app for deploying and managing a self-hosted Hermes AI Agent on any VPS — no terminal required.**
+
+- **Repository:** [jellydn/hermes-hub](https://github.com/jellydn/hermes-hub)
+- **Website:** [hermes-hub.itman.fyi](https://hermes-hub.itman.fyi/)
+- **Built with:** GPT 5.5 (planning) + [Grok CLI](https://x.ai/cli) Composer 2.5 (implementation)
+- **Tech Stack:** TanStack Start, TailwindCSS v4, shadcn/ui, Hono, PostgreSQL, Drizzle ORM, Better Auth, Vitest
+
+### Features
+
+- **Guided VPS setup** — Step-by-step server connection wizard for non-technical users
+- **One-click Hermes deployment** — Install Docker, Compose, and Hermes from the dashboard with live SSE progress
+- **AI provider configuration** — OpenAI, Anthropic, OpenRouter, Ollama, and custom endpoints without editing env files
+- **Telegram onboarding** — Connect a bot, verify the token, and approve pairing codes from one screen
+- **Agent persona editor** — Define how Hermes speaks via `SOUL.md`, then deploy to a chosen VPS
+- **MCP server manager** — Add stdio or HTTP MCP servers (with presets) and deploy to Hermes `config.yaml`
+- **Built-in Hermes Web UI** — Deploy and open the Hermes browser interface from the server detail page
+
+### Development Approach
+
+Split planning and implementation across two models:
+
+1. **GPT 5.5 for planning** — Architecture, API design, feature specs, and execution plans before writing code
+2. **Grok CLI Composer 2.5 for implementation** — Fast iteration on TanStack Start routes, Hono API handlers, SSH deploy pipelines, and Vitest coverage
+
+The planner produced bite-sized tasks with file paths and verification steps; Composer 2.5 executed them in focused sessions. Review and docs passes stayed in the same Grok CLI workflow.
+
+---
+
 ## Key Takeaways
 
-| Tool Combination      | Best For                                                    |
-| --------------------- | ----------------------------------------------------------- |
-| **Claude + spec-kit** | Greenfield projects requiring structured planning           |
-| **Amp + Ralph**       | Autonomous development with PRD-to-implementation pipelines |
-| **AI CLI Switcher**   | Developers working with multiple AI tools                   |
-| **Tiny Agent**        | Cost-conscious development with minimal overhead            |
+| Tool Combination                      | Best For                                                    |
+| ------------------------------------- | ----------------------------------------------------------- |
+| **Claude + spec-kit**                 | Greenfield projects requiring structured planning           |
+| **GPT 5.5 + Grok CLI Composer 2.5**   | Plan-heavy web apps with fast, tool-aware implementation    |
+| **Amp + Ralph**                       | Autonomous development with PRD-to-implementation pipelines |
+| **AI CLI Switcher**                   | Developers working with multiple AI tools                   |
+| **Tiny Agent**                        | Cost-conscious development with minimal overhead            |
 
 Focused, single-purpose solutions > heavy, all-in-one frameworks.
 
