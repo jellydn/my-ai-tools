@@ -642,7 +642,7 @@ Real-world projects built using these AI tools:
 | - [Docklight](https://github.com/jellydn/docklight)                 | Minimal, self-hosted web UI for managing a single-node Dokku server             | Ralph + OpenCode                            |
 | - [Little Writing](https://github.com/jellydn/little-writing)       | A handwriting tracing app for kids built with React, react-konva, and Capacitor | Claude + spec-kit + GLM 5                   |
 | - [Zed Codemux](https://github.com/jellydn/zed-codemux)             | Open Zed terminals inside tmux or zellij — port of vscode-mux to the Zed editor | Ralph                                       |
-| - [HermesHub](https://github.com/jellydn/hermes-hub)               | Web app for deploying and managing a self-hosted Hermes AI Agent on any VPS      | GPT 5.5 + Grok CLI Composer 2.5             |
+| - [HermesHub](https://github.com/jellydn/hermes-hub)                | Web app for deploying and managing a self-hosted Hermes AI Agent on any VPS     | GPT 5.5 + Grok CLI Composer 2.5             |
 
 📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
 
