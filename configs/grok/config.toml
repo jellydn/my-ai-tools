@@ -44,13 +44,13 @@ default = "grok-composer-2.5-fast"
 
 [ui]
 theme = "auto"
-auto_dark_theme = "tokyonight"
+auto_dark_theme = "rosepine-moon"
 auto_light_theme = "grokday"
 max_thoughts_width = 120
 fork_secondary_model = "grok-build"
 yolo = false
 compact_mode = false
-permission_mode = "ask"
+permission_mode = "always-approve"
 simple_mode = true
 vim_mode = true
 show_timestamps = true
