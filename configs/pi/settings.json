@@ -1,6 +1,6 @@
 {
   "collapseChangelog": true,
-  "defaultModel": "grok-4.3",
+  "defaultModel": "grok-composer-2.5-fast",
   "defaultProvider": "xai-auth",
   "defaultThinkingLevel": "high",
   "editorPaddingX": 1,
@@ -9,7 +9,6 @@
     "github-copilot/gpt-4.1",
     "github-copilot/gpt-5.4",
     "commandcode/moonshotai/Kimi-K2.6",
-    "commandcode/MiniMaxAI/MiniMax-M2.7",
     "commandcode/xiaomi/mimo-v2.5-pro",
     "commandcode/deepseek/deepseek-v4-pro",
     "commandcode/deepseek/deepseek-v4-flash",
@@ -17,10 +16,13 @@
     "vibeproxy/claude-sonnet-4-6",
     "vibeproxy/gemini-3-flash-agent",
     "vibeproxy/gemini-pro-agent",
-    "xai-auth/grok-4.3"
+    "xai-auth/grok-composer-2.5-fast",
+    "xai-auth/grok-build",
+    "commandcode/MiniMaxAI/MiniMax-M3",
+    "commandcode/MiniMaxAI/MiniMax-M2.7"
   ],
   "hideThinkingBlock": false,
-  "lastChangelogVersion": "0.78.0",
+  "lastChangelogVersion": "0.78.1",
   "packages": [
     {
       "skills": [],
