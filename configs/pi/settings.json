@@ -1,7 +1,7 @@
 {
   "collapseChangelog": true,
-  "defaultModel": "grok-composer-2.5-fast",
-  "defaultProvider": "xai-auth",
+  "defaultModel": "deepseek/deepseek-v4-flash",
+  "defaultProvider": "commandcode",
   "defaultThinkingLevel": "high",
   "editorPaddingX": 1,
   "enabledModels": [
@@ -13,13 +13,13 @@
     "commandcode/deepseek/deepseek-v4-pro",
     "commandcode/deepseek/deepseek-v4-flash",
     "vibeproxy/claude-opus-4-6-thinking",
-    "vibeproxy/claude-sonnet-4-6",
     "vibeproxy/gemini-3-flash-agent",
     "vibeproxy/gemini-pro-agent",
     "xai-auth/grok-composer-2.5-fast",
     "xai-auth/grok-build",
     "commandcode/MiniMaxAI/MiniMax-M3",
-    "commandcode/MiniMaxAI/MiniMax-M2.7"
+    "commandcode/MiniMaxAI/MiniMax-M2.7",
+    "ollama/minimax-m2.5:cloud"
   ],
   "hideThinkingBlock": false,
   "lastChangelogVersion": "0.78.1",
@@ -38,8 +38,8 @@
     "npm:pi-codex-goal",
     "npm:pi-dynamic-workflows",
     "npm:pi-commandcode-provider",
-    "npm:pi-web-access",
-    "npm:pi-xai-oauth"
+    "npm:pi-xai-oauth",
+    "npm:@ollama/pi-web-search"
   ],
   "permissionLevel": "high",
   "quietStartup": true,
