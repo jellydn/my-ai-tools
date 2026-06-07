@@ -88,7 +88,7 @@
 		},
 		{
 			"name": "pickup",
-			"description": "Resumes work from a previous handoff session stored in .claude/handoffs/. Load and continue from where you left off in prior sessions.",
+			"description": "Resumes work from previous handoff sessions stored in .planning/handoffs/. Load and continue from where you left off in prior sessions.",
 			"version": "1.0.0",
 			"author": {
 				"name": "Dung Huynh Duc",
