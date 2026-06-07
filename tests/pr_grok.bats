@@ -103,7 +103,7 @@ GROK_CONFIG_DIR="$REPO_ROOT/configs/grok"
 	[ "$status" -eq 0 ]
 	run grep -F 'theme = "auto"' "$GROK_CONFIG_DIR/config.toml"
 	[ "$status" -eq 0 ]
-	run grep -F 'auto_dark_theme = "tokyonight"' "$GROK_CONFIG_DIR/config.toml"
+	run grep -F 'auto_dark_theme = "rosepine-moon"' "$GROK_CONFIG_DIR/config.toml"
 	[ "$status" -eq 0 ]
 }
 

@@ -11,11 +11,11 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/pi/settings.json defaultModel is grok-4.3" {
+@test "configs/pi/settings.json defaultModel is grok-composer-2.5-fast" {
     require_jq
     run jq -r '.defaultModel' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "grok-4.3" ]
+    [ "$output" = "grok-composer-2.5-fast" ]
 }
 
 @test "configs/pi/settings.json defaultModel is not gemini-3.5-flash" {
@@ -60,9 +60,9 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains xai-auth/grok-4.3" {
+@test "configs/pi/settings.json enabledModels contains xai-auth/grok-composer-2.5-fast" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "xai-auth/grok-4.3")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "xai-auth/grok-composer-2.5-fast")] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
