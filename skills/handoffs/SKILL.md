@@ -124,6 +124,6 @@ Then write the handoff file with this structure:
 
 After providing your analysis and summary:
 
-1. Ensure the `.claude/handoffs/` directory exists (create it if needed)
-2. Write the handoff summary to a markdown file at `.claude/handoffs/[timestamp]-[slug].md` where [timestamp] is the current date in format YYYY-MM-DD and the slug is what we defined before
+1. Ensure the `.planning/handoffs/` directory exists (create it if needed)
+2. Write the handoff summary to a markdown file at `.planning/handoffs/[timestamp]-[slug].md` where [timestamp] is the current date in format YYYY-MM-DD and the slug is what we defined before
 3. Tell the user about this file and that they can use `/pickup $1` to continue where $1 is the filename

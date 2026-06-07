@@ -11,11 +11,11 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/pi/settings.json defaultModel is grok-4.3" {
+@test "configs/pi/settings.json defaultModel is deepseek/deepseek-v4-flash" {
     require_jq
     run jq -r '.defaultModel' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "grok-4.3" ]
+    [ "$output" = "deepseek/deepseek-v4-flash" ]
 }
 
 @test "configs/pi/settings.json defaultModel is not gemini-3.5-flash" {
@@ -25,11 +25,11 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" != "gemini-3.5-flash" ]
 }
 
-@test "configs/pi/settings.json defaultProvider is xai-auth" {
+@test "configs/pi/settings.json defaultProvider is commandcode" {
     require_jq
     run jq -r '.defaultProvider' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "xai-auth" ]
+    [ "$output" = "commandcode" ]
 }
 
 @test "configs/pi/settings.json defaultProvider is not google-antigravity" {
@@ -53,16 +53,16 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains vibeproxy/claude-sonnet-4-6" {
+@test "configs/pi/settings.json enabledModels no longer contains vibeproxy/claude-sonnet-4-6" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "vibeproxy/claude-sonnet-4-6")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "vibeproxy/claude-sonnet-4-6")] | length == 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains xai-auth/grok-4.3" {
+@test "configs/pi/settings.json enabledModels contains xai-auth/grok-composer-2.5-fast" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "xai-auth/grok-4.3")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "xai-auth/grok-composer-2.5-fast")] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }

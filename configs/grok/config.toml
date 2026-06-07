@@ -54,3 +54,6 @@ permission_mode = "always-approve"
 simple_mode = true
 vim_mode = true
 show_timestamps = true
+
+[cli]
+installer = "internal"
