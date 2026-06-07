@@ -1,6 +1,6 @@
 ---
 name: pickup
-description: Resumes work from a previous handoff session which are stored in `.claude/handoffs/`
+description: Resumes work from a previous handoff session which are stored in `.planning/handoffs/`
 license: MIT
 compatibility: claude, opencode, codex, gemini, cursor, pi
 hint: Use when resuming work from a previous handoff session
@@ -12,7 +12,7 @@ metadata:
 
 # Pickup Handoff
 
-Resumes work from a previous handoff session which are stored in `.claude/handoffs/`.
+Resumes work from a previous handoff session which are stored in `.planning/handoffs/`.
 
 ## Usage
 
@@ -22,7 +22,7 @@ If no handoff file is specified, will show available handoffs and prompt for sel
 
 ## Process
 
-1. Find available handoffs in `.claude/handoffs/`
+1. Find available handoffs in `.planning/handoffs/`
 2. Read the selected handoff file
 3. Present the handoff summary to the user
 4. Ask the user to confirm they want to continue
@@ -33,7 +33,7 @@ If no handoff file is specified, will show available handoffs and prompt for sel
 To see available handoffs:
 
 ```bash
-ls -la .claude/handoffs/
+ls -la .planning/handoffs/
 ```
 
 Handoffs are named in format: `[YYYY-MM-DD]-[slug].md`
