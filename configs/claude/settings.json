@@ -3,14 +3,7 @@
 	"env": {
 		"CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
 		"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-		"CLAUDE_CODE_NO_FLICKER": "1",
-		"ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
-		"ANTHROPIC_AUTH_TOKEN": "",
-		"ANTHROPIC_API_KEY": "",
-		"ANTHROPIC_DEFAULT_HAIKU_MODEL": "openrouter/owl-alpha",
-		"ANTHROPIC_DEFAULT_SONNET_MODEL": "openrouter/owl-alpha",
-		"ANTHROPIC_DEFAULT_OPUS_MODEL": "openrouter/owl-alpha",
-		"CLAUDE_CODE_SUBAGENT_MODEL": "openrouter/owl-alpha"
+		"CLAUDE_CODE_NO_FLICKER": "1"
 	},
 	"permissions": {
 		"allow": [
