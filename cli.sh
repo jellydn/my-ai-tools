@@ -962,6 +962,7 @@ install_gemini() {
 	_run_gemini_install() {
 		if command -v gemini &>/dev/null; then
 			log_warning "Gemini CLI is already installed"
+			_gemini_deprecation_warning
 			return 0
 		fi
 
@@ -976,12 +977,40 @@ install_gemini() {
 		log_info "Installing Gemini CLI with $pkg_manager..."
 		if execute "$pkg_manager install -g @google/gemini-cli"; then
 			log_success "Gemini CLI installed"
+			_gemini_deprecation_warning
 		else
 			log_error "Failed to install Gemini CLI"
 			return 1
 		fi
 	}
 	run_installer "Google Gemini CLI" "_run_gemini_install" "command -v gemini" ""
+}
+
+_gemini_deprecation_warning() {
+	echo ""
+	log_warning "╔══════════════════════════════════════════════════════════════╗"
+	log_warning "║  ⚠️  GEMINI CLI DEPRECATION NOTICE                          ║"
+	log_warning "║                                                            ║"
+	log_warning "║  Gemini CLI stops serving Google One / unpaid tiers on:     ║"
+	log_warning "║  June 18, 2026                                             ║"
+	log_warning "║                                                            ║"
+	log_warning "║  API-key workflows are NOT affected.                        ║"
+	log_warning "║                                                            ║"
+	log_warning "║  Migrate to Antigravity CLI:                                ║"
+	log_warning "║  https://antigravity.google/product/antigravity-cli         ║"
+	log_warning "║  Migration guide: https://goo.gle/gemini-cli-migration      ║"
+	log_warning "╚══════════════════════════════════════════════════════════════╝"
+	echo ""
+
+	if command -v agy &>/dev/null; then
+		log_success "Antigravity CLI is already installed — you're all set!"
+	elif [ "$YES_TO_ALL" = true ]; then
+		log_info "Antigravity CLI will be installed in the next step (--yes mode)."
+	elif [ -t 0 ]; then
+		log_info "You'll be offered Antigravity CLI installation in the next step."
+	else
+		log_info "Run this script interactively or with --yes to install Antigravity CLI."
+	fi
 }
 
 install_antigravity() {
@@ -1805,6 +1834,10 @@ copy_gemini_configs() {
 	fi
 
 	log_info "Detected Gemini CLI (via $gemini_status)"
+	log_warning "⚠️  Gemini CLI deprecation: Google One / unpaid tiers stop working June 18, 2026"
+	log_warning "    Migrate to Antigravity CLI: https://antigravity.google/product/antigravity-cli"
+	log_warning "    Migration guide: https://goo.gle/gemini-cli-migration"
+	log_info "Copying Gemini configs (retained for API-key users and migration compatibility)..."
 	execute_quoted mkdir -p "$HOME/.gemini"
 
 	copy_config_file "$SCRIPT_DIR/configs/gemini/AGENTS.md" "$HOME/.gemini/" || true

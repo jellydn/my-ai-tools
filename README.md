@@ -1182,9 +1182,16 @@ codex "Explain this code"
 
 ## 🔷 Google Gemini CLI (Deprecated for Google One / unpaid tiers)
 
+> ⚠️ **DEPRECATION NOTICE — June 18, 2026**
+> Gemini CLI will **stop serving requests** to Google One and unpaid (free) tiers on **June 18, 2026**.
+> API-key-based workflows are **not affected**.
+>
+> 👉 **Migrate now:** [Antigravity CLI](https://antigravity.google/product/antigravity-cli) | [Migration guide](https://goo.gle/gemini-cli-migration)
+> 👉 This repo's Antigravity setup: see the [Antigravity CLI section](#-antigravity-cli-optional) below.
+
 Google's AI agent that brings the power of Gemini directly into your terminal. [Homepage](https://github.com/google-gemini/gemini-cli)
 
-> **Migration notice:** Google is transitioning Google One and unpaid-tier Gemini CLI users to Antigravity CLI. Gemini CLI will stop serving those tiers starting June 18, so use the Antigravity CLI setup below for those accounts. This repository still keeps Gemini CLI configs for existing installations, API-key workflows, and migration/export compatibility.
+> **Archival note:** This repository still keeps Gemini CLI configs for existing installations, API-key workflows, and migration/export compatibility. The section is maintained for reference but new users should use Antigravity CLI instead.
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
