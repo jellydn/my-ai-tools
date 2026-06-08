@@ -13,6 +13,8 @@ VERBOSE=false
 
 # Track whether Amp is installed (for backlog.md dependency)
 AMP_INSTALLED=false
+# Track whether --migrate-gemini flag was passed (standalone Gemini→Antigravity migration)
+MIGRATE_GEMINI=false
 
 # Parse command-line arguments first
 for arg in "$@"; do
@@ -39,6 +41,10 @@ for arg in "$@"; do
 		VERBOSE=true
 		shift
 		;;
+	--migrate-gemini)
+		MIGRATE_GEMINI=true
+		shift
+		;;
 	--rollback)
 		log_info "Rolling back last transaction..."
 		rollback_transaction
@@ -46,7 +52,7 @@ for arg in "$@"; do
 		;;
 	*)
 		echo "Unknown option: $arg"
-		echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--rollback]"
+		echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback]"
 		exit 1
 		;;
 	esac
@@ -1928,6 +1934,40 @@ configure_antigravity_statusline() {
 	rm -f "$updated_file"
 }
 
+# Standalone Gemini CLI → Antigravity CLI migration
+# Triggered by --migrate-gemini flag. Installs Antigravity, imports Gemini extensions,
+# and copies Antigravity configs — all in one step.
+migrate_gemini_to_antigravity() {
+	echo "╔══════════════════════════════════════════════════════════════╗"
+	echo "║        Gemini CLI → Antigravity CLI Migration                ║"
+	echo "╚══════════════════════════════════════════════════════════════╝"
+	echo
+
+	log_info "Gemini CLI deprecation: Google One / unpaid tiers stop working June 18, 2026"
+	log_info "Migration guide: https://goo.gle/gemini-cli-migration"
+	echo
+
+	# Step 1: Install Antigravity CLI (delegates to existing installer)
+	log_info "Step 1/2: Installing Antigravity CLI..."
+	install_antigravity
+	echo
+
+	# Step 2: Copy Antigravity configs (includes Gemini extension import)
+	log_info "Step 2/2: Copying Antigravity CLI configs and importing Gemini extensions..."
+	copy_antigravity_configs
+	echo
+
+	log_success "Migration complete!"
+	echo
+	echo "Next steps:"
+	echo "  1. Run 'agy' to start Antigravity CLI"
+	echo "  2. Check imported plugins: /plugins  (inside agy)"
+	echo "  3. Review settings: cat ~/.gemini/antigravity-cli/settings.json"
+	echo "  4. Migration guide: https://goo.gle/gemini-cli-migration"
+	echo
+	echo "Your Gemini CLI configs at ~/.gemini/ are preserved for API-key workflows."
+}
+
 migrate_gemini_plugins_to_antigravity() {
 	local antigravity_home="$1"
 
@@ -2830,6 +2870,16 @@ copy_skill_to_universal() {
 }
 
 main() {
+	# --migrate-gemini: standalone migration mode (skips full install flow)
+	if [ "$MIGRATE_GEMINI" = true ]; then
+		preflight_check
+		echo
+		check_prerequisites
+		echo
+		migrate_gemini_to_antigravity
+		exit 0
+	fi
+
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Antigravity         ║"
