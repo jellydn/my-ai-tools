@@ -2881,6 +2881,8 @@ main() {
 		echo
 		check_prerequisites
 		echo
+		install_jq_if_needed
+		echo
 		migrate_gemini_to_antigravity
 		exit 0
 	fi
