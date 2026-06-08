@@ -71,7 +71,7 @@
 		],
 		"defaultMode": "plan"
 	},
-	"model": "haiku",
+	"model": "opus[1m]",
 	"hooks": {
 		"Notification": [],
 		"Stop": [
