@@ -26,7 +26,7 @@
 | **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                    |
 | **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                   |
 | **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, node_repl   | -                                                                                                                                                                   |
-| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory                | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, ollama-web-search, footer) |
+| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory                | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, ollama-web-search, footer, tps-meter) |
 | **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                   |
 | **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                      |
 | **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot (via plugin) | my-ai-tools-gemini-migration                                                                                                                                        |
@@ -1484,8 +1484,8 @@ Installer copies the repo-managed files `configs/pi/settings.json` and `configs/
 
 **Key Settings:**
 
-- **Default Model**: `openrouter/owl-alpha` (via OpenRouter)
-- **Default Provider**: `openrouter`
+- **Default Model**: `deepseek/deepseek-v4-flash` (via CommandCode)
+- **Default Provider**: `commandcode`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
@@ -1522,7 +1522,8 @@ Then register them in `~/.pi/agent/settings.json`:
 		"npm:pi-dynamic-workflows",
 		"npm:pi-commandcode-provider",
 		"npm:@ollama/pi-web-search",
-		"npm:pi-footer"
+		"npm:pi-footer",
+		"npm:pi-tps-meter"
 	]
 }
 ```
@@ -1545,6 +1546,7 @@ Then register them in `~/.pi/agent/settings.json`:
 | `pi-commandcode-provider`   | CommandCode model provider integration for Pi                              |
 | `@ollama/pi-web-search`     | Web search and content fetching for AI models                              |
 | `pi-footer`                 | Customizable status footer for the Pi TUI                                  |
+| `pi-tps-meter`              | Live tokens-per-second meter for the Pi TUI status bar                     |
 
 ### Enabled Models
 
