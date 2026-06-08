@@ -1935,8 +1935,8 @@ configure_antigravity_statusline() {
 }
 
 # Standalone Gemini CLI → Antigravity CLI migration
-# Triggered by --migrate-gemini flag. Installs Antigravity, imports Gemini extensions,
-# and copies Antigravity configs — all in one step.
+# Triggered by --migrate-gemini flag. Installs Antigravity, ensures jq,
+# imports Gemini extensions, and copies Antigravity configs — all in one step.
 migrate_gemini_to_antigravity() {
 	echo "╔══════════════════════════════════════════════════════════════╗"
 	echo "║        Gemini CLI → Antigravity CLI Migration                ║"
@@ -1948,12 +1948,17 @@ migrate_gemini_to_antigravity() {
 	echo
 
 	# Step 1: Install Antigravity CLI (delegates to existing installer)
-	log_info "Step 1/2: Installing Antigravity CLI..."
+	log_info "Step 1/3: Installing Antigravity CLI..."
 	install_antigravity
 	echo
 
-	# Step 2: Copy Antigravity configs (includes Gemini extension import)
-	log_info "Step 2/2: Copying Antigravity CLI configs and importing Gemini extensions..."
+	# Step 2: Ensure jq is available (needed for config normalization)
+	log_info "Step 2/3: Ensuring jq is installed..."
+	install_jq_if_needed
+	echo
+
+	# Step 3: Copy Antigravity configs (includes Gemini extension import)
+	log_info "Step 3/3: Copying Antigravity CLI configs and importing Gemini extensions..."
 	copy_antigravity_configs
 	echo
 
