@@ -1,7 +1,7 @@
 {
 	"collapseChangelog": true,
-	"defaultModel": "openrouter/owl-alpha",
-	"defaultProvider": "openrouter",
+	"defaultModel": "deepseek/deepseek-v4-flash",
+	"defaultProvider": "commandcode",
 	"defaultThinkingLevel": "high",
 	"editorPaddingX": 1,
 	"enabledModels": [
@@ -23,7 +23,7 @@
 		"openrouter/openrouter/owl-alpha"
 	],
 	"hideThinkingBlock": false,
-	"lastChangelogVersion": "0.78.1",
+	"lastChangelogVersion": "0.79.0",
 	"packages": [
 		{
 			"skills": [],
@@ -40,7 +40,8 @@
 		"npm:pi-dynamic-workflows",
 		"npm:pi-commandcode-provider",
 		"npm:@ollama/pi-web-search",
-		"npm:pi-footer"
+		"npm:pi-footer",
+		"npm:pi-tps-meter"
 	],
 	"permissionLevel": "high",
 	"quietStartup": true,
