@@ -60,9 +60,9 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains xai-auth/grok-composer-2.5-fast" {
+@test "configs/pi/settings.json enabledModels no longer contains xai-auth/grok-composer-2.5-fast" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "xai-auth/grok-composer-2.5-fast")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "xai-auth/grok-composer-2.5-fast")] | length == 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
@@ -123,9 +123,9 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json packages contains pi-xai-oauth" {
+@test "configs/pi/settings.json packages no longer contains pi-xai-oauth" {
     require_jq
-    run jq -e '[.packages[] | select(type == "string" and . == "npm:pi-xai-oauth")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.packages[] | select(type == "string" and . == "npm:pi-xai-oauth")] | length == 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
