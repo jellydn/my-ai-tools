@@ -1,5 +1,6 @@
 {
 	"$schema": "https://opencode.ai/config.json",
+	"model": "opencode/mimo-v2.5-free",
 	"agent": {
 		"build": {
 			"permission": {
