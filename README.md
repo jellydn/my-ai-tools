@@ -26,7 +26,7 @@
 | **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                    |
 | **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                   |
 | **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, node_repl   | -                                                                                                                                                                   |
-| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory                | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, web-access) |
+| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory                | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, ollama-web-search, footer) |
 | **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                   |
 | **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                      |
 | **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot (via plugin) | my-ai-tools-gemini-migration                                                                                                                                        |
@@ -102,6 +102,9 @@ curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --backup
 
 # Skip backup prompt
 curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --no-backup
+
+# One-step Gemini→Antigravity CLI migration
+curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --migrate-gemini
 ```
 
 ### Manual Installation
@@ -119,6 +122,7 @@ cd my-ai-tools
 - `--dry-run` - Preview changes without making them
 - `--backup` - Backup existing configs before installing
 - `--no-backup` - Skip backup prompt
+- `--migrate-gemini` - One-step Gemini→Antigravity CLI migration
 
 ## 🔄 Bidirectional Config Sync
 
@@ -127,7 +131,7 @@ cd my-ai-tools
 Copy configurations from this repository to your home directory (`~/.claude/`, `~/.config/opencode/`, etc.):
 
 ```bash
-./cli.sh [--dry-run] [--backup] [--no-backup]
+./cli.sh [--dry-run] [--backup] [--no-backup] [--migrate-gemini]
 ```
 
 ### Reverse: Generate from Home (`generate.sh`)
@@ -1476,12 +1480,12 @@ Located in [`configs/pi/`](configs/pi/):
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 - [`models.json`](configs/pi/models.json) - Provider and model definitions (vibeproxy, antigravity proxy, ollama)
 
-Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `vibeproxy` as the default provider with `claude-opus-4-6-thinking` default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `openrouter` as the default provider with `openrouter/owl-alpha` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `claude-opus-4-6-thinking` (via vibeproxy)
-- **Default Provider**: `vibeproxy`
+- **Default Model**: `openrouter/owl-alpha` (via OpenRouter)
+- **Default Provider**: `openrouter`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
@@ -1517,7 +1521,8 @@ Then register them in `~/.pi/agent/settings.json`:
 		"npm:pi-codex-goal",
 		"npm:pi-dynamic-workflows",
 		"npm:pi-commandcode-provider",
-		"npm:pi-web-access"
+		"npm:@ollama/pi-web-search",
+		"npm:pi-footer"
 	]
 }
 ```
@@ -1538,7 +1543,8 @@ Then register them in `~/.pi/agent/settings.json`:
 | `pi-codex-goal`             | Codex-style goal management integration                                    |
 | `pi-dynamic-workflows`      | Dynamic workflow automation for Pi                                         |
 | `pi-commandcode-provider`   | CommandCode model provider integration for Pi                              |
-| `pi-web-access`             | Web search and content fetching for AI models                              |
+| `@ollama/pi-web-search`     | Web search and content fetching for AI models                              |
+| `pi-footer`                 | Customizable status footer for the Pi TUI                                  |
 
 ### Enabled Models
 
@@ -1554,7 +1560,7 @@ Pi is configured with multi-provider model access:
 |                    | `gemini-pro-agent`, `gemini-2.5-pro`, `gemini-2.5-flash`, `gpt-oss-120b` (via rotator)          |
 | commandcode        | `moonshotai/Kimi-K2.6`, `MiniMaxAI/MiniMax-M2.7`, `xiaomi/mimo-v2.5-pro`                        |
 |                    | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash`                                        |
-| openrouter         | `moonshotai/kimi-k2.6:free`                                                                     |
+| openrouter         | `moonshotai/kimi-k2.6:free`, `z-ai/glm-4.5-air:free`, `openrouter/owl-alpha`                    |
 | ollama             | `minimax-m2.5:cloud`                                                                            |
 
 ### Pi Vibeproxy & Antigravity Rotator
