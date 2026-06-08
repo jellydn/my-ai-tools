@@ -710,6 +710,19 @@ Local marketplace plugins are in [`skills/`](skills/).
 - **Git Worktree**: Use git worktree with `try` CLI. For tmux users, use `claude-squash` to manage sessions efficiently. Use [superset.sh](https://superset.sh/) to run multiple AI agents in parallel across worktrees
 - **Neovim Integration**: Check out [tiny-nvim](https://github.com/jellydn/tiny-nvim) for a complete setup with [sidekick.nvim](https://github.com/folke/sidekick.nvim) or [claudecode.nvim](https://github.com/coder/claudecode.nvim)
 - **Cost Optimization**: Use [CCS](https://ccs.kaitran.ca/) to switch between affordable providers.
+	- **OpenRouter Provider**: To route Claude Code through OpenRouter instead of Anthropic directly, add these to `~/.claude/settings.json` under `"env"`:
+	  ```json
+	  {
+	    "env": {
+	      "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
+	      "ANTHROPIC_API_KEY": "your-openrouter-api-key",
+	      "ANTHROPIC_DEFAULT_OPUS_MODEL": "openrouter/owl-alpha",
+	      "ANTHROPIC_DEFAULT_SONNET_MODEL": "openrouter/owl-alpha",
+	      "ANTHROPIC_DEFAULT_HAIKU_MODEL": "openrouter/owl-alpha"
+	    }
+	  }
+	  ```
+	  This repo's `configs/claude/settings.json` intentionally does **not** hardcode provider credentials, so you can choose your preferred provider via environment variables. See [OpenRouter free models](https://openrouter.ai/collections/free-models) for no-cost options.
 
 ---
 
@@ -1564,6 +1577,8 @@ Pi is configured with multi-provider model access:
 |                    | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash`                                        |
 | openrouter         | `moonshotai/kimi-k2.6:free`, `z-ai/glm-4.5-air:free`, `openrouter/owl-alpha`                    |
 | ollama             | `minimax-m2.5:cloud`                                                                            |
+
+> See [OpenRouter free models](https://openrouter.ai/collections/free-models) for additional no-cost options.
 
 ### Pi Vibeproxy & Antigravity Rotator
 
