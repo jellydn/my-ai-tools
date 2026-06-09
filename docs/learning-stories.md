@@ -122,13 +122,13 @@ The planner produced bite-sized tasks with file paths and verification steps; Co
 
 ## Key Takeaways
 
-| Tool Combination                      | Best For                                                    |
-| ------------------------------------- | ----------------------------------------------------------- |
-| **Claude + spec-kit**                 | Greenfield projects requiring structured planning           |
-| **GPT-5.5 + Grok CLI Composer 2.5**   | Plan-heavy web apps with fast, tool-aware implementation    |
-| **Amp + Ralph**                       | Autonomous development with PRD-to-implementation pipelines |
-| **AI CLI Switcher**                   | Developers working with multiple AI tools                   |
-| **Tiny Agent**                        | Cost-conscious development with minimal overhead            |
+| Tool Combination                    | Best For                                                    |
+| ----------------------------------- | ----------------------------------------------------------- |
+| **Claude + spec-kit**               | Greenfield projects requiring structured planning           |
+| **GPT-5.5 + Grok CLI Composer 2.5** | Plan-heavy web apps with fast, tool-aware implementation    |
+| **Amp + Ralph**                     | Autonomous development with PRD-to-implementation pipelines |
+| **AI CLI Switcher**                 | Developers working with multiple AI tools                   |
+| **Tiny Agent**                      | Cost-conscious development with minimal overhead            |
 
 Focused, single-purpose solutions > heavy, all-in-one frameworks.
 

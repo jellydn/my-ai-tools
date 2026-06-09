@@ -246,6 +246,8 @@ generate_codex_configs() {
 
 generate_gemini_configs() {
 	log_info "Generating Gemini CLI configs..."
+	log_warning "⚠️  Gemini CLI is deprecated for Google One / unpaid tiers (cutoff: June 18, 2026)"
+	log_warning "    Consider migrating to Antigravity CLI: https://antigravity.google/product/antigravity-cli"
 
 	if [ ! -d "$HOME/.gemini" ]; then
 		log_warning "Gemini CLI config directory not found: $HOME/.gemini"

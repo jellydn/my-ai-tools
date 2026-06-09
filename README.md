@@ -21,23 +21,23 @@
 
 ## 🔌 MCP Servers & Plugins Overview
 
-| Tool            | MCP Servers                                                                                 | Plugins/Extensions                                                                                                                                                  |
-| --------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                    |
-| **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                   |
-| **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, node_repl   | -                                                                                                                                                                   |
-| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory                | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, web-access) |
-| **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                   |
-| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                      |
-| **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot (via plugin) | my-ai-tools-gemini-migration                                                                                                                                        |
-| **Kilo**        | (uses OpenCode config)                                                                      | (uses OpenCode plugins)                                                                                                                                             |
-| **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                   |
-| **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                   |
-| **Cursor**      | context7 (via bunx), sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot   | -                                                                                                                                                                   |
-| **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | core, security-engineer, droid-evolved, autoresearch                                                                                                                |
-| **Orca**        | -                                                                                           | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                  |
-| **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                   |
-| **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Kanagawa palette staged (`tokyonight` until built-in)                                                                                                               |
+| Tool            | MCP Servers                                                                                 | Plugins/Extensions                                                                                                                                                                            |
+| --------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                                              |
+| **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                             |
+| **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, node_repl   | -                                                                                                                                                                                             |
+| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory                        | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, ollama-web-search, footer, tps-meter) |
+| **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                                             |
+| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                                |
+| **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot (via plugin) | my-ai-tools-gemini-migration                                                                                                                                                                  |
+| **Kilo**        | (uses OpenCode config)                                                                      | (uses OpenCode plugins)                                                                                                                                                                       |
+| **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                                             |
+| **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                                             |
+| **Cursor**      | context7 (via bunx), sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot   | -                                                                                                                                                                                             |
+| **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | core, security-engineer, droid-evolved, autoresearch                                                                                                                                          |
+| **Orca**        | -                                                                                           | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                                            |
+| **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                                             |
+| **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Kanagawa palette staged (`tokyonight` until built-in)                                                                                                                                         |
 
 ### 📋 MCP Server Details
 
@@ -102,6 +102,9 @@ curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --backup
 
 # Skip backup prompt
 curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --no-backup
+
+# One-step Gemini→Antigravity CLI migration
+curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --migrate-gemini
 ```
 
 ### Manual Installation
@@ -119,6 +122,7 @@ cd my-ai-tools
 - `--dry-run` - Preview changes without making them
 - `--backup` - Backup existing configs before installing
 - `--no-backup` - Skip backup prompt
+- `--migrate-gemini` - One-step Gemini→Antigravity CLI migration
 
 ## 🔄 Bidirectional Config Sync
 
@@ -127,7 +131,7 @@ cd my-ai-tools
 Copy configurations from this repository to your home directory (`~/.claude/`, `~/.config/opencode/`, etc.):
 
 ```bash
-./cli.sh [--dry-run] [--backup] [--no-backup]
+./cli.sh [--dry-run] [--backup] [--no-backup] [--migrate-gemini]
 ```
 
 ### Reverse: Generate from Home (`generate.sh`)
@@ -706,6 +710,19 @@ Local marketplace plugins are in [`skills/`](skills/).
 - **Git Worktree**: Use git worktree with `try` CLI. For tmux users, use `claude-squash` to manage sessions efficiently. Use [superset.sh](https://superset.sh/) to run multiple AI agents in parallel across worktrees
 - **Neovim Integration**: Check out [tiny-nvim](https://github.com/jellydn/tiny-nvim) for a complete setup with [sidekick.nvim](https://github.com/folke/sidekick.nvim) or [claudecode.nvim](https://github.com/coder/claudecode.nvim)
 - **Cost Optimization**: Use [CCS](https://ccs.kaitran.ca/) to switch between affordable providers.
+  - **OpenRouter Provider**: To route Claude Code through OpenRouter instead of Anthropic directly, add these to `~/.claude/settings.json` under `"env"`:
+    ```json
+    {
+    	"env": {
+    		"ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
+    		"ANTHROPIC_API_KEY": "your-openrouter-api-key",
+    		"ANTHROPIC_DEFAULT_OPUS_MODEL": "openrouter/owl-alpha",
+    		"ANTHROPIC_DEFAULT_SONNET_MODEL": "openrouter/owl-alpha",
+    		"ANTHROPIC_DEFAULT_HAIKU_MODEL": "openrouter/owl-alpha"
+    	}
+    }
+    ```
+    This repo's `configs/claude/settings.json` intentionally does **not** hardcode provider credentials, so you can choose your preferred provider via environment variables. See [OpenRouter free models](https://openrouter.ai/collections/free-models) for no-cost options.
 
 ---
 
@@ -1182,9 +1199,16 @@ codex "Explain this code"
 
 ## 🔷 Google Gemini CLI (Deprecated for Google One / unpaid tiers)
 
+> ⚠️ **DEPRECATION NOTICE — June 18, 2026**
+> Gemini CLI will **stop serving requests** to Google One and unpaid (free) tiers on **June 18, 2026**.
+> API-key-based workflows are **not affected**.
+>
+> 👉 **Migrate now:** [Antigravity CLI](https://antigravity.google/product/antigravity-cli) | [Migration guide](https://goo.gle/gemini-cli-migration)
+> 👉 This repo's Antigravity setup: see the [Antigravity CLI section](#-antigravity-cli-optional) below.
+
 Google's AI agent that brings the power of Gemini directly into your terminal. [Homepage](https://github.com/google-gemini/gemini-cli)
 
-> **Migration notice:** Google is transitioning Google One and unpaid-tier Gemini CLI users to Antigravity CLI. Gemini CLI will stop serving those tiers starting June 18, so use the Antigravity CLI setup below for those accounts. This repository still keeps Gemini CLI configs for existing installations, API-key workflows, and migration/export compatibility.
+> **Archival note:** This repository still keeps Gemini CLI configs for existing installations, API-key workflows, and migration/export compatibility. The section is maintained for reference but new users should use Antigravity CLI instead.
 
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
@@ -1469,12 +1493,12 @@ Located in [`configs/pi/`](configs/pi/):
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 - [`models.json`](configs/pi/models.json) - Provider and model definitions (vibeproxy, antigravity proxy, ollama)
 
-Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `vibeproxy` as the default provider with `claude-opus-4-6-thinking` default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `commandcode` as the default provider with `deepseek/deepseek-v4-flash` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `claude-opus-4-6-thinking` (via vibeproxy)
-- **Default Provider**: `vibeproxy`
+- **Default Model**: `deepseek/deepseek-v4-flash` (via CommandCode)
+- **Default Provider**: `commandcode`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
@@ -1510,7 +1534,9 @@ Then register them in `~/.pi/agent/settings.json`:
 		"npm:pi-codex-goal",
 		"npm:pi-dynamic-workflows",
 		"npm:pi-commandcode-provider",
-		"npm:pi-web-access"
+		"npm:@ollama/pi-web-search",
+		"npm:pi-footer",
+		"npm:pi-tps-meter"
 	]
 }
 ```
@@ -1531,24 +1557,24 @@ Then register them in `~/.pi/agent/settings.json`:
 | `pi-codex-goal`             | Codex-style goal management integration                                    |
 | `pi-dynamic-workflows`      | Dynamic workflow automation for Pi                                         |
 | `pi-commandcode-provider`   | CommandCode model provider integration for Pi                              |
-| `pi-web-access`             | Web search and content fetching for AI models                              |
+| `@ollama/pi-web-search`     | Web search and content fetching for AI models                              |
+| `pi-footer`                 | Customizable status footer for the Pi TUI                                  |
+| `pi-tps-meter`              | Live tokens-per-second meter for the Pi TUI status bar                     |
 
 ### Enabled Models
 
 Pi is configured with multi-provider model access:
 
-| Provider           | Models                                                                                          |
-| ------------------ | ----------------------------------------------------------------------------------------------- |
-| github-copilot     | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                                                              |
-| vibeproxy          | `claude-opus-4-6-thinking`, `claude-sonnet-4-6`, `gemini-3-flash-agent`, `gemini-3-pro-high`    |
-|                    | `gemini-pro-agent`                                                                              |
-| google-antigravity | `claude`, `gemini-3.5-flash`, `gemini-3.1-pro`, `claude-sonnet-4-6`, `claude-opus-4-6-thinking` |
-|                    | `gemini-3.5-flash-low`, `gemini-3.5-flash-high`, `gemini-3.1-pro-low`, `gemini-3.1-pro-high`    |
-|                    | `gemini-pro-agent`, `gemini-2.5-pro`, `gemini-2.5-flash`, `gpt-oss-120b` (via rotator)          |
-| commandcode        | `moonshotai/Kimi-K2.6`, `MiniMaxAI/MiniMax-M2.7`, `xiaomi/mimo-v2.5-pro`                        |
-|                    | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash`                                        |
-| openrouter         | `moonshotai/kimi-k2.6:free`                                                                     |
-| ollama             | `minimax-m2.5:cloud`                                                                            |
+| Provider       | Models                                                                                           |
+| -------------- | ------------------------------------------------------------------------------------------------ |
+| github-copilot | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                                                               |
+| vibeproxy      | `claude-opus-4-6-thinking`, `gemini-3-flash-agent`, `gemini-pro-agent`                           |
+| commandcode    | `moonshotai/Kimi-K2.6`, `MiniMaxAI/MiniMax-M3`, `MiniMaxAI/MiniMax-M2.7`, `xiaomi/mimo-v2.5-pro` |
+|                | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash`                                         |
+| openrouter     | `moonshotai/kimi-k2.6:free`, `z-ai/glm-4.5-air:free`, `openrouter/owl-alpha`                     |
+| ollama         | `minimax-m2.5:cloud`                                                                             |
+
+> See [OpenRouter free models](https://openrouter.ai/collections/free-models) for additional no-cost options.
 
 ### Pi Vibeproxy & Antigravity Rotator
 
