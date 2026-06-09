@@ -30,6 +30,7 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     require_jq
     run jq -r '[.templates[] | select(.name == "review")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
+    [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
     [[ "$output" == "opencode run --agent plan"* ]]
 }
@@ -38,6 +39,7 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     require_jq
     run jq -r '[.templates[] | select(.name == "commit-zen")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
+    [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
     [[ "$output" == "opencode run --agent plan"* ]]
 }
@@ -46,6 +48,7 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     require_jq
     run jq -r '[.templates[] | select(.name == "commit-staged")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
+    [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
     [[ "$output" == "opencode run --agent build"* ]]
 }
@@ -54,6 +57,7 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     require_jq
     run jq -r '[.templates[] | select(.name == "commit-atomic")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
+    [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
     [[ "$output" == "opencode run --agent build"* ]]
 }
@@ -62,6 +66,7 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     require_jq
     run jq -r '[.templates[] | select(.name == "architecture-explanation")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
+    [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
     [[ "$output" == "opencode run --agent plan"* ]]
 }
@@ -70,6 +75,7 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     require_jq
     run jq -r '[.templates[] | select(.name == "draft-pull-request")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
+    [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
     [[ "$output" == "opencode run --agent build"* ]]
 }
