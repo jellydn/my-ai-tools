@@ -2875,11 +2875,9 @@ copy_skill_to_universal() {
 }
 
 main() {
-	# --migrate-gemini: standalone migration mode (skips full install flow)
+	# --migrate-gemini: lightweight migration-only path (no Node/Bun required)
 	if [ "$MIGRATE_GEMINI" = true ]; then
 		preflight_check
-		echo
-		check_prerequisites
 		echo
 		install_jq_if_needed
 		echo
