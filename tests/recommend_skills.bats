@@ -26,13 +26,13 @@ README_FILE="$REPO_ROOT/README.md"
     [ "$output" = "true" ]
 }
 
-@test "recommend-skills.json has 12 entries in recommended_skills" {
+@test "recommend-skills.json has 13 entries in recommended_skills" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
     fi
     run jq -r '.recommended_skills | length' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
-    [ "$output" = "12" ]
+    [ "$output" = "13" ]
 }
 
 @test "every entry in recommended-skills.json has a non-empty repo field" {
@@ -243,5 +243,46 @@ README_FILE="$REPO_ROOT/README.md"
 
 @test "README.md table row references openclaw autoreview SKILL.md URL" {
     run grep -F 'https://github.com/openclaw/agent-skills/blob/main/skills/autoreview/SKILL.md' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+# ---------------------------------------------------------------------------
+# openai/codex babysit-pr entry (newly added)
+# ---------------------------------------------------------------------------
+
+@test "recommend-skills.json contains openai/codex babysit-pr skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "openai/codex" and .skill == "babysit-pr")] | length > 0' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "babysit-pr entry has non-empty description" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.skill == "babysit-pr")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
+@test "babysit-pr description mentions monitor or review comments" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.skill == "babysit-pr")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"monitor"* ]] || [[ "$output" == *"review"* ]]
+}
+
+@test "README.md install block contains openai/codex babysit-pr install command" {
+    run grep -F 'npx skills add openai/codex --skill babysit-pr' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md table row references openai/codex babysit-pr SKILL.md URL" {
+    run grep -F 'https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md' "$README_FILE"
     [ "$status" -eq 0 ]
 }

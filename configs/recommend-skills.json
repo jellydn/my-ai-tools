@@ -53,6 +53,11 @@
 			"repo": "GoogleChrome/modern-web-guidance",
 			"skill": "modern-web-guidance",
 			"description": "Search tool for modern web development best practices"
+		},
+		{
+			"repo": "openai/codex",
+			"skill": "babysit-pr",
+			"description": "Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required"
 		}
 	]
 }
