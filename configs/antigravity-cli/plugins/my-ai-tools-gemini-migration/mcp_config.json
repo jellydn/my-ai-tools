@@ -1,31 +1,45 @@
 {
-	"mcpServers": {
-		"context7": {
-			"serverUrl": "https://mcp.context7.com/mcp"
-		},
-		"sequential-thinking": {
-			"command": "npx",
-			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-		},
-		"qmd": {
-			"command": "qmd",
-			"args": ["mcp"]
-		},
-		"fff": {
-			"command": "fff-mcp",
-			"args": []
-		},
-		"react-grab-mcp": {
-			"command": "npx",
-			"args": ["-y", "@react-grab/mcp", "--stdio"]
-		},
-		"logpilot": {
-			"command": "logpilot",
-			"args": ["mcp-server"]
-		},
-		"agentmemory": {
-			"command": "npx",
-			"args": ["-y", "@agentmemory/mcp"]
-		}
-	}
+  "mcpServers": {
+    "context7": {
+      "serverUrl": "https://mcp.context7.com/mcp"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "qmd": {
+      "command": "qmd",
+      "args": [
+        "mcp"
+      ]
+    },
+    "fff": {
+      "command": "fff-mcp",
+      "args": []
+    },
+    "react-grab-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@react-grab/mcp",
+        "--stdio"
+      ]
+    },
+    "logpilot": {
+      "command": "logpilot",
+      "args": [
+        "mcp-server"
+      ]
+    },
+    "agentmemory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@agentmemory/mcp"
+      ]
+    }
+  }
 }
