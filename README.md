@@ -61,6 +61,7 @@
 
 ### All Platforms
 
+- **Bash 3.0+** - Shell interpreter for `cli.sh` and `generate.sh` (the scripts use bash-only syntax — process substitution, arrays, pattern-parameter expansion — that `sh`/`dash` cannot parse; the entry-point scripts `source` [`lib/require_bash.sh`](./lib/require_bash.sh) which auto-relaunches under bash if invoked via `sh`/`dash` — see [Shell Interpreter](#-shell-interpreter) below)
 - **Bun or Node.js LTS** - Runtime for tools and scripts
 - **Git** - Version control
 - **Claude Code subscription** or use [CCS](#-ccs---claude-code-switch-optional) with affordable providers (GLM, MiniMax)
@@ -143,6 +144,18 @@ Export your current configurations back to this repository for version control:
 ```
 
 > **Tip:** Use `generate.sh` after customizing your local setup to save changes back to this repo.
+
+## 🐚 Shell Interpreter
+
+`cli.sh` and `generate.sh` use bash-only syntax (process substitution, arrays, pattern-parameter expansion) and **require bash**. Both scripts `source` [`lib/require_bash.sh`](./lib/require_bash.sh) as their first non-shebang line; that shim is intentionally POSIX-compatible so `sh`/`dash` can source it and transparently re-launch the script under `bash` before `lib/common.sh` is reached. Prefer one of these invocations for clarity:
+
+```bash
+./cli.sh                # Uses the #!/bin/bash shebang (recommended)
+bash cli.sh             # Explicit bash
+bash generate.sh        # Explicit bash for the reverse-sync script
+```
+
+> If `bash` is not on `PATH`, the guard falls back to a clear error: `Error: cli.sh requires bash, but bash was not found in PATH`. See `lib/require_bash.sh` for the canonical guard implementation.
 
 ## 🪟 Windows Installation
 

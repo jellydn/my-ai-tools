@@ -52,7 +52,8 @@ git diff            # Final check before committing
 | Pattern           | Convention                                    |
 | ----------------- | --------------------------------------------- |
 | Shebang           | `#!/bin/bash`                                 |
-| Error handling    | `set -e` at top                               |
+| Re-exec guard     | Source `lib/require_bash.sh` before any `lib/common.sh` source (see file for canonical implementation) |
+| Error handling    | `set -e` at top (placed *after* the re-exec guard) |
 | Guard clauses     | Return early on preconditions                 |
 | Variable quoting  | Always quote: `"$variable"`                   |
 | Paths             | Use `$HOME`, relative - **no absolute paths** |
@@ -133,6 +134,7 @@ execute() {
 
 ### Prerequisites
 
+- **Required**: Bash 3.0+ — `cli.sh` and `generate.sh` use bash-only syntax (process substitution, arrays, `${var//pat/repl}`). Both entry-point scripts `source` [`lib/require_bash.sh`](./lib/require_bash.sh) as their first non-shebang line; that shim is POSIX-compatible and auto-detects `sh`/`dash` invocation (including macOS where `/bin/sh` IS bash in POSIX mode) and transparently re-launches under `bash`. See [Shell Scripts](#shell-scripts) for the guard pattern.
 - **Required**: Git, Bun (preferred over Node.js)
 - **Required**: `jq` for JSON parsing
 - **Optional**: biome for JS/TS formatting
