@@ -57,3 +57,11 @@ show_timestamps = true
 
 [cli]
 installer = "internal"
+auto_update = true
+
+[marketplace]
+official_marketplace_auto_installed = true
+
+[[marketplace.sources]]
+name = "xAI Official"
+git = "https://github.com/xai-org/plugin-marketplace.git"
