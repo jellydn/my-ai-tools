@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Re-exec under bash if invoked via sh/dash. lib/require_bash.sh is POSIX-compatible
+# so sh can source it and trigger the re-exec before lib/common.sh is reached.
+source "$(dirname "${BASH_SOURCE[0]}")/lib/require_bash.sh"
+
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -265,7 +269,7 @@ install_qmd_now() {
 		if command -v bun &>/dev/null; then
 			local bun_global_bin
 			bun_global_bin="$(bun pm bin -g 2>/dev/null)"
-			if [ -n "$bun_global_bin" ] && [[ ":$PATH:" != *":$bun_global_bin:"* ]]; then
+			if [ -n "$bun_global_bin" ] && case ":$PATH:" in *":$bun_global_bin:"*) false ;; *) true ;; esac; then
 				export PATH="$bun_global_bin:$PATH"
 			fi
 		fi
@@ -289,7 +293,7 @@ install_fff_mcp_now() {
 	if execute_installer "https://dmtrkovalenko.dev/install-fff-mcp.sh" "" "fff-mcp"; then
 		# Ensure ~/.local/bin is in PATH for the current session
 		local local_bin="$HOME/.local/bin"
-		if [[ ":$PATH:" != *":$local_bin:"* ]]; then
+		if case ":$PATH:" in *":$local_bin:"*) false ;; *) true ;; esac; then
 			export PATH="$local_bin:$PATH"
 		fi
 		log_success "fff-mcp installed successfully"
@@ -320,7 +324,7 @@ install_logpilot_now() {
 	if execute "cargo install logpilot"; then
 		# Ensure cargo bin is in PATH
 		local cargo_bin="${CARGO_HOME:-$HOME/.cargo}/bin"
-		if [[ ":$PATH:" != *":$cargo_bin:"* ]]; then
+		if case ":$PATH:" in *":$cargo_bin:"*) false ;; *) true ;; esac; then
 			export PATH="$cargo_bin:$PATH"
 		fi
 		log_success "logpilot installed successfully"
@@ -666,6 +670,10 @@ safe_copy_dir() {
 	prune_expr="${prune_expr% -o}"
 
 	mkdir -p "$dest_dir"
+	# POSIX: use temp file instead of process substitution so the loop runs in the current shell
+	local _find_list
+	_find_list=$(make_temp_file "safe-copy-find" "list")
+	find "$source_dir" -type d \( $prune_expr \) -prune -o -type f -print 2>/dev/null > "$_find_list"
 	while IFS= read -r file; do
 		case "$file" in *.sqlite | *.sqlite-wal | *.sqlite-shm) continue ;; esac
 		local rel_path="${file#"$source_dir"/}"
@@ -676,7 +684,8 @@ safe_copy_dir() {
 			((skipped++))
 			[ "$VERBOSE" = true ] && log_warning "Skipped busy file: $rel_path"
 		fi
-	done < <(find "$source_dir" -type d \( $prune_expr \) -prune -o -type f -print 2>/dev/null)
+	done < "$_find_list"
+	rm -f "$_find_list"
 
 	[ "$VERBOSE" = true ] && [ $skipped -gt 0 ] && log_info "Skipped $skipped busy file(s)"
 	return 0
@@ -1514,8 +1523,8 @@ install_mcp_servers_from_registry() {
 	# Fields: server_name, name, description, command, args_delimited, requires_delimited, category
 	# Read from FD 3 so stdin stays attached to the terminal for prompt_yn.
 	while IFS=$'\t' read -r server_name name description command args_delimited requires_delimited category <&3; do
-		# Substitute {{SCRIPT_RUNNER}} placeholder
-		command="${command//\{\{SCRIPT_RUNNER\}\}/$script_runner}"
+		# Substitute {{SCRIPT_RUNNER}} placeholder (POSIX: use sed, not ${}//)
+		command=$(printf '%s\n' "$command" | sed "s|{{SCRIPT_RUNNER}}|$script_runner|g")
 
 		# Parse args into array (args are delimited by SOH character)
 		local args_array=()
@@ -2009,9 +2018,14 @@ normalize_antigravity_mcp_configs() {
 	local config_files=()
 	[ -f "$antigravity_home/mcp_config.json" ] && config_files+=("$antigravity_home/mcp_config.json")
 	if [ -d "$antigravity_home/plugins" ]; then
-		while IFS= read -r config_file; do
-			config_files+=("$config_file")
-		done < <(find "$antigravity_home/plugins" -mindepth 2 -maxdepth 2 -name mcp_config.json -type f 2>/dev/null)
+		# POSIX: use temp file instead of process substitution
+		local _mcp_list
+		_mcp_list=$(make_temp_file "antigravity-mcp" "list")
+		find "$antigravity_home/plugins" -mindepth 2 -maxdepth 2 -name mcp_config.json -type f 2>/dev/null > "$_mcp_list"
+	while IFS= read -r config_file; do
+		config_files+=("$config_file")
+	done < "$_mcp_list"
+	rm -f "$_mcp_list"
 	fi
 
 	for config_file in "${config_files[@]}"; do
