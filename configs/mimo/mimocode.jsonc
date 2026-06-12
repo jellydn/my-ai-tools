@@ -112,8 +112,8 @@
 		}
 	},
 	"permission": {
-		"edit": {
-			"deny": []
-		}
+		"*": "ask",
+		"bash": "allow",
+		"edit": "deny"
 	}
 }
