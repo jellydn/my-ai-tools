@@ -561,6 +561,42 @@ generate_grok_configs() {
 	log_success "Grok CLI configs generated"
 }
 
+generate_mimo_configs() {
+	log_info "Generating MiMo-Code configs..."
+
+	if [ ! -d "$HOME/.config/mimocode" ]; then
+		log_warning "MiMo-Code config directory not found: $HOME/.config/mimocode"
+		return 0
+	fi
+
+	execute "mkdir -p $SCRIPT_DIR/configs/mimo"
+
+	copy_single "$HOME/.config/mimocode/AGENTS.md" "$SCRIPT_DIR/configs/mimo/AGENTS.md"
+	copy_single "$HOME/.config/mimocode/mimocode.jsonc" "$SCRIPT_DIR/configs/mimo/mimocode.jsonc"
+	copy_single "$HOME/.config/mimocode/tui.json" "$SCRIPT_DIR/configs/mimo/tui.json"
+
+	if [ -d "$HOME/.config/mimocode/themes" ]; then
+		copy_directory "$HOME/.config/mimocode/themes" "$SCRIPT_DIR/configs/mimo/themes"
+		log_success "MiMo-Code themes generated"
+	fi
+
+	if [ -d "$HOME/.config/mimocode/agent" ]; then
+		copy_directory "$HOME/.config/mimocode/agent" "$SCRIPT_DIR/configs/mimo/agent"
+		log_success "MiMo-Code agents generated"
+	fi
+
+	if [ -d "$HOME/.config/mimocode/command" ]; then
+		copy_directory "$HOME/.config/mimocode/command" "$SCRIPT_DIR/configs/mimo/command"
+		log_success "MiMo-Code commands generated"
+	fi
+
+	# Export optional subdirectories
+	[ -d "$HOME/.config/mimocode/plugins" ] && copy_directory "$HOME/.config/mimocode/plugins" "$SCRIPT_DIR/configs/mimo/plugins"
+	[ -d "$HOME/.config/mimocode/skills" ] && copy_directory "$HOME/.config/mimocode/skills" "$SCRIPT_DIR/configs/mimo/skills"
+
+	log_success "MiMo-Code configs generated"
+}
+
 generate_cline_configs() {
 	log_info "Generating Cline configs..."
 
@@ -672,6 +708,9 @@ main() {
 	echo
 
 	generate_grok_configs
+	echo
+
+	generate_mimo_configs
 	echo
 
 	generate_best_practices

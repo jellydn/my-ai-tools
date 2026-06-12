@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, MiMo-Code, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, agentmemory
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -38,6 +38,7 @@
 | **Orca**        | -                                                                                           | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                                            |
 | **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                                             |
 | **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Kanagawa palette staged (`tokyonight` until built-in)                                                                                                                                         |
+| **MiMo-Code**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                             |
 
 ### 📋 MCP Server Details
 
@@ -1508,12 +1509,12 @@ Located in [`configs/pi/`](configs/pi/):
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 - [`models.json`](configs/pi/models.json) - Provider and model definitions (vibeproxy, antigravity proxy, ollama)
 
-Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `commandcode` as the default provider with `deepseek/deepseek-v4-flash` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `xiaomi-token-plan-sgp` as the default provider with `mimo-v2.5-pro` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `deepseek/deepseek-v4-flash` (via CommandCode)
-- **Default Provider**: `commandcode`
+- **Default Model**: `mimo-v2.5-pro` (via Xiaomi Token Plan)
+- **Default Provider**: `xiaomi-token-plan-sgp`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
@@ -1584,8 +1585,9 @@ Pi is configured with multi-provider model access:
 | -------------- | ------------------------------------------------------------------------------------------------ |
 | github-copilot | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                                                               |
 | vibeproxy      | `claude-opus-4-6-thinking`, `gemini-3-flash-agent`, `gemini-pro-agent`                           |
-| commandcode    | `moonshotai/Kimi-K2.6`, `MiniMaxAI/MiniMax-M3`, `MiniMaxAI/MiniMax-M2.7`, `xiaomi/mimo-v2.5-pro` |
+| commandcode    | `moonshotai/Kimi-K2.6`, `MiniMaxAI/MiniMax-M3`, `MiniMaxAI/MiniMax-M2.7`                        |
 |                | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash`                                         |
+| xiaomi-token-plan-sgp | `mimo-v2.5-pro`                                                                       |
 | openrouter     | `moonshotai/kimi-k2.6:free`, `z-ai/glm-4.5-air:free`, `openrouter/owl-alpha`                     |
 | ollama         | `minimax-m2.5:cloud`                                                                             |
 
@@ -2182,6 +2184,143 @@ grok "Explain the architecture of this codebase"
 
 ---
 
+## 🏮 MiMo-Code (Optional)
+
+Xiaomi's open-source, terminal-native AI coding assistant with persistent memory, agentic orchestration, and self-improvement capabilities. Forked from OpenCode. [Homepage](https://mimo.xiaomi.com) | [GitHub](https://github.com/XiaomiMiMo/MiMo-Code)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### 📋 Installation
+
+```bash
+npm install -g @mimo-ai/cli
+```
+
+Alternatively, use the curl installer:
+
+```bash
+curl -fsSL https://mimo.xiaomi.com/install | bash
+```
+
+### 🔧 Configuration
+
+Run the setup script to install configurations to `~/.config/mimocode/`:
+
+```bash
+./cli.sh
+```
+
+The setup script automatically deploys config files, commands, and agent guidelines.
+
+### ✨ Key Features
+
+- **Persistent Cross-Session Memory** — SQLite-powered system that maintains project understanding across sessions (saves `MEMORY.md`, checkpoints, task history)
+- **Intelligent Context Management** — Auto-creates checkpoints, ranks and injects relevant past knowledge when resuming
+- **Agentic Orchestration** — Multiple agents (`build`, `plan`, `compose`) with on-demand subagents
+- **Goal Tracking** — `/goal` command with independent judge model to verify completion
+- **Self-Improvement** — `/dream` extracts knowledge from session traces; `/distill` packages workflows into reusable skills
+- **Voice Input** — Real-time voice commands via TenVAD and MiMo ASR
+- **OpenCode Compatible** — Inherits OpenCode's architecture; uses the same config schema, MCP servers, formatters, and plugin system
+
+### 🔌 MCP Servers
+
+Configuration in [`configs/mimo/mimocode.jsonc`](configs/mimo/mimocode.jsonc):
+
+```jsonc
+{
+	"$schema": "https://opencode.ai/config.json",
+	"mcp": {
+		"context7": {
+			"enabled": true,
+			"type": "remote",
+			"url": "https://mcp.context7.com/mcp"
+		},
+		"qmd": {
+			"command": ["qmd", "mcp"],
+			"enabled": true,
+			"type": "local"
+		},
+		"fff": {
+			"type": "local",
+			"command": ["fff-mcp"],
+			"enabled": true
+		},
+		"sequential-thinking": {
+			"type": "local",
+			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+			"enabled": true
+		},		"react-grab-mcp": {
+			"type": "local",
+			"command": ["npx", "-y", "@react-grab/mcp", "--stdio"],
+			"enabled": true
+		},
+
+		"logpilot": {
+			"type": "local",
+			"command": ["logpilot", "mcp-server"],
+			"enabled": true
+		},
+		"agentmemory": {
+			"type": "local",
+			"command": ["npx", "-y", "@agentmemory/mcp"],
+			"enabled": true
+		}
+	}
+}
+```
+
+### 🎨 Theme
+
+MiMo-Code uses the **Kanagawa** theme by default (no custom theme file shipped).
+
+### ⌨️ Custom Commands
+
+Located in [`configs/mimo/command/`](configs/mimo/command/):
+
+- `rmslop` - Remove AI-generated boilerplate and redundant code
+
+### 📖 Agent Guidelines
+
+Installed to `~/.config/mimocode/AGENTS.md` with instructions for:
+
+- Session management with tmux
+- Using fff MCP for file search
+- Following best practices from `~/.ai-tools/best-practices.md`
+- qmd knowledge management integration
+- Git safety guidelines
+
+### Usage
+
+```bash
+# Start MiMo-Code
+mimo
+
+# Run non-interactively
+mimo -p "Analyze the test coverage for this project"
+
+# Use with a specific task
+mimo "Explain the architecture of this codebase"
+```
+
+### 🚀 MiMo Open Platform — Xiaomi's Most Powerful AI
+
+Invite builders to try the **MiMo Open Platform** — Xiaomi's most powerful AI lineup including **MiMo V2.5** and more. Sign up with the invite code below: both you and your friend get **$2 in API credits** plus **10% off your first plan**.
+
+| Offer                         | Details                                             |
+| ----------------------------- | --------------------------------------------------- |
+| Friend signs up with your code | Both get **$2 API credits** · first 30 sign-ups    |
+| Friend's first plan purchase   | Friend gets **10% off** · you earn **10% back**    |
+| Referral window                | **40 days** from their sign-up date                |
+
+**Invite Code:** `EAEGUP`
+
+👉 [Sign up at platform.xiaomimimo.com](https://platform.xiaomimimo.com?ref=EAEGUP) — code auto-filled on sign-up
+
+</details>
+
+---
+
 ## 🔄 AI Launcher (Optional)
 
 Fast launcher for switching between AI coding assistants. [Homepage](https://github.com/jellydn/ai-launcher)
@@ -2371,6 +2510,8 @@ Copy the file to your preferred location and reference it in your AI tools.
 - [Modern Web Guidance](https://developer.chrome.com/docs/modern-web-guidance) - Chrome's best practices for modern web development
 - [xAI CLI](https://x.ai/cli) - Grok CLI official page
 - [Grok Build Docs](https://docs.x.ai/build/overview) - Getting started and configuration
+- [MiMo-Code GitHub](https://github.com/XiaomiMiMo/MiMo-Code) - MiMo-Code repository
+- [MiMo-Code Docs](https://mimo.xiaomi.com/mimocode/rules) - Configuration and usage documentation
 
 ---
 

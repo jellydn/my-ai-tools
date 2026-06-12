@@ -706,6 +706,7 @@ copy_config_dir() {
 }
 
 # Helper: Copy a config file if it exists in source
+# If the destination already has a file with the same name, backs it up as .bak first.
 # Usage: copy_config_file "source_file" "dest_dir"
 copy_config_file() {
 	local source_file="$1"
@@ -716,6 +717,16 @@ copy_config_file() {
 	fi
 
 	execute_quoted mkdir -p "$dest_dir" || return 1
+
+	local _filename
+	_filename=$(basename "$source_file")
+
+	# Backup existing file before overwriting
+	if [ -f "$dest_dir/$_filename" ]; then
+		execute_quoted cp "$dest_dir/$_filename" "$dest_dir/$_filename.bak" || true
+		log_success "Backed up existing $_filename to $_filename.bak"
+	fi
+
 	execute_quoted cp -p "$source_file" "$dest_dir/" || return 1
 	return 0
 }
@@ -775,6 +786,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.cline" "$BACKUP_DIR" "cline"
 		copy_config_dir "$HOME/.commandcode" "$BACKUP_DIR" "commandcode"
 		copy_config_dir "$HOME/.grok" "$BACKUP_DIR" "grok"
+		copy_config_dir "$HOME/.config/mimocode" "$BACKUP_DIR" "mimocode"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -910,29 +922,9 @@ install_amp() {
 }
 
 install_ccs() {
-	_run_ccs_install() {
-		if command -v ccs &>/dev/null; then
-			log_warning "CCS is already installed ($(ccs --version))"
-			return 0
-		fi
-
-		local pkg_manager
-		pkg_manager=$(_verify_package_manager "CCS")
-
-		if [ -z "$pkg_manager" ]; then
-			log_error "No package manager found. Install Bun or Node.js/npm to install CCS."
-			return 1
-		fi
-
-		log_info "Installing CCS with $pkg_manager..."
-		if execute "$pkg_manager install -g @kaitranntt/ccs"; then
-			log_success "CCS installed"
-		else
-			log_error "Failed to install CCS"
-			return 1
-		fi
-	}
-	run_installer "CCS" "_run_ccs_install" "command -v ccs" "ccs --version"
+	install_npm_tool "CCS" "ccs" "@kaitranntt/ccs" \
+		"npm install -g @kaitranntt/ccs" \
+		"ccs --version"
 }
 
 install_ai_switcher() {
@@ -948,29 +940,8 @@ install_ai_switcher() {
 }
 
 install_codex() {
-	_run_codex_install() {
-		if command -v codex &>/dev/null; then
-			log_warning "Codex CLI is already installed"
-			return 0
-		fi
-
-		local pkg_manager
-		pkg_manager=$(_verify_package_manager "Codex CLI")
-
-		if [ -z "$pkg_manager" ]; then
-			log_error "No package manager found. Install Bun or Node.js/npm to install Codex CLI."
-			return 1
-		fi
-
-		log_info "Installing Codex CLI with $pkg_manager..."
-		if execute "$pkg_manager install -g @openai/codex"; then
-			log_success "Codex CLI installed"
-		else
-			log_error "Failed to install Codex CLI"
-			return 1
-		fi
-	}
-	run_installer "OpenAI Codex CLI" "_run_codex_install" "command -v codex" ""
+	install_npm_tool "OpenAI Codex CLI" "codex" "@openai/codex" \
+		"npm install -g @openai/codex"
 }
 
 install_gemini() {
@@ -1053,55 +1024,13 @@ install_antigravity() {
 }
 
 install_kilo() {
-	_run_kilo_install() {
-		if command -v kilo &>/dev/null; then
-			log_warning "Kilo CLI is already installed"
-			return 0
-		fi
-
-		local pkg_manager
-		pkg_manager=$(_verify_package_manager "Kilo CLI")
-
-		if [ -z "$pkg_manager" ]; then
-			log_error "No package manager found. Install Bun or Node.js/npm to install Kilo CLI."
-			return 1
-		fi
-
-		log_info "Installing Kilo CLI with $pkg_manager..."
-		if execute "$pkg_manager install -g @kilocode/cli"; then
-			log_success "Kilo CLI installed"
-		else
-			log_error "Failed to install Kilo CLI"
-			return 1
-		fi
-	}
-	run_installer "Kilo CLI" "_run_kilo_install" "command -v kilo" ""
+	install_npm_tool "Kilo CLI" "kilo" "@kilocode/cli" \
+		"npm install -g @kilocode/cli"
 }
 
 install_pi() {
-	_run_pi_install() {
-		if command -v pi &>/dev/null; then
-			log_warning "Pi is already installed"
-			return 0
-		fi
-
-		local pkg_manager
-		pkg_manager=$(_verify_package_manager "Pi")
-
-		if [ -z "$pkg_manager" ]; then
-			log_error "No package manager found. Install Bun or Node.js/npm to install Pi."
-			return 1
-		fi
-
-		log_info "Installing Pi with $pkg_manager..."
-		if execute "$pkg_manager install -g @mariozechner/pi-coding-agent"; then
-			log_success "Pi installed"
-		else
-			log_error "Failed to install Pi"
-			return 1
-		fi
-	}
-	run_installer "Pi" "_run_pi_install" "command -v pi" ""
+	install_npm_tool "Pi" "pi" "@mariozechner/pi-coding-agent" \
+		"npm install -g @mariozechner/pi-coding-agent"
 }
 
 is_commandcode_installed() {
@@ -1109,29 +1038,9 @@ is_commandcode_installed() {
 }
 
 install_commandcode() {
-	_run_commandcode_install() {
-		if is_commandcode_installed; then
-			log_warning "Command Code is already installed"
-			return 0
-		fi
-
-		local pkg_manager
-		pkg_manager=$(_verify_package_manager "Command Code")
-
-		if [ -z "$pkg_manager" ]; then
-			log_error "No package manager found. Install Bun or Node.js/npm to install Command Code."
-			return 1
-		fi
-
-		log_info "Installing Command Code with $pkg_manager..."
-		if execute "$pkg_manager install -g command-code"; then
-			log_success "Command Code installed (binary: cmd)"
-		else
-			log_error "Failed to install Command Code"
-			return 1
-		fi
-	}
-	run_installer "Command Code" "_run_commandcode_install" "is_commandcode_installed" ""
+	install_npm_tool "Command Code" "cmd" "command-code" \
+		"npm install -g command-code" \
+		"cmd --version 2>/dev/null || true"
 }
 
 install_copilot() {
@@ -1206,76 +1115,60 @@ install_cursor() {
 }
 
 install_factory() {
-	_run_factory_install() {
-		local pkg_manager
-		pkg_manager=$(_verify_package_manager "Factory CLI")
-
-		if [ -z "$pkg_manager" ]; then
-			log_error "No package manager found. Install Bun or Node.js/npm to install Factory CLI."
-			return 1
-		fi
-
-		log_info "Installing Factory CLI with $pkg_manager..."
-		if execute "$pkg_manager install -g @factory/cli"; then
-			log_success "Factory Droid CLI installed"
-		else
-			log_error "Failed to install Factory CLI"
-			return 1
-		fi
-	}
-	run_installer "Factory Droid" "_run_factory_install" "command -v droid" ""
+	install_npm_tool "Factory Droid" "droid" "@factory/cli" \
+		"npm install -g @factory/cli"
 }
 
 install_cline() {
-	_run_cline_install() {
-		if command -v cline &>/dev/null; then
-			log_warning "Cline is already installed"
+	install_npm_tool "Cline" "cline" "cline" \
+		"npm install -g cline"
+}
+
+# Shared helper: Install an npm-based AI coding CLI tool with consistent pattern.
+# Usage: install_npm_tool "display_name" "binary" "npm_pkg" "manual_url" [version_cmd]
+install_npm_tool() {
+	local display_name="$1"
+	local binary="$2"
+	local npm_pkg="$3"
+	local manual_url="$4"
+	local version_cmd="${5:-$binary --version 2>/dev/null || true}"
+
+	_run_install_npm_body() {
+		if command -v "$binary" &>/dev/null; then
+			log_warning "$display_name is already installed"
 			return 0
 		fi
 
 		local pkg_manager
-		pkg_manager=$(_verify_package_manager "Cline")
+		pkg_manager=$(_verify_package_manager "$display_name")
 
 		if [ -z "$pkg_manager" ]; then
-			log_error "No package manager found. Install Bun or Node.js/npm to install Cline."
+			log_error "No package manager found. Install Bun or Node.js/npm to install $display_name."
 			return 1
 		fi
 
-		if execute "$pkg_manager install -g cline"; then
-			log_success "Cline installed"
+		log_info "Installing $display_name with $pkg_manager..."
+		if execute "$pkg_manager install -g $npm_pkg"; then
+			log_success "$display_name installed"
 		else
-			log_error "Failed to install Cline"
+			log_error "Failed to install $display_name"
+			log_info "You can install manually: $manual_url"
 			return 1
 		fi
 	}
-	run_installer "Cline" "_run_cline_install" "command -v cline" ""
+
+	run_installer "$display_name" "_run_install_npm_body" "command -v $binary" "$version_cmd"
 }
 
 install_grok() {
-	_run_grok_install() {
-		if command -v grok &>/dev/null; then
-			log_warning "Grok CLI is already installed"
-			return 0
-		fi
+	install_npm_tool "xAI Grok CLI" "grok" "@xai-official/grok" \
+		"curl -fsSL https://x.ai/cli/install.sh | bash" \
+		"grok --version 2>/dev/null || grok version 2>/dev/null || true"
+}
 
-		local pkg_manager
-		pkg_manager=$(_verify_package_manager "Grok CLI")
-
-		if [ -z "$pkg_manager" ]; then
-			log_error "No package manager found. Install Bun or Node.js/npm to install Grok CLI."
-			return 1
-		fi
-
-		log_info "Installing Grok CLI with $pkg_manager..."
-		if execute "$pkg_manager install -g @xai-official/grok"; then
-			log_success "Grok CLI installed"
-		else
-			log_error "Failed to install Grok CLI"
-			log_info "You can install manually: curl -fsSL https://x.ai/cli/install.sh | bash"
-			return 1
-		fi
-	}
-	run_installer "xAI Grok CLI" "_run_grok_install" "command -v grok" "grok --version 2>/dev/null || grok version 2>/dev/null || true"
+install_mimo() {
+	install_npm_tool "Xiaomi MiMo-Code" "mimo" "@mimo-ai/cli" \
+		"curl -fsSL https://mimo.xiaomi.com/install | bash"
 }
 
 # Helper: Copy non-marketplace skills to universal directory only
@@ -1357,13 +1250,7 @@ copy_grok_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/grok/AGENTS.md" "$HOME/.grok/" || true
 
-	if [ -f "$SCRIPT_DIR/configs/grok/config.toml" ]; then
-		if [ -f "$HOME/.grok/config.toml" ]; then
-			execute_quoted cp "$HOME/.grok/config.toml" "$HOME/.grok/config.toml.bak"
-			log_success "Backed up existing config.toml to config.toml.bak"
-		fi
-		execute_quoted cp "$SCRIPT_DIR/configs/grok/config.toml" "$HOME/.grok/"
-	fi
+	copy_config_file "$SCRIPT_DIR/configs/grok/config.toml" "$HOME/.grok/" || true
 
 	if [ -d "$SCRIPT_DIR/configs/grok/themes" ]; then
 		execute_quoted mkdir -p "$HOME/.grok/themes"
@@ -1371,6 +1258,58 @@ copy_grok_configs() {
 	fi
 
 	log_success "Grok CLI configs copied"
+}
+
+copy_mimo_configs() {
+	local mimo_status
+	mimo_status=$(detect_tool --detailed "mimo" "$HOME/.config/mimocode") || mimo_status="missing"
+	if [ "$mimo_status" = "missing" ]; then
+		log_info "MiMo-Code not detected - skipping MiMo-Code config installation"
+		return 0
+	fi
+
+	log_info "Detected MiMo-Code (via $mimo_status)"
+	execute_quoted mkdir -p "$HOME/.config/mimocode"
+
+	# Single config files (AGENTS.md, mimocode.jsonc, tui.json) are copied individually.
+	# mimocode.jsonc gets a backup-before-overwrite since users may customize it.
+	copy_config_file "$SCRIPT_DIR/configs/mimo/AGENTS.md" "$HOME/.config/mimocode/" || true
+
+	copy_config_file "$SCRIPT_DIR/configs/mimo/mimocode.jsonc" "$HOME/.config/mimocode/" || true
+
+	if [ -f "$SCRIPT_DIR/configs/mimo/tui.json" ]; then
+		execute_quoted cp "$SCRIPT_DIR/configs/mimo/tui.json" "$HOME/.config/mimocode/"
+	fi
+
+	# Agent and command directories get full replacement (rm -rf + safe_copy_dir)
+	# These are repo-owned and should always mirror the source exactly.
+	# Any user-local additions would be lost, so don't add custom agents/commands here;
+	# add them directly in ~/.config/mimocode/agent/ or ~/.config/mimocode/command/ instead.
+	if [ -d "$SCRIPT_DIR/configs/mimo/agent" ]; then
+		execute_quoted rm -rf "$HOME/.config/mimocode/agent"
+		safe_copy_dir "$SCRIPT_DIR/configs/mimo/agent" "$HOME/.config/mimocode/agent"
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/mimo/command" ]; then
+		execute_quoted rm -rf "$HOME/.config/mimocode/command"
+		safe_copy_dir "$SCRIPT_DIR/configs/mimo/command" "$HOME/.config/mimocode/command"
+	fi
+
+	# Theme and plugin directories use additive copy (mkdir -p + safe_copy_dir)
+	# Users may add custom themes or plugins locally that should be preserved.
+	# safe_copy_dir copies repo files but does NOT remove files that already exist
+	# in the destination — user additions survive the install.
+	if [ -d "$SCRIPT_DIR/configs/mimo/themes" ]; then
+		execute_quoted mkdir -p "$HOME/.config/mimocode/themes"
+		safe_copy_dir "$SCRIPT_DIR/configs/mimo/themes" "$HOME/.config/mimocode/themes"
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/mimo/plugins" ]; then
+		execute_quoted mkdir -p "$HOME/.config/mimocode/plugins"
+		safe_copy_dir "$SCRIPT_DIR/configs/mimo/plugins" "$HOME/.config/mimocode/plugins"
+	fi
+
+	log_success "MiMo-Code configs copied"
 }
 
 copy_configurations() {
@@ -1394,6 +1333,7 @@ copy_configurations() {
 	copy_orca_configs
 	copy_cline_configs
 	copy_grok_configs
+	copy_mimo_configs
 	copy_best_practices
 }
 
@@ -1783,11 +1723,7 @@ copy_amp_configs() {
 
 	if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
 		execute_quoted cp "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/amp/"
-		if [ -f "$HOME/.config/AGENTS.md" ]; then
-			execute_quoted cp "$HOME/.config/AGENTS.md" "$HOME/.config/AGENTS.md.bak"
-			log_warning "Backed up existing AGENTS.md to .bak"
-		fi
-		execute_quoted cp "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/AGENTS.md"
+		copy_config_file "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/"
 	fi
 
 	log_success "Amp configs copied"
@@ -1824,13 +1760,7 @@ copy_codex_configs() {
 	copy_config_file "$SCRIPT_DIR/configs/codex/AGENTS.md" "$HOME/.codex/" || true
 	copy_config_file "$SCRIPT_DIR/configs/codex/config.json" "$HOME/.codex/" || true
 
-	if [ -f "$SCRIPT_DIR/configs/codex/config.toml" ]; then
-		if [ -f "$HOME/.codex/config.toml" ]; then
-			execute_quoted cp "$HOME/.codex/config.toml" "$HOME/.codex/config.toml.bak"
-			log_success "Backed up existing config.toml to config.toml.bak"
-		fi
-		execute_quoted cp "$SCRIPT_DIR/configs/codex/config.toml" "$HOME/.codex/"
-	fi
+	copy_config_file "$SCRIPT_DIR/configs/codex/config.toml" "$HOME/.codex/" || true
 
 	if [ -d "$SCRIPT_DIR/configs/codex/themes" ]; then
 		execute_quoted mkdir -p "$HOME/.codex/themes"
@@ -2096,10 +2026,6 @@ copy_pi_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/pi/mcp.json" "$HOME/.pi/agent/" || true
 
-	if [ -f "$HOME/.pi/agent/models.json" ]; then
-		execute_quoted cp "$HOME/.pi/agent/models.json" "$HOME/.pi/agent/models.json.bak"
-		log_success "Backed up existing models.json to models.json.bak"
-	fi
 	copy_config_file "$SCRIPT_DIR/configs/pi/models.json" "$HOME/.pi/agent/" || true
 
 	log_success "Pi configs copied"
@@ -2218,10 +2144,6 @@ copy_factory_configs() {
 	copy_config_file "$SCRIPT_DIR/configs/factory/mcp.json" "$HOME/.factory/" || true
 	copy_config_file "$SCRIPT_DIR/configs/factory/settings.json" "$HOME/.factory/" || true
 
-	if [ -f "$HOME/.factory/config.json" ]; then
-		execute_quoted cp "$HOME/.factory/config.json" "$HOME/.factory/config.json.bak"
-		log_success "Backed up existing config.json to config.json.bak"
-	fi
 	copy_config_file "$SCRIPT_DIR/configs/factory/config.json" "$HOME/.factory/" || true
 
 	if [ -d "$SCRIPT_DIR/configs/factory/droids" ] && [ -n "$(ls -A "$SCRIPT_DIR/configs/factory/droids" 2>/dev/null)" ]; then
@@ -2786,7 +2708,7 @@ install_local_skills() {
 	done
 
 	log_success "Skills installed to universal directory: $UNIVERSAL_SKILLS_DIR"
-	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Gemini, Antigravity, Cursor, Pi, Command Code, and more"
+	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Gemini, Antigravity, Cursor, Pi, Command Code, Grok, MiMo-Code, and more"
 
 	# Create symlinks from tool-specific directories to universal directory
 	create_tool_skills_symlinks "$UNIVERSAL_SKILLS_DIR"
@@ -2806,6 +2728,7 @@ create_tool_skills_symlinks() {
 		"$HOME/.config/amp/skills"
 		"$HOME/.codex/skills"
 		"$HOME/.commandcode/skills"
+		"$HOME/.config/mimocode/skills"
 	)
 
 	for tool_dir in "${tool_dirs[@]}"; do
@@ -2903,7 +2826,7 @@ main() {
 	echo "║                        AI Tools Setup                                ║"
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Antigravity         ║"
 	echo "║  Pi • Kilo • Copilot • Cursor • Factory Droid • Cline • Command Code  ║"
-	echo "║  Grok                                                                 ║"
+	echo "║  Grok • MiMo-Code                                                     ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -2972,6 +2895,9 @@ main() {
 	install_grok
 	echo
 
+	install_mimo
+	echo
+
 	copy_configurations
 	echo
 
@@ -2982,7 +2908,7 @@ main() {
 	echo
 	echo "Next steps:"
 	echo "  1. Restart your terminal"
-	echo "  2. Run 'claude' to start Claude Code (or 'agy' for Antigravity CLI, 'cmd' for Command Code, 'grok' for Grok CLI)"
+	echo "  2. Run 'claude' to start Claude Code (or 'agy' for Antigravity CLI, 'cmd' for Command Code, 'grok' for Grok CLI, 'mimo' for MiMo-Code)"
 	echo "  3. Enable plugins with 'claude plugin enable <plugin-name>'"
 	echo "  4. Check out the README.md for more information"
 	echo
