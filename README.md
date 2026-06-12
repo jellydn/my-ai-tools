@@ -2269,14 +2269,9 @@ Configuration in [`configs/mimo/mimocode.jsonc`](configs/mimo/mimocode.jsonc):
 }
 ```
 
-### 🎨 Theme (Nord)
+### 🎨 Theme
 
-This repo ships a **Nord** color palette theme at [`configs/mimo/themes/mytheme.json`](configs/mimo/themes/mytheme.json). The theme configures dark and light variants for:
-
-- Core UI elements (primary, secondary, accent, error, warning, success, info)
-- Diff views (additions, deletions, context)
-- Markdown rendering (headings, links, code, quotes)
-- Syntax highlighting (comments, keywords, functions, strings, types)
+MiMo-Code uses the **Kanagawa** theme by default (no custom theme file shipped).
 
 ### 🎯 Custom Agents
 
@@ -2288,13 +2283,7 @@ Located in [`configs/mimo/agent/`](configs/mimo/agent/):
 
 Located in [`configs/mimo/command/`](configs/mimo/command/):
 
-- `commit` - Structured git commit and push with conventional prefixes
-- `changelog` - Generate UPCOMING_CHANGELOG.md from commit data
-- `issues` - GitHub issues management and triage
-- `learn` - Extract project knowledge and conventions
-- `ai-deps` - Manage AI-managed tooling and dependency configurations
 - `rmslop` - Remove AI-generated boilerplate and redundant code
-- `spellcheck` - Check and fix spelling across project files
 
 ### 📖 Agent Guidelines
 
