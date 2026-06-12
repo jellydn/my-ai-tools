@@ -2250,11 +2250,12 @@ Configuration in [`configs/mimo/mimocode.jsonc`](configs/mimo/mimocode.jsonc):
 			"type": "local",
 			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
 			"enabled": true
-		},
-		"react-grab-mcp": {
+		},		"react-grab-mcp": {
 			"type": "local",
-			"command": ["npx", "-y", "@react-grab/mcp", "--stdio"]
+			"command": ["npx", "-y", "@react-grab/mcp", "--stdio"],
+			"enabled": true
 		},
+
 		"logpilot": {
 			"type": "local",
 			"command": ["logpilot", "mcp-server"],
