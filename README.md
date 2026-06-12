@@ -2318,22 +2318,19 @@ mimo -p "Analyze the test coverage for this project"
 mimo "Explain the architecture of this codebase"
 ```
 
-### 🚀 MiMo V2.5 — Xiaomi's Flagship Model
+### 🚀 MiMo Open Platform — Xiaomi's Most Powerful AI
 
-Invite builders to try **MiMo V2.5**, Xiaomi's flagship AI model with advanced reasoning and coding capabilities.
+Invite builders to try the **MiMo Open Platform** — Xiaomi's most powerful AI lineup including **MiMo V2.5** and more. Sign up with the invite code below: both you and your friend get **$2 in API credits** plus **10% off your first plan**.
 
-**Referral Program:**
-
-| Action                      | Reward                                                      |
-| --------------------------- | ----------------------------------------------------------- |
-| Friend signs up             | Both get **$2** each · first 30 sign-ups                    |
-| Friend's first order        | Friend gets **10% off** · you earn **10% back** per order   |
-| Friend signs up with link   | **$2** each · earn up to **10% back**                       |
-| Referral period             | 40 days from sign-up                                        |
+| Offer                         | Details                                             |
+| ----------------------------- | --------------------------------------------------- |
+| Friend signs up with your code | Both get **$2 API credits** · first 30 sign-ups    |
+| Friend's first plan purchase   | Friend gets **10% off** · you earn **10% back**    |
+| Referral window                | **40 days** from their sign-up date                |
 
 **Invite Code:** `EAEGUP`
 
-👉 [Sign up for MiMo V2.5](https://mimo.xiaomi.com)
+👉 [Sign up at platform.xiaomimimo.com](https://platform.xiaomimimo.com?ref=EAEGUP) — code auto-filled on sign-up
 
 </details>
 
