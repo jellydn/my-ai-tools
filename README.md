@@ -61,6 +61,7 @@
 
 ### All Platforms
 
+- **Bash 3.0+** - Shell interpreter for `cli.sh` and `generate.sh` (the scripts use bash-only syntax — process substitution, arrays, pattern-parameter expansion — that `sh`/`dash` cannot parse; the entry-point scripts `source` [`lib/require_bash.sh`](./lib/require_bash.sh) which auto-relaunches under bash if invoked via `sh`/`dash` — see [Shell Interpreter](#-shell-interpreter) below)
 - **Bun or Node.js LTS** - Runtime for tools and scripts
 - **Git** - Version control
 - **Claude Code subscription** or use [CCS](#-ccs---claude-code-switch-optional) with affordable providers (GLM, MiniMax)
@@ -143,6 +144,18 @@ Export your current configurations back to this repository for version control:
 ```
 
 > **Tip:** Use `generate.sh` after customizing your local setup to save changes back to this repo.
+
+## 🐚 Shell Interpreter
+
+`cli.sh` and `generate.sh` use bash-only syntax (process substitution, arrays, pattern-parameter expansion) and **require bash**. Both scripts `source` [`lib/require_bash.sh`](./lib/require_bash.sh) as their first non-shebang line; that shim is intentionally POSIX-compatible so `sh`/`dash` can source it and transparently re-launch the script under `bash` before `lib/common.sh` is reached. Prefer one of these invocations for clarity:
+
+```bash
+./cli.sh                # Uses the #!/bin/bash shebang (recommended)
+bash cli.sh             # Explicit bash
+bash generate.sh        # Explicit bash for the reverse-sync script
+```
+
+> If `bash` is not on `PATH`, the guard falls back to a clear error: `Error: cli.sh requires bash, but bash was not found in PATH`. See `lib/require_bash.sh` for the canonical guard implementation.
 
 ## 🪟 Windows Installation
 
@@ -672,6 +685,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Facts**                  | [av/facts](https://github.com/av/facts)                                                                       | Track project specs and facts in a `.facts` file. Lifecycle stages (`@draft` → `@spec` → `@implemented`) with shell-command verification. Ships four skills: `facts`, `facts-discover`, `facts-refine`, and `facts-implement`.                                                      |
 | **Modern Web Guidance**    | [GoogleChrome/modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance)                       | Search tool for modern web development best practices (HTML, CSS, accessibility, and client-side JS APIs).                                                                                                                                                                          |
 | **Plannotator Setup Goal** | [backnotprop/plannotator](https://github.com/backnotprop/plannotator)                                         | Turn ideas into structured goal packages with fact sheets and execution plans, gated by Plannotator annotation                                                                                                                                                                      |
+| **Codex PR Babysitter**    | [openai/codex](https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md)                     | Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required                                                                  |
 
 **Installation:**
 
@@ -690,6 +704,7 @@ npx skills add warpdotdev/oz-skills --skill docs-update --global --agent claude-
 npx skills add openclaw/agent-skills --skill autoreview --global --agent claude-code
 npx skills add av/facts --global --agent claude-code
 npx skills add GoogleChrome/modern-web-guidance --skill modern-web-guidance --global --agent claude-code
+npx skills add openai/codex --skill babysit-pr --global --agent claude-code
 ```
 
 ### Configuration Files

@@ -12,10 +12,11 @@ NC='\033[0m'
 # Detect OS (Windows vs Unix-like)
 IS_WINDOWS=false
 _detect_os() {
-	case "$OSTYPE" in
-	msys* | mingw* | cygwin* | win*) return 0 ;;
+	# Use uname (POSIX) instead of $OSTYPE (bash). Also check MSYSTEM for Git Bash / MSYS2.
+	_uname_s=$(uname -s 2>/dev/null || echo "")
+	case "$_uname_s" in
+	MINGW* | MSYS* | CYGWIN* | Windows*) return 0 ;;
 	esac
-	# Also check for MSYSTEM environment variable (common in MSYS2/Git Bash)
 	if [ -n "$MSYSTEM" ]; then
 		case "$MSYSTEM" in
 		MINGW* | MSYS* | CLANG*) return 0 ;;
@@ -28,21 +29,27 @@ _detect_os && IS_WINDOWS=true
 # Path helper functions for cross-platform compatibility
 
 # Normalize path to use forward slashes (Unix-style)
-# Usage: normalize_path "path/with\\slashes"
+# Usage: normalize_path "path/with\slashes"
 normalize_path() {
 	local path="$1"
 	# Replace backslashes with forward slashes (for Windows paths)
-	path="${path//\\//}"
+	path=$(printf '%s' "$path" | sed 's/\\/\//g')
 	# Remove duplicate slashes, but skip URLs (://) and UNC paths (// at start)
-	if [[ ! "$path" =~ :// ]] && [[ ! "$path" =~ ^// ]]; then
-		# Replace all // with / (repeat until no more consecutive slashes)
-		while [[ "$path" =~ // ]]; do
-			path="${path//\/\///}"
-		done
-	fi
+	case "$path" in
+		*://* | //*) ;;
+		*)
+			# Replace all // with / (repeat until no more consecutive slashes)
+			while case "$path" in *//*) true ;; *) false ;; esac; do
+				path=$(printf '%s' "$path" | sed 's|//|/|g')
+			done
+			;;
+	esac
 	# Remove trailing slashes (except for root paths like / or C:/)
-	if [ "$path" != "/" ] && [[ ! "$path" =~ ^[A-Za-z]:/$ ]]; then
-		path="${path%/}"
+	if [ "$path" != "/" ]; then
+		case "$path" in
+			[A-Za-z]:/) ;;
+			*) path="${path%/}" ;;
+		esac
 	fi
 	echo "$path"
 }
@@ -76,7 +83,7 @@ quote_path() {
 	local path="$1"
 	case "$path" in
 	*[\ \'\"]*)
-		path="${path//\"/\\\"}"
+		path=$(printf '%s' "$path" | sed 's/"/\\"/g')
 		echo "\"$path\""
 		;;
 	*)
@@ -89,9 +96,9 @@ quote_path() {
 # Usage: expand_path "~/path" -> "/home/user/path"
 expand_path() {
 	local path="$1"
-	if [ "${path:0:1}" = "~" ]; then
-		path="$HOME${path:1}"
-	fi
+	case "$path" in
+		~*) path="$HOME${path#?}" ;;
+	esac
 	normalize_path "$path"
 }
 
@@ -173,12 +180,13 @@ detect_tool() {
 		return 0
 	fi
 
-	# Priority 2: Check config paths
-	local dirs_to_check=()
-	[ -n "$config_dir" ] && dirs_to_check+=("$config_dir")
-	[ -n "$alt_config_dir" ] && dirs_to_check+=("$alt_config_dir")
+	# Priority 2: Check config paths. Use positional parameters (set --) instead
+	# of a bash array so this works under dash and other strict POSIX shells.
+	set --
+	[ -n "$config_dir" ] && set -- "$@" "$config_dir"
+	[ -n "$alt_config_dir" ] && set -- "$@" "$alt_config_dir"
 
-	for dir in "${dirs_to_check[@]}"; do
+	for dir in "$@"; do
 		local expanded_dir
 		expanded_dir=$(expand_path "$dir")
 		if [ -d "$expanded_dir" ] || [ -f "$expanded_dir" ]; then
@@ -219,21 +227,22 @@ make_temp_dir() {
 }
 
 # Logging functions
-# Output to stderr to avoid interfering with command substitution
+# Output to stderr to avoid interfering with command substitution.
+# Use printf '%b' (POSIX) instead of echo -e (bash) to interpret backslash escapes.
 log_info() {
-	echo -e "${BLUE}ℹ ${NC}$1" >&2
+	printf '%b\n' "${BLUE}ℹ ${NC}$1" >&2
 }
 
 log_success() {
-	echo -e "${GREEN}✓${NC} $1" >&2
+	printf '%b\n' "${GREEN}✓${NC} $1" >&2
 }
 
 log_warning() {
-	echo -e "${YELLOW}⚠${NC} $1" >&2
+	printf '%b\n' "${YELLOW}⚠${NC} $1" >&2
 }
 
 log_error() {
-	echo -e "${RED}✗${NC} $1" >&2
+	printf '%b\n' "${RED}✗${NC} $1" >&2
 }
 
 # Execute function (for dry-run support)
@@ -254,10 +263,11 @@ execute_quoted() {
 	if [ "$DRY_RUN" = true ]; then
 		# Build display string for logging
 		local cmd_str=""
+		local display_arg
 		for arg in "$@"; do
 			case "$arg" in
 			*[\"\'[:space:]]*)
-				local display_arg="${arg//\"/\\\"}"
+				display_arg=$(printf '%s' "$arg" | sed 's/"/\\"/g')
 				cmd_str="$cmd_str \"$display_arg\""
 				;;
 			*)
@@ -316,7 +326,8 @@ execute_installer() {
 	shift 2
 	local description="$1"
 	shift
-	local args=("$@")
+	# Remaining positional parameters are the install args. Use "$@" directly
+	# instead of a bash array so this works under dash and other strict POSIX shells.
 
 	if [ "$DRY_RUN" = true ]; then
 		log_info "[DRY RUN] Would execute installer from: $url"
@@ -337,7 +348,7 @@ execute_installer() {
 		return 1
 	fi
 
-	"$temp_script" "${args[@]}"
+	"$temp_script" "$@"
 	local result=$?
 	rm -f "$temp_script"
 	return $result
@@ -474,28 +485,36 @@ run_parallel() {
 		return 0
 	fi
 
-	local jobs=("$@")
+	# POSIX: use "$@" directly for commands and a temp file for PIDs (no bash arrays).
 	local running=0
-	local pids=()
+	local _pids_file
+	_pids_file=$(make_temp_file "pids" "list")
+	: > "$_pids_file"
 
-	for cmd in "${jobs[@]}"; do
+	for cmd in "$@"; do
 		[ -z "$cmd" ] && continue
 		(eval "$cmd") &
-		pids+=("$!")
+		printf '%s\n' "$!" >> "$_pids_file"
 		running=$((running + 1))
 
 		if [ "$running" -ge "$max_jobs" ]; then
-			# Wait for any job to complete (Bash 3.2 compatible)
-			wait "${pids[0]}"
-			pids=("${pids[@]:1}")
+			# Wait for the oldest job to complete, then drop it from the queue.
+			local _oldest_pid
+			_oldest_pid=$(head -n 1 "$_pids_file")
+			wait "$_oldest_pid" 2>/dev/null || true
+			tail -n +2 "$_pids_file" > "$_pids_file.tmp"
+			mv "$_pids_file.tmp" "$_pids_file"
 			running=$((running - 1))
 		fi
 	done
 
 	# Wait for remaining jobs
-	if [ "${#pids[@]}" -gt 0 ]; then
-		wait "${pids[@]}"
+	if [ -s "$_pids_file" ]; then
+		while IFS= read -r pid; do
+			wait "$pid" 2>/dev/null || true
+		done < "$_pids_file"
 	fi
+	rm -f "$_pids_file"
 }
 
 # Generic interactive installer helper
@@ -547,16 +566,17 @@ prompt_yn() {
 		return 1
 	fi
 
-	read -rp "$prompt (y/n) " -n 1 response
-	echo
-
-	# Clear any remaining input (like the Enter key)
-	while IFS= read -r -t 0 2>/dev/null; do
-		IFS= read -r -t 0.1 || break
-	done 2>/dev/null || true
+	# POSIX: no -n or -p on read. Print prompt separately, then read one byte
+	# from the terminal (dd is the portable way to read exactly one char).
+	printf '%s (y/n) ' "$prompt" >&2
+	response=$(dd bs=1 count=1 2>/dev/null)
+	printf '\n' >&2
 
 	# Return 0 only if response is y or Y
-	[[ "$response" =~ ^[Yy]$ ]]
+	case "$response" in
+		[Yy]) return 0 ;;
+		*) return 1 ;;
+	esac
 }
 
 # Transaction tracking for rollback support
@@ -593,14 +613,19 @@ rollback_transaction() {
 	log_warning "Rolling back transaction..."
 	local count=0
 
-	# Read actions in reverse order (LIFO)
+	# Read actions in reverse order (LIFO). Use a temp file because the loop
+	# runs in the current shell (a pipe would put it in a subshell and lose $count).
+	local _reversed_log
+	_reversed_log=$(make_temp_file "rollback" "log")
+	tac "$TRANSACTION_LOG" > "$_reversed_log"
 	while IFS='|' read -r action_type target backup_cmd restore_cmd; do
 		if [ -n "$action_type" ]; then
 			log_info "Rolling back: $action_type on $target"
 			eval "$restore_cmd" 2>/dev/null || true
 			count=$((count + 1))
 		fi
-	done < <(tac "$TRANSACTION_LOG")
+	done < "$_reversed_log"
+	rm -f "$_reversed_log"
 
 	log_success "Rolled back $count actions"
 }
