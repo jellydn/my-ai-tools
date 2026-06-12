@@ -2211,7 +2211,7 @@ Run the setup script to install configurations to `~/.config/mimocode/`:
 ./cli.sh
 ```
 
-The setup script automatically deploys config files, custom agents, commands, and themes.
+The setup script automatically deploys config files, commands, and agent guidelines.
 
 ### ✨ Key Features
 
@@ -2273,12 +2273,6 @@ Configuration in [`configs/mimo/mimocode.jsonc`](configs/mimo/mimocode.jsonc):
 ### 🎨 Theme
 
 MiMo-Code uses the **Kanagawa** theme by default (no custom theme file shipped).
-
-### 🎯 Custom Agents
-
-Located in [`configs/mimo/agent/`](configs/mimo/agent/):
-
-- `translator` - Professional translation agent that preserves technical integrity, code blocks, file paths, and CLI commands
 
 ### ⌨️ Custom Commands
 
