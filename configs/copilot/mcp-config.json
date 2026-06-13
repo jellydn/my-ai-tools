@@ -54,10 +54,12 @@
 			"tools": ["*"]
 		},
 		"sem": {
+			"type": "local",
 			"transport": "stdio",
 			"enabled": true,
 			"command": "sem-mcp",
-			"args": []
+			"args": [],
+			"tools": ["*"]
 		}
 	}
 }
