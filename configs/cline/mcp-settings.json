@@ -33,6 +33,13 @@
 			"alwaysAllow": [],
 			"command": "npx",
 			"args": ["-y", "@agentmemory/mcp"]
+		},
+		"sem": {
+			"type": "local",
+			"command": "sem-mcp",
+			"args": [],
+			"env": {},
+			"tools": ["*"]
 		}
 	}
 }

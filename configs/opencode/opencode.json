@@ -86,7 +86,14 @@
       "type": "local",
       "command": ["npx", "-y", "@agentmemory/mcp"],
       "enabled": true
-    }
+    },
+  "sem": {
+    "type": "local",
+    "command": [
+      "sem-mcp"
+    ],
+    "enabled": true
+  }
   },
   "plugin": [
     "@plannotator/opencode@latest",

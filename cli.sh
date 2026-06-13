@@ -340,6 +340,51 @@ handle_logpilot_installation_if_needed() {
 	handle_tool_installation "logpilot" "install_logpilot_now" "command -v logpilot" "logpilot" "Log monitoring MCP"
 }
 
+install_sem_now() {
+	if command -v sem &>/dev/null && command -v sem-mcp &>/dev/null; then
+		log_success "sem and sem-mcp already installed"
+		return 0
+	fi
+
+	# Install sem CLI via official installer
+	if ! command -v sem &>/dev/null; then
+		log_info "Installing sem via official installer..."
+		if execute "curl -fsSL https://raw.githubusercontent.com/Ataraxy-Labs/sem/main/install.sh | sh"; then
+			log_success "sem installed successfully"
+		else
+			log_error "Failed to install sem"
+			log_info "You can install it manually: curl -fsSL https://raw.githubusercontent.com/Ataraxy-Labs/sem/main/install.sh | sh"
+			return 1
+		fi
+	fi
+
+	# Install sem-mcp via cargo
+	if ! command -v sem-mcp &>/dev/null; then
+		if ! command -v cargo &>/dev/null; then
+			log_warning "cargo not found. sem-mcp requires Rust to build from source."
+			log_info "Install Rust first: https://rustup.rs/, then run: cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp"
+			return 0
+		fi
+
+		log_info "Installing sem-mcp via cargo..."
+		if execute "cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp"; then
+			local cargo_bin="${CARGO_HOME:-$HOME/.cargo}/bin"
+			if case ":$PATH:" in *":$cargo_bin:"*) false ;; *) true ;; esac; then
+				export PATH="$cargo_bin:$PATH"
+			fi
+			log_success "sem-mcp installed successfully"
+		else
+			log_error "Failed to install sem-mcp"
+			log_info "You can install it manually: cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp"
+			return 1
+		fi
+	fi
+}
+
+handle_sem_installation_if_needed() {
+	handle_tool_installation "sem" "install_sem_now" "command -v sem" "sem" "Semantic version control MCP"
+}
+
 resolve_installer_checksum() {
 	local installer="$1"
 	local checksum_url=""
@@ -1620,6 +1665,13 @@ setup_claude_mcp_servers() {
 			log_warning "fff-mcp not found. MCP setup skipped. Install with: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
 		fi
 
+		handle_sem_installation_if_needed
+		if command -v sem-mcp &>/dev/null; then
+			install_mcp_interactive "sem" "claude mcp add --scope user --transport stdio sem -- sem-mcp" "semantic version control"
+		else
+			log_warning "sem-mcp not found. MCP setup skipped. Install with: cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp"
+		fi
+
 		log_success "MCP server setup complete (legacy mode)"
 	fi
 }
@@ -1651,6 +1703,7 @@ setup_commandcode_mcp_servers() {
 	handle_qmd_installation_if_needed
 	handle_fff_mcp_installation_if_needed
 	handle_logpilot_installation_if_needed
+	handle_sem_installation_if_needed
 
 	local dest_file="$HOME/.commandcode/mcp.json"
 

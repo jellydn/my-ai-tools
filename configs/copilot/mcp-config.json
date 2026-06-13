@@ -52,6 +52,12 @@
 				"AGENTMEMORY_TOOLS": "${AGENTMEMORY_TOOLS:-all}"
 			},
 			"tools": ["*"]
+		},
+		"sem": {
+			"transport": "stdio",
+			"enabled": true,
+			"command": "sem-mcp",
+			"args": []
 		}
 	}
 }
