@@ -361,9 +361,9 @@ install_sem_now() {
 	# Install sem-mcp via cargo
 	if ! command -v sem-mcp &>/dev/null; then
 		if ! command -v cargo &>/dev/null; then
-			log_warning "cargo not found. sem-mcp requires Rust to build from source."
+			log_error "cargo not found. sem-mcp requires Rust to build from source."
 			log_info "Install Rust first: https://rustup.rs/, then run: cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp"
-			return 0
+			return 1
 		fi
 
 		log_info "Installing sem-mcp via cargo..."
@@ -382,7 +382,7 @@ install_sem_now() {
 }
 
 handle_sem_installation_if_needed() {
-	handle_tool_installation "sem" "install_sem_now" "command -v sem" "sem" "Semantic version control MCP"
+	handle_tool_installation "sem" "install_sem_now" "command -v sem-mcp" "sem" "Semantic version control MCP"
 }
 
 resolve_installer_checksum() {
