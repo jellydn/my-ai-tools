@@ -42,9 +42,10 @@
 			"disabled": false
 		},
 		"sem": {
-			"alwaysAllow": [],
+			"type": "stdio",
 			"command": "sem-mcp",
-			"args": []
+			"args": [],
+			"disabled": false
 		}
 	}
 }
