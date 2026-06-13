@@ -49,16 +49,16 @@ git diff            # Final check before committing
 
 ### Shell Scripts
 
-| Pattern           | Convention                                    |
-| ----------------- | --------------------------------------------- |
-| Shebang           | `#!/bin/bash`                                 |
+| Pattern           | Convention                                                                                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| Shebang           | `#!/bin/bash`                                                                                          |
 | Re-exec guard     | Source `lib/require_bash.sh` before any `lib/common.sh` source (see file for canonical implementation) |
-| Error handling    | `set -e` at top (placed *after* the re-exec guard) |
-| Guard clauses     | Return early on preconditions                 |
-| Variable quoting  | Always quote: `"$variable"`                   |
-| Paths             | Use `$HOME`, relative - **no absolute paths** |
-| Command execution | Use `execute()` wrapper for dry-run support   |
-| Local variables   | Use `local` for function-scoped               |
+| Error handling    | `set -e` at top (placed _after_ the re-exec guard)                                                     |
+| Guard clauses     | Return early on preconditions                                                                          |
+| Variable quoting  | Always quote: `"$variable"`                                                                            |
+| Paths             | Use `$HOME`, relative - **no absolute paths**                                                          |
+| Command execution | Use `execute()` wrapper for dry-run support                                                            |
+| Local variables   | Use `local` for function-scoped                                                                        |
 
 ### Color Output
 
