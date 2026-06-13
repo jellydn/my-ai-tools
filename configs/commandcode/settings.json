@@ -1,75 +1,75 @@
 {
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "write|edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.ts$|\\.tsx$|\\.js$|\\.jsx$ ]]; then biome check --write \"$(jq -r .tool_input.file_path)\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.go$ ]]; then gofmt -w \"$(jq -r .tool_input.file_path)\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.md$|\\.mdx$ ]]; then npx prettier --write \"$(jq -r .tool_input.file_path)\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.py$ ]]; then ruff format \"$(jq -r .tool_input.file_path)\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.rs$ ]]; then rustfmt \"$(jq -r .tool_input.file_path)\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.sh$ ]]; then shfmt -w \"$(jq -r .tool_input.file_path)\"; fi"
-          }
-        ]
-      },
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/command-code-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/command-code-hook.sh\"; fi"
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "shell",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun ~/.commandcode/hooks/index.ts PreToolUse",
-            "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/command-code-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/command-code-hook.sh\"; fi"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/command-code-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/command-code-hook.sh\"; fi"
-          }
-        ]
-      }
-    ]
-  }
+	"hooks": {
+		"PostToolUse": [
+			{
+				"matcher": "write|edit",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.ts$|\\.tsx$|\\.js$|\\.jsx$ ]]; then biome check --write \"$(jq -r .tool_input.file_path)\"; fi"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.go$ ]]; then gofmt -w \"$(jq -r .tool_input.file_path)\"; fi"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.md$|\\.mdx$ ]]; then npx prettier --write \"$(jq -r .tool_input.file_path)\"; fi"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.py$ ]]; then ruff format \"$(jq -r .tool_input.file_path)\"; fi"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.rs$ ]]; then rustfmt \"$(jq -r .tool_input.file_path)\"; fi"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$(jq -r .tool_input.file_path)\" =~ \\.sh$ ]]; then shfmt -w \"$(jq -r .tool_input.file_path)\"; fi"
+					}
+				]
+			},
+			{
+				"matcher": ".*",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/command-code-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/command-code-hook.sh\"; fi"
+					}
+				]
+			}
+		],
+		"PreToolUse": [
+			{
+				"matcher": "shell",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "bun ~/.commandcode/hooks/index.ts PreToolUse",
+						"timeout": 10
+					}
+				]
+			},
+			{
+				"matcher": ".*",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/command-code-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/command-code-hook.sh\"; fi"
+					}
+				]
+			}
+		],
+		"Stop": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/command-code-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/command-code-hook.sh\"; fi"
+					}
+				]
+			}
+		]
+	}
 }
