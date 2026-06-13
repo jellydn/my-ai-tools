@@ -24,6 +24,10 @@
 		"agentmemory": {
 			"command": "npx",
 			"args": ["-y", "@agentmemory/mcp"]
+		},
+		"sem": {
+			"command": "sem-mcp",
+			"args": []
 		}
 	}
 }

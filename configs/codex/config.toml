@@ -210,3 +210,7 @@ trusted_hash = "sha256:f0f840070daee63b7b597ff9fba314db652a4c8084ea055abde4cd2f6
 
 [hooks.state."$HOME/.codex/hooks.json:stop:1:0"]
 trusted_hash = "sha256:92c2692bb315148c26b738a5312e07f6986b0e9d2cd01b202542856bcd69ddf0"
+
+[mcp_servers.sem]
+command = "sem-mcp"
+args = []

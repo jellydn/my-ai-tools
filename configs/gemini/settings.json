@@ -41,6 +41,10 @@
         "-y",
         "@agentmemory/mcp"
       ]
+    },
+    "sem": {
+      "command": "sem-mcp",
+      "args": []
     }
   },
   "security": {
