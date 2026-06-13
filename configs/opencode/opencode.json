@@ -19,35 +19,84 @@
   "default_agent": "plan",
   "formatter": {
     "biome": {
-      "command": ["biome", "check", "--write", "$FILE"],
-      "extensions": [".ts", ".tsx", ".js", ".jsx"]
+      "command": [
+        "biome",
+        "check",
+        "--write",
+        "$FILE"
+      ],
+      "extensions": [
+        ".ts",
+        ".tsx",
+        ".js",
+        ".jsx"
+      ]
     },
     "gofmt": {
-      "command": ["gofmt", "-w", "$FILE"],
-      "extensions": [".go"]
+      "command": [
+        "gofmt",
+        "-w",
+        "$FILE"
+      ],
+      "extensions": [
+        ".go"
+      ]
     },
     "prettier": {
-      "command": ["npx", "prettier", "--write", "$FILE"],
-      "extensions": [".md", ".mdx"]
+      "command": [
+        "npx",
+        "prettier",
+        "--write",
+        "$FILE"
+      ],
+      "extensions": [
+        ".md",
+        ".mdx"
+      ]
     },
     "ruff": {
-      "command": ["ruff", "format", "$FILE"],
-      "extensions": [".py"]
+      "command": [
+        "ruff",
+        "format",
+        "$FILE"
+      ],
+      "extensions": [
+        ".py"
+      ]
     },
     "rustfmt": {
-      "command": ["rustfmt", "$FILE"],
-      "extensions": [".rs"]
+      "command": [
+        "rustfmt",
+        "$FILE"
+      ],
+      "extensions": [
+        ".rs"
+      ]
     },
     "shfmt": {
-      "command": ["shfmt", "-w", "$FILE"],
-      "extensions": [".sh"]
+      "command": [
+        "shfmt",
+        "-w",
+        "$FILE"
+      ],
+      "extensions": [
+        ".sh"
+      ]
     },
     "stylua": {
-      "command": ["stylua", "$FILE"],
-      "extensions": [".lua"]
+      "command": [
+        "stylua",
+        "$FILE"
+      ],
+      "extensions": [
+        ".lua"
+      ]
     }
   },
-  "instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
+  "instructions": [
+    "~/.ai-tools/best-practices.md",
+    "~/.ai-tools/MEMORY.md"
+  ],
   "mcp": {
     "context7": {
       "enabled": true,
@@ -55,13 +104,18 @@
       "url": "https://mcp.context7.com/mcp"
     },
     "qmd": {
-      "command": ["qmd", "mcp"],
+      "command": [
+        "qmd",
+        "mcp"
+      ],
       "enabled": true,
       "type": "local"
     },
     "fff": {
       "type": "local",
-      "command": ["fff-mcp"],
+      "command": [
+        "fff-mcp"
+      ],
       "enabled": true
     },
     "sequential-thinking": {
@@ -75,25 +129,37 @@
     },
     "react-grab-mcp": {
       "type": "local",
-      "command": ["npx", "-y", "@react-grab/mcp", "--stdio"]
+      "command": [
+        "npx",
+        "-y",
+        "@react-grab/mcp",
+        "--stdio"
+      ]
     },
     "logpilot": {
       "type": "local",
-      "command": ["logpilot", "mcp-server"],
+      "command": [
+        "logpilot",
+        "mcp-server"
+      ],
       "enabled": true
     },
     "agentmemory": {
       "type": "local",
-      "command": ["npx", "-y", "@agentmemory/mcp"],
+      "command": [
+        "npx",
+        "-y",
+        "@agentmemory/mcp"
+      ],
       "enabled": true
     },
-  "sem": {
-    "type": "local",
-    "command": [
-      "sem-mcp"
-    ],
-    "enabled": true
-  }
+    "sem": {
+      "type": "local",
+      "command": [
+        "sem-mcp"
+      ],
+      "enabled": true
+    }
   },
   "plugin": [
     "@plannotator/opencode@latest",

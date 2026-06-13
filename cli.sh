@@ -1538,6 +1538,10 @@ install_mcp_servers_from_registry() {
 						log_info "Auto-installing prerequisite: $prereq"
 						install_logpilot_now && continue
 						;;
+					"sem-mcp")
+						log_info "Auto-installing prerequisite: $prereq"
+						install_sem_now && continue
+						;;
 					esac
 					prereqs_met=false
 					missing_prereqs+=("$prereq")
@@ -1670,6 +1674,13 @@ setup_claude_mcp_servers() {
 			install_mcp_interactive "sem" "claude mcp add --scope user --transport stdio sem -- sem-mcp" "semantic version control"
 		else
 			log_warning "sem-mcp not found. MCP setup skipped. Install with: cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp"
+		fi
+
+		handle_logpilot_installation_if_needed
+		if command -v logpilot &>/dev/null; then
+			install_mcp_interactive "logpilot" "claude mcp add --scope user --transport stdio logpilot -- logpilot mcp-server" "log analysis"
+		else
+			log_warning "logpilot not found. MCP setup skipped. Install with: cargo install logpilot"
 		fi
 
 		log_success "MCP server setup complete (legacy mode)"
