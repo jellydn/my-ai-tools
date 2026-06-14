@@ -46,7 +46,7 @@
 			"extensions": [".lua"]
 		}
 	},
-	"instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
+	"instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md", "~/.ai-tools/agent-memory.md"],
 	"mcp": {
 		"agentmemory": {
 			"command": ["npx", "-y", "@agentmemory/mcp"],
