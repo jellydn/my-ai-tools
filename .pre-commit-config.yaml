@@ -9,7 +9,7 @@ repos:
       - id: check-yaml
       - id: check-added-large-files
 
-  - repo: "https://github.com/biomejs/pre-commit"
-    rev: v2.4.16
+  - repo: "https://github.com/oxc-project/mirrors-oxfmt"
+    rev: v0.51.0
     hooks:
-      - id: biome-format
+      - id: oxfmt
