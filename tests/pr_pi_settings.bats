@@ -11,44 +11,44 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/pi/settings.json defaultModel is mimo-v2.5-pro" {
+@test "configs/pi/settings.json defaultModel is deepseek/deepseek-v4-flash" {
     require_jq
     run jq -r '.defaultModel' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "mimo-v2.5-pro" ]
+    [ "$output" = "deepseek/deepseek-v4-flash" ]
 }
 
-@test "configs/pi/settings.json defaultModel is not deepseek/deepseek-v4-flash" {
+@test "configs/pi/settings.json defaultModel is not mimo-v2.5-pro" {
     require_jq
     run jq -r '.defaultModel' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" != "deepseek/deepseek-v4-flash" ]
+    [ "$output" != "mimo-v2.5-pro" ]
 }
 
-@test "configs/pi/settings.json defaultProvider is xiaomi-token-plan-sgp" {
+@test "configs/pi/settings.json defaultProvider is commandcode" {
     require_jq
     run jq -r '.defaultProvider' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "xiaomi-token-plan-sgp" ]
+    [ "$output" = "commandcode" ]
 }
 
-@test "configs/pi/settings.json defaultProvider is not commandcode" {
+@test "configs/pi/settings.json defaultProvider is not xiaomi-token-plan-sgp" {
     require_jq
     run jq -r '.defaultProvider' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" != "commandcode" ]
+    [ "$output" != "xiaomi-token-plan-sgp" ]
 }
 
-@test "configs/pi/settings.json enabledModels no longer contains vibeproxy/gemini-3-flash-agent" {
+@test "configs/pi/settings.json enabledModels contains vibeproxy/gemini-3-flash-agent" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "vibeproxy/gemini-3-flash-agent")] | length == 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "vibeproxy/gemini-3-flash-agent")] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels no longer contains vibeproxy/claude-opus-4-6-thinking" {
+@test "configs/pi/settings.json enabledModels contains vibeproxy/claude-opus-4-6-thinking" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "vibeproxy/claude-opus-4-6-thinking")] | length == 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "vibeproxy/claude-opus-4-6-thinking")] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
@@ -67,9 +67,9 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels no longer contains vibeproxy/gemini-pro-agent" {
+@test "configs/pi/settings.json enabledModels contains vibeproxy/gemini-pro-agent" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "vibeproxy/gemini-pro-agent")] | length == 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "vibeproxy/gemini-pro-agent")] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
