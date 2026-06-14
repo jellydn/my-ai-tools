@@ -9,6 +9,8 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 source "$SCRIPT_DIR/lib/install.sh"
+# Parse command-line arguments first (only when executed, not sourced)
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 BACKUP_DIR="$HOME/ai-tools-backup-$(date +%Y%m%d-%H%M%S)"
 DRY_RUN=false
 BACKUP=false
@@ -20,8 +22,6 @@ VERBOSE=false
 AMP_INSTALLED=false
 # Track whether --migrate-gemini flag was passed (standalone Gemini→Antigravity migration)
 MIGRATE_GEMINI=false
-
-# Parse command-line arguments first
 for arg in "$@"; do
 	case $arg in
 	--dry-run)
@@ -68,6 +68,8 @@ done
 if is_non_interactive; then
 	YES_TO_ALL=true
 	log_info "Non-interactive mode detected (CI or piped input)"
+fi
+
 fi
 
 # Preflight check for required tools
@@ -2091,4 +2093,6 @@ main() {
 	fi
 }
 
-main
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
+fi

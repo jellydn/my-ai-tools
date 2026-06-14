@@ -1,10 +1,14 @@
 {
 	"recommended_skills": [
- 		{
- 			"repo": "mvanhorn/last30days-skill",
- 			"description": "Research what people actually say about any topic in the last 30 days"
- 		},
- 		{
+		{
+			"repo": "shadcn/improve",
+			"description": "Audit any codebase and write implementation plans for cheaper models to execute. Uses expensive model for planning, cheap model for execution."
+		},
+		{
+			"repo": "mvanhorn/last30days-skill",
+			"description": "Research what people actually say about any topic in the last 30 days"
+		},
+		{
 			"repo": "vercel-labs/agent-skills",
 			"description": "Vercel's agent skills for Next.js and React"
 		},
