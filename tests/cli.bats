@@ -2,10 +2,14 @@
 # Test suite for cli.sh functions
 
 setup() {
-    # Source the common.sh library
-    load "$SCRIPT_DIR/lib/common.sh"
+    source "$BATS_TEST_DIRNAME/../lib/common.sh"
+    source "$BATS_TEST_DIRNAME/../lib/install.sh"
+    # Source cli.sh for function definitions (CLI parsing is guarded internally)
+    source "$BATS_TEST_DIRNAME/../cli.sh"
     export DRY_RUN=false
-    export SCRIPT_DIR
+    export SCRIPT_DIR="$BATS_TEST_DIRNAME/.."
+    export YES_TO_ALL=false
+    export VERBOSE=false
 }
 
 @test "backup_configs creates backup directory" {
@@ -33,7 +37,7 @@ setup() {
     echo '{"valid": true}' > "$SCRIPT_DIR/configs/claude/settings.json"
 
     # This test validates that the function exists and can be called
-    type copy_configurations &>/dev/null
+    run declare -f copy_configurations
 
     rm -rf "$SCRIPT_DIR/configs"
 
@@ -70,14 +74,17 @@ setup() {
 
     run execute "rm -rf /tmp/nonexistent-test-file-$$"
     [ "$status" -eq 0 ]
-    [[ "$output" == "[DRY RUN]"* ]]
+    # log_info writes to stderr; strip color codes before matching
+    local clean_output
+    clean_output="$(echo "$output" | sed -E 's/\x1B\[[0-9;]*m//g')"
+    [[ "$clean_output" == *"[DRY RUN]"* ]]
 }
 
 @test "install_mcp_server handles installation result" {
     export DRY_RUN=true
 
     # Test that the function exists
-    type install_mcp_server &>/dev/null
+    run declare -f install_mcp_server
 
     [ "$status" -eq 0 ]
 }

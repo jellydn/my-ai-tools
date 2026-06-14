@@ -21,7 +21,8 @@ AMP_INSTALLED=false
 # Track whether --migrate-gemini flag was passed (standalone Gemini→Antigravity migration)
 MIGRATE_GEMINI=false
 
-# Parse command-line arguments first
+# Parse command-line arguments first (only when executed, not sourced)
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 for arg in "$@"; do
 	case $arg in
 	--dry-run)
@@ -68,6 +69,8 @@ done
 if is_non_interactive; then
 	YES_TO_ALL=true
 	log_info "Non-interactive mode detected (CI or piped input)"
+fi
+
 fi
 
 # Preflight check for required tools
@@ -2091,4 +2094,6 @@ main() {
 	fi
 }
 
-main
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
+fi
