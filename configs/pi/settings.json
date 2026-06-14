@@ -1,7 +1,7 @@
 {
   "collapseChangelog": true,
-  "defaultModel": "deepseek/deepseek-v4-flash",
-  "defaultProvider": "commandcode",
+  "defaultModel": "mimo-v2.5-pro",
+  "defaultProvider": "xiaomi-token-plan-sgp",
   "defaultThinkingLevel": "high",
   "editorPaddingX": 1,
   "enabledModels": [
