@@ -2643,10 +2643,7 @@ Copy the file to your preferred location and reference it in your AI tools.
 
 - [Claude Code Documentation](https://claude.com/claude-code) - Official docs
 - [OpenCode Documentation](https://opencode.ai/docs) - Guide with agents and skills
-- [Antigravity CLI Getting Started](https://antigravity.google/docs/cli-getting-started) - Official guide
-- [Antigravity CLI Using Guide](https://antigravity.google/docs/cli-using) - Commands and usage
-- [Antigravity CLI Features](https://antigravity.google/docs/cli-features) - Feature overview
-- [Antigravity gcli Migration](https://antigravity.google/docs/gcli-migration) - Migration guide
+- [Antigravity CLI Docs](https://antigravity.google/docs) - Official documentation (getting started, commands, features, migration)
 - [MCP Servers Directory](https://mcp.so) - Model Context Protocol servers
 - [Context7 Documentation](https://context7.com/docs) - Library documentation lookup
 - [CCS Documentation](https://github.com/kaitranntt/ccs) - Claude Code Switch
