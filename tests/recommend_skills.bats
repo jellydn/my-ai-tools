@@ -26,13 +26,13 @@ README_FILE="$REPO_ROOT/README.md"
     [ "$output" = "true" ]
 }
 
-@test "recommend-skills.json has 15 entries in recommended_skills" {
+@test "recommend-skills.json has 16 entries in recommended_skills" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
     fi
     run jq -r '.recommended_skills | length' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
-    [ "$output" = "15" ]
+    [ "$output" = "16" ]
 }
 
 @test "every entry in recommended-skills.json has a non-empty repo field" {
@@ -379,4 +379,13 @@ README_FILE="$REPO_ROOT/README.md"
     [ "$status" -eq 0 ]
     # The table row should contain context about planning/execution model split
     [[ "$output" == *"cheaper"* ]] || [[ "$output" == *"model"* ]] || [[ "$output" == *"plan"* ]]
+}
+
+@test "recommend-skills.json contains Gentleman-Programming/engram" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "Gentleman-Programming/engram")] | length' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "1" ]
 }

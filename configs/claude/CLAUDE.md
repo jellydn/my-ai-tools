@@ -34,6 +34,9 @@ See @~/.ai-tools/best-practices.md for full details.
 
 - Follow my software development practice @~/.ai-tools/best-practices.md
 - Read @~/.ai-tools/MEMORY.md first — qmd (durable) vs agentmemory (session); follow the decision rule there
+- Auto-capture learnings as you work: save decisions, debugging discoveries, user preferences, and tool quirks using `mem_save` (agentmemory) — do not wait to be asked.
+- After fixing a non-trivial bug or learning something project-specific, persist it immediately so future sessions benefit.
+- Keep memories concise and actionable — prefer facts and patterns over narrative.
 - Keep responses concise and actionable.
 - Always propose a plan before edits. Use phases to break down tasks into manageable steps.
 - Run typecheck, lint and biome on js/ts file changes after finish

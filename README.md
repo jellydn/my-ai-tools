@@ -703,6 +703,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Codex PR Babysitter**    | [openai/codex](https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md)                   | Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required                                                                                      |
 | **Last 30 Days**           | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill)                                     | Research what people actually say about any topic in the last 30 days. Pulls from Reddit, X, YouTube, TikTok, HN, Polymarket, GitHub, and the web.                                                                                                                                  |
 | **Improve**                | [shadcn/improve](https://github.com/shadcn/improve)                                                           | Audit any codebase and write implementation plans for cheaper models to execute. Uses expensive model for planning, cheap model for execution.                                                                                                                                      |
+| **Engram**                 | [Gentleman-Programming/engram](https://github.com/Gentleman-Programming/engram)                             | Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, and git-based cross-machine sync.                                                                                                                                             |
 
 **Installation:**
 
@@ -724,6 +725,7 @@ npx skills add GoogleChrome/modern-web-guidance --skill modern-web-guidance --gl
 npx skills add openai/codex --skill babysit-pr --global --agent claude-code
 npx skills add mvanhorn/last30days-skill --global --agent claude-code
 npx skills add shadcn/improve --global --agent claude-code
+npx skills add Gentleman-Programming/engram --skill engram --global --agent claude-code
 ```
 
 ### Configuration Files

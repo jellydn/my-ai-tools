@@ -1,71 +1,76 @@
 {
-	"recommended_skills": [
-		{
-			"repo": "shadcn/improve",
-			"description": "Audit any codebase and write implementation plans for cheaper models to execute. Uses expensive model for planning, cheap model for execution."
-		},
-		{
-			"repo": "mvanhorn/last30days-skill",
-			"description": "Research what people actually say about any topic in the last 30 days"
-		},
-		{
-			"repo": "vercel-labs/agent-skills",
-			"description": "Vercel's agent skills for Next.js and React"
-		},
-		{
-			"repo": "factory-ai/factory-plugins",
-			"skill": "no-use-effect",
-			"description": "Patterns to replace useEffect with better alternatives"
-		},
-		{
-			"repo": "mattpocock/skills",
-			"skill": "grill-with-docs",
-			"description": "Stress-test plans with docs-grounded Q&A, ensuring decisions are backed by evidence"
-		},
-		{
-			"repo": "mattpocock/skills",
-			"skill": "improve-codebase-architecture",
-			"description": "Find deepening opportunities in a codebase, informed by the domain language in CONTEXT.md"
-		},
-		{
-			"repo": "github/gh-stack",
-			"description": "GitHub CLI extension for managing stacked branches and pull requests"
-		},
-		{
-			"repo": "expo/skills",
-			"description": "Official Expo skills for React Native development"
-		},
-		{
-			"repo": "blader/humanizer",
-			"description": "Removes AI-generated writing patterns from text"
-		},
-		{
-			"repo": "jezweb/claude-skills",
-			"description": "97 production-ready skills for Claude Code"
-		},
-		{
-			"repo": "warpdotdev/oz-skills",
-			"skill": "docs-update",
-			"description": "Automated documentation synchronization with code changes"
-		},
-		{
-			"repo": "openclaw/agent-skills",
-			"skill": "autoreview",
-			"description": "Automatic code review skill for structured pull request feedback"
-		},
-		{
-			"repo": "av/facts",
-			"description": "Track project specs and facts in a .facts file with lifecycle stages (draft, spec, implemented) and shell-command verification"
-		},
-		{
-			"repo": "GoogleChrome/modern-web-guidance",
-			"skill": "modern-web-guidance",
-			"description": "Search tool for modern web development best practices"
-		},
-		{
-			"repo": "openai/codex",
-			"skill": "babysit-pr",
-			"description": "Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required"
-		}
-	]
+  "recommended_skills": [
+    {
+      "repo": "shadcn/improve",
+      "description": "Audit any codebase and write implementation plans for cheaper models to execute. Uses expensive model for planning, cheap model for execution."
+    },
+    {
+      "repo": "mvanhorn/last30days-skill",
+      "description": "Research what people actually say about any topic in the last 30 days"
+    },
+    {
+      "repo": "vercel-labs/agent-skills",
+      "description": "Vercel's agent skills for Next.js and React"
+    },
+    {
+      "repo": "factory-ai/factory-plugins",
+      "skill": "no-use-effect",
+      "description": "Patterns to replace useEffect with better alternatives"
+    },
+    {
+      "repo": "mattpocock/skills",
+      "skill": "grill-with-docs",
+      "description": "Stress-test plans with docs-grounded Q&A, ensuring decisions are backed by evidence"
+    },
+    {
+      "repo": "mattpocock/skills",
+      "skill": "improve-codebase-architecture",
+      "description": "Find deepening opportunities in a codebase, informed by the domain language in CONTEXT.md"
+    },
+    {
+      "repo": "github/gh-stack",
+      "description": "GitHub CLI extension for managing stacked branches and pull requests"
+    },
+    {
+      "repo": "expo/skills",
+      "description": "Official Expo skills for React Native development"
+    },
+    {
+      "repo": "blader/humanizer",
+      "description": "Removes AI-generated writing patterns from text"
+    },
+    {
+      "repo": "jezweb/claude-skills",
+      "description": "97 production-ready skills for Claude Code"
+    },
+    {
+      "repo": "warpdotdev/oz-skills",
+      "skill": "docs-update",
+      "description": "Automated documentation synchronization with code changes"
+    },
+    {
+      "repo": "openclaw/agent-skills",
+      "skill": "autoreview",
+      "description": "Automatic code review skill for structured pull request feedback"
+    },
+    {
+      "repo": "av/facts",
+      "description": "Track project specs and facts in a .facts file with lifecycle stages (draft, spec, implemented) and shell-command verification"
+    },
+    {
+      "repo": "GoogleChrome/modern-web-guidance",
+      "skill": "modern-web-guidance",
+      "description": "Search tool for modern web development best practices"
+    },
+    {
+      "repo": "openai/codex",
+      "skill": "babysit-pr",
+      "description": "Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required"
+    },
+    {
+      "repo": "Gentleman-Programming/engram",
+      "skill": "engram",
+      "description": "Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, git-based sync"
+    }
+  ]
 }
