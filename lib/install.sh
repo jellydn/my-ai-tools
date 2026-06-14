@@ -920,3 +920,8 @@ install_mimo() {
 	install_npm_tool "Xiaomi MiMo-Code" "mimo" "@mimo-ai/cli" \
 		"curl -fsSL https://mimo.xiaomi.com/install | bash"
 }
+
+install_open_code_review() {
+	install_npm_tool "Alibaba Open Code Review" "ocr" "@alibaba-group/open-code-review" \
+		"npm install -g @alibaba-group/open-code-review"
+}
