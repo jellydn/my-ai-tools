@@ -2068,6 +2068,9 @@ main() {
 	install_mimo
 	echo
 
+	install_open_code_review
+	echo
+
 	copy_configurations
 	echo
 
