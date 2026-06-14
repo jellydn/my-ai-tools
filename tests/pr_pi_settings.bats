@@ -39,16 +39,16 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" != "commandcode" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains vibeproxy/gemini-3-flash-agent" {
+@test "configs/pi/settings.json enabledModels no longer contains vibeproxy/gemini-3-flash-agent" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "vibeproxy/gemini-3-flash-agent")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "vibeproxy/gemini-3-flash-agent")] | length == 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains vibeproxy/claude-opus-4-6-thinking" {
+@test "configs/pi/settings.json enabledModels no longer contains vibeproxy/claude-opus-4-6-thinking" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "vibeproxy/claude-opus-4-6-thinking")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "vibeproxy/claude-opus-4-6-thinking")] | length == 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
@@ -67,9 +67,9 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains vibeproxy/gemini-pro-agent" {
+@test "configs/pi/settings.json enabledModels no longer contains vibeproxy/gemini-pro-agent" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "vibeproxy/gemini-pro-agent")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "vibeproxy/gemini-pro-agent")] | length == 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
