@@ -26,13 +26,13 @@ README_FILE="$REPO_ROOT/README.md"
     [ "$output" = "true" ]
 }
 
-@test "recommend-skills.json has 14 entries in recommended_skills" {
+@test "recommend-skills.json has 15 entries in recommended_skills" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
     fi
     run jq -r '.recommended_skills | length' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
-    [ "$output" = "14" ]
+    [ "$output" = "15" ]
 }
 
 @test "every entry in recommended-skills.json has a non-empty repo field" {
@@ -284,5 +284,46 @@ README_FILE="$REPO_ROOT/README.md"
 
 @test "README.md table row references openai/codex babysit-pr SKILL.md URL" {
     run grep -F 'https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+# ---------------------------------------------------------------------------
+# shadcn/improve entry (newly added)
+# ---------------------------------------------------------------------------
+
+@test "recommend-skills.json contains shadcn/improve skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "shadcn/improve")] | length > 0' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "shadcn/improve entry has non-empty description" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "shadcn/improve")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
+@test "shadcn/improve description mentions audit or plan" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "shadcn/improve")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"audit"* ]] || [[ "$output" == *"plan"* ]]
+}
+
+@test "README.md install block contains shadcn/improve install command" {
+    run grep -F 'npx skills add shadcn/improve' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md table row references shadcn/improve GitHub URL" {
+    run grep -F 'https://github.com/shadcn/improve' "$README_FILE"
     [ "$status" -eq 0 ]
 }
