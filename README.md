@@ -19,6 +19,18 @@
 - 📦 **Plugin support** - Official and community plugins
 - 🛡️ **Git Guard Hook** - Prevents dangerous git commands (force push, hard reset, etc.)
 
+## ⭐ Top 5 Skills
+
+The most-used skills across Claude Code, OpenCode, and other AI tools:
+
+| Skill | What it does | When to use it |
+| --- | --- | --- |
+| **adr** | Generate Architecture Decision Records from design discussions | Before implementing significant technical changes — captures the why, alternatives considered, and consequences |
+| **codemap** | Parallel codebase analysis producing 7 structured documents | Onboarding to a new project, or before major refactoring — gives you the full picture fast |
+| **thermo-nuclear-code-quality-review** | Extremely strict maintainability and structural code quality review | Before merging PRs — catches issues that regular linters miss |
+| **babysit-pr** | Continuously monitor open PRs, auto-fix CI failures, surface review feedback | After pushing a PR — hands-off monitoring until it's ready to merge |
+| **improve** | Audit any codebase and write implementation plans for cheaper models to execute | When you want a senior-level code review with actionable, self-contained plans |
+
 ## 🔌 MCP Servers & Plugins Overview
 
 | Tool            | MCP Servers                                                                                      | Plugins/Extensions                                                                                                                                                                            |
