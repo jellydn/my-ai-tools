@@ -77,7 +77,20 @@ copy_claude_subdirectory() {
 	fi
 }
 
-# Copy skills with marketplace plugin filtering
+# Load npx-installed skill names from recommend-skills.json
+# Returns skill names as a space-separated string
+# Only includes entries with explicit "skill" field (specific npx-installed skills)
+load_npx_skills() {
+	local recommend_file="$SCRIPT_DIR/configs/recommend-skills.json"
+	if [ ! -f "$recommend_file" ] || ! command -v jq &>/dev/null; then
+		echo ""
+		return
+	fi
+	# Only extract skills with explicit "skill" field (skip collections)
+	jq -r '.recommended_skills[] | select(.skill) | .skill' "$recommend_file" 2>/dev/null | tr '\n' ' '
+}
+
+# Copy skills with marketplace plugin and npx-installed filtering
 # Usage: copy_skills_with_filter "source_dir" "dest_dir" "tool_name"
 copy_skills_with_filter() {
 	local source_dir="$1"
@@ -93,6 +106,10 @@ copy_skills_with_filter() {
 		return 0
 	fi
 
+	# Load npx-installed skills once
+	local npx_skills
+	npx_skills="$(load_npx_skills)"
+
 	execute "mkdir -p '$dest_dir'"
 	for skill_dir in "$source_dir"/*; do
 		if [ ! -d "$skill_dir" ]; then
@@ -107,6 +124,8 @@ copy_skills_with_filter() {
 		*)
 			if skill_exists_in_plugins "$skill_name"; then
 				log_info "Skipping $skill_name (exists in skills)"
+			elif [[ " $npx_skills " == *" $skill_name "* ]]; then
+				log_info "Skipping $skill_name (npx-installed, can be reinstalled)"
 			elif execute "cp -r '$skill_dir' '$dest_dir'/ 2>/dev/null"; then
 				log_success "Copied skill: $skill_name"
 			fi
