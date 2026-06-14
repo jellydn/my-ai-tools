@@ -2658,8 +2658,7 @@ Copy the file to your preferred location and reference it in your AI tools.
 - [Modern Web Guidance](https://developer.chrome.com/docs/modern-web-guidance) - Chrome's best practices for modern web development
 - [xAI CLI](https://x.ai/cli) - Grok CLI official page
 - [Grok Build Docs](https://docs.x.ai/build/overview) - Getting started and configuration
-- [MiMo-Code GitHub](https://github.com/XiaomiMiMo/MiMo-Code) - MiMo-Code repository
-- [MiMo-Code Docs](https://mimo.xiaomi.com/mimocode/rules) - Configuration and usage documentation
+- [MiMo-Code](https://github.com/XiaomiMiMo/MiMo-Code) - MiMo-Code repository and documentation
 
 ---
 
