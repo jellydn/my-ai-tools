@@ -689,6 +689,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Modern Web Guidance**    | [GoogleChrome/modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance)                       | Search tool for modern web development best practices (HTML, CSS, accessibility, and client-side JS APIs).                                                                                                                                                                          |
 | **Plannotator Setup Goal** | [backnotprop/plannotator](https://github.com/backnotprop/plannotator)                                         | Turn ideas into structured goal packages with fact sheets and execution plans, gated by Plannotator annotation                                                                                                                                                                      |
 | **Codex PR Babysitter**    | [openai/codex](https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md)                   | Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required                                                                                      |
+| **Last 30 Days**           | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill)                                     | Research what people actually say about any topic in the last 30 days. Pulls from Reddit, X, YouTube, TikTok, HN, Polymarket, GitHub, and the web. |
 
 **Installation:**
 
@@ -708,6 +709,7 @@ npx skills add openclaw/agent-skills --skill autoreview --global --agent claude-
 npx skills add av/facts --global --agent claude-code
 npx skills add GoogleChrome/modern-web-guidance --skill modern-web-guidance --global --agent claude-code
 npx skills add openai/codex --skill babysit-pr --global --agent claude-code
+npx skills add mvanhorn/last30days-skill --global --agent claude-code
 ```
 
 ### Configuration Files
