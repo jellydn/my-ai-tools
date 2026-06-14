@@ -69,7 +69,7 @@
     },
     {
       "repo": "Gentleman-Programming/engram",
-      "skill": "engram",
+      "skill": "engram-memory",
       "description": "Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, git-based sync"
     }
   ]

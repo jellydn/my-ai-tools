@@ -725,7 +725,7 @@ npx skills add GoogleChrome/modern-web-guidance --skill modern-web-guidance --gl
 npx skills add openai/codex --skill babysit-pr --global --agent claude-code
 npx skills add mvanhorn/last30days-skill --global --agent claude-code
 npx skills add shadcn/improve --global --agent claude-code
-npx skills add Gentleman-Programming/engram --skill engram --global --agent claude-code
+npx skills add Gentleman-Programming/engram --skill engram-memory --global --agent claude-code
 ```
 
 ### Configuration Files
