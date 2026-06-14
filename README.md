@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, MiMo-Code, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, MiMo-Code, Open Code Review, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, agentmemory, sem
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -689,7 +689,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Modern Web Guidance**    | [GoogleChrome/modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance)                       | Search tool for modern web development best practices (HTML, CSS, accessibility, and client-side JS APIs).                                                                                                                                                                          |
 | **Plannotator Setup Goal** | [backnotprop/plannotator](https://github.com/backnotprop/plannotator)                                         | Turn ideas into structured goal packages with fact sheets and execution plans, gated by Plannotator annotation                                                                                                                                                                      |
 | **Codex PR Babysitter**    | [openai/codex](https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md)                   | Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required                                                                                      |
-| **Last 30 Days**           | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill)                                     | Research what people actually say about any topic in the last 30 days. Pulls from Reddit, X, YouTube, TikTok, HN, Polymarket, GitHub, and the web. |
+| **Last 30 Days**           | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill)                                     | Research what people actually say about any topic in the last 30 days. Pulls from Reddit, X, YouTube, TikTok, HN, Polymarket, GitHub, and the web.                                                                                                                                  |
 
 **Installation:**
 
@@ -2325,6 +2325,129 @@ Invite builders to try the **MiMo Open Platform** — Xiaomi's most powerful AI 
 **Invite Code:** `EAEGUP`
 
 👉 [Sign up at platform.xiaomimimo.com](https://platform.xiaomimimo.com?ref=EAEGUP) — code auto-filled on sign-up
+
+</details>
+
+---
+
+## 🔍 Open Code Review (Optional)
+
+AI-powered code review CLI from Alibaba. Reads Git diffs, sends changed files to a configurable LLM, and generates structured review comments with line-level precision. [Homepage](https://alibaba.github.io/open-code-review/) | [GitHub](https://github.com/alibaba/open-code-review)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### 📋 Installation
+
+```bash
+npm install -g @alibaba-group/open-code-review
+```
+
+Alternatively, install via `./cli.sh` (automated):
+
+```bash
+./cli.sh
+```
+
+### 🔧 LLM Configuration (Required)
+
+**You must configure an LLM endpoint before using `ocr`.** Without it, reviews will fail with:
+
+```
+Error: resolve LLM endpoint: no valid LLM endpoint configured
+```
+
+**Option A: Interactive config (recommended)**
+
+```bash
+ocr config set llm.url https://api.anthropic.com/v1/messages
+ocr config set llm.auth_token your-api-key-here
+ocr config set llm.model claude-opus-4-6
+ocr config set llm.use_anthropic true
+```
+
+**Option B: Environment variables**
+
+```bash
+export OCR_LLM_URL=https://api.anthropic.com/v1/messages
+export OCR_LLM_TOKEN=your-api-key-here
+export OCR_LLM_MODEL=claude-opus-4-6
+export OCR_USE_ANTHROPIC=true
+```
+
+**Option C: Claude Code compatible** — auto-detects from `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_MODEL` and parses `~/.zshrc` / `~/.bashrc` for those exports.
+
+> **Anthropic API keys (`sk-ant-*`):** You must also set `llm.auth_header` to `x-api-key`:
+>
+> ```bash
+> ocr config set llm.auth_header x-api-key
+> ```
+
+Config is stored in `~/.opencodereview/config.json`.
+
+### ✨ Key Features
+
+- **Deterministic + Agent Hybrid** — Engineering logic for file selection and bundling, agent for dynamic review decisions
+- **Smart File Bundling** — Groups related files into review units with isolated context per bundle
+- **Line-Level Precision** — External positioning and reflection modules improve location accuracy
+- **Custom Review Rules** — JSON rules matched per file path with four-layer priority chain
+- **CI/CD Integration** — `--format json` output for pipeline automation
+
+### 🚀 Usage
+
+```bash
+# Review all staged, unstaged, and untracked changes
+ocr review
+
+# Review branch diff
+ocr review --from main --to feature-branch
+
+# Review a specific commit
+ocr review --commit abc123
+
+# Preview which files will be reviewed (no LLM calls)
+ocr review --preview
+
+# Test LLM connectivity
+ocr llm test
+
+# Launch web viewer for review sessions
+ocr viewer
+```
+
+### 🧩 Integration with Coding Agents
+
+OCR can be installed as a skill or plugin for your AI coding agent:
+
+```bash
+# As a skill (works with Claude Code, OpenCode, etc.)
+npx skills add alibaba/open-code-review --skill open-code-review
+
+# As a Claude Code plugin
+/plugin marketplace add alibaba/open-code-review
+/plugin install open-code-review@open-code-review
+```
+
+### 📝 Custom Review Rules
+
+Create `.opencodereview/rule.json` in your project root:
+
+```json
+{
+	"rules": [
+		{
+			"path": "**/*.java",
+			"rule": "Check for null safety and resource leak patterns"
+		},
+		{
+			"path": "**/*.{ts,tsx}",
+			"rule": "Verify TypeScript strict mode compliance"
+		}
+	]
+}
+```
+
+Rules support `include`/`exclude` patterns and follow a four-layer priority chain: CLI flag > project config > global config > system default.
 
 </details>
 
