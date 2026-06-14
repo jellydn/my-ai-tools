@@ -1,6 +1,10 @@
 {
 	"recommended_skills": [
-		{
+ 		{
+ 			"repo": "mvanhorn/last30days-skill",
+ 			"description": "Research what people actually say about any topic in the last 30 days"
+ 		},
+ 		{
 			"repo": "vercel-labs/agent-skills",
 			"description": "Vercel's agent skills for Next.js and React"
 		},
