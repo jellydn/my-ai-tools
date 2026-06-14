@@ -1,0 +1,8 @@
+{
+  "llm": {
+    "url": "https://api.anthropic.com/v1/messages",
+    "auth_token": "",
+    "model": "claude-opus-4-6",
+    "use_anthropic": true
+  }
+}

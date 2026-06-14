@@ -463,6 +463,28 @@ copy_mimo_configs() {
 	log_success "MiMo-Code configs copied"
 }
 
+copy_ocr_config() {
+	local ocr_bin
+	ocr_bin=$(which ocr 2>/dev/null) || ocr_bin=""
+	if [ -z "$ocr_bin" ]; then
+		log_info "ocr CLI not detected - skipping Open Code Review config installation"
+		return 0
+	fi
+
+	log_info "Detected ocr CLI ($ocr_bin)"
+
+	local ocr_config_dir="$HOME/.opencodereview"
+	execute_quoted mkdir -p "$ocr_config_dir"
+
+	if [ -f "$ocr_config_dir/config.json" ]; then
+		log_info "ocr config already exists at $ocr_config_dir/config.json — skipping (user may have custom config)"
+		return 0
+	fi
+
+	copy_config_file "$SCRIPT_DIR/configs/open-code-review/config.json" "$ocr_config_dir/" || true
+	log_success "Open Code Review config copied"
+}
+
 copy_configurations() {
 	log_info "Copying configurations..."
 
@@ -486,6 +508,7 @@ copy_configurations() {
 	copy_grok_configs
 	copy_mimo_configs
 	copy_best_practices
+	copy_ocr_config
 }
 
 # Validate all config files

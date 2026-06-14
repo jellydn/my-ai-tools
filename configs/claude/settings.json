@@ -4,7 +4,11 @@
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_NO_FLICKER": "1",
-    "ENABLE_TOOL_SEARCH": "true"
+    "ENABLE_TOOL_SEARCH": "true",
+    "OCR_LLM_URL": "https://api.anthropic.com/v1/messages",
+    "OCR_LLM_TOKEN": "",
+    "OCR_LLM_MODEL": "claude-opus-4-6",
+    "OCR_USE_ANTHROPIC": "true"
   },
   "permissions": {
     "allow": [
