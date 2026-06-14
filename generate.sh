@@ -624,6 +624,7 @@ generate_cline_configs() {
 generate_best_practices() {
 	log_info "Generating best-practices.md..."
 	copy_single "$HOME/.ai-tools/best-practices.md" "$SCRIPT_DIR/configs/best-practices.md"
+	copy_single "$HOME/.ai-tools/agent-memory.md" "$SCRIPT_DIR/configs/agent-memory-guidelines.md"
 }
 
 generate_memory_md() {
