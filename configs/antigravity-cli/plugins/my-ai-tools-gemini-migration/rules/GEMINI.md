@@ -3,6 +3,7 @@
 ## AI Tool Guidelines
 
 - Use the fff MCP tools for all file search operations instead of default tools.
+- Use the sem MCP tools for semantic version control and git operations.
 
 ## General Practices
 

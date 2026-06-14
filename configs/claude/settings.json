@@ -3,7 +3,8 @@
   "env": {
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_CODE_NO_FLICKER": "1"
+    "CLAUDE_CODE_NO_FLICKER": "1",
+    "ENABLE_TOOL_SEARCH": "true"
   },
   "permissions": {
     "allow": [
@@ -74,8 +75,9 @@
   "model": "haiku",
   "hooks": {
     "Notification": [],
-    "Stop": [
+    "PermissionRequest": [
       {
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
@@ -128,8 +130,9 @@
         ]
       }
     ],
-    "UserPromptSubmit": [
+    "PostToolUseFailure": [
       {
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
@@ -159,20 +162,8 @@
         ]
       }
     ],
-    "PostToolUseFailure": [
+    "Stop": [
       {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x \"$HOME/.orca/agent-hooks/claude-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/claude-hook.sh\"; fi"
-          }
-        ]
-      }
-    ],
-    "PermissionRequest": [
-      {
-        "matcher": "*",
         "hooks": [
           {
             "type": "command",
@@ -190,6 +181,16 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/claude-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/claude-hook.sh\"; fi"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
@@ -197,26 +198,38 @@
     "command": "bash -c 'node \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
   },
   "enabledPlugins": {
-    "typescript-lsp@claude-plugins-official": true,
-    "pyright-lsp@claude-plugins-official": true,
+    "claude-hud@claude-hud": true,
+    "claude-md-management@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "codex@openai-codex": true,
     "context7@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
     "learning-output-style@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true,
     "plannotator@plannotator": true,
-    "claude-hud@claude-hud": true,
-    "code-simplifier@claude-plugins-official": true,
-    "worktrunk@worktrunk": true,
+    "pyright-lsp@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
-    "claude-md-management@claude-plugins-official": true,
-    "codex@openai-codex": true
+    "swift-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "worktrunk@worktrunk": true
   },
   "extraKnownMarketplaces": {
+    "claude-hud": {
+      "source": {
+        "source": "github",
+        "repo": "jarrodwatts/claude-hud"
+      }
+    },
     "claude-plugins-official": {
       "source": {
         "source": "github",
         "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
       }
     },
     "plannotator": {
@@ -225,22 +238,10 @@
         "repo": "backnotprop/plannotator"
       }
     },
-    "claude-hud": {
-      "source": {
-        "source": "github",
-        "repo": "jarrodwatts/claude-hud"
-      }
-    },
     "worktrunk": {
       "source": {
         "source": "github",
         "repo": "max-sixty/worktrunk"
-      }
-    },
-    "openai-codex": {
-      "source": {
-        "source": "github",
-        "repo": "openai/codex-plugin-cc"
       }
     }
   },

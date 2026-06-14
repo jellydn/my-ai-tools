@@ -13,7 +13,7 @@
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
 - 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, MiMo-Code, and more
-- 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, agentmemory
+- 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, agentmemory, sem
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
 - 📦 **Plugin support** - Official and community plugins
@@ -21,36 +21,37 @@
 
 ## 🔌 MCP Servers & Plugins Overview
 
-| Tool            | MCP Servers                                                                                 | Plugins/Extensions                                                                                                                                                                            |
-| --------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                                              |
-| **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                             |
-| **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, node_repl   | -                                                                                                                                                                                             |
-| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory                        | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, ollama-web-search, footer, tps-meter) |
-| **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                                             |
-| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                                |
-| **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot (via plugin) | my-ai-tools-gemini-migration                                                                                                                                                                  |
-| **Kilo**        | (uses OpenCode config)                                                                      | (uses OpenCode plugins)                                                                                                                                                                       |
-| **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                                             |
-| **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                                             |
-| **Cursor**      | context7 (via bunx), sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot   | -                                                                                                                                                                                             |
-| **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | core, security-engineer, droid-evolved, autoresearch                                                                                                                                          |
-| **Orca**        | -                                                                                           | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                                            |
-| **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | -                                                                                                                                                                                             |
-| **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | Kanagawa palette staged (`tokyonight` until built-in)                                                                                                                                         |
-| **MiMo-Code**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                             |
+| Tool            | MCP Servers                                                                                      | Plugins/Extensions                                                                                                                                                                            |
+| --------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                                              |
+| **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                             |
+| **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl   | -                                                                                                                                                                                             |
+| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory, sem                        | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, ollama-web-search, footer, tps-meter) |
+| **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
+| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                                |
+| **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem (via plugin) | my-ai-tools-gemini-migration                                                                                                                                                                  |
+| **Kilo**        | (uses OpenCode config)                                                                           | (uses OpenCode plugins)                                                                                                                                                                       |
+| **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
+| **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
+| **Cursor**      | context7 (via bunx), sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem   | -                                                                                                                                                                                             |
+| **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | core, security-engineer, droid-evolved, autoresearch                                                                                                                                          |
+| **Orca**        | -                                                                                                | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                                            |
+| **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
+| **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Kanagawa palette staged (`tokyonight` until built-in)                                                                                                                                         |
+| **MiMo-Code**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                             |
 
 ### 📋 MCP Server Details
 
-| Server                | Purpose                                                                                   | Package                                            |
-| --------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| `context7`            | Documentation lookup for any library                                                      | `@upstash/context7-mcp`                            |
-| `sequential-thinking` | Multi-step reasoning for complex analysis                                                 | `@modelcontextprotocol/server-sequential-thinking` |
-| `qmd`                 | Knowledge management with AI-powered search                                               | `qmd`                                              |
-| `agentmemory`         | "Persistent memory" per the tool; we use it session-only (qmd = durable; see `MEMORY.md`) | `@agentmemory/mcp`                                 |
-| `fff`                 | Fast file search with frecency ranking                                                    | `fff-mcp`                                          |
-| `react-grab-mcp`      | React component capture and inspection                                                    | `@react-grab/mcp`                                  |
-| `logpilot`            | AI-powered log analysis and tmux monitoring                                               | `logpilot`                                         |
+| Server                | Purpose                                                                                   | Package                                                                 |
+| --------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `context7`            | Documentation lookup for any library                                                      | `@upstash/context7-mcp`                                                 |
+| `sequential-thinking` | Multi-step reasoning for complex analysis                                                 | `@modelcontextprotocol/server-sequential-thinking`                      |
+| `qmd`                 | Knowledge management with AI-powered search                                               | `qmd`                                                                   |
+| `agentmemory`         | "Persistent memory" per the tool; we use it session-only (qmd = durable; see `MEMORY.md`) | `@agentmemory/mcp`                                                      |
+| `fff`                 | Fast file search with frecency ranking                                                    | `fff-mcp`                                                               |
+| `react-grab-mcp`      | React component capture and inspection                                                    | `@react-grab/mcp`                                                       |
+| `logpilot`            | AI-powered log analysis and tmux monitoring                                               | `logpilot`                                                              |
+| `sem`                 | Semantic version control - entity-level diffs, blame, and impact analysis                 | `sem-mcp` (via [Ataraxy-Labs/sem](https://github.com/Ataraxy-Labs/sem)) |
 
 ## 🎬 Demo
 
@@ -287,6 +288,7 @@ claude mcp add --scope user --transport stdio qmd -- qmd mcp
 claude mcp add --scope user --transport stdio agentmemory -- npx -y @agentmemory/mcp
 claude mcp add --scope user --transport stdio fff -- fff-mcp  # Requires: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
 claude mcp add --scope user --transport stdio logpilot -- logpilot mcp-server  # Requires: cargo install logpilot
+claude mcp add --scope user --transport stdio sem -- sem-mcp  # Requires: cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp
 ```
 
 > **MCP Scopes:**
@@ -686,7 +688,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Facts**                  | [av/facts](https://github.com/av/facts)                                                                       | Track project specs and facts in a `.facts` file. Lifecycle stages (`@draft` → `@spec` → `@implemented`) with shell-command verification. Ships four skills: `facts`, `facts-discover`, `facts-refine`, and `facts-implement`.                                                      |
 | **Modern Web Guidance**    | [GoogleChrome/modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance)                       | Search tool for modern web development best practices (HTML, CSS, accessibility, and client-side JS APIs).                                                                                                                                                                          |
 | **Plannotator Setup Goal** | [backnotprop/plannotator](https://github.com/backnotprop/plannotator)                                         | Turn ideas into structured goal packages with fact sheets and execution plans, gated by Plannotator annotation                                                                                                                                                                      |
-| **Codex PR Babysitter**    | [openai/codex](https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md)                     | Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required                                                                  |
+| **Codex PR Babysitter**    | [openai/codex](https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md)                   | Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required                                                                                      |
 
 **Installation:**
 
@@ -1581,15 +1583,15 @@ Then register them in `~/.pi/agent/settings.json`:
 
 Pi is configured with multi-provider model access:
 
-| Provider       | Models                                                                                           |
-| -------------- | ------------------------------------------------------------------------------------------------ |
-| github-copilot | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                                                               |
-| vibeproxy      | `claude-opus-4-6-thinking`, `gemini-3-flash-agent`, `gemini-pro-agent`                           |
-| commandcode    | `moonshotai/Kimi-K2.6`, `MiniMaxAI/MiniMax-M3`, `MiniMaxAI/MiniMax-M2.7`                        |
-|                | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash`                                         |
-| xiaomi-token-plan-sgp | `mimo-v2.5-pro`                                                                       |
-| openrouter     | `moonshotai/kimi-k2.6:free`, `z-ai/glm-4.5-air:free`, `openrouter/owl-alpha`                     |
-| ollama         | `minimax-m2.5:cloud`                                                                             |
+| Provider              | Models                                                                       |
+| --------------------- | ---------------------------------------------------------------------------- |
+| github-copilot        | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                                           |
+| vibeproxy             | `claude-opus-4-6-thinking`, `gemini-3-flash-agent`, `gemini-pro-agent`       |
+| commandcode           | `moonshotai/Kimi-K2.6`, `MiniMaxAI/MiniMax-M3`, `MiniMaxAI/MiniMax-M2.7`     |
+|                       | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash`                     |
+| xiaomi-token-plan-sgp | `mimo-v2.5-pro`                                                              |
+| openrouter            | `moonshotai/kimi-k2.6:free`, `z-ai/glm-4.5-air:free`, `openrouter/owl-alpha` |
+| ollama                | `minimax-m2.5:cloud`                                                         |
 
 > See [OpenRouter free models](https://openrouter.ai/collections/free-models) for additional no-cost options.
 
@@ -2234,39 +2236,44 @@ Configuration in [`configs/mimo/mimocode.jsonc`](configs/mimo/mimocode.jsonc):
 		"context7": {
 			"enabled": true,
 			"type": "remote",
-			"url": "https://mcp.context7.com/mcp"
+			"url": "https://mcp.context7.com/mcp",
 		},
 		"qmd": {
 			"command": ["qmd", "mcp"],
 			"enabled": true,
-			"type": "local"
+			"type": "local",
 		},
 		"fff": {
 			"type": "local",
 			"command": ["fff-mcp"],
-			"enabled": true
+			"enabled": true,
 		},
 		"sequential-thinking": {
 			"type": "local",
-			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
-			"enabled": true
-		},		"react-grab-mcp": {
+			"command": [
+				"npx",
+				"-y",
+				"@modelcontextprotocol/server-sequential-thinking",
+			],
+			"enabled": true,
+		},
+		"react-grab-mcp": {
 			"type": "local",
 			"command": ["npx", "-y", "@react-grab/mcp", "--stdio"],
-			"enabled": true
+			"enabled": true,
 		},
 
 		"logpilot": {
 			"type": "local",
 			"command": ["logpilot", "mcp-server"],
-			"enabled": true
+			"enabled": true,
 		},
 		"agentmemory": {
 			"type": "local",
 			"command": ["npx", "-y", "@agentmemory/mcp"],
-			"enabled": true
-		}
-	}
+			"enabled": true,
+		},
+	},
 }
 ```
 
@@ -2307,11 +2314,11 @@ mimo "Explain the architecture of this codebase"
 
 Invite builders to try the **MiMo Open Platform** — Xiaomi's most powerful AI lineup including **MiMo V2.5** and more. Sign up with the invite code below: both you and your friend get **$2 in API credits** plus **10% off your first plan**.
 
-| Offer                         | Details                                             |
-| ----------------------------- | --------------------------------------------------- |
-| Friend signs up with your code | Both get **$2 API credits** · first 30 sign-ups    |
-| Friend's first plan purchase   | Friend gets **10% off** · you earn **10% back**    |
-| Referral window                | **40 days** from their sign-up date                |
+| Offer                          | Details                                         |
+| ------------------------------ | ----------------------------------------------- |
+| Friend signs up with your code | Both get **$2 API credits** · first 30 sign-ups |
+| Friend's first plan purchase   | Friend gets **10% off** · you earn **10% back** |
+| Referral window                | **40 days** from their sign-up date             |
 
 **Invite Code:** `EAEGUP`
 

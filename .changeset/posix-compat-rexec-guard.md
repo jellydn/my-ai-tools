@@ -18,12 +18,12 @@ Extract the duplicated 9-line re-exec guard from `generate.sh` and `cli.sh` into
 
 ### How
 
-1. `lib/require_bash.sh` is intentionally POSIX-compatible so `sh` can source it and trigger the re-exec *before* `lib/common.sh` is reached.
+1. `lib/require_bash.sh` is intentionally POSIX-compatible so `sh` can source it and trigger the re-exec _before_ `lib/common.sh` is reached.
 2. Both `generate.sh` and `cli.sh` `source` `lib/require_bash.sh` as their first non-shebang line (before `set -e` and before any `lib/common.sh` source).
 3. The shim is single-sourced (no duplication), trivially auditable, and tested with `sh -n` syntax checks plus 6 behavioral tests on `sh generate.sh --dry-run`.
 
 ### Trade-offs
 
 - `lib/require_bash.sh` adds a 32-line POSIX shim and a bats test file. This is real machinery, justified by the fact that `sh cli.sh` and `sh generate.sh` transparently work on any Unix-like system.
-- The guard is a *symptom* fix, not a *root-cause* fix. The root cause (`lib/common.sh` using bash-only syntax) is also resolved in this branch: process substitution is replaced with temp files, arrays with `set --` and temp files, and parameter expansion with `printf | sed`. After that change, `lib/common.sh` is verified to source cleanly under `dash` at runtime. The guard still remains in place because `cli.sh` has ~10 bash arrays pending the same treatment.
+- The guard is a _symptom_ fix, not a _root-cause_ fix. The root cause (`lib/common.sh` using bash-only syntax) is also resolved in this branch: process substitution is replaced with temp files, arrays with `set --` and temp files, and parameter expansion with `printf | sed`. After that change, `lib/common.sh` is verified to source cleanly under `dash` at runtime. The guard still remains in place because `cli.sh` has ~10 bash arrays pending the same treatment.
 - The shebang on `lib/common.sh` is still `#!/bin/bash` even though the file is now POSIX-compatible. This is intentional: the file is sourced (not executed), so the shebang is cosmetic. Changing it to `#!/bin/sh` would signal the new POSIX-compat intent but is not required for correctness.

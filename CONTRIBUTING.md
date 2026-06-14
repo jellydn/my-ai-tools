@@ -139,6 +139,35 @@ Before submitting a PR or commit:
 - Use meaningful names for files and functions
 - Avoid over-engineering solutions or overcomplicating things unnecessarily
 
+### Formatting & Pre-commit Hooks
+
+This repository uses **biome** for formatting and **pre-commit hooks** for code quality:
+
+```bash
+# Format code with biome
+biome check --write .
+
+# Run pre-commit hooks on all files
+pre-commit run --all-files
+
+# Run pre-commit hooks on staged files only
+pre-commit run
+```
+
+**Pre-commit hooks included:**
+
+- `trailing-whitespace` - Removes trailing whitespace
+- `end-of-file-fixer` - Ensures files end with newline
+- `check-yaml` - Validates YAML syntax
+- `check-added-large-files` - Prevents large files from being committed
+- `oxfmt` - Formats TypeScript/JavaScript files
+
+**biome.json configuration:**
+
+- Tab indentation (matching .editorconfig)
+- Line width: 120 characters
+- Double quotes for JavaScript strings
+
 Remember: **Software design is an exercise in human relationships.** Make your contributions clear, well-documented, and respectful of existing code.
 
 ## Questions?

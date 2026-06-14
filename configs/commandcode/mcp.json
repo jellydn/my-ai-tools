@@ -58,6 +58,12 @@
         "-y",
         "@agentmemory/mcp"
       ]
+    },
+    "sem": {
+      "transport": "stdio",
+      "enabled": true,
+      "command": "sem-mcp",
+      "args": []
     }
   }
 }

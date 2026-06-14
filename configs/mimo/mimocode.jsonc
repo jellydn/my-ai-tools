@@ -1,11 +1,6 @@
 {
-	// Main configuration for MiMo-Code
-	// Schema: https://opencode.ai/config.json
 	"$schema": "https://opencode.ai/config.json",
-	"instructions": [
-		"~/.ai-tools/best-practices.md",
-		"~/.ai-tools/MEMORY.md"
-	],
+	"instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
 	"default_agent": "plan",
 	"formatter": {
 		"biome": {
@@ -72,12 +67,14 @@
 			"type": "local",
 			"command": ["npx", "-y", "@agentmemory/mcp"],
 			"enabled": true
+		},
+		"sem": {
+			"type": "local",
+			"command": ["sem-mcp"],
+			"enabled": true
 		}
 	},
-	"plugin": [
-		"@plannotator/opencode@latest",
-		"opencode-chrome-annotation@latest"
-	],
+	"plugin": ["@plannotator/opencode@latest", "opencode-chrome-annotation@latest"],
 	"provider": {
 		"llama.cpp": {
 			"npm": "@ai-sdk/openai-compatible",
@@ -111,10 +108,5 @@
 				"baseURL": "http://127.0.0.1:11434/v1"
 			}
 		}
-	},
-	"permission": {
-		"*": "ask",
-		"bash": "allow",
-		"edit": "deny"
 	}
 }

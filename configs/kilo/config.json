@@ -21,11 +21,7 @@
 		},
 		"sequential-thinking": {
 			"type": "local",
-			"command": [
-				"npx",
-				"-y",
-				"@modelcontextprotocol/server-sequential-thinking"
-			],
+			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
 			"enabled": true
 		},
 		"react-grab-mcp": {
@@ -41,6 +37,11 @@
 		"agentmemory": {
 			"type": "local",
 			"command": ["npx", "-y", "@agentmemory/mcp"],
+			"enabled": true
+		},
+		"sem": {
+			"type": "local",
+			"command": ["sem-mcp"],
 			"enabled": true
 		}
 	},
@@ -59,10 +60,7 @@
 			}
 		}
 	},
-	"plugin": [
-		"@plannotator/opencode@latest",
-		"@mohak34/opencode-notifier@latest"
-	],
+	"plugin": ["@plannotator/opencode@latest", "@mohak34/opencode-notifier@latest"],
 	"formatter": {
 		"biome": {
 			"command": ["biome", "check", "--write", "$FILE"],

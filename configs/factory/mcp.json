@@ -40,6 +40,12 @@
 			"command": "npx",
 			"args": ["-y", "@agentmemory/mcp"],
 			"disabled": false
+		},
+		"sem": {
+			"type": "stdio",
+			"command": "sem-mcp",
+			"args": [],
+			"disabled": false
 		}
 	}
 }

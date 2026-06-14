@@ -16,6 +16,32 @@ For automated validation, check all scripts with syntax validation:
 bash -n cli.sh generate.sh && echo "All scripts valid"
 ```
 
+## 🧹 Code Quality Checks
+
+### Pre-commit Hooks
+
+Run pre-commit hooks to validate code quality:
+
+```bash
+# Run all pre-commit hooks on staged files
+pre-commit run
+
+# Run all pre-commit hooks on all files
+pre-commit run --all-files
+```
+
+### Biome Formatting
+
+Format TypeScript/JavaScript and JSON files:
+
+```bash
+# Check formatting without modifying files
+biome check .
+
+# Format files in-place
+biome check --write .
+```
+
 ## 🧪 Functional Testing with BATS
 
 Functional tests are written using the [BATS (Bash Automated Testing System)](https://github.com/bats-core/bats-core) framework.
