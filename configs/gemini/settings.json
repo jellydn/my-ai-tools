@@ -1,36 +1,56 @@
 {
 	"$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
 	"mcpServers": {
-		"context7": {
-			"url": "https://mcp.context7.com/mcp"
-		},
-		"sequential-thinking": {
+		"agentmemory": {
 			"command": "npx",
-			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+			"args": ["-y", "@agentmemory/mcp"],
+			"env": {
+				"AGENTMEMORY_URL": "${AGENTMEMORY_URL:-http://localhost:3111}",
+				"AGENTMEMORY_SECRET": "${AGENTMEMORY_SECRET:-}",
+				"AGENTMEMORY_TOOLS": "${AGENTMEMORY_TOOLS:-all}"
+			},
+			"timeout": 60000
 		},
 		"qmd": {
+			"env": {},
 			"command": "qmd",
-			"args": ["mcp"]
+			"args": ["mcp"],
+			"timeout": 60000
 		},
-		"fff": {
-			"command": "fff-mcp",
-			"args": []
+		"context7": {
+			"env": {},
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@latest"],
+			"timeout": 60000
+		},
+		"logpilot": {
+			"env": {},
+			"command": "logpilot",
+			"args": ["mcp-server"],
+			"timeout": 60000
 		},
 		"react-grab-mcp": {
 			"command": "npx",
-			"args": ["-y", "@react-grab/mcp", "--stdio"]
+			"args": ["-y", "@react-grab/mcp", "--stdio"],
+			"timeout": 60000
 		},
-		"logpilot": {
-			"command": "logpilot",
-			"args": ["mcp-server"]
+		"fff": {
+			"env": {},
+			"command": "fff-mcp",
+			"args": [],
+			"timeout": 60000
 		},
-		"agentmemory": {
+		"sequential-thinking": {
+			"env": {},
 			"command": "npx",
-			"args": ["-y", "@agentmemory/mcp"]
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+			"timeout": 60000
 		},
 		"sem": {
+			"env": {},
 			"command": "sem-mcp",
-			"args": []
+			"args": [],
+			"timeout": 60000
 		}
 	},
 	"security": {
@@ -54,15 +74,7 @@
 		"hideBanner": true,
 		"footer": {
 			"hideContextPercentage": false,
-			"items": [
-				"workspace",
-				"git-branch",
-				"sandbox",
-				"model-name",
-				"context-used",
-				"quota",
-				"code-changes"
-			],
+			"items": ["workspace", "git-branch", "sandbox", "model-name", "context-used", "quota", "code-changes"],
 			"showLabels": true,
 			"hideCWD": true,
 			"hideSandboxStatus": true

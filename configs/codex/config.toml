@@ -7,6 +7,7 @@ personality = "pragmatic"
 # Notify the Codex Computer Use client when a turn ends.
 # Restored to match the desktop app's --previous-notify protocol.
 
+
 notify = ["$HOME/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended", "--previous-notify", "[\"turn-ended\"]"]
 
 [features]
@@ -28,60 +29,66 @@ goals = true
 network_access = true
 
 [mcp_servers.context7]
+type = "stdio"
 command = "npx"
-args = ["-y", "@upstash/context7-mcp"]
+args = ["-y", "@upstash/context7-mcp@latest"]
 
 [mcp_servers.sequential-thinking]
+type = "stdio"
 command = "npx"
 args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 
 [mcp_servers.qmd]
+type = "stdio"
 command = "qmd"
 args = ["mcp"]
 
 [mcp_servers.fff]
+type = "stdio"
 command = "fff-mcp"
-args = []
-
-[mcp_servers.fff.tools.find_files]
-approval_mode = "approve"
-
-[mcp_servers.fff.tools.grep]
-approval_mode = "approve"
-
-[mcp_servers.fff.tools.multi_grep]
-approval_mode = "approve"
 
 [mcp_servers.react-grab-mcp]
+type = "stdio"
 command = "npx"
 args = ["-y", "@react-grab/mcp", "--stdio"]
 
+[mcp_servers.sem]
+type = "stdio"
+command = "sem-mcp"
+
 [mcp_servers.logpilot]
+type = "stdio"
 command = "logpilot"
 args = ["mcp-server"]
 
 [mcp_servers.agentmemory]
+type = "stdio"
 command = "npx"
 args = ["-y", "@agentmemory/mcp"]
 
+[mcp_servers.agentmemory.env]
+AGENTMEMORY_URL = "${AGENTMEMORY_URL:-http://localhost:3111}"
+AGENTMEMORY_SECRET = "${AGENTMEMORY_SECRET:-}"
+AGENTMEMORY_TOOLS = "${AGENTMEMORY_TOOLS:-all}"
+
 [mcp_servers.node_repl]
-args = []
+type = "stdio"
 command = "/Applications/Codex.app/Contents/Resources/node_repl"
 startup_timeout_sec = 120
 
 [mcp_servers.node_repl.env]
-NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
-NODE_REPL_NODE_MODULE_DIRS = ""
-NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/node"
-NODE_REPL_TRUSTED_CODE_PATHS = "$HOME/.codex"
-CODEX_HOME = "$HOME/.codex"
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "4946b004b23af02244ece97240aceb8d123475207fa6a6fc399486bd7086049f"
 BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
-NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
-NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
 BROWSER_USE_CODEX_APP_VERSION = "26.602.71036"
 CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
+CODEX_HOME = "$HOME/.codex"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = ""
+NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/node"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "4946b004b23af02244ece97240aceb8d123475207fa6a6fc399486bd7086049f"
+NODE_REPL_TRUSTED_CODE_PATHS = "$HOME/.codex"
 
 [notice]
 fast_default_opt_out = true
@@ -108,7 +115,7 @@ theme = "kanagawa"
 status_line_use_colors = true
 
 [tui.model_availability_nux]
-"gpt-5.5" = 2
+"gpt-5.5" = 3
 
 [memories]
 disable_on_external_context = true
@@ -164,18 +171,12 @@ diffRemoved = "#ff5555"
 skill = "#ff79c6"
 
 [desktop.open-in-target-preferences]
-global = "vscodeInsiders"
+global = "zed"
 
 [plugins."gmail@openai-curated"]
 enabled = true
 
 [plugins."github@openai-curated"]
-enabled = true
-
-[plugins."browser@openai-bundled"]
-enabled = true
-
-[plugins."chrome@openai-bundled"]
 enabled = true
 
 [plugins."documents@openai-primary-runtime"]
@@ -190,8 +191,14 @@ enabled = true
 [plugins."computer-use@openai-bundled"]
 enabled = true
 
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."chrome@openai-bundled"]
+enabled = true
+
 [marketplaces.openai-bundled]
-last_updated = "2026-06-09T14:12:20Z"
+last_updated = "2026-06-12T09:16:22Z"
 source_type = "local"
 source = "$HOME/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
@@ -202,6 +209,8 @@ source = "$HOME/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-prima
 
 [hooks.state]
 
+
+
 [hooks.state."$HOME/.codex/hooks.json:session_start:0:0"]
 trusted_hash = "sha256:0da4d2802a51631b408538e45793c82eccaeb82081f8c977765faad879a37cff"
 
@@ -211,6 +220,8 @@ trusted_hash = "sha256:f0f840070daee63b7b597ff9fba314db652a4c8084ea055abde4cd2f6
 [hooks.state."$HOME/.codex/hooks.json:stop:1:0"]
 trusted_hash = "sha256:92c2692bb315148c26b738a5312e07f6986b0e9d2cd01b202542856bcd69ddf0"
 
-[mcp_servers.sem]
-command = "sem-mcp"
-args = []
+[projects."$HOME/src/tries/2026-04-22-jellydn-my-ai-tools"]
+trust_level = "trusted"
+
+[projects."$HOME/src/tries/2026-05-26-hermes-hub"]
+trust_level = "trusted"

@@ -1,6 +1,5 @@
 {
 	"$schema": "https://opencode.ai/config.json",
-	"model": "opencode/big-pickle",
 	"agent": {
 		"build": {
 			"permission": {
@@ -49,69 +48,69 @@
 	},
 	"instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
 	"mcp": {
-		"context7": {
+		"agentmemory": {
+			"command": ["npx", "-y", "@agentmemory/mcp"],
 			"enabled": true,
-			"type": "remote",
-			"url": "https://mcp.context7.com/mcp"
+			"environment": {
+				"AGENTMEMORY_SECRET": "${AGENTMEMORY_SECRET:-}",
+				"AGENTMEMORY_TOOLS": "${AGENTMEMORY_TOOLS:-all}",
+				"AGENTMEMORY_URL": "${AGENTMEMORY_URL:-http://localhost:3111}"
+			},
+			"type": "local"
+		},
+		"context7": {
+			"command": ["npx", "-y", "@upstash/context7-mcp@latest"],
+			"enabled": true,
+			"type": "local"
+		},
+		"fff": {
+			"command": ["fff-mcp"],
+			"enabled": true,
+			"type": "local"
+		},
+		"logpilot": {
+			"command": ["logpilot", "mcp-server"],
+			"enabled": true,
+			"type": "local"
 		},
 		"qmd": {
 			"command": ["qmd", "mcp"],
 			"enabled": true,
 			"type": "local"
 		},
-		"fff": {
-			"type": "local",
-			"command": ["fff-mcp"],
-			"enabled": true
+		"react-grab-mcp": {
+			"command": ["npx", "-y", "@react-grab/mcp", "--stdio"],
+			"enabled": true,
+			"type": "local"
 		},
 		"sequential-thinking": {
-			"type": "local",
-			"command": [
-				"npx",
-				"-y",
-				"@modelcontextprotocol/server-sequential-thinking"
-			],
-			"enabled": true
-		},
-		"react-grab-mcp": {
-			"type": "local",
-			"command": ["npx", "-y", "@react-grab/mcp", "--stdio"]
-		},
-		"logpilot": {
-			"type": "local",
-			"command": ["logpilot", "mcp-server"],
-			"enabled": true
-		},
-		"agentmemory": {
-			"type": "local",
-			"command": ["npx", "-y", "@agentmemory/mcp"],
-			"enabled": true
+			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+			"enabled": true,
+			"type": "local"
 		},
 		"sem": {
-			"type": "local",
 			"command": ["sem-mcp"],
-			"enabled": true
+			"enabled": true,
+			"type": "local"
 		}
 	},
-	"plugin": [
-		"@plannotator/opencode@latest",
-		"opencode-chrome-annotation@latest"
-	],
+	"model": "opencode/big-pickle",
+	"plugin": ["@plannotator/opencode@latest", "opencode-chrome-annotation@latest"],
 	"provider": {
 		"llama.cpp": {
-			"npm": "@ai-sdk/openai-compatible",
-			"name": "llama-server (local)",
-			"options": {
-				"baseURL": "http://192.168.1.11:8000/v1"
-			},
 			"models": {
 				"glm": {
-					"name": "GLM-4.7-Flash (local)",
 					"limit": {
 						"context": 32768,
 						"output": 16384
-					}
+					},
+					"name": "GLM-4.7-Flash (local)"
 				}
+			},
+			"name": "llama-server (local)",
+			"npm": "@ai-sdk/openai-compatible",
+			"options": {
+				"baseURL": "http://192.168.1.11:8000/v1"
 			}
 		},
 		"ollama": {
