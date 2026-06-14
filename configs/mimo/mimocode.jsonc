@@ -55,7 +55,8 @@
 		},
 		"react-grab-mcp": {
 			"type": "local",
-			"command": ["npx", "-y", "@react-grab/mcp", "--stdio"]
+			"command": ["npx", "-y", "@react-grab/mcp", "--stdio"],
+			"enabled": true
 		},
 		"logpilot": {
 			"type": "local",
