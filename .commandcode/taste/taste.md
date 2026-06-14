@@ -7,3 +7,6 @@
 
 # paths
 - Use $HOME environment variable instead of hardcoded absolute paths. Confidence: 0.65
+
+# mcp
+- Use `sem` MCP server (git) and `fff` MCP server across all AI tool configs. Confidence: 0.75
