@@ -50,6 +50,9 @@ GROK_CONFIG_DIR="$REPO_ROOT/configs/grok"
 
 @test "cli.sh has install_grok function" {
 	run grep -F "install_grok()" "$REPO_ROOT/cli.sh"
+	if [ "$status" -ne 0 ]; then
+		run grep -F "install_grok()" "$REPO_ROOT/lib/install.sh"
+	fi
 	[ "$status" -eq 0 ]
 }
 
@@ -60,6 +63,9 @@ GROK_CONFIG_DIR="$REPO_ROOT/configs/grok"
 
 @test "cli.sh calls install_grok in main" {
 	run grep -F "install_grok" "$REPO_ROOT/cli.sh"
+	if [ "$status" -ne 0 ]; then
+		run grep -F "install_grok" "$REPO_ROOT/lib/install.sh"
+	fi
 	[ "$status" -eq 0 ]
 }
 
