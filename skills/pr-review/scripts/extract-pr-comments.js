@@ -84,7 +84,9 @@ function extractPrComments(reviewCommentsFile, issueCommentsFile, outputFile) {
 	fs.writeFileSync(summaryFile, summaryContent, "utf8");
 
 	const resolvedCount = commentIdsWithReplies.size;
-	console.log(`Extracted ${relevantComments.length} unresolved comments from ${comments.length} total comments`);
+	console.log(
+		`Extracted ${relevantComments.length} unresolved comments from ${comments.length} total comments`,
+	);
 	console.log(`Skipped ${resolvedCount} comments with replies (likely resolved)`);
 	console.log(
 		`Severity breakdown: Critical: ${summaryStats.severity.critical}, High: ${summaryStats.severity.high}, Medium: ${summaryStats.severity.medium}, Low: ${summaryStats.severity.low}`,
@@ -157,16 +159,36 @@ function classifyComment(comment) {
 	) {
 		categories.push("accessibility");
 	}
-	if (body.includes("test") || body.includes("coverage") || body.includes("spec") || body.includes("unit test")) {
+	if (
+		body.includes("test") ||
+		body.includes("coverage") ||
+		body.includes("spec") ||
+		body.includes("unit test")
+	) {
 		categories.push("testing");
 	}
-	if (body.includes("doc") || body.includes("comment") || body.includes("readme") || body.includes("jsdoc")) {
+	if (
+		body.includes("doc") ||
+		body.includes("comment") ||
+		body.includes("readme") ||
+		body.includes("jsdoc")
+	) {
 		categories.push("documentation");
 	}
-	if (body.includes("type") || body.includes("typescript") || body.includes("interface") || body.includes("generic")) {
+	if (
+		body.includes("type") ||
+		body.includes("typescript") ||
+		body.includes("interface") ||
+		body.includes("generic")
+	) {
 		categories.push("typing");
 	}
-	if (body.includes("style") || body.includes("format") || body.includes("lint") || body.includes("prettier")) {
+	if (
+		body.includes("style") ||
+		body.includes("format") ||
+		body.includes("lint") ||
+		body.includes("prettier")
+	) {
 		categories.push("style");
 	}
 
@@ -279,7 +301,8 @@ function createTodoFile(comments, inputFile) {
 		})
 		.map((comment, index) => {
 			const shortBody = comment.body.split("\n")[0].replace(/[*_`]/g, "").substring(0, 60);
-			const filePath = comment.path || (comment.comment_type === "issue" ? "General PR Discussion" : "unknown");
+			const filePath =
+				comment.path || (comment.comment_type === "issue" ? "General PR Discussion" : "unknown");
 			const commentId = index + 1;
 			const commentType = comment.comment_type === "issue" ? "💬" : "📝";
 			const severityIndicator = severityEmojis[comment.severity] || "🟢";
@@ -296,7 +319,9 @@ if (require.main === module) {
 	const args = process.argv.slice(2);
 
 	if (args.length < 2) {
-		console.log("Usage: node extract-pr-comments.js <review-comments-file> <issue-comments-file> [output-file]");
+		console.log(
+			"Usage: node extract-pr-comments.js <review-comments-file> <issue-comments-file> [output-file]",
+		);
 		console.log(
 			"Example: node .claude/extract-pr-comments.js pr-4972-review-comments-raw.json pr-4972-issue-comments-raw.json pr-4972-comments.ndjson",
 		);
@@ -313,7 +338,10 @@ if (require.main === module) {
 	const reviewCommentsFile = args[0];
 	const issueCommentsFile = args[1];
 	const outputFile =
-		args[2] || reviewCommentsFile.replace("-review-comments-raw.json", "-comments.ndjson").replace(".claude/", "");
+		args[2] ||
+		reviewCommentsFile
+			.replace("-review-comments-raw.json", "-comments.ndjson")
+			.replace(".claude/", "");
 
 	extractPrComments(reviewCommentsFile, issueCommentsFile, outputFile);
 }
