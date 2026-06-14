@@ -703,6 +703,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Codex PR Babysitter**    | [openai/codex](https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md)                   | Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required                                                                                      |
 | **Last 30 Days**           | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill)                                     | Research what people actually say about any topic in the last 30 days. Pulls from Reddit, X, YouTube, TikTok, HN, Polymarket, GitHub, and the web.                                                                                                                                  |
 | **Improve**                | [shadcn/improve](https://github.com/shadcn/improve)                                                           | Audit any codebase and write implementation plans for cheaper models to execute. Uses expensive model for planning, cheap model for execution.                                                                                                                                      |
+| **Engram**                 | [Gentleman-Programming/engram](https://github.com/Gentleman-Programming/engram)                             | Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, and git-based cross-machine sync.                                                                                                                                             |
 
 **Installation:**
 
@@ -724,6 +725,7 @@ npx skills add GoogleChrome/modern-web-guidance --skill modern-web-guidance --gl
 npx skills add openai/codex --skill babysit-pr --global --agent claude-code
 npx skills add mvanhorn/last30days-skill --global --agent claude-code
 npx skills add shadcn/improve --global --agent claude-code
+npx skills add Gentleman-Programming/engram --skill engram-memory --global --agent claude-code
 ```
 
 ### Configuration Files
@@ -2641,10 +2643,7 @@ Copy the file to your preferred location and reference it in your AI tools.
 
 - [Claude Code Documentation](https://claude.com/claude-code) - Official docs
 - [OpenCode Documentation](https://opencode.ai/docs) - Guide with agents and skills
-- [Antigravity CLI Getting Started](https://antigravity.google/docs/cli-getting-started) - Official guide
-- [Antigravity CLI Using Guide](https://antigravity.google/docs/cli-using) - Commands and usage
-- [Antigravity CLI Features](https://antigravity.google/docs/cli-features) - Feature overview
-- [Antigravity gcli Migration](https://antigravity.google/docs/gcli-migration) - Migration guide
+- [Antigravity CLI Docs](https://antigravity.google/docs) - Official documentation (getting started, commands, features, migration)
 - [MCP Servers Directory](https://mcp.so) - Model Context Protocol servers
 - [Context7 Documentation](https://context7.com/docs) - Library documentation lookup
 - [CCS Documentation](https://github.com/kaitranntt/ccs) - Claude Code Switch
@@ -2656,8 +2655,7 @@ Copy the file to your preferred location and reference it in your AI tools.
 - [Modern Web Guidance](https://developer.chrome.com/docs/modern-web-guidance) - Chrome's best practices for modern web development
 - [xAI CLI](https://x.ai/cli) - Grok CLI official page
 - [Grok Build Docs](https://docs.x.ai/build/overview) - Getting started and configuration
-- [MiMo-Code GitHub](https://github.com/XiaomiMiMo/MiMo-Code) - MiMo-Code repository
-- [MiMo-Code Docs](https://mimo.xiaomi.com/mimocode/rules) - Configuration and usage documentation
+- [MiMo-Code](https://github.com/XiaomiMiMo/MiMo-Code) - MiMo-Code repository and documentation
 
 ---
 
@@ -2675,7 +2673,9 @@ Copy the file to your preferred location and reference it in your AI tools.
 
 Give a ⭐️ if this project helped you!
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/dunghd)
+[![GitHub stars](https://img.shields.io/github/stars/jellydn/my-ai-tools?style=flat&logo=github&label=Stars)](https://github.com/jellydn/my-ai-tools/stargazers)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20me-ff5e5b?logo=ko-fi&logoColor=white)](https://ko-fi.com/dunghd)
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ff69b4?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/jellydn)
 
 ---
 

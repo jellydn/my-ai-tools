@@ -1,6 +1,6 @@
 {
 	"$schema": "https://opencode.ai/config.json",
-	"instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
+	"instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md", "~/.ai-tools/agent-memory.md"],
 	"default_agent": "plan",
 	"formatter": {
 		"biome": {
