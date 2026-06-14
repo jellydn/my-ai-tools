@@ -2673,7 +2673,9 @@ Copy the file to your preferred location and reference it in your AI tools.
 
 Give a ⭐️ if this project helped you!
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/dunghd)
+[![GitHub stars](https://img.shields.io/github/stars/jellydn/my-ai-tools?style=flat&logo=github&label=Stars)](https://github.com/jellydn/my-ai-tools/stargazers)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20me-ff5e5b?logo=ko-fi&logoColor=white)](https://ko-fi.com/dunghd)
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ff69b4?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/jellydn)
 
 ---
 
