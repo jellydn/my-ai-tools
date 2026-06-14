@@ -9,6 +9,8 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 source "$SCRIPT_DIR/lib/install.sh"
+# Parse command-line arguments first (only when executed, not sourced)
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 BACKUP_DIR="$HOME/ai-tools-backup-$(date +%Y%m%d-%H%M%S)"
 DRY_RUN=false
 BACKUP=false
@@ -20,9 +22,6 @@ VERBOSE=false
 AMP_INSTALLED=false
 # Track whether --migrate-gemini flag was passed (standalone Gemini→Antigravity migration)
 MIGRATE_GEMINI=false
-
-# Parse command-line arguments first (only when executed, not sourced)
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 for arg in "$@"; do
 	case $arg in
 	--dry-run)
