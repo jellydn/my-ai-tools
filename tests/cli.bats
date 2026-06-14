@@ -88,3 +88,60 @@ setup() {
 
     [ "$status" -eq 0 ]
 }
+
+# ---------------------------------------------------------------------------
+# BASH_SOURCE guard – cli.sh arg-parsing and main() are skipped when sourced
+# ---------------------------------------------------------------------------
+
+@test "sourcing cli.sh does not alter DRY_RUN when --dry-run is not in args" {
+    # setup() sources cli.sh; DRY_RUN should still be the value we exported
+    export DRY_RUN=false
+    # Re-source to confirm the guard does not fire from $@
+    source "$BATS_TEST_DIRNAME/../cli.sh"
+    [ "$DRY_RUN" = "false" ]
+}
+
+@test "sourcing cli.sh leaves YES_TO_ALL at its exported value" {
+    export YES_TO_ALL=false
+    source "$BATS_TEST_DIRNAME/../cli.sh"
+    [ "$YES_TO_ALL" = "false" ]
+}
+
+@test "sourcing cli.sh leaves VERBOSE at its exported value" {
+    export VERBOSE=false
+    source "$BATS_TEST_DIRNAME/../cli.sh"
+    [ "$VERBOSE" = "false" ]
+}
+
+@test "sourcing cli.sh leaves MIGRATE_GEMINI at its default false" {
+    source "$BATS_TEST_DIRNAME/../cli.sh"
+    [ "$MIGRATE_GEMINI" = "false" ]
+}
+
+@test "main function is defined after sourcing cli.sh" {
+    run declare -f main
+    [ "$status" -eq 0 ]
+}
+
+@test "preflight_check function is defined after sourcing cli.sh" {
+    run declare -f preflight_check
+    [ "$status" -eq 0 ]
+}
+
+@test "sourcing cli.sh does not produce main banner output" {
+    # When sourced the BASH_SOURCE guard must prevent main() from running,
+    # so no "AI Tools Installer" banner should appear.
+    run bash -c "
+        export DRY_RUN=false
+        export YES_TO_ALL=false
+        export VERBOSE=false
+        source '$BATS_TEST_DIRNAME/../lib/common.sh'
+        source '$BATS_TEST_DIRNAME/../lib/install.sh'
+        source '$BATS_TEST_DIRNAME/../cli.sh'
+        echo 'sourced_ok'
+    "
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"sourced_ok"* ]]
+    # Banner text from main() must not appear when cli.sh is sourced
+    [[ "$output" != *"AI Tools Installer"* ]]
+}

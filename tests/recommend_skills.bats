@@ -327,3 +327,56 @@ README_FILE="$REPO_ROOT/README.md"
     run grep -F 'https://github.com/shadcn/improve' "$README_FILE"
     [ "$status" -eq 0 ]
 }
+
+@test "shadcn/improve is the first entry in recommended_skills" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '.recommended_skills[0].repo' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "shadcn/improve" ]
+}
+
+@test "shadcn/improve entry has no skill subfield" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    # shadcn/improve is a repo-level skill, not a sub-skill – skill key must be absent
+    run jq -r '[.recommended_skills[] | select(.repo == "shadcn/improve")][0].skill' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "null" ]
+}
+
+@test "shadcn/improve description mentions model cost or execution strategy" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "shadcn/improve")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"model"* ]] || [[ "$output" == *"execution"* ]]
+}
+
+@test "recommend-skills.json contains shadcn/improve exactly once" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "shadcn/improve")] | length' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "1" ]
+}
+
+@test "recommend-skills.json still contains mvanhorn/last30days-skill after reorder" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "mvanhorn/last30days-skill")] | length > 0' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "README.md Improve table row includes description about cheaper models" {
+    run grep -F 'shadcn/improve' "$README_FILE"
+    [ "$status" -eq 0 ]
+    # The table row should contain context about planning/execution model split
+    [[ "$output" == *"cheaper"* ]] || [[ "$output" == *"model"* ]] || [[ "$output" == *"plan"* ]]
+}
