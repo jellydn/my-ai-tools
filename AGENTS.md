@@ -1,175 +1,92 @@
-# 🤖 Agent Instructions
+# Agent Instructions
 
-## 🏗️ What This Is
+## What This Is
 
-Monorepo for **my-ai-tools** — configuration management for AI coding assistants: Claude Code, OpenCode, Amp, CCS, Gemini CLI, Antigravity CLI, Pi, Codex CLI, Kilo CLI, CommandCode, Cursor, Factory Droid, Cline, Grok CLI.
+Monorepo for **my-ai-tools** — configuration management for 14+ AI coding assistants (Claude Code, OpenCode, Amp, CCS, Gemini CLI, Antigravity CLI, Pi, Codex CLI, Kilo CLI, CommandCode, Cursor, Factory Droid, Cline, Grok CLI). Exports configs to `~/.claude/`, `~/.config/opencode/`, `~/.pi/`, etc.
 
-Exports configurations to `~/.claude/`, `~/.config/opencode/`, `~/.npm-global/`, `~/.factory/`, `~/.pi/`, etc.
-
-**Reference**: [docs website](https://ai-tools.itman.fyi) | [Testing Guide](./TESTING.md)
-
-## 🔧 Essential Commands
+## Essential Commands
 
 ```bash
-# Shell scripts (root)
-bash -n cli.sh generate.sh       # Validate syntax
-
-# Docker/ci would run these:
-./cli.sh --dry-run               # Preview install
-./cli.sh                        # Install to home
-./generate.sh --dry-run          # Preview export
-./generate.sh                    # Export changes
-
-# Testing
+# Validate shell scripts (CI and local)
 bash -n cli.sh generate.sh
+
+# Preview changes, then apply
+./cli.sh --dry-run          # Preview install
+./cli.sh                    # Install to home
+
+# Export local configs back to repo
+./generate.sh --dry-run     # Preview export
+./generate.sh               # Export
+
+# Code quality
+biome check .               # Check formatting
+biome check --write .       # Format in-place
+bats tests/                 # Run functional tests
+bats tests/cli.bats         # Run a single test file
 ```
 
-## 👤 Agent Guidelines
-
-### Workflow Order
+## Workflow
 
 ```bash
-./cli.sh --dry-run   → Review changes
-git diff            → Verify modifications
-./cli.sh            # Install if approved
-git diff            # Final check before committing
+./cli.sh --dry-run  →  git diff  →  ./cli.sh  →  git diff  →  commit
 ```
 
-### Test Pattern Checklist
+Never run `./cli.sh` without `--dry-run` first. Config validation runs automatically and warns on failures.
 
-- ✅ Shell scripts pass `bash -n` syntax check
-- ✅ Tested with `--dry-run` first
-- ✅ No absolute paths in configs
-- ✅ Colors/logging functions used consistently
-- ✅ Error handling (`set -e` and guard clauses)
-- ✅ Documentation updated if workflow changed
-- ✅ Git operations follow safety guidelines
+## Shell Script Conventions
 
-## 🎨 Style Patterns
+These are enforced across `cli.sh`, `generate.sh`, and `lib/`:
 
-### Shell Scripts
+- **Re-exec guard**: Every entry-point script must `source lib/require_bash.sh` before `lib/common.sh`. This is non-negotiable — `lib/common.sh` uses bash-only syntax that crashes under `sh`/`dash`.
+- **Error handling**: `set -e` goes _after_ the re-exec guard.
+- **Dry-run**: Use `execute()` or `execute_quoted()` wrapper for any side-effecting command. Never run destructive commands directly.
+- **Paths**: Use `$HOME`, relative paths. **No absolute paths** in configs or scripts.
+- **Quoting**: Always quote variables: `"$variable"`.
+- **Locals**: Use `local` for function-scoped variables.
+- **Colors/logging**: Use `log_info`, `log_success`, `log_warning`, `log_error` from `lib/common.sh`.
 
-| Pattern           | Convention                                                                                             |
-| ----------------- | ------------------------------------------------------------------------------------------------------ |
-| Shebang           | `#!/bin/bash`                                                                                          |
-| Re-exec guard     | Source `lib/require_bash.sh` before any `lib/common.sh` source (see file for canonical implementation) |
-| Error handling    | `set -e` at top (placed _after_ the re-exec guard)                                                     |
-| Guard clauses     | Return early on preconditions                                                                          |
-| Variable quoting  | Always quote: `"$variable"`                                                                            |
-| Paths             | Use `$HOME`, relative - **no absolute paths**                                                          |
-| Command execution | Use `execute()` wrapper for dry-run support                                                            |
-| Local variables   | Use `local` for function-scoped                                                                        |
+## Testing
 
-### Color Output
+- `bash -n cli.sh generate.sh` — syntax validation (CI runs this)
+- `bats tests/` — functional tests (requires `bats-core`: `brew install bats-core`)
+- `biome check .` — TS/JS/JSON formatting (tabs, 120 line width, double quotes)
+- `pre-commit run --all-files` — trailing whitespace, YAML check, oxfmt
 
-```bash
-RED='\033[0;31m'; GREEN='\033[0;32m'
-YELLOW='\033[1;33m'; BLUE='\033[0;34m'
-NC='\033[0m'
+## Prerequisites
 
-log_info()   { echo -e "${BLUE}[INFO]${NC} $1"; }
-log_success() { echo -e "${GREEN}[OK]${NC} $1"; }
-log_warning() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-log_error()  { echo -e "${RED}[ERROR]${NC} $1" >&2; }
-```
+- Bash 3.0+ (scripts use process substitution, arrays, `${var//pat/repl}`)
+- Git
+- Bun (preferred) or Node.js
+- `jq` for JSON parsing
 
-### JSON Configuration
-
-- Standard formatting (no trailing commas)
-- Use `jq` for validation: `jq . settings.json`
-- Claude Code: `settings.json`, `mcp-servers.json`
-- OpenCode/Amp: `settings.json`
-- CCS: `config.yaml`, `delegation-sessions.json`
-
-### YAML Configuration
-
-- 2-space indentation (no tabs)
-- CCS: `config.yaml` for main config
-- Hooks: YAML-based definition files
-
-## 📂 Directory Structure
+## Directory Structure
 
 ```text
-cli.sh, generate.sh              # Root scripts
-configs/<tool>/                 # Source configs
-  claude/                      # Claude Code configs
-  opencode/                    # OpenCode configs
-  amp/                         # Amp configs
-  ccs/                         # CCS configs
-  ai-launcher/                 # AI Launcher config
-  gemini/
-  antigravity-cli/             # Staged from cli.sh migration
-  pi/
-  codex/                       # Codex configs
-  commandcode/
-  cursor/
-  kilo/
-  cline/
-  factory/
-  orca/
-  grok/                        # Grok CLI configs
-  copilot/                     # Copilot configs
-skills/                         # Local marketplace plugins
+cli.sh, generate.sh              # Entry points
+lib/common.sh                    # Shared utilities (execute(), logging, validation)
+lib/require_bash.sh              # Re-exec guard for sh/dash
+lib/install.sh                   # Installation helpers
+configs/<tool>/                  # Source configs per tool
+  claude/, opencode/, amp/, codex/, gemini/, etc.
+configs/mcp-registry.json        # Central MCP server registry
+configs/best-practices.md        # Exported to ~/.ai-tools/
+configs/git-guidelines.md        # Git safety rules
+skills/                          # Local marketplace plugins
+tests/                           # BATS functional tests
 ```
 
-## 🔑 Key Conventions
+## Key Gotchas
 
-### Dry-Run Support
+- `cli.sh` auto-detects installed tools and skips missing ones. It won't install configs for tools you don't have.
+- `generate.sh` exports _from_ your home directory _to_ the repo. Only copies configs for tools it finds installed.
+- MCP server installation uses a central registry (`configs/mcp-registry.json`). Legacy fallback exists but prefer registry.
+- Config files are validated with `jq` before install. Failures warn but don't block (unless you say no to the prompt).
+- `safe_copy_dir()` excludes `node_modules`, `cache`, `*.sqlite`, and other runtime dirs automatically.
+- Backup location: `$HOME/ai-tools-backup-{timestamp}`. Auto-cleanup keeps last 5.
+- Gemini CLI is deprecated for Google One/unpaid tiers (June 18, 2026 cutoff). Migrate to Antigravity CLI.
 
-```bash
-execute() {
-    if [ "$DRY_RUN" = true ]; then
-        log_info "[DRY RUN] $1"
-    else
-        eval "$1"
-    fi
-}
-```
+## Git Safety
 
-### Backup (cli.sh only)
-
-- Auto-cleanup keeps last 5 backups
-- Location: `$HOME/ai-tools-backup-{timestamp}`
-- Interactive prompts in non-dry-run mode
-
-### Prerequisites
-
-- **Required**: Bash 3.0+ — `cli.sh` and `generate.sh` use bash-only syntax (process substitution, arrays, `${var//pat/repl}`). Both entry-point scripts `source` [`lib/require_bash.sh`](./lib/require_bash.sh) as their first non-shebang line; that shim is POSIX-compatible and auto-detects `sh`/`dash` invocation (including macOS where `/bin/sh` IS bash in POSIX mode) and transparently re-launches under `bash`. See [Shell Scripts](#shell-scripts) for the guard pattern.
-- **Required**: Git, Bun (preferred over Node.js)
-- **Required**: `jq` for JSON parsing
-- **Optional**: biome for JS/TS formatting
-
-### Git Guidelines
-
-- Refer to [`configs/git-guidelines.md`](./configs/git-guidelines.md)
-- Safe operations: Read, safe commits, branch management
-- Avoid: Force push, history rewriting, destructive resets
-
-## 📝 README Sections to Reference
-
-### Bash Scripts
-
-- Root tools: [`cli.sh`](./cli.sh), [`generate.sh`](./generate.sh)
-
-### Platform/Tool Details
-
-When any CLI features prominently, reference:
-
-- Installation commands
-- Configuration files (`~/.toolname/`)
-- MCP servers (`mcp.json`)
-- Custom agents/commands
-
-### Pre-commit Checklist
-
-(Based on patterns above, with Git safety)
-
-## ✅ Pre-commit Checklist
-
-- [ ] Shell scripts pass `bash -n` syntax check
-- [ ] Tested with `--dry-run`
-- [ ] No absolute paths in configs
-- [ ] Colors and logging functions used consistently
-- [ ] Error handling with `set -e` and guard clauses
-- [ ] Documentation updated if workflow changed
-- [ ] Git operations follow safety guidelines
+- Prefer `git add <specific-files>` over `git add -A`
+- Never force push, rewrite history, or run destructive resets without explicit approval
+- See `configs/git-guidelines.md` for full rules
