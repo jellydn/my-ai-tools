@@ -324,9 +324,7 @@
 			}
 		],
 		"claudeHooksImported": true,
-		"importedClaudeHooks": [
-			"node \"$HOME/.ccs/hooks/websearch-transformer.cjs\""
-		],
+		"importedClaudeHooks": ["node \"$HOME/.ccs/hooks/websearch-transformer.cjs\""],
 		"SubagentStop": [
 			{
 				"hooks": [

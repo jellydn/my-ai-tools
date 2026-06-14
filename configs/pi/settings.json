@@ -1,7 +1,7 @@
 {
 	"collapseChangelog": true,
-	"defaultModel": "mimo-v2.5-pro",
-	"defaultProvider": "xiaomi-token-plan-sgp",
+	"defaultModel": "deepseek/deepseek-v4-flash",
+	"defaultProvider": "commandcode",
 	"defaultThinkingLevel": "high",
 	"editorPaddingX": 1,
 	"enabledModels": [
@@ -21,10 +21,12 @@
 		"openrouter/z-ai/glm-4.5-air:free",
 		"openrouter/moonshotai/kimi-k2.6:free",
 		"openrouter/openrouter/owl-alpha",
-		"xiaomi-token-plan-sgp/mimo-v2.5-pro"
+		"xiaomi-token-plan-sgp/mimo-v2.5-pro",
+		"xiaomi-token-plan-sgp/mimo-v2.5",
+		"xiaomi-token-plan-sgp/mimo-v2-omni"
 	],
 	"hideThinkingBlock": false,
-	"lastChangelogVersion": "0.79.1",
+	"lastChangelogVersion": "0.79.3",
 	"packages": [
 		{
 			"skills": [],
