@@ -32,9 +32,7 @@ See @~/.ai-tools/best-practices.md for full details.
 
 - Follow my software development practice @~/.ai-tools/best-practices.md
 - Read @~/.ai-tools/MEMORY.md first — qmd (durable) vs agentmemory (session); follow the decision rule there
-- Auto-capture learnings as you work: save decisions, debugging discoveries, user preferences, and tool quirks using `mem_save` (agentmemory) — do not wait to be asked.
-- After fixing a non-trivial bug or learning something project-specific, persist it immediately so future sessions benefit.
-- Keep memories concise and actionable — prefer facts and patterns over narrative.
+- Read @~/.ai-tools/agent-memory.md — auto-capture learnings, persist bug fixes, keep memories concise.
 - Follow git safety guidelines @~/.ai-tools/git-guidelines.md
 - Keep responses concise and actionable.
 - Never run destructive commands.
