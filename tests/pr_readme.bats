@@ -5,38 +5,38 @@ load helpers
 
 README_FILE="$REPO_ROOT/README.md"
 
-@test "README.md references vibeproxy as Pi default provider" {
-    run grep -F "vibeproxy" "$README_FILE"
+@test "README.md references commandcode as Pi default provider" {
+    run grep -F "commandcode" "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
-@test "README.md mentions claude-opus-4-6-thinking as Pi default model" {
-    run grep -F "claude-opus-4-6-thinking" "$README_FILE"
+@test "README.md mentions deepseek/deepseek-v4-pro as Pi default model" {
+    run grep -F "deepseek/deepseek-v4-pro" "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
-@test "README.md Pi section heading contains Vibeproxy" {
-    run grep -iF "vibeproxy" "$README_FILE"
+@test "README.md Pi section heading contains Antigravity Rotator" {
+    run grep -F "Antigravity Rotator" "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
-@test "README.md contains brew install cask vibeproxy command" {
-    run grep -F "brew install --cask vibeproxy" "$README_FILE"
+@test "README.md contains npm install pi-antigravity-rotator command" {
+    run grep -F "npm install -g pi-antigravity-rotator" "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
-@test "README.md Pi provider table has vibeproxy row" {
-    run grep -E "^\| vibeproxy" "$README_FILE"
+@test "README.md Pi provider table has commandcode row" {
+    run grep -E "^\| commandcode" "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
-@test "README.md Pi vibeproxy table row lists gemini-3-flash-agent" {
-    run grep -E "vibeproxy.*gemini-3-flash-agent" "$README_FILE"
+@test "README.md Pi commandcode table row lists deepseek models" {
+    run grep -E "commandcode.*deepseek/deepseek-v4-pro" "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
-@test "README.md Pi vibeproxy table row lists claude-opus-4-6-thinking" {
-    run grep -E "vibeproxy.*claude-opus-4-6-thinking" "$README_FILE"
+@test "README.md Pi commandcode table row lists mimo-v2.5-pro" {
+    run grep -E "commandcode.*mimo-v2.5-pro" "$README_FILE"
     [ "$status" -eq 0 ]
 }
 

@@ -401,7 +401,7 @@ npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
 
-# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, thermo-nuclear-code-quality-review, commit-atomic, draft-pull-request
+# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, thermo-nuclear-code-quality-review, commit-atomic, draft-pull-request, docs-update
 # Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
@@ -645,6 +645,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `handoffs` - Create handoff plans for continuing work (provides `/handoffs` command)
 - `pickup` - Resume work from previous handoff sessions (provides `/pickup` command)
 - `plannotator-setup-goal` - Turn an idea into a structured goal package via Plannotator-gated discovery, fact sheet, and plan
+- `docs-update` - Automated documentation synchronization with code changes (Mintlify, Docusaurus, GitBook, Fumadocs, etc.)
 - `portless-local` - Named .localhost URLs for local development - replaces port numbers with stable URLs
 - `pr-review` - Pull request review workflows
 - `prd` - Generate Product Requirements Documents
@@ -691,7 +692,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Andrej Karpathy**        | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)                 | Community skills inspired by Andrej Karpathy's coding principles and practices for AI-focused development workflows.                                                                                                                                                                |
 | **Humanizer**              | [blader/humanizer](https://github.com/blader/humanizer)                                                       | Removes signs of AI-generated writing from text. Based on Wikipedia's AI writing detection guide, it detects 24 patterns to make text sound more natural and human.                                                                                                                 |
 | **Claude Skills**          | [jezweb/claude-skills](https://github.com/jezweb/claude-skills)                                               | 97 production-ready skills for Claude Code CLI including Cloudflare, React, AI integrations, and more. Includes context-mate for project analysis and workflow management.                                                                                                          |
-| **OZ Skills**              | [warpdotdev/oz-skills](https://github.com/warpdotdev/oz-skills)                                               | 14 production-ready skills by Warp. Includes `docs-update` for automated documentation synchronization with code changes across all major platforms (Mintlify, Docusaurus, GitBook, Fumadocs). Other skills cover CI fix, PR creation, web testing, accessibility audits, and more. |
+| **OZ Skills**              | [warpdotdev/oz-skills](https://github.com/warpdotdev/oz-skills)                                               | 14 production-ready skills by Warp. Covers CI fix, PR creation, web testing, accessibility audits, and more. |
 | **Auto-Review**            | [openclaw/agent-skills](https://github.com/openclaw/agent-skills/blob/main/skills/autoreview/SKILL.md)        | Auto-review skill for structured and actionable pull request feedback workflows.                                                                                                                                                                                                    |
 | **Skills Discovery**       | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.                                                                                                                                                 |
 | **Matt Pocock**            | [mattpocock/skills](https://github.com/mattpocock/skills)                                                     | Community skills by Matt Pocock. Includes `grill-with-docs` for docs-grounded plan stress-testing, `improve-codebase-architecture` for finding deepening opportunities, and more.                                                                                                   |
@@ -718,7 +719,6 @@ npx skills add mattpocock/skills --skill grill-with-docs --global --agent claude
 npx skills add mattpocock/skills --skill improve-codebase-architecture --global --agent claude-code
 npx skills add mitsuhiko/agent-stuff --global --agent claude-code
 npx skills add github/gh-stack --global --agent claude-code
-npx skills add warpdotdev/oz-skills --skill docs-update --global --agent claude-code
 npx skills add openclaw/agent-skills --skill autoreview --global --agent claude-code
 npx skills add av/facts --global --agent claude-code
 npx skills add GoogleChrome/modern-web-guidance --skill modern-web-guidance --global --agent claude-code
@@ -905,6 +905,7 @@ Plugins are automatically installed on next OpenCode launch.
 Located in [`configs/opencode/agent/`](configs/opencode/agent/):
 
 - `ai-slop-remover` - Remove AI-generated boilerplate
+- `docs-update` - Automated documentation synchronization with code changes
 - `docs-writer` - Generate documentation
 - `review` - Code review
 - `security-audit` - Security auditing
@@ -1527,14 +1528,14 @@ Pi uses `~/.pi/agent/settings.json` for global user settings and `.pi/settings.j
 Located in [`configs/pi/`](configs/pi/):
 
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
-- [`models.json`](configs/pi/models.json) - Provider and model definitions (vibeproxy, antigravity proxy, ollama)
+- [`models.json`](configs/pi/models.json) - Provider and model definitions (google-antigravity, ollama)
 
-Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `xiaomi-token-plan-sgp` as the default provider with `mimo-v2.5-pro` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `commandcode` as the default provider with `deepseek/deepseek-v4-pro` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `mimo-v2.5-pro` (via Xiaomi Token Plan)
-- **Default Provider**: `xiaomi-token-plan-sgp`
+- **Default Model**: `deepseek/deepseek-v4-pro`
+- **Default Provider**: `commandcode`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
@@ -1560,7 +1561,6 @@ Then register them in `~/.pi/agent/settings.json`:
 			"skills": []
 		},
 		"https://github.com/davebcn87/pi-autoresearch",
-		"npm:pi-hooks",
 		"npm:@ff-labs/pi-fff",
 		"npm:pi-mcp-adapter",
 		"npm:pi-simplify",
@@ -1572,7 +1572,9 @@ Then register them in `~/.pi/agent/settings.json`:
 		"npm:pi-commandcode-provider",
 		"npm:@ollama/pi-web-search",
 		"npm:pi-footer",
-		"npm:pi-tps-meter"
+		"npm:pi-tps-meter",
+		"npm:@juicesharp/rpiv-advisor",
+		"npm:pi-cursor-sdk"
 	]
 }
 ```
@@ -1583,7 +1585,6 @@ Then register them in `~/.pi/agent/settings.json`:
 | --------------------------- | -------------------------------------------------------------------------- |
 | `@plannotator/pi-extension` | Interactive plan review with visual annotation                             |
 | `pi-autoresearch`           | Autonomous experiment loop for optimization targets                        |
-| `pi-hooks`                  | Collection of extensions (checkpoint, lsp, permission, ralph-loop, repeat) |
 | `@ff-labs/pi-fff`           | FFF-powered fuzzy file and content search                                  |
 | `pi-mcp-adapter`            | MCP (Model Context Protocol) adapter for Pi                                |
 | `pi-simplify`               | Reviews changed code for clarity, consistency, and maintainability         |
@@ -1596,40 +1597,39 @@ Then register them in `~/.pi/agent/settings.json`:
 | `@ollama/pi-web-search`     | Web search and content fetching for AI models                              |
 | `pi-footer`                 | Customizable status footer for the Pi TUI                                  |
 | `pi-tps-meter`              | Live tokens-per-second meter for the Pi TUI status bar                     |
+| `@juicesharp/rpiv-advisor` | Second opinion from a stronger reviewer model before taking action         |
+| `pi-cursor-sdk`             | Pi provider extension backed by @cursor/sdk local agents                   |
 
 ### Enabled Models
 
 Pi is configured with multi-provider model access:
 
-| Provider              | Models                                                                       |
-| --------------------- | ---------------------------------------------------------------------------- |
-| github-copilot        | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                                           |
-| vibeproxy             | `claude-opus-4-6-thinking`, `gemini-3-flash-agent`, `gemini-pro-agent`       |
-| commandcode           | `moonshotai/Kimi-K2.6`, `MiniMaxAI/MiniMax-M3`, `MiniMaxAI/MiniMax-M2.7`     |
-|                       | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash`                     |
-| xiaomi-token-plan-sgp | `mimo-v2.5-pro`                                                              |
-| openrouter            | `moonshotai/kimi-k2.6:free`, `z-ai/glm-4.5-air:free`, `openrouter/owl-alpha` |
-| ollama                | `minimax-m2.5:cloud`                                                         |
+| Provider              | Models                                                                   |
+| --------------------- | ------------------------------------------------------------------------ |
+| github-copilot        | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                                       |
+| commandcode           | `moonshotai/Kimi-K2.6`, `xiaomi/mimo-v2.5-pro`                           |
+|                       | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash`                 |
+|                       | `MiniMaxAI/MiniMax-M3`, `MiniMaxAI/MiniMax-M2.7`                         |
+| ollama                | `minimax-m2.5:cloud`                                                     |
+| openrouter            | `openrouter/owl-alpha`                                                   |
+| google                | `gemini-3.5-flash`                                                       |
+| cursor                | `auto`, `composer-2.5`                                                   |
 
 > See [OpenRouter free models](https://openrouter.ai/collections/free-models) for additional no-cost options.
 
-### Pi Vibeproxy & Antigravity Rotator
+### Pi Antigravity Rotator
 
-For multi-account rotation, local model routing, and quota management across Google Antigravity and Anthropic accounts, use [vibeproxy](https://github.com/automazeio/vibeproxy) or [pi-antigravity-rotator](https://github.com/tuxevil/pi-antigravity-rotator).
+For multi-account rotation, local model routing, and quota management across Google Antigravity accounts, use [pi-antigravity-rotator](https://github.com/tuxevil/pi-antigravity-rotator).
 
-Both run as a local proxy on port `51200` and support per-model routing, real-time quota tracking, and automatic token management.
+It runs as a local proxy on port `51200` and supports per-model routing, real-time quota tracking, and automatic token management.
 
 ```bash
-# Install Vibeproxy (macOS Menu Bar App)
-brew install --cask vibeproxy
-
-# Or install Antigravity Rotator
 npm install -g pi-antigravity-rotator
 pi-antigravity-rotator login
 pi-antigravity-rotator start
 ```
 
-Once running, Pi connects automatically via the configured provider (`vibeproxy` or `google-antigravity` respectively) in [`configs/pi/models.json`](configs/pi/models.json).
+Once running, Pi connects automatically via the configured provider (`google-antigravity`) in [`configs/pi/models.json`](configs/pi/models.json).
 
 ### Usage
 
@@ -2628,14 +2628,22 @@ This repository backs up Orca agent hook scripts under `configs/orca/agent-hooks
 
 ## 📚 Best Practices
 
-Setup includes [`configs/best-practices.md`](configs/best-practices.md) with comprehensive software development guidelines:
+Setup includes the following shared configuration files installed by `./cli.sh`:
+
+**Software Development Best Practices** — [`configs/best-practices.md`](configs/best-practices.md):
 
 - Kent Beck's "Tidy First?" principles
 - Kent C. Dodds' programming wisdom
 - Testing Trophy approach
 - Performance optimization patterns
 
-Copy the file to your preferred location and reference it in your AI tools.
+**Agent Memory Guidelines** — [`configs/agent-memory-guidelines.md`](configs/agent-memory-guidelines.md) (→ `~/.ai-tools/agent-memory.md`):
+
+- Auto-capture learnings, debugging discoveries, and user preferences as you work
+- Persist non-trivial bug fixes immediately for future sessions
+- Keep memories concise and actionable — facts and patterns over narrative
+
+These are automatically referenced by all 15+ AI tool AGENTS.md configurations installed by this repo.
 
 ---
 
