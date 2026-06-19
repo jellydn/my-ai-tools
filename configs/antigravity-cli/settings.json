@@ -4,7 +4,7 @@
 	"artifactReviewPolicy": "agent-decides",
 	"enableTelemetry": false,
 	"enableTerminalSandbox": true,
-	"model": "Gemini 3.1 Pro (High)",
+	"model": "Gemini 3.5 Flash (High)",
 	"notifications": true,
 	"permissions": {
 		"allow": [
@@ -70,7 +70,8 @@
 			"unsandboxed(go vet)",
 			"unsandboxed(gh api)",
 			"unsandboxed(node)",
-			"unsandboxed(python3)"
+			"unsandboxed(python3)",
+			"unsandboxed(command)"
 		],
 		"deny": ["command(git reset --hard)", "command(git push --force)", "command(rm -rf)"]
 	},
