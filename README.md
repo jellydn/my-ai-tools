@@ -2629,14 +2629,22 @@ This repository backs up Orca agent hook scripts under `configs/orca/agent-hooks
 
 ## 📚 Best Practices
 
-Setup includes [`configs/best-practices.md`](configs/best-practices.md) with comprehensive software development guidelines:
+Setup includes the following shared configuration files installed by `./cli.sh`:
+
+**Software Development Best Practices** — [`configs/best-practices.md`](configs/best-practices.md):
 
 - Kent Beck's "Tidy First?" principles
 - Kent C. Dodds' programming wisdom
 - Testing Trophy approach
 - Performance optimization patterns
 
-Copy the file to your preferred location and reference it in your AI tools.
+**Agent Memory Guidelines** — [`configs/agent-memory-guidelines.md`](configs/agent-memory-guidelines.md) (→ `~/.ai-tools/agent-memory.md`):
+
+- Auto-capture learnings, debugging discoveries, and user preferences as you work
+- Persist non-trivial bug fixes immediately for future sessions
+- Keep memories concise and actionable — facts and patterns over narrative
+
+These are automatically referenced by all 15+ AI tool AGENTS.md configurations installed by this repo.
 
 ---
 
