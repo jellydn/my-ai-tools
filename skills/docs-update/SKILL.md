@@ -94,10 +94,7 @@ Output a text summary describing:
 
 2. Make documentation changes to appropriate files
 
-3. Commit with descriptive message listing the changes
-   - Include co-author line: `Co-Authored-By: Warp <agent@warp.dev>`
-
-4. Push branch and create PR with description linking to relevant commits:
+3. Push branch and create PR with description linking to relevant commits:
    - List which code changes triggered which documentation updates
    - Include commit references or URLs from source repository
    - Request review for accuracy and completeness
