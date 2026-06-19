@@ -1561,7 +1561,6 @@ Then register them in `~/.pi/agent/settings.json`:
 			"skills": []
 		},
 		"https://github.com/davebcn87/pi-autoresearch",
-		"npm:pi-hooks",
 		"npm:@ff-labs/pi-fff",
 		"npm:pi-mcp-adapter",
 		"npm:pi-simplify",
@@ -1574,7 +1573,8 @@ Then register them in `~/.pi/agent/settings.json`:
 		"npm:@ollama/pi-web-search",
 		"npm:pi-footer",
 		"npm:pi-tps-meter",
-		"npm:@juicesharp/rpiv-advisor"
+		"npm:@juicesharp/rpiv-advisor",
+		"npm:pi-cursor-sdk"
 	]
 }
 ```
@@ -1585,7 +1585,6 @@ Then register them in `~/.pi/agent/settings.json`:
 | --------------------------- | -------------------------------------------------------------------------- |
 | `@plannotator/pi-extension` | Interactive plan review with visual annotation                             |
 | `pi-autoresearch`           | Autonomous experiment loop for optimization targets                        |
-| `pi-hooks`                  | Collection of extensions (checkpoint, lsp, permission, ralph-loop, repeat) |
 | `@ff-labs/pi-fff`           | FFF-powered fuzzy file and content search                                  |
 | `pi-mcp-adapter`            | MCP (Model Context Protocol) adapter for Pi                                |
 | `pi-simplify`               | Reviews changed code for clarity, consistency, and maintainability         |
@@ -1599,6 +1598,7 @@ Then register them in `~/.pi/agent/settings.json`:
 | `pi-footer`                 | Customizable status footer for the Pi TUI                                  |
 | `pi-tps-meter`              | Live tokens-per-second meter for the Pi TUI status bar                     |
 | `@juicesharp/rpiv-advisor` | Second opinion from a stronger reviewer model before taking action         |
+| `pi-cursor-sdk`             | Pi provider extension backed by @cursor/sdk local agents                   |
 
 ### Enabled Models
 
