@@ -1573,7 +1573,8 @@ Then register them in `~/.pi/agent/settings.json`:
 		"npm:pi-commandcode-provider",
 		"npm:@ollama/pi-web-search",
 		"npm:pi-footer",
-		"npm:pi-tps-meter"
+		"npm:pi-tps-meter",
+		"npm:@juicesharp/rpiv-advisor"
 	]
 }
 ```
@@ -1597,6 +1598,7 @@ Then register them in `~/.pi/agent/settings.json`:
 | `@ollama/pi-web-search`     | Web search and content fetching for AI models                              |
 | `pi-footer`                 | Customizable status footer for the Pi TUI                                  |
 | `pi-tps-meter`              | Live tokens-per-second meter for the Pi TUI status bar                     |
+| `@juicesharp/rpiv-advisor` | Second opinion from a stronger reviewer model before taking action         |
 
 ### Enabled Models
 
