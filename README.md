@@ -1528,7 +1528,7 @@ Pi uses `~/.pi/agent/settings.json` for global user settings and `.pi/settings.j
 Located in [`configs/pi/`](configs/pi/):
 
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
-- [`models.json`](configs/pi/models.json) - Provider and model definitions (vibeproxy, google-antigravity, ollama)
+- [`models.json`](configs/pi/models.json) - Provider and model definitions (google-antigravity, ollama)
 
 Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `commandcode` as the default provider with `deepseek/deepseek-v4-pro` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
@@ -1617,23 +1617,19 @@ Pi is configured with multi-provider model access:
 
 > See [OpenRouter free models](https://openrouter.ai/collections/free-models) for additional no-cost options.
 
-### Pi Vibeproxy & Antigravity Rotator
+### Pi Antigravity Rotator
 
-For multi-account rotation, local model routing, and quota management across Google Antigravity and Anthropic accounts, use [vibeproxy](https://github.com/automazeio/vibeproxy) or [pi-antigravity-rotator](https://github.com/tuxevil/pi-antigravity-rotator).
+For multi-account rotation, local model routing, and quota management across Google Antigravity accounts, use [pi-antigravity-rotator](https://github.com/tuxevil/pi-antigravity-rotator).
 
-Both run as a local proxy on port `51200` and support per-model routing, real-time quota tracking, and automatic token management.
+It runs as a local proxy on port `51200` and supports per-model routing, real-time quota tracking, and automatic token management.
 
 ```bash
-# Install Vibeproxy (macOS Menu Bar App)
-brew install --cask vibeproxy
-
-# Or install Antigravity Rotator
 npm install -g pi-antigravity-rotator
 pi-antigravity-rotator login
 pi-antigravity-rotator start
 ```
 
-Once running, Pi connects automatically via the configured provider (`vibeproxy` or `google-antigravity` respectively) in [`configs/pi/models.json`](configs/pi/models.json).
+Once running, Pi connects automatically via the configured provider (`google-antigravity`) in [`configs/pi/models.json`](configs/pi/models.json).
 
 ### Usage
 
