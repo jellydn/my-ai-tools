@@ -1528,14 +1528,14 @@ Pi uses `~/.pi/agent/settings.json` for global user settings and `.pi/settings.j
 Located in [`configs/pi/`](configs/pi/):
 
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
-- [`models.json`](configs/pi/models.json) - Provider and model definitions (vibeproxy, antigravity proxy, ollama)
+- [`models.json`](configs/pi/models.json) - Provider and model definitions (vibeproxy, google-antigravity, ollama)
 
-Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `xiaomi-token-plan-sgp` as the default provider with `mimo-v2.5-pro` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `commandcode` as the default provider with `deepseek/deepseek-v4-pro` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `mimo-v2.5-pro` (via Xiaomi Token Plan)
-- **Default Provider**: `xiaomi-token-plan-sgp`
+- **Default Model**: `deepseek/deepseek-v4-pro`
+- **Default Provider**: `commandcode`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
@@ -1604,15 +1604,16 @@ Then register them in `~/.pi/agent/settings.json`:
 
 Pi is configured with multi-provider model access:
 
-| Provider              | Models                                                                       |
-| --------------------- | ---------------------------------------------------------------------------- |
-| github-copilot        | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                                           |
-| vibeproxy             | `claude-opus-4-6-thinking`, `gemini-3-flash-agent`, `gemini-pro-agent`       |
-| commandcode           | `moonshotai/Kimi-K2.6`, `MiniMaxAI/MiniMax-M3`, `MiniMaxAI/MiniMax-M2.7`     |
-|                       | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash`                     |
-| xiaomi-token-plan-sgp | `mimo-v2.5-pro`                                                              |
-| openrouter            | `moonshotai/kimi-k2.6:free`, `z-ai/glm-4.5-air:free`, `openrouter/owl-alpha` |
-| ollama                | `minimax-m2.5:cloud`                                                         |
+| Provider              | Models                                                                   |
+| --------------------- | ------------------------------------------------------------------------ |
+| github-copilot        | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                                       |
+| commandcode           | `moonshotai/Kimi-K2.6`, `xiaomi/mimo-v2.5-pro`                           |
+|                       | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash`                 |
+|                       | `MiniMaxAI/MiniMax-M3`, `MiniMaxAI/MiniMax-M2.7`                         |
+| ollama                | `minimax-m2.5:cloud`                                                     |
+| openrouter            | `openrouter/owl-alpha`                                                   |
+| google                | `gemini-3.5-flash`                                                       |
+| cursor                | `auto`, `composer-2.5`                                                   |
 
 > See [OpenRouter free models](https://openrouter.ai/collections/free-models) for additional no-cost options.
 

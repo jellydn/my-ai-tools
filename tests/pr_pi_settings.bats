@@ -11,37 +11,23 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/pi/settings.json defaultModel is mimo-v2.5-pro" {
+@test "configs/pi/settings.json defaultModel is deepseek/deepseek-v4-pro" {
     require_jq
     run jq -r '.defaultModel' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "mimo-v2.5-pro" ]
+    [ "$output" = "deepseek/deepseek-v4-pro" ]
 }
 
-@test "configs/pi/settings.json defaultProvider is xiaomi-token-plan-sgp" {
+@test "configs/pi/settings.json defaultProvider is commandcode" {
     require_jq
     run jq -r '.defaultProvider' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "xiaomi-token-plan-sgp" ]
+    [ "$output" = "commandcode" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains vibeproxy/gemini-3-flash-agent" {
+@test "configs/pi/settings.json enabledModels no longer contains vibeproxy models" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "vibeproxy/gemini-3-flash-agent")] | length > 0' "$PI_SETTINGS"
-    [ "$status" -eq 0 ]
-    [ "$output" = "true" ]
-}
-
-@test "configs/pi/settings.json enabledModels contains vibeproxy/claude-opus-4-6-thinking" {
-    require_jq
-    run jq -e '[.enabledModels[] | select(. == "vibeproxy/claude-opus-4-6-thinking")] | length > 0' "$PI_SETTINGS"
-    [ "$status" -eq 0 ]
-    [ "$output" = "true" ]
-}
-
-@test "configs/pi/settings.json enabledModels no longer contains vibeproxy/claude-sonnet-4-6" {
-    require_jq
-    run jq -e '[.enabledModels[] | select(. == "vibeproxy/claude-sonnet-4-6")] | length == 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(startswith("vibeproxy/"))] | length == 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
@@ -53,9 +39,9 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains vibeproxy/gemini-pro-agent" {
+@test "configs/pi/settings.json enabledModels contains cursor models" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "vibeproxy/gemini-pro-agent")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(startswith("cursor/"))] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
