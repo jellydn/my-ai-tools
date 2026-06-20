@@ -297,6 +297,30 @@ if [ "$BACKTICK_BUGS" -gt 0 ]; then
 	code_quality=$(( code_quality - (BACKTICK_BUGS * 3) ))
 fi
 
+# Prompt/tool-list consistency: prompt should not reference tools not in the declared list
+# Only flag tools that are likely used as references (not common English words)
+# Exclude common words that overlap with tool names: search, task, grep
+PROMPT_TOOL_REFS=$(echo "$PROMPT_CONTENT" | grep -oiE '\b(finder|oracle|librarian|Bash|Read|read_web_page|web_search|edit_file|create_file|find_thread|view_media|painter|read_thread|skill|apply_patch|shell_command|chart|read_mcp_resource|find_file)\b' 2>/dev/null | sort -u || echo "")
+MISMATCHES=0
+if [ -n "$PROMPT_TOOL_REFS" ] && [ -n "$TOOL_STRINGS" ]; then
+	# Build a normalized list of declared tools
+	DECLARED_NORM=""
+	for name in $TOOL_STRINGS; do
+		clean=$(echo "$name" | tr -d '"' | tr '[:upper:]' '[:lower:]')
+		DECLARED_NORM="$DECLARED_NORM $clean"
+	done
+	
+	for ref in $PROMPT_TOOL_REFS; do
+		ref_lower=$(echo "$ref" | tr '[:upper:]' '[:lower:]')
+		if ! echo "$DECLARED_NORM" | grep -qw "$ref_lower"; then
+			MISMATCHES=$(( MISMATCHES + 1 ))
+		fi
+	done
+fi
+if [ "$MISMATCHES" -gt 0 ]; then
+	code_quality=$(( code_quality - (MISMATCHES * 2) ))
+fi
+
 [ "$code_quality" -gt 10 ] && code_quality=10
 [ "$code_quality" -lt 0 ] && code_quality=0
 
