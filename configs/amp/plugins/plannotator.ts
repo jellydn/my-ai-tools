@@ -1,8 +1,8 @@
-import type { PluginAPI, PluginCommandContext, ThreadMessage } from "@ampcode/plugin";
+import { randomUUID } from "node:crypto";
 import { existsSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
-import { randomUUID } from "node:crypto";
+import type { PluginAPI, PluginCommandContext, ThreadMessage } from "@ampcode/plugin";
 
 const CATEGORY = "Plannotator";
 const INSTALL_URL = "https://plannotator.ai/docs/getting-started/installation/";
@@ -68,8 +68,7 @@ export default function plannotatorAmpPlugin(amp: PluginAPI) {
 		{
 			title: "Review changes or PR",
 			category: CATEGORY,
-			description:
-				"Open Plannotator code review for local changes, a PR/MR URL, or review arguments.",
+			description: "Open Plannotator code review for local changes, a PR/MR URL, or review arguments.",
 		},
 		async (ctx) => {
 			const target = await ctx.ui.input({
@@ -141,10 +140,7 @@ export default function plannotatorAmpPlugin(amp: PluginAPI) {
 						runtime,
 					});
 				} else {
-					tempFile = join(
-						tmpdir(),
-						`plannotator-amp-last-${process.pid}-${Date.now()}-${randomUUID()}.md`,
-					);
+					tempFile = join(tmpdir(), `plannotator-amp-last-${process.pid}-${Date.now()}-${randomUUID()}.md`);
 					writeFileSync(tempFile, message, { encoding: "utf8", mode: 0o600 });
 					result = await runPlannotator(amp, ctx, ["annotate", tempFile, "--json"], { runtime });
 				}
@@ -180,9 +176,7 @@ export function parseAnnotateDecision(raw: string): AnnotateDecision | null {
 		const parsed = JSON.parse(trimmed) as Partial<AnnotateDecision>;
 		if (
 			parsed &&
-			(parsed.decision === "approved" ||
-				parsed.decision === "dismissed" ||
-				parsed.decision === "annotated")
+			(parsed.decision === "approved" || parsed.decision === "dismissed" || parsed.decision === "annotated")
 		) {
 			return {
 				decision: parsed.decision,
@@ -207,11 +201,7 @@ export function formatAnnotationFeedback(
 
 	const config = loadPlannotatorConfig();
 	if (options.kind === "file") {
-		const template = getConfiguredPrompt(
-			config,
-			"fileFeedback",
-			DEFAULT_ANNOTATE_FILE_FEEDBACK_PROMPT,
-		);
+		const template = getConfiguredPrompt(config, "fileFeedback", DEFAULT_ANNOTATE_FILE_FEEDBACK_PROMPT);
 		return resolveTemplate(template, {
 			fileHeader: "File",
 			filePath: options.filePath,
@@ -219,11 +209,7 @@ export function formatAnnotationFeedback(
 		});
 	}
 
-	const template = getConfiguredPrompt(
-		config,
-		"messageFeedback",
-		DEFAULT_ANNOTATE_MESSAGE_FEEDBACK_PROMPT,
-	);
+	const template = getConfiguredPrompt(config, "messageFeedback", DEFAULT_ANNOTATE_MESSAGE_FEEDBACK_PROMPT);
 	return resolveTemplate(template, { feedback });
 }
 
@@ -252,10 +238,7 @@ export function splitCommandArgs(input: string): string[] {
 			const next = text[i + 1];
 			const escapesNext =
 				next !== undefined &&
-				(next === "\\" ||
-					/\s/.test(next) ||
-					next === quote ||
-					(!quote && (next === "'" || next === '"')));
+				(next === "\\" || /\s/.test(next) || next === quote || (!quote && (next === "'" || next === '"')));
 
 			if (escapesNext) {
 				current += next;
@@ -378,26 +361,15 @@ async function appendFeedback(ctx: CommandContext, content: string): Promise<voi
 	await ctx.thread.append([{ type: "user-message", content }]);
 }
 
-async function notifyFailure(
-	ctx: CommandContext,
-	result: RunResult,
-	mode: "review" | "annotate",
-): Promise<boolean> {
+async function notifyFailure(ctx: CommandContext, result: RunResult, mode: "review" | "annotate"): Promise<boolean> {
 	if (!result.error && result.status === 0) return false;
 
-	const details = [result.error, result.stderr.trim(), result.stdout.trim()]
-		.filter(Boolean)
-		.join("\n")
-		.trim();
+	const details = [result.error, result.stderr.trim(), result.stdout.trim()].filter(Boolean).join("\n").trim();
 	const missingExecutable =
-		/\bENOENT\b/i.test(details) ||
-		/executable not found/i.test(details) ||
-		/command not found/i.test(details);
+		/\bENOENT\b/i.test(details) || /executable not found/i.test(details) || /command not found/i.test(details);
 	const installHint = missingExecutable ? `\n\nInstall the CLI first: ${INSTALL_URL}` : "";
 
-	await ctx.ui.notify(
-		`Plannotator ${mode} failed.${details ? `\n\n${details}` : ""}${installHint}`,
-	);
+	await ctx.ui.notify(`Plannotator ${mode} failed.${details ? `\n\n${details}` : ""}${installHint}`);
 	return true;
 }
 
@@ -472,9 +444,7 @@ async function runPlannotator(
 		status,
 		stdout,
 		stderr,
-		...(readyTimedOut
-			? { error: "Timed out waiting for Plannotator to publish its browser URL." }
-			: {}),
+		...(readyTimedOut ? { error: "Timed out waiting for Plannotator to publish its browser URL." } : {}),
 	};
 }
 
@@ -499,11 +469,8 @@ export async function resolveCwd(ctx: CommandContext): Promise<string> {
 	return normalizeDirectory(process.cwd()) ?? process.cwd();
 }
 
-export function resolveAmpWorkspaceRoot(
-	options: { logPath?: string; parentPid?: number } = {},
-): string | null {
-	const logPath =
-		options.logPath ?? process.env.AMP_LOG_FILE ?? join(getAmpCacheDir(), "logs", "cli.log");
+export function resolveAmpWorkspaceRoot(options: { logPath?: string; parentPid?: number } = {}): string | null {
+	const logPath = options.logPath ?? process.env.AMP_LOG_FILE ?? join(getAmpCacheDir(), "logs", "cli.log");
 	if (!existsSync(logPath)) return null;
 
 	const parentPid = options.parentPid ?? process.ppid;
@@ -542,9 +509,7 @@ function fileUrlToPath(value: string): string {
 	if (url.protocol !== "file:") throw new Error(`Unsupported URL protocol: ${url.protocol}`);
 
 	const pathname = decodeURIComponent(url.pathname);
-	return process.platform === "win32" && /^\/[A-Za-z]:/.test(pathname)
-		? pathname.slice(1)
-		: pathname;
+	return process.platform === "win32" && /^\/[A-Za-z]:/.test(pathname) ? pathname.slice(1) : pathname;
 }
 
 export function buildPlannotatorEnv(cwd: string, readyFile: string | null): Record<string, string> {
@@ -575,11 +540,7 @@ export function buildEnv(extra: Record<string, string>): Record<string, string> 
 	return { ...env, ...extra };
 }
 
-async function collectStderr(
-	amp: PluginAPI,
-	ctx: CommandContext,
-	stream: ReadableStream<Uint8Array>,
-): Promise<string> {
+async function collectStderr(amp: PluginAPI, ctx: CommandContext, stream: ReadableStream<Uint8Array>): Promise<string> {
 	const decoder = new TextDecoder();
 	const reader = stream.getReader();
 	const seenUrls = new Set<string>();
@@ -706,12 +667,7 @@ function resolvePlannotatorCommand(): { command: string[]; version: string | nul
 }
 
 export function getPlannotatorCommandCandidates(
-	options: {
-		env?: Record<string, string | undefined>;
-		home?: string;
-		pluginDir?: string;
-		platform?: string;
-	} = {},
+	options: { env?: Record<string, string | undefined>; home?: string; pluginDir?: string; platform?: string } = {},
 ): string[][] {
 	const env = options.env ?? process.env;
 	const homes = getHomeDirectoryCandidates(env, options.home, options.pluginDir ?? import.meta.dir);
@@ -763,11 +719,7 @@ function deriveHomeFromAmpPluginDir(pluginDir: string): string | null {
 	const ampDir = dirname(pluginsDir);
 	const configDir = dirname(ampDir);
 
-	if (
-		basename(pluginsDir) === "plugins" &&
-		basename(ampDir) === "amp" &&
-		basename(configDir) === ".config"
-	) {
+	if (basename(pluginsDir) === "plugins" && basename(ampDir) === "amp" && basename(configDir) === ".config") {
 		return dirname(configDir);
 	}
 
@@ -924,11 +876,7 @@ export function getPlannotatorDataDir(): string {
 	return resolve(value);
 }
 
-function getConfiguredPrompt(
-	config: PromptConfig,
-	key: "fileFeedback" | "messageFeedback",
-	fallback: string,
-): string {
+function getConfiguredPrompt(config: PromptConfig, key: "fileFeedback" | "messageFeedback", fallback: string): string {
 	const annotate = config.prompts?.annotate;
 	const runtimePrompt = normalizePrompt(annotate?.runtimes?.[RUNTIME]?.[key]);
 	const genericPrompt = normalizePrompt(annotate?.[key]);

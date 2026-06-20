@@ -1,5 +1,5 @@
-import { readFileSync, statSync } from "fs";
 import type { PluginAPI } from "@ampcode/plugin";
+import { readFileSync, statSync } from "fs";
 
 // Managed by Orca. Do not edit; changes may be overwritten.
 type HookCoords = { port?: string; token?: string; env?: string; version?: string };
