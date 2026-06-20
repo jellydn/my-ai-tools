@@ -68,34 +68,44 @@ structure_score=$(( structure_score + (SECTION_COUNT * 20 / 9) ))
 
 # --- Check 2: Tool Selection (20 pts) ---
 
-# Extract tool names array
-TOOL_LINE=$(echo "$FILE_CONTENT" | grep -A 30 'const.*TOOL_NAMES\|const.*TOOLS' | head -30 | grep -o '"[^"]*"' || echo "")
+# Extract tool names from the const array — only strings inside the array brackets
+# Find the line containing TOOL_NAMES/TOOLS = [ and extract until ] as const;
+TOOL_RAW=$(echo "$FILE_CONTENT" | awk '
+/const.*TOOL_NAMES|const.*TOOLS/ {in_arr=1; sub(/.*\[/,""); print}
+in_arr && /\] as const/ {sub(/\].*/,""); print; in_arr=0}
+in_arr {print}
+' 2>/dev/null || echo "")
+# Extract quoted strings from the array region only
+TOOL_STRINGS=$(echo "$TOOL_RAW" | grep -o '"[^"]*"' || echo "")
 
-# Count unique tools (not the const name itself)
-TOOL_COUNT=0
+# Count unique tool strings
+TOTAL_TOOLS=$(echo "$TOOL_STRINGS" | sort -u | grep -c . || echo 0)
+
+# Count matches against desired tools
 DESIRED_TOOLS=("Read" "Bash" "edit_file" "create_file" "web_search" "search" "grep" "read_web_page" "skill" "oracle")
+TOOL_MATCHES=0
 for tool in "${DESIRED_TOOLS[@]}"; do
-	if echo "$TOOL_LINE" | grep -q "\"$tool\""; then
-		TOOL_COUNT=$(( TOOL_COUNT + 1 ))
+	if echo "$TOOL_STRINGS" | grep -q "\"$tool\""; then
+		TOOL_MATCHES=$(( TOOL_MATCHES + 1 ))
 	fi
 done
 
 # Score: 20 pts if 8+ desired tools found, proportional otherwise
-if [ "$TOOL_COUNT" -ge 8 ]; then
+if [ "$TOOL_MATCHES" -ge 8 ]; then
 	tool_score=20
-elif [ "$TOOL_COUNT" -ge 5 ]; then
-	tool_score=$(( TOOL_COUNT * 20 / 8 ))
+elif [ "$TOOL_MATCHES" -ge 5 ]; then
+	tool_score=$(( TOOL_MATCHES * 20 / 8 ))
 else
-	tool_score=$(( TOOL_COUNT * 2 ))
+	tool_score=$(( TOOL_MATCHES * 2 ))
 fi
 
-# Count total tools declared
-TOTAL_TOOLS=$(echo "$TOOL_LINE" | tr ' ' '\n' | sort -u | grep -v '^$' | wc -l || echo 0)
-# Penalize if too many tools (bloat) or too few
-if [ "$TOTAL_TOOLS" -gt 18 ] || [ "$TOTAL_TOOLS" -lt 3 ]; then
+# Penalize if too many tools (bloat > 14) or too few (< 3)
+if [ "$TOTAL_TOOLS" -gt 14 ] || [ "$TOTAL_TOOLS" -lt 3 ]; then
 	tool_score=$(( tool_score - 5 ))
 fi
 [ "$tool_score" -lt 0 ] && tool_score=0
+
+
 
 # --- Check 3: Specificity to Cursor Composer 2.5 (25 pts) ---
 
