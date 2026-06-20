@@ -639,6 +639,75 @@ end_transaction() {
 	fi
 }
 
+# Helper: Safely copy a directory, handling "Text file busy" errors
+# Usage: safe_copy_dir "source_dir" "dest_dir"
+safe_copy_dir() {
+	local source_dir="$1"
+	local dest_dir="$2"
+	local skipped=0
+	local errors=0
+
+	if [ "${DRY_RUN:-false}" = true ]; then
+		log_info "[DRY RUN] Would copy $source_dir to $dest_dir"
+		return 0
+	fi
+
+	if ! mkdir -p "$(dirname "$dest_dir")" 2>/dev/null; then
+		log_warning "Failed to create destination directory: $(dirname "$dest_dir")"
+		return 1
+	fi
+
+	# Directories to exclude from copies
+	local -a exclude_dirs=(
+		"node_modules" "plugins" "projects" "debug" "sessions" ".git"
+		"cache" "extensions" "chats" "antigravity" "antigravity-browser-profile"
+		"log" "logs" "tmp" "vendor_imports" "file-history" "ai-tracking"
+	)
+
+	# Prefer rsync when available
+	if command -v rsync &>/dev/null; then
+		local -a rsync_excludes=()
+		for dir in "${exclude_dirs[@]}"; do
+			rsync_excludes+=(--exclude "$dir" --exclude "$dir/**")
+		done
+		rsync_excludes+=(--exclude "*.sqlite" --exclude "*.sqlite-wal" --exclude "*.sqlite-shm")
+		if rsync -a --ignore-errors "${rsync_excludes[@]}" "$source_dir/" "$dest_dir/" 2>/dev/null; then
+			return 0
+		fi
+	fi
+
+	# Fallback: manual copy
+	local prune_expr=""
+	for dir in "${exclude_dirs[@]}"; do
+		prune_expr="$prune_expr -name $dir -o"
+	done
+	prune_expr="${prune_expr% -o}"
+
+	mkdir -p "$dest_dir"
+	# Don't prune the source root itself, only matching subdirectories.
+	# This prevents pruning when the source directory is named after an
+	# excluded directory (e.g. amp/plugins).
+	# POSIX: use temp file instead of process substitution so the loop runs in the current shell
+	local _find_list
+	_find_list=$(make_temp_file "safe-copy-find" "list")
+	find "$source_dir" -type d \( $prune_expr ! -path "$source_dir" \) -prune -o -type f -print 2>/dev/null > "$_find_list"
+	while IFS= read -r file; do
+		case "$file" in *.sqlite | *.sqlite-wal | *.sqlite-shm) continue ;; esac
+		local rel_path="${file#"$source_dir"/}"
+		local dest_file="$dest_dir/$rel_path"
+		mkdir -p "$(dirname "$dest_file")"
+		if ! cp "$file" "$dest_file" 2>/dev/null; then
+			((errors++))
+			((skipped++))
+			[ "${VERBOSE:-false}" = true ] && log_warning "Skipped busy file: $rel_path"
+		fi
+	done < "$_find_list"
+	rm -f "$_find_list"
+
+	[ "${VERBOSE:-false}" = true ] && [ $skipped -gt 0 ] && log_info "Skipped $skipped busy file(s)"
+	return 0
+}
+
 # Cleanup plugin cache with proper error handling
 # Usage: cleanup_plugin_cache "cli_tool" "plugin_name"
 # Returns: 0 on success or if directory doesn't exist, 1 on permission/other errors

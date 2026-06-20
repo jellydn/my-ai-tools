@@ -41,18 +41,6 @@ copy_single() {
 	fi
 }
 
-copy_directory() {
-	local src="$1"
-	local dest="$2"
-	if [ -d "$src" ]; then
-		execute_quoted mkdir -p "$dest"
-		execute_quoted cp -r "$src"/. "$dest"/ 2>/dev/null || true
-		log_success "Copied directory: $src → $dest"
-	else
-		log_warning "Skipped (not found): $src"
-	fi
-}
-
 # Copy a Claude subdirectory with proper logging
 # Usage: copy_claude_subdirectory "source_path" "dest_path" "name_for_logging"
 copy_claude_subdirectory() {
@@ -160,6 +148,21 @@ generate_claude_configs() {
 	log_success "Claude Code configs generated"
 }
 
+copy_directory() {
+	local src="$1"
+	local dest="$2"
+	if [ ! -d "$src" ]; then
+		log_warning "Source directory not found: $src"
+		return 1
+	fi
+	execute_quoted mkdir -p "$dest"
+	if execute_quoted cp -r "$src"/. "$dest"/ 2>/dev/null; then
+		log_success "Copied: $src → $dest"
+	else
+		log_warning "Failed to copy: $src → $dest"
+	fi
+}
+
 copy_claude_settings() {
 	local settings_source=""
 
@@ -247,6 +250,11 @@ generate_amp_configs() {
 	fi
 
 	copy_skills_with_filter "$HOME/.config/amp/skills" "$SCRIPT_DIR/configs/amp/skills" "Amp"
+
+	# Copy plugins
+	if [ -d "$HOME/.config/amp/plugins" ]; then
+		safe_copy_dir "$HOME/.config/amp/plugins" "$SCRIPT_DIR/configs/amp/plugins"
+	fi
 
 	log_success "Amp configs generated"
 }
