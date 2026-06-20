@@ -145,7 +145,7 @@ export default function plannotatorAmpPlugin(amp: PluginAPI) {
 						tmpdir(),
 						`plannotator-amp-last-${process.pid}-${Date.now()}-${randomUUID()}.md`,
 					);
-					writeFileSync(tempFile, message, "utf8");
+					writeFileSync(tempFile, message, { encoding: "utf8", mode: 0o600 });
 					result = await runPlannotator(amp, ctx, ["annotate", tempFile, "--json"], { runtime });
 				}
 			} finally {
@@ -508,7 +508,6 @@ export function resolveAmpWorkspaceRoot(
 
 	const parentPid = options.parentPid ?? process.ppid;
 	const lines = readFileSync(logPath, "utf8").split(/\r?\n/).filter(Boolean);
-	let latestWorkspace: string | null = null;
 
 	for (let i = lines.length - 1; i >= 0; i -= 1) {
 		let entry: { pid?: unknown; workspaceRoot?: unknown };
@@ -521,11 +520,10 @@ export function resolveAmpWorkspaceRoot(
 		const workspace = normalizeWorkspaceRoot(entry.workspaceRoot);
 		if (!workspace) continue;
 
-		latestWorkspace ??= workspace;
 		if (entry.pid === parentPid) return workspace;
 	}
 
-	return latestWorkspace;
+	return null;
 }
 
 function normalizeWorkspaceRoot(value: unknown): string | null {
