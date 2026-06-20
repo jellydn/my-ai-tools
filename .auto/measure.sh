@@ -239,8 +239,23 @@ fi
 
 code_quality=0
 
-# Model reference
-if echo "$FILE_CONTENT" | grep -q 'model:'; then code_quality=$((code_quality + 2)); fi
+# Model reference — check it's a known AMP-supported model
+MODEL_LINE=$(echo "$FILE_CONTENT" | grep -oE 'model: "[^"]+"' | head -1 || echo "")
+if [ -n "$MODEL_LINE" ]; then
+	code_quality=$((code_quality + 1))
+	# Known AMP plugin agent models (verified via `amp plugins show-agent-options --json`)
+	KNOWN_MODELS="anthropic/claude- openai/gpt- baseten/zai-org/ vertexai/gemini- xai/grok-"
+	MODEL_VALID=false
+	for prefix in $KNOWN_MODELS; do
+		if echo "$MODEL_LINE" | grep -q "$prefix"; then
+			MODEL_VALID=true
+			break
+		fi
+	done
+	if [ "$MODEL_VALID" = true ]; then
+		code_quality=$((code_quality + 2))
+	fi
+fi
 
 # Display config
 if echo "$FILE_CONTENT" | grep -q 'display:'; then code_quality=$((code_quality + 2)); fi

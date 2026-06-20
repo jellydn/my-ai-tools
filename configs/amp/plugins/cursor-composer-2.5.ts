@@ -1,6 +1,7 @@
 // @amp-plugin
 // Cursor Composer 2.5 agent mode for AMP
 // Pattern: https://github.com/jellydn/my-ai-tools/blob/main/configs/amp/plugins/glm-52-mode.ts
+// Model: openai/gpt-5.2-codex (verified via `amp plugins show-agent-options --json`)
 import type { PluginAPI } from "@ampcode/plugin";
 
 const CURSOR_COMPOSER_25_PROMPT = `
@@ -187,16 +188,16 @@ export default function (amp: PluginAPI) {
 
 	const agent = amp.experimental.createAgent({
 		name: "cursor-composer-2.5",
-		model: "cursor/composer-2.5",
+		model: "openai/gpt-5.2-codex",
 		instructions: CURSOR_COMPOSER_25_PROMPT,
 		tools: CURSOR_TOOL_NAMES,
 		reasoningEffort: "max",
-		display: { label: "Cursor Composer 2.5", color: "#5E6AD2" },
+		display: { label: "Cursor Composer", color: "#5E6AD2" },
 	});
 
 	amp.experimental.registerAgentMode({
 		key: "cursor-composer-2.5",
-		label: "Cursor Composer 2.5",
+		label: "Cursor Composer",
 		description: "Cursor Composer 2.5 agent mode for code editing and project work.",
 		color: "#5E6AD2",
 		agent: agent.definition,
