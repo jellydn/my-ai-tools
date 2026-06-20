@@ -85,7 +85,7 @@ TOTAL_TOOLS=$(echo "$TOOL_STRINGS" | sort -u | grep -c . || echo 0)
 # Tier 2 (discovery): finder, find_thread — code & thread navigation
 # Tier 3 (research): web_search, read_web_page — external knowledge
 # Tier 4 (expert): skill, oracle, librarian — advanced capability
-DESIRED_TOOLS=("Read" "Bash" "edit_file" "create_file" "finder" "web_search" "read_web_page" "skill" "oracle" "librarian")
+DESIRED_TOOLS=("Read" "Bash" "edit_file" "create_file" "finder" "find_thread" "web_search" "read_web_page" "skill" "oracle" "librarian")
 
 TOOL_MATCHES=0
 for tool in "${DESIRED_TOOLS[@]}"; do
@@ -93,7 +93,7 @@ for tool in "${DESIRED_TOOLS[@]}"; do
 		TOOL_MATCHES=$(( TOOL_MATCHES + 1 ))
 	fi
 done
-tool_score=$(( TOOL_MATCHES * 15 / 10 ))
+tool_score=$(( TOOL_MATCHES * 15 / 11 ))
 [ "$tool_score" -gt 15 ] && tool_score=15
 
 # Penalty for bloat or missing core tools (5 pts)

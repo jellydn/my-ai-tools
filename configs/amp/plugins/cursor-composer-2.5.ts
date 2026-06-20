@@ -173,6 +173,7 @@ const CURSOR_TOOL_NAMES = [
 	"web_search",
 	"read_web_page",
 	"finder",
+	"find_thread",
 	"skill",
 	"oracle",
 	"librarian",
