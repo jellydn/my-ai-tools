@@ -47,10 +47,32 @@ workspace="$(basename "$cwd")"
 
 branch=""
 dirty=""
+pr_number=""
 if git -C "$cwd" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 	branch="$(git -C "$cwd" branch --show-current 2>/dev/null || true)"
 	if [ -n "$(git -C "$cwd" status --short 2>/dev/null)" ]; then
 		dirty="*"
+	fi
+	if [ -n "$branch" ] && command -v gh >/dev/null 2>&1; then
+		git_dir="$(git -C "$cwd" rev-parse --git-dir 2>/dev/null || true)"
+		if [ -n "$git_dir" ]; then
+			case "$git_dir" in
+				/*) ;;
+				*) git_dir="$cwd/$git_dir" ;;
+			esac
+			cache_branch="${branch//\//_}"
+			cache_file="$git_dir/agy-pr-cache-$cache_branch"
+			if [ -n "$(find "$cache_file" -mmin -5 2>/dev/null)" ]; then
+				pr_number="$(cat "$cache_file" 2>/dev/null || true)"
+			else
+				if command -v timeout >/dev/null 2>&1; then
+					pr_number="$(timeout 3 gh pr view --json number -q '.number' 2>/dev/null || true)"
+				else
+					pr_number="$(gh pr view --json number -q '.number' 2>/dev/null || true)"
+				fi
+				printf '%s' "$pr_number" > "$cache_file" 2>/dev/null || true
+			fi
+		fi
 	fi
 fi
 
@@ -64,6 +86,7 @@ context="$(format_percent "$context")"
 
 parts=("$workspace")
 [ -n "$branch" ] && parts+=("$branch$dirty")
+[ -n "$pr_number" ] && parts+=("PR#$pr_number")
 [ -n "$model" ] && parts+=("$model")
 [ -n "$state" ] && parts+=("$state")
 [ -n "$context" ] && parts+=("ctx $context")
