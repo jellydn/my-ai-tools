@@ -68,10 +68,18 @@
 			"unsandboxed(gofmt)",
 			"unsandboxed(npx tsc)",
 			"unsandboxed(go vet)",
+			"unsandboxed(mo)",
 			"unsandboxed(gh api)",
 			"unsandboxed(node)",
 			"unsandboxed(python3)",
-			"unsandboxed(command)"
+			"unsandboxed(command)",
+			"unsandboxed(open)",
+			"unsandboxed(bat)",
+			"unsandboxed(cat)",
+			"unsandboxed(~/\\.bun/bin/qmd)",
+			"unsandboxed(plannotator)",
+			"unsandboxed(rg)",
+			"unsandboxed(bun install)"
 		],
 		"deny": ["command(git reset --hard)", "command(git push --force)", "command(rm -rf)"]
 	},
