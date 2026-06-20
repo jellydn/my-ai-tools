@@ -1,7 +1,8 @@
 // @amp-plugin
 // Cursor Composer 2.5 agent mode for AMP
-// Pattern: https://github.com/jellydn/my-ai-tools/blob/main/configs/amp/plugins/glm-52-mode.ts
+// Source: https://github.com/jellydn/my-ai-tools/blob/main/configs/amp/plugins/cursor-composer-2.5.ts
 // Model: openai/gpt-5.2-codex (verified via `amp plugins show-agent-options --json`)
+// Tools: 11 AMP built-in tools (Read, Bash, create_file, edit_file, web_search, read_web_page, finder, find_thread, skill, oracle, librarian)
 import type { PluginAPI } from "@ampcode/plugin";
 
 const CURSOR_COMPOSER_25_PROMPT = `
