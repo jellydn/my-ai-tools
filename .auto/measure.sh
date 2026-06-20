@@ -275,10 +275,17 @@ if echo "$FILE_CONTENT" | grep -qE '(//|#).*Cursor.*Composer'; then code_quality
 # Experimental guard
 if echo "$FILE_CONTENT" | grep -q 'amp.experimental'; then code_quality=$((code_quality + 1)); fi
 
-# Agent mode key matches name
+# Agent mode key matches name and is ≤ 16 characters (AMP runtime constraint)
 AGENT_KEY=$(echo "$FILE_CONTENT" | grep -oE 'key:.*"[^"]+"' | grep -oE '"[^"]+"' | tr -d '"' || echo "")
 AGENT_NAME=$(echo "$FILE_CONTENT" | grep -oE 'name:.*"[^"]+"' | head -1 | grep -oE '"[^"]+"' | tr -d '"' || echo "")
 if [ -n "$AGENT_KEY" ] && [ -n "$AGENT_NAME" ] && [ "$AGENT_KEY" = "$AGENT_NAME" ]; then
+	code_quality=$((code_quality + 1))
+fi
+# Key and name must be ≤ 16 characters (AMP runtime enforces this)
+if [ -n "$AGENT_KEY" ] && [ "${#AGENT_KEY}" -le 16 ]; then
+	code_quality=$((code_quality + 1))
+fi
+if [ -n "$AGENT_NAME" ] && [ "${#AGENT_NAME}" -le 16 ]; then
 	code_quality=$((code_quality + 1))
 fi
 
