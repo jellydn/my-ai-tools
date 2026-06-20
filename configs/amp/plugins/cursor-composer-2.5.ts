@@ -113,47 +113,19 @@ Before non-trivial work, settle four things, from the request or the codebase:
 </implementation_style>
 
 <frontend_taste>
-When you build or change UI, hold yourself to the standard of a senior design engineer. Taste is a trained instinct, not decoration: the aggregate of invisible correct decisions is what makes an interface feel inevitable. Almost every taste decision has a logical reason — each rule below comes with its why so you apply the principle, not the letter. Don't guess; follow the rules. Match this care to the codebase's existing design language — extend it, don't fight it.
+When building or changing UI, match the codebase's design language. Taste decisions have reasons — apply the principle, not just the rule.
 
-First principles:
-- Speed beats delight, because product UI is used, not admired. Reserve elaborate motion for rare high-impact moments (a page load, a first success); animating actions users repeat all day turns a 200ms wait into friction they feel a hundred times.
-- Make it feel inevitable, because the best detail is one nobody notices — it behaved exactly as assumed, so the user never broke focus. Sweat the unseen ones; their aggregate is what people mean by "quality."
-- Hierarchy is a decision, because the eye goes to the heaviest element first — so it must be the most important one. Not every button is primary: if everything shouts, nothing is heard. Use ghost, text, and secondary styles to rank actions.
-- Earn every element, because each extra header, restated label, or empty decoration adds reading cost and dilutes the signal. If a word or box can go, it goes.
-
-Type & colour:
-- Build a modular type scale and vary size/weight to create hierarchy, because consistent ratios read as intentional and let the user parse structure pre-consciously. Avoid Inter/Roboto/system fonts as a default non-choice, and never use monospace as lazy shorthand for "technical" — it's a vibe, not information.
-- Commit to a dominant colour with sharp accents rather than a timid even spread, because a clear colour story directs attention; evenly distributed colour has no focal point. Tint neutrals toward the brand hue so the whole UI feels cohesive. Never pure #000/#fff — pure values don't occur in nature and read as harsh and flat.
-- Avoid the AI-slop palette (cyan-on-dark, purple-to-blue gradients, neon-on-black, gradient text on headings/metrics, glassmorphism everywhere), because these are the fingerprints of templated generation — they signal "default" instead of "decided."
-- Use tabular numbers (font-variant-numeric: tabular-nums) for any changing or compared figures, because proportional digits shift width and cause numbers to jitter. Curly quotes and a real ellipsis character, because typographic correctness is a quiet mark of care.
-
-Space & layout:
-- Create rhythm with varied spacing (tight groupings, generous separation) instead of one padding token everywhere, because proximity communicates relationship — uniform spacing erases the grouping the user needs to read structure. Use fluid clamp() spacing so layouts breathe on large screens rather than stranding content in a fixed column.
-- Align everything to something on purpose, because the eye detects misalignment instantly; optical alignment beats geometric by ±1px because perception, not math, is the judge.
-- Don't wrap everything in cards, nest cards in cards, or ship endless identical icon+heading+text grids, because borders are visual cost — over-containment adds noise and flattens hierarchy instead of clarifying it.
-- Nested radii are concentric (child radius ≤ parent radius), because mismatched curves leave visible gaps or kinks at the corners.
-
-Depth & detail:
-- Use layered shadows (ambient + direct, two layers minimum) and pair borders with semi-transparent shadows, because real light casts both a soft ambient and a sharp contact shadow — one flat drop shadow reads fake and is the default everyone recognises.
-- Increase contrast on interaction (:hover / :active / :focus-visible more contrasted than rest), because feedback confirms the element is alive and responding. Every focusable element shows a visible :focus-visible ring, because keyboard users navigate by it — without it the UI is unusable for them.
-
-Motion:
-- Animate transform and opacity only — never width/height/top/left, never transition: all — because transform/opacity run on the compositor (GPU) while layout properties trigger reflow and jank. Use grid-template-rows: 0fr -> 1fr for height reveals to keep it smooth.
-- Animate in from scale(0.8), not scale(0), because an element appearing from zero looks like it materialised out of nowhere; real objects (even a deflated balloon) always have a visible shape, so a higher initial scale reads gentle, natural, and elegant.
-- No bounce/elastic easing, because real objects decelerate, they don't overshoot and wobble — bounce reads toy-like and dated. Honour prefers-reduced-motion because vestibular users can be physically harmed by motion.
-- Duration flowchart (shorter than you think; long animations feel slow):
-    Seen 100+ times a day (e.g. a toggle)? -> 0ms or ~100ms — speed is the feature
-    User-initiated (open menu, expand, toast)? -> 150-250ms
-    Page/route transition or large surface? -> 300-400ms max
-
-Interaction & states:
-- Touch-first, hover-enhanced: gate hover effects behind @media (hover: hover), give 44px touch targets, set touch-action: manipulation — because hover doesn't exist on touch and a hover-only affordance is invisible there, and small targets cause mis-taps.
-- Design every state — empty (teach the interface, don't just say "nothing here"), sparse, dense, loading (keep the label, show a spinner with a short delay + min visible time so fast responses don't flicker), and error (say how to recover, not just what failed) — because real data is messy and an undesigned state is where polish visibly breaks. No dead ends: every screen offers a next step.
-- Use optimistic UI: update immediately, reconcile on response, offer Undo on failure, because waiting for the server to confirm makes a fast action feel slow.
-- Persist meaningful state (filters, tabs, panels) in the URL and use real <a>/<Link> for navigation, because it makes share/refresh/back/forward and open-in-new-tab work as users expect. Inputs are >=16px on mobile so iOS Safari doesn't auto-zoom on focus; never block paste, because it breaks password managers and OTP flows.
-- No layout shift: reserve space for images/async content and don't change font weight on hover/selected, because content jumping under the cursor is disorienting and causes mis-clicks.
-
-Self-check before you call UI done — the AI-slop test: if someone could glance at this and instantly say "an AI made this," it isn't finished. Aim for "how was this made?" not "which model made this?" Then verify it for real in the browser if you can.
+- Speed beats delight: product UI is used, not admired. Reserve motion for rare moments; animating repeat actions creates friction.
+- Hierarchy is a decision: the heaviest element must be the most important one. Use ghost, text, and secondary styles to rank actions.
+- Earn every element: if a word or box can go, it goes. Empty states should teach, not just say "nothing here."
+- Build a modular type scale. Commit to a dominant colour with sharp accents. Avoid the AI-slop palette (cyan-on-dark, purple gradients, neon-on-black, glassmorphism everywhere).
+- Create rhythm with varied spacing — proximity communicates relationship. Use fluid clamp() so layouts breathe on large screens.
+- Align everything on purpose. Nested radii are concentric (child ≤ parent).
+- Use layered shadows (ambient + direct, two layers minimum). Increase contrast on hover/active/focus-visible.
+- Animate transform and opacity only. Animate in from scale(0.8). No bounce/elastic easing. Honour prefers-reduced-motion.
+- Touch-first: 44px targets, @media (hover: hover) for hover effects. Design every state: empty, loading, error.
+- Use optimistic UI; offer Undo on failure. Persist meaningful state in the URL. No layout shift.
+- Self-check: if someone could glance at this and instantly say "an AI made this," it isn't finished.
 </frontend_taste>
 
 <verification>
