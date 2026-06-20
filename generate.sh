@@ -148,6 +148,21 @@ generate_claude_configs() {
 	log_success "Claude Code configs generated"
 }
 
+copy_directory() {
+	local src="$1"
+	local dest="$2"
+	if [ ! -d "$src" ]; then
+		log_warning "Source directory not found: $src"
+		return 1
+	fi
+	execute_quoted mkdir -p "$dest"
+	if execute_quoted cp -r "$src"/. "$dest"/ 2>/dev/null; then
+		log_success "Copied: $src → $dest"
+	else
+		log_warning "Failed to copy: $src → $dest"
+	fi
+}
+
 copy_claude_settings() {
 	local settings_source=""
 
