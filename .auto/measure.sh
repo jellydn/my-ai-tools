@@ -266,7 +266,14 @@ if [ -n "$AGENT_KEY" ] && [ -n "$AGENT_NAME" ] && [ "$AGENT_KEY" = "$AGENT_NAME"
 	code_quality=$((code_quality + 1))
 fi
 
+# Penalty for unescaped backticks inside template literal (would break at runtime)
+BACKTICK_BUGS=$(echo "$PROMPT_BODY" | grep -c '\x60' 2>/dev/null || echo 0)
+if [ "$BACKTICK_BUGS" -gt 0 ]; then
+	code_quality=$(( code_quality - BACKTICK_BUGS ))
+fi
+
 [ "$code_quality" -gt 10 ] && code_quality=10
+[ "$code_quality" -lt 0 ] && code_quality=0
 
 # =============================================================================
 # COMPOSITE SCORE
