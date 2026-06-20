@@ -68,3 +68,11 @@ Outputs `METRIC name=value` lines.
   - Section quality: 13/15 (7/7 complete sections)
   - Code quality: 10/10 (perfect)
   - Key gap: Most prompt sections are 4-7 lines. Need to deepen operating_principles, frame_the_task, plan_before_acting, codebase_discovery, tool_use, implementation_style, verification, and communication to 8+ lines.
+
+- **Iteration 1** (commit b7822c0) — Deepened all 8 short sections. Section depth count: 2→5. Score: 73/100 (new stricter metric).
+  - Structure: 15/30 (+3 from section depth improvement)
+  - Tools: 15/20 (removed view_media, painter — 9 tools)
+  - Authenticity: 20/25 (originality 5→7 from more unique content)
+  - Section quality: 13/15 (unchanged)
+  - Code quality: 10/10 (unchanged)
+  - Remaining gaps: frame_the_task (6 lines), plan_before_acting (6 lines), codebase_discovery (7 lines), verification (6 lines), communication (6 lines) all still under 8 lines. Need 3 more sections at 8+ lines for full depth score.
