@@ -1,8 +1,47 @@
 // @amp-plugin
 // Cursor Composer 2.5 agent mode for AMP
 // Source: https://github.com/jellydn/my-ai-tools/blob/main/configs/amp/plugins/cursor-composer-2.5.ts
-// Model: openai/gpt-5.2-codex (verified via `amp plugins show-agent-options --json`)
-// Tools: 11 AMP built-in tools (Read, Bash, create_file, edit_file, web_search, read_web_page, finder, find_thread, skill, oracle, librarian)
+//
+// ── Model ────────────────────────────────────────────────────────────────────
+// Current:  openai/gpt-5.2-codex (verified via `amp plugins show-agent-options --json`)
+//
+// IMPORTANT LIMITATION: This is an approximation, not the real Cursor Composer.
+//
+//   Real Cursor Composer 2.5 runs on Kimi K2.5 (Moonshot AI), fine-tuned by
+//   Cursor/Anysphere with RL + continued pre-training. It is Cursor's proprietary
+//   model and is NOT available through AMP.
+//
+//   What we deliver:
+//     • Cursor Composer 2.5's system prompt (reverse-engineered behavioral spec)
+//     • Approximate tool mapping (11 AMP tools mirroring Cursor's capabilities)
+//     • A capable model (OpenAI Codex) as the closest available substitute
+//
+//   What we CAN'T deliver:
+//     • The actual Kimi K2.5 model (proprietary to Cursor)
+//     • Cursor's RL-trained agentic behavior patterns
+//     • Cursor's internal tool implementations
+//
+// ── BYOK Status ──────────────────────────────────────────────────────────────
+// AMP does NOT support Bring Your Own Key (BYOK). The `model` field in
+// createAgent() selects from AMP's provisioned catalog — there is no apiKey,
+// baseUrl, or provider config parameter. This is AMP's architectural choice,
+// not a missing feature in our plugin.
+//
+// TODO: If AMP ever supports BYOK or provisions Cursor's model:
+//   1. Replace model with the actual Cursor model identifier
+//   2. Consider switching to anthropic/claude-opus-4-8 (best agentic coding)
+//      or openai/gpt-5.5 (best reasoning) as intermediate upgrades
+//   3. Validate tool mapping against any new AMP tools that become available
+//   4. Check project issues for latest BYOK/model status
+//
+// ── Tools ────────────────────────────────────────────────────────────────────
+// 11 AMP built-in tools: Read, Bash, create_file, edit_file, web_search,
+// read_web_page, finder, find_thread, skill, oracle, librarian
+//
+// Other AMP tools NOT mapped (not part of Cursor Composer's tool set):
+// apply_patch, chart, painter, read_mcp_resource, read_thread, shell_command,
+// Task, view_media
+//
 import type { PluginAPI } from "@ampcode/plugin";
 
 const CURSOR_COMPOSER_25_PROMPT = `
