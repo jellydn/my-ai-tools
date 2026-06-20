@@ -80,10 +80,11 @@ TOOL_STRINGS=$(echo "$TOOL_RAW" | grep -o '"[^"]*"' || echo "")
 TOTAL_TOOLS=$(echo "$TOOL_STRINGS" | sort -u | grep -c . || echo 0)
 
 # Relevant tools for a code-editing agent (15 pts max)
-# Core: Read, Bash, edit_file, create_file — absolutely required
-# Support: search, web_search, read_web_page — useful for research
-# Expert: skill, oracle — advanced capability
-DESIRED_TOOLS=("Read" "Bash" "edit_file" "create_file" "search" "web_search" "read_web_page" "skill" "oracle")
+# Tier 1 (core): Read, Bash, edit_file, create_file — absolutely required
+# Tier 2 (discovery): search, grep, find — code navigation
+# Tier 3 (research): web_search, read_web_page — external knowledge
+# Tier 4 (expert): skill, oracle, librarian — advanced capability
+DESIRED_TOOLS=("Read" "Bash" "edit_file" "create_file" "search" "grep" "finder" "web_search" "read_web_page" "skill" "oracle" "librarian")
 
 TOOL_MATCHES=0
 for tool in "${DESIRED_TOOLS[@]}"; do
@@ -91,15 +92,14 @@ for tool in "${DESIRED_TOOLS[@]}"; do
 		TOOL_MATCHES=$(( TOOL_MATCHES + 1 ))
 	fi
 done
-tool_score=$(( TOOL_MATCHES * 15 / 9 ))
+tool_score=$(( TOOL_MATCHES * 15 / 12 ))
 [ "$tool_score" -gt 15 ] && tool_score=15
 
 # Penalty for bloat or missing core tools (5 pts)
 TOOL_PENALTY=0
-if [ "$TOTAL_TOOLS" -gt 14 ]; then
+if [ "$TOTAL_TOOLS" -gt 16 ]; then
 	TOOL_PENALTY=$(( TOOL_PENALTY + 3 ))
-fi
-if [ "$TOTAL_TOOLS" -lt 4 ]; then
+elif [ "$TOTAL_TOOLS" -lt 4 ]; then
 	TOOL_PENALTY=$(( TOOL_PENALTY + 3 ))
 fi
 # Check for core tools
@@ -108,6 +108,14 @@ for core in "Read" "Bash" "edit_file" "create_file"; do
 		TOOL_PENALTY=$(( TOOL_PENALTY + 1 ))
 	fi
 done
+
+# Extra penalty for non-code-editing tools
+for extra in "view_media" "painter" "read_thread" "find_thread"; do
+	if echo "$TOOL_STRINGS" | grep -q "\"$extra\""; then
+		TOOL_PENALTY=$(( TOOL_PENALTY + 2 ))
+	fi
+done
+
 tool_score=$(( tool_score - TOOL_PENALTY ))
 [ "$tool_score" -lt 0 ] && tool_score=0
 
@@ -212,7 +220,9 @@ HAS_PLACEHOLDER=$(echo "$PROMPT_BODY" | grep -ci '// TODO\|// FIXME\|TODO:\|FIXM
 
 	# Bonus for code examples or specific patterns in the prompt
 	HAS_CODE_EXAMPLE=$(echo "$PROMPT_BODY" | grep -ci 'code\|example\|pattern\|function\|component' || true)
-	if [ "$HAS_CODE_EXAMPLE" -ge 5 ]; then
+	if [ "$HAS_CODE_EXAMPLE" -ge 10 ]; then
+		section_quality=$(( section_quality + 5 ))
+	elif [ "$HAS_CODE_EXAMPLE" -ge 5 ]; then
 		section_quality=$(( section_quality + 3 ))
 	fi
 

@@ -1,3 +1,4 @@
+// @amp-plugin
 // Cursor Composer 2.5 agent mode for AMP
 // Pattern: https://github.com/jellydn/my-ai-tools/blob/main/configs/amp/plugins/glm-52-mode.ts
 import type { PluginAPI } from "@ampcode/plugin";
@@ -202,8 +203,11 @@ const CURSOR_TOOL_NAMES = [
 	"web_search",
 	"read_web_page",
 	"search",
+	"grep",
+	"finder",
 	"skill",
 	"oracle",
+	"librarian",
 ] as const;
 
 export default function (amp: PluginAPI) {
