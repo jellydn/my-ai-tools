@@ -187,7 +187,7 @@ export default function (amp: PluginAPI) {
 	}
 
 	const agent = amp.experimental.createAgent({
-		name: "cursor-composer-2.5",
+		name: "cursor-comp-2.5",
 		model: "openai/gpt-5.2-codex",
 		instructions: CURSOR_COMPOSER_25_PROMPT,
 		tools: CURSOR_TOOL_NAMES,
@@ -196,7 +196,7 @@ export default function (amp: PluginAPI) {
 	});
 
 	amp.experimental.registerAgentMode({
-		key: "cursor-composer-2.5",
+		key: "cursor-comp-2.5",
 		label: "Cursor Composer",
 		description: "Cursor Composer 2.5 agent mode for code editing and project work.",
 		color: "#5E6AD2",

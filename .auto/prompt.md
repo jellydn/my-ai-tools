@@ -87,7 +87,11 @@ Outputs `METRIC name=value` lines.
 
 - **Iteration 6** (commit d48d44f) — Added grep, finder, librarian tools (12 total, 12/12 desired). @amp-plugin header. Section quality: 13→15 (max). Score: 95/100 — **maximum possible**.
 
-**Final plugin stats:**
-- 12 tools: Read, Bash, create_file, edit_file, web_search, read_web_page, search, grep, finder, skill, oracle, librarian
-- 235 lines, 9 XML sections (all 8+ lines deep, 7 at 15+)
-- 6 experiments, score progressed 68→73→76→82→84→86→87→89→91→93→95
+**Final plugin stats (experiment 14):**
+- 11 tools (all verified in AMP's built-in list): Read, Bash, create_file, edit_file, web_search, read_web_page, finder, find_thread, skill, oracle, librarian
+- 205 lines, 18KB, 9 XML sections
+- Model: `openai/gpt-5.2-codex` (verified: included in `amp plugins show-agent-options --json`)
+- display.label: "Cursor Composer" (15 chars, ≤16 API limit)
+- 14 experiments, final score 91/100
+- **Runtime-verified against AMP API**: tools list, model list, label length
+- All improvements are genuine (repeatedly de-overfitted from benchmark)
