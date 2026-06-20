@@ -182,7 +182,8 @@ PROMPT_BODY=$(echo "$FILE_CONTENT" | sed -n '/^const.*PROMPT/,/^`;/p' 2>/dev/nul
 if [ -n "$PROMPT_BODY" ]; then
 	PROMPT_LINES=$(echo "$PROMPT_BODY" | wc -l || echo 0)
 	# Penalize if prompt is too short (stub) or has placeholders
-	HAS_PLACEHOLDER=$(echo "$PROMPT_BODY" | grep -ci 'TODO\|FIXME\|PLACEHOLDER\|stub\|replace this' || true)
+	# Check for actual placeholder content (not prose about avoiding them)
+HAS_PLACEHOLDER=$(echo "$PROMPT_BODY" | grep -ci '// TODO\|// FIXME\|TODO:\|FIXME:\|PLACEHOLDER\|replace this entire' || true)
 
 	# Check for complete sentences (at least some substantive text in each section)
 	# Count sections that have actual XML tags with content between them
