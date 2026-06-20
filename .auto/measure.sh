@@ -80,11 +80,12 @@ TOOL_STRINGS=$(echo "$TOOL_RAW" | grep -o '"[^"]*"' || echo "")
 TOTAL_TOOLS=$(echo "$TOOL_STRINGS" | sort -u | grep -c . || echo 0)
 
 # Relevant tools for a code-editing agent (15 pts max)
+# Based on AMP built-in tools + GLM-5.2's known-working tool set
 # Tier 1 (core): Read, Bash, edit_file, create_file — absolutely required
-# Tier 2 (discovery): search, grep, find — code navigation
+# Tier 2 (discovery): finder, find_thread — code & thread navigation  
 # Tier 3 (research): web_search, read_web_page — external knowledge
 # Tier 4 (expert): skill, oracle, librarian — advanced capability
-DESIRED_TOOLS=("Read" "Bash" "edit_file" "create_file" "search" "grep" "finder" "web_search" "read_web_page" "skill" "oracle" "librarian")
+DESIRED_TOOLS=("Read" "Bash" "edit_file" "create_file" "finder" "web_search" "read_web_page" "skill" "oracle" "librarian")
 
 TOOL_MATCHES=0
 for tool in "${DESIRED_TOOLS[@]}"; do
@@ -92,7 +93,7 @@ for tool in "${DESIRED_TOOLS[@]}"; do
 		TOOL_MATCHES=$(( TOOL_MATCHES + 1 ))
 	fi
 done
-tool_score=$(( TOOL_MATCHES * 15 / 12 ))
+tool_score=$(( TOOL_MATCHES * 15 / 10 ))
 [ "$tool_score" -gt 15 ] && tool_score=15
 
 # Penalty for bloat or missing core tools (5 pts)
@@ -110,7 +111,7 @@ for core in "Read" "Bash" "edit_file" "create_file"; do
 done
 
 # Extra penalty for non-code-editing tools
-for extra in "view_media" "painter" "read_thread" "find_thread"; do
+for extra in "view_media" "painter" "read_thread"; do
 	if echo "$TOOL_STRINGS" | grep -q "\"$extra\""; then
 		TOOL_PENALTY=$(( TOOL_PENALTY + 2 ))
 	fi
@@ -267,9 +268,11 @@ if [ -n "$AGENT_KEY" ] && [ -n "$AGENT_NAME" ] && [ "$AGENT_KEY" = "$AGENT_NAME"
 fi
 
 # Penalty for unescaped backticks inside template literal (would break at runtime)
-BACKTICK_BUGS=$(echo "$PROMPT_BODY" | grep -c '\x60' 2>/dev/null || echo 0)
+# Only check the prompt CONTENT (after opening backtick, before closing backtick)
+PROMPT_CONTENT=$(echo "$PROMPT_BODY" | sed '1d' | sed '$d' 2>/dev/null || echo "")
+BACKTICK_BUGS=$(echo "$PROMPT_CONTENT" | grep -c '\x60' 2>/dev/null || echo 0)
 if [ "$BACKTICK_BUGS" -gt 0 ]; then
-	code_quality=$(( code_quality - BACKTICK_BUGS ))
+	code_quality=$(( code_quality - (BACKTICK_BUGS * 3) ))
 fi
 
 [ "$code_quality" -gt 10 ] && code_quality=10

@@ -92,6 +92,8 @@ Before non-trivial work, settle four things, from the request or the codebase:
 - When debugging, use Bash to run the app with relevant flags or print statements rather than guessing what's wrong.
 - For file creation, ensure the new file follows the directory convention: if the project colocs tests, place the new test alongside the source.
 - When using search, prefer exact name matches first; broaden to regex or file-type filters only if exact search returns nothing useful.
+- When debugging a failing test, read the test file and the error output before inspecting the implementation. The test might reveal what the code should do, not just what broke.
+- If a Bash command fails, check the exit code and stderr before trying again or guessing a fix.
 </tool_use>
 
 <implementation_style>
@@ -200,8 +202,6 @@ const CURSOR_TOOL_NAMES = [
 	"edit_file",
 	"web_search",
 	"read_web_page",
-	"search",
-	"grep",
 	"finder",
 	"skill",
 	"oracle",
