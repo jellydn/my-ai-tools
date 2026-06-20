@@ -82,7 +82,7 @@ TOTAL_TOOLS=$(echo "$TOOL_STRINGS" | sort -u | grep -c . || echo 0)
 # Relevant tools for a code-editing agent (15 pts max)
 # Based on AMP built-in tools + GLM-5.2's known-working tool set
 # Tier 1 (core): Read, Bash, edit_file, create_file — absolutely required
-# Tier 2 (discovery): finder, find_thread — code & thread navigation  
+# Tier 2 (discovery): finder, find_thread — code & thread navigation
 # Tier 3 (research): web_search, read_web_page — external knowledge
 # Tier 4 (expert): skill, oracle, librarian — advanced capability
 DESIRED_TOOLS=("Read" "Bash" "edit_file" "create_file" "finder" "web_search" "read_web_page" "skill" "oracle" "librarian")
