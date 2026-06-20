@@ -898,6 +898,17 @@ copy_amp_configs() {
 		copy_config_file "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/"
 	fi
 
+	# Copy plugins
+	if [ -d "$SCRIPT_DIR/configs/amp/plugins" ]; then
+		execute_quoted mkdir -p "$HOME/.config/amp/plugins"
+		for plugin_dir in "$SCRIPT_DIR/configs/amp/plugins"/*; do
+			[ -d "$plugin_dir" ] || continue
+			local plugin_name
+			plugin_name="$(basename "$plugin_dir")"
+			safe_copy_dir "$plugin_dir" "$HOME/.config/amp/plugins/$plugin_name"
+		done
+	fi
+
 	log_success "Amp configs copied"
 }
 
