@@ -61,4 +61,10 @@ Outputs `METRIC name=value` lines.
 
 *(Update this section as experiments accumulate.)*
 
-- **Baseline** — Initial plugin created following GLM-5.2 pattern with Cursor-tailored prompt.
+- **Baseline** (commit 10aec40) — Initial plugin created following GLM-5.2 pattern with Cursor-tailored prompt. Score: 68/100.
+  - Structure: 12/30 (import/export perfect, but section depth very low — only 2 sections have 15+ lines)
+  - Tools: 15/20 (9/9 desired tools, 11 total, no bloat)
+  - Authenticity: 18/25 (5/10 originality, 13/15 Cursor-specificity)
+  - Section quality: 13/15 (7/7 complete sections)
+  - Code quality: 10/10 (perfect)
+  - Key gap: Most prompt sections are 4-7 lines. Need to deepen operating_principles, frame_the_task, plan_before_acting, codebase_discovery, tool_use, implementation_style, verification, and communication to 8+ lines.

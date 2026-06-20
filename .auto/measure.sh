@@ -1,192 +1,284 @@
 #!/bin/bash
-set -euo pipefail
+set -eo pipefail
 
 # Autoresearch benchmark for Cursor Composer 2.5 AMP Plugin
 # Validates structure, measures prompt quality, outputs METRIC lines
+# Score breakdown (max 100):
+#   - Structure (30): correct imports/exports (10) + section depth (20)
+#   - Tool Selection (20): relevant tools (15) + no bloat (5)
+#   - Prompt Authenticity (25): originality vs copy (10) + Cursor-specific content (15)
+#   - Section Quality (15): actual content per section, not just tags
+#   - Code Quality (10): AMP API correctness, config quality
 
 PLUGIN_FILE="configs/amp/plugins/cursor-composer-2.5.ts"
-REFERENCE_FILE="configs/amp/plugins/glm-52-mode.ts"
 
-# --- Fast pre-check: file exists ---
 if [ ! -f "$PLUGIN_FILE" ]; then
 	echo "METRIC prompt_score=0"
-	echo "METRIC tool_count=0"
-	echo "METRIC line_count=0"
-	echo "METRIC file_size_bytes=0"
-	echo "METRIC structure_score=0"
-	echo "METRIC has_create_agent=0"
-	echo "METRIC has_register_mode=0"
-	echo "PLUGIN_FILE_NOT_FOUND=1"
 	exit 0
 fi
 
 FILE_CONTENT=$(cat "$PLUGIN_FILE")
-LINE_COUNT=$(wc -l < "$PLUGIN_FILE")
-FILE_SIZE=$(wc -c < "$PLUGIN_FILE")
+LINE_COUNT=$(grep -c '' "$PLUGIN_FILE" || echo 0)
+FILE_SIZE=$(stat -f%z "$PLUGIN_FILE" 2>/dev/null || wc -c < "$PLUGIN_FILE" | tr -d ' ')
 
-# --- Check 1: Structure (35 pts) ---
+# =============================================================================
+# 1. STRUCTURE (30 pts)
+# =============================================================================
 
-# Required imports/patterns
+# Import/export patterns (10 pts)
 HAS_IMPORT=$(echo "$FILE_CONTENT" | grep -c 'import.*PluginAPI.*@ampcode/plugin' || true)
 HAS_EXPORT_DEFAULT=$(echo "$FILE_CONTENT" | grep -c 'export default function' || true)
 HAS_CREATE_AGENT=$(echo "$FILE_CONTENT" | grep -c 'createAgent' || true)
 HAS_REGISTER_MODE=$(echo "$FILE_CONTENT" | grep -c 'registerAgentMode' || true)
 
-# Required prompt sections
-HAS_OPERATING_PRINCIPLES=$(echo "$FILE_CONTENT" | grep -c 'operating_principles' || true)
-HAS_FRAME_TASK=$(echo "$FILE_CONTENT" | grep -c 'frame_the_task' || true)
-HAS_PLAN_BEFORE=$(echo "$FILE_CONTENT" | grep -c 'plan_before_acting' || true)
-HAS_CODEBASE_DISCOVERY=$(echo "$FILE_CONTENT" | grep -c 'codebase_discovery' || true)
-HAS_TOOL_USE=$(echo "$FILE_CONTENT" | grep -c 'tool_use' || true)
-HAS_IMPLEMENTATION=$(echo "$FILE_CONTENT" | grep -c 'implementation_style' || true)
-HAS_VERIFICATION=$(echo "$FILE_CONTENT" | grep -c 'verification' || true)
-HAS_COMMUNICATION=$(echo "$FILE_CONTENT" | grep -c 'communication' || true)
-HAS_FRONTEND_TASTE=$(echo "$FILE_CONTENT" | grep -c 'frontend_taste' || true)
-
-structure_score=0
-
-# Import/export (15 pts if all present)
-IMPORT_PATTERN_OK=$(( HAS_IMPORT > 0 ? 1 : 0 ))
+IMPORT_OK=$(( HAS_IMPORT > 0 ? 1 : 0 ))
 EXPORT_OK=$(( HAS_EXPORT_DEFAULT > 0 ? 1 : 0 ))
 AGENT_OK=$(( HAS_CREATE_AGENT > 0 ? 1 : 0 ))
 REGISTER_OK=$(( HAS_REGISTER_MODE > 0 ? 1 : 0 ))
-STRUCTURAL_COMPLETE=$(( IMPORT_PATTERN_OK + EXPORT_OK + AGENT_OK + REGISTER_OK ))
 
-if [ "$STRUCTURAL_COMPLETE" -eq 4 ]; then
-	structure_score=$(( structure_score + 15 ))
-elif [ "$STRUCTURAL_COMPLETE" -eq 3 ]; then
-	structure_score=$(( structure_score + 10 ))
-elif [ "$STRUCTURAL_COMPLETE" -eq 2 ]; then
-	structure_score=$(( structure_score + 5 ))
-fi
+STRUCTURAL_COMPLETE=$(( IMPORT_OK + EXPORT_OK + AGENT_OK + REGISTER_OK ))
+structure_score=$(( STRUCTURAL_COMPLETE * 10 / 4 ))
 
-# Prompt sections (20 pts, ~2.2 pts each)
-SECTION_COUNT=$(( HAS_OPERATING_PRINCIPLES + HAS_FRAME_TASK + HAS_PLAN_BEFORE + HAS_CODEBASE_DISCOVERY + HAS_TOOL_USE + HAS_IMPLEMENTATION + HAS_VERIFICATION + HAS_COMMUNICATION + HAS_FRONTEND_TASTE ))
-structure_score=$(( structure_score + (SECTION_COUNT * 20 / 9) ))
-# Cap at 35
-[ "$structure_score" -gt 35 ] && structure_score=35
+# Prompt section depth (20 pts) - each section must have meaningful content (>3 lines)
+PROMPT_PROTECTED=$(echo "$FILE_CONTENT" | grep -c '<frontend_taste>' || true)
+SECTION_TAGS="operating_principles frame_the_task plan_before_acting codebase_discovery tool_use implementation_style verification communication frontend_taste"
 
-# --- Check 2: Tool Selection (20 pts) ---
+section_depth_count=0
+for tag in $SECTION_TAGS; do
+	# Count lines in each section by extracting between XML tags
+	section_lines=$(echo "$FILE_CONTENT" | awk -v tag="$tag" '
+		/<'"$tag"'>/ {in_section=1; next}
+		in_section && /<\/'"$tag"'>/ {in_section=0; exit}
+		in_section {lines++}
+		END {print lines+0}
+	' 2>/dev/null || echo 0)
+	if [ "$section_lines" -ge 15 ]; then
+		section_depth_count=$(( section_depth_count + 2 ))
+	elif [ "$section_lines" -ge 8 ]; then
+		section_depth_count=$(( section_depth_count + 1 ))
+	fi
+done
 
-# Extract tool names from the const array — only strings inside the array brackets
-# Find the line containing TOOL_NAMES/TOOLS = [ and extract until ] as const;
+section_depth_score=$(( section_depth_count * 20 / 18 ))  # 9 sections * 2 max each = 18
+[ "$section_depth_score" -gt 20 ] && section_depth_score=20
+
+structure_score=$(( structure_score + section_depth_score ))
+[ "$structure_score" -gt 30 ] && structure_score=30
+
+# =============================================================================
+# 2. TOOL SELECTION (20 pts)
+# =============================================================================
+
+# Extract tool names from the const array
 TOOL_RAW=$(echo "$FILE_CONTENT" | awk '
 /const.*TOOL_NAMES|const.*TOOLS/ {in_arr=1; sub(/.*\[/,""); print}
 in_arr && /\] as const/ {sub(/\].*/,""); print; in_arr=0}
 in_arr {print}
 ' 2>/dev/null || echo "")
-# Extract quoted strings from the array region only
 TOOL_STRINGS=$(echo "$TOOL_RAW" | grep -o '"[^"]*"' || echo "")
 
-# Count unique tool strings
 TOTAL_TOOLS=$(echo "$TOOL_STRINGS" | sort -u | grep -c . || echo 0)
 
-# Count matches against desired tools
-DESIRED_TOOLS=("Read" "Bash" "edit_file" "create_file" "web_search" "search" "grep" "read_web_page" "skill" "oracle")
+# Relevant tools for a code-editing agent (15 pts max)
+# Core: Read, Bash, edit_file, create_file — absolutely required
+# Support: search, web_search, read_web_page — useful for research
+# Expert: skill, oracle — advanced capability
+DESIRED_TOOLS=("Read" "Bash" "edit_file" "create_file" "search" "web_search" "read_web_page" "skill" "oracle")
+
 TOOL_MATCHES=0
 for tool in "${DESIRED_TOOLS[@]}"; do
 	if echo "$TOOL_STRINGS" | grep -q "\"$tool\""; then
 		TOOL_MATCHES=$(( TOOL_MATCHES + 1 ))
 	fi
 done
+tool_score=$(( TOOL_MATCHES * 15 / 9 ))
+[ "$tool_score" -gt 15 ] && tool_score=15
 
-# Score: 20 pts if 8+ desired tools found, proportional otherwise
-if [ "$TOOL_MATCHES" -ge 8 ]; then
-	tool_score=20
-elif [ "$TOOL_MATCHES" -ge 5 ]; then
-	tool_score=$(( TOOL_MATCHES * 20 / 8 ))
-else
-	tool_score=$(( TOOL_MATCHES * 2 ))
+# Penalty for bloat or missing core tools (5 pts)
+TOOL_PENALTY=0
+if [ "$TOTAL_TOOLS" -gt 14 ]; then
+	TOOL_PENALTY=$(( TOOL_PENALTY + 3 ))
 fi
-
-# Penalize if too many tools (bloat > 14) or too few (< 3)
-if [ "$TOTAL_TOOLS" -gt 14 ] || [ "$TOTAL_TOOLS" -lt 3 ]; then
-	tool_score=$(( tool_score - 5 ))
+if [ "$TOTAL_TOOLS" -lt 4 ]; then
+	TOOL_PENALTY=$(( TOOL_PENALTY + 3 ))
 fi
+# Check for core tools
+for core in "Read" "Bash" "edit_file" "create_file"; do
+	if ! echo "$TOOL_STRINGS" | grep -q "\"$core\""; then
+		TOOL_PENALTY=$(( TOOL_PENALTY + 1 ))
+	fi
+done
+tool_score=$(( tool_score - TOOL_PENALTY ))
 [ "$tool_score" -lt 0 ] && tool_score=0
 
+# =============================================================================
+# 3. PROMPT AUTHENTICITY (25 pts)
+# =============================================================================
 
+# Originality vs copy from GLM-5.2 (10 pts)
+# Check for sections that are clearly adapted (have Cursor-specific content)
+# Count lines unique to this file vs generic agent prompt
+REF_FILE="configs/amp/plugins/glm-52-mode.ts"
+REF_CONTENT=$(cat "$REF_FILE" 2>/dev/null || echo "")
 
-# --- Check 3: Specificity to Cursor Composer 2.5 (25 pts) ---
+# Remove structural boilerplate and compare prompts
+THIS_PROMPT=$(echo "$FILE_CONTENT" | sed -n '/^const.*PROMPT/,/^`;/p' 2>/dev/null || echo "")
+REF_PROMPT=$(echo "$REF_CONTENT" | sed -n '/^const.*PROMPT/,/^`;/p' 2>/dev/null || echo "")
 
-CURSOR_REFS=$(echo "$FILE_CONTENT" | grep -ci 'cursor' || true)
-# Check for Cursor-specific content
-HAS_COMPOSER=$(echo "$FILE_CONTENT" | grep -ci 'composer' || true)
-HAS_AGENT_MODE=$(echo "$FILE_CONTENT" | grep -ci 'agent' || true)
-HAS_CODE_EDITING=$(echo "$FILE_CONTENT" | grep -ciE 'code.*edit|edit.*code|implement' || true)
-HAS_IDE=$(echo "$FILE_CONTENT" | grep -ciE 'ide|cursor' || true)
-
-specificity_score=0
-
-# General code agent references
-if [ "$HAS_CODE_EDITING" -gt 0 ]; then specificity_score=$((specificity_score + 5)); fi
-if [ "$CURSOR_REFS" -gt 2 ]; then specificity_score=$((specificity_score + 10)); fi
-if [ "$HAS_AGENT_MODE" -gt 2 ]; then specificity_score=$((specificity_score + 5)); fi
-if [ "$HAS_COMPOSER" -gt 0 ]; then specificity_score=$((specificity_score + 5)); fi
-
-[ "$specificity_score" -gt 25 ] && specificity_score=25
-
-# --- Check 4: Conciseness (10 pts) ---
-
-# Penalize very short or very long files
-conciseness_score=10
-if [ "$LINE_COUNT" -lt 50 ]; then
-	conciseness_score=$(( conciseness_score - 5 ))
-elif [ "$LINE_COUNT" -gt 500 ]; then
-	conciseness_score=$(( conciseness_score - 3 ))
+if [ -n "$THIS_PROMPT" ] && [ -n "$REF_PROMPT" ]; then
+	# Count lines that differ between the two prompts
+	THIS_LINES=$(echo "$THIS_PROMPT" | grep -c '' || echo 0)
+	DIFF_LINES=$(diff <(echo "$REF_PROMPT") <(echo "$THIS_PROMPT") 2>/dev/null | grep -c '^>' || true)
+	DIFF_LINES=${DIFF_LINES:-0}
+	CHANGE_RATIO=0
+	# Score based on percentage of new/changed lines
+	if [ "$THIS_LINES" -gt 0 ] && [ "$DIFF_LINES" -gt 0 ]; then
+		CHANGE_RATIO=$(( DIFF_LINES * 100 / THIS_LINES ))
+		if [ "$CHANGE_RATIO" -ge 50 ]; then
+			originality_score=10
+		elif [ "$CHANGE_RATIO" -ge 30 ]; then
+			originality_score=7
+		elif [ "$CHANGE_RATIO" -ge 15 ]; then
+			originality_score=5
+		else
+			originality_score=2
+		fi
+	else
+		originality_score=0
+	fi
+else
+	originality_score=0
 fi
 
-# Check for bloated content
-BLOAT_PATTERNS=$(echo "$FILE_CONTENT" | grep -ciE 'TODO|FIXME|placeholder|stub|PLACEHOLDER|todo:' || true)
-if [ "$BLOAT_PATTERNS" -gt 0 ]; then
-	conciseness_score=$(( conciseness_score - BLOAT_PATTERNS ))
+# Cursor-specific content (15 pts)
+# Check for content that demonstrates understanding of Cursor as a tool
+HAS_CURSOR_INTRODUCTION=$(echo "$FILE_CONTENT" | grep -ci 'cursor\|editor' || true)
+HAS_COMPOSER_REF=$(echo "$FILE_CONTENT" | grep -ci 'composer\|compose' || true)
+HAS_CURSOR_API_REF=$(echo "$FILE_CONTENT" | grep -ciE 'cursor.*agent|cursor.*cli|cursor.*sdk' || true)
+HAS_TAB_COMPLETION=$(echo "$FILE_CONTENT" | grep -ci 'tab\|accept\|suggest' || true)
+HAS_IDE_INTEGRATION=$(echo "$FILE_CONTENT" | grep -ciE 'ide.*integrat|inline.*edit|ai.*review' || true)
+HAS_CURSOR_WORKFLOW=$(echo "$FILE_CONTENT" | grep -ciE 'composer.*mode|ask.*mode|edit.*mode|cursor.*mode' || true)
+
+cursor_specificity=0
+if [ "$HAS_CURSOR_INTRODUCTION" -ge 3 ]; then cursor_specificity=$((cursor_specificity + 3)); fi
+if [ "$HAS_COMPOSER_REF" -gt 0 ]; then cursor_specificity=$((cursor_specificity + 3)); fi
+if [ "$HAS_CURSOR_API_REF" -gt 0 ]; then cursor_specificity=$((cursor_specificity + 3)); fi
+if [ "$HAS_TAB_COMPLETION" -gt 0 ]; then cursor_specificity=$((cursor_specificity + 2)); fi
+if [ "$HAS_IDE_INTEGRATION" -gt 0 ]; then cursor_specificity=$((cursor_specificity + 2)); fi
+if [ "$HAS_CURSOR_WORKFLOW" -gt 0 ]; then cursor_specificity=$((cursor_specificity + 2)); fi
+
+[ "$cursor_specificity" -gt 15 ] && cursor_specificity=15
+
+authenticity_score=$(( originality_score + cursor_specificity ))
+[ "$authenticity_score" -gt 25 ] && authenticity_score=25
+
+# =============================================================================
+# 4. SECTION QUALITY (15 pts)
+# =============================================================================
+
+# Extract prompt body to analyze content quality
+PROMPT_BODY=$(echo "$FILE_CONTENT" | sed -n '/^const.*PROMPT/,/^`;/p' 2>/dev/null || echo "")
+
+if [ -n "$PROMPT_BODY" ]; then
+	PROMPT_LINES=$(echo "$PROMPT_BODY" | wc -l || echo 0)
+	# Penalize if prompt is too short (stub) or has placeholders
+	HAS_PLACEHOLDER=$(echo "$PROMPT_BODY" | grep -ci 'TODO\|FIXME\|PLACEHOLDER\|stub\|replace this' || true)
+
+	# Check for complete sentences (at least some substantive text in each section)
+	# Count sections that have actual XML tags with content between them
+	COMPLETE_SECTIONS=0
+	for tag in operating_principles frame_the_task plan_before_acting codebase_discovery tool_use implementation_style verification; do
+		has_open=$(echo "$PROMPT_BODY" | grep -c "<$tag>" || true)
+		has_close=$(echo "$PROMPT_BODY" | grep -c "</$tag>" || true)
+		has_content=$(echo "$PROMPT_BODY" | awk -v tag="$tag" '
+			/<'"$tag"'>/ {in_s=1; next}
+			in_s && /<\/'"$tag"'>/ {in_s=0; exit}
+			in_s {content=1}
+			END {print content+0}
+		' 2>/dev/null || echo 0)
+
+		if [ "$has_open" -gt 0 ] && [ "$has_close" -gt 0 ] && [ "$has_content" -gt 0 ]; then
+			COMPLETE_SECTIONS=$(( COMPLETE_SECTIONS + 1 ))
+		fi
+	done
+
+	section_quality=$(( COMPLETE_SECTIONS * 10 / 7 ))  # 7 core sections
+
+	# Penalize placeholders
+	if [ "$HAS_PLACEHOLDER" -gt 0 ]; then
+		section_quality=$(( section_quality - HAS_PLACEHOLDER ))
+	fi
+
+	# Bonus for code examples or specific patterns in the prompt
+	HAS_CODE_EXAMPLE=$(echo "$PROMPT_BODY" | grep -ci 'code\|example\|pattern\|function\|component' || true)
+	if [ "$HAS_CODE_EXAMPLE" -ge 5 ]; then
+		section_quality=$(( section_quality + 3 ))
+	fi
+
+	[ "$section_quality" -gt 15 ] && section_quality=15
+	[ "$section_quality" -lt 0 ] && section_quality=0
+else
+	section_quality=0
 fi
-[ "$conciseness_score" -lt 0 ] && conciseness_score=0
 
-# --- Check 5: Code Quality (10 pts) ---
+# =============================================================================
+# 5. CODE QUALITY (10 pts)
+# =============================================================================
 
-code_quality_score=0
+code_quality=0
 
 # Model reference
-HAS_MODEL_REF=$(echo "$FILE_CONTENT" | grep -c 'model:' || true)
-if [ "$HAS_MODEL_REF" -gt 0 ]; then code_quality_score=$((code_quality_score + 3)); fi
+if echo "$FILE_CONTENT" | grep -q 'model:'; then code_quality=$((code_quality + 2)); fi
 
 # Display config
-HAS_DISPLAY=$(echo "$FILE_CONTENT" | grep -c 'display:' || true)
-if [ "$HAS_DISPLAY" -gt 0 ]; then code_quality_score=$((code_quality_score + 2)); fi
+if echo "$FILE_CONTENT" | grep -q 'display:'; then code_quality=$((code_quality + 2)); fi
 
 # reasoningEffort
-HAS_REASONING=$(echo "$FILE_CONTENT" | grep -c 'reasoningEffort' || true)
-if [ "$HAS_REASONING" -gt 0 ]; then code_quality_score=$((code_quality_score + 2)); fi
+if echo "$FILE_CONTENT" | grep -q 'reasoningEffort'; then code_quality=$((code_quality + 1)); fi
 
-# color in display config
-HAS_COLOR=$(echo "$FILE_CONTENT" | grep -c 'color:' || true)
-if [ "$HAS_COLOR" -gt 0 ]; then code_quality_score=$((code_quality_score + 1)); fi
+# color in display config with valid hex
+if echo "$FILE_CONTENT" | grep -qE "color.*#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})"; then code_quality=$((code_quality + 1)); fi
 
-# type annotation on tools
-HAS_AS_CONST=$(echo "$FILE_CONTENT" | grep -c 'as const' || true)
-if [ "$HAS_AS_CONST" -gt 0 ]; then code_quality_score=$((code_quality_score + 2)); fi
+# as const on tool array
+if echo "$FILE_CONTENT" | grep -q 'as const'; then code_quality=$((code_quality + 1)); fi
 
-[ "$code_quality_score" -gt 10 ] && code_quality_score=10
+# Plugin header comment
+if echo "$FILE_CONTENT" | grep -qE '(//|#).*Cursor.*Composer'; then code_quality=$((code_quality + 1)); fi
 
-# --- Composite score ---
-PROMPT_SCORE=$(( structure_score + tool_score + specificity_score + conciseness_score + code_quality_score ))
+# Experimental guard
+if echo "$FILE_CONTENT" | grep -q 'amp.experimental'; then code_quality=$((code_quality + 1)); fi
 
-# --- Output ---
+# Agent mode key matches name
+AGENT_KEY=$(echo "$FILE_CONTENT" | grep -oE 'key:.*"[^"]+"' | grep -oE '"[^"]+"' | tr -d '"' || echo "")
+AGENT_NAME=$(echo "$FILE_CONTENT" | grep -oE 'name:.*"[^"]+"' | head -1 | grep -oE '"[^"]+"' | tr -d '"' || echo "")
+if [ -n "$AGENT_KEY" ] && [ -n "$AGENT_NAME" ] && [ "$AGENT_KEY" = "$AGENT_NAME" ]; then
+	code_quality=$((code_quality + 1))
+fi
+
+[ "$code_quality" -gt 10 ] && code_quality=10
+
+# =============================================================================
+# COMPOSITE SCORE
+# =============================================================================
+
+PROMPT_SCORE=$(( structure_score + tool_score + authenticity_score + section_quality + code_quality ))
+
+# === OUTPUT ===
 echo "METRIC prompt_score=$PROMPT_SCORE"
 echo "METRIC tool_count=$TOTAL_TOOLS"
 echo "METRIC line_count=$LINE_COUNT"
 echo "METRIC file_size_bytes=$FILE_SIZE"
 echo "METRIC structure_score=$structure_score"
 echo "METRIC tool_selection_score=$tool_score"
-echo "METRIC specificity_score=$specificity_score"
-echo "METRIC conciseness_score=$conciseness_score"
-echo "METRIC code_quality_score=$code_quality_score"
+echo "METRIC authenticity_score=$authenticity_score"
+echo "METRIC section_quality=$section_quality"
+echo "METRIC code_quality=$code_quality"
 
-# Debug info
-echo "SECTIONS_FOUND=$SECTION_COUNT"
+# Debug - component breakdown
+echo "SECTION_DEPTH_COUNT=$section_depth_count"
+echo "ORIGINALITY_SCORE=$originality_score"
+echo "CURSOR_SPECIFICITY=$cursor_specificity"
+echo "COMPLETE_SECTIONS=$COMPLETE_SECTIONS"
+echo "TOOL_MATCHES=$TOOL_MATCHES"
+echo "TOTAL_TOOLS=$TOTAL_TOOLS"
 echo "STRUCTURAL_COMPLETE=$STRUCTURAL_COMPLETE"
-echo "HAS_CREATE_AGENT=$HAS_CREATE_AGENT"
-echo "HAS_REGISTER_MODE=$HAS_REGISTER_MODE"
-echo "HAS_IMPORT=$HAS_IMPORT"
-echo "HAS_EXPORT_DEFAULT=$HAS_EXPORT_DEFAULT"
