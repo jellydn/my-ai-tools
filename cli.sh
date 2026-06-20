@@ -898,6 +898,23 @@ copy_amp_configs() {
 		copy_config_file "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/"
 	fi
 
+	# Copy plugins
+	if [ -d "$SCRIPT_DIR/configs/amp/plugins" ]; then
+		execute_quoted mkdir -p "$HOME/.config/amp/plugins"
+		for plugin_path in "$SCRIPT_DIR/configs/amp/plugins"/*; do
+			if [ -d "$plugin_path" ]; then
+				local plugin_name
+				plugin_name="$(basename "$plugin_path")"
+				safe_copy_dir "$plugin_path" "$HOME/.config/amp/plugins/$plugin_name"
+			elif [ -f "$plugin_path" ] && [[ "$plugin_path" == *.ts ]]; then
+				# Single-file plugin (.ts files)
+				local plugin_file="$(basename "$plugin_path")"
+				log_info "Installing plugin: $plugin_file"
+				copy_config_file "$plugin_path" "$HOME/.config/amp/plugins"
+			fi
+		done
+	fi
+
 	log_success "Amp configs copied"
 }
 

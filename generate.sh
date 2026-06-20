@@ -248,6 +248,9 @@ generate_amp_configs() {
 
 	copy_skills_with_filter "$HOME/.config/amp/skills" "$SCRIPT_DIR/configs/amp/skills" "Amp"
 
+	# Copy plugins
+	[ -d "$HOME/.config/amp/plugins" ] && copy_directory "$HOME/.config/amp/plugins" "$SCRIPT_DIR/configs/amp/plugins"
+
 	log_success "Amp configs generated"
 }
 
