@@ -309,7 +309,7 @@ if [ -n "$PROMPT_TOOL_REFS" ] && [ -n "$TOOL_STRINGS" ]; then
 		clean=$(echo "$name" | tr -d '"' | tr '[:upper:]' '[:lower:]')
 		DECLARED_NORM="$DECLARED_NORM $clean"
 	done
-	
+
 	for ref in $PROMPT_TOOL_REFS; do
 		ref_lower=$(echo "$ref" | tr '[:upper:]' '[:lower:]')
 		if ! echo "$DECLARED_NORM" | grep -qw "$ref_lower"; then
