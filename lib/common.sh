@@ -659,7 +659,7 @@ safe_copy_dir() {
 
 	# Directories to exclude from copies
 	local -a exclude_dirs=(
-		"node_modules" "plugins" "projects" "debug" "sessions" "git"
+		"node_modules" "plugins" "projects" "debug" "sessions" ".git"
 		"cache" "extensions" "chats" "antigravity" "antigravity-browser-profile"
 		"log" "logs" "tmp" "vendor_imports" "file-history" "ai-tracking"
 	)
@@ -684,10 +684,13 @@ safe_copy_dir() {
 	prune_expr="${prune_expr% -o}"
 
 	mkdir -p "$dest_dir"
+	# Don't prune the source root itself, only matching subdirectories.
+	# This prevents pruning when the source directory is named after an
+	# excluded directory (e.g. amp/plugins).
 	# POSIX: use temp file instead of process substitution so the loop runs in the current shell
 	local _find_list
 	_find_list=$(make_temp_file "safe-copy-find" "list")
-	find "$source_dir" -type d \( $prune_expr \) -prune -o -type f -print 2>/dev/null > "$_find_list"
+	find "$source_dir" -type d \( $prune_expr ! -path "$source_dir" \) -prune -o -type f -print 2>/dev/null > "$_find_list"
 	while IFS= read -r file; do
 		case "$file" in *.sqlite | *.sqlite-wal | *.sqlite-shm) continue ;; esac
 		local rel_path="${file#"$source_dir"/}"
