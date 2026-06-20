@@ -75,7 +75,6 @@
 			"unsandboxed(command)",
 			"unsandboxed(open)",
 			"unsandboxed(bat)",
-			"unsandboxed(cat)",
 			"unsandboxed(~/\\.bun/bin/qmd)",
 			"unsandboxed(plannotator)",
 			"unsandboxed(rg)",
