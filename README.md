@@ -39,7 +39,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                             |
 | **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl   | -                                                                                                                                                                                             |
 | **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory, sem                        | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, ollama-web-search, footer, tps-meter) |
-| **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
+| **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Cursor Composer, GLM 5.2, Orca status, Plannotator                                                                                                                           |
 | **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                                |
 | **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem (via plugin) | my-ai-tools-gemini-migration                                                                                                                                                                  |
 | **Kilo**        | (uses OpenCode config)                                                                           | (uses OpenCode plugins)                                                                                                                                                                       |
@@ -1081,6 +1081,19 @@ Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/
 ```
 
 See [`configs/amp/AGENTS.md`](configs/amp/AGENTS.md) for agent guidelines.
+
+### Plugins
+
+Amp supports community plugins via `.ts` files in `~/.config/amp/plugins/`. This repo ships:
+
+| Plugin | Description | File |
+|--------|-------------|------|
+| **Cursor Composer** | Cursor Composer 2.5-style agent mode for code editing. 11 tools, `openai/gpt-5.2-codex` model. Select "Cursor Composer" in Amp's mode picker. | [`cursor-composer-2.5.ts`](configs/amp/plugins/cursor-composer-2.5.ts) |
+| **GLM 5.2** | Experimental GLM 5.2-driven agent mode. Select "GLM 5.2 (exp)" in Amp's mode picker. | [`glm-52-mode.ts`](configs/amp/plugins/glm-52-mode.ts) |
+| **Orca Agent Status** | Reports agent session events (start, tool calls, results) to Orca for status tracking. | [`orca-agent-status.ts`](configs/amp/plugins/orca-agent-status.ts) |
+| **Plannotator** | Code review, annotation, and change review directly in Amp. | [`plannotator.ts`](configs/amp/plugins/plannotator.ts) |
+
+> **Note:** Plugin-defined agent modes (Cursor Composer, GLM 5.2) are only selectable in Amp's desktop GUI — the CLI (`amp threads new --mode`) does not currently support custom modes.
 
 </details>
 
