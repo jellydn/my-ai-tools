@@ -26,23 +26,6 @@ See @~/.ai-tools/best-practices.md for full details.
 - Use the sem MCP tools for semantic version control and git operations.
 - When using bash commands for file/content search, prefer `fd` (fdfind) and `rg` (ripgrep) over standard `find` and `grep` for better performance and git-awareness.
 
-## Sandbox Configuration
-
-Pool CLI supports optional sandboxing for safe code execution. Use the built-in `configure-sandbox` skill to walk through setup interactively — it covers:
-
-- **Read-only vs read-write** sandboxing modes
-- **Network policy** (allow/deny outbound connections)
-- **Scope**: per-workspace (`.poolside/settings.local.yaml`) or global (`~/.config/poolside/settings.yaml`)
-
-Quick override via CLI flags:
-
-```bash
-pool --sandbox required    # Enforce sandboxing
-pool --sandbox disabled    # Skip sandboxing
-```
-
-To inspect or change sandbox settings without the skill, edit the YAML configs directly or use the `/sandbox` slash command inside an interactive session.
-
 ## General Practices
 
 - Follow my software development practice @~/.ai-tools/best-practices.md
