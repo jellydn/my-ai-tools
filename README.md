@@ -2374,7 +2374,15 @@ Run the setup script to install configurations to `~/.config/poolside/`:
 ./cli.sh
 ```
 
-The setup script automatically copies agent guidelines.
+The setup script copies agent guidelines and MCP server configuration. Pool CLI's full config layout:
+
+| File                    | Purpose                                  | Managed by repo? |
+| ----------------------- | ---------------------------------------- | ---------------- |
+| `AGENTS.md`             | Agent guidelines (tmux, fff, git safety) | ✅ Yes           |
+| `mcp.json`              | MCP server configuration (8 servers)     | ✅ Yes           |
+| `pool.json`             | Main CLI config (agent servers, models)  | User-managed     |
+| `settings.yaml`         | Agent settings (sandbox, permissions)    | User-managed     |
+| `credentials.json`      | Authentication credentials               | 🔒 Local only    |
 
 ### ✨ Key Features
 
