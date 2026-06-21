@@ -1,0 +1,10 @@
+{
+  "agent_servers": {
+    "default": {
+      "command": "{{SELF}}",
+      "args": [
+        "acp"
+      ]
+    }
+  }
+}

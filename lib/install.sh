@@ -925,3 +925,8 @@ install_open_code_review() {
 	install_npm_tool "Alibaba Open Code Review" "ocr" "@alibaba-group/open-code-review" \
 		"npm install -g @alibaba-group/open-code-review"
 }
+
+install_pool() {
+	install_npm_tool "Poolside Pool CLI" "pool" "@poolside/pool" \
+		"curl -fsSL https://poolside.ai/cli/install.sh | bash"
+}

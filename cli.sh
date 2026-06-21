@@ -265,9 +265,10 @@ backup_configs() {
 		copy_config_dir "$HOME/Library/Application Support/orca/agent-hooks" "$BACKUP_DIR/orca" "agent-hooks"
 		copy_config_dir "$HOME/.cline" "$BACKUP_DIR" "cline"
 		copy_config_dir "$HOME/.commandcode" "$BACKUP_DIR" "commandcode"
-		copy_config_dir "$HOME/.grok" "$BACKUP_DIR" "grok"
-		copy_config_dir "$HOME/.config/mimocode" "$BACKUP_DIR" "mimocode"
-		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
+	copy_config_dir "$HOME/.grok" "$BACKUP_DIR" "grok"
+	copy_config_dir "$HOME/.config/mimocode" "$BACKUP_DIR" "mimocode"
+	copy_config_dir "$HOME/.config/poolside" "$BACKUP_DIR" "poolside"
+	copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
 	fi
@@ -322,6 +323,38 @@ install_mcp_interactive() {
 	else
 		install_mcp_server "$name" "$install_cmd"
 	fi
+}
+
+setup_pool_mcp_servers() {
+	if ! command -v pool &>/dev/null; then
+		return 0
+	fi
+
+	log_info "Setting up Pool CLI MCP servers..."
+
+	if install_mcp_servers_from_registry "pool"; then
+		log_success "Pool CLI MCP server setup complete"
+	else
+		log_warning "Pool CLI MCP setup failed; continuing with other configs"
+	fi
+}
+
+copy_pool_configs() {
+	local pool_status
+	pool_status=$(detect_tool --detailed "pool" "$HOME/.config/poolside") || pool_status="missing"
+	if [ "$pool_status" = "missing" ]; then
+		log_info "Pool CLI not detected - skipping Pool config installation"
+		return 0
+	fi
+
+	log_info "Detected Pool CLI (via $pool_status)"
+	execute_quoted mkdir -p "$HOME/.config/poolside"
+
+	copy_config_file "$SCRIPT_DIR/configs/pool/AGENTS.md" "$HOME/.config/poolside/" || true
+
+	setup_pool_mcp_servers
+
+	log_success "Pool CLI configs copied"
 }
 
 copy_grok_configs() {
@@ -421,6 +454,7 @@ copy_configurations() {
 	copy_cline_configs
 	copy_grok_configs
 	copy_mimo_configs
+	copy_pool_configs
 	copy_best_practices
 }
 
@@ -556,9 +590,9 @@ install_mcp_servers_from_registry() {
 		# Parse args into array (args are delimited by SOH character)
 		local args_array=()
 		if [ -n "$args_delimited" ]; then
-			while IFS= read -r -d $'\x01' arg; do
-				args_array+=("$arg")
-			done <<<"$args_delimited"
+		while IFS= read -r -d $'\x01' arg; do
+			[ -n "$arg" ] && args_array+=("$arg")
+		done <<<"$args_delimited"
 		fi
 
 		# Check prerequisites
@@ -598,8 +632,13 @@ install_mcp_servers_from_registry() {
 			continue
 		fi
 
-		# Build install command
-		local install_cmd="$tool_cmd mcp add --scope user --transport stdio $server_name --"
+		# Build install command — Pool CLI uses simpler syntax (no --scope/--transport for stdio)
+		local install_cmd
+		if [ "$tool_cmd" = "pool" ]; then
+			install_cmd="$tool_cmd mcp add $server_name --"
+		else
+			install_cmd="$tool_cmd mcp add --scope user --transport stdio $server_name --"
+		fi
 		install_cmd="$install_cmd $(printf '%q' "$command")"
 		for arg in "${args_array[@]}"; do
 			install_cmd="$install_cmd $(printf '%q' "$arg")"
@@ -657,8 +696,8 @@ install_mcp_servers_from_registry() {
 			(.value.name // empty),
 			(.value.description // empty),
 			(.value.command // empty),
-			(.value.args | join("")),
-			(.value.requires | join("")),
+			(.value.args | join("") + ""),
+			(.value.requires | join("") + ""),
 			(.value.category // empty)
 		] | @tsv
 	' "$registry_file")
@@ -1852,6 +1891,8 @@ create_tool_skills_symlinks() {
 		"$HOME/.codex/skills"
 		"$HOME/.commandcode/skills"
 		"$HOME/.config/mimocode/skills"
+		"$HOME/.config/poolside/skills"
+		"$HOME/.grok/skills"
 	)
 
 	for tool_dir in "${tool_dirs[@]}"; do
@@ -1949,7 +1990,7 @@ main() {
 	echo "║                        AI Tools Setup                                ║"
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Antigravity         ║"
 	echo "║  Pi • Kilo • Copilot • Cursor • Factory Droid • Cline • Command Code  ║"
-	echo "║  Grok • MiMo-Code                                                     ║"
+	echo "║  Grok • MiMo-Code • Pool CLI                                          ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -2021,6 +2062,9 @@ main() {
 	install_mimo
 	echo
 
+	install_pool
+	echo
+
 	install_open_code_review
 	echo
 
@@ -2034,7 +2078,7 @@ main() {
 	echo
 	echo "Next steps:"
 	echo "  1. Restart your terminal"
-	echo "  2. Run 'claude' to start Claude Code (or 'agy' for Antigravity CLI, 'cmd' for Command Code, 'grok' for Grok CLI, 'mimo' for MiMo-Code)"
+	echo "  2. Run 'claude' to start Claude Code (or 'agy' for Antigravity CLI, 'cmd' for Command Code, 'grok' for Grok CLI, 'mimo' for MiMo-Code, 'pool' for Pool CLI)"
 	echo "  3. Enable plugins with 'claude plugin enable <plugin-name>'"
 	echo "  4. Check out the README.md for more information"
 	echo
