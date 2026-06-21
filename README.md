@@ -51,7 +51,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
 | **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Kanagawa palette staged (`tokyonight` until built-in)                                                                                                                                         |
 | **MiMo-Code**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                             |
-| **Pool CLI**    | (uses Poolside ACP agent server)                                                                 | -                                                                                                                                                                                             |
+| **Pool CLI**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | configure-sandbox, pool-product-reference, skill-creator                                                                                                                                     |
 
 ### 📋 MCP Server Details
 
