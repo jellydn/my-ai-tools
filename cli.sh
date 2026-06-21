@@ -325,6 +325,20 @@ install_mcp_interactive() {
 	fi
 }
 
+setup_pool_mcp_servers() {
+	if ! command -v pool &>/dev/null; then
+		return 0
+	fi
+
+	log_info "Setting up Pool CLI MCP servers..."
+
+	if install_mcp_servers_from_registry "pool"; then
+		log_success "Pool CLI MCP server setup complete"
+	else
+		log_warning "Pool CLI MCP setup failed; continuing with other configs"
+	fi
+}
+
 copy_pool_configs() {
 	local pool_status
 	pool_status=$(detect_tool --detailed "pool" "$HOME/.config/poolside") || pool_status="missing"
@@ -338,7 +352,10 @@ copy_pool_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/pool/AGENTS.md" "$HOME/.config/poolside/" || true
 
+	# mcp.json is a reference file — Pool CLI registers MCP servers via 'pool mcp add'
 	copy_config_file "$SCRIPT_DIR/configs/pool/mcp.json" "$HOME/.config/poolside/" || true
+
+	setup_pool_mcp_servers
 
 	log_success "Pool CLI configs copied"
 }
