@@ -624,6 +624,21 @@ generate_mimo_configs() {
 	log_success "MiMo-Code configs generated"
 }
 
+generate_pool_configs() {
+	log_info "Generating Pool CLI configs..."
+
+	if [ ! -d "$HOME/.config/poolside" ]; then
+		log_warning "Pool CLI config directory not found: $HOME/.config/poolside"
+		return 0
+	fi
+
+	execute "mkdir -p $SCRIPT_DIR/configs/pool"
+
+	copy_single "$HOME/.config/poolside/AGENTS.md" "$SCRIPT_DIR/configs/pool/AGENTS.md"
+
+	log_success "Pool CLI configs generated"
+}
+
 generate_cline_configs() {
 	log_info "Generating Cline configs..."
 
@@ -739,6 +754,9 @@ main() {
 	echo
 
 	generate_mimo_configs
+	echo
+
+	generate_pool_configs
 	echo
 
 	generate_best_practices

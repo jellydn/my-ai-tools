@@ -925,3 +925,31 @@ install_open_code_review() {
 	install_npm_tool "Alibaba Open Code Review" "ocr" "@alibaba-group/open-code-review" \
 		"npm install -g @alibaba-group/open-code-review"
 }
+
+install_pool() {
+	_run_pool_install() {
+		if command -v pool &>/dev/null; then
+			log_warning "Pool CLI is already installed"
+			return 0
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "Pool CLI")
+
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install Bun or Node.js/npm to install Pool CLI."
+			log_info "Or install manually: curl -fsSL https://poolside.ai/cli/install.sh | bash"
+			return 1
+		fi
+
+		log_info "Installing Pool CLI with $pkg_manager..."
+		if execute "$pkg_manager install -g @poolside/pool"; then
+			log_success "Pool CLI installed"
+		else
+			log_error "Failed to install Pool CLI"
+			log_info "You can install manually: curl -fsSL https://poolside.ai/cli/install.sh | bash"
+			return 1
+		fi
+	}
+	run_installer "Poolside Pool CLI" "_run_pool_install" "command -v pool" ""
+}

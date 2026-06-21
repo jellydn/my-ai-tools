@@ -265,9 +265,10 @@ backup_configs() {
 		copy_config_dir "$HOME/Library/Application Support/orca/agent-hooks" "$BACKUP_DIR/orca" "agent-hooks"
 		copy_config_dir "$HOME/.cline" "$BACKUP_DIR" "cline"
 		copy_config_dir "$HOME/.commandcode" "$BACKUP_DIR" "commandcode"
-		copy_config_dir "$HOME/.grok" "$BACKUP_DIR" "grok"
-		copy_config_dir "$HOME/.config/mimocode" "$BACKUP_DIR" "mimocode"
-		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
+	copy_config_dir "$HOME/.grok" "$BACKUP_DIR" "grok"
+	copy_config_dir "$HOME/.config/mimocode" "$BACKUP_DIR" "mimocode"
+	copy_config_dir "$HOME/.config/poolside" "$BACKUP_DIR" "poolside"
+	copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
 	fi
@@ -322,6 +323,22 @@ install_mcp_interactive() {
 	else
 		install_mcp_server "$name" "$install_cmd"
 	fi
+}
+
+copy_pool_configs() {
+	local pool_status
+	pool_status=$(detect_tool --detailed "pool" "$HOME/.config/poolside") || pool_status="missing"
+	if [ "$pool_status" = "missing" ]; then
+		log_info "Pool CLI not detected - skipping Pool config installation"
+		return 0
+	fi
+
+	log_info "Detected Pool CLI (via $pool_status)"
+	execute_quoted mkdir -p "$HOME/.config/poolside"
+
+	copy_config_file "$SCRIPT_DIR/configs/pool/AGENTS.md" "$HOME/.config/poolside/" || true
+
+	log_success "Pool CLI configs copied"
 }
 
 copy_grok_configs() {
@@ -421,6 +438,7 @@ copy_configurations() {
 	copy_cline_configs
 	copy_grok_configs
 	copy_mimo_configs
+	copy_pool_configs
 	copy_best_practices
 }
 
@@ -1949,7 +1967,7 @@ main() {
 	echo "║                        AI Tools Setup                                ║"
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Antigravity         ║"
 	echo "║  Pi • Kilo • Copilot • Cursor • Factory Droid • Cline • Command Code  ║"
-	echo "║  Grok • MiMo-Code                                                     ║"
+	echo "║  Grok • MiMo-Code • Pool CLI                                           ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -2021,6 +2039,9 @@ main() {
 	install_mimo
 	echo
 
+	install_pool
+	echo
+
 	install_open_code_review
 	echo
 
@@ -2034,7 +2055,7 @@ main() {
 	echo
 	echo "Next steps:"
 	echo "  1. Restart your terminal"
-	echo "  2. Run 'claude' to start Claude Code (or 'agy' for Antigravity CLI, 'cmd' for Command Code, 'grok' for Grok CLI, 'mimo' for MiMo-Code)"
+	echo "  2. Run 'claude' to start Claude Code (or 'agy' for Antigravity CLI, 'cmd' for Command Code, 'grok' for Grok CLI, 'mimo' for MiMo-Code, 'pool' for Pool CLI)"
 	echo "  3. Enable plugins with 'claude plugin enable <plugin-name>'"
 	echo "  4. Check out the README.md for more information"
 	echo

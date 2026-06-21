@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Pool CLI, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, MiMo-Code, Open Code Review, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, MiMo-Code, Pool CLI, Open Code Review, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, agentmemory, sem
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -51,6 +51,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
 | **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Kanagawa palette staged (`tokyonight` until built-in)                                                                                                                                         |
 | **MiMo-Code**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                             |
+| **Pool CLI**    | (uses Poolside ACP agent server)                                                                 | -                                                                                                                                                                                             |
 
 ### 📋 MCP Server Details
 
@@ -2341,6 +2342,81 @@ Invite builders to try the **MiMo Open Platform** — Xiaomi's most powerful AI 
 **Invite Code:** `EAEGUP`
 
 👉 [Sign up at platform.xiaomimimo.com](https://platform.xiaomimimo.com?ref=EAEGUP) — code auto-filled on sign-up
+
+</details>
+
+---
+
+## 🎱 Pool CLI (Optional)
+
+Poolside's ACP-based AI coding assistant for the terminal. [Homepage](https://poolside.ai) | [Docs](https://docs.poolside.ai)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### 📋 Installation
+
+```bash
+npm install -g @poolside/pool
+```
+
+Alternatively, use the curl installer:
+
+```bash
+curl -fsSL https://poolside.ai/cli/install.sh | bash
+```
+
+### 🔧 Configuration
+
+Run the setup script to install configurations to `~/.config/poolside/`:
+
+```bash
+./cli.sh
+```
+
+The setup script automatically copies agent guidelines.
+
+### ✨ Key Features
+
+- **ACP Protocol** — Agent Client Protocol client and server for Poolside's coding agent
+- **Interactive & Non-interactive** — Use `pool` for interactive sessions or `pool exec` for scripting
+- **Session Management** — Resume previous sessions with `-r` flag
+- **Git Worktree** — Run sessions in isolated git worktrees with `-w` flag
+- **Sandbox Support** — Optional sandboxing for safe code execution
+- **MCP Support** — Manage MCP servers via `pool mcp` command
+- **Secrets Management** — Secure credential handling via `pool secrets`
+
+### 📖 Agent Guidelines
+
+Installed to `~/.config/poolside/AGENTS.md` with instructions for:
+
+- Session management with tmux
+- Using fff MCP for file search
+- Following best practices from `~/.ai-tools/best-practices.md`
+- qmd knowledge management integration
+- Git safety guidelines
+
+### Usage
+
+```bash
+# Start Pool CLI
+pool
+
+# Run non-interactively (headless mode)
+pool exec "Analyze the test coverage for this project"
+
+# Use with a specific agent server
+pool -s
+
+# Resume a previous session
+pool -r
+
+# Run in a git worktree
+pool -w feature-branch
+
+# Login to Poolside
+pool login
+```
 
 </details>
 
