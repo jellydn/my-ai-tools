@@ -1,38 +1,36 @@
 pool:
-  api_url: https://inference.poolside.ai
+    api_url: https://inference.poolside.ai
 mcp_servers:
-  agentmemory:
-    command: npx
-    args:
-      - -y
-      - ""
-  context7:
-    command: npx
-    args:
-      - -y
-      - "@upstash/context7-mcp@latest"
-  fff:
-    command: fff-mcp
-  logpilot:
-    command: logpilot
-  qmd:
-    command: qmd
-  react-grab-mcp:
-    command: npx
-    args:
-      - -y
-      - ""
-      - "@react-grab/mcp"
-      - ""
-  sem:
-    command: sem-mcp
-  sequential-thinking:
-    command: npx
-    args:
-      - -y
-      - ""
-# sandbox:
-#     image: alpine:latest
-#     filesystem:
-#         workspaces:
-#             access: read-only
+    agentmemory:
+        command: npx
+        args:
+            - -y
+            - '@agentmemory/mcp'
+    context7:
+        command: npx
+        args:
+            - -y
+            - '@upstash/context7-mcp@latest'
+    fff:
+        command: fff-mcp
+    logpilot:
+        command: logpilot
+        args:
+            - mcp-server
+    qmd:
+        command: qmd
+        args:
+            - mcp
+    react-grab-mcp:
+        command: npx
+        args:
+            - -y
+            - '@react-grab/mcp'
+            - --stdio
+    sem:
+        command: sem-mcp
+    sequential-thinking:
+        command: npx
+        args:
+            - -y
+            - '@modelcontextprotocol/server-sequential-thinking'
