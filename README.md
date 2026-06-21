@@ -2385,6 +2385,10 @@ The setup script automatically copies agent guidelines.
 - **Sandbox Support** — Optional sandboxing for safe code execution
 - **MCP Support** — Manage MCP servers via `pool mcp` command
 - **Secrets Management** — Secure credential handling via `pool secrets`
+- **Built-in Skills** — Three skills included at `~/.config/poolside/skills/`:
+  - `configure-sandbox` — Walk through sandboxing setup (read-only/read-write, network policy, workspace vs global)
+  - `pool-product-reference` — Answer questions about the CLI itself (installation, slash commands, MCP/ACP, config, logs)
+  - `skill-creator` — Guide for creating new Pool CLI skills
 
 ### 📖 Agent Guidelines
 
