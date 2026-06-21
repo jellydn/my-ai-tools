@@ -352,9 +352,6 @@ copy_pool_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/pool/AGENTS.md" "$HOME/.config/poolside/" || true
 
-	# mcp.json is a reference file — Pool CLI registers MCP servers via 'pool mcp add'
-	copy_config_file "$SCRIPT_DIR/configs/pool/mcp.json" "$HOME/.config/poolside/" || true
-
 	setup_pool_mcp_servers
 
 	log_success "Pool CLI configs copied"

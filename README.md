@@ -2379,7 +2379,6 @@ The setup script copies agent guidelines and MCP server configuration. Pool CLI'
 | File                    | Purpose                                  | Managed by repo? |
 | ----------------------- | ---------------------------------------- | ---------------- |
 | `AGENTS.md`             | Agent guidelines (tmux, fff, git safety) | ✅ Yes           |
-| `mcp.json`              | MCP server configuration (8 servers)     | ✅ Yes           |
 | `pool.json`             | Main CLI config (agent servers, models)  | User-managed     |
 | `settings.yaml`         | Agent settings (sandbox, permissions)    | User-managed     |
 | `credentials.json`      | Authentication credentials               | 🔒 Local only    |

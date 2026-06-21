@@ -635,7 +635,6 @@ generate_pool_configs() {
 	execute "mkdir -p $SCRIPT_DIR/configs/pool"
 
 	copy_single "$HOME/.config/poolside/AGENTS.md" "$SCRIPT_DIR/configs/pool/AGENTS.md"
-	copy_single "$HOME/.config/poolside/mcp.json" "$SCRIPT_DIR/configs/pool/mcp.json"
 
 	log_success "Pool CLI configs generated"
 }
