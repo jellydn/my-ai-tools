@@ -338,6 +338,8 @@ copy_pool_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/pool/AGENTS.md" "$HOME/.config/poolside/" || true
 
+	copy_config_file "$SCRIPT_DIR/configs/pool/mcp.json" "$HOME/.config/poolside/" || true
+
 	log_success "Pool CLI configs copied"
 }
 
