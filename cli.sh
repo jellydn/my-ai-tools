@@ -635,8 +635,13 @@ install_mcp_servers_from_registry() {
 			continue
 		fi
 
-		# Build install command
-		local install_cmd="$tool_cmd mcp add --scope user --transport stdio $server_name --"
+		# Build install command — Pool CLI uses simpler syntax (no --scope/--transport for stdio)
+		local install_cmd
+		if [ "$tool_cmd" = "pool" ]; then
+			install_cmd="$tool_cmd mcp add $server_name --"
+		else
+			install_cmd="$tool_cmd mcp add --scope user --transport stdio $server_name --"
+		fi
 		install_cmd="$install_cmd $(printf '%q' "$command")"
 		for arg in "${args_array[@]}"; do
 			install_cmd="$install_cmd $(printf '%q' "$arg")"
