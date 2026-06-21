@@ -1872,6 +1872,8 @@ create_tool_skills_symlinks() {
 		"$HOME/.codex/skills"
 		"$HOME/.commandcode/skills"
 		"$HOME/.config/mimocode/skills"
+		"$HOME/.config/poolside/skills"
+		"$HOME/.grok/skills"
 	)
 
 	for tool_dir in "${tool_dirs[@]}"; do

@@ -150,3 +150,8 @@ POOL_CONFIG_DIR="$REPO_ROOT/configs/pool"
 	run grep -F '$HOME/.config/poolside/mcp.json' "$REPO_ROOT/generate.sh"
 	[ "$status" -eq 0 ]
 }
+
+@test "cli.sh creates poolside skills symlink" {
+	run grep -F '$HOME/.config/poolside/skills' "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+}
