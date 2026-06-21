@@ -1967,7 +1967,7 @@ main() {
 	echo "║                        AI Tools Setup                                ║"
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Antigravity         ║"
 	echo "║  Pi • Kilo • Copilot • Cursor • Factory Droid • Cline • Command Code  ║"
-	echo "║  Grok • MiMo-Code • Pool CLI                                           ║"
+	echo "║  Grok • MiMo-Code • Pool CLI                                          ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
