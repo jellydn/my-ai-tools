@@ -590,9 +590,9 @@ install_mcp_servers_from_registry() {
 		# Parse args into array (args are delimited by SOH character)
 		local args_array=()
 		if [ -n "$args_delimited" ]; then
-			while IFS= read -r -d $'\x01' arg; do
-				args_array+=("$arg")
-			done <<<"$args_delimited"
+		while IFS= read -r -d $'\x01' arg; do
+			[ -n "$arg" ] && args_array+=("$arg")
+		done <<<"$args_delimited"
 		fi
 
 		# Check prerequisites
@@ -696,8 +696,8 @@ install_mcp_servers_from_registry() {
 			(.value.name // empty),
 			(.value.description // empty),
 			(.value.command // empty),
-			(.value.args | join("")),
-			(.value.requires | join("")),
+			(.value.args | join("") + ""),
+			(.value.requires | join("") + ""),
 			(.value.category // empty)
 		] | @tsv
 	' "$registry_file")
