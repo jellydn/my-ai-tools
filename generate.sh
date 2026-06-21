@@ -635,6 +635,11 @@ generate_pool_configs() {
 	execute "mkdir -p $SCRIPT_DIR/configs/pool"
 
 	copy_single "$HOME/.config/poolside/AGENTS.md" "$SCRIPT_DIR/configs/pool/AGENTS.md"
+	copy_single "$HOME/.config/poolside/pool.json" "$SCRIPT_DIR/configs/pool/pool.json"
+	copy_single "$HOME/.config/poolside/settings.yaml" "$SCRIPT_DIR/configs/pool/settings.yaml"
+
+	# Export optional subdirectories (skills/)
+	[ -d "$HOME/.config/poolside/skills" ] && copy_directory "$HOME/.config/poolside/skills" "$SCRIPT_DIR/configs/pool/skills"
 
 	log_success "Pool CLI configs generated"
 }
