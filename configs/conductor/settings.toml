@@ -1,6 +1,18 @@
 "$schema" = "https://conductor.build/schemas/settings.schema.json"
+claude_provider = "custom"
+enterprise_data_privacy = true
 
 [git]
 archive_on_merge = true
 branch_prefix_type = "github_username"
 delete_branch_on_archive = false
+
+[models]
+default = "claude:opus-4-8-1m"
+default_plan_mode = true
+review = "gpt-5.5"
+
+[models.codex]
+default_thinking_level = "high"
+personality = "pragmatic"
+review_thinking_level = "xhigh"
