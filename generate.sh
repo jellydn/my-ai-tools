@@ -503,6 +503,31 @@ generate_cursor_configs() {
 	fi
 }
 
+generate_conductor_configs() {
+	log_info "Generating Conductor configs..."
+
+	if [ ! -d "$HOME/.conductor" ] && [ ! -d "/Applications/Conductor.app" ]; then
+		log_warning "Conductor not found"
+		return 0
+	fi
+
+	execute "mkdir -p \"$SCRIPT_DIR/configs/conductor\""
+
+	if [ -f "$HOME/.conductor/settings.toml" ]; then
+		copy_single "$HOME/.conductor/settings.toml" "$SCRIPT_DIR/configs/conductor/settings.toml"
+		log_success "Conductor settings generated"
+	else
+		log_warning "Conductor settings not found: $HOME/.conductor/settings.toml"
+	fi
+
+	if [ -f "$HOME/.conductor/AGENTS.md" ]; then
+		copy_single "$HOME/.conductor/AGENTS.md" "$SCRIPT_DIR/configs/conductor/AGENTS.md"
+		log_success "Conductor AGENTS.md generated"
+	else
+		log_warning "Conductor AGENTS.md not found: $HOME/.conductor/AGENTS.md"
+	fi
+}
+
 generate_factory_configs() {
 	log_info "Generating Factory Droid configs..."
 
@@ -724,6 +749,9 @@ main() {
 	echo
 
 	generate_cursor_configs
+	echo
+
+	generate_conductor_configs
 	echo
 
 	generate_factory_configs

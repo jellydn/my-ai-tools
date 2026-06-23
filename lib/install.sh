@@ -925,3 +925,12 @@ install_open_code_review() {
 	install_npm_tool "Alibaba Open Code Review" "ocr" "@alibaba-group/open-code-review" \
 		"npm install -g @alibaba-group/open-code-review"
 }
+
+install_conductor() {
+	if [ -d "/Applications/Conductor.app" ]; then
+		log_success "Conductor is already installed"
+	else
+		log_info "Conductor is a macOS app - download from https://www.conductor.build"
+		log_info "After installing, run this script again to configure Conductor"
+	fi
+}

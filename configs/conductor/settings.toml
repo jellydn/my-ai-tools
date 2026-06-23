@@ -1,0 +1,6 @@
+"$schema" = "https://conductor.build/schemas/settings.schema.json"
+
+[git]
+archive_on_merge = true
+branch_prefix_type = "github_username"
+delete_branch_on_archive = false

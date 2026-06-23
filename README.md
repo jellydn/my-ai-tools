@@ -23,13 +23,13 @@
 
 The most-used skills across Claude Code, OpenCode, and other AI tools:
 
-| Skill | What it does | When to use it |
-| --- | --- | --- |
-| **adr** | Generate Architecture Decision Records from design discussions | Before implementing significant technical changes — captures the why, alternatives considered, and consequences |
-| **codemap** | Parallel codebase analysis producing 7 structured documents | Onboarding to a new project, or before major refactoring — gives you the full picture fast |
-| **thermo-nuclear-code-quality-review** | Extremely strict maintainability and structural code quality review | Before merging PRs — catches issues that regular linters miss |
-| **babysit-pr** | Continuously monitor open PRs, auto-fix CI failures, surface review feedback | After pushing a PR — hands-off monitoring until it's ready to merge |
-| **improve** | Audit any codebase and write implementation plans for cheaper models to execute | When you want a senior-level code review with actionable, self-contained plans |
+| Skill                                  | What it does                                                                    | When to use it                                                                                                  |
+| -------------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| **adr**                                | Generate Architecture Decision Records from design discussions                  | Before implementing significant technical changes — captures the why, alternatives considered, and consequences |
+| **codemap**                            | Parallel codebase analysis producing 7 structured documents                     | Onboarding to a new project, or before major refactoring — gives you the full picture fast                      |
+| **thermo-nuclear-code-quality-review** | Extremely strict maintainability and structural code quality review             | Before merging PRs — catches issues that regular linters miss                                                   |
+| **babysit-pr**                         | Continuously monitor open PRs, auto-fix CI failures, surface review feedback    | After pushing a PR — hands-off monitoring until it's ready to merge                                             |
+| **improve**                            | Audit any codebase and write implementation plans for cheaper models to execute | When you want a senior-level code review with actionable, self-contained plans                                  |
 
 ## 🔌 MCP Servers & Plugins Overview
 
@@ -46,6 +46,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
 | **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
 | **Cursor**      | context7 (via bunx), sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem   | -                                                                                                                                                                                             |
+| **Conductor**   | Per-harness (Claude Code, Codex, Cursor MCP configs)                                             | Orchestrates parallel agents in isolated workspaces                                                                                                                                           |
 | **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | core, security-engineer, droid-evolved, autoresearch                                                                                                                                          |
 | **Orca**        | -                                                                                                | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                                            |
 | **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
@@ -683,28 +684,28 @@ Real-world projects built using these AI tools:
 
 Official and community-maintained skill collections for specific frameworks:
 
-| Framework                  | Skills Repository                                                                                             | Description                                                                                                                                                                                                                                                                         |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **UI/UX Design**           | [Interface Design](https://interface-design.dev/)                                                             | Comprehensive guide to interface design patterns and best practices for anyone working with UI/UX development.                                                                                                                                                                      |
-| **Expo**                   | [expo/skills](https://github.com/expo/skills)                                                                 | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows.                                                                                                                                        |
-| **Next.js**                | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)                                       | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.                                                                                                                                                 |
-| **React Patterns**         | [factory-ai/factory-plugins](https://skills.sh/factory-ai/factory-plugins/no-use-effect)                      | No-use-effect skill: 5 patterns to replace useEffect with better alternatives - derived state, data-fetching libraries, event handlers, useMountEffect, and key prop resets.                                                                                                        |
-| **Andrej Karpathy**        | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)                 | Community skills inspired by Andrej Karpathy's coding principles and practices for AI-focused development workflows.                                                                                                                                                                |
-| **Humanizer**              | [blader/humanizer](https://github.com/blader/humanizer)                                                       | Removes signs of AI-generated writing from text. Based on Wikipedia's AI writing detection guide, it detects 24 patterns to make text sound more natural and human.                                                                                                                 |
-| **Claude Skills**          | [jezweb/claude-skills](https://github.com/jezweb/claude-skills)                                               | 97 production-ready skills for Claude Code CLI including Cloudflare, React, AI integrations, and more. Includes context-mate for project analysis and workflow management.                                                                                                          |
-| **OZ Skills**              | [warpdotdev/oz-skills](https://github.com/warpdotdev/oz-skills)                                               | 14 production-ready skills by Warp. Covers CI fix, PR creation, web testing, accessibility audits, and more. |
-| **Auto-Review**            | [openclaw/agent-skills](https://github.com/openclaw/agent-skills/blob/main/skills/autoreview/SKILL.md)        | Auto-review skill for structured and actionable pull request feedback workflows.                                                                                                                                                                                                    |
-| **Skills Discovery**       | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.                                                                                                                                                 |
-| **Matt Pocock**            | [mattpocock/skills](https://github.com/mattpocock/skills)                                                     | Community skills by Matt Pocock. Includes `grill-with-docs` for docs-grounded plan stress-testing, `improve-codebase-architecture` for finding deepening opportunities, and more.                                                                                                   |
-| **Mitsuhiko**              | [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff)                                             | Skills and extensions by Armin Ronacher. Includes tmux session control, GitHub CLI, web browser automation, Sentry integration, mermaid diagrams, and more.                                                                                                                         |
-| **Git Stacked PRs**        | [github/gh-stack](https://github.com/github/gh-stack)                                                         | GitHub CLI extension for managing stacked branches and pull requests. Create, push, rebase, sync, and navigate stacks of dependent PRs for incremental code review workflows.                                                                                                       |
-| **Facts**                  | [av/facts](https://github.com/av/facts)                                                                       | Track project specs and facts in a `.facts` file. Lifecycle stages (`@draft` → `@spec` → `@implemented`) with shell-command verification. Ships four skills: `facts`, `facts-discover`, `facts-refine`, and `facts-implement`.                                                      |
-| **Modern Web Guidance**    | [GoogleChrome/modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance)                       | Search tool for modern web development best practices (HTML, CSS, accessibility, and client-side JS APIs).                                                                                                                                                                          |
-| **Plannotator Setup Goal** | [backnotprop/plannotator](https://github.com/backnotprop/plannotator)                                         | Turn ideas into structured goal packages with fact sheets and execution plans, gated by Plannotator annotation                                                                                                                                                                      |
-| **Codex PR Babysitter**    | [openai/codex](https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md)                   | Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required                                                                                      |
-| **Last 30 Days**           | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill)                                     | Research what people actually say about any topic in the last 30 days. Pulls from Reddit, X, YouTube, TikTok, HN, Polymarket, GitHub, and the web.                                                                                                                                  |
-| **Improve**                | [shadcn/improve](https://github.com/shadcn/improve)                                                           | Audit any codebase and write implementation plans for cheaper models to execute. Uses expensive model for planning, cheap model for execution.                                                                                                                                      |
-| **Engram**                 | [Gentleman-Programming/engram](https://github.com/Gentleman-Programming/engram)                             | Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, and git-based cross-machine sync.                                                                                                                                             |
+| Framework                  | Skills Repository                                                                                             | Description                                                                                                                                                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **UI/UX Design**           | [Interface Design](https://interface-design.dev/)                                                             | Comprehensive guide to interface design patterns and best practices for anyone working with UI/UX development.                                                                                                                 |
+| **Expo**                   | [expo/skills](https://github.com/expo/skills)                                                                 | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows.                                                                                   |
+| **Next.js**                | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)                                       | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.                                                                                            |
+| **React Patterns**         | [factory-ai/factory-plugins](https://skills.sh/factory-ai/factory-plugins/no-use-effect)                      | No-use-effect skill: 5 patterns to replace useEffect with better alternatives - derived state, data-fetching libraries, event handlers, useMountEffect, and key prop resets.                                                   |
+| **Andrej Karpathy**        | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)                 | Community skills inspired by Andrej Karpathy's coding principles and practices for AI-focused development workflows.                                                                                                           |
+| **Humanizer**              | [blader/humanizer](https://github.com/blader/humanizer)                                                       | Removes signs of AI-generated writing from text. Based on Wikipedia's AI writing detection guide, it detects 24 patterns to make text sound more natural and human.                                                            |
+| **Claude Skills**          | [jezweb/claude-skills](https://github.com/jezweb/claude-skills)                                               | 97 production-ready skills for Claude Code CLI including Cloudflare, React, AI integrations, and more. Includes context-mate for project analysis and workflow management.                                                     |
+| **OZ Skills**              | [warpdotdev/oz-skills](https://github.com/warpdotdev/oz-skills)                                               | 14 production-ready skills by Warp. Covers CI fix, PR creation, web testing, accessibility audits, and more.                                                                                                                   |
+| **Auto-Review**            | [openclaw/agent-skills](https://github.com/openclaw/agent-skills/blob/main/skills/autoreview/SKILL.md)        | Auto-review skill for structured and actionable pull request feedback workflows.                                                                                                                                               |
+| **Skills Discovery**       | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.                                                                                            |
+| **Matt Pocock**            | [mattpocock/skills](https://github.com/mattpocock/skills)                                                     | Community skills by Matt Pocock. Includes `grill-with-docs` for docs-grounded plan stress-testing, `improve-codebase-architecture` for finding deepening opportunities, and more.                                              |
+| **Mitsuhiko**              | [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff)                                             | Skills and extensions by Armin Ronacher. Includes tmux session control, GitHub CLI, web browser automation, Sentry integration, mermaid diagrams, and more.                                                                    |
+| **Git Stacked PRs**        | [github/gh-stack](https://github.com/github/gh-stack)                                                         | GitHub CLI extension for managing stacked branches and pull requests. Create, push, rebase, sync, and navigate stacks of dependent PRs for incremental code review workflows.                                                  |
+| **Facts**                  | [av/facts](https://github.com/av/facts)                                                                       | Track project specs and facts in a `.facts` file. Lifecycle stages (`@draft` → `@spec` → `@implemented`) with shell-command verification. Ships four skills: `facts`, `facts-discover`, `facts-refine`, and `facts-implement`. |
+| **Modern Web Guidance**    | [GoogleChrome/modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance)                       | Search tool for modern web development best practices (HTML, CSS, accessibility, and client-side JS APIs).                                                                                                                     |
+| **Plannotator Setup Goal** | [backnotprop/plannotator](https://github.com/backnotprop/plannotator)                                         | Turn ideas into structured goal packages with fact sheets and execution plans, gated by Plannotator annotation                                                                                                                 |
+| **Codex PR Babysitter**    | [openai/codex](https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md)                   | Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required                                 |
+| **Last 30 Days**           | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill)                                     | Research what people actually say about any topic in the last 30 days. Pulls from Reddit, X, YouTube, TikTok, HN, Polymarket, GitHub, and the web.                                                                             |
+| **Improve**                | [shadcn/improve](https://github.com/shadcn/improve)                                                           | Audit any codebase and write implementation plans for cheaper models to execute. Uses expensive model for planning, cheap model for execution.                                                                                 |
+| **Engram**                 | [Gentleman-Programming/engram](https://github.com/Gentleman-Programming/engram)                               | Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, and git-based cross-machine sync.                                                                                          |
 
 **Installation:**
 
@@ -1581,39 +1582,39 @@ Then register them in `~/.pi/agent/settings.json`:
 
 **Package Overview:**
 
-| Package                     | Description                                                                |
-| --------------------------- | -------------------------------------------------------------------------- |
-| `@plannotator/pi-extension` | Interactive plan review with visual annotation                             |
-| `pi-autoresearch`           | Autonomous experiment loop for optimization targets                        |
-| `@ff-labs/pi-fff`           | FFF-powered fuzzy file and content search                                  |
-| `pi-mcp-adapter`            | MCP (Model Context Protocol) adapter for Pi                                |
-| `pi-simplify`               | Reviews changed code for clarity, consistency, and maintainability         |
-| `pi-manage-todo-list`       | GitHub Copilot-style todo list management tool                             |
-| `pi-btw`                    | Parallel side conversations with `/btw` command                            |
-| `pi-code-previews`          | Live previews of code changes during editing                               |
-| `pi-codex-goal`             | Codex-style goal management integration                                    |
-| `pi-dynamic-workflows`      | Dynamic workflow automation for Pi                                         |
-| `pi-commandcode-provider`   | CommandCode model provider integration for Pi                              |
-| `@ollama/pi-web-search`     | Web search and content fetching for AI models                              |
-| `pi-footer`                 | Customizable status footer for the Pi TUI                                  |
-| `pi-tps-meter`              | Live tokens-per-second meter for the Pi TUI status bar                     |
-| `@juicesharp/rpiv-advisor` | Second opinion from a stronger reviewer model before taking action         |
-| `pi-cursor-sdk`             | Pi provider extension backed by @cursor/sdk local agents                   |
+| Package                     | Description                                                        |
+| --------------------------- | ------------------------------------------------------------------ |
+| `@plannotator/pi-extension` | Interactive plan review with visual annotation                     |
+| `pi-autoresearch`           | Autonomous experiment loop for optimization targets                |
+| `@ff-labs/pi-fff`           | FFF-powered fuzzy file and content search                          |
+| `pi-mcp-adapter`            | MCP (Model Context Protocol) adapter for Pi                        |
+| `pi-simplify`               | Reviews changed code for clarity, consistency, and maintainability |
+| `pi-manage-todo-list`       | GitHub Copilot-style todo list management tool                     |
+| `pi-btw`                    | Parallel side conversations with `/btw` command                    |
+| `pi-code-previews`          | Live previews of code changes during editing                       |
+| `pi-codex-goal`             | Codex-style goal management integration                            |
+| `pi-dynamic-workflows`      | Dynamic workflow automation for Pi                                 |
+| `pi-commandcode-provider`   | CommandCode model provider integration for Pi                      |
+| `@ollama/pi-web-search`     | Web search and content fetching for AI models                      |
+| `pi-footer`                 | Customizable status footer for the Pi TUI                          |
+| `pi-tps-meter`              | Live tokens-per-second meter for the Pi TUI status bar             |
+| `@juicesharp/rpiv-advisor`  | Second opinion from a stronger reviewer model before taking action |
+| `pi-cursor-sdk`             | Pi provider extension backed by @cursor/sdk local agents           |
 
 ### Enabled Models
 
 Pi is configured with multi-provider model access:
 
-| Provider              | Models                                                                   |
-| --------------------- | ------------------------------------------------------------------------ |
-| github-copilot        | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                                       |
-| commandcode           | `moonshotai/Kimi-K2.6`, `xiaomi/mimo-v2.5-pro`                           |
-|                       | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash`                 |
-|                       | `MiniMaxAI/MiniMax-M3`, `MiniMaxAI/MiniMax-M2.7`                         |
-| ollama                | `minimax-m2.5:cloud`                                                     |
-| openrouter            | `openrouter/owl-alpha`                                                   |
-| google                | `gemini-3.5-flash`                                                       |
-| cursor                | `auto`, `composer-2.5`                                                   |
+| Provider       | Models                                                   |
+| -------------- | -------------------------------------------------------- |
+| github-copilot | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                       |
+| commandcode    | `moonshotai/Kimi-K2.6`, `xiaomi/mimo-v2.5-pro`           |
+|                | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash` |
+|                | `MiniMaxAI/MiniMax-M3`, `MiniMaxAI/MiniMax-M2.7`         |
+| ollama         | `minimax-m2.5:cloud`                                     |
+| openrouter     | `openrouter/owl-alpha`                                   |
+| google         | `gemini-3.5-flash`                                       |
+| cursor         | `auto`, `composer-2.5`                                   |
 
 > See [OpenRouter free models](https://openrouter.ai/collections/free-models) for additional no-cost options.
 
@@ -1826,6 +1827,73 @@ cursor /path/to/file
 
 # Check the CLI version
 cursor --version
+```
+
+</details>
+
+---
+
+## ⚡ Conductor (Optional)
+
+Orchestrate parallel AI coding agents (Claude Code, Codex, Cursor, OpenCode) in isolated workspaces. [Docs](https://www.conductor.build/docs)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Prerequisites
+
+- macOS (Conductor is a macOS desktop app)
+- GitHub authentication via `gh auth status`
+- At least one agent provider (Claude Code, Codex, or Cursor API key)
+
+### Installation
+
+Download Conductor from [conductor.build](https://www.conductor.build) or use Homebrew:
+
+```bash
+brew install conductorbuild/tap/conductor
+```
+
+### Configuration
+
+Conductor configs are stored in [`configs/conductor/`](configs/conductor/) and installed to `~/.conductor/`.
+
+- [`settings.toml`](configs/conductor/settings.toml) — User-level settings (model defaults, git behavior, harness config)
+- [`AGENTS.md`](configs/conductor/AGENTS.md) — Agent guidelines and best practices
+
+Project-level settings go in `.conductor/settings.toml` at the repository root:
+
+```toml
+"$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
+
+[scripts]
+setup = "prek install"
+```
+
+### 📋 MCP Servers
+
+Conductor does not define its own MCP config format. MCP servers are configured per harness:
+
+- **Claude Code**: `~/.claude.json` or `.mcp.json` at repo root
+- **Codex**: `~/.codex/config.toml` or `codex mcp add`
+- **Cursor**: `~/.cursor/mcp.json` or `.cursor/mcp.json` at repo root
+
+When you open a Conductor workspace in Cursor, Cursor reads project-level MCP config from that workspace checkout.
+
+### Usage
+
+```bash
+# Open Conductor app
+open -a Conductor
+
+# Create a new workspace with a task
+conductor start "Implement user authentication"
+
+# List active workspaces
+conductor list
+
+# Open workspace in Cursor
+conductor open --cursor
 ```
 
 </details>
@@ -2567,10 +2635,6 @@ See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for det
 ### cmux
 
 [**cmux**](https://github.com/manaflow-ai/cmux) - Ghostty-based macOS terminal with vertical tabs and notifications for AI coding agents.
-
-### Conductor
-
-[**Conductor**](https://www.conductor.build/) - Orchestrate parallel AI coding agents to work on multiple tasks simultaneously.
 
 ### Helmor
 
