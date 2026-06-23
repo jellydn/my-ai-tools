@@ -38,7 +38,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                                              |
 | **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                             |
 | **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl   | -                                                                                                                                                                                             |
-| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory, sem                        | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, ollama-web-search, footer, tps-meter) |
+| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory, sem                        | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, pi-web-access, footer, tps-meter) |
 | **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
 | **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                                |
 | **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem (via plugin) | my-ai-tools-gemini-migration                                                                                                                                                                  |
@@ -1571,7 +1571,7 @@ Then register them in `~/.pi/agent/settings.json`:
 		"npm:pi-codex-goal",
 		"npm:pi-dynamic-workflows",
 		"npm:pi-commandcode-provider",
-		"npm:@ollama/pi-web-search",
+		"npm:pi-web-access",
 		"npm:pi-footer",
 		"npm:pi-tps-meter",
 		"npm:@juicesharp/rpiv-advisor",
@@ -1595,7 +1595,7 @@ Then register them in `~/.pi/agent/settings.json`:
 | `pi-codex-goal`             | Codex-style goal management integration                            |
 | `pi-dynamic-workflows`      | Dynamic workflow automation for Pi                                 |
 | `pi-commandcode-provider`   | CommandCode model provider integration for Pi                      |
-| `@ollama/pi-web-search`     | Web search and content fetching for AI models                      |
+| `pi-web-access`              | Web access and content fetching for AI models                              |
 | `pi-footer`                 | Customizable status footer for the Pi TUI                          |
 | `pi-tps-meter`              | Live tokens-per-second meter for the Pi TUI status bar             |
 | `@juicesharp/rpiv-advisor`  | Second opinion from a stronger reviewer model before taking action |
@@ -1868,6 +1868,29 @@ Project-level settings go in `.conductor/settings.toml` at the repository root:
 
 [scripts]
 setup = "prek install"
+```
+
+**User-level settings** in `~/.conductor/settings.toml`:
+
+```toml
+"$schema" = "https://conductor.build/schemas/settings.schema.json"
+claude_provider = "custom"
+enterprise_data_privacy = true
+
+[git]
+archive_on_merge = true
+branch_prefix_type = "github_username"
+delete_branch_on_archive = false
+
+[models]
+default = "claude:opus-4-8-1m"
+default_plan_mode = true
+review = "gpt-5.5"
+
+[models.codex]
+default_thinking_level = "high"
+personality = "pragmatic"
+review_thinking_level = "xhigh"
 ```
 
 ### 📋 MCP Servers
