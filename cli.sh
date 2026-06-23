@@ -261,6 +261,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/kilo" "$BACKUP_DIR" "kilo"
 		copy_config_dir "$HOME/.pi" "$BACKUP_DIR" "pi"
 		copy_config_dir "$HOME/.cursor" "$BACKUP_DIR" "cursor"
+		copy_config_dir "$HOME/.conductor" "$BACKUP_DIR" "conductor"
 		copy_config_dir "$HOME/.factory" "$BACKUP_DIR" "factory"
 		copy_config_dir "$HOME/Library/Application Support/orca/agent-hooks" "$BACKUP_DIR/orca" "agent-hooks"
 		copy_config_dir "$HOME/.cline" "$BACKUP_DIR" "cline"
@@ -416,6 +417,7 @@ copy_configurations() {
 	copy_commandcode_configs
 	copy_copilot_configs
 	copy_cursor_configs
+	copy_conductor_configs
 	copy_factory_configs
 	copy_orca_configs
 	copy_cline_configs
@@ -1250,6 +1252,27 @@ copy_cursor_configs() {
 	log_success "Cursor configs copied"
 }
 
+copy_conductor_configs() {
+	local conductor_status
+	conductor_status=$(detect_tool --detailed "conductor" "$HOME/.conductor" "/Applications/Conductor.app") || conductor_status="missing"
+	if [ "$conductor_status" = "missing" ]; then
+		log_info "Conductor not detected - skipping Conductor config installation"
+		return 0
+	fi
+
+	log_info "Detected Conductor (via $conductor_status)"
+	execute_quoted mkdir -p "$HOME/.conductor"
+
+	if [ -f "$SCRIPT_DIR/configs/conductor/settings.toml" ]; then
+		copy_config_file "$SCRIPT_DIR/configs/conductor/settings.toml" "$HOME/.conductor/"
+	fi
+	if [ -f "$SCRIPT_DIR/configs/conductor/AGENTS.md" ]; then
+		execute_quoted cp "$SCRIPT_DIR/configs/conductor/AGENTS.md" "$HOME/.conductor/"
+	fi
+
+	log_success "Conductor configs copied"
+}
+
 copy_factory_configs() {
 	local factory_status
 	factory_status=$(detect_tool --detailed "droid" "$HOME/.factory") || factory_status="missing"
@@ -2007,6 +2030,9 @@ main() {
 	echo
 
 	install_cursor
+	echo
+
+	install_conductor
 	echo
 
 	install_factory

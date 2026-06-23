@@ -83,13 +83,13 @@
 			"enabled": true,
 			"type": "local"
 		},
-		"sequential-thinking": {
-			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+		"sem": {
+			"command": ["sem-mcp"],
 			"enabled": true,
 			"type": "local"
 		},
-		"sem": {
-			"command": ["sem-mcp"],
+		"sequential-thinking": {
+			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
 			"enabled": true,
 			"type": "local"
 		}
