@@ -20,8 +20,8 @@
 		"cursor/auto",
 		"cursor/composer-2.5"
 	],
-	"hideThinkingBlock": false,
-	"lastChangelogVersion": "0.79.8",
+	"hideThinkingBlock": true,
+	"lastChangelogVersion": "0.79.10",
 	"packages": [
 		{
 			"skills": [],
@@ -37,11 +37,11 @@
 		"npm:pi-codex-goal",
 		"npm:pi-dynamic-workflows",
 		"npm:pi-commandcode-provider",
-		"npm:@ollama/pi-web-search",
 		"npm:pi-footer",
 		"npm:pi-tps-meter",
 		"npm:@juicesharp/rpiv-advisor",
-		"npm:pi-cursor-sdk"
+		"npm:pi-cursor-sdk",
+		"npm:pi-web-access"
 	],
 	"permissionLevel": "high",
 	"quietStartup": true,
