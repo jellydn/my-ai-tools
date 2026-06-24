@@ -1,24 +1,5 @@
 # 🤖 Qoder CLI Agent Guidelines
 
-[**Qoder**](https://qoder.com/cli) is an agentic coding platform. The `qodercli` entry command (binary: `qodercli`) ships first-class support for `-p`, `--print`, `--output-format=json`, `/init`, `/memory`, `/mcp`, `/status`, and `/effort`. Install with:
-
-- macOS/Linux: `curl -fsSL https://qoder.com/install | bash`
-- Windows PowerShell: `irm https://qoder.com/install.ps1 | iex`
-- Re-run with `--force` to upgrade in place.
-
-## 📍 Config Locations
-
-| Scope           | Path                                            |
-| --------------- | ----------------------------------------------- |
-| **User (home)** | `~/.qoder/settings.json`                        |
-| **Project**     | `<project>/.qoder/settings.json`               |
-| **Project local** (gitignored) | `<project>/.qoder/settings.local.json` |
-| **User AGENTS** | `~/.qoder/AGENTS.md`                            |
-| **Project AGENTS** | `<project>/AGENTS.md`                       |
-| **Project AGENTS local** | `<project>/AGENTS.local.md`        |
-
-Inside a project, run `/init` to scaffold a starter `AGENTS.md`, and `/memory` to manage it from the TUI. MCP servers are configured via `qodercli mcp add <name> -- <command>` and reloaded with `/mcp reload`.
-
 ## Session Management with tmux
 
 Run dev servers, tests, and interactive CLIs inside tmux with the **current directory name as the session name** for easy debugging:
