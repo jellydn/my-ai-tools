@@ -418,6 +418,7 @@ copy_configurations() {
 	copy_copilot_configs
 	copy_cursor_configs
 	copy_conductor_configs
+	copy_herdr_configs
 	copy_factory_configs
 	copy_orca_configs
 	copy_cline_configs
@@ -1273,6 +1274,22 @@ copy_conductor_configs() {
 	log_success "Conductor configs copied"
 }
 
+copy_herdr_configs() {
+	local herdr_status
+	herdr_status=$(detect_tool --detailed "herdr" "$HOME/.config/herdr" "$HOME/.herdr") || herdr_status="missing"
+	if [ "$herdr_status" = "missing" ]; then
+		log_info "herdr not detected - skipping herdr config installation"
+		return 0
+	fi
+
+	log_info "Detected herdr (via $herdr_status)"
+	execute_quoted mkdir -p "$HOME/.config/herdr"
+
+	copy_config_file "$SCRIPT_DIR/configs/herdr/AGENTS.md" "$HOME/.config/herdr/" || true
+
+	log_success "herdr configs copied"
+}
+
 copy_factory_configs() {
 	local factory_status
 	factory_status=$(detect_tool --detailed "droid" "$HOME/.factory") || factory_status="missing"
@@ -1972,7 +1989,7 @@ main() {
 	echo "║                        AI Tools Setup                                ║"
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Antigravity         ║"
 	echo "║  Pi • Kilo • Copilot • Cursor • Factory Droid • Cline • Command Code  ║"
-	echo "║  Grok • MiMo-Code                                                     ║"
+	echo "║  Grok • MiMo-Code • herdr                                             ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -2033,6 +2050,9 @@ main() {
 	echo
 
 	install_conductor
+	echo
+
+	install_herdr
 	echo
 
 	install_factory
