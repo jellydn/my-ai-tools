@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, MiMo-Code, Open Code Review, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Open Code Review, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, agentmemory, sem
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -53,6 +53,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Kanagawa palette staged (`tokyonight` until built-in)                                                                                                                                         |
 | **MiMo-Code**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                             |
 | **Qoder CLI**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
+| **Kiro CLI**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Steering files (AGENTS.md), slash commands, MCP servers, ACP                                                                |
 
 ### 📋 MCP Server Details
 
@@ -2498,6 +2499,30 @@ The official agent skill file teaches agents how to control herdr from inside a 
 
 For agents with a skill system, install as a skill named `herdr`. The skill activates when `HERDR_ENV=1` is set (agent is running inside a herdr-managed pane).
 
+### Usage
+
+```bash
+# Start herdr
+herdr
+
+# List panes in current workspace
+herdr pane list
+
+# Split a pane to the right and run a command
+herdr pane split 1-2 --direction right --no-focus
+herdr pane run 1-3 "npm run dev"
+
+# Wait for an agent to finish
+herdr wait agent-status 1-1 --status done --timeout 60000
+
+# Read another pane's output
+herdr pane read 1-1 --source recent --lines 50
+```
+
+See the full [herdr docs](https://herdr.dev/docs/) for details.
+
+</details>
+
 ---
 
 ## 🧠 Qoder CLI (Optional)
@@ -2593,27 +2618,66 @@ See the full [Qoder CLI docs](https://docs.qoder.com/en/cli/quick-start) for det
 
 </details>
 
+---
+
+## 🥷 Kiro CLI (Optional)
+
+Kiro Dev's AI coding assistant with native MCP support, steering files (AGENTS.md), and ACP (Agent Client Protocol) integration. Ships with `/model`, `/editor`, `/usage`, and custom agents. [Homepage](https://kiro.dev/) | [Docs](https://kiro.dev/docs/cli/installation/) | [GitHub](https://github.com/kirodotdev/Kiro)
+
+<details>
+<summary><strong>Installation &amp; Configuration</strong></summary>
+
+### Installation
+
+```bash
+# Mac/Linux
+curl -fsSL https://cli.kiro.dev/install | bash
+
+# Windows PowerShell
+irm https://kiro.dev/install.ps1 | iex
+```
+
+Or run this repo's installer:
+
+```bash
+./cli.sh
+```
+
+### Configuration
+
+Kiro CLI configs are stored in [`configs/kiro/`](configs/kiro/) and installed to `~/.kiro/`:
+
+- [`AGENTS.md`](configs/kiro/AGENTS.md) — Agent guidelines (Kiro uses steering files to guide agent behavior)
+- MCP servers are configured via `kiro mcp add <name> -- <command>` or hand-edited in `~/.kiro/settings.json`
+
+**Config Locations:**
+
+| Scope           | Path                                            |
+| --------------- | ----------------------------------------------- |
+| User config     | `~/.kiro/`                                      |
+| Steering files  | `~/.kiro/AGENTS.md`, `<project>/AGENTS.md`     |
+| Conversations   | `~/.kiro/conversations/`                        |
+
 ### Usage
 
 ```bash
-# Start herdr
-herdr
+# Start Kiro CLI
+kiro
 
-# List panes in current workspace
-herdr pane list
+# Non-interactive single prompt (headless mode)
+kiro --print "Explain the architecture of this codebase"
 
-# Split a pane to the right and run a command
-herdr pane split 1-2 --direction right --no-focus
-herdr pane run 1-3 "npm run dev"
+# Select model
+kiro /model
 
-# Wait for an agent to finish
-herdr wait agent-status 1-1 --status done --timeout 60000
+# Add an MCP server (global)
+kiro mcp add context7 -- npx -y @upstash/context7-mcp@latest
 
-# Read another pane's output
-herdr pane read 1-1 --source recent --lines 50
+# Check context usage
+kiro /usage
 ```
 
-See the full [herdr docs](https://herdr.dev/docs/) for details.
+See the full [Kiro CLI docs](https://kiro.dev/docs/cli/installation/) for details.
 
 </details>
 ---
