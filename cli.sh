@@ -419,6 +419,7 @@ copy_configurations() {
 	copy_cursor_configs
 	copy_conductor_configs
 	copy_herdr_configs
+	copy_qodercli_configs
 	copy_factory_configs
 	copy_orca_configs
 	copy_cline_configs
@@ -1290,6 +1291,22 @@ copy_herdr_configs() {
 	log_success "herdr configs copied"
 }
 
+copy_qodercli_configs() {
+	local qodercli_status
+	qodercli_status=$(detect_tool --detailed "qodercli" "$HOME/.qoder") || qodercli_status="missing"
+	if [ "$qodercli_status" = "missing" ]; then
+		log_info "Qoder CLI not detected - skipping Qoder CLI config installation"
+		return 0
+	fi
+
+	log_info "Detected Qoder CLI (via $qodercli_status)"
+	execute_quoted mkdir -p "$HOME/.qoder"
+
+	copy_config_file "$SCRIPT_DIR/configs/qodercli/AGENTS.md" "$HOME/.qoder/" || true
+
+	log_success "Qoder CLI configs copied"
+}
+
 copy_factory_configs() {
 	local factory_status
 	factory_status=$(detect_tool --detailed "droid" "$HOME/.factory") || factory_status="missing"
@@ -1988,8 +2005,7 @@ main() {
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Antigravity         ║"
-	echo "║  Pi • Kilo • Copilot • Cursor • Factory Droid • Cline • Command Code  ║"
-	echo "║  Grok • MiMo-Code • herdr                                             ║"
+	echo "║  Pi • Kilo • Copilot • Cursor • Factory Droid • Cline • Command Code  ║"	echo "║  Grok • MiMo-Code • herdr • Qoder CLI                                 ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -2053,6 +2069,9 @@ main() {
 	echo
 
 	install_herdr
+	echo
+
+	install_qodercli
 	echo
 
 	install_factory

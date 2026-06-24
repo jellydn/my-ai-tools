@@ -649,6 +649,21 @@ generate_mimo_configs() {
 	log_success "MiMo-Code configs generated"
 }
 
+generate_qodercli_configs() {
+	log_info "Generating Qoder CLI configs..."
+
+	if [ ! -d "$HOME/.qoder" ]; then
+		log_warning "Qoder CLI config directory not found: $HOME/.qoder"
+		return 0
+	fi
+
+	execute "mkdir -p $SCRIPT_DIR/configs/qodercli"
+
+	copy_single "$HOME/.qoder/AGENTS.md" "$SCRIPT_DIR/configs/qodercli/AGENTS.md"
+
+	log_success "Qoder CLI configs generated"
+}
+
 generate_cline_configs() {
 	log_info "Generating Cline configs..."
 
@@ -767,6 +782,9 @@ main() {
 	echo
 
 	generate_mimo_configs
+	echo
+
+	generate_qodercli_configs
 	echo
 
 	generate_best_practices
