@@ -1532,17 +1532,17 @@ Located in [`configs/pi/`](configs/pi/):
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 - [`models.json`](configs/pi/models.json) - Provider and model definitions (google-antigravity, ollama)
 
-Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `commandcode` as the default provider with `deepseek/deepseek-v4-pro` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `openai-codex` as the default provider with `gpt-5.4-mini` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `deepseek/deepseek-v4-pro`
-- **Default Provider**: `commandcode`
+- **Default Model**: `gpt-5.4-mini`
+- **Default Provider**: `openai-codex`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
 - **Quiet Startup**: Enabled (skips changelog on launch)
-- **Hide Thinking Block**: Disabled (shows thinking process)
+- **Hide Thinking Block**: Enabled (hides thinking process)
 
 ### Pi Packages
 
@@ -1604,18 +1604,14 @@ Then register them in `~/.pi/agent/settings.json`:
 
 ### Enabled Models
 
-Pi is configured with multi-provider model access:
+Pi is configured with multi-provider model access (`settings.json` `enabledModels`):
 
-| Provider       | Models                                                   |
-| -------------- | -------------------------------------------------------- |
-| github-copilot | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                       |
-| commandcode    | `moonshotai/Kimi-K2.6`, `xiaomi/mimo-v2.5-pro`           |
-|                | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash` |
-|                | `MiniMaxAI/MiniMax-M3`, `MiniMaxAI/MiniMax-M2.7`         |
-| ollama         | `minimax-m2.5:cloud`                                     |
-| openrouter     | `openrouter/owl-alpha`                                   |
-| google         | `gemini-3.5-flash`                                       |
-| cursor         | `auto`, `composer-2.5`                                   |
+| Provider     | Models                                                                  |
+| ------------ | ----------------------------------------------------------------------- |
+| openrouter   | `openrouter/owl-alpha`                                                  |
+| cursor       | `auto`, `composer-2.5`                                                  |
+| cursorapi    | `composer-2.5`                                                          |
+| openai-codex | `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.3-codex-spark`, `gpt-5.5`             |
 
 > See [OpenRouter free models](https://openrouter.ai/collections/free-models) for additional no-cost options.
 
