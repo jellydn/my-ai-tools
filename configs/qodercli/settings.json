@@ -1,37 +1,62 @@
 {
-	"mcpServers": {
-		"context7": {
-			"command": "npx",
-			"args": ["-y", "@upstash/context7-mcp@latest"]
-		},
-		"sequential-thinking": {
-			"command": "npx",
-			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-		},
-		"qmd": {
-			"command": "qmd",
-			"args": ["mcp"]
-		},
-		"fff": {
-			"type": "stdio",
-			"command": "fff-mcp",
-			"args": []
-		},
-		"react-grab-mcp": {
-			"command": "npx",
-			"args": ["-y", "@react-grab/mcp", "--stdio"]
-		},
-		"logpilot": {
-			"command": "logpilot",
-			"args": ["mcp-server"]
-		},
-		"agentmemory": {
-			"command": "npx",
-			"args": ["-y", "@agentmemory/mcp"]
-		},
-		"sem": {
-			"command": "sem-mcp",
-			"args": []
-		}
-	}
+  "permissions": {
+    "additionalDirectories": [],
+    "trustDirectories": [
+      "/Users/huynhdung/Projects/dotfiles",
+      "/Users/huynhdung/src/tries/2026-06-24-jellydn-my-ai-tools-pr-263",
+      "/Users/huynhdung/src/tries/2026-06-24-jellydn-my-ai-tools"
+    ]
+  },
+  "security": {
+    "auth": {
+      "selectedType": "qoder-browser"
+    }
+  },
+  "general": {
+    "vimMode": true,
+    "defaultPermissionMode": "plan"
+  },
+  "ui": {
+    "inlineThinkingMode": "full",
+    "escapePastedAtSymbols": true,
+    "theme": "GitHub"
+  },
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "qmd": {
+      "command": "qmd",
+      "args": ["mcp"]
+    },
+    "fff": {
+      "type": "stdio",
+      "command": "fff-mcp",
+      "args": []
+    },
+    "react-grab-mcp": {
+      "command": "npx",
+      "args": ["-y", "@react-grab/mcp", "--stdio"]
+    },
+    "logpilot": {
+      "command": "logpilot",
+      "args": ["mcp-server"]
+    },
+    "agentmemory": {
+      "command": "npx",
+      "args": ["-y", "@agentmemory/mcp"]
+    },
+    "sem": {
+      "command": "sem-mcp",
+      "args": []
+    }
+  },
+  "experimental": {
+    "taskTracker": true
+  }
 }
