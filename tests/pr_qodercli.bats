@@ -13,6 +13,24 @@ README="$REPO_ROOT/README.md"
     [ -f "$REPO_ROOT/configs/qodercli/AGENTS.md" ]
 }
 
+@test "configs/qodercli/settings.json exists" {
+    [ -f "$REPO_ROOT/configs/qodercli/settings.json" ]
+}
+
+@test "configs/qodercli/settings.json contains mcpServers key" {
+    require_jq
+    run jq -e '.mcpServers | type == "object"' "$REPO_ROOT/configs/qodercli/settings.json"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "configs/qodercli/settings.json mcpServers includes context7" {
+    require_jq
+    run jq -e '.mcpServers.context7.command == "npx"' "$REPO_ROOT/configs/qodercli/settings.json"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
 @test "lib/install.sh defines install_qodercli()" {
     run grep -E '^install_qodercli\(\)' "$LIB_INSTALL"
     [ "$status" -eq 0 ]
@@ -55,6 +73,12 @@ README="$REPO_ROOT/README.md"
     [ -n "$output" ]
 }
 
+@test "cli.sh copy_qodercli_configs() copies settings.json" {
+    run grep -E "copy_config_file.*configs/qodercli/settings\.json" "$CLI_SH"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
 @test "cli.sh copy_qodercli_configs() targets ~/.qoder/" {
     run grep -E 'HOME/\.qoder' "$CLI_SH"
     [ "$status" -eq 0 ]
@@ -63,6 +87,12 @@ README="$REPO_ROOT/README.md"
 
 @test "generate.sh defines generate_qodercli_configs()" {
     run grep -E '^generate_qodercli_configs\(\)' "$GENERATE_SH"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
+@test "generate.sh generate_qodercli_configs() exports settings.json" {
+    run grep -E 'copy_single.*qoder/settings\.json' "$GENERATE_SH"
     [ "$status" -eq 0 ]
     [ -n "$output" ]
 }
@@ -81,6 +111,18 @@ README="$REPO_ROOT/README.md"
 
 @test "README.md has a Qoder CLI section with a curl installer example" {
     run grep -E 'qoder\.com/install' "$README"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
+@test "README.md Qoder section shows settings.json" {
+    run grep -E 'settings\.json.*MCP server' "$README"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
+@test "README.md Qoder MCP section includes context7" {
+    run grep -E 'context7' "$README"
     [ "$status" -eq 0 ]
     [ -n "$output" ]
 }

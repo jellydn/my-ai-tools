@@ -2528,7 +2528,34 @@ Or run this repo's installer:
 Qoder CLI configs are stored in [`configs/qodercli/`](configs/qodercli/) and installed to `~/.qoder/`:
 
 - [`AGENTS.md`](configs/qodercli/AGENTS.md) — Agent guidelines (read by Qoder from `~/.qoder/AGENTS.md`)
-- MCP servers are configured via `qodercli mcp add <name> -- <command>` or hand-edited in `~/.qoder/settings.json`. Reload in TUI with `/mcp reload`.
+- [`settings.json`](configs/qodercli/settings.json) — MCP server configuration (installed to `~/.qoder/settings.json`; reload in TUI with `/mcp reload`)
+
+### 🔌 MCP Servers
+
+```json
+{
+	"mcpServers": {
+		"context7":
+			{ "command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"] },
+		"sequential-thinking":
+			{ "command": "npx", "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"] },
+		"qmd":
+			{ "command": "qmd", "args": ["mcp"] },
+		"fff":
+			{ "type": "stdio", "command": "fff-mcp", "args": [] },
+		"react-grab-mcp":
+			{ "command": "npx", "args": ["-y", "@react-grab/mcp", "--stdio"] },
+		"logpilot":
+			{ "command": "logpilot", "args": ["mcp-server"] },
+		"agentmemory":
+			{ "command": "npx", "args": ["-y", "@agentmemory/mcp"] },
+		"sem":
+			{ "command": "sem-mcp", "args": [] }
+	}
+}
+```
+
+> MCP servers are shipped via `settings.json`. Users who already have `~/.qoder/settings.json` get a `.bak` backup before the repo version is installed.
 
 **Config Locations:**
 

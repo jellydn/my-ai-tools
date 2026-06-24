@@ -1303,6 +1303,7 @@ copy_qodercli_configs() {
 	execute_quoted mkdir -p "$HOME/.qoder"
 
 	copy_config_file "$SCRIPT_DIR/configs/qodercli/AGENTS.md" "$HOME/.qoder/" || true
+	copy_config_file "$SCRIPT_DIR/configs/qodercli/settings.json" "$HOME/.qoder/" || true
 
 	log_success "Qoder CLI configs copied"
 }

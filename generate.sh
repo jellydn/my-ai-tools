@@ -661,6 +661,8 @@ generate_qodercli_configs() {
 
 	copy_single "$HOME/.qoder/AGENTS.md" "$SCRIPT_DIR/configs/qodercli/AGENTS.md"
 
+	copy_single "$HOME/.qoder/settings.json" "$SCRIPT_DIR/configs/qodercli/settings.json"
+
 	log_success "Qoder CLI configs generated"
 }
 
