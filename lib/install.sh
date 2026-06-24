@@ -960,3 +960,29 @@ install_herdr() {
 	}
 	run_installer "herdr" "_run_herdr_install" "command -v herdr" "herdr --version 2>/dev/null || true"
 }
+
+# ─── qodercli installation ────────────────────────────────────────────
+
+install_qodercli() {
+	_run_qodercli_install() {
+		if command -v qodercli &>/dev/null; then
+			log_warning "Qoder CLI is already installed"
+			return 0
+		fi
+
+		if [ "$IS_WINDOWS" = true ]; then
+			if command -v powershell.exe &>/dev/null; then
+				execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://qoder.com/install.ps1 | iex\""
+			else
+				log_error "PowerShell is required to install Qoder CLI on Windows."
+				log_info "Install manually: https://docs.qoder.com/en/cli/quick-start"
+				return 1
+			fi
+		else
+			execute_installer "https://qoder.com/install" "" "Qoder CLI"
+		fi
+
+		log_success "Qoder CLI installed"
+	}
+	run_installer "Qoder CLI" "_run_qodercli_install" "command -v qodercli" "qodercli --version 2>/dev/null || true"
+}

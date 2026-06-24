@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, MiMo-Code, Open Code Review, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Open Code Review, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, agentmemory, sem
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -52,6 +52,8 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
 | **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Kanagawa palette staged (`tokyonight` until built-in)                                                                                                                                         |
 | **MiMo-Code**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                             |
+| **Qoder CLI**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
+| **Kiro CLI**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Steering files (AGENTS.md), slash commands, MCP servers, ACP                                                                |
 
 ### 📋 MCP Server Details
 
@@ -2518,6 +2520,164 @@ herdr pane read 1-1 --source recent --lines 50
 ```
 
 See the full [herdr docs](https://herdr.dev/docs/) for details.
+
+</details>
+
+---
+
+## 🧠 Qoder CLI (Optional)
+
+Qoder's agentic coding CLI. Reads `AGENTS.md` for context, supports MCP servers via `qodercli mcp add`, and ships TUI slash commands like `/init`, `/memory`, `/mcp`, `/status`, `/effort`. [Homepage](https://qoder.com/cli) | [Docs](https://docs.qoder.com/en/cli/quick-start)
+
+<details>
+<summary><strong>Installation &amp; Configuration</strong></summary>
+
+### Installation
+
+```bash
+# Mac/Linux
+curl -fsSL https://qoder.com/install | bash
+
+# Windows PowerShell
+irm https://qoder.com/install.ps1 | iex
+```
+
+Or run this repo's installer:
+
+```bash
+./cli.sh
+```
+
+### Configuration
+
+Qoder CLI configs are stored in [`configs/qodercli/`](configs/qodercli/) and installed to `~/.qoder/`:
+
+- [`AGENTS.md`](configs/qodercli/AGENTS.md) — Agent guidelines (read by Qoder from `~/.qoder/AGENTS.md`)
+- [`settings.json`](configs/qodercli/settings.json) — MCP server configuration (installed to `~/.qoder/settings.json`; reload in TUI with `/mcp reload`)
+
+### 🔌 MCP Servers
+
+```json
+{
+	"mcpServers": {
+		"context7":
+			{ "command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"] },
+		"sequential-thinking":
+			{ "command": "npx", "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"] },
+		"qmd":
+			{ "command": "qmd", "args": ["mcp"] },
+		"fff":
+			{ "type": "stdio", "command": "fff-mcp", "args": [] },
+		"react-grab-mcp":
+			{ "command": "npx", "args": ["-y", "@react-grab/mcp", "--stdio"] },
+		"logpilot":
+			{ "command": "logpilot", "args": ["mcp-server"] },
+		"agentmemory":
+			{ "command": "npx", "args": ["-y", "@agentmemory/mcp"] },
+		"sem":
+			{ "command": "sem-mcp", "args": [] }
+	}
+}
+```
+
+> MCP servers are shipped via `settings.json`. Users who already have `~/.qoder/settings.json` get a `.bak` backup before the repo version is installed.
+
+**Config Locations:**
+
+| Scope           | Path                                            |
+| --------------- | ----------------------------------------------- |
+| User settings   | `~/.qoder/settings.json`                        |
+| Project settings | `<project>/.qoder/settings.json`               |
+| Project local settings (gitignored) | `<project>/.qoder/settings.local.json` |
+| User AGENTS.md  | `~/.qoder/AGENTS.md`                            |
+| Project AGENTS.md | `<project>/AGENTS.md`                        |
+| Project AGENTS.local.md | `<project>/AGENTS.local.md`           |
+
+Inside a project, run `/init` to scaffold a starter `AGENTS.md` and manage it with `/memory` in the TUI.
+
+### Usage
+
+```bash
+# Start Qoder CLI
+qodercli
+
+# Non-interactive single prompt
+qodercli -p "Explain the architecture of this codebase"
+
+# Print mode for CI / automation
+qodercli --print --output-format=json
+
+# Add an MCP server (global)
+qodercli mcp add context7 -- npx -y @upstash/context7-mcp@latest
+
+# Inspect current session / model
+qodercli status
+```
+
+See the full [Qoder CLI docs](https://docs.qoder.com/en/cli/quick-start) for details.
+
+</details>
+
+---
+
+## 🥷 Kiro CLI (Optional)
+
+Kiro Dev's AI coding assistant with native MCP support, steering files (AGENTS.md), and ACP (Agent Client Protocol) integration. Ships with `/model`, `/editor`, `/usage`, and custom agents. [Homepage](https://kiro.dev/) | [Docs](https://kiro.dev/docs/cli/installation/) | [GitHub](https://github.com/kirodotdev/Kiro)
+
+<details>
+<summary><strong>Installation &amp; Configuration</strong></summary>
+
+### Installation
+
+```bash
+# Mac/Linux
+curl -fsSL https://cli.kiro.dev/install | bash
+
+# Windows PowerShell
+irm https://kiro.dev/install.ps1 | iex
+```
+
+Or run this repo's installer:
+
+```bash
+./cli.sh
+```
+
+### Configuration
+
+Kiro CLI configs are stored in [`configs/kiro/`](configs/kiro/) and installed to `~/.kiro/`:
+
+- [`AGENTS.md`](configs/kiro/AGENTS.md) — Agent guidelines (Kiro uses steering files to guide agent behavior)
+- MCP servers are configured via `kiro mcp add <name> -- <command>` or hand-edited in `~/.kiro/settings.json`
+
+**Config Locations:**
+
+| Scope           | Path                                            |
+| --------------- | ----------------------------------------------- |
+| User config     | `~/.kiro/`                                      |
+| Steering files  | `~/.kiro/AGENTS.md`, `<project>/AGENTS.md`     |
+| Conversations   | `~/.kiro/conversations/`                        |
+
+### Usage
+
+```bash
+# Start Kiro CLI
+kiro
+
+# Non-interactive single prompt (headless mode)
+kiro --print "Explain the architecture of this codebase"
+
+# Select model
+kiro /model
+
+# Add an MCP server (global)
+kiro mcp add context7 -- npx -y @upstash/context7-mcp@latest
+
+# Check context usage
+kiro /usage
+```
+
+See the full [Kiro CLI docs](https://kiro.dev/docs/cli/installation/) for details.
 
 </details>
 ---

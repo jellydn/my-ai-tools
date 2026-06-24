@@ -11,18 +11,18 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/pi/settings.json defaultModel is deepseek/deepseek-v4-pro" {
+@test "configs/pi/settings.json defaultModel is gpt-5.4-mini" {
     require_jq
     run jq -r '.defaultModel' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "deepseek/deepseek-v4-pro" ]
+    [ "$output" = "gpt-5.4-mini" ]
 }
 
-@test "configs/pi/settings.json defaultProvider is commandcode" {
+@test "configs/pi/settings.json defaultProvider is openai-codex" {
     require_jq
     run jq -r '.defaultProvider' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "commandcode" ]
+    [ "$output" = "openai-codex" ]
 }
 
 @test "configs/pi/settings.json enabledModels no longer contains vibeproxy models" {
@@ -46,9 +46,9 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains commandcode models" {
+@test "configs/pi/settings.json enabledModels contains openai-codex models" {
     require_jq
-    run jq -e '[.enabledModels[] | select(startswith("commandcode/"))] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(startswith("openai-codex/"))] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }

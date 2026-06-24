@@ -10,7 +10,7 @@
 set -e
 
 HOOK_NAME="mempal_save"
-COUNTER_FILE="${TMPDIR:-/tmp}/.mempal_save_counter"
+COUNTER_FILE="$HOME/.mempalace/.mempal_save_counter"
 THRESHOLD=15
 LOG_DIR="$HOME/.mempalace/logs"
 LOG_FILE="$LOG_DIR/hooks.log"
