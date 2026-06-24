@@ -25,18 +25,18 @@ README_FILE="$REPO_ROOT/README.md"
     [ "$status" -eq 0 ]
 }
 
-@test "README.md Pi provider table has commandcode row" {
-    run grep -E "^\| commandcode" "$README_FILE"
+@test "README.md Pi enabled models table has openai-codex row" {
+    run grep -E "^\| openai-codex" "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
-@test "README.md Pi commandcode table row lists deepseek models" {
-    run grep -E "commandcode.*deepseek/deepseek-v4-pro" "$README_FILE"
+@test "README.md Pi openai-codex table row lists gpt models" {
+    run grep -E "openai-codex.*gpt-5.4" "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
-@test "README.md Pi commandcode table row lists mimo-v2.5-pro" {
-    run grep -E "commandcode.*mimo-v2.5-pro" "$README_FILE"
+@test "README.md Pi openai-codex table row lists gpt-5.4-mini" {
+    run grep -E "openai-codex.*gpt-5.4-mini" "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
