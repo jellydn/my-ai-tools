@@ -7,9 +7,6 @@ personality = "pragmatic"
 # Notify the Codex Computer Use client when a turn ends.
 # Restored to match the desktop app's --previous-notify protocol.
 
-
-notify = ["$HOME/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended", "--previous-notify", "[\"turn-ended\"]"]
-
 [features]
 unified_exec = true
 shell_snapshot = true
@@ -71,27 +68,9 @@ AGENTMEMORY_URL = "${AGENTMEMORY_URL:-http://localhost:3111}"
 AGENTMEMORY_SECRET = "${AGENTMEMORY_SECRET:-}"
 AGENTMEMORY_TOOLS = "${AGENTMEMORY_TOOLS:-all}"
 
-[mcp_servers.node_repl]
-type = "stdio"
-command = "/Applications/Codex.app/Contents/Resources/node_repl"
-startup_timeout_sec = 120
-
-[mcp_servers.node_repl.env]
-BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
-BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.602.71036"
-CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
-CODEX_HOME = "$HOME/.codex"
-NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
-NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
-NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
-NODE_REPL_NODE_MODULE_DIRS = ""
-NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/node"
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "4946b004b23af02244ece97240aceb8d123475207fa6a6fc399486bd7086049f"
-NODE_REPL_TRUSTED_CODE_PATHS = "$HOME/.codex"
-
 [notice]
 fast_default_opt_out = true
+hide_rate_limit_model_nudge = true
 
 [notice.model_migrations]
 "gpt-5.2-codex" = "gpt-5.3-codex"
@@ -115,7 +94,7 @@ theme = "kanagawa"
 status_line_use_colors = true
 
 [tui.model_availability_nux]
-"gpt-5.5" = 3
+"gpt-5.5" = 4
 
 [memories]
 disable_on_external_context = true
@@ -123,7 +102,7 @@ disable_on_external_context = true
 [desktop]
 ambient-suggestions-enabled = true
 appearanceLightCodeThemeId = "rose-pine"
-appearanceDarkCodeThemeId = "dracula"
+appearanceDarkCodeThemeId = "rose-pine"
 sansFontSize = 14
 codeFontSize = 13
 usePointerCursors = true
@@ -157,21 +136,21 @@ diffRemoved = "#797593"
 skill = "#907aa9"
 
 [desktop.appearanceDarkChromeTheme]
-accent = "#ff79c6"
+accent = "#ea9a97"
 contrast = 60
-ink = "#f8f8f2"
+ink = "#e0def4"
 opaqueWindows = false
-surface = "#282a36"
+surface = "#232136"
 
 [desktop.appearanceDarkChromeTheme.fonts]
 
 [desktop.appearanceDarkChromeTheme.semanticColors]
-diffAdded = "#50fa7b"
-diffRemoved = "#ff5555"
-skill = "#ff79c6"
+diffAdded = "#9ccfd8"
+diffRemoved = "#908caa"
+skill = "#c4a7e7"
 
 [desktop.open-in-target-preferences]
-global = "zed"
+global = "cursor"
 
 [plugins."gmail@openai-curated"]
 enabled = true
@@ -191,40 +170,15 @@ enabled = true
 [plugins."computer-use@openai-bundled"]
 enabled = true
 
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
 [plugins."browser@openai-bundled"]
 enabled = true
 
 [plugins."chrome@openai-bundled"]
 enabled = true
 
-[marketplaces.openai-bundled]
-last_updated = "2026-06-12T09:16:22Z"
-source_type = "local"
-source = "$HOME/.codex/.tmp/bundled-marketplaces/openai-bundled"
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
 
-[marketplaces.openai-primary-runtime]
-last_updated = "2026-06-09T14:29:38Z"
-source_type = "local"
-source = "$HOME/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
-
-[hooks.state]
-
-
-
-[hooks.state."$HOME/.codex/hooks.json:session_start:0:0"]
-trusted_hash = "sha256:0da4d2802a51631b408538e45793c82eccaeb82081f8c977765faad879a37cff"
-
-[hooks.state."$HOME/.codex/hooks.json:stop:0:0"]
-trusted_hash = "sha256:f0f840070daee63b7b597ff9fba314db652a4c8084ea055abde4cd2f65c2bd12"
-
-[hooks.state."$HOME/.codex/hooks.json:stop:1:0"]
-trusted_hash = "sha256:92c2692bb315148c26b738a5312e07f6986b0e9d2cd01b202542856bcd69ddf0"
-
-[projects."$HOME/src/tries/2026-04-22-jellydn-my-ai-tools"]
-trust_level = "trusted"
-
-[projects."$HOME/src/tries/2026-05-26-hermes-hub"]
-trust_level = "trusted"
-
-[projects."$HOME/conductor/repos/minui-easy-installer"]
-trust_level = "trusted"
