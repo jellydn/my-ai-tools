@@ -934,3 +934,29 @@ install_conductor() {
 		log_info "After installing, run this script again to configure Conductor"
 	fi
 }
+
+# ─── herdr installation ────────────────────────────────────────────
+
+install_herdr() {
+	_run_herdr_install() {
+		if command -v herdr &>/dev/null; then
+			log_warning "herdr is already installed"
+			return 0
+		fi
+
+		if [ "$IS_WINDOWS" = true ]; then
+			if command -v powershell.exe &>/dev/null; then
+				execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://herdr.dev/install.ps1 | iex\""
+			else
+				log_error "PowerShell is required to install herdr on Windows."
+				log_info "Install manually: https://herdr.dev/docs/install/"
+				return 1
+			fi
+		else
+			execute_installer "https://herdr.dev/install.sh" "" "herdr"
+		fi
+
+		log_success "herdr installed"
+	}
+	run_installer "herdr" "_run_herdr_install" "command -v herdr" "herdr --version 2>/dev/null || true"
+}

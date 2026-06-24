@@ -915,10 +915,11 @@ Located in [`configs/opencode/agent/`](configs/opencode/agent/):
 
 OpenCode supports custom model providers via OpenAI-compatible endpoints:
 
-| Provider  | Models                          | Endpoint                      |
-| --------- | ------------------------------- | ----------------------------- |
-| llama.cpp | GLM-4.7-Flash (local inference) | `http://192.168.1.11:8000/v1` |
-| ollama    | minimax-m2.5:cloud              | `http://127.0.0.1:11434/v1`   |
+| Provider  | Models                              | Endpoint                                       |
+| --------- | ----------------------------------- | ---------------------------------------------- |
+| cursorapi | `composer-2.5`, `composer-2.5-fast` | `http://127.0.0.1:8788/v1` (local Cursor proxy) |
+| llama.cpp | GLM-4.7-Flash (local inference)     | `http://192.168.1.11:8000/v1`                  |
+| ollama    | minimax-m2.5:cloud                  | `http://127.0.0.1:11434/v1`                    |
 
 These are configured in `opencode.json` under the `provider` key with custom model limits.
 
@@ -1531,17 +1532,17 @@ Located in [`configs/pi/`](configs/pi/):
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 - [`models.json`](configs/pi/models.json) - Provider and model definitions (google-antigravity, ollama)
 
-Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `commandcode` as the default provider with `deepseek/deepseek-v4-pro` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `openai-codex` as the default provider with `gpt-5.4-mini` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `deepseek/deepseek-v4-pro`
-- **Default Provider**: `commandcode`
+- **Default Model**: `gpt-5.4-mini`
+- **Default Provider**: `openai-codex`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
 - **Quiet Startup**: Enabled (skips changelog on launch)
-- **Hide Thinking Block**: Disabled (shows thinking process)
+- **Hide Thinking Block**: Enabled (hides thinking process)
 
 ### Pi Packages
 
@@ -1603,18 +1604,14 @@ Then register them in `~/.pi/agent/settings.json`:
 
 ### Enabled Models
 
-Pi is configured with multi-provider model access:
+Pi is configured with multi-provider model access (`settings.json` `enabledModels`):
 
-| Provider       | Models                                                   |
-| -------------- | -------------------------------------------------------- |
-| github-copilot | `gpt-5-mini`, `gpt-4.1`, `gpt-5.4`                       |
-| commandcode    | `moonshotai/Kimi-K2.6`, `xiaomi/mimo-v2.5-pro`           |
-|                | `deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash` |
-|                | `MiniMaxAI/MiniMax-M3`, `MiniMaxAI/MiniMax-M2.7`         |
-| ollama         | `minimax-m2.5:cloud`                                     |
-| openrouter     | `openrouter/owl-alpha`                                   |
-| google         | `gemini-3.5-flash`                                       |
-| cursor         | `auto`, `composer-2.5`                                   |
+| Provider     | Models                                                                  |
+| ------------ | ----------------------------------------------------------------------- |
+| openrouter   | `openrouter/owl-alpha`                                                  |
+| cursor       | `auto`, `composer-2.5`                                                  |
+| cursorapi    | `composer-2.5`                                                          |
+| openai-codex | `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.3-codex-spark`, `gpt-5.5`             |
 
 > See [OpenRouter free models](https://openrouter.ai/collections/free-models) for additional no-cost options.
 
@@ -1883,9 +1880,10 @@ branch_prefix_type = "github_username"
 delete_branch_on_archive = false
 
 [models]
-default = "claude:opus-4-8-1m"
+default = "opencode:opencode/deepseek-v4-flash-free"
 default_plan_mode = true
 review = "gpt-5.5"
+visible_provider_models = "{\"claude\":[],\"codex\":[],\"cursor\":[],\"opencode\":[\"opencode:deepseek/deepseek-v4-flash\",\"opencode:deepseek/deepseek-v4-pro\",\"opencode:google/gemini-3.5-flash\",\"opencode:opencode/deepseek-v4-flash-free\"],\"pi\":[]}"
 
 [models.codex]
 default_thinking_level = "high"
@@ -2436,6 +2434,93 @@ Invite builders to try the **MiMo Open Platform** — Xiaomi's most powerful AI 
 </details>
 
 ---
+## 🚀 herdr (Optional)
+
+Terminal-native agent multiplexer — like `tmux` but agent-aware. Manage workspaces, tabs, and panes, each running its own shell, agent, server, or log stream, with automatic agent status tracking and a local socket API. [Homepage](https://herdr.dev/) | [Docs](https://herdr.dev/docs/) | [GitHub](https://github.com/ogulcancelik/herdr)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Prerequisites
+
+- Bash 3.0+ (or any POSIX shell)
+- A terminal emulator with multiplexer support
+
+### Installation
+
+```bash
+# Mac/Linux
+curl -fsSL https://herdr.dev/install.sh | bash
+
+# Windows PowerShell
+irm https://herdr.dev/install.ps1 | iex
+```
+
+Or run this repo's installer:
+
+```bash
+./cli.sh
+```
+
+### Configuration
+
+herdr configs are stored in [`configs/herdr/`](configs/herdr/) and installed to `~/.config/herdr/`:
+
+- [`AGENTS.md`](configs/herdr/AGENTS.md) — Agent guidelines and best practices
+
+User configuration is generated by herdr itself:
+
+- `~/.config/herdr/config.toml` — Main config (generate defaults with `herdr --default-config`)
+- `~/.config/herdr/agent-detection/<agent>.toml` — Per-agent detection overrides
+
+Changes require a reload: `herdr server reload-config` or the global menu.
+
+### Integrations
+
+herdr installs integrations for detected coding agents to enable session restoration and richer state tracking:
+
+```bash
+herdr integration install claude    # Claude Code
+herdr integration install codex     # OpenAI Codex CLI
+herdr integration install copilot   # GitHub Copilot CLI
+herdr integration status            # Check installed integrations
+```
+
+The Claude Code integration writes a hook (`herdr-agent-state.sh`) to `~/.claude/hooks/` and updates `settings.json` — this is managed by herdr itself, not by this repo.
+
+### Agent Skill
+
+The official agent skill file teaches agents how to control herdr from inside a herdr-managed pane. Install it from the upstream source of truth:
+
+- Docs: https://herdr.dev/docs/agent-skill/
+- Source: https://github.com/ogulcancelik/herdr/blob/master/SKILL.md
+
+For agents with a skill system, install as a skill named `herdr`. The skill activates when `HERDR_ENV=1` is set (agent is running inside a herdr-managed pane).
+
+### Usage
+
+```bash
+# Start herdr
+herdr
+
+# List panes in current workspace
+herdr pane list
+
+# Split a pane to the right and run a command
+herdr pane split 1-2 --direction right --no-focus
+herdr pane run 1-3 "npm run dev"
+
+# Wait for an agent to finish
+herdr wait agent-status 1-1 --status done --timeout 60000
+
+# Read another pane's output
+herdr pane read 1-1 --source recent --lines 50
+```
+
+See the full [herdr docs](https://herdr.dev/docs/) for details.
+
+</details>
+---
 
 ## 🔍 Open Code Review (Optional)
 
@@ -2704,10 +2789,6 @@ brew install --cask stablyai/orca/orca
 ```
 
 This repository backs up Orca agent hook scripts under `configs/orca/agent-hooks/` and restores them to `~/Library/Application Support/orca/agent-hooks/` during `./cli.sh`. Hook scripts are available for Claude Code, Gemini CLI, Codex CLI, Cursor, and Factory Droid — each sends lifecycle events to Orca's hook endpoint for session tracking.
-
-### herdr
-
-[**herdr**](https://herdr.dev/) - Terminal-native workspace manager and multiplexer for supervising multiple AI coding agents (Claude Code, Codex, pi, and more) side by side. Run, monitor, and orchestrate agents in parallel with real terminal panes, status tracking, and a local socket API. ([GitHub](https://github.com/ogulcancelik/herdr))
 
 </details>
 

@@ -97,6 +97,38 @@
 	"model": "opencode/big-pickle",
 	"plugin": ["@plannotator/opencode@latest", "opencode-chrome-annotation@latest"],
 	"provider": {
+		"cursorapi": {
+			"models": {
+				"composer-2.5": {
+					"cost": {
+						"input": 0.5,
+						"output": 2.5
+					},
+					"limit": {
+						"context": 200000,
+						"output": 65536
+					},
+					"name": "Composer 2.5"
+				},
+				"composer-2.5-fast": {
+					"cost": {
+						"input": 3,
+						"output": 15
+					},
+					"limit": {
+						"context": 200000,
+						"output": 65536
+					},
+					"name": "Composer 2.5 Fast"
+				}
+			},
+			"name": "API for Cursor",
+			"npm": "@ai-sdk/openai-compatible",
+			"options": {
+				"apiKey": "cursor-local",
+				"baseURL": "http://127.0.0.1:8788/v1"
+			}
+		},
 		"llama.cpp": {
 			"models": {
 				"glm": {
