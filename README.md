@@ -915,10 +915,11 @@ Located in [`configs/opencode/agent/`](configs/opencode/agent/):
 
 OpenCode supports custom model providers via OpenAI-compatible endpoints:
 
-| Provider  | Models                          | Endpoint                      |
-| --------- | ------------------------------- | ----------------------------- |
-| llama.cpp | GLM-4.7-Flash (local inference) | `http://192.168.1.11:8000/v1` |
-| ollama    | minimax-m2.5:cloud              | `http://127.0.0.1:11434/v1`   |
+| Provider  | Models                              | Endpoint                                       |
+| --------- | ----------------------------------- | ---------------------------------------------- |
+| cursorapi | `composer-2.5`, `composer-2.5-fast` | `http://127.0.0.1:8788/v1` (local Cursor proxy) |
+| llama.cpp | GLM-4.7-Flash (local inference)     | `http://192.168.1.11:8000/v1`                  |
+| ollama    | minimax-m2.5:cloud                  | `http://127.0.0.1:11434/v1`                    |
 
 These are configured in `opencode.json` under the `provider` key with custom model limits.
 
