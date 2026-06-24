@@ -1,11 +1,7 @@
 {
   "permissions": {
     "additionalDirectories": [],
-    "trustDirectories": [
-      "/Users/huynhdung/Projects/dotfiles",
-      "/Users/huynhdung/src/tries/2026-06-24-jellydn-my-ai-tools-pr-263",
-      "/Users/huynhdung/src/tries/2026-06-24-jellydn-my-ai-tools"
-    ]
+    "trustDirectories": []
   },
   "security": {
     "auth": {
