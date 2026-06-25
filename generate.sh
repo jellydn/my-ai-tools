@@ -666,6 +666,24 @@ generate_qodercli_configs() {
 	log_success "Qoder CLI configs generated"
 }
 
+generate_kiro_configs() {
+	log_info "Generating Kiro CLI configs..."
+
+	if [ ! -d "$HOME/.kiro" ]; then
+		log_warning "Kiro CLI config directory not found: $HOME/.kiro"
+		return 0
+	fi
+
+	execute "mkdir -p \"$SCRIPT_DIR/configs/kiro\""
+
+	copy_single "$HOME/.kiro/AGENTS.md" "$SCRIPT_DIR/configs/kiro/AGENTS.md"
+	copy_single "$HOME/.kiro/settings.json" "$SCRIPT_DIR/configs/kiro/settings.json"
+	copy_single "$HOME/.kiro/settings/mcp.json" "$SCRIPT_DIR/configs/kiro/mcp.json"
+	copy_single "$HOME/.kiro/settings/cli.json" "$SCRIPT_DIR/configs/kiro/cli.json"
+
+	log_success "Kiro CLI configs generated"
+}
+
 generate_cline_configs() {
 	log_info "Generating Cline configs..."
 
@@ -787,6 +805,9 @@ main() {
 	echo
 
 	generate_qodercli_configs
+	echo
+
+	generate_kiro_configs
 	echo
 
 	generate_best_practices

@@ -1,4 +1,4 @@
-# 🤖 Qoder CLI Agent Guidelines
+# 🤖 Kiro CLI Agent Guidelines
 
 ## Session Management with tmux
 
@@ -42,4 +42,3 @@ See @~/.ai-tools/best-practices.md for full details.
 - Keep your code modular and reusable. Avoid tight coupling and excessive dependencies.
 - Run typecheck, lint and biome on js/ts file changes after finish.
 - Prefer to use Bun to run scripts if possible, otherwise use tsx to run ts files.
-
