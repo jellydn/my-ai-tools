@@ -268,6 +268,8 @@ backup_configs() {
 		copy_config_dir "$HOME/.commandcode" "$BACKUP_DIR" "commandcode"
 		copy_config_dir "$HOME/.grok" "$BACKUP_DIR" "grok"
 		copy_config_dir "$HOME/.config/mimocode" "$BACKUP_DIR" "mimocode"
+		copy_config_dir "$HOME/.qoder" "$BACKUP_DIR" "qodercli"
+		copy_config_dir "$HOME/.kiro" "$BACKUP_DIR" "kiro"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -1318,9 +1320,54 @@ copy_kiro_configs() {
 	fi
 
 	log_info "Detected Kiro CLI (via $kiro_status)"
-	execute_quoted mkdir -p "$HOME/.kiro"
+	# Kiro reads AGENTS.md and settings.json from its config root (~/.kiro/),
+	# while structured configs (cli.json, mcp.json) live in a settings/
+	# subdirectory to avoid polluting the root. Kiro discovers files in both
+	# locations — the split is by config type, not visibility.
+	execute_quoted mkdir -p "$HOME/.kiro/settings"
 
 	copy_config_file "$SCRIPT_DIR/configs/kiro/AGENTS.md" "$HOME/.kiro/" || true
+	copy_config_file "$SCRIPT_DIR/configs/kiro/settings.json" "$HOME/.kiro/" || true
+
+	# Merge cli.json settings (repo defaults win, user state keys like mcp.loadedBefore are preserved)
+	local src_cli="$SCRIPT_DIR/configs/kiro/cli.json"
+	local dest_cli="$HOME/.kiro/settings/cli.json"
+	if [ -f "$src_cli" ]; then
+		if command -v jq &>/dev/null && [ -f "$dest_cli" ]; then
+			local merged_cli
+			merged_cli=$(make_temp_file "kiro-cli" "json")
+			if jq -s '.[0] * .[1]' "$dest_cli" "$src_cli" >"$merged_cli" 2>/dev/null; then
+				execute_quoted cp -p "$merged_cli" "$dest_cli"
+				log_success "Kiro CLI settings merged"
+			fi
+			rm -f "$merged_cli"
+		else
+			copy_config_file "$src_cli" "$HOME/.kiro/settings/" || true
+			log_success "Kiro CLI settings installed"
+		fi
+	fi
+
+	# Merge MCP servers into ~/.kiro/settings/mcp.json (preserving existing entries)
+	local src_mcp="$SCRIPT_DIR/configs/kiro/mcp.json"
+	local dest_mcp="$HOME/.kiro/settings/mcp.json"
+	if [ -f "$src_mcp" ]; then
+		if command -v jq &>/dev/null && [ -f "$dest_mcp" ]; then
+			log_info "Merging Kiro MCP servers into existing config..."
+			local merged_file
+			merged_file=$(make_temp_file "kiro-mcp" "json")
+		if jq -s '.[0] as $dest | .[1] as $src | ($dest // {}) * ($src // {}) | .mcpServers = (($dest.mcpServers // {}) + ($src.mcpServers // {}))' \
+			"$dest_mcp" "$src_mcp" >"$merged_file" 2>/dev/null; then
+				execute_quoted cp -p "$merged_file" "$dest_mcp"
+				log_success "Kiro MCP servers merged"
+			else
+				log_warning "Failed to merge Kiro MCP config"
+			fi
+			rm -f "$merged_file"
+		else
+			copy_config_file "$src_mcp" "$HOME/.kiro/settings/" || true
+			log_success "Kiro MCP config installed"
+		fi
+	fi
 
 	log_success "Kiro CLI configs copied"
 }

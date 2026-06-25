@@ -986,3 +986,30 @@ install_qodercli() {
 	}
 	run_installer "Qoder CLI" "_run_qodercli_install" "command -v qodercli" "qodercli --version 2>/dev/null || true"
 }
+
+# ─── kiro installation ────────────────────────────────────────────
+
+install_kiro() {
+	_run_kiro_install() {
+		if command -v kiro-cli &>/dev/null || command -v kiro &>/dev/null; then
+			log_warning "Kiro CLI is already installed"
+			return 0
+		fi
+
+		if [ "$IS_WINDOWS" = true ]; then
+			if command -v powershell.exe &>/dev/null; then
+				# -ExecutionPolicy Bypass is required because PowerShell's default
+				# Restricted policy blocks unsigned remote scripts. Kiro's installer
+				# PS1 is hosted at kiro.dev and fetched via irm (Invoke-RestMethod).
+				execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://kiro.dev/install.ps1 | iex\""
+			else
+				log_error "PowerShell is required to install Kiro CLI on Windows."
+				log_info "Install manually: https://kiro.dev/docs/cli/installation/"
+				return 1
+			fi
+		else
+			execute_installer "https://cli.kiro.dev/install" "" "Kiro CLI"
+		fi
+	}
+	run_installer "Kiro CLI" "_run_kiro_install" "command -v kiro-cli || command -v kiro" "kiro-cli --version 2>/dev/null || true"
+}
