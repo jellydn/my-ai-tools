@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Open Code Review, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, Open Code Review, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, agentmemory, sem
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -54,6 +54,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **MiMo-Code**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                         |
 | **Qoder CLI**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                         |
 | **Kiro CLI**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Steering files (AGENTS.md), slash commands, MCP servers, ACP                                                                                                                              |
+| **Codiff**      | — (desktop app — uses configured agent backend via settings)                                     | —                                                                                                                                                                                         |
 
 ### 📋 MCP Server Details
 
@@ -2684,6 +2685,60 @@ kiro /usage
 See the full [Kiro CLI docs](https://kiro.dev/docs/cli/installation/) for details.
 
 ## </details>
+
+## 🎨 Codiff (Optional)
+
+Beautiful, minimal local diff viewer with LLM-powered walkthroughs. Review Git changes, comment on PRs/MRs inline, and share walkthroughs. [GitHub](https://github.com/nkzw-tech/codiff) | [Homepage](https://codiff.app)
+
+<details>
+<summary><strong>Installation &amp; Configuration</strong></summary>
+
+### Installation
+
+```bash
+# macOS (Homebrew)
+brew install --cask nkzw-tech/tap/codiff
+
+# Then run: Codiff > Install Terminal Helper (for `codiff` CLI command)
+```
+
+Or run this repo's installer:
+
+```bash
+./cli.sh
+```
+
+### Configuration
+
+Codiff config is stored in [`configs/codiff/`](configs/codiff/) and installed to `~/.codiff/`:
+
+- [`codiff.jsonc`](configs/codiff/codiff.jsonc) — Settings (agent backend, theme, diff style, font) and keymap overrides
+
+**Config Location:**
+
+| Scope       | Path                     |
+| ----------- | ------------------------ |
+| User config | `~/.codiff/codiff.jsonc` |
+
+### Usage
+
+```bash
+# Launch Codiff
+codiff
+
+# Review current repository
+codiff .
+
+# Generate LLM walkthrough of the diff
+codiff -w
+
+# Review a GitHub PR
+codiff pr 75
+```
+
+See the full [Codiff docs](https://github.com/nkzw-tech/codiff#readme) for details.
+
+</details>
 
 ## 🔍 Open Code Review (Optional)
 

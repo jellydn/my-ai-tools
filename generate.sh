@@ -684,6 +684,21 @@ generate_kiro_configs() {
 	log_success "Kiro CLI configs generated"
 }
 
+generate_codiff_configs() {
+	log_info "Generating Codiff configs..."
+
+	if [ ! -d "$HOME/.codiff" ]; then
+		log_warning "Codiff config directory not found: $HOME/.codiff"
+		return 0
+	fi
+
+	execute "mkdir -p \"$SCRIPT_DIR/configs/codiff\""
+
+	copy_single "$HOME/.codiff/codiff.jsonc" "$SCRIPT_DIR/configs/codiff/codiff.jsonc"
+
+	log_success "Codiff configs generated"
+}
+
 generate_cline_configs() {
 	log_info "Generating Cline configs..."
 
@@ -808,6 +823,9 @@ main() {
 	echo
 
 	generate_kiro_configs
+	echo
+
+	generate_codiff_configs
 	echo
 
 	generate_best_practices

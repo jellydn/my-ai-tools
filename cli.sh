@@ -11,64 +11,64 @@ source "$SCRIPT_DIR/lib/common.sh"
 source "$SCRIPT_DIR/lib/install.sh"
 # Parse command-line arguments first (only when executed, not sourced)
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-BACKUP_DIR="$HOME/ai-tools-backup-$(date +%Y%m%d-%H%M%S)"
-DRY_RUN=false
-BACKUP=false
-PROMPT_BACKUP=true
-YES_TO_ALL=false
-VERBOSE=false
+	BACKUP_DIR="$HOME/ai-tools-backup-$(date +%Y%m%d-%H%M%S)"
+	DRY_RUN=false
+	BACKUP=false
+	PROMPT_BACKUP=true
+	YES_TO_ALL=false
+	VERBOSE=false
 
-# Track whether Amp is installed (for backlog.md dependency)
-AMP_INSTALLED=false
-# Track whether --migrate-gemini flag was passed (standalone Gemini→Antigravity migration)
-MIGRATE_GEMINI=false
-for arg in "$@"; do
-	case $arg in
-	--dry-run)
-		DRY_RUN=true
-		shift
-		;;
-	--backup)
-		BACKUP=true
-		PROMPT_BACKUP=false
-		shift
-		;;
-	--no-backup)
-		BACKUP=false
-		PROMPT_BACKUP=false
-		shift
-		;;
-	--yes | -y)
+	# Track whether Amp is installed (for backlog.md dependency)
+	AMP_INSTALLED=false
+	# Track whether --migrate-gemini flag was passed (standalone Gemini→Antigravity migration)
+	MIGRATE_GEMINI=false
+	for arg in "$@"; do
+		case $arg in
+		--dry-run)
+			DRY_RUN=true
+			shift
+			;;
+		--backup)
+			BACKUP=true
+			PROMPT_BACKUP=false
+			shift
+			;;
+		--no-backup)
+			BACKUP=false
+			PROMPT_BACKUP=false
+			shift
+			;;
+		--yes | -y)
+			YES_TO_ALL=true
+			shift
+			;;
+		-v | --verbose)
+			VERBOSE=true
+			shift
+			;;
+		--migrate-gemini)
+			MIGRATE_GEMINI=true
+			shift
+			;;
+		--rollback)
+			log_info "Rolling back last transaction..."
+			rollback_transaction
+			exit $?
+			;;
+		*)
+			echo "Unknown option: $arg"
+			echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback]"
+			exit 1
+			;;
+		esac
+	done
+
+	# Auto-detect non-interactive mode AFTER parsing arguments
+	# This ensures DRY_RUN and other flags are set before any functions use them
+	if is_non_interactive; then
 		YES_TO_ALL=true
-		shift
-		;;
-	-v | --verbose)
-		VERBOSE=true
-		shift
-		;;
-	--migrate-gemini)
-		MIGRATE_GEMINI=true
-		shift
-		;;
-	--rollback)
-		log_info "Rolling back last transaction..."
-		rollback_transaction
-		exit $?
-		;;
-	*)
-		echo "Unknown option: $arg"
-		echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback]"
-		exit 1
-		;;
-	esac
-done
-
-# Auto-detect non-interactive mode AFTER parsing arguments
-# This ensures DRY_RUN and other flags are set before any functions use them
-if is_non_interactive; then
-	YES_TO_ALL=true
-	log_info "Non-interactive mode detected (CI or piped input)"
-fi
+		log_info "Non-interactive mode detected (CI or piped input)"
+	fi
 
 fi
 
@@ -174,7 +174,6 @@ check_prerequisites() {
 	handle_qmd_installation_if_needed
 }
 
-
 # Helper: Copy a config directory if it exists in source and destination
 # Usage: copy_config_dir "source_dir" "dest_parent" "dest_name"
 copy_config_dir() {
@@ -270,6 +269,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/mimocode" "$BACKUP_DIR" "mimocode"
 		copy_config_dir "$HOME/.qoder" "$BACKUP_DIR" "qodercli"
 		copy_config_dir "$HOME/.kiro" "$BACKUP_DIR" "kiro"
+		copy_config_dir "$HOME/.codiff" "$BACKUP_DIR" "codiff"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -423,6 +423,7 @@ copy_configurations() {
 	copy_herdr_configs
 	copy_qodercli_configs
 	copy_kiro_configs
+	copy_codiff_configs
 	copy_factory_configs
 	copy_orca_configs
 	copy_cline_configs
@@ -1079,11 +1080,11 @@ normalize_antigravity_mcp_configs() {
 		# POSIX: use temp file instead of process substitution
 		local _mcp_list
 		_mcp_list=$(make_temp_file "antigravity-mcp" "list")
-		find "$antigravity_home/plugins" -mindepth 2 -maxdepth 2 -name mcp_config.json -type f 2>/dev/null > "$_mcp_list"
-	while IFS= read -r config_file; do
-		config_files+=("$config_file")
-	done < "$_mcp_list"
-	rm -f "$_mcp_list"
+		find "$antigravity_home/plugins" -mindepth 2 -maxdepth 2 -name mcp_config.json -type f 2>/dev/null >"$_mcp_list"
+		while IFS= read -r config_file; do
+			config_files+=("$config_file")
+		done <"$_mcp_list"
+		rm -f "$_mcp_list"
 	fi
 
 	for config_file in "${config_files[@]}"; do
@@ -1355,8 +1356,8 @@ copy_kiro_configs() {
 			log_info "Merging Kiro MCP servers into existing config..."
 			local merged_file
 			merged_file=$(make_temp_file "kiro-mcp" "json")
-		if jq -s '.[0] as $dest | .[1] as $src | ($dest // {}) * ($src // {}) | .mcpServers = (($dest.mcpServers // {}) + ($src.mcpServers // {}))' \
-			"$dest_mcp" "$src_mcp" >"$merged_file" 2>/dev/null; then
+			if jq -s '.[0] as $dest | .[1] as $src | ($dest // {}) * ($src // {}) | .mcpServers = (($dest.mcpServers // {}) + ($src.mcpServers // {}))' \
+				"$dest_mcp" "$src_mcp" >"$merged_file" 2>/dev/null; then
 				execute_quoted cp -p "$merged_file" "$dest_mcp"
 				log_success "Kiro MCP servers merged"
 			else
@@ -1370,6 +1371,28 @@ copy_kiro_configs() {
 	fi
 
 	log_success "Kiro CLI configs copied"
+}
+
+copy_codiff_configs() {
+	local codiff_status
+	codiff_status=$(detect_tool --detailed "codiff" "$HOME/.codiff") || codiff_status="missing"
+	if [ "$codiff_status" = "missing" ]; then
+		log_info "Codiff not detected - skipping Codiff config installation"
+		return 0
+	fi
+
+	log_info "Detected Codiff (via $codiff_status)"
+	execute_quoted mkdir -p "$HOME/.codiff"
+
+	if [ -f "$SCRIPT_DIR/configs/codiff/codiff.jsonc" ]; then
+		if [ -f "$HOME/.codiff/codiff.jsonc" ]; then
+			log_info "Merging Codiff config into existing config..."
+		fi
+		copy_config_file "$SCRIPT_DIR/configs/codiff/codiff.jsonc" "$HOME/.codiff/" || true
+		log_success "Codiff config copied"
+	fi
+
+	log_success "Codiff configs copied"
 }
 
 copy_factory_configs() {
@@ -2071,7 +2094,7 @@ main() {
 	echo "║                        AI Tools Setup                                ║"
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Antigravity         ║"
 	echo "║  Pi • Kilo • Copilot • Cursor • Factory Droid • Cline • Command Code  ║"
-	echo "║  Grok • MiMo-Code • herdr • Qoder CLI • Kiro                           ║"
+	echo "║  Grok • MiMo-Code • herdr • Qoder CLI • Kiro • Codiff                    ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -2143,6 +2166,9 @@ main() {
 	install_kiro
 	echo
 
+	install_codiff
+	echo
+
 	install_factory
 	echo
 
@@ -2179,5 +2205,5 @@ main() {
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main
+	main
 fi
