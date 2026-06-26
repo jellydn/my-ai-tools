@@ -103,8 +103,8 @@ README="$REPO_ROOT/README.md"
 	[ -n "$output" ]
 }
 
-@test "configs/codiff/codiff.jsonc has theme set to dark" {
-	run grep -E '"theme".*"dark"' "$REPO_ROOT/configs/codiff/codiff.jsonc"
+@test "configs/codiff/codiff.jsonc has theme set to system" {
+	run grep -E '"theme".*"system"' "$REPO_ROOT/configs/codiff/codiff.jsonc"
 	[ "$status" -eq 0 ]
 	[ -n "$output" ]
 }
