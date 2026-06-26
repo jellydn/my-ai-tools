@@ -720,6 +720,7 @@ npx skills add blader/humanizer --global --agent claude-code
 npx skills add jezweb/claude-skills --global --agent claude-code
 npx skills add mattpocock/skills --skill grill-with-docs --global --agent claude-code
 npx skills add mattpocock/skills --skill improve-codebase-architecture --global --agent claude-code
+npx skills add privatenumber/mac-ocr --skill mac-ocr --global --agent claude-code
 npx skills add mitsuhiko/agent-stuff --global --agent claude-code
 npx skills add github/gh-stack --global --agent claude-code
 npx skills add openclaw/agent-skills --skill autoreview --global --agent claude-code
