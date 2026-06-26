@@ -284,7 +284,7 @@ install_qmd_now() {
 		if command -v bun &>/dev/null; then
 			local bun_global_bin
 			bun_global_bin="$(bun pm bin -g 2>/dev/null)"
-			if [ -n "$bun_global_bin" ] && case ":$PATH:" in *":$bun_global_bin:"*) false ;; *) true ;; esac then
+			if [ -n "$bun_global_bin" ] && case ":$PATH:" in *":$bun_global_bin:"*) false ;; *) true ;; esac; then
 				export PATH="$bun_global_bin:$PATH"
 			fi
 		fi
@@ -314,7 +314,7 @@ install_fff_mcp_now() {
 	if execute_installer "https://dmtrkovalenko.dev/install-fff-mcp.sh" "" "fff-mcp"; then
 		# Ensure ~/.local/bin is in PATH for the current session
 		local local_bin="$HOME/.local/bin"
-		if case ":$PATH:" in *":$local_bin:"*) false ;; *) true ;; esac then
+		if case ":$PATH:" in *":$local_bin:"*) false ;; *) true ;; esac; then
 			export PATH="$local_bin:$PATH"
 		fi
 		log_success "fff-mcp installed successfully"
@@ -347,7 +347,7 @@ install_logpilot_now() {
 	if execute "cargo install logpilot"; then
 		# Ensure cargo bin is in PATH
 		local cargo_bin="${CARGO_HOME:-$HOME/.cargo}/bin"
-		if case ":$PATH:" in *":$cargo_bin:"*) false ;; *) true ;; esac then
+		if case ":$PATH:" in *":$cargo_bin:"*) false ;; *) true ;; esac; then
 			export PATH="$cargo_bin:$PATH"
 		fi
 		log_success "logpilot installed successfully"
@@ -396,7 +396,7 @@ install_sem_now() {
 		log_info "Installing sem-mcp via cargo..."
 		if execute "cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp"; then
 			local cargo_bin="${CARGO_HOME:-$HOME/.cargo}/bin"
-			if case ":$PATH:" in *":$cargo_bin:"*) false ;; *) true ;; esac then
+			if case ":$PATH:" in *":$cargo_bin:"*) false ;; *) true ;; esac; then
 				export PATH="$cargo_bin:$PATH"
 			fi
 			log_success "sem-mcp installed successfully"
@@ -1042,7 +1042,7 @@ install_codiff() {
 			return 1
 		fi
 
-		execute "brew install --cask codiff"
+		execute "brew install --cask nkzw-tech/tap/codiff"
 	}
 	run_installer "Codiff" "_run_codiff_install" "command -v codiff" "codiff --version 2>/dev/null || true"
 }
