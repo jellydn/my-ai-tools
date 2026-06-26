@@ -1,39 +1,37 @@
 {
 	"$schema": "https://raw.githubusercontent.com/nkzw-tech/codiff/main/core/config/codiff-config.schema.json",
-	// Settings: https://github.com/nkzw-tech/codiff?tab=readme-ov-file#configuration
-	"settings": {
-		// Agent backend for LLM-powered walkthroughs (codiff -w)
-		// Options: "codex", "claude", "opencode", "pi"
-		"agentBackend": "pi",
-		// Theme: "system", "light", "dark"
-		// Note: Kanagawa theme is not natively supported by Codiff's built-in themes.
-		// Use "dark" for a similar aesthetic. If you have a Kanagawa .json theme file,
-		// place it in ~/.codiff/themes/ and reference it here if Codiff supports custom themes.
-		"theme": "dark",
-		// Diff display style: "split" (side-by-side) or "unified" (inline)
-		"diffStyle": "split",
-		// Font size for code (10-32)
-		"codeFontSize": 13,
-		// Show whitespace characters in the diff
-		"showWhitespace": false,
-		// Wrap long lines
-		"wordWrap": false,
-		// Show outdated comments
-		"showOutdated": false,
-		// Copy comments as Markdown when closing
-		"copyCommentsOnClose": false,
-		// Editor command for opening files (empty = system default)
-		"editorCommand": "",
-		// Code font family (empty = system monospace default)
-		"codeFontFamily": "",
-		// Pi model for walkthroughs
-		"piModel": "pi-default",
-		// Prompt prefix for walkthrough generation
-		"walkthroughPrompt": "",
-		// Prefix for review comments posted to PRs/MRs
-		"reviewCommentsPrefix": "# Address these Review Comments"
+	"keymap": {
+		"closeSearch": "Escape",
+		"commandBar": "Mod+Shift+p",
+		"diffSearch": "Mod+f",
+		"discardComment": "Escape",
+		"fileFilter": "Mod+p",
+		"nextHunk": ["Ctrl+ArrowDown", "j"],
+		"nextSearchMatch": "Enter",
+		"openFile": "Mod+k",
+		"prevHunk": ["Ctrl+ArrowUp", "k"],
+		"prevSearchMatch": "Shift+Enter",
+		"shortcutsHelp": "Shift+?",
+		"submitComment": "Mod+Enter",
+		"toggleSidebar": "Mod+b",
+		"toggleWordWrap": "Alt+z"
 	},
-	// Keyboard shortcuts. These override Codiff's defaults.
-	// Use "Mod" for Cmd on macOS, Ctrl on Windows/Linux.
-	"keymap": {}
+	"settings": {
+		"agentBackend": "pi",
+		"claudeModel": "claude-sonnet-4-6",
+		"codeFontFamily": "",
+		"codeFontSize": 13,
+		"copyCommentsOnClose": false,
+		"diffStyle": "split",
+		"editorCommand": "zed",
+		"openAIModel": "gpt-5.3-codex-spark",
+		"opencodeModel": "opencode-default",
+		"piModel": "pi-default",
+		"reviewCommentsPrefix": "# Address these Review Comments",
+		"showOutdated": false,
+		"showWhitespace": false,
+		"theme": "system",
+		"walkthroughPrompt": "",
+		"wordWrap": false
+	}
 }
