@@ -233,7 +233,7 @@ README_FILE="$REPO_ROOT/README.md"
 }
 
 @test "README.md table row references privatenumber/mac-ocr" {
-    run grep -F 'privatenumber/mac-ocr' "$README_FILE"
+    run grep -F '[privatenumber/mac-ocr]' "$README_FILE"
     [ "$status" -eq 0 ]
     [[ "$output" == *"mac-ocr"* ]]
 }
