@@ -26,13 +26,13 @@ README_FILE="$REPO_ROOT/README.md"
     [ "$output" = "true" ]
 }
 
-@test "recommend-skills.json has 16 entries in recommended_skills" {
+@test "recommend-skills.json has 17 entries in recommended_skills" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
     fi
     run jq -r '.recommended_skills | length' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
-    [ "$output" = "16" ]
+    [ "$output" = "17" ]
 }
 
 @test "every entry in recommended-skills.json has a non-empty repo field" {
@@ -227,6 +227,17 @@ README_FILE="$REPO_ROOT/README.md"
     [ "$status" -eq 0 ]
 }
 
+@test "README.md install block contains mac-ocr install command" {
+    run grep -F 'npx skills add privatenumber/mac-ocr --skill mac-ocr' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md table row references privatenumber/mac-ocr" {
+    run grep -F '[privatenumber/mac-ocr]' "$README_FILE"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"mac-ocr"* ]]
+}
+
 @test "recommend-skills.json contains openclaw autoreview skill entry" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
@@ -388,4 +399,13 @@ README_FILE="$REPO_ROOT/README.md"
     run jq -r '[.recommended_skills[] | select(.repo == "Gentleman-Programming/engram")] | length' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
     [ "$output" = "1" ]
+}
+
+@test "recommend-skills.json contains privatenumber/mac-ocr skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "privatenumber/mac-ocr" and .skill == "mac-ocr")] | length > 0' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
 }
