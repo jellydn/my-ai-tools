@@ -1386,7 +1386,7 @@ copy_codiff_configs() {
 
 	if [ -f "$SCRIPT_DIR/configs/codiff/codiff.jsonc" ]; then
 		if [ -f "$HOME/.codiff/codiff.jsonc" ]; then
-			log_info "Merging Codiff config into existing config..."
+			log_info "Backing up existing Codiff config and replacing..."
 		fi
 		copy_config_file "$SCRIPT_DIR/configs/codiff/codiff.jsonc" "$HOME/.codiff/" || true
 		log_success "Codiff config copied"
