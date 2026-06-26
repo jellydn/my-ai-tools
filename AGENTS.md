@@ -6,6 +6,8 @@ Monorepo for **my-ai-tools** — configuration management for 14+ AI coding assi
 
 ## Essential Commands
 
+Use microsandbox when testing or working with shell scripts.
+
 ```bash
 # Validate shell scripts (CI and local)
 bash -n cli.sh generate.sh
