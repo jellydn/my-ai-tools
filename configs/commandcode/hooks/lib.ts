@@ -76,10 +76,7 @@ export interface TranscriptAssistantMessage {
 	timestamp: string;
 }
 
-export type TranscriptMessage =
-	| TranscriptSummary
-	| TranscriptUserMessage
-	| TranscriptAssistantMessage;
+export type TranscriptMessage = TranscriptSummary | TranscriptUserMessage | TranscriptAssistantMessage;
 
 // Helper function to load the initial user message from a transcript
 export async function getInitialMessage(transcriptPath: string): Promise<string | null> {
@@ -366,12 +363,8 @@ export interface EditToolInput {
 }
 
 // Hook handler types
-export type PreToolUseHandler = (
-	payload: PreToolUsePayload,
-) => Promise<PreToolUseResponse> | PreToolUseResponse;
-export type PostToolUseHandler = (
-	payload: PostToolUsePayload,
-) => Promise<PostToolUseResponse> | PostToolUseResponse;
+export type PreToolUseHandler = (payload: PreToolUsePayload) => Promise<PreToolUseResponse> | PreToolUseResponse;
+export type PostToolUseHandler = (payload: PostToolUsePayload) => Promise<PostToolUseResponse> | PostToolUseResponse;
 
 export interface HookHandlers {
 	preToolUse?: PreToolUseHandler;

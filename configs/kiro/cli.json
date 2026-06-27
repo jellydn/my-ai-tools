@@ -1,13 +1,13 @@
 {
-  "app.beta": true,
-  "app.launchOnStartup": false,
-  "autocomplete.theme": "dracula",
-  "codeWhisperer.shareCodeWhispererContentWithAWS": false,
-  "mcp.loadedBefore": true,
-  "telemetry.enabled": false,
-  "chat.allowAnimations": false,
-  "chat.allowAsciiArt": false,
-  "chat.hasSeenLogo": true,
-  "chat.terminalTitle": true,
-  "chat.allowIcons": false
+	"app.beta": true,
+	"app.launchOnStartup": false,
+	"autocomplete.theme": "dracula",
+	"codeWhisperer.shareCodeWhispererContentWithAWS": false,
+	"mcp.loadedBefore": true,
+	"telemetry.enabled": false,
+	"chat.allowAnimations": false,
+	"chat.allowAsciiArt": false,
+	"chat.hasSeenLogo": true,
+	"chat.terminalTitle": true,
+	"chat.allowIcons": false
 }

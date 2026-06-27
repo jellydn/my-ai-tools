@@ -5,8 +5,8 @@
 Add Codiff as a first-class supported tool with install/copy/generate scaffolding,
 codiff.jsonc config, and README section.
 
-- configs/codiff/codiff.jsonc: settings (agentBackend: pi, theme: dark, diffStyle: split)
-  and keymap defaults; Kanagawa theme not natively supported by Codiff (dark is closest)
+- configs/codiff/codiff.jsonc: settings (agentBackend: pi, theme: system, diffStyle: split)
+  and keymap defaults
 - cli.sh: copy_codiff_configs() installs codiff.jsonc with .bak safety; backup_configs()
   includes ~/.codiff/
 - generate.sh: generate_codiff_configs() reverse-syncs codiff.jsonc
