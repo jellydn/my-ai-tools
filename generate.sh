@@ -8,21 +8,26 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
-DRY_RUN=false
+# Parse command-line arguments first (only when executed, not sourced).
+# When sourced (e.g. from bats tests), BASH_SOURCE[0] != $0, so we skip arg
+# parsing and leave DRY_RUN at whatever value the caller exported.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+	DRY_RUN=false
 
-for arg in "$@"; do
-	case $arg in
-	--dry-run)
-		DRY_RUN=true
-		shift
-		;;
-	*)
-		echo "Unknown option: $arg"
-		echo "Usage: $0 [--dry-run]"
-		exit 1
-		;;
-	esac
-done
+	for arg in "$@"; do
+		case $arg in
+		--dry-run)
+			DRY_RUN=true
+			shift
+			;;
+		*)
+			echo "Unknown option: $arg"
+			echo "Usage: $0 [--dry-run]"
+			exit 1
+			;;
+		esac
+	done
+fi
 
 skill_exists_in_plugins() {
 	local skill_name="$1"
@@ -843,4 +848,6 @@ main() {
 	echo "Commit changes with: git add . && git commit -m 'Update configs'"
 }
 
-main
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+	main
+fi
