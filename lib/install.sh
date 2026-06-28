@@ -284,8 +284,11 @@ install_qmd_now() {
 		if command -v bun &>/dev/null; then
 			local bun_global_bin
 			bun_global_bin="$(bun pm bin -g 2>/dev/null)"
-			if [ -n "$bun_global_bin" ] && case ":$PATH:" in *":$bun_global_bin:"*) false ;; *) true ;; esac; then
-				export PATH="$bun_global_bin:$PATH"
+			if [ -n "$bun_global_bin" ]; then
+				case ":$PATH:" in
+					*":$bun_global_bin:"*) ;;
+					*) export PATH="$bun_global_bin:$PATH" ;;
+				esac
 			fi
 		fi
 		local qmd_version
@@ -314,9 +317,10 @@ install_fff_mcp_now() {
 	if execute_installer "https://dmtrkovalenko.dev/install-fff-mcp.sh" "" "fff-mcp"; then
 		# Ensure ~/.local/bin is in PATH for the current session
 		local local_bin="$HOME/.local/bin"
-		if case ":$PATH:" in *":$local_bin:"*) false ;; *) true ;; esac; then
-			export PATH="$local_bin:$PATH"
-		fi
+		case ":$PATH:" in
+			*":$local_bin:"*) ;;
+			*) export PATH="$local_bin:$PATH" ;;
+		esac
 		log_success "fff-mcp installed successfully"
 		return 0
 	fi
@@ -347,9 +351,10 @@ install_logpilot_now() {
 	if execute "cargo install logpilot"; then
 		# Ensure cargo bin is in PATH
 		local cargo_bin="${CARGO_HOME:-$HOME/.cargo}/bin"
-		if case ":$PATH:" in *":$cargo_bin:"*) false ;; *) true ;; esac; then
-			export PATH="$cargo_bin:$PATH"
-		fi
+		case ":$PATH:" in
+			*":$cargo_bin:"*) ;;
+			*) export PATH="$cargo_bin:$PATH" ;;
+		esac
 		log_success "logpilot installed successfully"
 		return 0
 	fi
@@ -396,9 +401,10 @@ install_sem_now() {
 		log_info "Installing sem-mcp via cargo..."
 		if execute "cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp"; then
 			local cargo_bin="${CARGO_HOME:-$HOME/.cargo}/bin"
-			if case ":$PATH:" in *":$cargo_bin:"*) false ;; *) true ;; esac; then
-				export PATH="$cargo_bin:$PATH"
-			fi
+			case ":$PATH:" in
+				*":$cargo_bin:"*) ;;
+				*) export PATH="$cargo_bin:$PATH" ;;
+			esac
 			log_success "sem-mcp installed successfully"
 		else
 			log_error "Failed to install sem-mcp"
