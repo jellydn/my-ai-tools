@@ -722,8 +722,15 @@ generate_cline_configs() {
 	# Copy kanban config
 	copy_single "$HOME/.cline/kanban/config.json" "$SCRIPT_DIR/configs/cline/kanban-config.json"
 
-	# Copy skills with filtering
-	copy_skills_with_filter "$HOME/.cline/skills" "$SCRIPT_DIR/configs/cline/skills" "Cline"
+	# Copy global rules back to repo
+	# Prefer ~/.agents/AGENTS.md (canonical cross-tool source); fall back to ~/.cline/rules/01-guidelines.md
+	if [ -f "$HOME/.agents/AGENTS.md" ]; then
+		copy_single "$HOME/.agents/AGENTS.md" "$SCRIPT_DIR/configs/cline/AGENTS.md"
+	elif [ -f "$HOME/.cline/rules/01-guidelines.md" ]; then
+		copy_single "$HOME/.cline/rules/01-guidelines.md" "$SCRIPT_DIR/configs/cline/AGENTS.md"
+	fi
+
+	# Skills are managed in the universal ~/.agents/skills/ directory and not copied per-tool
 
 	log_success "Cline configs generated"
 }
