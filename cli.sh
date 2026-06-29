@@ -465,6 +465,8 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/pi/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/mcp.json" \
+		"$SCRIPT_DIR/configs/cline/mcp-settings.json" \
+		"$SCRIPT_DIR/configs/cline/models.json" \
 		"$SCRIPT_DIR/configs/factory/settings.json"; do
 		if [ -f "$config_file" ] && ! validate_config "$config_file"; then
 			log_error "Config validation failed: $config_file"
@@ -1462,17 +1464,40 @@ copy_cline_configs() {
 		log_success "Cline kanban config copied"
 	fi
 
-	# Copy Cline-specific skills directly to ~/.cline/skills
+	# Install global agent instructions (AGENTS.md)
+	# Cline reads global rules from ~/.cline/rules/ and ~/.agents/AGENTS.md
+	if [ -f "$SCRIPT_DIR/configs/cline/AGENTS.md" ]; then
+		execute_quoted mkdir -p "$HOME/.cline/rules"
+		execute_quoted cp "$SCRIPT_DIR/configs/cline/AGENTS.md" "$HOME/.cline/rules/01-guidelines.md"
+		log_success "Cline global rules copied to ~/.cline/rules/"
+
+		# Also publish to the cross-tool global location (~/.agents/AGENTS.md)
+		# Cline reads this via resolveGlobalAgentsRulesPath(); shared with other AGENTS.md tools
+		execute_quoted mkdir -p "$HOME/.agents"
+		execute_quoted cp "$SCRIPT_DIR/configs/cline/AGENTS.md" "$HOME/.agents/AGENTS.md"
+		log_success "Cline global AGENTS.md copied to ~/.agents/AGENTS.md"
+	fi
+
+	# Copy Cline-specific skills (complement the universal ~/.agents/skills/ directory)
+	# These skills are Cline-tailored variants and are discovered via ~/.cline/skills/ search path
 	if [ -d "$SCRIPT_DIR/configs/cline/skills" ]; then
 		execute_quoted mkdir -p "$HOME/.cline/skills"
 		for skill_dir in "$SCRIPT_DIR/configs/cline/skills"/*; do
 			if [ -d "$skill_dir" ]; then
 				local skill_name
 				skill_name=$(basename "$skill_dir")
+				rm -rf "$HOME/.cline/skills/$skill_name"
 				safe_copy_dir "$skill_dir" "$HOME/.cline/skills/$skill_name"
 			fi
 		done
 		log_success "Cline-specific skills copied"
+	fi
+
+	# Copy hooks (SDK plugin files and shell hooks)
+	if [ -d "$SCRIPT_DIR/configs/cline/hooks" ]; then
+		execute_quoted mkdir -p "$HOME/.cline/hooks"
+		safe_copy_dir "$SCRIPT_DIR/configs/cline/hooks" "$HOME/.cline/hooks"
+		log_success "Cline hooks copied"
 	fi
 
 	log_success "Cline configs copied"
@@ -1969,7 +1994,7 @@ install_local_skills() {
 	done
 
 	log_success "Skills installed to universal directory: $UNIVERSAL_SKILLS_DIR"
-	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Gemini, Antigravity, Cursor, Pi, Command Code, Grok, MiMo-Code, and more"
+	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Gemini, Antigravity, Cursor, Pi, Command Code, Grok, MiMo-Code, Cline, and more"
 
 	# Create symlinks from tool-specific directories to universal directory
 	create_tool_skills_symlinks "$UNIVERSAL_SKILLS_DIR"
@@ -1990,6 +2015,7 @@ create_tool_skills_symlinks() {
 		"$HOME/.codex/skills"
 		"$HOME/.commandcode/skills"
 		"$HOME/.config/mimocode/skills"
+		"$HOME/.cline/skills"
 	)
 
 	for tool_dir in "${tool_dirs[@]}"; do

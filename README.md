@@ -49,7 +49,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **Conductor**   | Per-harness (Claude Code, Codex, Cursor MCP configs)                                             | Orchestrates parallel agents in isolated workspaces                                                                                                                                       |
 | **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | core, security-engineer, droid-evolved, autoresearch                                                                                                                                      |
 | **Orca**        | -                                                                                                | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                                        |
-| **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                         |
+| **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Global rules (AGENTS.md → ~/.cline/rules/, ~/.agents/AGENTS.md), universal skills (~/.agents/skills)                                                                                      |
 | **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Kanagawa palette staged (`tokyonight` until built-in)                                                                                                                                     |
 | **MiMo-Code**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                         |
 | **Qoder CLI**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                         |
@@ -2115,10 +2115,13 @@ export OPENAI_API_KEY="your_key_here"
 
 Cline configs are stored in `configs/cline/` and installed to `~/.cline/`:
 
+- [`AGENTS.md`](configs/cline/AGENTS.md) - Global agent guidelines (tmux, AI tool usage, best practices), installed to `~/.cline/rules/01-guidelines.md` and the cross-tool `~/.agents/AGENTS.md` (Cline reads both via its rules search paths)
 - [`mcp-settings.json`](configs/cline/mcp-settings.json) - MCP server configurations, installed to `~/.cline/data/settings/cline_mcp_settings.json`
 - [`models.json`](configs/cline/models.json) - Model configurations
 - [`providers.json`](configs/cline/providers.json.example) - Provider credentials (copy from example and fill in your keys)
 - [`kanban-config.json`](configs/cline/kanban-config.json) - Kanban board settings
+
+Skills are shared via the universal `~/.agents/skills/` directory, which Cline searches natively. `~/.cline/skills` is symlinked to it for consistency with the other tools.
 
 ### MCP Servers
 
