@@ -1374,14 +1374,7 @@ copy_kiro_configs() {
 }
 
 copy_codiff_configs() {
-	local codiff_status
-	codiff_status=$(detect_tool --detailed "codiff" "$HOME/.codiff") || codiff_status="missing"
-	if [ "$codiff_status" = "missing" ]; then
-		log_info "Codiff not detected - skipping Codiff config installation"
-		return 0
-	fi
-
-	log_info "Detected Codiff (via $codiff_status)"
+	log_info "Copying Codiff configs..."
 	execute_quoted mkdir -p "$HOME/.codiff"
 
 	if [ -f "$SCRIPT_DIR/configs/codiff/codiff.jsonc" ]; then

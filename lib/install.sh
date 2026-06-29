@@ -1026,7 +1026,7 @@ install_codiff() {
 		if [ "$IS_LINUX" = true ]; then
 			log_info "Codiff: download from https://github.com/nkzw-tech/codiff/releases"
 			log_info "Install manually, or on macOS: brew install --cask nkzw-tech/tap/codiff"
-			return 0
+			return 1
 		fi
 
 		# macOS: Homebrew cask
