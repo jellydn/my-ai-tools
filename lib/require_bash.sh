@@ -10,7 +10,7 @@
 # entry-point script that ultimately needs bash features:
 #
 #     #!/bin/bash
-#     source "$(dirname "${BASH_SOURCE[0]}")/lib/require_bash.sh"
+#     . "$(dirname "${BASH_SOURCE:-$0}")/lib/require_bash.sh"
 #     source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 #
 # Detection logic:

@@ -1013,3 +1013,36 @@ install_kiro() {
 	}
 	run_installer "Kiro CLI" "_run_kiro_install" "command -v kiro-cli || command -v kiro" "kiro-cli --version 2>/dev/null || true"
 }
+
+# ─── codiff installation ──────────────────────────────────────────
+
+install_codiff() {
+	_run_codiff_install() {
+		if command -v codiff &>/dev/null; then
+			log_warning "Codiff is already installed"
+			return 0
+		fi
+
+		if [ "$IS_LINUX" = true ]; then
+			log_info "Codiff: download from https://github.com/nkzw-tech/codiff/releases"
+			log_info "Install manually, or on macOS: brew install --cask nkzw-tech/tap/codiff"
+			return 1
+		fi
+
+		# macOS: Homebrew cask
+		if ! command -v brew &>/dev/null; then
+			log_error "Homebrew is required to install Codiff on macOS."
+			log_info "Install Homebrew first: https://brew.sh"
+			return 1
+		fi
+
+		# Tap and install
+		if ! brew tap nkzw-tech/tap &>/dev/null; then
+			log_error "Failed to tap nkzw-tech/tap"
+			return 1
+		fi
+
+		execute "brew install --cask nkzw-tech/tap/codiff"
+	}
+	run_installer "Codiff" "_run_codiff_install" "command -v codiff" "codiff --version 2>/dev/null || true"
+}

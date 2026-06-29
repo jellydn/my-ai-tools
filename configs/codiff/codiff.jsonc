@@ -1,0 +1,37 @@
+{
+	"$schema": "https://raw.githubusercontent.com/nkzw-tech/codiff/main/core/config/codiff-config.schema.json",
+	"keymap": {
+		"closeSearch": "Escape",
+		"commandBar": "Mod+Shift+p",
+		"diffSearch": "Mod+f",
+		"discardComment": "Escape",
+		"fileFilter": "Mod+p",
+		"nextHunk": ["Ctrl+ArrowDown", "j"],
+		"nextSearchMatch": "Enter",
+		"openFile": "Mod+k",
+		"prevHunk": ["Ctrl+ArrowUp", "k"],
+		"prevSearchMatch": "Shift+Enter",
+		"shortcutsHelp": "Shift+?",
+		"submitComment": "Mod+Enter",
+		"toggleSidebar": "Mod+b",
+		"toggleWordWrap": "Alt+z"
+	},
+	"settings": {
+		"agentBackend": "pi",
+		"claudeModel": "claude-sonnet-4-6",
+		"codeFontFamily": "",
+		"codeFontSize": 13,
+		"copyCommentsOnClose": false,
+		"diffStyle": "split",
+		"editorCommand": "zed",
+		"openAIModel": "gpt-5.3-codex-spark",
+		"opencodeModel": "opencode-default",
+		"piModel": "pi-default",
+		"reviewCommentsPrefix": "# Address these Review Comments",
+		"showOutdated": false,
+		"showWhitespace": false,
+		"theme": "system",
+		"walkthroughPrompt": "",
+		"wordWrap": false
+	}
+}

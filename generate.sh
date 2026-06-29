@@ -2,27 +2,32 @@
 
 # Re-exec under bash if invoked via sh/dash. lib/require_bash.sh is POSIX-compatible
 # so sh can source it and trigger the re-exec before lib/common.sh is reached.
-source "$(dirname "${BASH_SOURCE[0]}")/lib/require_bash.sh"
+. "$(dirname "${BASH_SOURCE:-$0}")/lib/require_bash.sh"
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
-DRY_RUN=false
+# Parse command-line arguments first (only when executed, not sourced).
+# When sourced (e.g. from bats tests), BASH_SOURCE[0] != $0, so we skip arg
+# parsing and leave DRY_RUN at whatever value the caller exported.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+	DRY_RUN=false
 
-for arg in "$@"; do
-	case $arg in
-	--dry-run)
-		DRY_RUN=true
-		shift
-		;;
-	*)
-		echo "Unknown option: $arg"
-		echo "Usage: $0 [--dry-run]"
-		exit 1
-		;;
-	esac
-done
+	for arg in "$@"; do
+		case $arg in
+		--dry-run)
+			DRY_RUN=true
+			shift
+			;;
+		*)
+			echo "Unknown option: $arg"
+			echo "Usage: $0 [--dry-run]"
+			exit 1
+			;;
+		esac
+	done
+fi
 
 skill_exists_in_plugins() {
 	local skill_name="$1"
@@ -684,6 +689,21 @@ generate_kiro_configs() {
 	log_success "Kiro CLI configs generated"
 }
 
+generate_codiff_configs() {
+	log_info "Generating Codiff configs..."
+
+	if [ ! -d "$HOME/.codiff" ]; then
+		log_warning "Codiff config directory not found: $HOME/.codiff"
+		return 0
+	fi
+
+	execute "mkdir -p \"$SCRIPT_DIR/configs/codiff\""
+
+	copy_single "$HOME/.codiff/codiff.jsonc" "$SCRIPT_DIR/configs/codiff/codiff.jsonc"
+
+	log_success "Codiff configs generated"
+}
+
 generate_cline_configs() {
 	log_info "Generating Cline configs..."
 
@@ -810,6 +830,9 @@ main() {
 	generate_kiro_configs
 	echo
 
+	generate_codiff_configs
+	echo
+
 	generate_best_practices
 	echo
 
@@ -825,4 +848,6 @@ main() {
 	echo "Commit changes with: git add . && git commit -m 'Update configs'"
 }
 
-main
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+	main
+fi
