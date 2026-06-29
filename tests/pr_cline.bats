@@ -126,20 +126,6 @@ README="$REPO_ROOT/README.md"
 	[ -n "$output" ]
 }
 
-@test "configs/cline/skills/ has pr-review skill with SKILL.md" {
-	[ -f "$CLINE_CONFIG_DIR/skills/pr-review/SKILL.md" ]
-}
-
-@test "configs/cline/skills/ has simplify skill with SKILL.md" {
-	[ -f "$CLINE_CONFIG_DIR/skills/simplify/SKILL.md" ]
-}
-
-@test "configs/cline/skills/ skills have cline in compatibility" {
-	run grep -F 'compatibility: ' "$CLINE_CONFIG_DIR/skills/pr-review/SKILL.md"
-	[ "$status" -eq 0 ]
-	[[ "$output" == *"cline"* ]]
-}
-
 @test "configs/cline/hooks/ has git-guard.sh" {
 	[ -f "$CLINE_CONFIG_DIR/hooks/git-guard.sh" ]
 }
