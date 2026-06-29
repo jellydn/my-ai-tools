@@ -2,7 +2,7 @@
 name: handoffs
 description: Creates detailed handoff plans of conversations for continuing work in new sessions
 license: MIT
-compatibility: claude, opencode, codex, gemini, cursor, pi
+compatibility: cline, claude, opencode, codex, gemini, cursor, pi
 hint: Use when ending a session and want to continue work later with full context
 user-invocable: true
 metadata:

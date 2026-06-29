@@ -730,7 +730,15 @@ generate_cline_configs() {
 		copy_single "$HOME/.cline/rules/01-guidelines.md" "$SCRIPT_DIR/configs/cline/AGENTS.md"
 	fi
 
-	# Skills are managed in the universal ~/.agents/skills/ directory and not copied per-tool
+	# Copy Cline-specific skills back to repo
+	copy_skills_with_filter "$HOME/.cline/skills" "$SCRIPT_DIR/configs/cline/skills" "Cline"
+
+	# Copy hooks back to repo
+	if [ -d "$HOME/.cline/hooks" ]; then
+		execute_quoted mkdir -p "$SCRIPT_DIR/configs/cline/hooks"
+		execute_quoted rm -rf "$SCRIPT_DIR/configs/cline/hooks"
+		safe_copy_dir "$HOME/.cline/hooks" "$SCRIPT_DIR/configs/cline/hooks"
+	fi
 
 	log_success "Cline configs generated"
 }

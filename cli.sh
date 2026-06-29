@@ -1478,9 +1478,27 @@ copy_cline_configs() {
 		log_success "Cline global AGENTS.md copied to ~/.agents/AGENTS.md"
 	fi
 
-	# Note: skills are managed via the universal ~/.agents/skills/ directory,
-	# which Cline searches natively (resolveSkillsConfigSearchPaths includes ~/.agents/skills).
-	# create_tool_skills_symlinks() also symlinks ~/.cline/skills -> ~/.agents/skills for consistency.
+	# Copy Cline-specific skills (complement the universal ~/.agents/skills/ directory)
+	# These skills are Cline-tailored variants and are discovered via ~/.cline/skills/ search path
+	if [ -d "$SCRIPT_DIR/configs/cline/skills" ]; then
+		execute_quoted mkdir -p "$HOME/.cline/skills"
+		for skill_dir in "$SCRIPT_DIR/configs/cline/skills"/*; do
+			if [ -d "$skill_dir" ]; then
+				local skill_name
+				skill_name=$(basename "$skill_dir")
+				rm -rf "$HOME/.cline/skills/$skill_name"
+				safe_copy_dir "$skill_dir" "$HOME/.cline/skills/$skill_name"
+			fi
+		done
+		log_success "Cline-specific skills copied"
+	fi
+
+	# Copy hooks (SDK plugin files and shell hooks)
+	if [ -d "$SCRIPT_DIR/configs/cline/hooks" ]; then
+		execute_quoted mkdir -p "$HOME/.cline/hooks"
+		safe_copy_dir "$SCRIPT_DIR/configs/cline/hooks" "$HOME/.cline/hooks"
+		log_success "Cline hooks copied"
+	fi
 
 	log_success "Cline configs copied"
 }

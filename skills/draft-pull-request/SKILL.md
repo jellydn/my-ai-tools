@@ -2,7 +2,7 @@
 name: draft-pull-request
 description: Creates a draft pull request using gh CLI with a structured what/why/how description
 license: MIT
-compatibility: claude, opencode, amp, codex, gemini, cursor, pi
+compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when creating a draft pull request with a structured description using gh CLI
 user-invocable: true
 metadata:

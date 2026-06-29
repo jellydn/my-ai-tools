@@ -126,6 +126,52 @@ README="$REPO_ROOT/README.md"
 	[ -n "$output" ]
 }
 
+@test "configs/cline/skills/ has pr-review skill with SKILL.md" {
+	[ -f "$CLINE_CONFIG_DIR/skills/pr-review/SKILL.md" ]
+}
+
+@test "configs/cline/skills/ has simplify skill with SKILL.md" {
+	[ -f "$CLINE_CONFIG_DIR/skills/simplify/SKILL.md" ]
+}
+
+@test "configs/cline/skills/ skills have cline in compatibility" {
+	run grep -F 'compatibility: ' "$CLINE_CONFIG_DIR/skills/pr-review/SKILL.md"
+	[ "$status" -eq 0 ]
+	[[ "$output" == *"cline"* ]]
+}
+
+@test "configs/cline/hooks/ has git-guard.sh" {
+	[ -f "$CLINE_CONFIG_DIR/hooks/git-guard.sh" ]
+}
+
+@test "configs/cline/hooks/git-guard.sh is executable" {
+	[ -x "$CLINE_CONFIG_DIR/hooks/git-guard.sh" ]
+}
+
+@test "configs/cline/hooks/ has README.md" {
+	[ -f "$CLINE_CONFIG_DIR/hooks/README.md" ]
+}
+
+@test "cli.sh copy_cline_configs() installs skills directory" {
+	run grep -F 'configs/cline/skills' "$CLI_SH"
+	[ "$status" -eq 0 ]
+}
+
+@test "cli.sh copy_cline_configs() installs hooks directory" {
+	run grep -F 'configs/cline/hooks' "$CLI_SH"
+	[ "$status" -eq 0 ]
+}
+
+@test "generate.sh generate_cline_configs() exports skills" {
+	run grep -F 'configs/cline/skills' "$GENERATE_SH"
+	[ "$status" -eq 0 ]
+}
+
+@test "generate.sh generate_cline_configs() exports hooks" {
+	run grep -F 'configs/cline/hooks' "$GENERATE_SH"
+	[ "$status" -eq 0 ]
+}
+
 @test "README.md mentions Cline in the supported-tools list" {
 	run grep -F 'Cline' "$README"
 	[ "$status" -eq 0 ]

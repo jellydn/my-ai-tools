@@ -2,7 +2,7 @@
 name: commit-atomic
 description: Creates atomic commits by logically grouping staged changes with commitizen convention
 license: MIT
-compatibility: claude, opencode, amp, codex, gemini, cursor, pi
+compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when committing staged changes as focused, atomic commits grouped by logical change
 user-invocable: true
 metadata:
