@@ -40,6 +40,16 @@ README="$REPO_ROOT/README.md"
     [ -n "$output" ]
 }
 
+@test "lib/install.sh install_kimi_code() includes both Unix and Windows installer URLs" {
+    run grep -E 'code\.kimi\.com/kimi-code/install\.sh' "$LIB_INSTALL"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+
+    run grep -E 'code\.kimi\.com/kimi-code/install\.ps1' "$LIB_INSTALL"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
 @test "cli.sh defines copy_kimi_code_configs()" {
     run grep -E '^copy_kimi_code_configs\(\)' "$CLI_SH"
     [ "$status" -eq 0 ]

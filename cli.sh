@@ -2138,7 +2138,7 @@ main() {
 
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
-	echo "║  Claude • OpenCode • Amp • CCS • Codex • Kimi • Gemini               ║"
+	echo "║  Claude • OpenCode • Amp • CCS • Codex • Kimi Code • Gemini          ║"
 	echo "║  Antigravity • Pi • Kilo • Copilot • Cursor • Command Code           ║"
 	echo "║  Factory Droid • Cline • Grok • MiMo-Code • herdr                    ║"
 	echo "║  Qoder CLI • Kiro • Codiff                                           ║"
