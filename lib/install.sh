@@ -739,6 +739,7 @@ install_kimi_code() {
 
 		if [ "$IS_WINDOWS" = true ]; then
 			if command -v powershell.exe &>/dev/null; then
+				log_warning "Installing Kimi Code CLI via remote PowerShell script (review command before running in high-security environments)"
 				execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://code.kimi.com/kimi-code/install.ps1 | iex\""
 			else
 				log_error "PowerShell is required to install Kimi Code CLI on Windows."
