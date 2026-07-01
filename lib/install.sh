@@ -739,7 +739,7 @@ install_kimi_code() {
 
 		if [ "$IS_WINDOWS" = true ]; then
 			if command -v powershell.exe &>/dev/null; then
-				log_warning "Installing Kimi Code CLI via remote PowerShell script (review command before running in high-security environments)"
+				log_warning "Kimi Code installer will execute remotely-downloaded PowerShell code (ExecutionPolicy Bypass); review before use in high-security environments"
 				if [ "$YES_TO_ALL" = false ] && [ -t 0 ]; then
 					if ! prompt_yn "Run Kimi Code official PowerShell installer from code.kimi.com"; then
 						log_warning "Skipping Kimi Code CLI installation"
