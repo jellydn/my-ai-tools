@@ -13,7 +13,6 @@
       "args": ["mcp"]
     },
     "fff": {
-      "type": "stdio",
       "command": "fff-mcp",
       "args": []
     },
