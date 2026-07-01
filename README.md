@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Kimi Code, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, Open Code Review, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, Open Code Review, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, agentmemory, sem
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -38,6 +38,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                                          |
 | **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                         |
 | **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl   | -                                                                                                                                                                                         |
+| **Kimi Code**   | context7, sequential-thinking, qmd, agentmemory, fff, logpilot, sem                             | Skills, MCP servers, and hooks via `~/.kimi-code/`                                                                                                                                        |
 | **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory, sem                        | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, pi-web-access, footer, tps-meter) |
 | **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                         |
 | **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                            |
@@ -1509,6 +1510,38 @@ kilo --model kilo/giga-potato
 
 # Non-interactive mode
 kilo run "Refactor this component to use hooks"
+```
+
+</details>
+
+---
+
+## 🌙 Kimi Code (Optional)
+
+Moonshot AI's terminal-native coding agent. [Homepage](https://www.kimi.com/code/en)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Installation
+
+```bash
+curl -fsSL https://code.kimi.com/kimi-code/install.sh | bash
+```
+
+### Configuration
+
+Kimi Code stores user-level configs in `~/.kimi-code/`:
+
+- [`AGENTS.md`](configs/kimi-code/AGENTS.md) - Global Kimi-specific instructions
+- [`config.toml`](configs/kimi-code/config.toml) - Runtime settings (models, permissions, loop control)
+- [`mcp.json`](configs/kimi-code/mcp.json) - User-level MCP server declarations
+
+### Usage
+
+```bash
+# Start Kimi Code
+kimi
 ```
 
 </details>
