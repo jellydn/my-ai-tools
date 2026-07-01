@@ -730,6 +730,30 @@ install_codex() {
 		"npm install -g @openai/codex"
 }
 
+install_kimi_code() {
+	_run_kimi_code_install() {
+		if command -v kimi &>/dev/null; then
+			log_warning "Kimi Code CLI is already installed"
+			return 0
+		fi
+
+		if [ "$IS_WINDOWS" = true ]; then
+			if command -v powershell.exe &>/dev/null; then
+				execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://code.kimi.com/kimi-code/install.ps1 | iex\""
+			else
+				log_error "PowerShell is required to install Kimi Code CLI on Windows."
+				log_info "Install manually: https://www.kimi.com/code/en"
+				return 1
+			fi
+		else
+			execute_installer "https://code.kimi.com/kimi-code/install.sh" "" "Kimi Code CLI"
+		fi
+
+		log_success "Kimi Code CLI installed"
+	}
+	run_installer "Kimi Code CLI" "_run_kimi_code_install" "command -v kimi" "kimi --version 2>/dev/null || true"
+}
+
 install_gemini() {
 	_run_gemini_install() {
 		if command -v gemini &>/dev/null; then

@@ -280,6 +280,23 @@ generate_codex_configs() {
 	log_success "Codex CLI configs generated"
 }
 
+generate_kimi_code_configs() {
+	log_info "Generating Kimi Code CLI configs..."
+
+	if [ ! -d "$HOME/.kimi-code" ]; then
+		log_warning "Kimi Code CLI config directory not found: $HOME/.kimi-code"
+		return 0
+	fi
+
+	execute "mkdir -p $SCRIPT_DIR/configs/kimi-code"
+	copy_single "$HOME/.kimi-code/AGENTS.md" "$SCRIPT_DIR/configs/kimi-code/AGENTS.md"
+	copy_single "$HOME/.kimi-code/config.toml" "$SCRIPT_DIR/configs/kimi-code/config.toml"
+	copy_single "$HOME/.kimi-code/mcp.json" "$SCRIPT_DIR/configs/kimi-code/mcp.json"
+	copy_skills_with_filter "$HOME/.kimi-code/skills" "$SCRIPT_DIR/configs/kimi-code/skills" "Kimi Code"
+
+	log_success "Kimi Code CLI configs generated"
+}
+
 generate_gemini_configs() {
 	log_info "Generating Gemini CLI configs..."
 	log_warning "⚠️  Gemini CLI is deprecated for Google One / unpaid tiers (cutoff: June 18, 2026)"
@@ -798,6 +815,9 @@ main() {
 	echo
 
 	generate_codex_configs
+	echo
+
+	generate_kimi_code_configs
 	echo
 
 	generate_gemini_configs
