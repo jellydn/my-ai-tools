@@ -1,4 +1,4 @@
-default_model = "kimi-code/kimi-for-coding"
+default_model = "fireworks-ai/accounts/fireworks/models/deepseek-v4-flash"
 default_permission_mode = "manual"
 default_plan_mode = false
 merge_all_available_skills = true
@@ -6,13 +6,158 @@ merge_all_available_skills = true
 [providers."managed:kimi-code"]
 type = "kimi"
 base_url = "https://api.kimi.com/coding/v1"
-# Authenticate in Kimi Code CLI with `/login` or provide a Kimi API key here.
 api_key = ""
+
+[providers.fireworks-ai]
+type = "openai"
+api_key = ""
+base_url = "https://api.fireworks.ai/inference/v1/"
 
 [models."kimi-code/kimi-for-coding"]
 provider = "managed:kimi-code"
 model = "kimi-for-coding"
 max_context_size = 262144
+
+[models."fireworks-ai/accounts/fireworks/routers/kimi-k2p6-turbo"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/routers/kimi-k2p6-turbo"
+max_context_size = 262000
+max_output_size = 262000
+capabilities = [ "image_in", "thinking", "tool_use" ]
+display_name = "Kimi K2.6 Turbo"
+reasoning_key = "reasoning_content"
+
+[models."fireworks-ai/accounts/fireworks/routers/glm-5p2-fast"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/routers/glm-5p2-fast"
+max_context_size = 1048575
+max_output_size = 131072
+capabilities = [ "thinking", "tool_use" ]
+display_name = "GLM 5.2 Fast"
+reasoning_key = "reasoning_content"
+
+[models."fireworks-ai/accounts/fireworks/routers/kimi-k2p7-code-fast"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/routers/kimi-k2p7-code-fast"
+max_context_size = 262000
+max_output_size = 262000
+capabilities = [ "image_in", "thinking", "tool_use" ]
+display_name = "Kimi K2.7 Code Fast"
+reasoning_key = "reasoning_content"
+
+[models."fireworks-ai/accounts/fireworks/routers/glm-5p1-fast"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/routers/glm-5p1-fast"
+max_context_size = 202800
+max_output_size = 131072
+capabilities = [ "thinking", "tool_use" ]
+display_name = "GLM 5.1 Fast"
+reasoning_key = "reasoning_content"
+
+[models."fireworks-ai/accounts/fireworks/routers/kimi-k2p6-fast"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/routers/kimi-k2p6-fast"
+max_context_size = 262000
+max_output_size = 262000
+capabilities = [ "image_in", "thinking", "tool_use" ]
+display_name = "Kimi K2.6 Fast"
+reasoning_key = "reasoning_content"
+
+[models."fireworks-ai/accounts/fireworks/models/deepseek-v4-flash"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/models/deepseek-v4-flash"
+max_context_size = 1000000
+max_output_size = 384000
+capabilities = [ "thinking", "tool_use" ]
+display_name = "DeepSeek V4 Flash"
+reasoning_key = "reasoning_content"
+
+[models."fireworks-ai/accounts/fireworks/models/deepseek-v4-pro"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/models/deepseek-v4-pro"
+max_context_size = 1000000
+max_output_size = 384000
+capabilities = [ "thinking", "tool_use" ]
+display_name = "DeepSeek V4 Pro"
+reasoning_key = "reasoning_content"
+
+[models."fireworks-ai/accounts/fireworks/models/minimax-m2p7"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/models/minimax-m2p7"
+max_context_size = 196608
+max_output_size = 196608
+capabilities = [ "thinking", "tool_use" ]
+display_name = "MiniMax-M2.7"
+reasoning_key = "reasoning_content"
+
+[models."fireworks-ai/accounts/fireworks/models/minimax-m3"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/models/minimax-m3"
+max_context_size = 512000
+max_output_size = 512000
+capabilities = [ "thinking", "tool_use" ]
+display_name = "MiniMax-M3"
+reasoning_key = "reasoning_content"
+
+[models."fireworks-ai/accounts/fireworks/models/kimi-k2p6"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/models/kimi-k2p6"
+max_context_size = 262000
+max_output_size = 262000
+capabilities = [ "image_in", "thinking", "tool_use" ]
+display_name = "Kimi K2.6"
+reasoning_key = "reasoning_content"
+
+[models."fireworks-ai/accounts/fireworks/models/qwen3p7-plus"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/models/qwen3p7-plus"
+max_context_size = 262144
+max_output_size = 65536
+capabilities = [ "image_in", "thinking", "tool_use" ]
+display_name = "Qwen 3.7 Plus"
+
+[models."fireworks-ai/accounts/fireworks/models/glm-5p1"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/models/glm-5p1"
+max_context_size = 202800
+max_output_size = 131072
+capabilities = [ "thinking", "tool_use" ]
+display_name = "GLM 5.1"
+reasoning_key = "reasoning_content"
+
+[models."fireworks-ai/accounts/fireworks/models/glm-5p2"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/models/glm-5p2"
+max_context_size = 1048575
+max_output_size = 131072
+capabilities = [ "thinking", "tool_use" ]
+display_name = "GLM 5.2"
+reasoning_key = "reasoning_content"
+
+[models."fireworks-ai/accounts/fireworks/models/gpt-oss-120b"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/models/gpt-oss-120b"
+max_context_size = 131072
+max_output_size = 32768
+capabilities = [ "thinking", "tool_use" ]
+display_name = "GPT OSS 120B"
+
+[models."fireworks-ai/accounts/fireworks/models/gpt-oss-20b"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/models/gpt-oss-20b"
+max_context_size = 131072
+max_output_size = 32768
+capabilities = [ "thinking", "tool_use" ]
+display_name = "GPT OSS 20B"
+
+[models."fireworks-ai/accounts/fireworks/models/kimi-k2p7-code"]
+provider = "fireworks-ai"
+model = "accounts/fireworks/models/kimi-k2p7-code"
+max_context_size = 262000
+max_output_size = 262000
+capabilities = [ "image_in", "thinking", "tool_use" ]
+display_name = "Kimi K2.7 Code"
+reasoning_key = "reasoning_content"
 
 [thinking]
 enabled = true
@@ -24,12 +169,15 @@ reserved_context_size = 50000
 
 [[permission.rules]]
 decision = "allow"
+scope = "user"
 pattern = "Read"
 
 [[permission.rules]]
 decision = "allow"
+scope = "user"
 pattern = "Grep"
 
 [[permission.rules]]
 decision = "ask"
+scope = "user"
 pattern = "Bash"
