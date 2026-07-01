@@ -716,13 +716,12 @@ install_ccs() {
 install_ai_switcher() {
 	_run_ai_switcher_install() {
 		if command -v ai &>/dev/null; then
-			log_warning "AI Launcher is already installed"
-		else
-			execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "AI Launcher"
-			log_success "AI Launcher installed"
+			log_info "Upgrading AI Launcher from existing installation..."
 		fi
+		execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "AI Launcher"
+		log_success "AI Launcher installed/upgraded"
 	}
-	run_installer "AI Launcher" "_run_ai_switcher_install" "command -v ai" "ai --version"
+	run_installer "AI Launcher" "_run_ai_switcher_install" "" "ai --version"
 }
 
 install_codex() {
