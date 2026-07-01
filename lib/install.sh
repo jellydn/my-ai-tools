@@ -721,7 +721,7 @@ install_ai_switcher() {
 		execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "AI Launcher"
 		log_success "AI Launcher installed/upgraded"
 	}
-	run_installer "AI Launcher" "_run_ai_switcher_install" "" "ai --version"
+	run_installer "AI Launcher" "_run_ai_switcher_install" "false" "ai --version"
 }
 
 install_codex() {
