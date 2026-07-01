@@ -6,6 +6,7 @@ merge_all_available_skills = true
 [providers."managed:kimi-code"]
 type = "kimi"
 base_url = "https://api.kimi.com/coding/v1"
+# Authenticate in Kimi Code CLI with `/login` or provide a Kimi API key here.
 api_key = ""
 
 [models."kimi-code/kimi-for-coding"]
