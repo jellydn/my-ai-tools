@@ -66,7 +66,7 @@ Write a structured description following the **What / Why / How** template:
 - [ ] No breaking changes (or breaking changes documented above)
 ```
 
-### 4. Create the draft PR with gh CLI
+### 3. Create the draft PR with gh CLI
 
 ```bash
 gh pr create \

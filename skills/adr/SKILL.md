@@ -1,6 +1,6 @@
 ---
 name: adr
-description: Manages Architecture Decision Records (ADR) for tracking important architectural decisions
+description: Manage Architecture Decision Records for tracking important architectural decisions. Use when creating, listing, searching, viewing, or superseding ADRs.
 license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when managing architecture decisions, creating ADRs, or tracking architectural choices
@@ -26,7 +26,6 @@ Provides a unified interface for managing Architecture Decision Records.
 - **list** - List all ADRs in the project
 - **search <TERM>** - Search ADRs by content
 - **view <NUMBER>** - View specific ADR
-- **help** - Show this help
 
 ## What are ADRs?
 
