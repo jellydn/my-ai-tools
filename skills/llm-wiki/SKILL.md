@@ -42,6 +42,7 @@ your-wiki/
 │   ├── overview.md
 │   ├── entities/  # People, places, organizations
 │   ├── concepts/  # Ideas, topics, themes
+│   ├── synthesis/ # Filed query answers and analyses
 │   └── sources/   # One summary page per source
 └── CLAUDE.md      # Schema: wiki conventions and per-operation workflows
 ```
@@ -52,14 +53,14 @@ Templates for all three layers are in `$SKILL_PATH/templates/`.
 
 ## For "init [DIRECTORY]":
 
-1. Create the directory structure: `raw/`, `wiki/`, `wiki/entities/`, `wiki/concepts/`, `wiki/sources/`
+1. Create the directory structure: `raw/`, `wiki/`, `wiki/entities/`, `wiki/concepts/`, `wiki/synthesis/`, `wiki/sources/`
 2. Copy `$SKILL_PATH/templates/schema.md` to `CLAUDE.md` (or `AGENTS.md`)
 3. Create `wiki/index.md` from `$SKILL_PATH/templates/index.md`
 4. Create `wiki/log.md` from `$SKILL_PATH/templates/log.md`
 5. Create a starter `wiki/overview.md` stating the wiki's domain and purpose
 6. Tell the user to add sources to `raw/` and run `/llm-wiki ingest <file>` next
 
-**Done when:** all five files and directories exist and the user has been told the next step.
+**Done when:** `raw/`, `wiki/`, `wiki/entities/`, `wiki/concepts/`, `wiki/synthesis/`, `wiki/sources/`, `CLAUDE.md` (or `AGENTS.md`), `wiki/index.md`, `wiki/log.md`, and `wiki/overview.md` exist, and the user has been told the next step.
 
 ---
 
@@ -83,7 +84,7 @@ Templates for all three layers are in `$SKILL_PATH/templates/`.
 1. Read `wiki/index.md` to identify the most relevant pages
 2. Read those pages in full
 3. Synthesize an answer with citations to specific wiki pages
-4. If the answer is a valuable synthesis (comparison, analysis, discovered connection), offer to file it as a new wiki page; if filed, update `wiki/index.md` and append to `wiki/log.md`
+4. If the answer is a valuable synthesis (comparison, analysis, discovered connection), offer to file it as a new wiki page under `wiki/synthesis/`; if filed, update `wiki/index.md` and append to `wiki/log.md`
 
 **Done when:** the question is answered with citations, and any filing decision (page created or skipped) is resolved.
 
