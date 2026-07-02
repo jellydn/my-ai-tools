@@ -3010,6 +3010,10 @@ See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for det
 
 [**Backlog.md**](https://github.com/MrLesk/Backlog.md) - Markdown-native task manager and Kanban visualizer. ([npm](https://www.npmjs.com/package/backlog.md))
 
+### OpenWiki
+
+[**OpenWiki**](https://github.com/langchain-ai/openwiki) - CLI for generating and maintaining repository documentation for AI agents.
+
 ### Agent Browser
 
 [**agent-browser**](https://github.com/vercel-labs/agent-browser) - Headless browser automation CLI for AI agents.
