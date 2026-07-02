@@ -1,6 +1,6 @@
 ---
 name: llm-wiki
-description: Build and maintain a persistent, LLM-driven knowledge wiki from raw sources. Based on Karpathy's LLM Wiki pattern — incremental ingestion, compounding synthesis, and zero-maintenance cross-referencing.
+description: Build and maintain a persistent, compounding knowledge wiki from raw sources. Use when the user wants to create a knowledge base, ingest documents into a wiki, query a wiki, health-check a wiki, or set up Karpathy's LLM Wiki pattern.
 license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when building a personal knowledge base, researching a topic over time, or maintaining a structured wiki from raw documents
@@ -14,7 +14,7 @@ metadata:
 
 Build and maintain a persistent, compounding knowledge wiki from raw sources.
 
-Inspired by [Karpathy's LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f): the LLM incrementally builds and maintains a structured, interlinked collection of markdown files — so knowledge compounds across sessions instead of being re-derived from scratch on every query.
+Based on [Karpathy's LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f): the LLM incrementally integrates each new source into a structured wiki of markdown files — updating entity pages, flagging contradictions, strengthening cross-references. Synthesis is compiled once and kept current, not re-derived on every query.
 
 ## Usage
 
@@ -22,179 +22,131 @@ Inspired by [Karpathy's LLM Wiki pattern](https://gist.github.com/karpathy/442a6
 
 ## Actions
 
-- **init [DIRECTORY]** - Initialize a new LLM Wiki in the given directory (default: `wiki/`)
-- **ingest <SOURCE>** - Process a new source file and integrate it into the wiki
+- **init [DIRECTORY]** - Initialize a new wiki (default: `wiki/`)
+- **ingest <SOURCE>** - Process a source file and integrate it into the wiki
 - **query <QUESTION>** - Answer a question using the wiki as the knowledge base
 - **lint** - Health-check the wiki for contradictions, orphan pages, and stale content
 - **status** - Show a summary of the wiki's current state
-- **help** - Show this help
-
----
-
-## The Core Idea
-
-Most LLM+document workflows are stateless: documents are retrieved at query time and the LLM re-derives synthesis from scratch on every question. **Nothing compounds.**
-
-The LLM Wiki pattern is different. The LLM **incrementally builds and maintains a persistent wiki** — a structured directory of markdown files that sits between you and your raw sources. When you add a new source:
-
-- The LLM reads it, extracts key information, and **integrates it into the existing wiki**
-- It updates entity pages, revises topic summaries, flags contradictions, strengthens cross-references
-- The synthesis is compiled once and kept current — not re-derived on every query
-
-**The wiki is a persistent, compounding artifact.** Cross-references are already there. Contradictions have already been flagged. Synthesis already reflects everything you've read.
-
-You never write the wiki yourself — the LLM writes and maintains all of it. You curate sources, explore, and ask good questions.
-
-> **Obsidian = IDE; LLM = programmer; Wiki = codebase.**
 
 ---
 
 ## Architecture
 
-A wiki has three layers:
-
 ```
 your-wiki/
-├── raw/           # Immutable source documents (you add these)
-│   ├── article-1.md
-│   ├── paper-2.pdf
-│   └── assets/    # Downloaded images
-├── wiki/          # LLM-generated and maintained pages (LLM writes these)
+├── raw/           # Immutable source documents — you add, LLM never modifies
+│   └── assets/    # Downloaded images referenced by sources
+├── wiki/          # LLM-generated and maintained pages
 │   ├── index.md   # Catalog of all pages with one-line summaries
-│   ├── log.md     # Append-only chronological record of operations
+│   ├── log.md     # Append-only record of all operations
 │   ├── overview.md
-│   ├── entities/  # Pages for people, places, organizations
-│   ├── concepts/  # Pages for ideas, topics, themes
-│   └── sources/   # Summary pages per source
-└── CLAUDE.md      # Schema: wiki conventions and LLM workflow instructions
+│   ├── entities/  # People, places, organizations
+│   ├── concepts/  # Ideas, topics, themes
+│   └── sources/   # One summary page per source
+└── CLAUDE.md      # Schema: wiki conventions and per-operation workflows
 ```
 
-**raw/** — Your curated source documents. Immutable — the LLM reads from them but never modifies them.
-
-**wiki/** — LLM-generated markdown files. Summaries, entity pages, concept pages, comparisons, synthesis. The LLM owns this layer entirely.
-
-**CLAUDE.md / AGENTS.md** — The schema that tells the LLM how the wiki is structured, what conventions to follow, and what workflows to run during ingest, query, and lint. Co-evolve this with the LLM over time.
-
-Templates for all of these are available in `$SKILL_PATH/templates/`.
+Templates for all three layers are in `$SKILL_PATH/templates/`.
 
 ---
 
-## Operations
+## For "init [DIRECTORY]":
 
-### For "init [DIRECTORY]":
-
-1. Create the directory structure (`raw/`, `wiki/`, `wiki/entities/`, `wiki/concepts/`, `wiki/sources/`)
-2. Copy `$SKILL_PATH/templates/schema.md` to `CLAUDE.md` (or `AGENTS.md`) as the starting schema
+1. Create the directory structure: `raw/`, `wiki/`, `wiki/entities/`, `wiki/concepts/`, `wiki/sources/`
+2. Copy `$SKILL_PATH/templates/schema.md` to `CLAUDE.md` (or `AGENTS.md`)
 3. Create `wiki/index.md` from `$SKILL_PATH/templates/index.md`
 4. Create `wiki/log.md` from `$SKILL_PATH/templates/log.md`
-5. Create a starter `wiki/overview.md` summarizing the wiki's domain and purpose
-6. Print next steps: add sources to `raw/`, then run `/llm-wiki ingest <file>`
+5. Create a starter `wiki/overview.md` stating the wiki's domain and purpose
+6. Tell the user to add sources to `raw/` and run `/llm-wiki ingest <file>` next
 
-### For "ingest <SOURCE>":
-
-1. Read the source file from `raw/<SOURCE>`
-2. Discuss key takeaways — what's new, what's important, what's surprising
-3. Write a source summary page in `wiki/sources/<slug>.md`
-4. Update `wiki/overview.md` if the source changes the big picture
-5. Create or update entity pages (`wiki/entities/`) for key people, places, organizations
-6. Create or update concept pages (`wiki/concepts/`) for key ideas and themes
-7. Flag any contradictions with existing wiki content (note them on the affected pages)
-8. Update `wiki/index.md` with all new/modified pages
-9. Append an entry to `wiki/log.md`: `## [YYYY-MM-DD] ingest | <Source Title>`
-
-A single source typically touches 5–15 wiki pages. Stay involved — read the summaries, check the updates, and guide the LLM on emphasis.
-
-### For "query <QUESTION>":
-
-1. Read `wiki/index.md` to identify the most relevant pages
-2. Read the relevant pages in full
-3. Synthesize an answer with citations to specific wiki pages
-4. If the answer is a valuable synthesis (comparison, analysis, new connection), offer to file it as a new wiki page
-5. If filed, update `wiki/index.md` and append to `wiki/log.md`
-
-Good answers compound in the wiki just like ingested sources do.
-
-### For "lint":
-
-Scan the entire wiki and report on:
-
-- **Contradictions**: Claims on different pages that conflict with each other
-- **Stale content**: Pages superseded by newer ingested material
-- **Orphan pages**: Pages with no inbound links from other wiki pages
-- **Missing pages**: Important concepts mentioned across multiple pages but lacking their own page
-- **Broken references**: Links to pages that don't exist
-- **Data gaps**: Areas where a targeted web search or new source could meaningfully fill in missing knowledge
-
-Suggest new questions to investigate and new sources to look for. Optionally fix issues in place.
-
-### For "status":
-
-Report:
-
-- Total source count in `raw/`
-- Total wiki page count
-- Recent entries in `wiki/log.md` (last 10)
-- Any obvious health issues (orphan pages, missing index entries)
+**Done when:** all five files and directories exist and the user has been told the next step.
 
 ---
 
-## Index and Log
+## For "ingest <SOURCE>":
 
-Two special files help navigate the wiki as it grows:
+1. Read the source file; share key takeaways and ask the user what to emphasize
+2. Create `wiki/sources/<slug>.md` with a structured summary
+3. Update `wiki/overview.md` if the source shifts the big picture
+4. Create or update entity pages in `wiki/entities/` for key people, places, organizations
+5. Create or update concept pages in `wiki/concepts/` for key ideas and themes
+6. Add a contradiction note on any existing page where this source conflicts with current content
+7. Update `wiki/index.md` — every new or modified page must appear with a one-line summary
+8. Append to `wiki/log.md`: `## [YYYY-MM-DD] ingest | <Source Title>`
 
-**wiki/index.md** — Content-oriented catalog. Every page listed with a link, one-line summary, and optional metadata (date added, source count). Organized by category. Updated on every ingest. The LLM reads this first when answering queries to find relevant pages.
+**Done when:** every affected page is updated, every new or changed page appears in `index.md`, and the log entry is appended. A single ingest typically touches 5–15 pages.
 
-**wiki/log.md** — Chronological, append-only record. Each entry starts with `## [YYYY-MM-DD] <operation> | <title>`. Parseable with standard tools:
+---
+
+## For "query <QUESTION>":
+
+1. Read `wiki/index.md` to identify the most relevant pages
+2. Read those pages in full
+3. Synthesize an answer with citations to specific wiki pages
+4. If the answer is a valuable synthesis (comparison, analysis, discovered connection), offer to file it as a new wiki page; if filed, update `wiki/index.md` and append to `wiki/log.md`
+
+**Done when:** the question is answered with citations, and any filing decision (page created or skipped) is resolved.
+
+---
+
+## For "lint":
+
+Scan the entire wiki and report on each of the following:
+
+- **Contradictions** — conflicting claims across pages
+- **Stale content** — pages superseded by newer ingested material
+- **Orphan pages** — pages with no inbound links
+- **Missing pages** — concepts mentioned on multiple pages but lacking their own page
+- **Broken links** — `[[Page Name]]` links pointing to non-existent pages
+- **Data gaps** — areas a targeted source or web search could fill
+
+Suggest new questions and sources. Ask before making any fixes.
+
+Append to `wiki/log.md`: `## [YYYY-MM-DD] lint | health check`
+
+**Done when:** all six issue types are checked and reported, suggestions are given, and the log entry is appended.
+
+---
+
+## For "status":
+
+Report: source count in `raw/`, wiki page count, last 10 entries in `wiki/log.md`, and any obvious health issues (orphan pages, missing index entries).
+
+**Done when:** all four items are reported.
+
+---
+
+## Index and log
+
+**wiki/index.md** — content catalog, updated on every ingest. Every page with a link and one-line summary, organized by category. The LLM reads this first when answering queries.
+
+**wiki/log.md** — append-only operation log. Entry format: `## [YYYY-MM-DD] <operation> | <title>`. Grep-parseable:
 
 ```bash
-# Last 5 operations
-grep "^## \[" wiki/log.md | tail -5
-
-# All ingests
-grep "^## \[.*\] ingest" wiki/log.md
-
-# All queries
-grep "^## \[.*\] query" wiki/log.md
+grep "^## \[" wiki/log.md | tail -5          # last 5 operations
+grep "^## \[.*\] ingest" wiki/log.md          # all ingests
+grep "^## \[.*\] query" wiki/log.md           # all queries
 ```
 
 ---
 
-## Optional: Search with qmd
+## Optional: qmd search
 
-At small scale the index file is enough. As the wiki grows, add proper search using [qmd](https://github.com/tobi/qmd) — local hybrid BM25/vector search with an MCP server:
+For larger wikis, add [qmd](https://github.com/tobi/qmd) — local hybrid BM25/vector search with an MCP server:
 
 ```bash
-# Install
 bun install -g @tobilu/qmd
-
-# Add your wiki as a collection
 qmd collection add ./wiki --name my-wiki
 qmd embed
-
-# Search from CLI
 qmd query "how does X relate to Y" -c my-wiki
-
-# Or use the MCP server for native tool access in Claude/OpenCode
 ```
 
 ---
 
 ## Tips
 
-- **Obsidian Web Clipper**: Browser extension that converts web articles to clean markdown — ideal for quickly adding sources to `raw/`.
-- **Obsidian graph view**: Best way to see the shape of your wiki — which pages are hubs, which are orphans.
-- **Download images locally**: In Obsidian → Settings → Files and links, set attachment folder to `raw/assets/`. Use "Download attachments for current file" (bind to a hotkey) after clipping.
-- **Marp slides**: Ask the LLM to generate a Marp slide deck from wiki content for presentations.
-- **Version control**: The wiki is just a git repo of markdown files — you get history, branching, and collaboration for free.
-- **Ingest one at a time**: Stay involved during ingestion. Read the summaries, check the updates, guide emphasis. You can batch-ingest with less supervision, but you'll get more value staying in the loop.
-- **File good answers**: Valuable query results (comparisons, analyses, new connections) should be filed back as wiki pages. Your explorations compound the knowledge base.
+- **Obsidian Web Clipper** converts web articles to markdown — fast source collection for `raw/`.
+- **File good answers**: valuable query results (comparisons, analyses, new connections) should become wiki pages — explorations compound the knowledge base just like ingested sources do.
+- **Ingest one source at a time** — read the summaries, check the updates, guide emphasis. You get more value staying in the loop than batch-ingesting unattended.
+- The wiki is a git repo of markdown files — version history and collaboration come free.
 
----
-
-## Use Cases
-
-- **Personal**: Tracking goals, health, self-improvement — filing journal entries, articles, podcast notes, building a structured picture over time
-- **Research**: Going deep on a topic — reading papers and incrementally building a comprehensive wiki with an evolving thesis
-- **Reading a book**: Filing each chapter, building pages for characters, themes, plot threads. By the end you have a rich companion wiki.
-- **Business/team**: Internal wiki fed by meeting transcripts, project documents, Slack threads — maintained by LLMs, reviewed by humans
-- **Competitive analysis, due diligence, trip planning, course notes, hobby deep-dives** — anything where knowledge accumulates over time
