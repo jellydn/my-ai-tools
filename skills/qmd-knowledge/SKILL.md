@@ -10,6 +10,8 @@ metadata:
   workflow: knowledge-management
 ---
 
+# QMD Knowledge
+
 ## What I do
 
 - Record and retrieve project learnings and insights
