@@ -22,7 +22,7 @@ Based on [Karpathy's LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf5
 
 ## Actions
 
-- **init [DIRECTORY]** - Initialize a new wiki (default: `wiki/`)
+- **init [DIRECTORY]** - Initialize a new wiki (default: `.` — current directory)
 - **ingest <SOURCE>** - Process a source file and integrate it into the wiki
 - **query <QUESTION>** - Answer a question using the wiki as the knowledge base
 - **lint** - Health-check the wiki for contradictions, orphan pages, and stale content
@@ -149,4 +149,3 @@ qmd query "how does X relate to Y" -c my-wiki
 - **File good answers**: valuable query results (comparisons, analyses, new connections) should become wiki pages — explorations compound the knowledge base just like ingested sources do.
 - **Ingest one source at a time** — read the summaries, check the updates, guide emphasis. You get more value staying in the loop than batch-ingesting unattended.
 - The wiki is a git repo of markdown files — version history and collaboration come free.
-

@@ -61,7 +61,7 @@ When a new source contradicts an existing claim, add a note block to the relevan
 
 ```markdown
 > [!NOTE] Contradiction (YYYY-MM-DD)
-> Source [Source Title] (wiki/sources/source-slug.md) contradicts the claim above: [brief description]. See both sources for context.
+> Source [[source-slug|Source Title]] contradicts the claim above: [brief description]. See both sources for context.
 ```
 
 ---
@@ -170,6 +170,6 @@ When I ask for a wiki health check:
 
 - **Voice**: Neutral, informative, encyclopedic — like Wikipedia
 - **Page length**: Aim for focused pages (300–800 words). Split if a page grows too large.
-- **Images**: Reference images from `raw/assets/` using relative paths: `![description](../raw/assets/image.png)`
+- **Images**: Reference images from `raw/assets/` using relative paths: `../../raw/assets/image.png` for nested pages (entities, concepts, sources), or `../raw/assets/image.png` for top-level pages (overview, index).
 - **Tables**: Use markdown tables for comparisons; Dataview for dynamic lists
-- **Citations**: Always cite which source supports a claim, linking to `wiki/sources/<slug>`
+- **Citations**: Always cite which source supports a claim, linking to the source page using Obsidian-style links: `[[slug]]`
