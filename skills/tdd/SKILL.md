@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: Guide through the complete TDD workflow with Red-Green-Refactor cycle. Use when writing tests first, running Red-Green-Refactor cycles, or doing test-driven development.
+description: Guides through the complete TDD workflow with Red-Green-Refactor cycle. Use when writing tests first, running Red-Green-Refactor cycles, or doing test-driven development.
 license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when doing test-driven development with Red-Green-Refactor cycle
