@@ -671,6 +671,21 @@ generate_mimo_configs() {
 	log_success "MiMo-Code configs generated"
 }
 
+generate_ctx_configs() {
+	log_info "Generating ctx configs..."
+
+	if [ ! -d "$HOME/.ctx" ]; then
+		log_warning "ctx config directory not found: $HOME/.ctx"
+		return 0
+	fi
+
+	execute "mkdir -p \"$SCRIPT_DIR/configs/ctx\""
+
+	copy_single "$HOME/.ctx/config.toml" "$SCRIPT_DIR/configs/ctx/config.toml"
+
+	log_success "ctx configs generated"
+}
+
 generate_qodercli_configs() {
 	log_info "Generating Qoder CLI configs..."
 
@@ -857,6 +872,9 @@ main() {
 	echo
 
 	generate_mimo_configs
+	echo
+
+	generate_ctx_configs
 	echo
 
 	generate_qodercli_configs
