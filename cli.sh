@@ -2141,7 +2141,7 @@ main() {
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Kimi Code • Gemini          ║"
 	echo "║  Antigravity • Pi • Kilo • Copilot • Cursor • Command Code           ║"
 	echo "║  Factory Droid • Cline • Grok • MiMo-Code • herdr                    ║"
-	echo "║  Qoder CLI • Kiro • Codiff                                           ║"
+	echo "║  Qoder CLI • Kiro • Codiff • ctx                                     ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -2210,6 +2210,9 @@ main() {
 	install_herdr
 	echo
 
+	install_ctx
+	echo
+
 	install_qodercli
 	echo
 
@@ -2244,7 +2247,7 @@ main() {
 	echo
 	echo "Next steps:"
 	echo "  1. Restart your terminal"
-	echo "  2. Run 'claude' to start Claude Code (or 'kimi' for Kimi Code, 'agy' for Antigravity CLI, 'cmd' for Command Code, 'grok' for Grok CLI, 'mimo' for MiMo-Code)"
+	echo "  2. Run 'claude' to start Claude Code (or 'kimi' for Kimi Code, 'agy' for Antigravity CLI, 'cmd' for Command Code, 'grok' for Grok CLI, 'mimo' for MiMo-Code, 'ctx' for local history search)"
 	echo "  3. Enable plugins with 'claude plugin enable <plugin-name>'"
 	echo "  4. Check out the README.md for more information"
 	echo

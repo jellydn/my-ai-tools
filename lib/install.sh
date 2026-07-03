@@ -991,6 +991,30 @@ install_herdr() {
 	run_installer "herdr" "_run_herdr_install" "command -v herdr" "herdr --version 2>/dev/null || true"
 }
 
+# ─── ctx installation ──────────────────────────────────────────────
+
+install_ctx() {
+	_run_ctx_install() {
+		if command -v ctx &>/dev/null; then
+			log_warning "ctx is already installed"
+			return 0
+		fi
+
+		if [ "$IS_WINDOWS" = true ]; then
+			if command -v powershell.exe &>/dev/null; then
+				execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://ctx.rs/install.ps1 | iex\""
+			else
+				log_error "PowerShell is required to install ctx on Windows."
+				log_info "Install manually: https://github.com/ctxrs/ctx"
+				return 1
+			fi
+		else
+			execute_installer "https://ctx.rs/install" "" "ctx"
+		fi
+	}
+	run_installer "ctx" "_run_ctx_install" "command -v ctx" "ctx --version 2>/dev/null || true"
+}
+
 # ─── qodercli installation ────────────────────────────────────────────
 
 install_qodercli() {
