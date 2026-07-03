@@ -406,7 +406,7 @@ npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
 
-# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, thermo-nuclear-code-quality-review, commit-atomic, draft-pull-request, docs-update
+# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, thermo-nuclear-code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, tmux
 # Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
@@ -648,6 +648,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `commit-atomic` - Atomic commits by logically grouping changes with commitizen convention (no `git add -A`)
 - `draft-pull-request` - Create draft pull requests using gh CLI with what/why/how template
 - `handoffs` - Create handoff plans for continuing work (provides `/handoffs` command)
+- `llm-wiki` - Build and maintain a persistent, compounding knowledge wiki from raw sources (Karpathy's LLM Wiki pattern)
 - `pickup` - Resume work from previous handoff sessions (provides `/pickup` command)
 - `plannotator-setup-goal` - Turn an idea into a structured goal package via Plannotator-gated discovery, fact sheet, and plan
 - `docs-update` - Automated documentation synchronization with code changes (Mintlify, Docusaurus, GitBook, Fumadocs, etc.)
@@ -659,6 +660,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `slop` - AI slop detection and removal
 - `tdd` - Test-Driven Development workflows
 - `thermo-nuclear-code-quality-review` - Extremely strict maintainability and structural code quality reviews
+- `tmux` - Remote control tmux sessions for interactive CLIs (python, node, gdb, etc.)
 
 #### Projects Built with AI
 

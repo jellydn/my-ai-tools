@@ -1,16 +1,33 @@
 {
   "mcpServers": {
+    "fetch": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch"
+      ],
+      "env": {},
+      "disabled": true,
+      "autoApprove": []
+    },
     "context7": {
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"]
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ]
     },
     "sequential-thinking": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking@latest"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking@latest"
+      ]
     },
     "qmd": {
       "command": "qmd",
-      "args": ["mcp"]
+      "args": [
+        "mcp"
+      ]
     },
     "fff": {
       "type": "stdio",
@@ -19,15 +36,24 @@
     },
     "react-grab-mcp": {
       "command": "npx",
-      "args": ["-y", "@react-grab/mcp@latest", "--stdio"]
+      "args": [
+        "-y",
+        "@react-grab/mcp@latest",
+        "--stdio"
+      ]
     },
     "logpilot": {
       "command": "logpilot",
-      "args": ["mcp-server"]
+      "args": [
+        "mcp-server"
+      ]
     },
     "agentmemory": {
       "command": "npx",
-      "args": ["-y", "@agentmemory/mcp@latest"]
+      "args": [
+        "-y",
+        "@agentmemory/mcp@latest"
+      ]
     },
     "sem": {
       "command": "sem-mcp",

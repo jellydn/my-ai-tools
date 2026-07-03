@@ -95,6 +95,7 @@ configs/mcp-registry.json        # Central MCP server registry
 configs/best-practices.md        # Exported to ~/.ai-tools/
 configs/git-guidelines.md        # Git safety rules
 skills/                          # Local marketplace plugins
+wiki/                            # LLM Wiki — persistent, compounding knowledge base
 tests/                           # BATS functional tests
 ```
 
