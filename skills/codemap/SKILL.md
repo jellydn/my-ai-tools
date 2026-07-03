@@ -10,6 +10,8 @@ metadata:
   workflow: codebase-mapping
 ---
 
+# Codemap
+
 ## What I do
 
 Analyze your entire codebase and create 7 comprehensive documentation files in `.planning/codebase/`:
@@ -282,14 +284,6 @@ _finder -t f "\.ts$" -e "\.tsx$" src/ 2>/dev/null | xargs wc -l 2>/dev/null | so
 4. **Be thorough** - Read actual files, don't guess
 5. **Return only confirmation** - Response should be ~10 lines with file paths and line counts
 6. **Don't commit** - The orchestrator handles git operations
-
-## Benefits
-
-- **Fast**: Parallel exploration reduces total time
-- **Fresh context**: Each agent starts clean, no token contamination
-- **Minimal context transfer**: Agents write directly, orchestrator only receives confirmations
-- **Comprehensive**: 7 structured documents cover all aspects of the codebase
-- **Reusable**: Documents serve as reference for future planning and development
 
 ## Inspiration
 
