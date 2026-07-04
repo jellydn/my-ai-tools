@@ -44,7 +44,7 @@ README="$REPO_ROOT/README.md"
 }
 
 @test "cli.sh copy_configurations() calls copy_ctx_configs" {
-	run grep -E 'copy_ctx_configs' "$CLI_SH"
+	run grep -E '^[[:space:]]*copy_ctx_configs' "$CLI_SH"
 	[ "$status" -eq 0 ]
 	[ -n "$output" ]
 }

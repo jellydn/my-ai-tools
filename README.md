@@ -2789,6 +2789,14 @@ Open-source local agent-history search CLI. Indexes your past coding-agent sessi
 curl -fsSL https://ctx.rs/install | sh
 ```
 
+> **Security Note:** Review the script before running:
+>
+> ```bash
+> curl -fsSL https://ctx.rs/install -o install-ctx.sh
+> cat install-ctx.sh  # Review the script
+> sh install-ctx.sh
+> ```
+
 Or run this repo's installer:
 
 ```bash
