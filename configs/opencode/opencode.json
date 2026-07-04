@@ -92,6 +92,11 @@
 			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
 			"enabled": true,
 			"type": "local"
+		},
+		"ctx": {
+			"command": ["ctx", "mcp", "serve"],
+			"enabled": true,
+			"type": "local"
 		}
 	},
 	"model": "opencode/big-pickle",

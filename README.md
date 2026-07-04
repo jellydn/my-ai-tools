@@ -39,7 +39,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                         |
 | **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl   | -                                                                                                                                                                                         |
 | **Kimi Code**   | context7, sequential-thinking, qmd, agentmemory, fff, logpilot, sem                             | Skills, MCP servers, and hooks via `~/.kimi-code/`                                                                                                                                        |
-| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory, sem                        | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, pi-web-access, footer, tps-meter) |
+| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory, sem, ctx                        | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, pi-web-access, footer, tps-meter) |
 | **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                         |
 | **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                            |
 | **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem (via plugin) | my-ai-tools-gemini-migration                                                                                                                                                              |
@@ -69,6 +69,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | `react-grab-mcp`      | React component capture and inspection                                                    | `@react-grab/mcp`                                                       |
 | `logpilot`            | AI-powered log analysis and tmux monitoring                                               | `logpilot`                                                              |
 | `sem`                 | Semantic version control - entity-level diffs, blame, and impact analysis                 | `sem-mcp` (via [Ataraxy-Labs/sem](https://github.com/Ataraxy-Labs/sem)) |
+| `ctx`                 | Local agent-history search across coding sessions                                        | `ctx mcp serve`                                                           |
 
 ## 🎬 Demo
 
@@ -2825,6 +2826,34 @@ ctx search "failed migration"
 ```
 
 See the full [ctx docs](https://ctx.rs/first-search) for details.
+
+### MCP Server
+
+ctx provides a read-only MCP server over stdio. It exposes six tools for searching and inspecting your local agent index:
+
+| Tool            | Description                     |
+| --------------- | ------------------------------- |
+| `status`        | Index status                    |
+| `sources`       | List discovered history sources |
+| `search`        | Search by query or file path    |
+| `sql`           | Run read-only SQL against index |
+| `show_session`  | Get session transcript          |
+| `show_event`    | Get event with surrounding context |
+
+Start the MCP server:
+
+```bash
+ctx mcp serve
+```
+
+The server is configured automatically for Pi via `configs/pi/mcp.json`. To configure for other tools, add:
+
+```json
+{
+  "command": "ctx",
+  "args": ["mcp", "serve"]
+}
+```
 
 </details>
 

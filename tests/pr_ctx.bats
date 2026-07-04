@@ -96,3 +96,98 @@ README="$REPO_ROOT/README.md"
 	[ "$status" -eq 0 ]
 	[ -n "$output" ]
 }
+
+@test "ctx MCP server registered in mcp-registry.json" {
+	# jq check: .mcpServers.ctx.name exists
+	run jq -r '.mcpServers.ctx.name' "$REPO_ROOT/configs/mcp-registry.json"
+	[ "$status" -eq 0 ]
+	[ "$output" = "ctx" ]
+}
+
+@test "ctx MCP server in claude mcp-servers.json" {
+	run jq -r '.mcpServers.ctx.command' "$REPO_ROOT/configs/claude/mcp-servers.json"
+	[ "$status" -eq 0 ]
+	[ "$output" = "ctx" ]
+}
+
+@test "ctx MCP server in cursor mcp.json" {
+	run jq -r '.mcpServers.ctx.command' "$REPO_ROOT/configs/cursor/mcp.json"
+	[ "$status" -eq 0 ]
+	[ "$output" = "ctx" ]
+}
+
+@test "ctx MCP server in cline mcp-settings.json" {
+	run jq -r '.mcpServers.ctx.command' "$REPO_ROOT/configs/cline/mcp-settings.json"
+	[ "$status" -eq 0 ]
+	[ "$output" = "ctx" ]
+}
+
+@test "ctx MCP server in factory mcp.json" {
+	run jq -r '.mcpServers.ctx.command' "$REPO_ROOT/configs/factory/mcp.json"
+	[ "$status" -eq 0 ]
+	[ "$output" = "ctx" ]
+}
+
+@test "ctx MCP server in kimi-code mcp.json" {
+	run jq -r '.mcpServers.ctx.command' "$REPO_ROOT/configs/kimi-code/mcp.json"
+	[ "$status" -eq 0 ]
+	[ "$output" = "ctx" ]
+}
+
+@test "ctx MCP server in commandcode mcp.json" {
+	run jq -r '.mcpServers.ctx.command' "$REPO_ROOT/configs/commandcode/mcp.json"
+	[ "$status" -eq 0 ]
+	[ "$output" = "ctx" ]
+}
+
+@test "ctx MCP server in kiro mcp.json" {
+	run jq -r '.mcpServers.ctx.command' "$REPO_ROOT/configs/kiro/mcp.json"
+	[ "$status" -eq 0 ]
+	[ "$output" = "ctx" ]
+}
+
+@test "ctx MCP server in copilot mcp-config.json" {
+	run jq -r '.mcpServers.ctx.command' "$REPO_ROOT/configs/copilot/mcp-config.json"
+	[ "$status" -eq 0 ]
+	[ "$output" = "ctx" ]
+}
+
+@test "ctx MCP server in qodercli settings.json" {
+	run jq -r '.mcpServers.ctx.command' "$REPO_ROOT/configs/qodercli/settings.json"
+	[ "$status" -eq 0 ]
+	[ "$output" = "ctx" ]
+}
+
+@test "ctx MCP server in pi mcp.json" {
+	run jq -r '.mcpServers.ctx.command' "$REPO_ROOT/configs/pi/mcp.json"
+	[ "$status" -eq 0 ]
+	[ "$output" = "ctx" ]
+}
+
+@test "ctx MCP server in antigravity-migration mcp_config.json" {
+	run jq -r '.mcpServers.ctx.command' "$REPO_ROOT/configs/antigravity-cli/plugins/my-ai-tools-gemini-migration/mcp_config.json"
+	[ "$status" -eq 0 ]
+	[ "$output" = "ctx" ]
+}
+
+@test "ctx MCP server in opencode opencode.json (mcp.ctx path)" {
+	run jq -r '.mcp.ctx.command[0]' "$REPO_ROOT/configs/opencode/opencode.json"
+	[ "$status" -eq 0 ]
+	[ "$output" = "ctx" ]
+}
+
+@test "ctx MCP server in kilo config.json (mcp.ctx path)" {
+	run jq -r '.mcp.ctx.command[0]' "$REPO_ROOT/configs/kilo/config.json"
+	[ "$status" -eq 0 ]
+	[ "$output" = "ctx" ]
+}
+
+@test "ctx MCP server in codex config.toml" {
+	run grep -c '\[mcp_servers.ctx\]' "$REPO_ROOT/configs/codex/config.toml"
+	[ "$status" -eq 0 ]
+}
+
+@test "ctx MCP server in grok config.toml" {
+	run grep -c '\[mcp_servers.ctx\]' "$REPO_ROOT/configs/grok/config.toml"
+	[ "$status" -eq 0 ]
+}

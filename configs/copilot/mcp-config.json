@@ -60,6 +60,13 @@
 			"command": "sem-mcp",
 			"args": [],
 			"tools": ["*"]
+		},
+		"ctx": {
+			"type": "local",
+			"command": "ctx",
+			"args": ["mcp", "serve"],
+			"env": {},
+			"tools": ["*"]
 		}
 	}
 }

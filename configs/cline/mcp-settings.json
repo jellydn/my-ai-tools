@@ -39,6 +39,11 @@
 			"alwaysAllow": [],
 			"command": "sem-mcp",
 			"args": []
+		},
+		"ctx": {
+			"alwaysAllow": [],
+			"command": "ctx",
+			"args": ["mcp", "serve"]
 		}
 	}
 }
