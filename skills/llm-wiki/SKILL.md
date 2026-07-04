@@ -149,4 +149,3 @@ qmd query "how does X relate to Y" -c my-wiki
 - **File good answers**: valuable query results (comparisons, analyses, new connections) should become wiki pages — explorations compound the knowledge base just like ingested sources do.
 - **Ingest one source at a time** — read the summaries, check the updates, guide emphasis. You get more value staying in the loop than batch-ingesting unattended.
 - The wiki is a git repo of markdown files — version history and collaboration come free.
-

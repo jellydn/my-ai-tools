@@ -8,6 +8,129 @@
 	},
 	"plugins": [
 		{
+			"name": "adr",
+			"description": "Manages Architecture Decision Records (ADR) for tracking important architectural decisions. Initialize, create, list, search, and view ADRs.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/adr",
+			"category": "productivity"
+		},
+		{
+			"name": "codemap",
+			"description": "Orchestrate parallel codebase analysis to produce 7 structured documents (STACK, INTEGRATIONS, ARCHITECTURE, STRUCTURE, CONVENTIONS, TESTING, CONCERNS) in .planning/codebase/.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/codemap",
+			"category": "productivity",
+			"homepage": "https://github.com/jellydn/my-ai-tools"
+		},
+		{
+			"name": "commit-atomic",
+			"description": "Creates atomic commits by logically grouping staged changes with commitizen convention",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/commit-atomic",
+			"category": "productivity"
+		},
+		{
+			"name": "docs-update",
+			"description": "Update user-facing documentation when code changes. Use when asked to update docs, review docs, handle documentation changes, run scheduled documentation tasks, or analyze recent commits for documentation needs.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/docs-update",
+			"category": "productivity"
+		},
+		{
+			"name": "draft-pull-request",
+			"description": "Creates a draft pull request using gh CLI with a structured what/why/how description",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/draft-pull-request",
+			"category": "productivity"
+		},
+		{
+			"name": "handoffs",
+			"description": "Creates detailed handoff plans of conversations for continuing work in new sessions. Capture context, technical decisions, and pending tasks for seamless session continuation.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/handoffs",
+			"category": "productivity"
+		},
+		{
+			"name": "llm-wiki",
+			"description": "Build and maintain a persistent, compounding knowledge wiki from raw sources. Use when the user wants to create a knowledge base, ingest documents into a wiki, query a wiki, health-check a wiki, or set up Karpathy's LLM Wiki pattern.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/llm-wiki",
+			"category": "productivity",
+			"homepage": "https://github.com/jellydn/my-ai-tools"
+		},
+		{
+			"name": "pickup",
+			"description": "Resumes work from previous handoff sessions stored in .planning/handoffs/. Load and continue from where you left off in prior sessions.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/pickup",
+			"category": "productivity"
+		},
+		{
+			"name": "plannotator-setup-goal",
+			"description": "Turn an idea into a structured goal package via Plannotator-gated discovery, fact sheet, and plan.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/plannotator-setup-goal",
+			"category": "productivity"
+		},
+		{
+			"name": "portless-local",
+			"description": "Named .localhost URLs for local development - replaces port numbers with stable, readable URLs",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/portless-local",
+			"category": "productivity"
+		},
+		{
+			"name": "pr-review",
+			"description": "Fix PR review comments by implementing requested changes. Fetch review comments, implement fixes, run tests, and commit changes.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/pr-review",
+			"category": "productivity"
+		},
+		{
 			"name": "prd",
 			"description": "Generate Product Requirements Documents (PRD) for new features. Use when planning features, starting projects, or creating specifications.",
 			"version": "1.0.0",
@@ -16,17 +139,6 @@
 				"email": "dung@productsway.com"
 			},
 			"source": "./skills/prd",
-			"category": "productivity"
-		},
-		{
-			"name": "ralph",
-			"description": "Convert PRDs to prd.json format for the Ralph autonomous agent system. Converts markdown PRDs to Ralph's JSON format.",
-			"version": "1.0.0",
-			"author": {
-				"name": "Dung Huynh Duc",
-				"email": "dung@productsway.com"
-			},
-			"source": "./skills/ralph",
 			"category": "productivity"
 		},
 		{
@@ -42,70 +154,14 @@
 			"homepage": "https://github.com/jellydn/my-ai-tools"
 		},
 		{
-			"name": "codemap",
-			"description": "Orchestrate parallel codebase analysis to produce 7 structured documents (STACK, INTEGRATIONS, ARCHITECTURE, STRUCTURE, CONVENTIONS, TESTING, CONCERNS) in .planning/codebase/.",
+			"name": "ralph",
+			"description": "Convert PRDs to prd.json format for the Ralph autonomous agent system. Converts markdown PRDs to Ralph's JSON format.",
 			"version": "1.0.0",
 			"author": {
 				"name": "Dung Huynh Duc",
 				"email": "dung@productsway.com"
 			},
-			"source": "./skills/codemap",
-			"category": "productivity",
-			"homepage": "https://github.com/jellydn/my-ai-tools"
-		},
-		{
-			"name": "adr",
-			"description": "Manages Architecture Decision Records (ADR) for tracking important architectural decisions. Initialize, create, list, search, and view ADRs.",
-			"version": "1.0.0",
-			"author": {
-				"name": "Dung Huynh Duc",
-				"email": "dung@productsway.com"
-			},
-			"source": "./skills/adr",
-			"category": "productivity"
-		},
-		{
-			"name": "handoffs",
-			"description": "Creates detailed handoff plans of conversations for continuing work in new sessions. Capture context, technical decisions, and pending tasks for seamless session continuation.",
-			"version": "1.0.0",
-			"author": {
-				"name": "Dung Huynh Duc",
-				"email": "dung@productsway.com"
-			},
-			"source": "./skills/handoffs",
-			"category": "productivity"
-		},
-		{
-			"name": "plannotator-setup-goal",
-			"description": "Turn an idea into a structured goal package via Plannotator-gated discovery, fact sheet, and plan.",
-			"version": "1.0.0",
-			"author": {
-				"name": "Dung Huynh Duc",
-				"email": "dung@productsway.com"
-			},
-			"source": "./skills/plannotator-setup-goal",
-			"category": "productivity"
-		},
-		{
-			"name": "pickup",
-			"description": "Resumes work from previous handoff sessions stored in .planning/handoffs/. Load and continue from where you left off in prior sessions.",
-			"version": "1.0.0",
-			"author": {
-				"name": "Dung Huynh Duc",
-				"email": "dung@productsway.com"
-			},
-			"source": "./skills/pickup",
-			"category": "productivity"
-		},
-		{
-			"name": "pr-review",
-			"description": "Fix PR review comments by implementing requested changes. Fetch review comments, implement fixes, run tests, and commit changes.",
-			"version": "1.0.0",
-			"author": {
-				"name": "Dung Huynh Duc",
-				"email": "dung@productsway.com"
-			},
-			"source": "./skills/pr-review",
+			"source": "./skills/ralph",
 			"category": "productivity"
 		},
 		{
@@ -129,6 +185,17 @@
 			},
 			"source": "./skills/tdd",
 			"category": "productivity"
+		},
+		{
+			"name": "thermo-nuclear-code-quality-review",
+			"description": "Run an extremely strict maintainability code quality review for abstraction quality, giant files, and spaghetti-condition growth. Catch deep structural issues before merging.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/thermo-nuclear-code-quality-review",
+			"category": "code-quality"
 		},
 		{
 			"name": "tmux",
