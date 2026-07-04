@@ -24,18 +24,18 @@ One source ingested: the project README.md. The wiki now covers the repository s
 
 ### Wiki files
 
-| File | Purpose |
-|------|---------|
-| `AGENTS.md` | Agent instructions — how to work with this wiki |
-| `CLAUDE.md` | Schema: wiki conventions and per-operation workflows |
-| `wiki/index.md` | Catalog of all generated pages |
-| `wiki/log.md` | Append-only operation log |
-| `wiki/overview.md` | Big-picture synthesis |
-| `wiki/sources/readme.md` | README.md source summary |
-| `wiki/entities/my-ai-tools-repo.md` | Monorepo structure |
-| `wiki/entities/ctx.md` | Agent-history search CLI |
-| `wiki/entities/pi-agent.md` | Pi coding agent |
-| `wiki/concepts/mcp-registry.md` | Central MCP server registry |
+| File                                | Purpose                                              |
+| ----------------------------------- | ---------------------------------------------------- |
+| `AGENTS.md`                         | Agent instructions — how to work with this wiki      |
+| `CLAUDE.md`                         | Schema: wiki conventions and per-operation workflows |
+| `wiki/index.md`                     | Catalog of all generated pages                       |
+| `wiki/log.md`                       | Append-only operation log                            |
+| `wiki/overview.md`                  | Big-picture synthesis                                |
+| `wiki/sources/readme.md`            | README.md source summary                             |
+| `wiki/entities/my-ai-tools-repo.md` | Monorepo structure                                   |
+| `wiki/entities/ctx.md`              | Agent-history search CLI                             |
+| `wiki/entities/pi-agent.md`         | Pi coding agent                                      |
+| `wiki/concepts/mcp-registry.md`     | Central MCP server registry                          |
 
 ## Ingested Sources
 

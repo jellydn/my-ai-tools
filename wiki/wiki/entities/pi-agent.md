@@ -20,22 +20,22 @@ Pi uses `~/.pi/agent/settings.json` for global settings. The repo stores configs
 
 ## Default Settings (as of 2026-07-04)
 
-| Setting | Value |
-|---------|-------|
-| Default Provider | `clinepass` |
-| Default Model | `deepseek-v4-flash` |
-| Theme | `kanagawa` |
-| Permission Level | `high` |
+| Setting          | Value               |
+| ---------------- | ------------------- |
+| Default Provider | `clinepass`         |
+| Default Model    | `deepseek-v4-flash` |
+| Theme            | `kanagawa`          |
+| Permission Level | `high`              |
 
 ## Enabled Models (5 providers)
 
-| Provider | Models |
-|----------|--------|
-| cursor | `auto`, `composer-2.5` |
-| openai-codex | `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.3-codex-spark`, `gpt-5.5` |
-| clinepass | `deepseek-v4-pro`, `deepseek-v4-flash`, `kimi-k2.7-code`, `glm-5.2`, `kimi-k2.6`, `minimax-m3`, `qwen3.7-max`, `qwen3.7-plus` |
-| google-antigravity | `gemini-3.5-flash`, `gemini-3-pro`, `claude-opus-4-6` |
-| commandcode | `deepseek/deepseek-v4-pro` |
+| Provider           | Models                                                                                                                        |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| cursor             | `auto`, `composer-2.5`                                                                                                        |
+| openai-codex       | `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.3-codex-spark`, `gpt-5.5`                                                                   |
+| clinepass          | `deepseek-v4-pro`, `deepseek-v4-flash`, `kimi-k2.7-code`, `glm-5.2`, `kimi-k2.6`, `minimax-m3`, `qwen3.7-max`, `qwen3.7-plus` |
+| google-antigravity | `gemini-3.5-flash`, `gemini-3-pro`, `claude-opus-4-6`                                                                         |
+| commandcode        | `deepseek/deepseek-v4-pro`                                                                                                    |
 
 ## Packages (19 total)
 

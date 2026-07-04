@@ -29,12 +29,12 @@ my-ai-tools is a monorepo that manages configuration files for 20+ AI coding too
 
 ## Tools Covered
 
-| Category | Tools |
-|----------|-------|
-| Primary agents | Claude Code, OpenCode, Codex, Pi, Amp, Cursor, Cline |
-| Specialized | Factory Droid, Grok, Kimi Code, Command Code, Kilo CLI |
-| Emerging | Copilot CLI, Gemini CLI (deprecated), Antigravity CLI, Qoder CLI, Kiro CLI, Codiff, ctx |
-| Review | Open Code Review, CCS |
+| Category       | Tools                                                                                   |
+| -------------- | --------------------------------------------------------------------------------------- |
+| Primary agents | Claude Code, OpenCode, Codex, Pi, Amp, Cursor, Cline                                    |
+| Specialized    | Factory Droid, Grok, Kimi Code, Command Code, Kilo CLI                                  |
+| Emerging       | Copilot CLI, Gemini CLI (deprecated), Antigravity CLI, Qoder CLI, Kiro CLI, Codiff, ctx |
+| Review         | Open Code Review, CCS                                                                   |
 
 ## Directory Structure
 

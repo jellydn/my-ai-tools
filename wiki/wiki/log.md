@@ -29,6 +29,7 @@ grep -c "^## \[.*\] ingest" wiki/log.md
 ## Log
 
 ## [2026-07-03] init | LLM Wiki
+
 ## [2026-07-03] fix | add AGENTS.md and update CLAUDE.md to reference it
 
 ## [2026-07-04] ingest | README.md — my-ai-tools Main Documentation

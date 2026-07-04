@@ -20,14 +20,14 @@ ctx was added as a first-class tool in PR #282:
 
 ## MCP Tools
 
-| Tool | Description |
-|------|-------------|
-| `status` | Index status |
-| `sources` | List discovered history sources |
-| `search` | Search by query or file path |
-| `sql` | Run read-only SQL against index |
-| `show_session` | Get session transcript |
-| `show_event` | Get event with surrounding context |
+| Tool           | Description                        |
+| -------------- | ---------------------------------- |
+| `status`       | Index status                       |
+| `sources`      | List discovered history sources    |
+| `search`       | Search by query or file path       |
+| `sql`          | Run read-only SQL against index    |
+| `show_session` | Get session transcript             |
+| `show_event`   | Get event with surrounding context |
 
 ## Related
 
