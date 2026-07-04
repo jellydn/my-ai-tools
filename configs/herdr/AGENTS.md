@@ -11,6 +11,18 @@
 
 ## Configuration
 
+## Learning Recording
+
+Read @~/.ai-tools/MEMORY.md and @~/.ai-tools/agent-memory.md for the full decision rule.
+
+After fixing a bug (confirmed by human), introducing a new tech choice, or encountering something important, ask the user:
+
+> "Would you like me to record this as a learning?"
+
+If yes:
+- **qmd** (durable) — project-specific gotchas, architecture decisions, conventions
+- **agentmemory** (session) — transient context only the current session needs
+
 - User config: `~/.config/herdr/config.toml` (generate defaults with `herdr --default-config`)
 - Agent detection overrides: `~/.config/herdr/agent-detection/<agent>.toml`
 - Changes require reload: `herdr server reload-config` or the global menu
