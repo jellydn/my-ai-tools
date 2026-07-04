@@ -30,3 +30,7 @@ grep -c "^## \[.*\] ingest" wiki/log.md
 
 ## [2026-07-03] init | LLM Wiki
 ## [2026-07-03] fix | add AGENTS.md and update CLAUDE.md to reference it
+
+## [2026-07-04] ingest | README.md — my-ai-tools Main Documentation
+
+Created source summary, entity pages (my-ai-tools-repo, ctx, pi-agent), concept page (mcp-registry). Updated overview and index.

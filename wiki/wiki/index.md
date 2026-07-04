@@ -1,6 +1,6 @@
 ---
 title: "Wiki Index"
-updated: 2026-07-03
+updated: 2026-07-04
 ---
 
 # Wiki Index
@@ -21,7 +21,7 @@ Catalog of all pages in this wiki. Updated on every ingest.
 
 | Page | Summary | Date Ingested |
 |------|---------|---------------|
-| *(no sources yet)* | | |
+| [[sources/readme]] | Project README — feature matrix, tool configs, MCP registry, docs | 2026-07-04 |
 
 ---
 
@@ -29,7 +29,9 @@ Catalog of all pages in this wiki. Updated on every ingest.
 
 | Page | Type | Summary |
 |------|------|---------|
-| *(no entity pages yet)* | | |
+| [[entities/my-ai-tools-repo]] | Project | Monorepo structure, conventions, CI, testing |
+| [[entities/ctx]] | Tool | Agent-history search CLI with MCP server |
+| [[entities/pi-agent]] | Tool | Pi coding agent configs, models, packages, MCP |
 
 ---
 
@@ -37,7 +39,7 @@ Catalog of all pages in this wiki. Updated on every ingest.
 
 | Page | Summary |
 |------|---------|
-| *(no concept pages yet)* | |
+| [[concepts/mcp-registry]] | Central MCP server registry for all 15+ tools |
 
 ---
 

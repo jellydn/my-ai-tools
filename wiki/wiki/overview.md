@@ -2,7 +2,7 @@
 title: "Overview"
 type: overview
 tags: [my-ai-tools]
-updated: 2026-07-03
+updated: 2026-07-04
 ---
 
 # Overview
@@ -20,7 +20,7 @@ The wiki is intended to compound understanding of:
 
 ## Current State
 
-No sources have been ingested yet. The wiki shell is initialized and ready for raw documents.
+One source ingested: the project README.md. The wiki now covers the repository structure, MCP registry, ctx CLI, and Pi agent configuration.
 
 ### Wiki files
 
@@ -31,6 +31,15 @@ No sources have been ingested yet. The wiki shell is initialized and ready for r
 | `wiki/index.md` | Catalog of all generated pages |
 | `wiki/log.md` | Append-only operation log |
 | `wiki/overview.md` | Big-picture synthesis |
+| `wiki/sources/readme.md` | README.md source summary |
+| `wiki/entities/my-ai-tools-repo.md` | Monorepo structure |
+| `wiki/entities/ctx.md` | Agent-history search CLI |
+| `wiki/entities/pi-agent.md` | Pi coding agent |
+| `wiki/concepts/mcp-registry.md` | Central MCP server registry |
+
+## Ingested Sources
+
+- `README.md` (2026-07-04) — Project overview, feature matrix, tool configs, docs, tests
 
 ## Good First Sources
 
