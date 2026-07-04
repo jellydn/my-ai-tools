@@ -1571,12 +1571,12 @@ Located in [`configs/pi/`](configs/pi/):
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 - [`models.json`](configs/pi/models.json) - Provider and model definitions (google-antigravity, ollama)
 
-Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `openai-codex` as the default provider with `gpt-5.4-mini` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `clinepass` as the default provider with `deepseek-v4-flash` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `gpt-5.4-mini`
-- **Default Provider**: `openai-codex`
+- **Default Model**: `deepseek-v4-flash`
+- **Default Provider**: `clinepass`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
@@ -1611,11 +1611,14 @@ Then register them in `~/.pi/agent/settings.json`:
 		"npm:pi-codex-goal",
 		"npm:pi-dynamic-workflows",
 		"npm:pi-commandcode-provider",
-		"npm:pi-web-access",
 		"npm:pi-footer",
 		"npm:pi-tps-meter",
 		"npm:@juicesharp/rpiv-advisor",
-		"npm:pi-cursor-sdk"
+		"npm:pi-cursor-sdk",
+		"npm:pi-web-access",
+		"npm:pi-clinepass-provider",
+		"npm:@juicesharp/rpiv-ask-user-question",
+		"npm:@yofriadi/pi-antigravity-oauth"
 	]
 }
 ```
@@ -1640,6 +1643,9 @@ Then register them in `~/.pi/agent/settings.json`:
 | `pi-tps-meter`              | Live tokens-per-second meter for the Pi TUI status bar             |
 | `@juicesharp/rpiv-advisor`  | Second opinion from a stronger reviewer model before taking action |
 | `pi-cursor-sdk`             | Pi provider extension backed by @cursor/sdk local agents           |
+| `pi-clinepass-provider`     | ClinePass model provider for Pi                                   |
+| `@juicesharp/rpiv-ask-user-question` | Structured question-asking tool for user clarification       |
+| `@yofriadi/pi-antigravity-oauth`     | Antigravity OAuth authentication for Pi                    |
 
 ### Enabled Models
 
@@ -1647,12 +1653,11 @@ Pi is configured with multi-provider model access (`settings.json` `enabledModel
 
 | Provider     | Models                                                      |
 | ------------ | ----------------------------------------------------------- |
-| openrouter   | `openrouter/owl-alpha`                                      |
 | cursor       | `auto`, `composer-2.5`                                      |
-| cursorapi    | `composer-2.5`                                              |
 | openai-codex | `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.3-codex-spark`, `gpt-5.5` |
-
-> See [OpenRouter free models](https://openrouter.ai/collections/free-models) for additional no-cost options.
+| clinepass    | `deepseek-v4-pro`, `deepseek-v4-flash`, `kimi-k2.7-code`, `glm-5.2`, `kimi-k2.6`, `minimax-m3`, `qwen3.7-max`, `qwen3.7-plus` |
+| google-antigravity | `gemini-3.5-flash`, `gemini-3-pro`, `claude-opus-4-6` |
+| commandcode  | `deepseek/deepseek-v4-pro`                                  |
 
 ### Pi Antigravity Rotator
 
