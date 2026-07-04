@@ -11,18 +11,18 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/pi/settings.json defaultModel is gpt-5.4-mini" {
+@test "configs/pi/settings.json defaultModel is deepseek-v4-flash" {
     require_jq
     run jq -r '.defaultModel' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "gpt-5.4-mini" ]
+    [ "$output" = "cline-pass/deepseek-v4-flash" ]
 }
 
-@test "configs/pi/settings.json defaultProvider is openai-codex" {
+@test "configs/pi/settings.json defaultProvider is clinepass" {
     require_jq
     run jq -r '.defaultProvider' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "openai-codex" ]
+    [ "$output" = "clinepass" ]
 }
 
 @test "configs/pi/settings.json enabledModels no longer contains vibeproxy models" {
