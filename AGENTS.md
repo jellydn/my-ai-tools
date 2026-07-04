@@ -109,6 +109,18 @@ tests/                           # BATS functional tests
 - Backup location: `$HOME/ai-tools-backup-{timestamp}`. Auto-cleanup keeps last 5.
 - Gemini CLI is deprecated for Google One/unpaid tiers (June 18, 2026 cutoff). Migrate to Antigravity CLI.
 
+## Learning Recording
+
+After fixing a bug (confirmed by human), introducing a new tech choice, or encountering something important, ask the user:
+
+> "Would you like me to record this as a learning?"
+
+If yes, decide which lane (see `~/.ai-tools/MEMORY.md`):
+- **qmd** (durable) — project-specific gotchas, architecture decisions, conventions
+- **agentmemory** (session) — transient context only the current session needs
+
+Read `@~/.ai-tools/agent-memory.md` and `@~/.ai-tools/MEMORY.md` for the full decision rule.
+
 ## Git Safety
 
 - Prefer `git add <specific-files>` over `git add -A`
