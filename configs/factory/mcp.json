@@ -46,6 +46,12 @@
 			"command": "sem-mcp",
 			"args": [],
 			"disabled": false
+		},
+		"ctx": {
+			"type": "stdio",
+			"command": "ctx",
+			"args": ["mcp", "serve"],
+			"disabled": false
 		}
 	}
 }

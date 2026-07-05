@@ -114,6 +114,7 @@ setup() {
 }
 
 @test "sourcing cli.sh leaves MIGRATE_GEMINI at its default false" {
+    export MIGRATE_GEMINI=false
     source "$BATS_TEST_DIRNAME/../cli.sh"
     [ "$MIGRATE_GEMINI" = "false" ]
 }

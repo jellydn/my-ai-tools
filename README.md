@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Kimi Code, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Open Code Review, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, agentmemory, sem
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -33,27 +33,29 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 
 ## 🔌 MCP Servers & Plugins Overview
 
-| Tool            | MCP Servers                                                                                      | Plugins/Extensions                                                                                                                                                                            |
-| --------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                                              |
-| **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                             |
-| **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl   | -                                                                                                                                                                                             |
-| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory, sem                        | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, pi-web-access, footer, tps-meter) |
-| **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
-| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                                |
-| **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem (via plugin) | my-ai-tools-gemini-migration                                                                                                                                                                  |
-| **Kilo**        | (uses OpenCode config)                                                                           | (uses OpenCode plugins)                                                                                                                                                                       |
-| **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
-| **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
-| **Cursor**      | context7 (via bunx), sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem   | -                                                                                                                                                                                             |
-| **Conductor**   | Per-harness (Claude Code, Codex, Cursor MCP configs)                                             | Orchestrates parallel agents in isolated workspaces                                                                                                                                           |
-| **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | core, security-engineer, droid-evolved, autoresearch                                                                                                                                          |
-| **Orca**        | -                                                                                                | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                                            |
-| **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
-| **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Kanagawa palette staged (`tokyonight` until built-in)                                                                                                                                         |
-| **MiMo-Code**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                             |
-| **Qoder CLI**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | -                                                                                                                                                                                             |
-| **Kiro CLI**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem              | Steering files (AGENTS.md), slash commands, MCP servers, ACP                                                                |
+| Tool            | MCP Servers                                                                                           | Plugins/Extensions                                                                                                                                                                        |
+| --------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                                          |
+| **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                         |
+| **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl, ctx   | -                                                                                                                                                                                         |
+| **Kimi Code**   | context7, sequential-thinking, qmd, agentmemory, fff, logpilot, sem, ctx                              | Skills, MCP servers, and hooks via `~/.kimi-code/`                                                                                                                                        |
+| **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory, sem, ctx                        | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, pi-web-access, footer, tps-meter) |
+| **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                         |
+| **Gemini**      | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                            |
+| **Antigravity** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx (via plugin) | my-ai-tools-gemini-migration                                                                                                                                                              |
+| **Kilo**        | (uses OpenCode config)                                                                                | (uses OpenCode plugins)                                                                                                                                                                   |
+| **CommandCode** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                         |
+| **Copilot**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                         |
+| **Cursor**      | context7 (via bunx), sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx   | -                                                                                                                                                                                         |
+| **Conductor**   | Per-harness (Claude Code, Codex, Cursor MCP configs)                                                  | Orchestrates parallel agents in isolated workspaces                                                                                                                                       |
+| **Factory**     | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | core, security-engineer, droid-evolved, autoresearch                                                                                                                                      |
+| **Orca**        | -                                                                                                     | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                                        |
+| **Cline**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Global rules (AGENTS.md → ~/.cline/rules/, ~~/.agents/AGENTS.md), universal skills (~~/.agents/skills)                                                                                    |
+| **Grok**        | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Kanagawa palette staged (`tokyonight` until built-in)                                                                                                                                     |
+| **MiMo-Code**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                         |
+| **Qoder CLI**   | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                         |
+| **Kiro CLI**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Steering files (AGENTS.md), slash commands, MCP servers, ACP                                                                                                                              |
+| **Codiff**      | — (desktop app — uses configured agent backend via settings)                                          | —                                                                                                                                                                                         |
 
 ### 📋 MCP Server Details
 
@@ -67,6 +69,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | `react-grab-mcp`      | React component capture and inspection                                                    | `@react-grab/mcp`                                                       |
 | `logpilot`            | AI-powered log analysis and tmux monitoring                                               | `logpilot`                                                              |
 | `sem`                 | Semantic version control - entity-level diffs, blame, and impact analysis                 | `sem-mcp` (via [Ataraxy-Labs/sem](https://github.com/Ataraxy-Labs/sem)) |
+| `ctx`                 | Local agent-history search across coding sessions                                         | `ctx mcp serve`                                                         |
 
 ## 🎬 Demo
 
@@ -404,7 +407,7 @@ npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
 
-# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, thermo-nuclear-code-quality-review, commit-atomic, draft-pull-request, docs-update
+# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, thermo-nuclear-code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, tmux
 # Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
@@ -646,6 +649,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `commit-atomic` - Atomic commits by logically grouping changes with commitizen convention (no `git add -A`)
 - `draft-pull-request` - Create draft pull requests using gh CLI with what/why/how template
 - `handoffs` - Create handoff plans for continuing work (provides `/handoffs` command)
+- `llm-wiki` - Build and maintain a persistent, compounding knowledge wiki from raw sources (Karpathy's LLM Wiki pattern)
 - `pickup` - Resume work from previous handoff sessions (provides `/pickup` command)
 - `plannotator-setup-goal` - Turn an idea into a structured goal package via Plannotator-gated discovery, fact sheet, and plan
 - `docs-update` - Automated documentation synchronization with code changes (Mintlify, Docusaurus, GitBook, Fumadocs, etc.)
@@ -657,6 +661,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `slop` - AI slop detection and removal
 - `tdd` - Test-Driven Development workflows
 - `thermo-nuclear-code-quality-review` - Extremely strict maintainability and structural code quality reviews
+- `tmux` - Remote control tmux sessions for interactive CLIs (python, node, gdb, etc.)
 
 #### Projects Built with AI
 
@@ -708,6 +713,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Last 30 Days**           | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill)                                     | Research what people actually say about any topic in the last 30 days. Pulls from Reddit, X, YouTube, TikTok, HN, Polymarket, GitHub, and the web.                                                                             |
 | **Improve**                | [shadcn/improve](https://github.com/shadcn/improve)                                                           | Audit any codebase and write implementation plans for cheaper models to execute. Uses expensive model for planning, cheap model for execution.                                                                                 |
 | **Engram**                 | [Gentleman-Programming/engram](https://github.com/Gentleman-Programming/engram)                               | Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, and git-based cross-machine sync.                                                                                          |
+| **mac-OCR**                | [privatenumber/mac-ocr](https://github.com/privatenumber/mac-ocr)                                             | macOS CLI for OCR and searchable PDFs using Apple's Vision framework                                                                                                                                                           |
 
 **Installation:**
 
@@ -730,6 +736,7 @@ npx skills add openai/codex --skill babysit-pr --global --agent claude-code
 npx skills add mvanhorn/last30days-skill --global --agent claude-code
 npx skills add shadcn/improve --global --agent claude-code
 npx skills add Gentleman-Programming/engram --skill engram-memory --global --agent claude-code
+npx skills add ctxrs/ctx --global --agent claude-code
 ```
 
 ### Configuration Files
@@ -918,11 +925,11 @@ Located in [`configs/opencode/agent/`](configs/opencode/agent/):
 
 OpenCode supports custom model providers via OpenAI-compatible endpoints:
 
-| Provider  | Models                              | Endpoint                                       |
-| --------- | ----------------------------------- | ---------------------------------------------- |
+| Provider  | Models                              | Endpoint                                        |
+| --------- | ----------------------------------- | ----------------------------------------------- |
 | cursorapi | `composer-2.5`, `composer-2.5-fast` | `http://127.0.0.1:8788/v1` (local Cursor proxy) |
-| llama.cpp | GLM-4.7-Flash (local inference)     | `http://192.168.1.11:8000/v1`                  |
-| ollama    | minimax-m2.5:cloud                  | `http://127.0.0.1:11434/v1`                    |
+| llama.cpp | GLM-4.7-Flash (local inference)     | `http://192.168.1.11:8000/v1`                   |
+| ollama    | minimax-m2.5:cloud                  | `http://127.0.0.1:11434/v1`                     |
 
 These are configured in `opencode.json` under the `provider` key with custom model limits.
 
@@ -1513,6 +1520,38 @@ kilo run "Refactor this component to use hooks"
 
 ---
 
+## 🌙 Kimi Code (Optional)
+
+Moonshot AI's terminal-native coding agent. [Homepage](https://www.kimi.com/code/en)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Installation
+
+```bash
+curl -fsSL https://code.kimi.com/kimi-code/install.sh | bash
+```
+
+### Configuration
+
+Kimi Code stores user-level configs in `~/.kimi-code/`:
+
+- [`AGENTS.md`](configs/kimi-code/AGENTS.md) - Global Kimi-specific instructions
+- [`config.toml`](configs/kimi-code/config.toml) - Runtime settings (models, permissions, loop control)
+- [`mcp.json`](configs/kimi-code/mcp.json) - User-level MCP server declarations
+
+### Usage
+
+```bash
+# Start Kimi Code
+kimi
+```
+
+</details>
+
+---
+
 ## 🥧 Pi (Optional)
 
 AI coding agent built for agentic coding workflows. [Homepage](https://pi.dev)
@@ -1535,12 +1574,12 @@ Located in [`configs/pi/`](configs/pi/):
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 - [`models.json`](configs/pi/models.json) - Provider and model definitions (google-antigravity, ollama)
 
-Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `openai-codex` as the default provider with `gpt-5.4-mini` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `clinepass` as the default provider with `deepseek-v4-flash` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `gpt-5.4-mini`
-- **Default Provider**: `openai-codex`
+- **Default Model**: `deepseek-v4-flash`
+- **Default Provider**: `clinepass`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
@@ -1575,52 +1614,59 @@ Then register them in `~/.pi/agent/settings.json`:
 		"npm:pi-codex-goal",
 		"npm:pi-dynamic-workflows",
 		"npm:pi-commandcode-provider",
-		"npm:pi-web-access",
 		"npm:pi-footer",
 		"npm:pi-tps-meter",
 		"npm:@juicesharp/rpiv-advisor",
-		"npm:pi-cursor-sdk"
+		"npm:pi-cursor-sdk",
+		"npm:pi-web-access",
+		"npm:pi-clinepass-provider",
+		"npm:@juicesharp/rpiv-ask-user-question",
+		"npm:@yofriadi/pi-antigravity-oauth"
 	]
 }
 ```
 
 **Package Overview:**
 
-| Package                     | Description                                                        |
-| --------------------------- | ------------------------------------------------------------------ |
-| `@plannotator/pi-extension` | Interactive plan review with visual annotation                     |
-| `pi-autoresearch`           | Autonomous experiment loop for optimization targets                |
-| `@ff-labs/pi-fff`           | FFF-powered fuzzy file and content search                          |
-| `pi-mcp-adapter`            | MCP (Model Context Protocol) adapter for Pi                        |
-| `pi-simplify`               | Reviews changed code for clarity, consistency, and maintainability |
-| `pi-manage-todo-list`       | GitHub Copilot-style todo list management tool                     |
-| `pi-btw`                    | Parallel side conversations with `/btw` command                    |
-| `pi-code-previews`          | Live previews of code changes during editing                       |
-| `pi-codex-goal`             | Codex-style goal management integration                            |
-| `pi-dynamic-workflows`      | Dynamic workflow automation for Pi                                 |
-| `pi-commandcode-provider`   | CommandCode model provider integration for Pi                      |
-| `pi-web-access`              | Web access and content fetching for AI models                              |
-| `pi-footer`                 | Customizable status footer for the Pi TUI                          |
-| `pi-tps-meter`              | Live tokens-per-second meter for the Pi TUI status bar             |
-| `@juicesharp/rpiv-advisor`  | Second opinion from a stronger reviewer model before taking action |
-| `pi-cursor-sdk`             | Pi provider extension backed by @cursor/sdk local agents           |
+| Package                              | Description                                                        |
+| ------------------------------------ | ------------------------------------------------------------------ |
+| `@plannotator/pi-extension`          | Interactive plan review with visual annotation                     |
+| `pi-autoresearch`                    | Autonomous experiment loop for optimization targets                |
+| `@ff-labs/pi-fff`                    | FFF-powered fuzzy file and content search                          |
+| `pi-mcp-adapter`                     | MCP (Model Context Protocol) adapter for Pi                        |
+| `pi-simplify`                        | Reviews changed code for clarity, consistency, and maintainability |
+| `pi-manage-todo-list`                | GitHub Copilot-style todo list management tool                     |
+| `pi-btw`                             | Parallel side conversations with `/btw` command                    |
+| `pi-code-previews`                   | Live previews of code changes during editing                       |
+| `pi-codex-goal`                      | Codex-style goal management integration                            |
+| `pi-dynamic-workflows`               | Dynamic workflow automation for Pi                                 |
+| `pi-commandcode-provider`            | CommandCode model provider integration for Pi                      |
+| `pi-web-access`                      | Web access and content fetching for AI models                      |
+| `pi-footer`                          | Customizable status footer for the Pi TUI                          |
+| `pi-tps-meter`                       | Live tokens-per-second meter for the Pi TUI status bar             |
+| `@juicesharp/rpiv-advisor`           | Second opinion from a stronger reviewer model before taking action |
+| `pi-cursor-sdk`                      | Pi provider extension backed by @cursor/sdk local agents           |
+| `pi-clinepass-provider`              | ClinePass model provider for Pi                                    |
+| `@juicesharp/rpiv-ask-user-question` | Structured question-asking tool for user clarification             |
+| `@yofriadi/pi-antigravity-oauth`     | Antigravity OAuth authentication for Pi; see the caveat below      |
+
+> **Antigravity OAuth caveat:** If you're experimenting with Pi, there's an OAuth plugin available for Antigravity. Be aware that Google currently states that using third-party software with Antigravity OAuth may violate its Terms of Service and could result in account restrictions. For the lowest-risk setup, prefer an official API key from AI Studio or Vertex AI when Pi supports it, and avoid OAuth plugins that reuse an Antigravity login in third-party clients unless Google changes its policy.
 
 ### Enabled Models
 
 Pi is configured with multi-provider model access (`settings.json` `enabledModels`):
 
-| Provider     | Models                                                                  |
-| ------------ | ----------------------------------------------------------------------- |
-| openrouter   | `openrouter/owl-alpha`                                                  |
-| cursor       | `auto`, `composer-2.5`                                                  |
-| cursorapi    | `composer-2.5`                                                          |
-| openai-codex | `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.3-codex-spark`, `gpt-5.5`             |
-
-> See [OpenRouter free models](https://openrouter.ai/collections/free-models) for additional no-cost options.
+| Provider           | Models                                                                                                                        |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| cursor             | `auto`, `composer-2.5`                                                                                                        |
+| openai-codex       | `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.3-codex-spark`, `gpt-5.5`                                                                   |
+| clinepass          | `deepseek-v4-pro`, `deepseek-v4-flash`, `kimi-k2.7-code`, `glm-5.2`, `kimi-k2.6`, `minimax-m3`, `qwen3.7-max`, `qwen3.7-plus` |
+| google-antigravity | `gemini-3.5-flash`, `gemini-3-pro`, `claude-opus-4-6`                                                                         |
+| commandcode        | `deepseek/deepseek-v4-pro`                                                                                                    |
 
 ### Pi Antigravity Rotator
 
-For multi-account rotation, local model routing, and quota management across Google Antigravity accounts, use [pi-antigravity-rotator](https://github.com/tuxevil/pi-antigravity-rotator).
+For multi-account rotation, local model routing, and quota management across Google Antigravity accounts, [pi-antigravity-rotator](https://github.com/tuxevil/pi-antigravity-rotator) is available, but it may carry the same Antigravity OAuth third-party access risk described above.
 
 It runs as a local proxy on port `51200` and supports per-model routing, real-time quota tracking, and automatic token management.
 
@@ -2113,10 +2159,13 @@ export OPENAI_API_KEY="your_key_here"
 
 Cline configs are stored in `configs/cline/` and installed to `~/.cline/`:
 
+- [`AGENTS.md`](configs/cline/AGENTS.md) - Global agent guidelines (tmux, AI tool usage, best practices), installed to `~/.cline/rules/01-guidelines.md` and the cross-tool `~/.agents/AGENTS.md` (Cline reads both via its rules search paths)
 - [`mcp-settings.json`](configs/cline/mcp-settings.json) - MCP server configurations, installed to `~/.cline/data/settings/cline_mcp_settings.json`
 - [`models.json`](configs/cline/models.json) - Model configurations
 - [`providers.json`](configs/cline/providers.json.example) - Provider credentials (copy from example and fill in your keys)
 - [`kanban-config.json`](configs/cline/kanban-config.json) - Kanban board settings
+
+Skills are shared via the universal `~/.agents/skills/` directory, which Cline searches natively. `~/.cline/skills` is symlinked to it for consistency with the other tools.
 
 ### MCP Servers
 
@@ -2437,6 +2486,7 @@ Invite builders to try the **MiMo Open Platform** — Xiaomi's most powerful AI 
 </details>
 
 ---
+
 ## 🚀 herdr (Optional)
 
 Terminal-native agent multiplexer — like `tmux` but agent-aware. Manage workspaces, tabs, and panes, each running its own shell, agent, server, or log stream, with automatic agent status tracking and a local socket API. [Homepage](https://herdr.dev/) | [Docs](https://herdr.dev/docs/) | [GitHub](https://github.com/ogulcancelik/herdr)
@@ -2561,22 +2611,23 @@ Qoder CLI configs are stored in [`configs/qodercli/`](configs/qodercli/) and ins
 ```json
 {
 	"mcpServers": {
-		"context7":
-			{ "command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"] },
-		"sequential-thinking":
-			{ "command": "npx", "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"] },
-		"qmd":
-			{ "command": "qmd", "args": ["mcp"] },
-		"fff":
-			{ "type": "stdio", "command": "fff-mcp", "args": [] },
-		"react-grab-mcp":
-			{ "command": "npx", "args": ["-y", "@react-grab/mcp", "--stdio"] },
-		"logpilot":
-			{ "command": "logpilot", "args": ["mcp-server"] },
-		"agentmemory":
-			{ "command": "npx", "args": ["-y", "@agentmemory/mcp"] },
-		"sem":
-			{ "command": "sem-mcp", "args": [] }
+		"context7": {
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@latest"]
+		},
+		"sequential-thinking": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"qmd": { "command": "qmd", "args": ["mcp"] },
+		"fff": { "type": "stdio", "command": "fff-mcp", "args": [] },
+		"react-grab-mcp": {
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
+		},
+		"logpilot": { "command": "logpilot", "args": ["mcp-server"] },
+		"agentmemory": { "command": "npx", "args": ["-y", "@agentmemory/mcp"] },
+		"sem": { "command": "sem-mcp", "args": [] }
 	}
 }
 ```
@@ -2585,14 +2636,14 @@ Qoder CLI configs are stored in [`configs/qodercli/`](configs/qodercli/) and ins
 
 **Config Locations:**
 
-| Scope           | Path                                            |
-| --------------- | ----------------------------------------------- |
-| User settings   | `~/.qoder/settings.json`                        |
-| Project settings | `<project>/.qoder/settings.json`               |
+| Scope                               | Path                                   |
+| ----------------------------------- | -------------------------------------- |
+| User settings                       | `~/.qoder/settings.json`               |
+| Project settings                    | `<project>/.qoder/settings.json`       |
 | Project local settings (gitignored) | `<project>/.qoder/settings.local.json` |
-| User AGENTS.md  | `~/.qoder/AGENTS.md`                            |
-| Project AGENTS.md | `<project>/AGENTS.md`                        |
-| Project AGENTS.local.md | `<project>/AGENTS.local.md`           |
+| User AGENTS.md                      | `~/.qoder/AGENTS.md`                   |
+| Project AGENTS.md                   | `<project>/AGENTS.md`                  |
+| Project AGENTS.local.md             | `<project>/AGENTS.local.md`            |
 
 Inside a project, run `/init` to scaffold a starter `AGENTS.md` and manage it with `/memory` in the TUI.
 
@@ -2653,11 +2704,11 @@ Kiro CLI configs are stored in [`configs/kiro/`](configs/kiro/) and installed to
 
 **Config Locations:**
 
-| Scope           | Path                                            |
-| --------------- | ----------------------------------------------- |
-| User config     | `~/.kiro/`                                      |
-| Steering files  | `~/.kiro/AGENTS.md`, `<project>/AGENTS.md`     |
-| Conversations   | `~/.kiro/conversations/`                        |
+| Scope          | Path                                       |
+| -------------- | ------------------------------------------ |
+| User config    | `~/.kiro/`                                 |
+| Steering files | `~/.kiro/AGENTS.md`, `<project>/AGENTS.md` |
+| Conversations  | `~/.kiro/conversations/`                   |
 
 ### Usage
 
@@ -2680,8 +2731,148 @@ kiro /usage
 
 See the full [Kiro CLI docs](https://kiro.dev/docs/cli/installation/) for details.
 
+## </details>
+
+## 🎨 Codiff (Optional)
+
+Beautiful, minimal local diff viewer with LLM-powered walkthroughs. Review Git changes, comment on PRs/MRs inline, and share walkthroughs. [GitHub](https://github.com/nkzw-tech/codiff) | [Homepage](https://codiff.app)
+
+<details>
+<summary><strong>Installation &amp; Configuration</strong></summary>
+
+### Installation
+
+```bash
+# macOS (Homebrew)
+brew install --cask nkzw-tech/tap/codiff
+
+# Then run: Codiff > Install Terminal Helper (for `codiff` CLI command)
+```
+
+Or run this repo's installer:
+
+```bash
+./cli.sh
+```
+
+### Configuration
+
+Codiff config is stored in [`configs/codiff/`](configs/codiff/) and installed to `~/.codiff/`:
+
+- [`codiff.jsonc`](configs/codiff/codiff.jsonc) — Settings (agent backend, theme, diff style, font) and keymap overrides
+
+**Config Location:**
+
+| Scope       | Path                     |
+| ----------- | ------------------------ |
+| User config | `~/.codiff/codiff.jsonc` |
+
+### Usage
+
+```bash
+# Launch Codiff
+codiff
+
+# Review current repository
+codiff .
+
+# Generate LLM walkthrough of the diff
+codiff -w
+
+# Review a GitHub PR
+codiff pr 75
+```
+
+See the full [Codiff docs](https://github.com/nkzw-tech/codiff#readme) for details.
+
 </details>
----
+
+## 🔎 ctx (Optional)
+
+Open-source local agent-history search CLI. Indexes your past coding-agent sessions into local SQLite and lets you search, inspect, and cite prior work from the terminal. [Homepage](https://ctx.rs) | [GitHub](https://github.com/ctxrs/ctx)
+
+<details>
+<summary><strong>Installation &amp; Configuration</strong></summary>
+
+### Installation
+
+```bash
+curl -fsSL https://ctx.rs/install | sh
+```
+
+> **Security Note:** Review the script before running:
+>
+> ```bash
+> curl -fsSL https://ctx.rs/install -o install-ctx.sh
+> cat install-ctx.sh  # Review the script
+> sh install-ctx.sh
+> ```
+
+Or run this repo's installer:
+
+```bash
+./cli.sh
+```
+
+### Configuration
+
+ctx configs are stored in [`configs/ctx/`](configs/ctx/) and installed to `~/.ctx/`:
+
+- [`config.toml`](configs/ctx/config.toml) — Upgrade channel/interval defaults
+
+ctx also stores runtime data under `~/.ctx/`:
+
+- `~/.ctx/work.sqlite` — local index database
+- `~/.ctx/config.toml` — ctx config (managed by this repo, then used by `ctx setup/status/search`)
+
+### Usage
+
+```bash
+# Initialize local index
+ctx setup
+
+# Search prior sessions
+ctx search "failed migration"
+```
+
+See the full [ctx docs](https://ctx.rs/first-search) for details.
+
+### MCP Server
+
+ctx provides a read-only MCP server over stdio. It exposes six tools for searching and inspecting your local agent index:
+
+| Tool           | Description                        |
+| -------------- | ---------------------------------- |
+| `status`       | Index status                       |
+| `sources`      | List discovered history sources    |
+| `search`       | Search by query or file path       |
+| `sql`          | Run read-only SQL against index    |
+| `show_session` | Get session transcript             |
+| `show_event`   | Get event with surrounding context |
+
+Start the MCP server:
+
+```bash
+ctx mcp serve
+```
+
+The ctx MCP server is configured for all supported AI tools via this repo's config files and the central MCP registry (`configs/mcp-registry.json`):
+
+- **Claude Code**, **Cursor**, **Cline**, **Factory Droid**, **Kimi Code**, **CommandCode**, **Kiro**, **Copilot**, **Qoder CLI**, **Pi**, **Antigravity** — registered in tool-specific `mcpServers` JSON config
+- **OpenCode**, **Kilo** — registered in `mcp.ctx` (array-command format)
+- **Codex**, **Grok** — registered in TOML `[mcp_servers.ctx]` format
+- **Claude Code**, **OpenCode**, **Codex**, **Amp**, **Gemini**, **Antigravity**, **CommandCode**, **Copilot**, **Cursor**, **Factory**, **Cline**, **Grok**, **MiMo-Code**, **Qoder CLI**, **Kiro** — also covered by the central `mcp-registry.json` for automatic setup.
+
+To manually configure for any other MCP-aware tool, add:
+
+```json
+{
+	"command": "ctx",
+	"args": ["mcp", "serve"]
+}
+```
+
+</details>
 
 ## 🔍 Open Code Review (Optional)
 
@@ -2916,6 +3107,10 @@ See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for det
 ### Backlog.md
 
 [**Backlog.md**](https://github.com/MrLesk/Backlog.md) - Markdown-native task manager and Kanban visualizer. ([npm](https://www.npmjs.com/package/backlog.md))
+
+### OpenWiki
+
+[**OpenWiki**](https://github.com/langchain-ai/openwiki) - CLI for generating and maintaining repository documentation for AI agents.
 
 ### Agent Browser
 

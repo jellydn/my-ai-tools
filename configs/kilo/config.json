@@ -43,6 +43,11 @@
 			"type": "local",
 			"command": ["sem-mcp"],
 			"enabled": true
+		},
+		"ctx": {
+			"command": ["ctx", "mcp", "serve"],
+			"enabled": true,
+			"type": "local"
 		}
 	},
 	"agent": {

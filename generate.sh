@@ -2,27 +2,32 @@
 
 # Re-exec under bash if invoked via sh/dash. lib/require_bash.sh is POSIX-compatible
 # so sh can source it and trigger the re-exec before lib/common.sh is reached.
-source "$(dirname "${BASH_SOURCE[0]}")/lib/require_bash.sh"
+. "$(dirname "${BASH_SOURCE:-$0}")/lib/require_bash.sh"
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
-DRY_RUN=false
+# Parse command-line arguments first (only when executed, not sourced).
+# When sourced (e.g. from bats tests), BASH_SOURCE[0] != $0, so we skip arg
+# parsing and leave DRY_RUN at whatever value the caller exported.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+	DRY_RUN=false
 
-for arg in "$@"; do
-	case $arg in
-	--dry-run)
-		DRY_RUN=true
-		shift
-		;;
-	*)
-		echo "Unknown option: $arg"
-		echo "Usage: $0 [--dry-run]"
-		exit 1
-		;;
-	esac
-done
+	for arg in "$@"; do
+		case $arg in
+		--dry-run)
+			DRY_RUN=true
+			shift
+			;;
+		*)
+			echo "Unknown option: $arg"
+			echo "Usage: $0 [--dry-run]"
+			exit 1
+			;;
+		esac
+	done
+fi
 
 skill_exists_in_plugins() {
 	local skill_name="$1"
@@ -273,6 +278,23 @@ generate_codex_configs() {
 	copy_single "$HOME/.codex/config.toml" "$SCRIPT_DIR/configs/codex/config.toml"
 
 	log_success "Codex CLI configs generated"
+}
+
+generate_kimi_code_configs() {
+	log_info "Generating Kimi Code CLI configs..."
+
+	if [ ! -d "$HOME/.kimi-code" ]; then
+		log_warning "Kimi Code CLI config directory not found: $HOME/.kimi-code"
+		return 0
+	fi
+
+	execute "mkdir -p $SCRIPT_DIR/configs/kimi-code"
+	copy_single "$HOME/.kimi-code/AGENTS.md" "$SCRIPT_DIR/configs/kimi-code/AGENTS.md"
+	copy_single "$HOME/.kimi-code/config.toml" "$SCRIPT_DIR/configs/kimi-code/config.toml"
+	copy_single "$HOME/.kimi-code/mcp.json" "$SCRIPT_DIR/configs/kimi-code/mcp.json"
+	copy_skills_with_filter "$HOME/.kimi-code/skills" "$SCRIPT_DIR/configs/kimi-code/skills" "Kimi Code"
+
+	log_success "Kimi Code CLI configs generated"
 }
 
 generate_gemini_configs() {
@@ -649,6 +671,21 @@ generate_mimo_configs() {
 	log_success "MiMo-Code configs generated"
 }
 
+generate_ctx_configs() {
+	log_info "Generating ctx configs..."
+
+	if [ ! -d "$HOME/.ctx" ]; then
+		log_warning "ctx config directory not found: $HOME/.ctx"
+		return 0
+	fi
+
+	execute "mkdir -p \"$SCRIPT_DIR/configs/ctx\""
+
+	copy_single "$HOME/.ctx/config.toml" "$SCRIPT_DIR/configs/ctx/config.toml"
+
+	log_success "ctx configs generated"
+}
+
 generate_qodercli_configs() {
 	log_info "Generating Qoder CLI configs..."
 
@@ -684,6 +721,21 @@ generate_kiro_configs() {
 	log_success "Kiro CLI configs generated"
 }
 
+generate_codiff_configs() {
+	log_info "Generating Codiff configs..."
+
+	if [ ! -d "$HOME/.codiff" ]; then
+		log_warning "Codiff config directory not found: $HOME/.codiff"
+		return 0
+	fi
+
+	execute "mkdir -p \"$SCRIPT_DIR/configs/codiff\""
+
+	copy_single "$HOME/.codiff/codiff.jsonc" "$SCRIPT_DIR/configs/codiff/codiff.jsonc"
+
+	log_success "Codiff configs generated"
+}
+
 generate_cline_configs() {
 	log_info "Generating Cline configs..."
 
@@ -702,8 +754,23 @@ generate_cline_configs() {
 	# Copy kanban config
 	copy_single "$HOME/.cline/kanban/config.json" "$SCRIPT_DIR/configs/cline/kanban-config.json"
 
-	# Copy skills with filtering
+	# Copy global rules back to repo
+	# Prefer ~/.agents/AGENTS.md (canonical cross-tool source); fall back to ~/.cline/rules/01-guidelines.md
+	if [ -f "$HOME/.agents/AGENTS.md" ]; then
+		copy_single "$HOME/.agents/AGENTS.md" "$SCRIPT_DIR/configs/cline/AGENTS.md"
+	elif [ -f "$HOME/.cline/rules/01-guidelines.md" ]; then
+		copy_single "$HOME/.cline/rules/01-guidelines.md" "$SCRIPT_DIR/configs/cline/AGENTS.md"
+	fi
+
+	# Copy Cline-specific skills back to repo
 	copy_skills_with_filter "$HOME/.cline/skills" "$SCRIPT_DIR/configs/cline/skills" "Cline"
+
+	# Copy hooks back to repo
+	if [ -d "$HOME/.cline/hooks" ]; then
+		execute_quoted mkdir -p "$SCRIPT_DIR/configs/cline/hooks"
+		execute_quoted rm -rf "$SCRIPT_DIR/configs/cline/hooks"
+		safe_copy_dir "$HOME/.cline/hooks" "$SCRIPT_DIR/configs/cline/hooks"
+	fi
 
 	log_success "Cline configs generated"
 }
@@ -765,6 +832,9 @@ main() {
 	generate_codex_configs
 	echo
 
+	generate_kimi_code_configs
+	echo
+
 	generate_gemini_configs
 	echo
 
@@ -804,10 +874,16 @@ main() {
 	generate_mimo_configs
 	echo
 
+	generate_ctx_configs
+	echo
+
 	generate_qodercli_configs
 	echo
 
 	generate_kiro_configs
+	echo
+
+	generate_codiff_configs
 	echo
 
 	generate_best_practices
@@ -825,4 +901,6 @@ main() {
 	echo "Commit changes with: git add . && git commit -m 'Update configs'"
 }
 
-main
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+	main
+fi

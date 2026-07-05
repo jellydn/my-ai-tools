@@ -9,21 +9,31 @@ setup() {
     export ORIG_HOME="$HOME"
     export HOME
     HOME="$(mktemp -d)"
+    # Save the temp dir in a separate variable before sourcing generate.sh.
+    # generate.sh overwrites SCRIPT_DIR to its own directory (the repo root),
+    # so teardown must not use $SCRIPT_DIR for cleanup — that would delete the
+    # entire repository including .git. See _TEMP_SCRIPT_DIR below.
     export SCRIPT_DIR
     SCRIPT_DIR="$(mktemp -d)"
+    export _TEMP_SCRIPT_DIR="$SCRIPT_DIR"
     export DRY_RUN=false
 
     # Source common.sh for execute_quoted / log_* helpers
     source "$REPO_ROOT/lib/common.sh"
     # Source generate.sh; main() runs but all generate_* functions return early
     # because the expected config directories do not exist under the temp HOME.
+    # generate.sh resets SCRIPT_DIR to the repo root — restore our temp dir
+    # afterwards so test bodies write to temp space, not the repository.
     source "$REPO_ROOT/generate.sh"
+    SCRIPT_DIR="$_TEMP_SCRIPT_DIR"
 }
 
 teardown() {
-    # Restore HOME and clean up temp directories
+    # Restore HOME and clean up temp directories.
+    # Use _TEMP_SCRIPT_DIR (not $SCRIPT_DIR) because generate.sh may have
+    # reset SCRIPT_DIR to the repo root; rm -rf on that would wipe the project.
     rm -rf "$HOME"
-    rm -rf "$SCRIPT_DIR"
+    rm -rf "$_TEMP_SCRIPT_DIR"
     export HOME="$ORIG_HOME"
 }
 

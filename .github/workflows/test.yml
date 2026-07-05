@@ -21,4 +21,4 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Run config validation tests
-        run: bats tests/pr_*.bats
+        run: bats tests/pr_*.bats tests/generate.bats tests/sh_reexec.bats
