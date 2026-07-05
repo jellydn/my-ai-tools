@@ -736,7 +736,6 @@ npx skills add openai/codex --skill babysit-pr --global --agent claude-code
 npx skills add mvanhorn/last30days-skill --global --agent claude-code
 npx skills add shadcn/improve --global --agent claude-code
 npx skills add Gentleman-Programming/engram --skill engram-memory --global --agent claude-code
-npx skills add ctxrs/ctx --global --agent claude-code
 ```
 
 ### Configuration Files

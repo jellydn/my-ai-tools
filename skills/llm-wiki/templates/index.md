@@ -11,33 +11,33 @@ Catalog of all pages in this wiki. Updated on every ingest.
 
 ## Overview
 
-| Page | Summary |
-|------|---------|
+| Page         | Summary                                  |
+| ------------ | ---------------------------------------- |
 | [[overview]] | Big-picture synthesis of the entire wiki |
 
 ---
 
 ## Sources
 
-| Page | Summary | Date Ingested |
-|------|---------|---------------|
-| *(no sources yet)* | | |
+| Page               | Summary | Date Ingested |
+| ------------------ | ------- | ------------- |
+| _(no sources yet)_ |         |               |
 
 ---
 
 ## Entities
 
-| Page | Type | Summary |
-|------|------|---------|
-| *(no entity pages yet)* | | |
+| Page                    | Type | Summary |
+| ----------------------- | ---- | ------- |
+| _(no entity pages yet)_ |      |         |
 
 ---
 
 ## Concepts
 
-| Page | Summary |
-|------|---------|
-| *(no concept pages yet)* | |
+| Page                     | Summary |
+| ------------------------ | ------- |
+| _(no concept pages yet)_ |         |
 
 ---
 
@@ -45,10 +45,10 @@ Catalog of all pages in this wiki. Updated on every ingest.
 
 Pages generated from queries and analyses (filed answers that compound the knowledge base).
 
-| Page | Summary | Date |
-|------|---------|------|
-| *(no synthesis pages yet)* | | |
+| Page                       | Summary | Date |
+| -------------------------- | ------- | ---- |
+| _(no synthesis pages yet)_ |         |      |
 
 ---
 
-*Last updated: YYYY-MM-DD*
+_Last updated: YYYY-MM-DD_

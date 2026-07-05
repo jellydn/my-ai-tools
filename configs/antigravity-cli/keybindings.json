@@ -1,7 +1,4 @@
 {
-  "battle.cancel": ["ctrl+shift+x"],
-  "battle.select_focused": ["ctrl+shift+e"],
-  "battle.switch_focus": ["ctrl+shift+space"],
   "cli.clear_screen": ["ctrl+l"],
   "cli.enter": ["enter"],
   "cli.escape": ["ctrl+c", "esc"],

@@ -44,7 +44,7 @@ Add YAML frontmatter to wiki pages to enable Dataview queries in Obsidian:
 title: "Page Title"
 type: concept | entity | source | synthesis | overview
 tags: [tag1, tag2]
-sources: 3          # Number of sources that informed this page
+sources: 3 # Number of sources that informed this page
 updated: YYYY-MM-DD
 ---
 ```

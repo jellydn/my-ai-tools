@@ -1,0 +1,4 @@
+[upgrade]
+auto = "apply"
+channel = "stable"
+interval_hours = 24

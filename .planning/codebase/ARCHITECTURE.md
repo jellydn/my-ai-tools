@@ -1,170 +1,246 @@
-# Architecture
+# Architecture: my-ai-tools
 
-**Analysis Date:** 2026-04-22
+## Overview
 
-## Pattern Overview
+**my-ai-tools** is a shell-script monorepo that manages configuration and installation for 25+ AI coding assistants. It provides a bidirectional sync mechanism — pushing curated configs from the repo to user home directories (`cli.sh`) and pulling user-local configs back into the repo (`generate.sh`).
 
-**Overall:** Configuration-as-Code with Bidirectional Sync
+## Architectural Pattern
 
-**Key Characteristics:**
+### Pattern: Bidirectional Configuration Hub
 
-- Declarative configuration management for multiple AI tools
-- Repository as source of truth (forward: `cli.sh`) and capture target (reverse: `generate.sh`)
-- Skill-based extensibility - reusable prompt templates and workflows
-- MCP server integration for enhanced AI capabilities
-- Cross-platform shell scripts with Windows compatibility
+The codebase follows a **hub-and-spoke** pattern where the repo is the central source of truth ("hub") and each supported tool's home-directory config is a "spoke."
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    REPO (source of truth)                │
+│                                                         │
+│  configs/  ←── generate.sh (export from home → repo)    │
+│  skills/   ←── generate.sh                              │
+│  lib/                                                  │
+│                                                         │
+│  ─────────────────────────────────────────────────────  │
+│                                                         │
+│  cli.sh ──→ configs/ → home dirs (repo → home)         │
+│  install.sh ──→ git clone → cli.sh (bootstrap)          │
+└─────────────────────────────────────────────────────────┘
+         │                    │                    │
+         ▼                    ▼                    ▼
+   ~/.claude/         ~/.config/opencode/     ~/.cursor/
+   ~/.gemini/         ~/.codex/               ~/.kiro/
+   ~/.commandcode/    ~/.pi/agent/            ~/.grok/
+   ~/.cline/          ~/.config/amp/          ~/.config/mimocode/
+   ~/.copilot/        ~/.config/kilo/         ~/.qoder/
+   ~/.config/ai-launcher/   ~/.conductor/     ~/.codiff/
+   ~/.factory/        ~/.herdr/               ~/.ctx/
+      ... 25+ tools
+```
+
+### Key Insight: Two Scripts, Opposite Directions
+
+| Script        | Direction   | Purpose                                  |
+| ------------- | ----------- | ---------------------------------------- |
+| `cli.sh`      | REPO → HOME | Install/apply configs to user's machine  |
+| `generate.sh` | HOME → REPO | Capture user's current configs into repo |
 
 ## Layers
 
-**Configuration Layer:**
+### Layer 1: Entry Points (Root scripts)
 
-- Purpose: Define AI tool settings, agents, skills, MCP servers
-- Location: `configs/<tool>/`
-- Contains: JSON settings, markdown agents/commands, skill definitions
-- Depends on: AI tool installations on target system
-- Used by: Installation scripts (`cli.sh`)
+| File          | Role                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------- |
+| `cli.sh`      | Main installer: detects tools, installs CLI binaries, copies configs, enables plugins |
+| `generate.sh` | Reverse exporter: reads user's home-dir configs and writes them back to `configs/`    |
+| `install.sh`  | Bootstrap: clones repo from GitHub, then runs `cli.sh`                                |
+| `install.ps1` | Windows PowerShell bootstrap equivalent                                               |
 
-**Installation Layer:**
+### Layer 2: Shared Libraries (`lib/`)
 
-- Purpose: Deploy configurations to user's home directory
-- Location: `cli.sh`, `lib/common.sh`
-- Contains: Shell functions for copying, backing up, validating configs
-- Depends on: Configuration layer, system tools (jq, git)
-- Used by: End users, CI/CD pipelines
+| File                  | Purpose                                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------ |
+| `lib/common.sh`       | Core utilities: logging, dry-run, path handling, JSON/YAML validation, transaction tracking, safe copy |
+| `lib/require_bash.sh` | POSIX-compatible re-exec guard — ensures scripts run under bash (not sh/dash)                          |
+| `lib/install.sh`      | Tool installation functions: package manager detection, npm/bun/curl-based installers for each AI tool |
 
-**Export Layer:**
+**Dependency order**: `require_bash.sh` → `common.sh` → `install.sh` → entry-point scripts
 
-- Purpose: Capture current user configurations back to repo
-- Location: `generate.sh`
-- Contains: Shell functions for reading installed configs and updating repo
-- Depends on: User's home directory configs
-- Used by: End users after customizing their setup
+### Layer 3: Configuration Templates (`configs/`)
 
-**Skill Layer:**
+Each tool has a subdirectory in `configs/` with its canonical config files:
 
-- Purpose: Reusable AI prompts and workflows
-- Location: `skills/<skill-name>/`
-- Contains: SKILL.md definitions, templates, scripts
-- Depends on: AI tool's skill system
-- Used by: AI tools during conversations
+```
+configs/
+  claude/           settings.json, mcp-servers.json, CLAUDE.md, commands/, agents/, hooks/, skills/
+  opencode/         opencode.json, agent/, command/, skills/
+  amp/              settings.json, AGENTS.md, plugins/
+  codex/            AGENTS.md, config.json, config.toml
+  kimi-code/        AGENTS.md, config.toml, mcp.json, skills/
+  gemini/           AGENTS.md, GEMINI.md, settings.json, agents/, commands/
+  antigravity-cli/  settings.json, keybindings.json, statusline.sh, plugins/
+  pi/               settings.json, mcp.json, themes/
+  cursor/           AGENTS.md, mcp.json, agents/, commands/, skills/
+  grok/             AGENTS.md, config.toml, themes/
+  mimo/             AGENTS.md, mimocode.jsonc, tui.json, agent/, command/, themes/
+  ... (25+ tool directories)
+  mcp-registry.json         Central MCP server definitions
+  recommend-skills.json     Community skill recommendations
+  best-practices.md         Shared coding best practices
+  git-guidelines.md         Git safety rules
+  agent-memory-guidelines.md Agent memory conventions
+```
 
-**Library Layer:**
+### Layer 4: Skills Marketplace (`skills/`)
 
-- Purpose: Shared utilities for shell scripts
-- Location: `lib/common.sh`, `lib/*.js`
-- Contains: Path helpers, logging functions, OS detection, temp file management
-- Depends on: POSIX shell environment
-- Used by: `cli.sh`, `generate.sh`, test scripts
+Local plugin marketplace for Claude Code — 18 skill directories packaged as plugins. Each skill is a directory with a `SKILL.md` file. Published via `skills/*/` → `~/.agents/skills/` (universal location) with symlinks from tool-specific directories.
+
+### Layer 5: Testing (`tests/`)
+
+BATS (Bash Automated Testing System) functional tests — 23 test files covering config validation, tool installers, and shell re-exec behavior.
+
+### Layer 6: CI/CD (`.github/workflows/`)
+
+Two workflows:
+
+- `test.yml`: BATS config validation tests + shell syntax checks
+- `deploy-pages.yml`: GitHub Pages deployment
 
 ## Data Flow
 
-**Forward Flow (Install):**
+### Install Flow (`cli.sh`)
 
-1. User runs `./cli.sh` or one-line installer
-2. Script detects OS and validates prerequisites
-3. Backup existing configs (optional)
-4. Copy configs from `configs/<tool>/` to `~/.<tool>/`
-5. Install MCP servers via npx
-6. Validate JSON configurations
+```
+User runs cli.sh
+  → require_bash.sh (POSIX guard)
+  → Parse flags (--dry-run, --backup, --yes, --migrate-gemini)
+  → Preflight check (awk, sed, grep, etc.)
+  → Check prerequisites (git, bun/node, qmd, fff-mcp, sem-mcp, logpilot)
+  → Backup existing configs (~/ai-tools-backup-{timestamp})
+  → For each tool (claude, opencode, amp, codex, ...):
+      detect_tool → if installed:
+        install_tool (if not already installed)
+        copy_configs (safe_copy_dir from configs/ → home dir)
+        install_mcp_servers_from_registry (from mcp-registry.json)
+  → enable_plugins (Claude Code marketplace + community + recommended)
+  → Install skills to ~/.agents/skills/ (universal directory)
+  → Create symlinks: ~/.claude/skills → ~/.agents/skills (and all other tools)
+```
 
-**Reverse Flow (Export):**
+### Export Flow (`generate.sh`)
 
-1. User runs `./generate.sh` after customizing setup
-2. Script reads configs from home directories
-3. Updates repository files with current settings
-4. Creates backup of previous repo state
-5. Ready for git commit and version control
+```
+User runs generate.sh
+  → require_bash.sh
+  → For each tool (claude, opencode, amp, ...):
+      Check if home config exists
+      If yes: copy_single / copy_claude_subdirectory / copy_skills_with_filter
+      Skills filter: skip marketplace plugins (prd, ralph, qmd-knowledge, codemap)
+                     skip npx-installed skills (from recommend-skills.json)
+  → Copy best-practices.md, MEMORY.md, ai-launcher configs
+```
 
-**Skill Deployment:**
+### Skills Architecture
 
-1. Skills defined in `skills/<name>/SKILL.md`
-2. cli.sh copies skills to AI tool directories
-3. AI tools parse SKILL.md for capabilities and triggers
-4. Skills invoked via `/skill-name` commands in AI conversations
+```
+Source: skills/                        Target: ~/.agents/skills/
+  ├── adr/                               ├── adr/
+  ├── commit-atomic/                     ├── commit-atomic/
+  ├── draft-pull-request/                ├── ... (all 18 skills)
+  ├── ...                               └── .my-ai-tools-managed (marker)
+
+Tool-specific symlinks:
+  ~/.claude/skills/         → ~/.agents/skills/
+  ~/.config/opencode/skills/ → ~/.agents/skills/
+  ~/.gemini/skills/         → ~/.agents/skills/
+  ~/.cursor/skills/         → ~/.agents/skills/
+  ~/.cline/skills/          → ~/.agents/skills/
+  ... (all supported tools)
+```
 
 ## Key Abstractions
 
-**Configuration Provider:**
+### 1. Tool Detection (`detect_tool`)
 
-- Purpose: Normalize config access across different AI tools
-- Examples: `configs/claude/settings.json`, `configs/amp/settings.json`
-- Pattern: Each tool has unique structure but common concepts (agents, MCP, commands)
+Checks for tool presence via command availability and config directory existence. Returns detailed status: `command`, `directory`, `file`, or `missing`.
 
-**Skill Definition:**
+### 2. Dry-Run Wrappers (`execute` / `execute_quoted`)
 
-- Purpose: Standardized AI capability definition
-- Examples: `skills/adr/SKILL.md`, `skills/tdd/SKILL.md`
-- Pattern: YAML frontmatter with metadata, markdown body with usage instructions
+All side-effecting operations go through wrappers that respect `DRY_RUN` mode. `execute` uses eval for simple commands; `execute_quoted` passes arguments directly (safe for paths with spaces).
 
-**Cross-Platform Path Handler:**
+### 3. Safe Copy (`safe_copy_dir`)
 
-- Purpose: Abstract Windows/Unix path differences
-- Examples: `lib/common.sh` functions: `normalize_path()`, `convert_path()`, `to_unix_path()`
-- Pattern: Detect OS at runtime, use appropriate path handling
+Copies directories while excluding runtime artifacts (node_modules, *.sqlite, cache, sessions, etc.). Prefers rsync; falls back to manual find+cp.
 
-**Dry-Run Executor:**
+### 4. MCP Registry (`mcp-registry.json`)
 
-- Purpose: Preview changes without applying them
-- Examples: `execute()` function in `lib/common.sh`
-- Pattern: Check `$DRY_RUN` flag, log instead of executing when true
+Central JSON registry defining all MCP servers with their commands, args, prerequisites, and categories. Both `cli.sh` and `generate.sh` use this as the single source of truth.
 
-## Entry Points
+### 5. Transaction Tracking
 
-**CLI Installer:**
+Optional rollback support via `start_transaction` / `record_action` / `rollback_transaction`. Actions are logged and can be reversed LIFO.
 
-- Location: `cli.sh`
-- Triggers: Manual execution, one-line curl installer
-- Responsibilities: Parse args, preflight checks, backup, install configs, MCP servers
+### 6. Skill Filtering
 
-**Export Generator:**
+`copy_skills_with_filter` in `generate.sh` excludes marketplace-managed plugins and npx-installed skills from export, preventing duplication.
 
-- Location: `generate.sh`
-- Triggers: Manual execution after customizing AI tools
-- Responsibilities: Backup repo configs, copy from home directories, update repository
+### 7. Universal Skills Directory (`~/.agents/skills/`)
 
-**Windows PowerShell Installer:**
+All skills live in one universal location. Tool-specific directories are symlinks to it. This avoids duplication and ensures consistency across tools.
 
-- Location: `install.ps1`
-- Triggers: Windows users running `irm ... | iex`
-- Responsibilities: Windows-specific prerequisites, Git Bash dependency checks
+## Shell Script Conventions
 
-**Hook Entry Points:**
+- **Bash 3.0+** required (process substitution, arrays, `${var//pat/repl}`)
+- **Re-exec guard** (`require_bash.sh`) on every entry point before any bash-only syntax
+- **`set -e`** after the re-exec guard
+- **All variables quoted**: `"$variable"`
+- **`local`** for function-scoped variables
+- **Colors/logging**: `log_info`, `log_success`, `log_warning`, `log_error` to stderr
+- **No absolute paths** — use `$HOME`, relative paths
+- **POSIX compatibility** in helper functions that may be sourced from sh
 
-- Location: `configs/claude/hooks/index.ts`
-- Triggers: Claude Code tool use events (PreToolUse, PostToolUse)
-- Responsibilities: Transform prompts, auto-format code, web search transformation
+## Supported Tools (25+)
 
-## Error Handling
+| Tool             | Config Dir                            | CLI Binary          |
+| ---------------- | ------------------------------------- | ------------------- |
+| Claude Code      | `~/.claude/`                          | `claude`            |
+| OpenCode         | `~/.config/opencode/`                 | `opencode`          |
+| Amp              | `~/.config/amp/`                      | `amp`               |
+| CCS              | npm global                            | `ccs`               |
+| AI Launcher      | `~/.config/ai-launcher/`              | `ai`                |
+| Codex CLI        | `~/.codex/`                           | `codex`             |
+| Kimi Code        | `~/.kimi-code/`                       | `kimi`              |
+| Gemini CLI       | `~/.gemini/`                          | `gemini`            |
+| Antigravity CLI  | `~/.gemini/antigravity-cli/`          | `agy`               |
+| Kilo CLI         | `~/.config/kilo/`                     | `kilo`              |
+| Pi               | `~/.pi/agent/`                        | `pi`                |
+| Command Code     | `~/.commandcode/`                     | `cmd`               |
+| Copilot CLI      | `~/.copilot/`                         | `copilot`           |
+| Cursor           | `~/.cursor/`                          | `agent`             |
+| Conductor        | `~/.conductor/`                       | macOS app           |
+| Factory Droid    | `~/.factory/`                         | `droid`             |
+| Orca             | `~/Library/Application Support/orca/` | macOS app           |
+| Cline            | `~/.cline/`                           | `cline`             |
+| Grok CLI         | `~/.grok/`                            | `grok`              |
+| MiMo-Code        | `~/.config/mimocode/`                 | `mimo`              |
+| Open Code Review | npm global                            | `ocr`               |
+| herdr            | `~/.config/herdr/`                    | `herdr`             |
+| ctx              | `~/.ctx/`                             | `ctx`               |
+| Qoder CLI        | `~/.qoder/`                           | `qodercli`          |
+| Kiro CLI         | `~/.kiro/`                            | `kiro-cli` / `kiro` |
+| Codiff           | `~/.codiff/`                          | `codiff`            |
 
-**Strategy:** Fail-fast with informative messages and rollback capability
+## Dependency Graph
 
-**Patterns:**
+```
+install.sh
+  └─ git clone → cli.sh
+       ├─ lib/require_bash.sh
+       ├─ lib/common.sh
+       ├─ lib/install.sh
+       └─ configs/**/* (read)
+            └─ copies to ~/.claude/, ~/.config/opencode/, ...
 
-- `set -e` at script start for immediate exit on errors
-- `trap` for cleanup on script exit/interrupt
-- Transaction logging for rollback support (`--rollback` flag)
-- Color-coded log levels: `log_info`, `log_success`, `log_warning`, `log_error`
-- Validation before destructive operations (JSON validation, dry-run mode)
-
-## Cross-Cutting Concerns
-
-**Logging:**
-
-- Approach: Console output with color coding
-- Functions: `log_info()` (blue), `log_success()` (green), `log_warning()` (yellow), `log_error()` (red)
-- Verbose mode for detailed output
-
-**Validation:**
-
-- Approach: JSON schema validation, shellcheck for scripts
-- Tools: `jq .` for JSON validation, `shellcheck` for bash scripts
-- Pre-commit hooks enforce validation
-
-**Authentication:**
-
-- Approach: Not handled by this repo - delegated to AI tools
-- Users authenticate directly with AI service providers
-
----
-
-_Architecture analysis: 2026-04-22_
+generate.sh
+  ├─ lib/require_bash.sh
+  ├─ lib/common.sh
+  └─ reads from ~/.claude/, ~/.config/opencode/, ...
+       └─ writes to configs/**/*
+```

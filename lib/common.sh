@@ -535,8 +535,12 @@ run_installer() {
 				log_warning "$tool_name is already installed"
 			fi
 		else
-			eval "$install_cmd"
-			log_success "$tool_name installed"
+			if eval "$install_cmd"; then
+				log_success "$tool_name installed"
+			else
+				log_error "$tool_name installation failed"
+				return 1
+			fi
 		fi
 	}
 

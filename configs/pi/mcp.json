@@ -28,6 +28,10 @@
 		"sem": {
 			"command": "sem-mcp",
 			"args": []
+		},
+		"ctx": {
+			"command": "ctx",
+			"args": ["mcp", "serve"]
 		}
 	}
 }

@@ -271,6 +271,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.qoder" "$BACKUP_DIR" "qodercli"
 		copy_config_dir "$HOME/.kiro" "$BACKUP_DIR" "kiro"
 		copy_config_dir "$HOME/.codiff" "$BACKUP_DIR" "codiff"
+		copy_config_dir "$HOME/.ctx" "$BACKUP_DIR" "ctx"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -423,6 +424,7 @@ copy_configurations() {
 	copy_cursor_configs
 	copy_conductor_configs
 	copy_herdr_configs
+	copy_ctx_configs
 	copy_qodercli_configs
 	copy_kiro_configs
 	copy_codiff_configs
@@ -1323,6 +1325,22 @@ copy_herdr_configs() {
 	log_success "herdr configs copied"
 }
 
+copy_ctx_configs() {
+	local ctx_status
+	ctx_status=$(detect_tool --detailed "ctx" "$HOME/.ctx") || ctx_status="missing"
+	if [ "$ctx_status" = "missing" ]; then
+		log_info "ctx not detected - skipping ctx config installation"
+		return 0
+	fi
+
+	log_info "Detected ctx (via $ctx_status)"
+	execute_quoted mkdir -p "$HOME/.ctx"
+
+	copy_config_file "$SCRIPT_DIR/configs/ctx/config.toml" "$HOME/.ctx/" || true
+
+	log_success "ctx configs copied"
+}
+
 copy_qodercli_configs() {
 	local qodercli_status
 	qodercli_status=$(detect_tool --detailed "qodercli" "$HOME/.qoder") || qodercli_status="missing"
@@ -2142,6 +2160,7 @@ main() {
 	echo "║  Antigravity • Pi • Kilo • Copilot • Cursor • Command Code           ║"
 	echo "║  Factory Droid • Cline • Grok • MiMo-Code • herdr                    ║"
 	echo "║  Qoder CLI • Kiro • Codiff                                           ║"
+	echo "║  ctx                                                                 ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -2210,6 +2229,9 @@ main() {
 	install_herdr
 	echo
 
+	install_ctx
+	echo
+
 	install_qodercli
 	echo
 
@@ -2244,7 +2266,8 @@ main() {
 	echo
 	echo "Next steps:"
 	echo "  1. Restart your terminal"
-	echo "  2. Run 'claude' to start Claude Code (or 'kimi' for Kimi Code, 'agy' for Antigravity CLI, 'cmd' for Command Code, 'grok' for Grok CLI, 'mimo' for MiMo-Code)"
+	echo "  2. Run 'claude' to start Claude Code"
+	echo "     Other CLIs: 'kimi' (Kimi Code), 'agy' (Antigravity), 'cmd' (Command Code), 'grok', 'mimo', 'ctx'"
 	echo "  3. Enable plugins with 'claude plugin enable <plugin-name>'"
 	echo "  4. Check out the README.md for more information"
 	echo

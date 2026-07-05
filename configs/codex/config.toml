@@ -68,6 +68,11 @@ AGENTMEMORY_URL = "${AGENTMEMORY_URL:-http://localhost:3111}"
 AGENTMEMORY_SECRET = "${AGENTMEMORY_SECRET:-}"
 AGENTMEMORY_TOOLS = "${AGENTMEMORY_TOOLS:-all}"
 
+[mcp_servers.ctx]
+type = "stdio"
+command = "ctx"
+args = ["mcp", "serve"]
+
 [notice]
 fast_default_opt_out = true
 hide_rate_limit_model_nudge = true
@@ -181,4 +186,3 @@ enabled = true
 
 [plugins."template-creator@openai-primary-runtime"]
 enabled = true
-

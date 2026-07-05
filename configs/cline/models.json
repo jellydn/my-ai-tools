@@ -1,46 +1,22 @@
 {
-  "version": 1,
-  "providers": {
-    "firepass": {
-      "provider": {
-        "name": "Firework - Firepass",
-        "baseUrl": "https://api.fireworks.ai/inference/v1",
-        "defaultModelId": "accounts/fireworks/routers/kimi-k2p5-turbo",
-        "capabilities": [
-          "streaming",
-          "tools",
-          "vision"
-        ]
-      },
-      "models": {
-        "accounts/fireworks/routers/kimi-k2p5-turbo": {
-          "id": "accounts/fireworks/routers/kimi-k2p5-turbo",
-          "name": "accounts/fireworks/routers/kimi-k2p5-turbo",
-          "supportsVision": true,
-          "supportsAttachments": true,
-          "supportsReasoning": false
-        }
-      }
-    },
-    "openai-compatible": {
-      "provider": {
-        "name": "OpenAI Compatible",
-        "baseUrl": "http://127.0.0.1:8787/v1",
-        "defaultModelId": "composer-2.5"
-      },
-      "models": {
-        "composer-2.5": {
-          "id": "composer-2.5",
-          "name": "composer-2.5",
-          "contextWindow": 128000,
-          "maxInputTokens": 128000,
-          "capabilities": [
-            "streaming",
-            "tools",
-            "images"
-          ]
-        }
-      }
-    }
-  }
+	"version": 1,
+	"providers": {
+		"firepass": {
+			"provider": {
+				"name": "Firework - Firepass",
+				"baseUrl": "https://api.fireworks.ai/inference/v1",
+				"defaultModelId": "accounts/fireworks/routers/kimi-k2p5-turbo",
+				"capabilities": ["streaming", "tools", "vision"]
+			},
+			"models": {
+				"accounts/fireworks/routers/kimi-k2p5-turbo": {
+					"id": "accounts/fireworks/routers/kimi-k2p5-turbo",
+					"name": "accounts/fireworks/routers/kimi-k2p5-turbo",
+					"supportsVision": true,
+					"supportsAttachments": true,
+					"supportsReasoning": false
+				}
+			}
+		}
+	}
 }
