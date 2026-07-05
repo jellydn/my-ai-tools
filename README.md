@@ -1614,6 +1614,7 @@ Then register them in `~/.pi/agent/settings.json`:
 		"npm:pi-codex-goal",
 		"npm:pi-dynamic-workflows",
 		"npm:pi-commandcode-provider",
+		"npm:@futurelab-studio/telepi",
 		"npm:pi-footer",
 		"npm:pi-tps-meter",
 		"npm:@juicesharp/rpiv-advisor",
@@ -1647,7 +1648,7 @@ Then register them in `~/.pi/agent/settings.json`:
 | `@juicesharp/rpiv-advisor`           | Second opinion from a stronger reviewer model before taking action |
 | `pi-cursor-sdk`                      | Pi provider extension backed by @cursor/sdk local agents           |
 | `pi-clinepass-provider`              | ClinePass model provider for Pi                                    |
-| `@juicesharp/rpiv-ask-user-question` | Structured question-asking tool for user clarification             |
+| `@futurelab-studio/telepi`          | Telegram bot interface for Pi — remote control from your phone       |
 | `@yofriadi/pi-antigravity-oauth`     | Antigravity OAuth authentication for Pi; see the caveat below      |
 
 > **Antigravity OAuth caveat:** If you're experimenting with Pi, there's an OAuth plugin available for Antigravity. Be aware that Google currently states that using third-party software with Antigravity OAuth may violate its Terms of Service and could result in account restrictions. For the lowest-risk setup, prefer an official API key from AI Studio or Vertex AI when Pi supports it, and avoid OAuth plugins that reuse an Antigravity login in third-party clients unless Google changes its policy.
@@ -1687,6 +1688,31 @@ pi
 # Run a task non-interactively
 pi "Refactor this function to be more readable"
 ```
+
+### TelePi — Telegram Bot for Pi
+
+[TelePi](https://github.com/futurelab-studio/telepi) lets you control your Pi agent remotely from Telegram — check session status, run commands, and receive notifications on your phone.
+
+**Prerequisites:**
+
+- Node.js 20+
+- A Telegram bot token from [@BotFather](https://t.me/BotFather)
+- Your numeric Telegram user ID for the allowlist
+- Pi installed and authenticated locally (`~/.pi/agent/auth.json` exists after a working Pi login)
+
+**Setup:**
+
+```bash
+npm install -g @futurelab-studio/telepi
+telepi setup
+telepi status
+```
+
+`telepi setup` asks for your bot token, allowed Telegram user IDs, and default workspace. It installs the local service for your platform and the Pi `/handoff` extension.
+
+**Verification:**
+
+Open Telegram and send `/start` to your bot. You should see your workspace/session status and voice backend status.
 
 </details>
 
