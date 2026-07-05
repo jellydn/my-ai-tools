@@ -95,6 +95,13 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
+@test "configs/pi/settings.json packages contains telepi" {
+    require_jq
+    run jq -e '[.packages[] | select(type == "string" and . == "npm:@futurelab-studio/telepi")] | length > 0' "$PI_SETTINGS"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
 @test "configs/pi/settings.json packages no longer contains pi-xai-oauth" {
     require_jq
     run jq -e '[.packages[] | select(type == "string" and . == "npm:pi-xai-oauth")] | length == 0' "$PI_SETTINGS"

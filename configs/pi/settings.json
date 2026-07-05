@@ -31,6 +31,7 @@
 		"npm:pi-codex-goal",
 		"npm:pi-dynamic-workflows",
 		"npm:pi-commandcode-provider",
+		"npm:@futurelab-studio/telepi",
 		"npm:pi-footer",
 		"npm:pi-tps-meter",
 		"npm:@juicesharp/rpiv-advisor",

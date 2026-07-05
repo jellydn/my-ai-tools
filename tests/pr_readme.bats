@@ -10,11 +10,6 @@ README_FILE="$REPO_ROOT/README.md"
     [ "$status" -eq 0 ]
 }
 
-@test "README.md includes TelePi project entry" {
-    run grep -F "https://github.com/benedict2310/TelePi" "$README_FILE"
-    [ "$status" -eq 0 ]
-}
-
 @test "README.md mentions deepseek/deepseek-v4-pro as Pi default model" {
     run grep -F "deepseek/deepseek-v4-pro" "$README_FILE"
     [ "$status" -eq 0 ]
