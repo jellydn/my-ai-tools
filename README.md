@@ -1648,7 +1648,9 @@ Then register them in `~/.pi/agent/settings.json`:
 | `pi-cursor-sdk`                      | Pi provider extension backed by @cursor/sdk local agents           |
 | `pi-clinepass-provider`              | ClinePass model provider for Pi                                    |
 | `@juicesharp/rpiv-ask-user-question` | Structured question-asking tool for user clarification             |
-| `@yofriadi/pi-antigravity-oauth`     | Antigravity OAuth authentication for Pi                            |
+| `@yofriadi/pi-antigravity-oauth`     | Antigravity OAuth authentication for Pi; see the caveat below      |
+
+> **Antigravity OAuth caveat:** If you're experimenting with Pi, there's an OAuth plugin available for Antigravity. Be aware that Google currently states that using third-party software with Antigravity OAuth may violate its Terms of Service and could result in account restrictions. For the lowest-risk setup, prefer an official API key from AI Studio or Vertex AI when Pi supports it, and avoid OAuth plugins that reuse an Antigravity login in third-party clients unless Google changes its policy.
 
 ### Enabled Models
 
@@ -1664,7 +1666,7 @@ Pi is configured with multi-provider model access (`settings.json` `enabledModel
 
 ### Pi Antigravity Rotator
 
-For multi-account rotation, local model routing, and quota management across Google Antigravity accounts, use [pi-antigravity-rotator](https://github.com/tuxevil/pi-antigravity-rotator).
+For multi-account rotation, local model routing, and quota management across Google Antigravity accounts, [pi-antigravity-rotator](https://github.com/tuxevil/pi-antigravity-rotator) is available, but it may carry the same Antigravity OAuth third-party access risk described above.
 
 It runs as a local proxy on port `51200` and supports per-model routing, real-time quota tracking, and automatic token management.
 
