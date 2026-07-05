@@ -675,6 +675,7 @@ Real-world projects built using these AI tools:
 | - [tiny-cloak.nvim](https://github.com/jellydn/tiny-cloak.nvim)     | Neovim plugin that masks sensitive data in `.env` files                         | Lua + Neovim                                |
 | - [tiny-term.nvim](https://github.com/jellydn/tiny-term.nvim)       | Minimal terminal plugin for Neovim 0.11+                                        | Lua + Neovim                                |
 | - [Sky Alert](https://github.com/jellydn/sky-alert)                 | Real-time flight monitoring Telegram bot                                        | OpenCode + GLM 4.7 + Amp + Codex CLI        |
+| - [TelePi](https://github.com/benedict2310/TelePi)                  | Telegram bridge for the Pi coding agent — continue sessions from your phone     | Pi + Telegram                                |
 | - [Docklight](https://github.com/jellydn/docklight)                 | Minimal, self-hosted web UI for managing a single-node Dokku server             | Ralph + OpenCode                            |
 | - [Little Writing](https://github.com/jellydn/little-writing)       | A handwriting tracing app for kids built with React, react-konva, and Capacitor | Claude + spec-kit + GLM 5                   |
 | - [Zed Codemux](https://github.com/jellydn/zed-codemux)             | Open Zed terminals inside tmux or zellij — port of vscode-mux to the Zed editor | Ralph                                       |
