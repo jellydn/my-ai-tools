@@ -126,3 +126,19 @@ Read `@~/.ai-tools/agent-memory.md` and `@~/.ai-tools/MEMORY.md` for the full de
 - Prefer `git add <specific-files>` over `git add -A`
 - Never force push, rewrite history, or run destructive resets without explicit approval
 - See `configs/git-guidelines.md` for full rules
+
+## Cursor Cloud specific instructions
+
+This is a Bash CLI tool, not a long-running server — there is nothing to keep running. You verify it by invoking commands and checking exit codes / file output. The Linux VM already has `bash`, `git`, `jq`, `node`, `bun`, and `bats` provisioned (bun is on PATH via `~/.bashrc`; the update script refreshes `configs/claude/hooks` deps).
+
+- **Ignore the microsandbox (`msb`) guidance above** on the cloud VM — it only exists to dodge macOS `getcwd`/directory issues. Run `bats tests/` directly.
+- **Tests / lint / typecheck** — see the `## Testing` section above for the canonical commands (`bash -n cli.sh generate.sh`, `bats tests/`, `biome check .` via `npx @biomejs/biome`, and `bun run typecheck` in `configs/claude/hooks`).
+  - `biome check .` and the hooks `typecheck` report pre-existing formatting/`tsconfig` deviations (the tsconfig omits node/dom lib types); these are repo-state issues, not environment failures. The toolchains themselves run fine.
+- **Running the app safely** — `./cli.sh` / `./generate.sh` mutate `$HOME`. In a non-TTY/CI shell `cli.sh` auto-enables `--yes`, which tries to network-install ~20 external CLIs (many will fail/hang without network) *before* the core config copy at the very end. To exercise the core config-sync deterministically without that noise, source the script and call its copy functions against a throwaway `HOME`, exactly like the bats tests do:
+  ```bash
+  H=$(mktemp -d); mkdir -p "$H/.cursor" "$H/.config/opencode" "$H/.codex"
+  ( export HOME="$H" DRY_RUN=false YES_TO_ALL=false; source ./cli.sh; copy_configurations )
+  find "$H" -type f   # verify configs landed in the sandbox home
+  ```
+  `copy_claude_configs` always runs; other tools only copy when detected (their CLI is on PATH or their config dir exists — hence pre-creating dirs above). Do NOT run the copy functions with `set -u`; `lib/common.sh` references optional vars like `MSYSTEM`.
+- Use `./cli.sh --dry-run` for a full, side-effect-free preview of the install plan.
