@@ -716,18 +716,48 @@ install_ccs() {
 install_ai_switcher() {
 	_run_ai_switcher_install() {
 		if command -v ai &>/dev/null; then
-			log_warning "AI Launcher is already installed"
-		else
-			execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "AI Launcher"
-			log_success "AI Launcher installed"
+			log_info "Upgrading AI Launcher from existing installation..."
 		fi
+		execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "AI Launcher"
+		log_success "AI Launcher installed/upgraded"
 	}
-	run_installer "AI Launcher" "_run_ai_switcher_install" "command -v ai" "ai --version"
+	run_installer "AI Launcher" "_run_ai_switcher_install" "false" "ai --version"
 }
 
 install_codex() {
 	install_npm_tool "OpenAI Codex CLI" "codex" "@openai/codex" \
 		"npm install -g @openai/codex"
+}
+
+install_kimi_code() {
+	_run_kimi_code_install() {
+		if command -v kimi &>/dev/null; then
+			log_warning "Kimi Code CLI is already installed"
+			return 0
+		fi
+
+		if [ "$IS_WINDOWS" = true ]; then
+			if command -v powershell.exe &>/dev/null; then
+				log_warning "WARNING: This will download and execute PowerShell code from code.kimi.com with ExecutionPolicy Bypass. Review the installer script before proceeding in security-sensitive environments."
+				if [ "$YES_TO_ALL" = false ] && [ -t 0 ]; then
+					if ! prompt_yn "Run Kimi Code official PowerShell installer from code.kimi.com"; then
+						log_warning "Skipping Kimi Code CLI installation"
+						return 0
+					fi
+				fi
+				execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://code.kimi.com/kimi-code/install.ps1 | iex\""
+			else
+				log_error "PowerShell is required to install Kimi Code CLI on Windows."
+				log_info "Install manually: https://www.kimi.com/code/en"
+				return 1
+			fi
+		else
+			execute_installer "https://code.kimi.com/kimi-code/install.sh" "" "Kimi Code CLI"
+		fi
+
+		log_success "Kimi Code CLI installed"
+	}
+	run_installer "Kimi Code CLI" "_run_kimi_code_install" "command -v kimi" "kimi --version 2>/dev/null || true"
 }
 
 install_gemini() {
@@ -961,6 +991,30 @@ install_herdr() {
 	run_installer "herdr" "_run_herdr_install" "command -v herdr" "herdr --version 2>/dev/null || true"
 }
 
+# ─── ctx installation ──────────────────────────────────────────────
+
+install_ctx() {
+	_run_ctx_install() {
+		if command -v ctx &>/dev/null; then
+			log_warning "ctx is already installed"
+			return 0
+		fi
+
+		if [ "$IS_WINDOWS" = true ]; then
+			if command -v powershell.exe &>/dev/null; then
+				execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://ctx.rs/install.ps1 | iex\""
+			else
+				log_error "PowerShell is required to install ctx on Windows."
+				log_info "Install manually: https://github.com/ctxrs/ctx"
+				return 1
+			fi
+		else
+			execute_installer "https://ctx.rs/install" "" "ctx"
+		fi
+	}
+	run_installer "ctx" "_run_ctx_install" "command -v ctx" "ctx --version 2>/dev/null || true"
+}
+
 # ─── qodercli installation ────────────────────────────────────────────
 
 install_qodercli() {
@@ -1012,4 +1066,37 @@ install_kiro() {
 		fi
 	}
 	run_installer "Kiro CLI" "_run_kiro_install" "command -v kiro-cli || command -v kiro" "kiro-cli --version 2>/dev/null || true"
+}
+
+# ─── codiff installation ──────────────────────────────────────────
+
+install_codiff() {
+	_run_codiff_install() {
+		if command -v codiff &>/dev/null; then
+			log_warning "Codiff is already installed"
+			return 0
+		fi
+
+		if [ "$IS_LINUX" = true ]; then
+			log_info "Codiff: download from https://github.com/nkzw-tech/codiff/releases"
+			log_info "Install manually, or on macOS: brew install --cask nkzw-tech/tap/codiff"
+			return 1
+		fi
+
+		# macOS: Homebrew cask
+		if ! command -v brew &>/dev/null; then
+			log_error "Homebrew is required to install Codiff on macOS."
+			log_info "Install Homebrew first: https://brew.sh"
+			return 1
+		fi
+
+		# Tap and install
+		if ! brew tap nkzw-tech/tap &>/dev/null; then
+			log_error "Failed to tap nkzw-tech/tap"
+			return 1
+		fi
+
+		execute "brew install --cask nkzw-tech/tap/codiff"
+	}
+	run_installer "Codiff" "_run_codiff_install" "command -v codiff" "codiff --version 2>/dev/null || true"
 }

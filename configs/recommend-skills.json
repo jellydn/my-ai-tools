@@ -53,6 +53,11 @@
 			"description": "Track project specs and facts in a .facts file with lifecycle stages (draft, spec, implemented) and shell-command verification"
 		},
 		{
+			"repo": "privatenumber/mac-ocr",
+			"skill": "mac-ocr",
+			"description": "macOS CLI for OCR and searchable PDFs using Apple's Vision framework"
+		},
+		{
 			"repo": "GoogleChrome/modern-web-guidance",
 			"skill": "modern-web-guidance",
 			"description": "Search tool for modern web development best practices"
@@ -66,6 +71,10 @@
 			"repo": "Gentleman-Programming/engram",
 			"skill": "engram-memory",
 			"description": "Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, git-based sync"
+		},
+		{
+			"repo": "ctxrs/ctx",
+			"description": "Install the ctx agent-history search skill — gives agents the ability to search past coding sessions before editing"
 		}
 	]
 }

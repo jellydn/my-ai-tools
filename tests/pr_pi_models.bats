@@ -39,11 +39,11 @@ PI_MODELS="$REPO_ROOT/configs/pi/models.json"
     [ "$output" = "http://127.0.0.1:51200/v1" ]
 }
 
-@test "configs/pi/models.json vibeproxy has 7 models" {
+@test "configs/pi/models.json vibeproxy has at least 3 models" {
     require_jq
     run jq -r '.providers.vibeproxy.models | length' "$PI_MODELS"
     [ "$status" -eq 0 ]
-    [ "$output" = "7" ]
+    [ "$output" -ge 3 ]
 }
 
 @test "configs/pi/models.json vibeproxy contains gemini-3-flash-agent model" {

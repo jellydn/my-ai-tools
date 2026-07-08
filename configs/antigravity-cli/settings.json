@@ -73,7 +73,6 @@
 			"unsandboxed(bash)",
 			"unsandboxed(helm)",
 			"unsandboxed(mktemp)",
-			"unsandboxed(cat)",
 			"unsandboxed(chmod)",
 			"unsandboxed(yarn)",
 			"unsandboxed(curl)",
@@ -88,7 +87,6 @@
 			"unsandboxed(command)",
 			"unsandboxed(open)",
 			"unsandboxed(bat)",
-			"unsandboxed(cat)",
 			"unsandboxed(~/\\.bun/bin/qmd)",
 			"unsandboxed(plannotator)",
 			"unsandboxed(rg)",
@@ -120,31 +118,13 @@
 			"unsandboxed(kubectl kustomize)",
 			"unsandboxed(jq)",
 			"unsandboxed(kubectl patch)",
-			"unsandboxed(git checkout)",
-			"unsandboxed(qmd)",
-			"unsandboxed(docker --version)",
-			"unsandboxed(~/.bun/bin/qmd)",
-			"unsandboxed(~/.gemini/skills/qmd-knowledge/scripts/record.sh)",
-			"command(bun --version)",
-			"unsandboxed(just test)",
-			"unsandboxed(just e2e)",
-			"command(git --no-pager diff main --stat)",
-			"command(git merge-base)",
-			"command(git rev-parse)",
-			"command(~/.gemini/skills/autoreview/scripts/autoreview)",
-			"unsandboxed(~/.gemini/skills/autoreview/scripts/autoreview)",
-			"command(just validate)",
-			"command(cargo test --lib drives)",
-			"unsandboxed(cargo test --lib drives)",
-			"unsandboxed(cargo clippy -- -D warnings)",
-			"unsandboxed(cargo test)",
-			"unsandboxed(cargo clippy --all-targets -- -D warnings)",
-			"unsandboxed(cargo fmt --check)",
-			"unsandboxed(cargo fmt)",
-			"unsandboxed(just check)",
-			"unsandboxed(diskutil)"
+			"unsandboxed(git checkout)"
 		],
-		"deny": ["command(git reset --hard)", "command(git push --force)", "command(rm -rf)"]
+		"deny": [
+			"command(git reset --hard)",
+			"command(git push --force)",
+			"command(rm -rf)"
+		]
 	},
 	"runningLightSpeed": "off",
 	"showFeedbackSurvey": false,
@@ -154,6 +134,5 @@
 		"command": "bash ~/.gemini/antigravity-cli/statusline.sh",
 		"enabled": true
 	},
-	"toolPermission": "proceed-in-sandbox",
-	"trustedWorkspaces": []
+	"toolPermission": "proceed-in-sandbox"
 }

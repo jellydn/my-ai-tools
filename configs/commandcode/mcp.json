@@ -1,78 +1,84 @@
 {
-  "mcpServers": {
-    "context7": {
-      "transport": "stdio",
-      "enabled": true,
-      "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp@latest"
-      ]
-    },
-    "sequential-thinking": {
-      "transport": "stdio",
-      "enabled": true,
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
-    },
-    "qmd": {
-      "transport": "stdio",
-      "enabled": true,
-      "command": "qmd",
-      "args": [
-        "mcp"
-      ]
-    },
-    "fff": {
-      "transport": "stdio",
-      "enabled": true,
-      "command": "fff-mcp",
-      "args": []
-    },
-    "react-grab-mcp": {
-      "transport": "stdio",
-      "enabled": true,
-      "command": "npx",
-      "args": [
-        "-y",
-        "@react-grab/mcp",
-        "--stdio"
-      ]
-    },
-    "logpilot": {
-      "transport": "stdio",
-      "enabled": true,
-      "command": "logpilot",
-      "args": [
-        "mcp-server"
-      ]
-    },
-    "agentmemory": {
-      "transport": "stdio",
-      "enabled": true,
-      "command": "npx",
-      "args": [
-        "-y",
-        "@agentmemory/mcp"
-      ]
-    },
-    "sem": {
-      "transport": "stdio",
-      "enabled": true,
-      "command": "sem-mcp",
-      "args": []
-    },
-    "ctx": {
-      "transport": "stdio",
-      "enabled": true,
-      "command": "ctx",
-      "args": [
-        "mcp",
-        "serve"
-      ]
-    }
-  }
+	"mcpServers": {
+		"context7": {
+			"transport": "stdio",
+			"enabled": true,
+			"command": "npx",
+			"args": [
+				"-y",
+				"@upstash/context7-mcp@latest"
+			]
+		},
+		"sequential-thinking": {
+			"transport": "stdio",
+			"enabled": true,
+			"command": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-sequential-thinking"
+			]
+		},
+		"qmd": {
+			"transport": "stdio",
+			"enabled": true,
+			"command": "qmd",
+			"args": [
+				"mcp"
+			]
+		},
+		"fff": {
+			"transport": "stdio",
+			"enabled": true,
+			"command": "fff-mcp",
+			"args": []
+		},
+		"react-grab-mcp": {
+			"transport": "stdio",
+			"enabled": true,
+			"command": "npx",
+			"args": [
+				"-y",
+				"@react-grab/mcp",
+				"--stdio"
+			]
+		},
+		"logpilot": {
+			"transport": "stdio",
+			"enabled": true,
+			"command": "logpilot",
+			"args": [
+				"mcp-server"
+			]
+		},
+		"agentmemory": {
+			"transport": "stdio",
+			"enabled": true,
+			"command": "npx",
+			"args": [
+				"-y",
+				"@agentmemory/mcp"
+			]
+		},
+		"sem": {
+			"transport": "stdio",
+			"enabled": true,
+			"command": "sem-mcp",
+			"args": []
+		},
+		"ctx": {
+			"transport": "stdio",
+			"enabled": true,
+			"command": "ctx",
+			"args": [
+				"mcp",
+				"serve"
+			]
+		},
+		"codebase-memory-mcp": {
+			"transport": "stdio",
+			"enabled": true,
+			"command": "~/.local/bin/codebase-memory-mcp",
+			"args": []
+		}
+	}
 }

@@ -2,7 +2,7 @@
 
 # Re-exec under bash if invoked via sh/dash. lib/require_bash.sh is POSIX-compatible
 # so sh can source it and trigger the re-exec before lib/common.sh is reached.
-source "$(dirname "${BASH_SOURCE[0]}")/lib/require_bash.sh"
+. "$(dirname "${BASH_SOURCE:-$0}")/lib/require_bash.sh"
 
 set -e
 
@@ -11,64 +11,64 @@ source "$SCRIPT_DIR/lib/common.sh"
 source "$SCRIPT_DIR/lib/install.sh"
 # Parse command-line arguments first (only when executed, not sourced)
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-BACKUP_DIR="$HOME/ai-tools-backup-$(date +%Y%m%d-%H%M%S)"
-DRY_RUN=false
-BACKUP=false
-PROMPT_BACKUP=true
-YES_TO_ALL=false
-VERBOSE=false
+	BACKUP_DIR="$HOME/ai-tools-backup-$(date +%Y%m%d-%H%M%S)"
+	DRY_RUN=false
+	BACKUP=false
+	PROMPT_BACKUP=true
+	YES_TO_ALL=false
+	VERBOSE=false
 
-# Track whether Amp is installed (for backlog.md dependency)
-AMP_INSTALLED=false
-# Track whether --migrate-gemini flag was passed (standalone Gemini→Antigravity migration)
-MIGRATE_GEMINI=false
-for arg in "$@"; do
-	case $arg in
-	--dry-run)
-		DRY_RUN=true
-		shift
-		;;
-	--backup)
-		BACKUP=true
-		PROMPT_BACKUP=false
-		shift
-		;;
-	--no-backup)
-		BACKUP=false
-		PROMPT_BACKUP=false
-		shift
-		;;
-	--yes | -y)
+	# Track whether Amp is installed (for backlog.md dependency)
+	AMP_INSTALLED=false
+	# Track whether --migrate-gemini flag was passed (standalone Gemini→Antigravity migration)
+	MIGRATE_GEMINI=false
+	for arg in "$@"; do
+		case $arg in
+		--dry-run)
+			DRY_RUN=true
+			shift
+			;;
+		--backup)
+			BACKUP=true
+			PROMPT_BACKUP=false
+			shift
+			;;
+		--no-backup)
+			BACKUP=false
+			PROMPT_BACKUP=false
+			shift
+			;;
+		--yes | -y)
+			YES_TO_ALL=true
+			shift
+			;;
+		-v | --verbose)
+			VERBOSE=true
+			shift
+			;;
+		--migrate-gemini)
+			MIGRATE_GEMINI=true
+			shift
+			;;
+		--rollback)
+			log_info "Rolling back last transaction..."
+			rollback_transaction
+			exit $?
+			;;
+		*)
+			echo "Unknown option: $arg"
+			echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback]"
+			exit 1
+			;;
+		esac
+	done
+
+	# Auto-detect non-interactive mode AFTER parsing arguments
+	# This ensures DRY_RUN and other flags are set before any functions use them
+	if is_non_interactive; then
 		YES_TO_ALL=true
-		shift
-		;;
-	-v | --verbose)
-		VERBOSE=true
-		shift
-		;;
-	--migrate-gemini)
-		MIGRATE_GEMINI=true
-		shift
-		;;
-	--rollback)
-		log_info "Rolling back last transaction..."
-		rollback_transaction
-		exit $?
-		;;
-	*)
-		echo "Unknown option: $arg"
-		echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback]"
-		exit 1
-		;;
-	esac
-done
-
-# Auto-detect non-interactive mode AFTER parsing arguments
-# This ensures DRY_RUN and other flags are set before any functions use them
-if is_non_interactive; then
-	YES_TO_ALL=true
-	log_info "Non-interactive mode detected (CI or piped input)"
-fi
+		log_info "Non-interactive mode detected (CI or piped input)"
+	fi
 
 fi
 
@@ -174,7 +174,6 @@ check_prerequisites() {
 	handle_qmd_installation_if_needed
 }
 
-
 # Helper: Copy a config directory if it exists in source and destination
 # Usage: copy_config_dir "source_dir" "dest_parent" "dest_name"
 copy_config_dir() {
@@ -257,6 +256,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/opencode" "$BACKUP_DIR" "opencode"
 		copy_config_dir "$HOME/.config/amp" "$BACKUP_DIR" "amp"
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
+		copy_config_dir "$HOME/.kimi-code" "$BACKUP_DIR" "kimi-code"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
 		copy_config_dir "$HOME/.config/kilo" "$BACKUP_DIR" "kilo"
 		copy_config_dir "$HOME/.pi" "$BACKUP_DIR" "pi"
@@ -270,6 +270,8 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/mimocode" "$BACKUP_DIR" "mimocode"
 		copy_config_dir "$HOME/.qoder" "$BACKUP_DIR" "qodercli"
 		copy_config_dir "$HOME/.kiro" "$BACKUP_DIR" "kiro"
+		copy_config_dir "$HOME/.codiff" "$BACKUP_DIR" "codiff"
+		copy_config_dir "$HOME/.ctx" "$BACKUP_DIR" "ctx"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -412,6 +414,7 @@ copy_configurations() {
 	copy_amp_configs
 	copy_ai_launcher_configs
 	copy_codex_configs
+	copy_kimi_code_configs
 	copy_gemini_configs
 	copy_antigravity_configs
 	copy_kilo_configs
@@ -421,8 +424,10 @@ copy_configurations() {
 	copy_cursor_configs
 	copy_conductor_configs
 	copy_herdr_configs
+	copy_ctx_configs
 	copy_qodercli_configs
 	copy_kiro_configs
+	copy_codiff_configs
 	copy_factory_configs
 	copy_orca_configs
 	copy_cline_configs
@@ -461,9 +466,12 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/gemini/settings.json" \
 		"$SCRIPT_DIR/configs/antigravity-cli/settings.json" \
 		"$SCRIPT_DIR/configs/kilo/config.json" \
+		"$SCRIPT_DIR/configs/kimi-code/mcp.json" \
 		"$SCRIPT_DIR/configs/pi/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/mcp.json" \
+		"$SCRIPT_DIR/configs/cline/mcp-settings.json" \
+		"$SCRIPT_DIR/configs/cline/models.json" \
 		"$SCRIPT_DIR/configs/factory/settings.json"; do
 		if [ -f "$config_file" ] && ! validate_config "$config_file"; then
 			log_error "Config validation failed: $config_file"
@@ -898,6 +906,29 @@ copy_codex_configs() {
 	log_success "Codex CLI configs copied"
 }
 
+copy_kimi_code_configs() {
+	local kimi_status
+	kimi_status=$(detect_tool --detailed "kimi" "$HOME/.kimi-code") || kimi_status="missing"
+	if [ "$kimi_status" = "missing" ]; then
+		log_info "Kimi Code CLI not detected - skipping Kimi Code config installation"
+		return 0
+	fi
+
+	log_info "Detected Kimi Code CLI (via $kimi_status)"
+	execute_quoted mkdir -p "$HOME/.kimi-code"
+
+	copy_config_file "$SCRIPT_DIR/configs/kimi-code/AGENTS.md" "$HOME/.kimi-code/" || true
+	copy_config_file "$SCRIPT_DIR/configs/kimi-code/config.toml" "$HOME/.kimi-code/" || true
+	copy_config_file "$SCRIPT_DIR/configs/kimi-code/mcp.json" "$HOME/.kimi-code/" || true
+
+	if [ -d "$SCRIPT_DIR/configs/kimi-code/skills" ]; then
+		execute_quoted mkdir -p "$HOME/.kimi-code/skills"
+		safe_copy_dir "$SCRIPT_DIR/configs/kimi-code/skills" "$HOME/.kimi-code/skills"
+	fi
+
+	log_success "Kimi Code CLI configs copied"
+}
+
 copy_gemini_configs() {
 	local gemini_status
 	gemini_status=$(detect_tool --detailed "gemini" "$HOME/.gemini") || gemini_status="missing"
@@ -1079,11 +1110,11 @@ normalize_antigravity_mcp_configs() {
 		# POSIX: use temp file instead of process substitution
 		local _mcp_list
 		_mcp_list=$(make_temp_file "antigravity-mcp" "list")
-		find "$antigravity_home/plugins" -mindepth 2 -maxdepth 2 -name mcp_config.json -type f 2>/dev/null > "$_mcp_list"
-	while IFS= read -r config_file; do
-		config_files+=("$config_file")
-	done < "$_mcp_list"
-	rm -f "$_mcp_list"
+		find "$antigravity_home/plugins" -mindepth 2 -maxdepth 2 -name mcp_config.json -type f 2>/dev/null >"$_mcp_list"
+		while IFS= read -r config_file; do
+			config_files+=("$config_file")
+		done <"$_mcp_list"
+		rm -f "$_mcp_list"
 	fi
 
 	for config_file in "${config_files[@]}"; do
@@ -1294,6 +1325,22 @@ copy_herdr_configs() {
 	log_success "herdr configs copied"
 }
 
+copy_ctx_configs() {
+	local ctx_status
+	ctx_status=$(detect_tool --detailed "ctx" "$HOME/.ctx") || ctx_status="missing"
+	if [ "$ctx_status" = "missing" ]; then
+		log_info "ctx not detected - skipping ctx config installation"
+		return 0
+	fi
+
+	log_info "Detected ctx (via $ctx_status)"
+	execute_quoted mkdir -p "$HOME/.ctx"
+
+	copy_config_file "$SCRIPT_DIR/configs/ctx/config.toml" "$HOME/.ctx/" || true
+
+	log_success "ctx configs copied"
+}
+
 copy_qodercli_configs() {
 	local qodercli_status
 	qodercli_status=$(detect_tool --detailed "qodercli" "$HOME/.qoder") || qodercli_status="missing"
@@ -1355,8 +1402,8 @@ copy_kiro_configs() {
 			log_info "Merging Kiro MCP servers into existing config..."
 			local merged_file
 			merged_file=$(make_temp_file "kiro-mcp" "json")
-		if jq -s '.[0] as $dest | .[1] as $src | ($dest // {}) * ($src // {}) | .mcpServers = (($dest.mcpServers // {}) + ($src.mcpServers // {}))' \
-			"$dest_mcp" "$src_mcp" >"$merged_file" 2>/dev/null; then
+			if jq -s '.[0] as $dest | .[1] as $src | ($dest // {}) * ($src // {}) | .mcpServers = (($dest.mcpServers // {}) + ($src.mcpServers // {}))' \
+				"$dest_mcp" "$src_mcp" >"$merged_file" 2>/dev/null; then
 				execute_quoted cp -p "$merged_file" "$dest_mcp"
 				log_success "Kiro MCP servers merged"
 			else
@@ -1370,6 +1417,21 @@ copy_kiro_configs() {
 	fi
 
 	log_success "Kiro CLI configs copied"
+}
+
+copy_codiff_configs() {
+	log_info "Copying Codiff configs..."
+	execute_quoted mkdir -p "$HOME/.codiff"
+
+	if [ -f "$SCRIPT_DIR/configs/codiff/codiff.jsonc" ]; then
+		if [ -f "$HOME/.codiff/codiff.jsonc" ]; then
+			log_info "Backing up existing Codiff config and replacing..."
+		fi
+		copy_config_file "$SCRIPT_DIR/configs/codiff/codiff.jsonc" "$HOME/.codiff/" || true
+		log_success "Codiff config copied"
+	fi
+
+	log_success "Codiff configs copied"
 }
 
 copy_factory_configs() {
@@ -1446,17 +1508,40 @@ copy_cline_configs() {
 		log_success "Cline kanban config copied"
 	fi
 
-	# Copy Cline-specific skills directly to ~/.cline/skills
+	# Install global agent instructions (AGENTS.md)
+	# Cline reads global rules from ~/.cline/rules/ and ~/.agents/AGENTS.md
+	if [ -f "$SCRIPT_DIR/configs/cline/AGENTS.md" ]; then
+		execute_quoted mkdir -p "$HOME/.cline/rules"
+		execute_quoted cp "$SCRIPT_DIR/configs/cline/AGENTS.md" "$HOME/.cline/rules/01-guidelines.md"
+		log_success "Cline global rules copied to ~/.cline/rules/"
+
+		# Also publish to the cross-tool global location (~/.agents/AGENTS.md)
+		# Cline reads this via resolveGlobalAgentsRulesPath(); shared with other AGENTS.md tools
+		execute_quoted mkdir -p "$HOME/.agents"
+		execute_quoted cp "$SCRIPT_DIR/configs/cline/AGENTS.md" "$HOME/.agents/AGENTS.md"
+		log_success "Cline global AGENTS.md copied to ~/.agents/AGENTS.md"
+	fi
+
+	# Copy Cline-specific skills (complement the universal ~/.agents/skills/ directory)
+	# These skills are Cline-tailored variants and are discovered via ~/.cline/skills/ search path
 	if [ -d "$SCRIPT_DIR/configs/cline/skills" ]; then
 		execute_quoted mkdir -p "$HOME/.cline/skills"
 		for skill_dir in "$SCRIPT_DIR/configs/cline/skills"/*; do
 			if [ -d "$skill_dir" ]; then
 				local skill_name
 				skill_name=$(basename "$skill_dir")
+				rm -rf "$HOME/.cline/skills/$skill_name"
 				safe_copy_dir "$skill_dir" "$HOME/.cline/skills/$skill_name"
 			fi
 		done
 		log_success "Cline-specific skills copied"
+	fi
+
+	# Copy hooks (SDK plugin files and shell hooks)
+	if [ -d "$SCRIPT_DIR/configs/cline/hooks" ]; then
+		execute_quoted mkdir -p "$HOME/.cline/hooks"
+		safe_copy_dir "$SCRIPT_DIR/configs/cline/hooks" "$HOME/.cline/hooks"
+		log_success "Cline hooks copied"
 	fi
 
 	log_success "Cline configs copied"
@@ -1953,7 +2038,7 @@ install_local_skills() {
 	done
 
 	log_success "Skills installed to universal directory: $UNIVERSAL_SKILLS_DIR"
-	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Gemini, Antigravity, Cursor, Pi, Command Code, Grok, MiMo-Code, and more"
+	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Kimi Code, Gemini, Antigravity, Cursor, Pi, Command Code, Grok, MiMo-Code, Cline, and more"
 
 	# Create symlinks from tool-specific directories to universal directory
 	create_tool_skills_symlinks "$UNIVERSAL_SKILLS_DIR"
@@ -1972,8 +2057,10 @@ create_tool_skills_symlinks() {
 		"$HOME/.cursor/skills"
 		"$HOME/.config/amp/skills"
 		"$HOME/.codex/skills"
+		"$HOME/.kimi-code/skills"
 		"$HOME/.commandcode/skills"
 		"$HOME/.config/mimocode/skills"
+		"$HOME/.cline/skills"
 	)
 
 	for tool_dir in "${tool_dirs[@]}"; do
@@ -2069,9 +2156,11 @@ main() {
 
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
-	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Antigravity         ║"
-	echo "║  Pi • Kilo • Copilot • Cursor • Factory Droid • Cline • Command Code  ║"
-	echo "║  Grok • MiMo-Code • herdr • Qoder CLI • Kiro                           ║"
+	echo "║  Claude • OpenCode • Amp • CCS • Codex • Kimi Code • Gemini          ║"
+	echo "║  Antigravity • Pi • Kilo • Copilot • Cursor • Command Code           ║"
+	echo "║  Factory Droid • Cline • Grok • MiMo-Code • herdr                    ║"
+	echo "║  Qoder CLI • Kiro • Codiff                                           ║"
+	echo "║  ctx                                                                 ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -2110,6 +2199,9 @@ main() {
 	install_codex
 	echo
 
+	install_kimi_code
+	echo
+
 	install_gemini
 	echo
 
@@ -2137,10 +2229,16 @@ main() {
 	install_herdr
 	echo
 
+	install_ctx
+	echo
+
 	install_qodercli
 	echo
 
 	install_kiro
+	echo
+
+	install_codiff
 	echo
 
 	install_factory
@@ -2168,7 +2266,8 @@ main() {
 	echo
 	echo "Next steps:"
 	echo "  1. Restart your terminal"
-	echo "  2. Run 'claude' to start Claude Code (or 'agy' for Antigravity CLI, 'cmd' for Command Code, 'grok' for Grok CLI, 'mimo' for MiMo-Code)"
+	echo "  2. Run 'claude' to start Claude Code"
+	echo "     Other CLIs: 'kimi' (Kimi Code), 'agy' (Antigravity), 'cmd' (Command Code), 'grok', 'mimo', 'ctx'"
 	echo "  3. Enable plugins with 'claude plugin enable <plugin-name>'"
 	echo "  4. Check out the README.md for more information"
 	echo
@@ -2179,5 +2278,5 @@ main() {
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main
+	main
 fi

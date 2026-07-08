@@ -1,224 +1,262 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-04-22
-
-## Naming Patterns
-
-**Files:**
-
-- Shell scripts: `kebab-case.sh` (e.g., `cli.sh`, `generate.sh`)
-- Config files: `kebab-case.json` or lowercase descriptive (e.g., `settings.json`)
-- Markdown docs: `UPPERCASE.md` for main docs, `kebab-case.md` for guides
-- Skill definitions: `SKILL.md` (always uppercase)
-- Agent definitions: `kebab-case.md` (e.g., `code-reviewer.md`)
-
-**Functions (Bash):**
-
-- Pattern: `snake_case` descriptive names
-- Examples: `install_claude_code()`, `backup_configs()`, `copy_claude_subdirectory()`
-- Prefixes: `install_*`, `backup_*`, `copy_*`, `log_*` indicate purpose
-
-**Variables:**
-
-- Environment/global: `UPPER_CASE` (e.g., `DRY_RUN`, `BACKUP_DIR`, `SCRIPT_DIR`)
-- Local: `lower_case` with `local` keyword (e.g., `local tool_name`, `local src_path`)
-- Constants: `UPPER_CASE` with descriptive names
-
-**Types (JSON):**
-
-- Schema files use standard JSON with `$schema` references
-- Keys: camelCase for settings (e.g., `"defaultMode"`, `"mcpServers"`)
-
-## Code Style
-
-**Formatting:**
-
-- Tool: `shfmt` for shell script formatting
-- Tool: `biome` for TypeScript/JavaScript
-- Tool: `prettier` for Markdown
-- Tool: `ruff` for Python (if present)
-- Indent: 2 spaces for JSON/YAML, tabs for shell scripts (shfmt default)
-
-**Linting:**
-
-- Tool: `shellcheck` for bash scripts (enforced in pre-commit)
-- Tool: `biome check` for JS/TS
-- Pre-commit: `.pre-commit-config.yaml` runs shellcheck
-
-**Shell Script Style:**
-
-- Shebang: `#!/bin/bash` (not `#!/bin/sh` for POSIX compliance)
-- Error handling: `set -e` at script top
-- Variable quoting: Always quote variables: `"$variable"`, never unquoted
-- Command substitution: `$(command)` preferred over backticks
-
-## Import Organization
-
-**Bash Scripts:**
-
-- Order:
-  1. Shebang and `set -e`
-  2. `SCRIPT_DIR` definition
-  3. Source common library: `source "$SCRIPT_DIR/lib/common.sh"`
-  4. Global variable declarations
-  5. Function definitions
-  6. Main execution (often in a `main()` function or at bottom)
-
-**TypeScript (Hooks):**
-
-- Standard ES6 imports
-- No specific grouping enforced
-
-## Error Handling
-
-**Patterns:**
-
-- Guard clauses check preconditions first, return early
-  ```bash
-  check_prerequisites() {
-      if ! command -v git &>/dev/null; then
-          log_error "Git is not installed"
-          exit 1
-      fi
-  }
-  ```
-- `set -e` for automatic exit on error
-- `trap` for cleanup on script exit
-- Transaction logging with rollback capability (`--rollback` flag)
-- Temporary files with cleanup: `make_temp_file()`, `rm -f` after use
-
-**Error Capture:**
-
-- Redirect errors to temp files for analysis: `2>"$err_file"`
-- Retry logic with exponential backoff for network operations
-- Color-coded error output: `log_error()` outputs to stderr in red
-
-## Logging
-
-**Framework:** Custom color-coded functions in `lib/common.sh`
-
-**Patterns:**
-
-```bash
-log_info()   { echo -e "${BLUE}[INFO]${NC} $1"; }
-log_success() { echo -e "${GREEN}[OK]${NC} $1"; }
-log_warning() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-log_error()  { echo -e "${RED}[ERROR]${NC} $1" >&2; }
-```
-
-**When to Log:**
-
-- `log_info`: Major operations starting
-- `log_success`: Operations completed successfully
-- `log_warning`: Non-fatal issues or skipped items
-- `log_error`: Fatal errors (always to stderr)
-- Verbose mode available: `VERBOSE=true` for detailed output
-
-## Comments
-
-**When to Comment:**
-
-- Function purpose at definition
-- Complex logic or non-obvious behavior
-- Cross-platform workarounds
-- Environment-specific handling
-
-**Documentation Style:**
-
-- Markdown for all documentation files
-- YAML frontmatter for skills with metadata
-- JSDoc not used (project is shell-script focused)
-
-**Example Function Comment:**
-
-```bash
-# Install MCP server with retry mechanism and better error handling
-# Usage: install_mcp_server "server_name" "install_command"
-install_mcp_server() {
-    local server_name="$1"
-    local install_cmd="$2"
-    # ...
-}
-```
-
-## Function Design
-
-**Size:** Functions should be focused and single-purpose (ideally <50 lines)
-
-- Large functions broken into smaller helpers
-- Example: `cli.sh` has 20+ focused functions vs one giant main
-
-**Parameters:**
-
-- Use positional parameters with local variables
-- Quote all parameters: `local var="$1"`
-- Avoid global variables when possible
-
-**Return Values:**
-
-- Use `return` for exit codes (0 = success, non-zero = failure)
-- Use `echo` for string output (captured by caller)
-- Use `local var=$(function_call)` pattern for data return
-
-## Module Design
-
-**Exports:**
-
-- Bash has no explicit export keyword - all functions are "exported" when sourced
-- `common.sh` is sourced by scripts that need its functions
-
-**Barrel Files:**
-
-- Not applicable (shell scripts)
-- Common patterns defined in `lib/common.sh` and sourced as needed
-
-## Guard Clauses
-
-**Pattern:** Check preconditions first, return/exit early
-
-```bash
-preflight_check() {
-    local missing_tools=()
-    local required_tools=("awk" "sed" "basename" "cat" "head" "tail" "grep" "date")
-    for tool in "${required_tools[@]}"; do
-        if ! command -v "$tool" &>/dev/null; then
-            missing_tools+=("$tool")
-        fi
-    done
-
-    if [ ${#missing_tools[@]} -gt 0 ]; then
-        log_error "Missing required tools: ${missing_tools[*]}"
-        exit 1
-    fi
-}
-```
-
-## Cross-Platform Compatibility
-
-**OS Detection:**
-
-```bash
-IS_WINDOWS=false
-_detect_os() {
-    case "$OSTYPE" in
-    msys* | mingw* | cygwin* | win*) return 0 ;;
-    esac
-    if [ -n "$MSYSTEM" ]; then
-        case "$MSYSTEM" in
-        MINGW* | MSYS* | CLANG*) return 0 ;;
-        esac
-    fi
-    return 1
-}
-```
-
-**Path Handling:**
-
-- No absolute paths - use `$HOME` and relative paths
-- `normalize_path()` function for Windows/Unix compatibility
-- `convert_path()` for Windows/Unix path conversion
-- Handle `TMPDIR` cross-device link issues
+**Analysis Date:** 2026-07-04
 
 ---
 
-_Convention analysis: 2026-04-22_
+## Language & Stack
+
+This is a **shell-script monorepo** (Bash 3.0+) with supporting JSON/TOML/Markdown configs. No TypeScript, JavaScript, or compiled code. Three shell libraries power everything:
+
+| File                  | Purpose                                                             |
+| --------------------- | ------------------------------------------------------------------- |
+| `lib/require_bash.sh` | POSIX-compatible re-exec guard — always sourced **first**           |
+| `lib/common.sh`       | Shared utilities: logging, dry-run, path helpers, validation, retry |
+| `lib/install.sh`      | Tool-specific installers (Claude Code, OpenCode, Codex, etc.)       |
+
+Two entry-point scripts: `cli.sh` (install configs → `$HOME`) and `generate.sh` (export configs ← `$HOME`).
+
+---
+
+## Naming Patterns
+
+### Files
+
+- **Shell scripts**: `kebab-case.sh` or short lowercase (`cli.sh`, `generate.sh`)
+- **Config files**: descriptive names: `settings.json`, `mcp-servers.json`, `mcp-registry.json`
+- **Markdown docs**: `UPPERCASE.md` for top-level (`AGENTS.md`, `README.md`, `MEMORY.md`, `GEMINI.md`); `kebab-case.md` for guides (`best-practices.md`, `git-guidelines.md`)
+- **Skill definitions**: `SKILL.md` (always uppercase filename inside `skills/<skill-name>/`)
+- **Agent definitions**: `kebab-case.md` inside tool `agents/` directories
+- **Test files**: `tests/<feature>.bats` — `pr_*.bats` for config-gating PRs, descriptive names for `lib_*.bats`, `cli.bats`
+
+### Functions (Bash)
+
+- **Convention**: `snake_case` with semantic prefixes
+- **Installers**: `install_<tool>_now()`, `install_<tool>()`, `handle_<feature>_installation_if_needed()`
+- **Config copiers**: `copy_<tool>_configs()`, `copy_config_file()`, `copy_config_dir()`, `copy_configurations()`
+- **Generators**: `generate_<tool>_configs()`
+- **Internal helpers**: prefixed with `_` (`_detect_os()`, `_verify_package_manager()`, `_detect_script_runner()`, `_run_<tool>_install()`)
+- **Logging**: `log_info`, `log_success`, `log_warning`, `log_error`
+- **Validation**: `validate_config()`, `validate_json()`, `validate_yaml()`, `validate_config_with_schema()`
+
+### Variables
+
+- **Environment/global**: `UPPER_CASE` — `DRY_RUN`, `BACKUP_DIR`, `SCRIPT_DIR`, `YES_TO_ALL`, `VERBOSE`, `IS_WINDOWS`, `TRANSACTION_ACTIVE`
+- **Function-local**: `lower_case` with `local` keyword — `local tool_name`, `local src_path`, `local err_file`
+- **Private-ish locals**: prefixed `_` — `_filename`, `_uname_s`, `_pids_file`
+- **Test exports**: tests re-export these globals to control behavior: `export DRY_RUN=false`, `export YES_TO_ALL=false`
+
+---
+
+## Code Style
+
+### EditorConfig & Biome
+
+```ini
+# .editorconfig
+[*.{ts,tsx,js,jsx}]    indent_style = tab, quote_type = double
+[*.json]                indent_style = tab
+[*.sh]                  indent_style = tab
+[*.{yaml,yml}]          indent_style = space, indent_size = 2
+[*.{md,mdx}]            indent_style = tab, trim_trailing_whitespace = false
+[*]                     charset = utf-8, end_of_line = lf, insert_final_newline = true
+```
+
+```json
+// biome.json
+{
+	"formatter": { "indentStyle": "tab", "indentWidth": 1, "lineWidth": 120 },
+	"javascript": { "formatter": { "quoteStyle": "double" } },
+	"json": { "formatter": { "indentStyle": "tab", "indentWidth": 1 } }
+}
+```
+
+### Shell Script Style
+
+- **Shebang**: `#!/bin/bash` on entry-point scripts; `#!/usr/bin/env bats` on test files
+- **Re-exec guard**: Every entry-point script **must** source `lib/require_bash.sh` before `lib/common.sh`. This is non-negotiable — `lib/common.sh` uses bash-only syntax (process substitution, arrays, `${var//pat/repl}`) that crashes under `sh`/`dash`.
+- **`set -e`** goes **after** the re-exec guard, not before it
+- **Always quote** variables: `"$variable"`, `"$@"`
+- **Use `printf`** instead of `echo -e` for portability: `printf '%b\n' "${BLUE}ℹ ${NC}$1" >&2`
+- **Use `local`** for all function-scoped variables
+- **Avoid bash arrays** in code paths that might be sourced under `dash`; use `set --` and positional params or temp files instead
+- **Process substitution** (`<(...)`): prefer temp files + `while read` for POSIX safety in `detect_tool` and similar helpers
+- **`[[` vs `[`**: `[[` is bash-only — use it freely in `cli.sh`/`generate.sh`/`lib/` (all guarded by `require_bash.sh`)
+
+### TOML Config Style
+
+- **Identifiers**: `snake_case` with dots for nesting — `[mcp_servers.ctx]`, `command = "ctx"`
+- **Tool configs**: `config.toml` files for Codex, Kimi Code, Grok, Conductor, ctx
+
+### JSON Config Style
+
+- **Top-level keys**: `camelCase` — `mcpServers`, `permissions`, `statusLine`
+- **`$schema`** references used where available for validation
+
+---
+
+## Import / Source Organization
+
+### Entry-point scripts (`cli.sh`, `generate.sh`)
+
+```
+1. #!/bin/bash
+2. . "$(dirname "${BASH_SOURCE:-$0}")/lib/require_bash.sh"    ← MUST BE FIRST
+3. set -e
+4. SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+5. source "$SCRIPT_DIR/lib/common.sh"
+6. source "$SCRIPT_DIR/lib/install.sh"                        ← cli.sh only
+7. [[ "${BASH_SOURCE[0]}" == "${0}" ]] → parse args + main()
+```
+
+### Test files
+
+```bash
+#!/usr/bin/env bats
+load helpers                    # if sharing skip helpers
+source "$BATS_TEST_DIRNAME/../lib/common.sh"
+source "$BATS_TEST_DIRNAME/../lib/install.sh"
+source "$BATS_TEST_DIRNAME/../cli.sh"
+export DRY_RUN=false            # always reset after sourcing
+```
+
+### `lib/require_bash.sh` (POSIX-compatible)
+
+```bash
+if [ -z "${BASH_VERSION:-}" ] || shopt -oq posix 2>/dev/null; then
+    if command -v bash >/dev/null 2>&1; then
+        exec bash "$0" "$@"
+    else
+        echo "Error: $0 requires bash, but bash was not found in PATH" >&2
+        exit 1
+    fi
+fi
+```
+
+---
+
+## Error Handling
+
+### Patterns
+
+1. **Guard clauses** — check preconditions first, return/exit early:
+
+   ```bash
+   if [ ! -f "$source_file" ]; then return 1; fi
+   if ! command -v jq &>/dev/null; then skip "jq not installed"; fi
+   ```
+
+2. **`set -e`** on entry scripts; tests run in subshells via `run` so they don't inherit it
+
+3. **`execute()` / `execute_quoted()`** — all side-effecting commands must use these wrappers (never raw). `execute()` uses `eval` for simple commands; `execute_quoted()` passes `"$@"` directly for path-safe execution
+
+4. **Dry-run** — `DRY_RUN=true` gates all destructive operations. Tested via exported env var
+
+5. **Transaction log** — `start_transaction()`, `record_action()`, `rollback_transaction()`, `end_transaction()` provide rollback via `--rollback` flag
+
+6. **Retry with backoff** — `install_mcp_server()` retries up to 3× with exponential sleep on network errors
+
+7. **Error capture** — `2>"$err_file"` then `grep` for known patterns (`already`, `connection`, `timed?out`)
+
+8. **Non-interactive fallback** — `is_non_interactive()` detects CI/piped stdin; sets `YES_TO_ALL=true` automatically
+
+### Exit codes
+
+- `0` = success
+- `1` = error / missing / failed
+- Functions return 0 on dry-run or skip, 1 on real failure only
+
+---
+
+## Logging
+
+All logging goes to **stderr** to avoid interfering with command substitution. Defined in `lib/common.sh`:
+
+```bash
+log_info()    { printf '%b\n' "${BLUE}ℹ ${NC}$1" >&2; }
+log_success() { printf '%b\n' "${GREEN}✓${NC} $1" >&2; }
+log_warning() { printf '%b\n' "${YELLOW}⚠${NC} $1" >&2; }
+log_error()   { printf '%b\n' "${RED}✗${NC} $1" >&2; }
+```
+
+- `log_info` — major operations, detection results, status updates
+- `log_success` — completion, successful copies/installs
+- `log_warning` — deprecation notices, skipped tools, missing optional deps
+- `log_error` — fatal conditions, validation failures, missing prerequisites
+- ANSI color codes stripped in test assertions with `sed -E 's/\x1B\[[0-9;]*m//g'`
+
+---
+
+## Function Design
+
+- **Single-purpose**: Most functions do exactly one thing (copy one tool's configs, install one tool)
+- **Consistent parameter conventions**: `local var="$1"`, `local var="${1:-default}"`
+- **Interactive prompt pattern**: `YES_TO_ALL=true` → auto-accept; `[ -t 0 ]` → `prompt_yn`; else → skip/log
+- **`_run_<tool>_install()`** inner functions used with `run_installer()` for consistent prompt/auto/non-interactive behavior
+- **Comment header** on every function: `# Usage:` line describing parameters and return value
+- **POSIX fallbacks**: When bash arrays would work, use temp files or `set --` for dash compatibility where needed
+
+---
+
+## Guard Clauses (Idioms)
+
+```bash
+# Tool detection guard
+if [ "$status" = "missing" ]; then
+    log_info "Tool not detected - skipping config installation"
+    return 0
+fi
+
+# Preflight missing tools
+if [ ${#missing_tools[@]} -gt 0 ]; then
+    log_error "Missing required tools: ${missing_tools[*]}"
+    exit 1
+fi
+
+# Test prerequisite skip
+if ! command -v jq &>/dev/null; then
+    skip "jq not installed"
+fi
+
+# BASH_SOURCE guard (arg parsing only when executed, not sourced)
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    # parse args, call main
+fi
+```
+
+---
+
+## Path Handling
+
+- **No absolute paths** in configs or scripts — always use `$HOME`, `$SCRIPT_DIR`, relative paths
+- `normalize_path()` — forward slashes, collapse duplicates, preserve URLs/UNC paths
+- `expand_path()` — resolve `~` to `$HOME`
+- `safe_copy_dir()` — rsync preferred; fallback manual copy excluding `node_modules`, `*.sqlite`, cache dirs
+- `make_temp_file()` / `make_temp_dir()` — `${TMPDIR}/prefix-$(date +%s)-$$.ext`
+
+---
+
+## Cross-Platform
+
+- `IS_WINDOWS` detected via `uname -s` (MINGW*, MSYS*, CYGWIN*) + `MSYSTEM` env var
+- Windows: PowerShell installers (`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm ... | iex"`)
+- macOS: Homebrew (`brew install`), Cask apps
+- Linux: `apt-get`, cargo, curl piped installers
+- `_detect_package_manager()`: bun preferred → npm fallback
+- `_detect_script_runner()`: bunx preferred → npx fallback
+- `resolve_installer_checksum()`: optional SHA-256 verification for trusted installers (bun, rust, plannotator, sem)
+
+---
+
+## Documentation Conventions
+
+- **`AGENTS.md`**: root-level agent instructions for this repository (CI commands, merge checklist, testing guide)
+- **`GEMINI.md`**: same content synced for Gemini CLI compatibility
+- **`MEMORY.md`**: persistent compounding knowledge base
+- **`CONTRIBUTING.md`**: how to add tools, skills, agents, hooks; style guide
+- **`TESTING.md`**: BATS quickstart, CI/non-interactive mode, pre-commit hooks
+- **Tool-level docs**: each `configs/<tool>/AGENTS.md` contains tool-specific instructions
+
+---
+
+_Last updated: 2026-07-04_

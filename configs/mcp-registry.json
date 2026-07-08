@@ -71,6 +71,14 @@
 			"args": [],
 			"requires": ["sem-mcp"],
 			"category": "version-control"
+		},
+		"ctx": {
+			"name": "ctx",
+			"description": "local agent-history search across coding sessions",
+			"command": "ctx",
+			"args": ["mcp", "serve"],
+			"requires": ["ctx"],
+			"category": "search"
 		}
 	}
 }
