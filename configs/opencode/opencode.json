@@ -101,7 +101,7 @@
 		"codebase-memory-mcp": {
 			"enabled": true,
 			"type": "local",
-			"command": ["~/.local/bin/codebase-memory-mcp"]
+			"command": ["codebase-memory-mcp"]
 		}
 	},
 	"model": "opencode/big-pickle",

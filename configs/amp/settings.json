@@ -34,6 +34,10 @@
 		"sem": {
 			"command": "sem-mcp",
 			"args": []
+		},
+		"codebase-memory-mcp": {
+			"command": "codebase-memory-mcp",
+			"args": []
 		}
 	},
 	"amp.terminal.theme": "kanagawa",

@@ -71,6 +71,11 @@
 			"type": "local",
 			"command": ["sem-mcp"],
 			"enabled": true
+		},
+		"codebase-memory-mcp": {
+			"type": "local",
+			"command": ["codebase-memory-mcp"],
+			"enabled": true
 		}
 	},
 	"plugin": ["@plannotator/opencode@latest", "opencode-chrome-annotation@latest"],

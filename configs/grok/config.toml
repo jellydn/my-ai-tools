@@ -73,3 +73,7 @@ args = []
 [mcp_servers.ctx]
 command = "ctx"
 args = ["mcp", "serve"]
+
+[mcp_servers.codebase-memory-mcp]
+type = "stdio"
+command = "codebase-memory-mcp"

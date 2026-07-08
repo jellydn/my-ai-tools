@@ -73,6 +73,10 @@ type = "stdio"
 command = "ctx"
 args = ["mcp", "serve"]
 
+[mcp_servers.codebase-memory-mcp]
+type = "stdio"
+command = "codebase-memory-mcp"
+
 [notice]
 fast_default_opt_out = true
 hide_rate_limit_model_nudge = true

@@ -67,6 +67,13 @@
 			"args": ["mcp", "serve"],
 			"env": {},
 			"tools": ["*"]
+		},
+		"codebase-memory-mcp": {
+			"type": "local",
+			"command": "codebase-memory-mcp",
+			"args": [],
+			"env": {},
+			"tools": ["*"]
 		}
 	}
 }

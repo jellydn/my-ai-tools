@@ -77,7 +77,7 @@
 		"codebase-memory-mcp": {
 			"transport": "stdio",
 			"enabled": true,
-			"command": "~/.local/bin/codebase-memory-mcp",
+			"command": "codebase-memory-mcp",
 			"args": []
 		}
 	}

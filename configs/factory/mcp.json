@@ -52,6 +52,10 @@
 			"command": "ctx",
 			"args": ["mcp", "serve"],
 			"disabled": false
+		},
+		"codebase-memory-mcp": {
+			"command": "codebase-memory-mcp",
+			"args": []
 		}
 	}
 }
