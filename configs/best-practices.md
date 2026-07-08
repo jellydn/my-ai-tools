@@ -1,10 +1,16 @@
 # Software Development Best Practices
 
+## Philosophy
+
+Code is communication between humans. Design for change, not perfection. Optimize for readability and simplicity.
+
+See @~/.ai-tools/fable-guide.md for working with next-generation AI models.
+
 ## AI Tool Session Management
 
 ### Run Commands in tmux for Debuggability
 
-Always run long-running commands, development servers, tests, and interactive sessions inside tmux with the **current directory name as the session name**. This enables easy debugging and monitoring.
+Run long-running commands in tmux with directory-based session names for easy debugging and monitoring.
 
 ```bash
 # Create session named after current directory (e.g., "my-project")
@@ -50,34 +56,27 @@ logpilot watch "$SESSION" --pane "$SESSION:0.0"
 
 ---
 
-## Context
+## Core Principles
 
-Comprehensive development guidelines for Agent OS projects, based on Kent Beck's "Tidy First?" principles and Kent C. Dodds' programming wisdom.
+### Tidy First Philosophy
 
-> "Software design is an exercise in human relationships" - Kent Beck
+Make big changes through small, safe steps. Code is communication between humans, not just instructions for machines.
 
-## 🎯 Core Principles
+**Key practices**:
+- Separate refactoring from feature work
+- Remove complexity rather than managing it
+- Balance current effort against future options
+- Build for the next developer
 
-### 🧹 Tidy First Philosophy
+### Code Quality Fundamentals
 
-- **Small, Safe Steps**: Make big changes through small, reversible steps
-- **Human Relationships**: Code is communication between humans
-- **Economic Thinking**: Balance current effort against future options
-- **Eliminate Problems**: Remove complexity rather than managing it
+**Don't solve problems, eliminate them**: Look for ways to remove complexity entirely.
 
-### ✨ Code Quality Fundamentals
+**Optimize for readability**: Clear code is maintainable code. Choose boring solutions that are easy to understand.
 
-- **Don't Solve Problems, Eliminate Them**: Look for ways to reduce complexity
-- **Optimize for Readability**: Prioritize code clarity over clever solutions
-- **Self-Documenting Code**: Use meaningful names and clear structure
-- **Test for Confidence**: Write tests that give confidence to change
+**Self-documenting**: Meaningful names and clear structure beat comments. Comments explain why, not what.
 
-### 🔄 Change-Friendly Design
-
-- **Separate Tidying from Behavior Changes**: Keep refactoring separate from new features
-- **Build for the Next Developer**: Consider maintainability and understanding
-- **Options Over Things**: Create flexibility for uncertain future requirements
-- **Progressive Enhancement**: Start simple, add complexity when needed
+**Test for confidence**: Write tests that enable change, not tests that constrain it.
 
 ## 📦 Dependencies
 

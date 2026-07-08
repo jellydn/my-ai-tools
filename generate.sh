@@ -779,6 +779,7 @@ generate_best_practices() {
 	log_info "Generating best-practices.md..."
 	copy_single "$HOME/.ai-tools/best-practices.md" "$SCRIPT_DIR/configs/best-practices.md"
 	copy_single "$HOME/.ai-tools/agent-memory.md" "$SCRIPT_DIR/configs/agent-memory-guidelines.md"
+	copy_single "$HOME/.ai-tools/fable-guide.md" "$SCRIPT_DIR/configs/fable-guide.md"
 }
 
 generate_memory_md() {

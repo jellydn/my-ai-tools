@@ -408,7 +408,7 @@ npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
 
-# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, thermo-nuclear-code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, tmux
+# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, thermo-nuclear-code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, tmux, blindspot-pass, implementation-logger, quiz-me, spec-interview
 # Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 

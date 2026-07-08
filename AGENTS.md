@@ -109,6 +109,24 @@ tests/                           # BATS functional tests
 - Backup location: `$HOME/ai-tools-backup-{timestamp}`. Auto-cleanup keeps last 5.
 - Gemini CLI is deprecated for Google One/unpaid tiers (June 18, 2026 cutoff). Migrate to Antigravity CLI.
 
+## Working with Advanced Models
+
+See `configs/fable-guide.md` for comprehensive guidance on:
+- **Capability Overhang**: Understanding what's newly possible
+- **Finding Unknowns**: Discovery techniques before implementation
+- **Context over Constraints**: Positive guidance patterns
+- **Being Unreasonable**: Challenging false tradeoffs
+
+Key skills for discovery-first development:
+- `skills/blindspot-pass/` - Find unknown unknowns before starting
+- `skills/context-discovery/` - Proactively gather context using MCP tools
+- `skills/git-context/` - Search git history for patterns and decisions
+- `skills/doc-search/` - Find ADRs, wiki entries, and project documentation
+- `skills/capability-experiments/` - HTML reports, embedded UIs, proactive research
+- `skills/spec-interview/` - Clarify requirements through targeted questions
+- `skills/implementation-logger/` - Track decisions and deviations
+- `skills/quiz-me/` - Verify understanding after implementation
+
 ## Learning Recording
 
 After fixing a bug (confirmed by human), introducing a new tech choice, or encountering something important, ask the user:
