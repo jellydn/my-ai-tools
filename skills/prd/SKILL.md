@@ -1,6 +1,6 @@
 ---
 name: prd
-description: "Generate a Product Requirements Document (PRD) for a new feature. Use when planning a feature, starting a new project, or when asked to create a PRD. Triggers on: create a prd, write prd for, plan this feature, requirements for, spec out."
+description: "Generate Product Requirements Documents from feature ideas — plans specs and requirements"
 license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when planning a feature, starting a new project, or creating PRD documents
@@ -147,7 +147,7 @@ Remaining questions or areas needing clarification.
 The PRD reader may be a junior developer or AI agent. Therefore:
 
 - Be explicit and unambiguous
-- Avoid jargon or explain it
+- Prefer plain language; explain domain terms
 - Provide enough detail to understand purpose and core logic
 - Number requirements for easy reference
 - Use concrete examples where helpful

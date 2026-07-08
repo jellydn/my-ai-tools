@@ -1,6 +1,6 @@
 ---
 name: pickup
-description: Resumes work from previous handoff sessions which are stored in `.planning/handoffs/`
+description: "Resume work from previous handoff sessions stored in .planning/handoffs/"
 license: MIT
 compatibility: claude, opencode, codex, gemini, cursor, pi
 hint: Use when resuming work from a previous handoff session

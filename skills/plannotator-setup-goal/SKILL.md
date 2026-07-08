@@ -1,6 +1,6 @@
 ---
 name: plannotator-setup-goal
-description: Turn an idea or objective into a goal package for /goal. Interviews the user, builds a reviewed fact sheet via Plannotator, then explores the codebase to produce an execution plan.
+description: "Turn ideas into executable goal packages with guided interviews and codebase analysis"
 license: MIT
 compatibility: claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when turning an idea or objective into a structured goal package with facts and plan
@@ -37,7 +37,7 @@ Ask questions **one at a time**, waiting for feedback before continuing. For eac
 
 **If a question can be answered by exploring the codebase, explore the codebase instead of asking.**
 
-Stop when you feel confident in being able to describe the facts of the goal outcome. Don't pad.
+Stop when confident you can describe the goal outcome facts.
 
 ### 3. Fact Sheet
 

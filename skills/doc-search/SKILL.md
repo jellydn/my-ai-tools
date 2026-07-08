@@ -1,6 +1,6 @@
 ---
 name: "doc-search"
-description: "Find and navigate existing project documentation — ADRs, wiki entries, conventions, and knowledge base using ripgrep, qmd, fff, and ctx"
+description: "Search project documentation — ADRs, wiki entries, conventions via ripgrep, qmd, fff, and ctx"
 license: "MIT"
 compatibility: "claude, opencode, codex, gemini, cursor, pi"
 hint: "Use when you need to find existing documentation before writing new docs"

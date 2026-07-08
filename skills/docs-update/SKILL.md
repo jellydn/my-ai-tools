@@ -1,6 +1,6 @@
 ---
 name: docs-update
-description: "Update user-facing documentation when code changes. Use when asked to update docs, review docs, handle documentation changes, run scheduled documentation tasks, or analyze recent commits for documentation needs."
+description: "Update docs when code changes — reviews commits and syncs user-facing documentation"
 license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when updating documentation, reviewing docs, or handling documentation changes after code changes

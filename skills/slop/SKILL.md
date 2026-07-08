@@ -1,6 +1,6 @@
 ---
 name: slop
-description: Removes AI-generated code slop from git diffs to maintain code quality
+description: "Remove AI-generated code slop from git diffs to maintain code quality"
 license: MIT
 compatibility: claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when cleaning up AI-generated code slop in git diffs
@@ -53,12 +53,12 @@ Simplify code structure by:
 - Improving readability through clear variable and function names
 - Consolidating related logic
 - Removing unnecessary comments that describe obvious code
-- **IMPORTANT**: Avoid nested ternary operators - prefer switch statements or if/else chains
+- **IMPORTANT**: Use switch statements or if/else chains over nested ternary operators
 - Choose clarity over brevity - explicit code is often better than overly compact code
 
 ### 4. Maintain Balance
 
-Avoid over-simplification that could:
+Preserve necessary complexity — over-simplification can:
 
 - Reduce code clarity or maintainability
 - Create overly clever solutions that are hard to understand
@@ -131,6 +131,6 @@ When refining code:
 
 - Prefer explicit over compact - readable code beats clever code
 - Use descriptive names - clarity over brevity
-- Avoid deep nesting - flatten structure when possible
+- Flatten deep nesting with early returns and guard clauses
 - Remove redundant code - eliminate duplicates
 - Use language-appropriate patterns - follow idiomatic practices

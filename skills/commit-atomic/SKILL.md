@@ -1,6 +1,6 @@
 ---
 name: commit-atomic
-description: Creates atomic commits by logically grouping staged changes with commitizen convention
+description: "Group staged changes into atomic commits with commitizen convention"
 license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when committing staged changes as focused, atomic commits grouped by logical change
@@ -49,7 +49,7 @@ Analyze the changes and group them into **logical, independent units**. Each gro
 
 ### 3. Stage each group intentionally
 
-**Never use `git add -A` or `git add --all`.** Instead, stage files explicitly:
+**Stage files explicitly with `git add <path>`.** Avoid `git add -A` or `git add --all`:
 
 ```bash
 # Stage specific files
@@ -132,8 +132,8 @@ Ensure the working tree is clean after all logical groups are committed.
 
 ## Rules
 
-- ❌ Never use `git add -A` or `git add --all`
-- ❌ Never mix unrelated changes in a single commit
+- ❌ Prefer `git add <path>` over `git add -A` or `git add --all`
+- ❌ Keep each commit focused on one logical change
 - ✅ Stage files explicitly with `git add <file>` or `git add -p`
 - ✅ Verify staged changes with `git diff --staged` before committing
 - ✅ Write messages in imperative mood ("add feature" not "added feature")

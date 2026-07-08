@@ -1,6 +1,6 @@
 ---
 name: "context-discovery"
-description: "Proactively gather context using MCP tools (fff, sem, ctx, qmd, codebase-memory-mcp) before and during implementation"
+description: "Discover context using MCP tools — fff, sem, ctx, qmd, codebase-memory-mcp for codebase understanding"
 license: "MIT"
 compatibility: "claude, opencode, codex, gemini, cursor, pi"
 hint: "Use before starting work to understand codebase context via available MCP tools"
@@ -141,5 +141,5 @@ Where to look depends on what you need:
 
 - **Start broad, narrow fast**: Use `fff` to find candidates, then `sem`/`qmd` for depth
 - **Prefer recent context**: `ctx` and `git log` give you recent work, which is most relevant
-- **Don't over-discover**: 2-5 minutes of context discovery is usually enough
+- **Limit discovery**: 2-5 minutes is usually enough
 - **Document what you find**: Add significant discoveries to implementation log or qmd

@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: Guides through the complete TDD workflow with Red-Green-Refactor cycle. Use when writing tests first, running Red-Green-Refactor cycles, or doing test-driven development.
+description: "Guide through the Red-Green-Refactor cycle for test-driven development"
 license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when doing test-driven development with Red-Green-Refactor cycle
@@ -67,7 +67,7 @@ Guides you through the complete TDD workflow with Red-Green-Refactor cycle.
 1. Implement minimal code to make failing tests pass
 2. Focus on making tests pass, not perfect code
 3. Run tests to confirm green state
-4. Avoid over-engineering at this stage
+4. Write just enough code to pass the test
 
 ### For "refactor":
 

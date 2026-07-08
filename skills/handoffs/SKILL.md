@@ -1,6 +1,6 @@
 ---
 name: handoffs
-description: Creates detailed handoff plans of conversations for continuing work in new sessions
+description: "Create handoff plans for continuing work across sessions"
 license: MIT
 compatibility: cline, claude, opencode, codex, gemini, cursor, pi
 hint: Use when ending a session and want to continue work later with full context

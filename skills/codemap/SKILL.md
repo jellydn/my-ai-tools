@@ -1,6 +1,6 @@
 ---
 name: codemap
-description: Orchestrate parallel codebase analysis to produce 7 structured documents about the codebase in .planning/codebase/
+description: "Map codebase structure with parallel analysis — produces 7 documents about architecture, concerns, and conventions"
 license: MIT
 compatibility: opencode, claude, amp, codex, gemini, cursor, pi
 hint: Use when mapping codebase structure, documenting architecture, or onboarding to a project
@@ -283,7 +283,7 @@ _finder -t f "\.ts$" -e "\.tsx$" src/ 2>/dev/null | xargs wc -l 2>/dev/null | so
 3. **Use the templates** - Fill in the template structure exactly
 4. **Be thorough** - Read actual files, don't guess
 5. **Return only confirmation** - Response should be ~10 lines with file paths and line counts
-6. **Don't commit** - The orchestrator handles git operations
+6. **Skip commits** — orchestrator handles git operations
 
 ## Inspiration
 

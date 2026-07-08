@@ -1,6 +1,6 @@
 ---
 name: llm-wiki
-description: Build and maintain a persistent, compounding knowledge wiki from raw sources. Use when the user wants to create a knowledge base, ingest documents into a wiki, query a wiki, health-check a wiki, or set up Karpathy's LLM Wiki pattern.
+description: "Build a persistent compounding wiki from raw sources using the LLM Wiki pattern"
 license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when building a personal knowledge base, researching a topic over time, or maintaining a structured wiki from raw documents

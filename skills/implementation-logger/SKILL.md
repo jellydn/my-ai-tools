@@ -1,6 +1,6 @@
 ---
 name: "implementation-logger"
-description: "Track decisions and deviations during complex work — log where reality differs from plan and capture decision rationale"
+description: "Log implementation decisions — tracks deviations from plan and captures rationale"
 license: "MIT"
 compatibility: "claude, opencode, codex, gemini, cursor, pi"
 hint: "Use during implementation of complex or uncertain changes to track decisions"
@@ -317,7 +317,7 @@ like user tokens. This wasn't in our initial spec.
 
 ## Best Practices
 
-1. **Log as you go**: Don't wait until end of implementation
+1. **Log as you go**: Record decisions throughout implementation
 2. **Be specific**: Include timestamps, commit SHAs, file paths
 3. **Explain reasoning**: Not just what changed, but why
 4. **Note impact**: What else does this affect?
@@ -370,7 +370,7 @@ A good implementation log:
 
 ## Common Pitfalls
 
-- **Too detailed**: Don't log every line of code, focus on decisions
+- **Focus on decisions**: Log only changes in direction and rationale
 - **Too late**: Logging after the fact loses context and rationale
 - **No extraction**: Log sits unused instead of feeding documentation
 - **No patterns**: Missing the forest for the trees; look for themes

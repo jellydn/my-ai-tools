@@ -1,6 +1,6 @@
 ---
 name: "quiz-me"
-description: "Verify understanding after implementation — generates quizzes on what was built to identify knowledge gaps and prepare PR descriptions"
+description: "Verify understanding after implementation with targeted quizzes"
 license: "MIT"
 compatibility: "claude, opencode, codex, gemini, cursor, pi"
 hint: "Use after completing complex work to verify understanding"

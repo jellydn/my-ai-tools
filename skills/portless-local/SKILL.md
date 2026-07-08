@@ -1,6 +1,6 @@
 ---
 name: portless-local
-description: Named .localhost URLs for local development - replaces port numbers with stable, readable URLs
+description: "Replace port numbers with stable named .localhost URLs for local development"
 license: MIT
 compatibility: claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when you want clean, named URLs for local development instead of remembering port numbers
