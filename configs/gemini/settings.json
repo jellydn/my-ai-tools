@@ -53,7 +53,9 @@
 			"timeout": 60000
 		},
 		"codebase-memory-mcp": {
-			"command": "~/.local/bin/codebase-memory-mcp"
+			"command": "~/.local/bin/codebase-memory-mcp",
+			"args": [],
+			"timeout": 60000
 		}
 	},
 	"security": {
