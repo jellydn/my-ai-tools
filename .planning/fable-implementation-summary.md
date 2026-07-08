@@ -14,7 +14,7 @@ Based on Thariq Shihipar's "Field Guide to Fable" talk (AI Engineer 2026), succe
 
 ### 1. Core Documentation
 
-#### `configs/fable-guide.md` (619 lines)
+#### `configs/fable-guide.md` (269 lines)
 Comprehensive guide covering:
 - **Core Philosophy**: Models are grown, not designed; what contains them is us
 - **Capability Overhang**: Models get smarter in spiky ways; tools unlock capabilities
@@ -372,7 +372,7 @@ Will track:
 ## Implementation Timeline
 
 - **Day 1**: Research, planning, document creation
-- **Day 1-2**: Core fable-guide.md (619 lines)
+- **Day 1-2**: Core fable-guide.md (269 lines)
 - **Day 2**: Skills implementation (1,650 lines)
 - **Day 2**: Commands and config updates (707 lines)
 - **Day 2**: Testing and verification

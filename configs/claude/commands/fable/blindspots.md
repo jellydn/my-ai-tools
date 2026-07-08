@@ -220,7 +220,7 @@ Works well with:
 Reads @skills/blindspot-pass/SKILL.md for execution guidance.
 
 Searches:
-- Git history (`git log`, `git grep`)
+- Git history (`git log`, `git log -S`)
 - Code patterns (`ripgrep`)
 - Tests and documentation
 - Related modules

@@ -161,9 +161,8 @@ org-level permission requirements. Added webhook endpoint for
 installation events.
 
 ## Original Approach
-- Implement standard OAuth 2.0 flow
-- Store user access tokens
-- Use Personal Access Token (PAT) flow
+- Implement standard OAuth 2.0 flow via library
+- Use Personal Access Token (PAT) flow for initial testing
 
 ## Deviations & Decisions
 
@@ -328,12 +327,12 @@ like user tokens. This wasn't in our initial spec.
 ### Where to Store Logs
 
 **Temporary logs** (during work):
-```
+```text
 .implementation-log.md  # Git ignored, working file
 ```
 
 **Permanent documentation** (after completion):
-```
+```text
 docs/adr/NNN-[decision].md          # Architecture decisions
 MEMORY.md                            # Gotchas and learnings
 wiki/[topic]/[entry].md              # Knowledge base entries
@@ -343,7 +342,7 @@ wiki/[topic]/[entry].md              # Knowledge base entries
 ### Git Ignore
 
 Add to `.gitignore`:
-```
+```text
 .implementation-log.md
 .dev-notes.md
 ```

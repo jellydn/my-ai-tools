@@ -10,12 +10,12 @@ Advanced models can traverse vast solution spaces, making unknown discovery crit
 
 ## Discovery Workflow
 
-```
+```text
 1. blindspot-pass → Identify unknown unknowns
 2. spec-interview → Clarify requirements  
 3. [Implementation with logging]
 4. quiz-me → Verify understanding
-```
+```markdown
 
 ## Skills
 
@@ -32,9 +32,9 @@ Searches for unknown unknowns before starting work:
 - Architectural considerations
 
 **Example**:
-```
+```text
 /blindspots Add webhook support for third-party integrations
-```
+```markdown
 
 Returns structured analysis with:
 - Context sources checked
@@ -56,9 +56,9 @@ Generates targeted questions to fill specification gaps:
 - Low-impact details
 
 **Example**:
-```
+```text
 /interview-me Add real-time collaboration to document editor
-```
+```markdown
 
 Returns prioritized questionnaire with:
 - Context for each question
@@ -106,7 +106,7 @@ Creates `.implementation-log.md` during work, then extracts to:
 
 ## Learnings
 [What worked, what surprised us, what to do differently]
-```
+```markdown
 
 ### 4. Quiz Me
 
@@ -144,7 +144,7 @@ Q2: Describe the token caching strategy
 [Open-ended answer]
 
 [Continue through multiple levels of questions]
-```
+```markdown
 
 ## Integration Example
 
@@ -166,7 +166,7 @@ Q2: Describe the token caching strategy
 # 3. Start implementation with logging
 # Agent creates .implementation-log.md
 # Tracks decisions as reality diverges from plan
-```
+```markdown
 
 ### During Implementation
 
@@ -182,7 +182,7 @@ Q2: Describe the token caching strategy
 **Decision**: Implement GitHub App Installation flow
 **Rationale**: Only way to get org-level repo access
 **Impact**: Added webhook endpoint, installation table, token caching
-```
+```markdown
 
 ### After Implementation
 
@@ -200,7 +200,7 @@ Q2: Describe the token caching strategy
 # - MEMORY.md
 # - ADRs
 # - Updated documentation
-```
+```markdown
 
 ## Benefits
 
@@ -221,11 +221,11 @@ Frontloading discovery means smoother implementation with fewer surprises.
 
 ## The Four Unknowns
 
-```
+```text
                 Known to You    Unknown to You
 Known Exists    Known Knowns    Known Unknowns
 Unknown Exists  Unknown Knowns  Unknown Unknowns
-```
+```markdown
 
 **Known Knowns**: What's explicit in your prompt
 **Known Unknowns**: Questions you know you need to answer

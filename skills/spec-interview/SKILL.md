@@ -75,7 +75,7 @@ After receiving answers:
 
 ### Architecture-Changing Questions
 
-```
+```text
 "How should we handle [X]?"
 Options:
 a) [Approach that extends existing pattern]
@@ -83,11 +83,11 @@ b) [Approach that creates new abstraction]
 c) [Approach that uses external service]
 
 Impact: This determines whether we modify current auth flow or build new one.
-```
+```markdown
 
 ### Scope Clarification
 
-```
+```text
 "Should [feature] support [variation]?"
 Options:
 a) Yes, in initial release
@@ -95,22 +95,22 @@ b) No, add later if needed
 c) Not needed
 
 Impact: Option A adds 2-3 more integration points to implement now.
-```
+```markdown
 
 ### Edge Case Discovery
 
-```
+```text
 "What happens when [edge case]?"
 Context: I found [situation] in the codebase that could trigger this.
 Options:
 a) [Graceful degradation]
 b) [Hard error]
 c) [Async recovery]
-```
+```markdown
 
 ## Example Usage
 
-```
+```text
 User: "Add ability to export user data to CSV"
 
 Agent: "Let me interview you about the requirements. I'll prioritize
@@ -190,13 +190,13 @@ c) Single CSV with denormalized data (duplicates but simpler)
 
 Take your time answering. Say 'skip' for any you want to defer.
 Start with the architecture questions (1-2) as they impact everything else."
-```
+```markdown
 
 ## Interview Formats
 
 ### Multiple Choice
 Best for: Clear options, technical decisions
-```
+```text
 **Question**: [Clear question]
 Options:
 a) [Option with tradeoffs]
@@ -204,24 +204,24 @@ b) [Option with tradeoffs]
 c) [Option with tradeoffs]
 
 Impact: [What this changes]
-```
+```markdown
 
 ### Open-Ended
 Best for: Design exploration, unknown constraints
-```
+```text
 **Question**: [Open question about requirements]
 Context: [Why this matters]
 Things to consider: [Relevant factors]
-```
+```markdown
 
 ### Ranked Priority
 Best for: Scope decisions
-```
+```text
 **Question**: Rank these features by priority (1=must have, 5=nice to have)
 - [ ] Feature A (impacts architecture)
 - [ ] Feature B (can add later)
 - [ ] Feature C (independent)
-```
+```markdown
 
 ## Best Practices
 
@@ -284,6 +284,6 @@ For Fable/advanced models, generate interactive questionnaires:
   
   <button type="submit">Submit Answers</button>
 </form>
-```
+```markdown
 
 This allows rich, interactive spec gathering with better UX than plain text.
