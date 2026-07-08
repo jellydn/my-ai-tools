@@ -33,10 +33,8 @@ See @~/.ai-tools/best-practices.md for full details.
 - Read @~/.ai-tools/agent-memory.md — auto-capture learnings, persist bug fixes, keep memories concise. After fixing a bug (confirmed by human), introducing a new tech choice, or encountering something important, ask: "Would you like me to record this as a learning?"
 - Follow git safety guidelines @~/.ai-tools/git-guidelines.md
 - Keep responses concise and actionable.
-- Never run destructive commands.
-- Use our conventions for file names, tests, and commands.
-- Keep your code clean and organized. Do not over-engineer solutions or overcomplicate things unnecessarily.
-- Write clear and concise code. Avoid unnecessary complexity and redundancy.
-- Use meaningful variable and function names.
-- Prefer self-documenting code. Write comments and documentation where necessary.
-- Keep your code modular and reusable. Avoid tight coupling and excessive dependencies.
+- Ask before destructive operations — don't guess safety
+- Code is communication — prefer clarity and simplicity
+- Self-documenting code through meaningful names and structure
+- Modular design that can evolve
+- Comments explain why, not what

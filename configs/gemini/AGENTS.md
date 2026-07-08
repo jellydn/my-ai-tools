@@ -38,10 +38,8 @@ See @~/.ai-tools/best-practices.md for full details.
 - Always propose a plan before edits. Use phases to break down tasks into manageable steps.
 - Run typecheck, lint and biome on js/ts file changes after finish
 - Prefer to use Bun to run scripts if possible, otherwise use tsx to run ts files.
-- Never run destructive commands.
-- Use our conventions for file names, tests, and commands.
-- Keep your code clean and organized. Do not over-engineer solutions or overcomplicate things unnecessarily.
-- Write clear and concise code. Avoid unnecessary complexity and redundancy.
-- Use meaningful variable and function names.
-- Prefer self-documenting code. Write comments and documentation where necessary.
-- Keep your code modular and reusable. Avoid tight coupling and excessive dependencies.
+- Ask before destructive operations — don't guess safety
+- Code is communication — prefer clarity and simplicity
+- Self-documenting code through meaningful names and structure
+- Modular design that can evolve
+- Comments explain why, not what
