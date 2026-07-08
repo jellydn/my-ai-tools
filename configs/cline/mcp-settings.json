@@ -47,7 +47,8 @@
 		},
 		"codebase-memory-mcp": {
 			"command": "codebase-memory-mcp",
-			"args": []
+			"args": [],
+			"alwaysAllow": []
 		}
 	}
 }
