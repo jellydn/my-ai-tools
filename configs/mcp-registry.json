@@ -24,6 +24,14 @@
 			"requires": ["qmd"],
 			"category": "knowledge"
 		},
+		"codebase-memory-mcp": {
+			"name": "codebase-memory-mcp",
+			"description": "code intelligence and structural search for large codebases",
+			"command": "codebase-memory-mcp",
+			"args": [],
+			"requires": ["codebase-memory-mcp"],
+			"category": "knowledge"
+		},
 		"fff": {
 			"name": "fff",
 			"description": "fast file search with frecency ranking",
