@@ -1,7 +1,7 @@
 {
   "collapseChangelog": true,
-  "defaultModel": "deepseek/deepseek-v4-pro",
-  "defaultProvider": "commandcode",
+  "defaultModel": "cline-pass/deepseek-v4-flash",
+  "defaultProvider": "clinepass",
   "defaultThinkingLevel": "high",
   "editorPaddingX": 1,
   "enabledModels": [
@@ -22,7 +22,8 @@
     "google-antigravity/gemini-3.5-flash",
     "google-antigravity/gemini-3-pro",
     "google-antigravity/claude-opus-4-6",
-    "commandcode/deepseek/deepseek-v4-pro"
+    "commandcode/deepseek/deepseek-v4-pro",
+    "commandcode/MiniMaxAI/MiniMax-M3"
   ],
   "hideThinkingBlock": true,
   "lastChangelogVersion": "0.80.3",

@@ -51,6 +51,11 @@
 			"command": "sem-mcp",
 			"args": [],
 			"timeout": 60000
+		},
+		"codebase-memory-mcp": {
+			"command": "codebase-memory-mcp",
+			"args": [],
+			"timeout": 60000
 		}
 	},
 	"security": {
@@ -172,6 +177,17 @@
 					{
 						"type": "command",
 						"command": "if [ -x \"$HOME/.orca/agent-hooks/gemini-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/gemini-hook.sh\"; fi"
+					}
+				]
+			}
+		],
+		"SessionStart": [
+			{
+				"matcher": "startup",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "echo \"Code discovery: prefer codebase-memory-mcp (search_graph, trace_path, get_code_snippet, query_graph, search_code) over grep/file-read; run index_repository first if the project is not indexed.\""
 					}
 				]
 			}

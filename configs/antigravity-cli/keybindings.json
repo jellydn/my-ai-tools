@@ -1,5 +1,6 @@
 {
   "cli.clear_screen": ["ctrl+l"],
+  "cli.cycle_mode": ["shift+tab"],
   "cli.enter": ["enter"],
   "cli.escape": ["ctrl+c", "esc"],
   "cli.exit": ["ctrl+d"],

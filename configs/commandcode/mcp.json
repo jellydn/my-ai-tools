@@ -53,6 +53,12 @@
 			"enabled": true,
 			"command": "ctx",
 			"args": ["mcp", "serve"]
+		},
+		"codebase-memory-mcp": {
+			"transport": "stdio",
+			"enabled": true,
+			"command": "codebase-memory-mcp",
+			"args": []
 		}
 	}
 }

@@ -181,3 +181,82 @@ pattern = "Grep"
 decision = "ask"
 scope = "user"
 pattern = "Bash"
+
+# >>> orca-managed-kimi-hooks (managed by Orca; do not edit) >>>
+[[hooks]]
+event = "UserPromptSubmit"
+command = "if [ -x '$HOME/.orca/agent-hooks/kimi-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/kimi-hook.sh'; fi"
+timeout = 10
+[[hooks]]
+event = "PreToolUse"
+command = "if [ -x '$HOME/.orca/agent-hooks/kimi-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/kimi-hook.sh'; fi"
+timeout = 10
+[[hooks]]
+event = "PostToolUse"
+command = "if [ -x '$HOME/.orca/agent-hooks/kimi-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/kimi-hook.sh'; fi"
+timeout = 10
+[[hooks]]
+event = "PostToolUseFailure"
+command = "if [ -x '$HOME/.orca/agent-hooks/kimi-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/kimi-hook.sh'; fi"
+timeout = 10
+[[hooks]]
+event = "PermissionRequest"
+command = "if [ -x '$HOME/.orca/agent-hooks/kimi-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/kimi-hook.sh'; fi"
+timeout = 10
+[[hooks]]
+event = "Stop"
+command = "if [ -x '$HOME/.orca/agent-hooks/kimi-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/kimi-hook.sh'; fi"
+timeout = 10
+[[hooks]]
+event = "StopFailure"
+command = "if [ -x '$HOME/.orca/agent-hooks/kimi-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/kimi-hook.sh'; fi"
+timeout = 10
+# <<< orca-managed-kimi-hooks <<<
+
+# >>> herdr kimi integration
+[[hooks]]
+event = "SessionStart"
+command = "bash '$HOME/.kimi-code/hooks/herdr-agent-state.sh' session"
+timeout = 10
+
+[[hooks]]
+event = "UserPromptSubmit"
+command = "bash '$HOME/.kimi-code/hooks/herdr-agent-state.sh' working"
+timeout = 10
+
+[[hooks]]
+event = "PreToolUse"
+command = "bash '$HOME/.kimi-code/hooks/herdr-agent-state.sh' working"
+timeout = 10
+
+[[hooks]]
+event = "SubagentStart"
+command = "bash '$HOME/.kimi-code/hooks/herdr-agent-state.sh' working"
+timeout = 10
+
+[[hooks]]
+event = "PreCompact"
+command = "bash '$HOME/.kimi-code/hooks/herdr-agent-state.sh' working"
+timeout = 10
+
+[[hooks]]
+event = "PermissionRequest"
+command = "bash '$HOME/.kimi-code/hooks/herdr-agent-state.sh' blocked"
+timeout = 10
+
+[[hooks]]
+event = "PermissionResult"
+command = "bash '$HOME/.kimi-code/hooks/herdr-agent-state.sh' working"
+timeout = 10
+
+[[hooks]]
+event = "Stop"
+command = "bash '$HOME/.kimi-code/hooks/herdr-agent-state.sh' idle"
+timeout = 10
+
+[[hooks]]
+event = "Interrupt"
+command = "bash '$HOME/.kimi-code/hooks/herdr-agent-state.sh' idle"
+timeout = 10
+
+# <<< herdr kimi integration

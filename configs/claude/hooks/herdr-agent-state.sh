@@ -3,7 +3,7 @@
 # managed by herdr; reinstalling or updating the integration overwrites this file.
 # add custom hooks beside this file instead of editing it.
 # HERDR_INTEGRATION_ID=claude
-# HERDR_INTEGRATION_VERSION=6
+# HERDR_INTEGRATION_VERSION=7
 
 set -eu
 
@@ -50,6 +50,8 @@ if hook_input_file:
 
 hook_event_name = str(hook_input.get("hook_event_name") or "")
 is_subagent = bool(hook_input.get("agent_id"))
+if is_subagent:
+    raise SystemExit(0)
 if hook_event_name == "SubagentStop":
     # SubagentStop is a completion event. Older Herdr integrations mapped it
     # to durable working, but Claude recap/away-summary can emit it after the

@@ -44,6 +44,11 @@
 			"alwaysAllow": [],
 			"command": "ctx",
 			"args": ["mcp", "serve"]
+		},
+		"codebase-memory-mcp": {
+			"command": "codebase-memory-mcp",
+			"args": [],
+			"alwaysAllow": []
 		}
 	}
 }

@@ -97,6 +97,11 @@
 			"command": ["ctx", "mcp", "serve"],
 			"enabled": true,
 			"type": "local"
+		},
+		"codebase-memory-mcp": {
+			"enabled": true,
+			"type": "local",
+			"command": ["codebase-memory-mcp"]
 		}
 	},
 	"model": "opencode/big-pickle",

@@ -1,70 +1,18 @@
 {
 	"mcpServers": {
-		"fetch": {
-			"command": "uvx",
-			"args": [
-				"mcp-server-fetch"
-			],
-			"env": {},
-			"disabled": true,
-			"autoApprove": []
-		},
-		"context7": {
-			"command": "npx",
-			"args": [
-				"-y",
-				"@upstash/context7-mcp@latest"
-			]
-		},
+		"fetch": { "command": "uvx", "args": ["mcp-server-fetch"], "env": {}, "disabled": true, "autoApprove": [] },
+		"context7": { "command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"] },
 		"sequential-thinking": {
 			"command": "npx",
-			"args": [
-				"-y",
-				"@modelcontextprotocol/server-sequential-thinking@latest"
-			]
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking@latest"]
 		},
-		"qmd": {
-			"command": "qmd",
-			"args": [
-				"mcp"
-			]
-		},
-		"fff": {
-			"type": "stdio",
-			"command": "fff-mcp",
-			"args": []
-		},
-		"react-grab-mcp": {
-			"command": "npx",
-			"args": [
-				"-y",
-				"@react-grab/mcp@latest",
-				"--stdio"
-			]
-		},
-		"logpilot": {
-			"command": "logpilot",
-			"args": [
-				"mcp-server"
-			]
-		},
-		"agentmemory": {
-			"command": "npx",
-			"args": [
-				"-y",
-				"@agentmemory/mcp@latest"
-			]
-		},
-		"sem": {
-			"command": "sem-mcp",
-			"args": []
-		},
-		"ctx": {
-			"command": "ctx",
-			"args": [
-				"mcp",
-				"serve"
-			]
-		}
+		"qmd": { "command": "qmd", "args": ["mcp"] },
+		"fff": { "type": "stdio", "command": "fff-mcp", "args": [] },
+		"react-grab-mcp": { "command": "npx", "args": ["-y", "@react-grab/mcp@latest", "--stdio"] },
+		"logpilot": { "command": "logpilot", "args": ["mcp-server"] },
+		"agentmemory": { "command": "npx", "args": ["-y", "@agentmemory/mcp@latest"] },
+		"sem": { "command": "sem-mcp", "args": [] },
+		"ctx": { "command": "ctx", "args": ["mcp", "serve"] },
+		"codebase-memory-mcp": { "command": "codebase-memory-mcp", "args": [] }
 	}
 }
