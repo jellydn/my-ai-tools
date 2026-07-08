@@ -4,6 +4,19 @@
 	"artifactReviewPolicy": "agent-decides",
 	"enableTelemetry": false,
 	"enableTerminalSandbox": true,
+	"hooks": {
+		"SessionStart": [
+			{
+				"matcher": "startup",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "echo \"Code discovery: prefer codebase-memory-mcp (search_graph, trace_path, get_code_snippet, query_graph, search_code) over grep/file-read; run index_repository first if the project is not indexed.\""
+					}
+				]
+			}
+		]
+	},
 	"model": "Gemini 3.5 Flash (High)",
 	"notifications": true,
 	"permissions": {
@@ -107,7 +120,29 @@
 			"unsandboxed(kubectl kustomize)",
 			"unsandboxed(jq)",
 			"unsandboxed(kubectl patch)",
-			"unsandboxed(git checkout)"
+			"unsandboxed(git checkout)",
+			"unsandboxed(qmd)",
+			"unsandboxed(docker --version)",
+			"unsandboxed(~/.bun/bin/qmd)",
+			"unsandboxed(~/.gemini/skills/qmd-knowledge/scripts/record.sh)",
+			"command(bun --version)",
+			"unsandboxed(just test)",
+			"unsandboxed(just e2e)",
+			"command(git --no-pager diff main --stat)",
+			"command(git merge-base)",
+			"command(git rev-parse)",
+			"command(~/.gemini/skills/autoreview/scripts/autoreview)",
+			"unsandboxed(~/.gemini/skills/autoreview/scripts/autoreview)",
+			"command(just validate)",
+			"command(cargo test --lib drives)",
+			"unsandboxed(cargo test --lib drives)",
+			"unsandboxed(cargo clippy -- -D warnings)",
+			"unsandboxed(cargo test)",
+			"unsandboxed(cargo clippy --all-targets -- -D warnings)",
+			"unsandboxed(cargo fmt --check)",
+			"unsandboxed(cargo fmt)",
+			"unsandboxed(just check)",
+			"unsandboxed(diskutil)"
 		],
 		"deny": ["command(git reset --hard)", "command(git push --force)", "command(rm -rf)"]
 	},
@@ -119,5 +154,6 @@
 		"command": "bash ~/.gemini/antigravity-cli/statusline.sh",
 		"enabled": true
 	},
-	"toolPermission": "proceed-in-sandbox"
+	"toolPermission": "proceed-in-sandbox",
+	"trustedWorkspaces": []
 }

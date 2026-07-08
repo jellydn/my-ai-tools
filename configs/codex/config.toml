@@ -125,6 +125,7 @@ conversationDetailMode = "STEPS_COMMANDS"
 show-context-window-usage = true
 composerEnterBehavior = "cmdIfMultiline"
 hotkey-window-projectless-default-enabled = true
+microphoneInputDeviceId = "7e75c40eb6416da40ab89dede65d7b2664b269fec7610267ea0ea58b41517ec7"
 
 [desktop.appearanceLightChromeTheme]
 accent = "#d7827e"
@@ -155,7 +156,7 @@ diffRemoved = "#908caa"
 skill = "#c4a7e7"
 
 [desktop.open-in-target-preferences]
-global = "cursor"
+global = "zed"
 
 [plugins."gmail@openai-curated"]
 enabled = true

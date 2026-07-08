@@ -8,10 +8,10 @@ branch_prefix_type = "github_username"
 delete_branch_on_archive = false
 
 [models]
-default = "opencode:opencode/deepseek-v4-flash-free"
+default = "opencode:clinepass/cline-pass/deepseek-v4-flash"
 default_plan_mode = true
 review = "gpt-5.5"
-visible_provider_models = "{\"claude\":[],\"codex\":[],\"cursor\":[],\"opencode\":[\"opencode:deepseek/deepseek-v4-flash\",\"opencode:deepseek/deepseek-v4-pro\",\"opencode:google/gemini-3.5-flash\",\"opencode:opencode/deepseek-v4-flash-free\"],\"pi\":[]}"
+visible_provider_models = "{\"claude\":[],\"codex\":[],\"cursor\":[],\"opencode\":[\"opencode:clinepass/cline-pass/deepseek-v4-flash\"],\"pi\":[]}"
 
 [models.codex]
 default_thinking_level = "high"
