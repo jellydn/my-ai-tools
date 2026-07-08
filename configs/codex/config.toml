@@ -7,6 +7,8 @@ personality = "pragmatic"
 # Notify the Codex Computer Use client when a turn ends.
 # Restored to match the desktop app's --previous-notify protocol.
 
+notify = ["$HOME/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
+
 [features]
 unified_exec = true
 shell_snapshot = true
@@ -129,6 +131,7 @@ conversationDetailMode = "STEPS_COMMANDS"
 show-context-window-usage = true
 composerEnterBehavior = "cmdIfMultiline"
 hotkey-window-projectless-default-enabled = true
+microphoneInputDeviceId = "7e75c40eb6416da40ab89dede65d7b2664b269fec7610267ea0ea58b41517ec7"
 
 [desktop.appearanceLightChromeTheme]
 accent = "#d7827e"

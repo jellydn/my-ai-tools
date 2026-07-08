@@ -5,7 +5,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
+            "timeout": 10
           }
         ]
       }
@@ -15,7 +16,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
+            "timeout": 10
           }
         ]
       }
@@ -25,7 +27,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
+            "timeout": 10
           }
         ]
       }
@@ -35,7 +38,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
+            "timeout": 10
           }
         ]
       }
@@ -46,7 +50,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
+            "timeout": 10
           }
         ]
       }
@@ -57,7 +62,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
+            "timeout": 10
           }
         ]
       }
@@ -68,7 +74,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
+            "timeout": 10
           }
         ]
       }
@@ -78,7 +85,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi"
+            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
+            "timeout": 10
           }
         ]
       }
