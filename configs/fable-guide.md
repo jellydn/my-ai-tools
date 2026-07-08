@@ -111,9 +111,11 @@ Before starting any non-trivial implementation, proactively gather context using
 3. **Check past work**: `ctx search` for previous agent sessions on this topic
 4. **Check project memory**: `qmd query` for ADRs, conventions, gotchas
 5. **Deep code analysis**: `codebase-memory-mcp` for call chains and structure
+6. **Documentation search**: `doc-search` for ADRs, wiki entries, conventions
 
 See @skills/context-discovery/ for detailed guidance.
 See @skills/git-context/ for git-specific context gathering.
+See @skills/doc-search/ for documentation-specific search.
 
 ## System Prompt Principles
 

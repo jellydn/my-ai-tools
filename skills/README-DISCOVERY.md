@@ -149,6 +149,17 @@ Searches git history to understand code evolution:
 - Related changes across commits
 - Impact analysis before making changes
 
+### 7. Documentation Search
+
+**File**: `skills/doc-search/SKILL.md`
+
+Systematically finds and navigates existing project documentation:
+- Locate ADRs, wiki entries, conventions, and guides
+- Search documentation content with `rg` and `qmd`
+- Query past agent sessions for documentation context
+- Match existing documentation style before creating new docs
+- Cross-reference related documentation
+
 **Example Output**:
 ```markdown
 # Quiz: GitHub OAuth Integration
