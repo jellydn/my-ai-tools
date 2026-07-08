@@ -1,95 +1,95 @@
 {
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "PostToolUseFailure": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -x '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '/Users/huynhdung/.orca/agent-hooks/grok-hook.sh'; fi",
-            "timeout": 10
-          }
-        ]
-      }
-    ]
-  }
+	"hooks": {
+		"SessionStart": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x '$HOME/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/grok-hook.sh'; fi",
+						"timeout": 10
+					}
+				]
+			}
+		],
+		"UserPromptSubmit": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x '$HOME/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/grok-hook.sh'; fi",
+						"timeout": 10
+					}
+				]
+			}
+		],
+		"Stop": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x '$HOME/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/grok-hook.sh'; fi",
+						"timeout": 10
+					}
+				]
+			}
+		],
+		"SessionEnd": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x '$HOME/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/grok-hook.sh'; fi",
+						"timeout": 10
+					}
+				]
+			}
+		],
+		"PreToolUse": [
+			{
+				"matcher": "*",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x '$HOME/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/grok-hook.sh'; fi",
+						"timeout": 10
+					}
+				]
+			}
+		],
+		"PostToolUse": [
+			{
+				"matcher": "*",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x '$HOME/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/grok-hook.sh'; fi",
+						"timeout": 10
+					}
+				]
+			}
+		],
+		"PostToolUseFailure": [
+			{
+				"matcher": "*",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x '$HOME/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/grok-hook.sh'; fi",
+						"timeout": 10
+					}
+				]
+			}
+		],
+		"Notification": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x '$HOME/.orca/agent-hooks/grok-hook.sh' ]; then /bin/sh '$HOME/.orca/agent-hooks/grok-hook.sh'; fi",
+						"timeout": 10
+					}
+				]
+			}
+		]
+	}
 }
