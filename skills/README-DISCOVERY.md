@@ -160,6 +160,17 @@ Systematically finds and navigates existing project documentation:
 - Match existing documentation style before creating new docs
 - Cross-reference related documentation
 
+### 8. Capability Experiments
+
+**File**: `skills/capability-experiments/SKILL.md`
+
+Leverages advanced model capabilities for rich outputs and proactive exploration:
+- **HTML reports**: Generate structured analysis with interactive elements
+- **Embedded questionnaires**: Rich HTML forms for interviews and quizzes
+- **Proactive research**: Self-directed codebase exploration patterns
+- **Multi-step reasoning**: Structured analysis for complex decisions
+- **Capability probes**: Explore what's newly possible with next-gen models
+
 **Example Output**:
 ```markdown
 # Quiz: GitHub OAuth Integration

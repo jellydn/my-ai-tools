@@ -27,6 +27,7 @@ Before jumping into implementation:
 - Context discovery (@skills/context-discovery/) - Proactive MCP tool usage
 - Git history context (@skills/git-context/) - Commit history and patterns
 - Documentation search (@skills/doc-search/) - Find ADRs, wiki, conventions
+- Capability experiments (@skills/capability-experiments/) - HTML reports, proactive research
 - Implementation logging (@skills/implementation-logger/) - Track deviations
 - `/quiz-me` - Verify understanding after completion
 

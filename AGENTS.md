@@ -122,6 +122,7 @@ Key skills for discovery-first development:
 - `skills/context-discovery/` - Proactively gather context using MCP tools
 - `skills/git-context/` - Search git history for patterns and decisions
 - `skills/doc-search/` - Find ADRs, wiki entries, and project documentation
+- `skills/capability-experiments/` - HTML reports, embedded UIs, proactive research
 - `skills/spec-interview/` - Clarify requirements through targeted questions
 - `skills/implementation-logger/` - Track decisions and deviations
 - `skills/quiz-me/` - Verify understanding after implementation
