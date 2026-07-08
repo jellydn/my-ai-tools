@@ -125,6 +125,30 @@ Helps with:
 - Staying "in the loop" with agent work
 - Identifying documentation gaps
 
+### 5. Context Discovery
+
+**File**: `skills/context-discovery/SKILL.md`
+
+Proactively gathers context using available MCP tools before and during implementation:
+- **fff**: Find relevant files by name/pattern
+- **sem**: Git history at function level
+- **ctx**: Past agent sessions on the same topic
+- **qmd**: Durable project knowledge and ADRs
+- **codebase-memory-mcp**: Code structure and call chains
+
+Includes a decision tree for which tool to use based on what you need to find.
+
+### 6. Git Context
+
+**File**: `skills/git-context/SKILL.md`
+
+Searches git history to understand code evolution:
+- Recent changes to a module
+- Function history via `git log -S`
+- Entity-level blame with `sem`
+- Related changes across commits
+- Impact analysis before making changes
+
 **Example Output**:
 ```markdown
 # Quiz: GitHub OAuth Integration

@@ -12,9 +12,10 @@ Before jumping into implementation:
 
 **For unfamiliar/complex work**:
 1. Run a blind spot pass (@skills/blindspot-pass/) to identify unknowns
-2. Interview me (@skills/spec-interview/) if major decisions unclear
-3. Search git history and existing patterns
-4. Propose approach based on findings
+2. Discover context using MCP tools (@skills/context-discovery/) — fff, sem, ctx, qmd
+3. Interview me (@skills/spec-interview/) if major decisions unclear
+4. Search git history for patterns
+5. Propose approach based on findings
 
 **Context over constraints**: These guidelines explain why, not just what. Apply reasoning to new situations.
 
@@ -23,6 +24,8 @@ Before jumping into implementation:
 - `/blindspots [task]` - Find unknown unknowns before starting
 - `/interview-me [feature]` - Clarify spec gaps with targeted questions  
 - `/map-from [reference]` - Learn from example code
+- Context discovery (@skills/context-discovery/) - Proactive MCP tool usage
+- Git history context (@skills/git-context/) - Commit history and patterns
 - Implementation logging (@skills/implementation-logger/) - Track deviations
 - `/quiz-me` - Verify understanding after completion
 

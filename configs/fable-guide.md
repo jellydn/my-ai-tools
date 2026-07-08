@@ -90,6 +90,31 @@ Quiz me on what you just implemented. Help me verify I understand
 the changes well enough to explain them in the PR.
 ```
 
+## Context Discovery
+
+Before starting any non-trivial implementation, proactively gather context using available tools:
+
+### Where to Look
+
+| Tool | What It Finds | Why It Matters |
+|------|--------------|----------------|
+| `fff` | Files by name/path | Find relevant files fast |
+| `sem` | Git history at function level | Understand why code changed |
+| `ctx` | Past agent sessions | Previous discussions and decisions |
+| `qmd` | Durable knowledge, ADRs | Project conventions and learnings |
+| `codebase-memory-mcp` | Code structure graph | Functions, classes, call chains |
+
+### Discovery Workflow
+
+1. **Find files**: `fff` to locate relevant modules
+2. **Understand history**: `sem` / `git log -S` to trace how the code evolved
+3. **Check past work**: `ctx search` for previous agent sessions on this topic
+4. **Check project memory**: `qmd query` for ADRs, conventions, gotchas
+5. **Deep code analysis**: `codebase-memory-mcp` for call chains and structure
+
+See @skills/context-discovery/ for detailed guidance.
+See @skills/git-context/ for git-specific context gathering.
+
 ## System Prompt Principles
 
 ### What Changed with Advanced Models
