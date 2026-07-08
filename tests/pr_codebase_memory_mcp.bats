@@ -33,7 +33,9 @@ README_FILE="$REPO_ROOT/README.md"
 }
 
 @test "README.md mentions codebase-memory-mcp in the MCP server overview" {
-    run grep -F 'codebase-memory-mcp' "$README_FILE"
+    # Extract the overview section and check for codebase-memory-mcp
+    overview_content="$(sed -n '/^## 🔌 MCP Servers & Plugins Overview$/,/^## /p' "$README_FILE")"
+    run grep -F 'codebase-memory-mcp' <<<"$overview_content"
     [ "$status" -eq 0 ]
 }
 

@@ -1490,7 +1490,7 @@ Configuration is managed through:
 
 ### MCP Servers
 
-Kilo delegates to OpenCode's MCP configuration. See [OpenCode MCP Servers](#mcp-servers-1) for the full list (context7, sequential-thinking, qmd, codebase-memory-mcp, fff, react-grab-mcp, logpilot, agentmemory).
+Kilo delegates to OpenCode's MCP configuration. See [OpenCode MCP Servers](#mcp-servers-1) for the full list.
 
 ### Key Features
 
