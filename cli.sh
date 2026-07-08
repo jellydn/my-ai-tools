@@ -1555,6 +1555,8 @@ copy_best_practices() {
 	log_success "Git guidelines copied to ~/.ai-tools/"
 	execute_quoted cp "$SCRIPT_DIR/configs/agent-memory-guidelines.md" "$HOME/.ai-tools/agent-memory.md"
 	log_success "Agent memory guidelines copied to ~/.ai-tools/"
+	execute_quoted cp "$SCRIPT_DIR/configs/fable-guide.md" "$HOME/.ai-tools/"
+	log_success "Fable guide copied to ~/.ai-tools/"
 
 	if [ -f "$SCRIPT_DIR/MEMORY.md" ]; then
 		execute_quoted cp "$SCRIPT_DIR/MEMORY.md" "$HOME/.ai-tools/"
