@@ -1,0 +1,7 @@
+#!/bin/bash
+# Augments grep/glob/read tool calls with codebase-memory-mcp graph context.
+# Never blocks - silent on failure (exit 0, no output).
+BIN="$(command -v codebase-memory-mcp)"
+[ -x "$BIN" ] || exit 0
+"$BIN" hook-augment 2>/dev/null
+exit 0

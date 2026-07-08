@@ -179,15 +179,6 @@
 						"command": "if [ -x \"$HOME/.orca/agent-hooks/gemini-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/gemini-hook.sh\"; fi"
 					}
 				]
-			},
-			{
-				"matcher": "google_search|grep_search",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "echo 'Reminder: prefer codebase-memory-mcp search_graph/trace_path/get_code_snippet over grep/file search for code discovery.' >&2"
-					}
-				]
 			}
 		],
 		"SessionStart": [

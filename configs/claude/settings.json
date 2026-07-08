@@ -165,7 +165,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "~/.claude/hooks/cbm-code-discovery-gate",
+						"command": "~/.claude/hooks/cbm-code-discovery-augment",
 						"timeout": 5
 					}
 				]
@@ -179,39 +179,7 @@
 						"type": "command",
 						"command": "bash \"$HOME/.claude/hooks/herdr-agent-state.sh\" session",
 						"timeout": 10
-					}
-				]
-			},
-			{
-				"matcher": "startup",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "~/.claude/hooks/cbm-session-reminder"
-					}
-				]
-			},
-			{
-				"matcher": "resume",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "~/.claude/hooks/cbm-session-reminder"
-					}
-				]
-			},
-			{
-				"matcher": "clear",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "~/.claude/hooks/cbm-session-reminder"
-					}
-				]
-			},
-			{
-				"matcher": "compact",
-				"hooks": [
+					},
 					{
 						"type": "command",
 						"command": "~/.claude/hooks/cbm-session-reminder"
