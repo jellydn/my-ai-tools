@@ -69,3 +69,7 @@ git = "https://github.com/xai-org/plugin-marketplace.git"
 [mcp_servers.sem]
 command = "sem-mcp"
 args = []
+
+[mcp_servers.ctx]
+command = "ctx"
+args = ["mcp", "serve"]

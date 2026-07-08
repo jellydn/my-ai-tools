@@ -92,6 +92,16 @@
 			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
 			"enabled": true,
 			"type": "local"
+		},
+		"ctx": {
+			"command": ["ctx", "mcp", "serve"],
+			"enabled": true,
+			"type": "local"
+		},
+		"codebase-memory-mcp": {
+			"enabled": true,
+			"type": "local",
+			"command": ["~/.local/bin/codebase-memory-mcp"]
 		}
 	},
 	"model": "opencode/big-pickle",

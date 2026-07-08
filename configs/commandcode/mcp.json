@@ -64,6 +64,15 @@
       "enabled": true,
       "command": "sem-mcp",
       "args": []
+    },
+    "ctx": {
+      "transport": "stdio",
+      "enabled": true,
+      "command": "ctx",
+      "args": [
+        "mcp",
+        "serve"
+      ]
     }
   }
 }

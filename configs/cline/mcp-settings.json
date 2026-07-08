@@ -2,7 +2,8 @@
 	"mcpServers": {
 		"context7": {
 			"alwaysAllow": [],
-			"url": "https://mcp.context7.com/mcp"
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@latest"]
 		},
 		"sequential-thinking": {
 			"alwaysAllow": [],
@@ -35,11 +36,14 @@
 			"args": ["-y", "@agentmemory/mcp"]
 		},
 		"sem": {
-			"type": "local",
+			"alwaysAllow": [],
 			"command": "sem-mcp",
-			"args": [],
-			"env": {},
-			"tools": ["*"]
+			"args": []
+		},
+		"ctx": {
+			"alwaysAllow": [],
+			"command": "ctx",
+			"args": ["mcp", "serve"]
 		}
 	}
 }
