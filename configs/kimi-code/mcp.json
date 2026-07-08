@@ -10,6 +10,7 @@
 		"logpilot": { "command": "logpilot", "args": ["mcp-server"] },
 		"agentmemory": { "command": "npx", "args": ["-y", "@agentmemory/mcp@latest"] },
 		"sem": { "command": "sem-mcp", "args": [] },
-		"ctx": { "command": "ctx", "args": ["mcp", "serve"] }
+		"ctx": { "command": "ctx", "args": ["mcp", "serve"] },
+		"codebase-memory-mcp": { "command": "~/.local/bin/codebase-memory-mcp" }
 	}
 }
