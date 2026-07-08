@@ -30,7 +30,7 @@ See @~/.ai-tools/best-practices.md for full details.
 
 - Follow my software development practice @~/.ai-tools/best-practices.md
 - Read @~/.ai-tools/MEMORY.md first — qmd (durable) vs agentmemory (session); follow the decision rule there
-- Read @~/.ai-tools/agent-memory.md — auto-capture learnings, persist bug fixes, keep memories concise.
+- Read @~/.ai-tools/agent-memory.md — auto-capture learnings, persist bug fixes, keep memories concise. After fixing a bug (confirmed by human), introducing a new tech choice, or encountering something important, ask: "Would you like me to record this as a learning?"
 - Follow git safety guidelines @~/.ai-tools/git-guidelines.md
 - Keep responses concise and actionable.
 - Never run destructive commands.
@@ -42,4 +42,3 @@ See @~/.ai-tools/best-practices.md for full details.
 - Keep your code modular and reusable. Avoid tight coupling and excessive dependencies.
 - Run typecheck, lint and biome on js/ts file changes after finish.
 - Prefer to use Bun to run scripts if possible, otherwise use tsx to run ts files.
-
