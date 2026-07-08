@@ -1,3 +1,12 @@
+---
+name: "implementation-logger"
+description: "Track decisions and deviations during complex work — log where reality differs from plan and capture decision rationale"
+license: "MIT"
+compatibility: "claude, opencode, codex, gemini, cursor, pi"
+hint: "Use during implementation of complex or uncertain changes to track decisions"
+user-invocable: true
+---
+
 # Implementation Logger
 
 ## When to Use

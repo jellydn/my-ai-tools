@@ -1,3 +1,12 @@
+---
+name: "context-discovery"
+description: "Proactively gather context using MCP tools (fff, sem, ctx, qmd, codebase-memory-mcp) before and during implementation"
+license: "MIT"
+compatibility: "claude, opencode, codex, gemini, cursor, pi"
+hint: "Use before starting work to understand codebase context via available MCP tools"
+user-invocable: true
+---
+
 # Context Discovery
 
 ## When to Use

@@ -1,3 +1,12 @@
+---
+name: "spec-interview"
+description: "Clarify requirements through targeted questions — uncovers unknown unknowns in feature specifications before implementation"
+license: "MIT"
+compatibility: "claude, opencode, codex, gemini, cursor, pi"
+hint: "Use when feature requirements are vague or incomplete"
+user-invocable: true
+---
+
 # Spec Interview
 
 ## When to Use
