@@ -164,6 +164,16 @@ Instead, use the `qmd-knowledge` skill:
 - Invoke via `/qmd-knowledge` slash command
 - Agent will handle proper file creation and embedding updates
 
+### 🧭 Implementation notes workflow
+
+Use `agent-memory.md` as the working rule for implementation notes:
+
+- capture what was learned
+- capture blockers and issues
+- capture weird behavior or gotchas
+- keep it concise and factual
+- route durable project knowledge to qmd when it should survive beyond the session
+
 ---
 
 ## 📋 Best Practices
