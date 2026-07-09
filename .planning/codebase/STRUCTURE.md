@@ -75,7 +75,7 @@ my-ai-tools/
 │   ├── ralph/
 │   ├── slop/
 │   ├── tdd/
-│   ├── thermo-nuclear-code-quality-review/
+│   ├── code-quality-review/
 │   └── tmux/
 ├── tests/                       # BATS functional test suite (23 files)
 │   ├── helpers.bash             # Shared test utilities
