@@ -63,7 +63,7 @@ Configured in `configs/claude/settings.json` via `extraKnownMarketplaces`:
 
 ## Custom Plugin Marketplace (This Repo)
 
-Defined in `.claude-plugin/marketplace.json` — 18 local skills published as Claude Code plugins:
+Defined in `.claude-plugin/marketplace.json` — 19 local skills published as Claude Code plugins:
 
 | Plugin                             | Category            | Description                                          |
 | ---------------------------------- | ------------------- | ---------------------------------------------------- |
@@ -83,7 +83,7 @@ Defined in `.claude-plugin/marketplace.json` — 18 local skills published as Cl
 | ralph                              | productivity        | Convert PRDs to Ralph agent JSON format              |
 | slop                               | productivity        | Remove AI-generated code slop from diffs             |
 | tdd                                | productivity        | Red-Green-Refactor TDD workflow                      |
-| thermo-nuclear-code-quality-review | code-quality        | Strict maintainability review                        |
+| code-quality-review | code-quality        | Strict maintainability review                        |
 | tmux                               | terminal-automation | Remote control tmux sessions, LogPilot integration   |
 
 ## Recommended Community Skills

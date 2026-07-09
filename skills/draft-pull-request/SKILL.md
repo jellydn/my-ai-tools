@@ -5,6 +5,7 @@ license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when creating a draft pull request with a structured description using gh CLI
 user-invocable: true
+disable-model-invocation: true
 metadata:
   audience: all
   workflow: git

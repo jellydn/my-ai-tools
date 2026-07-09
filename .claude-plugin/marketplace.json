@@ -187,14 +187,25 @@
 			"category": "productivity"
 		},
 		{
-			"name": "thermo-nuclear-code-quality-review",
-			"description": "Run an extremely strict maintainability code quality review for abstraction quality, giant files, and spaghetti-condition growth. Catch deep structural issues before merging.",
+			"name": "code-quality-review",
+			"description": "Run an extremely strict maintainability and structural code quality review — flags abstraction issues, spaghetti growth, and boundary leaks",
 			"version": "1.0.0",
 			"author": {
 				"name": "Dung Huynh Duc",
 				"email": "dung@productsway.com"
 			},
-			"source": "./skills/thermo-nuclear-code-quality-review",
+			"source": "./skills/code-quality-review",
+			"category": "code-quality"
+		},
+		{
+			"name": "code-review",
+			"description": "Review the diff since a fixed point along two axes — Conventions (does the code follow this repo's coding standards and Tidy First practices?) and Intent (does the change do what it claims to do?). Runs both reviews in parallel sub-agents and reports them side by side.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/code-review",
 			"category": "code-quality"
 		},
 		{

@@ -1,21 +1,19 @@
 ---
-name: thermo-nuclear-code-quality-review
+name: code-quality-review
 description: "Run an extremely strict maintainability and structural code quality review — flags abstraction issues, spaghetti growth, and boundary leaks"
 license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when performing a deep, unusually strict code quality review focused on maintainability, abstraction quality, and eliminating complexity
 user-invocable: true
-metadata:
-  audience: all
-  workflow: code-quality
 disable-model-invocation: true
+metadata:
 ---
 
-# Thermo-Nuclear Code Quality Review
+# Code Quality Review
 
 Use this skill for an unusually strict review focused on implementation quality, maintainability, abstraction quality, and codebase health.
 
-Above all, this skill should push the reviewer to be **ambitious** about code structure. Do not merely identify local cleanup opportunities. Actively search for "code judo" moves: restructurings that preserve behavior while making the implementation dramatically simpler, smaller, more direct, and more elegant.
+Above all, this skill should push the reviewer to be **ambitious** about code structure. Actively search for "code judo" moves: restructurings that preserve behavior while making the implementation dramatically simpler, smaller, more direct, and more elegant. Surface-level cleanup notes are useful but secondary — the real goal is structural simplification.
 
 ## Core Prompt
 
@@ -32,27 +30,25 @@ Start from this baseline:
 Apply the baseline prompt above, plus these explicit review rules:
 
 0. **Be ambitious about structural simplification.**
-   - Do not stop at "this could be a bit cleaner."
+   - Push past surface feedback — "this could be a bit cleaner" is where the conversation starts, not where it ends.
    - Look for opportunities to reframe the change so that whole branches, helpers, modes, conditionals, or layers disappear entirely.
    - Prefer the solution that makes the code feel inevitable in hindsight.
    - Assume there is often a "code judo" move available: a re-organization that uses the existing architecture more effectively and makes the change dramatically simpler and more elegant.
-   - If you see a path to delete complexity rather than rearrange it, push hard for that path.
+   - When you see a path to delete complexity rather than rearrange it, push hard for that path.
 
-1. **Do not let a PR push a file from under 1k lines to over 1k lines without a very strong reason.**
-   - Treat this as a strong code-quality smell by default.
-   - Prefer extracting helpers, subcomponents, modules, or local abstractions instead of letting a file sprawl past 1000 lines.
-   - If the diff crosses that threshold, explicitly ask whether the code should be decomposed first.
-   - Only waive this if there is a compelling structural reason and the resulting file is still clearly organized.
+1. **Keep files under 1k lines. Treat crossing that boundary as a decomposition signal.**
+   - When a PR would push a file past 1000 lines, that's a strong prompt to extract helpers, subcomponents, or modules before merging.
+   - Prefer decomposing: pull out helpers, split into focused modules, or introduce local abstractions.
+   - Waive this only when there is a compelling structural reason and the resulting file remains clearly organized.
 
-2. **Do not allow random spaghetti growth in existing code.**
-   - Be highly suspicious of new ad-hoc conditionals, scattered special cases, or one-off branches inserted into unrelated flows.
-   - If a change adds "weird if statements in random places", treat that as a design problem, not a stylistic nit.
-   - Prefer pushing the logic into a dedicated abstraction, helper, state machine, policy object, or separate module instead of tangling an existing path.
+2. **Keep existing control flows clean. Route new logic into dedicated abstractions.**
+   - Treat new ad-hoc conditionals, scattered special cases, or one-off branches inserted into unrelated flows as design problems.
+   - When a change adds "weird if statements in random places," push the logic into a dedicated abstraction, helper, state machine, policy object, or separate module instead of tangling an existing path.
    - Call out changes that make the surrounding code harder to reason about, even if they technically work.
 
 3. **Bias toward cleaning the design, not just accepting working code.**
    - If behavior can stay the same while the structure becomes meaningfully cleaner, push for the cleaner version.
-   - Do not rubber-stamp "it works" implementations that leave the codebase messier.
+   - Push for the cleanest architecture, not just working code. "It works" is the floor, not the ceiling.
    - Strongly prefer simplifications that remove moving pieces altogether over refactors that merely spread the same complexity around.
 
 4. **Prefer direct, boring, maintainable code over hacky or magical code.**
@@ -73,7 +69,7 @@ Apply the baseline prompt above, plus these explicit review rules:
 7. **Treat unnecessary sequential orchestration and non-atomic updates as design smells when the cleaner structure is obvious.**
    - If independent work is serialized for no good reason, ask whether the flow should run in parallel instead.
    - If related updates can leave state half-applied, push for a more atomic structure.
-   - Do not over-index on micro-optimizations, but do flag avoidable orchestration complexity that makes the implementation more brittle.
+   - Focus on avoidable orchestration complexity that makes the implementation more brittle, rather than micro-optimizations.
 
 ## Primary Review Questions
 
@@ -136,15 +132,15 @@ When you identify a code-quality problem, prefer suggestions like:
 - Parallelize independent work when that also simplifies the orchestration.
 - Restructure related updates into a more atomic flow when partial state would be harder to reason about.
 
-Do not be satisfied with "maybe rename this" feedback when the real issue is structural.
-Do not be satisfied with a merely cleaner version of the same messy idea if there is a plausible path to a much simpler idea.
+Push beyond surface-level feedback. When the real issue is structural, "maybe rename this" undersells the opportunity.
+When a merely cleaner version of the same messy idea is possible but a much simpler idea is also within reach, push for the simpler one.
 
 ## Review Tone
 
 Be direct, serious, and demanding about quality.
-Do not be rude, but do not soften major maintainability issues into mild suggestions.
-If the code is making the codebase messier, say so clearly.
-If the implementation missed an opportunity for a dramatic simplification, say that clearly too.
+Be respectful, and be clear. Name structural problems plainly — euphemism helps no one.
+When the code is making the codebase messier, say so.
+When the implementation missed an opportunity for a dramatic simplification, say that clearly too.
 
 Good phrases:
 
@@ -170,22 +166,22 @@ Prioritize findings in this order:
 6. Modularity and abstraction issues
 7. Legibility and maintainability concerns
 
-Do not flood the review with low-value nits if there are larger structural issues.
-Prefer a smaller number of high-conviction comments over a long list of cosmetic notes.
+Lead with the highest-impact structural findings.
+A small set of high-conviction comments is far more valuable than a long list of cosmetic notes.
 
 ## Approval Bar
 
-Do not approve merely because behavior seems correct.
-The bar for approval is:
+Approve only when structural quality holds up alongside correctness.
+The bar for approval requires all of:
 
-- no clear structural regression
-- no obvious missed opportunity to make the implementation dramatically simpler when such a path is visible
-- no unjustified file-size explosion
-- no obvious spaghetti-growth from special-case branching
-- no obviously hacky or magical abstraction that makes the code harder to reason about
-- no unnecessary wrapper/cast/optionality churn obscuring the real design
-- no clear architecture-boundary leak or avoidable canonical-helper duplication
-- no missed opportunity for an obvious decomposition that would materially improve maintainability
+- clear structural regression is absent
+- obvious opportunities for dramatic simplification have been addressed
+- file-size boundaries are respected (no unjustified explosion past 1k lines)
+- no spaghetti-growth from ad-hoc special-case branching
+- abstractions are honest (no hacky/magical indirection that makes code harder to reason about)
+- types and contracts are clean (no unnecessary wrapper/cast/optionality churn)
+- logic lives in the right layer (no architecture-boundary leaks, no avoidable helper duplication)
+- obvious decomposition opportunities that would materially improve maintainability have been taken
 
 Treat these as presumptive blockers unless the author can justify them clearly:
 

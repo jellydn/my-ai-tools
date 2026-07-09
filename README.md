@@ -27,7 +27,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | -------------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | **adr**                                | Generate Architecture Decision Records from design discussions                  | Before implementing significant technical changes — captures the why, alternatives considered, and consequences |
 | **codemap**                            | Parallel codebase analysis producing 7 structured documents                     | Onboarding to a new project, or before major refactoring — gives you the full picture fast                      |
-| **thermo-nuclear-code-quality-review** | Extremely strict maintainability and structural code quality review             | Before merging PRs — catches issues that regular linters miss                                                   |
+| **code-quality-review** | Extremely strict maintainability and structural code quality review             | Before merging PRs — catches issues that regular linters miss                                                   |
 | **babysit-pr**                         | Continuously monitor open PRs, auto-fix CI failures, surface review feedback    | After pushing a PR — hands-off monitoring until it's ready to merge                                             |
 | **improve**                            | Audit any codebase and write implementation plans for cheaper models to execute | When you want a senior-level code review with actionable, self-contained plans                                  |
 
@@ -412,7 +412,7 @@ npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
 
-# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, thermo-nuclear-code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, tmux, blindspot-pass, implementation-logger, quiz-me, spec-interview
+# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, tmux, blindspot-pass, implementation-logger, quiz-me, spec-interview
 # Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
@@ -453,7 +453,7 @@ If you encounter issues:
 | `ralph`                              | PRD to JSON converter                   | Local Marketplace |
 | `qmd-knowledge`                      | Project knowledge management            | Local Marketplace |
 | `codemap`                            | Parallel codebase analysis              | Local Marketplace |
-| `thermo-nuclear-code-quality-review` | Extremely strict maintainability review | Local Marketplace |
+| `code-quality-review` | Extremely strict maintainability review | Local Marketplace |
 | `claude-hud`                         | Status line with usage monitoring       | Community         |
 | `worktrunk`                          | Work management                         | Community         |
 | `codex`                              | Codex code review & task delegation     | Community         |
@@ -650,6 +650,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 **Local Marketplace Plugins** - Installed by `cli.sh` from [`skills/`](skills/):
 
 - `adr` - Architecture Decision Records
+- `code-review` - Two-axis diff review (Conventions + Intent) with parallel sub-agents — checks bash idioms, Tidy First practices, and whether the change does what it claims
 - `codemap` - Parallel codebase analysis producing structured documentation
 - `commit-atomic` - Atomic commits by logically grouping changes with commitizen convention (no `git add -A`)
 - `draft-pull-request` - Create draft pull requests using gh CLI with what/why/how template
@@ -665,7 +666,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `ralph` - Convert PRDs to JSON for autonomous agent execution
 - `slop` - AI slop detection and removal
 - `tdd` - Test-Driven Development workflows
-- `thermo-nuclear-code-quality-review` - Extremely strict maintainability and structural code quality reviews
+- `code-quality-review` - Extremely strict maintainability and structural code quality reviews
 - `tmux` - Remote control tmux sessions for interactive CLIs (python, node, gdb, etc.)
 
 #### Projects Built with AI
@@ -708,7 +709,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **OZ Skills**              | [warpdotdev/oz-skills](https://github.com/warpdotdev/oz-skills)                                               | 14 production-ready skills by Warp. Covers CI fix, PR creation, web testing, accessibility audits, and more.                                                                                                                   |
 | **Auto-Review**            | [openclaw/agent-skills](https://github.com/openclaw/agent-skills/blob/main/skills/autoreview/SKILL.md)        | Auto-review skill for structured and actionable pull request feedback workflows.                                                                                                                                               |
 | **Skills Discovery**       | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.                                                                                            |
-| **Matt Pocock**            | [mattpocock/skills](https://github.com/mattpocock/skills)                                                     | Community skills by Matt Pocock. Includes `grill-with-docs` for docs-grounded plan stress-testing, `improve-codebase-architecture` for finding deepening opportunities, and more.                                              |
+| **Matt Pocock**            | [mattpocock/skills](https://github.com/mattpocock/skills)                                                     | Community skills by Matt Pocock. Includes `grill-with-docs` for docs-grounded plan stress-testing, `improve-codebase-architecture` for finding deepening opportunities, and more.        |
 | **Mitsuhiko**              | [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff)                                             | Skills and extensions by Armin Ronacher. Includes tmux session control, GitHub CLI, web browser automation, Sentry integration, mermaid diagrams, and more.                                                                    |
 | **Git Stacked PRs**        | [github/gh-stack](https://github.com/github/gh-stack)                                                         | GitHub CLI extension for managing stacked branches and pull requests. Create, push, rebase, sync, and navigate stacks of dependent PRs for incremental code review workflows.                                                  |
 | **Facts**                  | [av/facts](https://github.com/av/facts)                                                                       | Track project specs and facts in a `.facts` file. Lifecycle stages (`@draft` → `@spec` → `@implemented`) with shell-command verification. Ships four skills: `facts`, `facts-discover`, `facts-refine`, and `facts-implement`. |
@@ -1865,7 +1866,7 @@ Located in [`configs/cursor/commands/`](configs/cursor/commands/):
 
 Located in [`configs/cursor/agents/`](configs/cursor/agents/):
 
-- `thermo-nuclear-code-quality-review` - Run a strict maintainability and structural quality audit
+- `code-quality-review` - Run a strict maintainability and structural quality audit
 
 ### Usage
 

@@ -110,7 +110,7 @@ README_FILE="$REPO_ROOT/README.md"
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
     fi
-    run jq -r '[.recommended_skills[] | select(.skill == "improve-codebase-architecture")][0].repo' "$RECOMMEND_SKILLS_JSON"
+    run jq -r '.recommended_skills[] | select(.skill == "improve-codebase-architecture") | .repo' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
     [ "$output" = "mattpocock/skills" ]
 }

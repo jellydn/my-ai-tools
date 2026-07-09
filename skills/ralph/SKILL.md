@@ -5,6 +5,7 @@ license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when converting PRDs to prd.json format for Ralph autonomous agent system
 user-invocable: true
+disable-model-invocation: true
 metadata:
   audience: all
   workflow: product
