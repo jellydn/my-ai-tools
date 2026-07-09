@@ -5,6 +5,7 @@ license: MIT
 compatibility: claude, opencode, codex, gemini, cursor, pi
 hint: Use when resuming work from a previous handoff session
 user-invocable: true
+disable-model-invocation: true
 metadata:
   audience: all
   workflow: workflow

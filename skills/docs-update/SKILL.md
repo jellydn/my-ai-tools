@@ -5,6 +5,7 @@ license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when updating documentation, reviewing docs, or handling documentation changes after code changes
 user-invocable: true
+disable-model-invocation: true
 metadata:
   audience: all
   workflow: documentation

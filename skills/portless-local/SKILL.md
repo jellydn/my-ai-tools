@@ -5,6 +5,7 @@ license: MIT
 compatibility: claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when you want clean, named URLs for local development instead of remembering port numbers
 user-invocable: true
+disable-model-invocation: true
 metadata:
   audience: all
   workflow: development
