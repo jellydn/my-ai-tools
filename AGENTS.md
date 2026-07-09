@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Monorepo for **my-ai-tools** — source-of-truth configs for 14+ AI coding assistants (Claude Code, OpenCode, Amp, Codex, Gemini, Antigravity, Cursor, Cline, etc.). It exports configs to `~/.claude/`, `~/.config/opencode/`, `~/.pi/`, etc. and imports them back via `generate.sh`. Per-tool configs live in `configs/<tool>/`.
+Monorepo for **my-ai-tools** — source-of-truth configs for 14+ AI coding assistants (Claude Code, OpenCode, Amp, Codex, Gemini, Antigravity, Cursor, Cline, Grok, etc.). It exports configs to `~/.claude/`, `~/.config/opencode/`, `~/.pi/`, etc. and imports them back via `generate.sh`. Per-tool configs live in `configs/<tool>/`.
 
 ## Essential Commands
 
