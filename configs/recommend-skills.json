@@ -28,6 +28,11 @@
 			"description": "Find deepening opportunities in a codebase, informed by the domain language in CONTEXT.md"
 		},
 		{
+			"repo": "mattpocock/skills",
+			"skill": "code-review",
+			"description": "Review a diff from a fixed point with parallel Standards and Spec sub-agents, then report actionable findings side by side"
+		},
+		{
 			"repo": "github/gh-stack",
 			"description": "GitHub CLI extension for managing stacked branches and pull requests"
 		},
