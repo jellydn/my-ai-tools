@@ -782,7 +782,7 @@ generate_best_practices() {
 	copy_single "$HOME/.ai-tools/fable-guide.md" "$SCRIPT_DIR/configs/fable-guide.md"
 
 	if [ -f "$HOME/.ai-tools/implementation-notes.md" ]; then
-		copy_single "$HOME/.ai-tools/implementation-notes.md" "$SCRIPT_DIR/agent-memory.md"
+		copy_single "$HOME/.ai-tools/implementation-notes.md" "$SCRIPT_DIR/configs/implementation-notes-guidelines.md"
 	fi
 }
 

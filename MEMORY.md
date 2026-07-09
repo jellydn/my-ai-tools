@@ -166,7 +166,7 @@ Instead, use the `qmd-knowledge` skill:
 
 ### 🧭 Implementation notes workflow
 
-Use @./`agent-memory.md` as the working rule for implementation notes:
+Use @./`configs/implementation-notes-guidelines.md` as the working rule for implementation notes:
 
 - Capture what was learned
 - Capture blockers and issues

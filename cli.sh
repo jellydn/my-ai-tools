@@ -1563,8 +1563,8 @@ copy_best_practices() {
 		log_success "MEMORY.md copied to ~/.ai-tools/"
 	fi
 
-	if [ -f "$SCRIPT_DIR/agent-memory.md" ]; then
-		execute_quoted cp "$SCRIPT_DIR/agent-memory.md" "$HOME/.ai-tools/implementation-notes.md"
+	if [ -f "$SCRIPT_DIR/configs/implementation-notes-guidelines.md" ]; then
+		execute_quoted cp "$SCRIPT_DIR/configs/implementation-notes-guidelines.md" "$HOME/.ai-tools/implementation-notes.md"
 		log_success "Implementation notes copied to ~/.ai-tools/implementation-notes.md"
 	fi
 }

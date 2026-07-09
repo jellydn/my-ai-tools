@@ -3164,6 +3164,12 @@ Setup includes the following shared configuration files installed by `./cli.sh`:
 - Persist non-trivial bug fixes immediately for future sessions
 - Keep memories concise and actionable — facts and patterns over narrative
 
+**Implementation Notes** — [`configs/implementation-notes-guidelines.md`](configs/implementation-notes-guidelines.md) (→ `~/.ai-tools/implementation-notes.md`):
+
+- Structured workflow for AI agents to capture implementation notes
+- Templates and style rules for what to record after each task
+- Decision rules for routing knowledge to the right store (qmd / agentmemory / handoffs)
+
 These are automatically referenced by all 15+ AI tool AGENTS.md configurations installed by this repo.
 
 ---
