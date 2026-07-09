@@ -168,11 +168,11 @@ Instead, use the `qmd-knowledge` skill:
 
 Use @./`agent-memory.md` as the working rule for implementation notes:
 
-- capture what was learned
-- capture blockers and issues
-- capture weird behavior or gotchas
-- keep it concise and factual
-- route durable project knowledge to qmd when it should survive beyond the session
+- Capture what was learned
+- Capture blockers and issues
+- Capture weird behavior or gotchas
+- Keep it concise and factual
+- Route durable project knowledge to qmd when it should survive beyond the session
 
 ---
 

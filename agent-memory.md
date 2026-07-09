@@ -40,9 +40,9 @@ Keep it short and factual. Focus on the parts that matter later:
 
 Choose the right place for the note:
 
-- **Durable project knowledge** that will matter later → record it in `qmd`
-- **Temporary blocker or hint for the current session** → use `agentmemory`
-- **Need to continue the same work later** → write a `/handoffs` plan, not a memory note
+- **Durable project knowledge** that will matter later → record it in `qmd` (via `/qmd-knowledge` skill)
+- **Temporary blocker or hint for the current session** → use `agentmemory` (via `mcp__agentmemory__memory_save` tool)
+- **Need to continue the same work later** → write a `/handoffs` plan (via `/handoffs` command), not a memory note
 - **Nothing durable and nothing actionable** → do not record it
 
 ## Suggested note template
@@ -79,7 +79,7 @@ Choose the right place for the note:
 
 ## Good examples
 
-- "The env var only works when passed as `\"$NAME\"`, not a literal string."
+- "The env var only works when passed as `"$NAME"`, not a literal string."
 - "Vitest failed until dependencies were installed with `npm ci`."
 - "This API needs a changeset before merge."
 - "Browser verification is required for UI changes."
