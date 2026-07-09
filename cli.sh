@@ -1562,6 +1562,11 @@ copy_best_practices() {
 		execute_quoted cp "$SCRIPT_DIR/MEMORY.md" "$HOME/.ai-tools/"
 		log_success "MEMORY.md copied to ~/.ai-tools/"
 	fi
+
+	if [ -f "$SCRIPT_DIR/agent-memory.md" ]; then
+		execute_quoted cp "$SCRIPT_DIR/agent-memory.md" "$HOME/.ai-tools/implementation-notes.md"
+		log_success "Implementation notes copied to ~/.ai-tools/implementation-notes.md"
+	fi
 }
 
 # Check if Claude CLI supports plugin marketplace functionality
