@@ -166,7 +166,7 @@ Instead, use the `qmd-knowledge` skill:
 
 ### 🧭 Implementation notes workflow
 
-Use @./`configs/implementation-notes-guidelines.md` as the working rule for implementation notes:
+Use @~/.ai-tools/implementation-notes.md as the working rule for implementation notes:
 
 - Capture what was learned
 - Capture blockers and issues
