@@ -804,6 +804,16 @@ generate_cline_configs() {
 	# Copy kanban config
 	copy_single "$HOME/.cline/kanban/config.json" "$SCRIPT_DIR/configs/cline/kanban-config.json"
 
+	# Export skills
+	if [ -d "$HOME/.cline/skills" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/cline/skills"
+		if [ -n "$(ls -A "$HOME/.cline/skills" 2>/dev/null)" ]; then
+			if execute "cp -r '$HOME/.cline/skills'/* '$SCRIPT_DIR/configs/cline/skills'/ 2>/dev/null"; then
+				log_success "Cline skills exported"
+			fi
+		fi
+	fi
+
 	# Copy global rules back to repo
 	# Prefer ~/.agents/AGENTS.md (canonical cross-tool source); fall back to ~/.cline/rules/01-guidelines.md
 	if [ -f "$HOME/.agents/AGENTS.md" ]; then
