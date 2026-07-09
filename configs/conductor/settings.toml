@@ -11,7 +11,7 @@ delete_branch_on_archive = false
 default = "opencode:clinepass/cline-pass/deepseek-v4-flash"
 default_plan_mode = true
 review = "gpt-5.5"
-visible_provider_models = "{\"claude\":[],\"codex\":[],\"cursor\":[],\"opencode\":[\"opencode:clinepass/cline-pass/deepseek-v4-flash\"],\"pi\":[]}"
+visible_provider_models = "{\"claude\":[],\"codex\":[],\"cursor\":[],\"opencode\":[\"opencode:clinepass/cline-pass/deepseek-v4-flash\",\"opencode:clinepass/cline-pass/deepseek-v4-pro\",\"opencode:clinepass/cline-pass/glm-5.2\",\"opencode:clinepass/cline-pass/kimi-k2.7-code\",\"opencode:clinepass/cline-pass/kimi-k2.6\",\"opencode:clinepass/cline-pass/minimax-m3\"],\"pi\":[]}"
 
 [models.codex]
 default_thinking_level = "high"

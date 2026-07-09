@@ -20,7 +20,7 @@ Based on Thariq Shihipar's "Field Guide to Fable" talk (AI Engineer 2026), adds 
 
 **Updated Files**:
 - `configs/claude/CLAUDE.md` - Discovery-first approach, context over constraints
-- `configs/best-practices.md` - Streamlined with Fable principles  
+- `configs/best-practices.md` - Streamlined with Fable principles
 - `AGENTS.md` - References new discovery tools
 
 **Key Concepts**:

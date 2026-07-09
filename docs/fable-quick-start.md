@@ -81,10 +81,10 @@ Agent generates quiz:
 
 ### 5. Extract Learnings
 
-Move log content to:
+Use `~/.ai-tools/implementation-notes.md` and `~/.ai-tools/MEMORY.md` to route notes, then move content to:
 - PR description ← Decision rationale
 - ADRs ← Architecture choices
-- MEMORY.md ← Gotchas for future
+- qmd / agentmemory ← per `~/.ai-tools/MEMORY.md` decision rule
 - Docs ← Patterns discovered
 
 ## The Four Unknowns
@@ -114,7 +114,7 @@ Unknown   | Unknown Knowns | Unknown Unknowns |
 **Good** ✅:
 ```
 We value type safety; TypeScript's inference catches bugs at compile time.
-Our codebase prioritizes editing existing files; new files create 
+Our codebase prioritizes editing existing files; new files create
 discoverability challenges for maintainers.
 Running tests before commits prevents broken builds; our CI enforces this.
 ```
@@ -211,7 +211,7 @@ Agent: "Turns out we need idempotency keys..."
 ```
 User: /blindspots Add Stripe payment integration
 
-Agent: 
+Agent:
 - Found existing PayPal integration (better pattern)
 - Webhook signature verification required (security)
 - Idempotency keys mandatory (PCI compliance)
@@ -236,9 +236,9 @@ git pull
 ```
 
 Files copied to:
-- `~/.ai-tools/fable-guide.md` - Full guide
-- `~/.ai-tools/best-practices.md` - Updated practices
-- `~/.claude/commands/fable/` - Commands
+- `~/.ai-tools/fable-guide.md` — Full guide
+- `~/.ai-tools/best-practices.md` — Updated practices
+- `~/.ai-tools/implementation-notes.md` — Implementation notes workflow guide
 
 ## Skills Location
 
@@ -253,14 +253,13 @@ Skills are referenced by agents automatically:
 - **Full Guide**: `~/.ai-tools/fable-guide.md`
 - **Skills Overview**: `skills/README-DISCOVERY.md`
 - **Video**: [Field Guide to Fable](https://www.youtube.com/watch?v=9fubhllmsBU)
-- **Roadmap**: `.planning/fable-improvements.md`
 
 ## Quick Tips
 
 1. **Start with /blindspots**: Especially on unfamiliar code
 2. **Log as you go**: Don't wait until end to record decisions
 3. **Quiz yourself**: Verify understanding before PR
-4. **Extract learnings**: Feed MEMORY.md for future work
+4. **Extract learnings**: Use `~/.ai-tools/implementation-notes.md` and `~/.ai-tools/MEMORY.md` to route learnings to the right store
 5. **Be unreasonable**: Challenge your assumptions about tradeoffs
 
 ## Common Mistakes
@@ -281,7 +280,7 @@ Skills are referenced by agents automatically:
 Implements without tracking decisions
 → Can't remember why choices were made in PR
 
-**Fix**: Create .implementation-log.md at start
+**Fix**: Create an implementation log at the start, use `~/.ai-tools/implementation-notes.md` for the workflow
 
 ### Mistake 4: Not Verifying Understanding
 Merges without quiz or review
@@ -331,9 +330,10 @@ Try this on your next task:
    - Take the quiz
    - Identify gaps
 
-6. **Extract**: Move log to
+6. **Extract**: Use `~/.ai-tools/implementation-notes.md` and `~/.ai-tools/MEMORY.md` to route notes, then move log to
    - PR description
-   - MEMORY.md
+   - ADRs
+   - qmd / agentmemory
    - Docs
 
 7. **Reflect**: What unknowns would you have missed without discovery?

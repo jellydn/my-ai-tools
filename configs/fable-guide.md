@@ -81,6 +81,8 @@ As you implement, log any deviations from the original plan and why.
 This helps me understand where reality differed from my mental model.
 ```
 
+See `~/.ai-tools/implementation-notes.md` for the full workflow, template, and decision rules on what to record and where (qmd / agentmemory / handoffs).
+
 ### 6. Knowledge Verification
 
 After implementation, test understanding:
@@ -283,7 +285,7 @@ After completing work:
 1. **Reflect on unknowns encountered**
 2. **Update your mental model** of what's possible
 3. **Document surprising capabilities** for future reference
-4. **Record gotchas** in your knowledge base
+4. **Record gotchas** — use `~/.ai-tools/implementation-notes.md` to decide where to route them; durable project knowledge belongs in qmd (see `~/.ai-tools/MEMORY.md`)
 5. **Share learnings** with your team
 
 The field is evolving fast. What's impossible today may be trivial tomorrow.

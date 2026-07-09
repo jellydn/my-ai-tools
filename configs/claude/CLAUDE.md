@@ -22,7 +22,7 @@ Before jumping into implementation:
 ## Tools for Discovery
 
 - `/blindspots [task]` - Find unknown unknowns before starting
-- `/interview-me [feature]` - Clarify spec gaps with targeted questions  
+- `/interview-me [feature]` - Clarify spec gaps with targeted questions
 - `/map-from [reference]` - Learn from example code
 - Context discovery (@skills/context-discovery/) - Proactive MCP tool usage
 - Git history context (@skills/git-context/) - Commit history and patterns

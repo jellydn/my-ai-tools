@@ -124,6 +124,9 @@ curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --backup
 # Skip backup prompt
 curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --no-backup
 
+# Non-interactive mode (auto-approve, only processes your active tools)
+curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --yes
+
 # One-step Gemini→Antigravity CLI migration
 curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --migrate-gemini
 ```
@@ -143,6 +146,7 @@ cd my-ai-tools
 - `--dry-run` - Preview changes without making them
 - `--backup` - Backup existing configs before installing
 - `--no-backup` - Skip backup prompt
+- `-y` / `--yes` - Non-interactive mode; only installs/configures your active tool set (amp, codex, ctx, cursor, kilo, opencode, open_code_review, pi, antigravity, ai-switcher). Shared infra (plugins, skills, global tools) still installed. Auto-activated in CI/piped input.
 - `--migrate-gemini` - One-step Gemini→Antigravity CLI migration
 
 ## 🔄 Bidirectional Config Sync
@@ -152,7 +156,7 @@ cd my-ai-tools
 Copy configurations from this repository to your home directory (`~/.claude/`, `~/.config/opencode/`, etc.):
 
 ```bash
-./cli.sh [--dry-run] [--backup] [--no-backup] [--migrate-gemini]
+./cli.sh [--dry-run] [--backup] [--no-backup] [-y|--yes] [--migrate-gemini]
 ```
 
 ### Reverse: Generate from Home (`generate.sh`)
@@ -3164,7 +3168,13 @@ Setup includes the following shared configuration files installed by `./cli.sh`:
 - Persist non-trivial bug fixes immediately for future sessions
 - Keep memories concise and actionable — facts and patterns over narrative
 
-These are automatically referenced by all 15+ AI tool AGENTS.md configurations installed by this repo.
+**Implementation Notes** — [`configs/implementation-notes-guidelines.md`](configs/implementation-notes-guidelines.md) (→ `~/.ai-tools/implementation-notes.md`):
+
+- Structured workflow for AI agents to capture implementation notes
+- Templates and style rules for what to record after each task
+- Decision rules for routing knowledge to the right store (qmd / agentmemory / handoffs)
+
+Best practices and memory guidelines are automatically referenced by all 15+ AI tool AGENTS.md configurations installed by this repo; implementation notes are linked from the shared memory workflow.
 
 ---
 

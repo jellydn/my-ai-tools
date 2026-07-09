@@ -9,6 +9,22 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 source "$SCRIPT_DIR/lib/install.sh"
+
+# Core tools installed/configured when -y (YES_TO_ALL) is active.
+# This is your personal active tool set. When YES_TO_ALL is false
+# (interactive mode), tool_allowed returns true for everything.
+TOOL_ALLOWLIST_YES=(amp codex ctx cursor kilo opencode open_code_review pi antigravity ai-switcher)
+
+tool_allowed() {
+	local name="$1"
+	[ "$YES_TO_ALL" != true ] && return 0
+	local t
+	for t in "${TOOL_ALLOWLIST_YES[@]}"; do
+		[ "$t" = "$name" ] && return 0
+	done
+	return 1
+}
+
 # Parse command-line arguments first (only when executed, not sourced)
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 	BACKUP_DIR="$HOME/ai-tools-backup-$(date +%Y%m%d-%H%M%S)"
@@ -409,57 +425,177 @@ copy_configurations() {
 
 	validate_all_configs
 
-	copy_claude_configs
-	copy_opencode_configs
-	copy_amp_configs
-	copy_ai_launcher_configs
-	copy_codex_configs
-	copy_kimi_code_configs
-	copy_gemini_configs
-	copy_antigravity_configs
-	copy_kilo_configs
-	copy_pi_configs
-	copy_commandcode_configs
-	copy_copilot_configs
-	copy_cursor_configs
-	copy_conductor_configs
-	copy_herdr_configs
-	copy_ctx_configs
-	copy_qodercli_configs
-	copy_kiro_configs
-	copy_codiff_configs
-	copy_factory_configs
-	copy_orca_configs
-	copy_cline_configs
-	copy_grok_configs
-	copy_mimo_configs
+	if tool_allowed "claude"; then
+		copy_claude_configs
+	else
+		log_info "Skipping claude config install (not in -y allowlist)"
+	fi
+	if tool_allowed "opencode"; then
+		copy_opencode_configs
+	else
+		log_info "Skipping opencode config install (not in -y allowlist)"
+	fi
+	if tool_allowed "amp"; then
+		copy_amp_configs
+	else
+		log_info "Skipping amp config install (not in -y allowlist)"
+	fi
+	if tool_allowed "ai-switcher"; then
+		copy_ai_launcher_configs
+	else
+		log_info "Skipping ai-switcher config install (not in -y allowlist)"
+	fi
+	if tool_allowed "codex"; then
+		copy_codex_configs
+	else
+		log_info "Skipping codex config install (not in -y allowlist)"
+	fi
+	if tool_allowed "kimi_code"; then
+		copy_kimi_code_configs
+	else
+		log_info "Skipping kimi_code config install (not in -y allowlist)"
+	fi
+	if tool_allowed "gemini"; then
+		copy_gemini_configs
+	else
+		log_info "Skipping gemini config install (not in -y allowlist)"
+	fi
+	if tool_allowed "antigravity"; then
+		copy_antigravity_configs
+	else
+		log_info "Skipping antigravity config install (not in -y allowlist)"
+	fi
+	if tool_allowed "kilo"; then
+		copy_kilo_configs
+	else
+		log_info "Skipping kilo config install (not in -y allowlist)"
+	fi
+	if tool_allowed "pi"; then
+		copy_pi_configs
+	else
+		log_info "Skipping pi config install (not in -y allowlist)"
+	fi
+	if tool_allowed "commandcode"; then
+		copy_commandcode_configs
+	else
+		log_info "Skipping commandcode config install (not in -y allowlist)"
+	fi
+	if tool_allowed "copilot"; then
+		copy_copilot_configs
+	else
+		log_info "Skipping copilot config install (not in -y allowlist)"
+	fi
+	if tool_allowed "cursor"; then
+		copy_cursor_configs
+	else
+		log_info "Skipping cursor config install (not in -y allowlist)"
+	fi
+	if tool_allowed "conductor"; then
+		copy_conductor_configs
+	else
+		log_info "Skipping conductor config install (not in -y allowlist)"
+	fi
+	if tool_allowed "herdr"; then
+		copy_herdr_configs
+	else
+		log_info "Skipping herdr config install (not in -y allowlist)"
+	fi
+	if tool_allowed "ctx"; then
+		copy_ctx_configs
+	else
+		log_info "Skipping ctx config install (not in -y allowlist)"
+	fi
+	if tool_allowed "qodercli"; then
+		copy_qodercli_configs
+	else
+		log_info "Skipping qodercli config install (not in -y allowlist)"
+	fi
+	if tool_allowed "kiro"; then
+		copy_kiro_configs
+	else
+		log_info "Skipping kiro config install (not in -y allowlist)"
+	fi
+	if tool_allowed "codiff"; then
+		copy_codiff_configs
+	else
+		log_info "Skipping codiff config install (not in -y allowlist)"
+	fi
+	if tool_allowed "factory"; then
+		copy_factory_configs
+	else
+		log_info "Skipping factory config install (not in -y allowlist)"
+	fi
+	if tool_allowed "orca"; then
+		copy_orca_configs
+	else
+		log_info "Skipping orca config install (not in -y allowlist)"
+	fi
+	if tool_allowed "cline"; then
+		copy_cline_configs
+	else
+		log_info "Skipping cline config install (not in -y allowlist)"
+	fi
+	if tool_allowed "grok"; then
+		copy_grok_configs
+	else
+		log_info "Skipping grok config install (not in -y allowlist)"
+	fi
+	if tool_allowed "mimo"; then
+		copy_mimo_configs
+	else
+		log_info "Skipping mimo config install (not in -y allowlist)"
+	fi
 	copy_best_practices
 }
 
 # Validate all config files
+# Map a config file path to its tool name for -y validation gating.
+# Used by validate_all_configs to skip non-allowlisted tool configs.
+_validate_config_tool_name() {
+	case "$1" in
+		*amp/settings.json*) echo "amp" ;;
+		*ai-launcher/config.json*) echo "ai-switcher" ;;
+		*codex/config.json*) echo "codex" ;;
+		*gemini/settings.json*) echo "gemini" ;;
+		*antigravity-cli/settings.json*) echo "antigravity" ;;
+		*kilo/config.json*) echo "kilo" ;;
+		*kimi-code/mcp.json*) echo "kimi_code" ;;
+		*pi/settings.json*) echo "pi" ;;
+		*commandcode/*.json*) echo "commandcode" ;;
+		*cline/*.json*) echo "cline" ;;
+		*factory/settings.json*) echo "factory" ;;
+		*) echo "unknown" ;;
+	esac
+}
+
 validate_all_configs() {
 	log_info "Validating configuration files..."
 	local config_validation_failed=false
 
 	# Validate Claude Code configs
-	if ! validate_config_with_schema "$SCRIPT_DIR/configs/claude/settings.json"; then
-		log_error "Claude Code settings.json failed validation"
-		config_validation_failed=true
-	fi
-	if ! validate_config "$SCRIPT_DIR/configs/claude/mcp-servers.json"; then
-		log_error "Claude Code mcp-servers.json failed validation"
-		config_validation_failed=true
-	fi
-
-	# Validate OpenCode config
-	if [ -f "$SCRIPT_DIR/configs/opencode/opencode.json" ]; then
-		if ! validate_config_with_schema "$SCRIPT_DIR/configs/opencode/opencode.json"; then
-			log_error "OpenCode config failed validation"
+	if tool_allowed "claude"; then
+		if ! validate_config_with_schema "$SCRIPT_DIR/configs/claude/settings.json"; then
+			log_error "Claude Code settings.json failed validation"
+			config_validation_failed=true
+		fi
+		if ! validate_config "$SCRIPT_DIR/configs/claude/mcp-servers.json"; then
+			log_error "Claude Code mcp-servers.json failed validation"
 			config_validation_failed=true
 		fi
 	fi
 
-	# Validate other tool configs
+	# Validate OpenCode config
+	if tool_allowed "opencode"; then
+		if [ -f "$SCRIPT_DIR/configs/opencode/opencode.json" ]; then
+			if ! validate_config_with_schema "$SCRIPT_DIR/configs/opencode/opencode.json"; then
+				log_error "OpenCode config failed validation"
+				config_validation_failed=true
+			fi
+		fi
+	fi
+
+	# Validate other tool configs — only for allowed tools under -y
+	local _vtool
 	for config_file in "$SCRIPT_DIR/configs/amp/settings.json" \
 		"$SCRIPT_DIR/configs/ai-launcher/config.json" \
 		"$SCRIPT_DIR/configs/codex/config.json" \
@@ -473,19 +609,26 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/cline/mcp-settings.json" \
 		"$SCRIPT_DIR/configs/cline/models.json" \
 		"$SCRIPT_DIR/configs/factory/settings.json"; do
+		_vtool=$(_validate_config_tool_name "$config_file")
+		if ! tool_allowed "$_vtool"; then
+			[ "$YES_TO_ALL" = true ] && log_info "Skipping config validation for $_vtool (not in -y allowlist)"
+			continue
+		fi
 		if [ -f "$config_file" ] && ! validate_config "$config_file"; then
 			log_error "Config validation failed: $config_file"
 			config_validation_failed=true
 		fi
 	done
 
-	for config_file in "$SCRIPT_DIR"/configs/antigravity-cli/plugins/*/plugin.json \
-		"$SCRIPT_DIR"/configs/antigravity-cli/plugins/*/mcp_config.json; do
-		if [ -f "$config_file" ] && ! validate_config "$config_file"; then
-			log_error "Config validation failed: $config_file"
-			config_validation_failed=true
-		fi
-	done
+	if tool_allowed "antigravity"; then
+		for config_file in "$SCRIPT_DIR"/configs/antigravity-cli/plugins/*/plugin.json \
+			"$SCRIPT_DIR"/configs/antigravity-cli/plugins/*/mcp_config.json; do
+			if [ -f "$config_file" ] && ! validate_config "$config_file"; then
+				log_error "Config validation failed: $config_file"
+				config_validation_failed=true
+			fi
+		done
+	fi
 
 	if [ "$config_validation_failed" = true ]; then
 		log_warning "Some configuration files failed validation"
@@ -1562,6 +1705,11 @@ copy_best_practices() {
 		execute_quoted cp "$SCRIPT_DIR/MEMORY.md" "$HOME/.ai-tools/"
 		log_success "MEMORY.md copied to ~/.ai-tools/"
 	fi
+
+	if [ -f "$SCRIPT_DIR/configs/implementation-notes-guidelines.md" ]; then
+		execute_quoted cp "$SCRIPT_DIR/configs/implementation-notes-guidelines.md" "$HOME/.ai-tools/implementation-notes.md"
+		log_success "Implementation notes copied to ~/.ai-tools/implementation-notes.md"
+	fi
 }
 
 # Check if Claude CLI supports plugin marketplace functionality
@@ -2180,82 +2328,182 @@ main() {
 	backup_configs
 	echo
 
-	install_claude_code
+	if tool_allowed "claude"; then
+		install_claude_code
+	else
+		log_info "Skipping claude installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_opencode
+	if tool_allowed "opencode"; then
+		install_opencode
+	else
+		log_info "Skipping opencode installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_amp
+	if tool_allowed "amp"; then
+		install_amp
+	else
+		log_info "Skipping amp installer (not in -y allowlist)"
+	fi
 	echo
 
 	install_global_tools
 	echo
 
-	install_ccs
+	if tool_allowed "ccs"; then
+		install_ccs
+	else
+		log_info "Skipping ccs installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_ai_switcher
+	if tool_allowed "ai-switcher"; then
+		install_ai_switcher
+	else
+		log_info "Skipping ai-switcher installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_codex
+	if tool_allowed "codex"; then
+		install_codex
+	else
+		log_info "Skipping codex installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_kimi_code
+	if tool_allowed "kimi_code"; then
+		install_kimi_code
+	else
+		log_info "Skipping kimi_code installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_gemini
+	if tool_allowed "gemini"; then
+		install_gemini
+	else
+		log_info "Skipping gemini installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_antigravity
+	if tool_allowed "antigravity"; then
+		install_antigravity
+	else
+		log_info "Skipping antigravity installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_kilo
+	if tool_allowed "kilo"; then
+		install_kilo
+	else
+		log_info "Skipping kilo installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_pi
+	if tool_allowed "pi"; then
+		install_pi
+	else
+		log_info "Skipping pi installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_commandcode
+	if tool_allowed "commandcode"; then
+		install_commandcode
+	else
+		log_info "Skipping commandcode installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_copilot
+	if tool_allowed "copilot"; then
+		install_copilot
+	else
+		log_info "Skipping copilot installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_cursor
+	if tool_allowed "cursor"; then
+		install_cursor
+	else
+		log_info "Skipping cursor installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_conductor
+	if tool_allowed "conductor"; then
+		install_conductor
+	else
+		log_info "Skipping conductor installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_herdr
+	if tool_allowed "herdr"; then
+		install_herdr
+	else
+		log_info "Skipping herdr installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_ctx
+	if tool_allowed "ctx"; then
+		install_ctx
+	else
+		log_info "Skipping ctx installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_qodercli
+	if tool_allowed "qodercli"; then
+		install_qodercli
+	else
+		log_info "Skipping qodercli installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_kiro
+	if tool_allowed "kiro"; then
+		install_kiro
+	else
+		log_info "Skipping kiro installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_codiff
+	if tool_allowed "codiff"; then
+		install_codiff
+	else
+		log_info "Skipping codiff installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_factory
+	if tool_allowed "factory"; then
+		install_factory
+	else
+		log_info "Skipping factory installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_cline
+	if tool_allowed "cline"; then
+		install_cline
+	else
+		log_info "Skipping cline installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_grok
+	if tool_allowed "grok"; then
+		install_grok
+	else
+		log_info "Skipping grok installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_mimo
+	if tool_allowed "mimo"; then
+		install_mimo
+	else
+		log_info "Skipping mimo installer (not in -y allowlist)"
+	fi
 	echo
 
-	install_open_code_review
+	if tool_allowed "open_code_review"; then
+		install_open_code_review
+	else
+		log_info "Skipping open_code_review installer (not in -y allowlist)"
+	fi
 	echo
 
 	copy_configurations
