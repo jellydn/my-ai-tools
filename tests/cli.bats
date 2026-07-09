@@ -146,3 +146,23 @@ setup() {
     # Banner text from main() must not appear when cli.sh is sourced
     [[ "$output" != *"AI Tools Installer"* ]]
 }
+
+@test "tool_allowed gates correctly under YES_TO_ALL" {
+    # Under YES_TO_ALL=true: only the 8 allowed tools return 0
+    export YES_TO_ALL=true
+    for tool in amp codex cursor kilo opencode pi antigravity ai-switcher; do
+        run tool_allowed "$tool"
+        [ "$status" -eq 0 ]
+    done
+    # Non-allowed tools return 1
+    for tool in claude cline gemini grok mimo; do
+        run tool_allowed "$tool"
+        [ "$status" -eq 1 ]
+    done
+    # Under YES_TO_ALL=false: everything returns 0
+    export YES_TO_ALL=false
+    for tool in claude cline gemini grok mimo; do
+        run tool_allowed "$tool"
+        [ "$status" -eq 0 ]
+    done
+}
