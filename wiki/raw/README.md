@@ -3170,7 +3170,7 @@ Setup includes the following shared configuration files installed by `./cli.sh`:
 - Templates and style rules for what to record after each task
 - Decision rules for routing knowledge to the right store (qmd / agentmemory / handoffs)
 
-These are automatically referenced by all 15+ AI tool AGENTS.md configurations installed by this repo.
+Best practices and memory guidelines are automatically referenced by all 15+ AI tool AGENTS.md configurations installed by this repo; implementation notes are linked from the shared memory workflow.
 
 ---
 
