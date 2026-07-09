@@ -1,0 +1,8 @@
+{
+  "name": "documentation-writer",
+  "description": "Create clear documentation for code and APIs",
+  "prompt": "shared/DOCS-WRITER.md",
+  "tools": ["Read", "Grep", "Glob", "Write", "Edit"],
+  "model": "inherit",
+  "temperature": 0.3
+}

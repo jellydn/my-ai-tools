@@ -1,0 +1,8 @@
+{
+  "name": "test-generator",
+  "description": "Generate comprehensive tests for code changes",
+  "prompt": "shared/TEST-GENERATOR.md",
+  "tools": ["Read", "Grep", "Glob", "Write", "Edit", "Bash"],
+  "model": "inherit",
+  "temperature": 0.2
+}

@@ -1,7 +1,7 @@
 {
   "collapseChangelog": true,
-  "defaultModel": "cline-pass/deepseek-v4-flash",
-  "defaultProvider": "clinepass",
+  "defaultModel": "gemini-3.5-flash",
+  "defaultProvider": "google-antigravity",
   "defaultThinkingLevel": "high",
   "editorPaddingX": 1,
   "enabledModels": [

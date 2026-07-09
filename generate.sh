@@ -277,6 +277,16 @@ generate_codex_configs() {
 	copy_single "$HOME/.codex/config.json" "$SCRIPT_DIR/configs/codex/config.json"
 	copy_single "$HOME/.codex/config.toml" "$SCRIPT_DIR/configs/codex/config.toml"
 
+	# Export agents
+	if [ -d "$HOME/.codex/agents" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/codex/agents"
+		if [ -n "$(ls -A "$HOME/.codex/agents" 2>/dev/null)" ]; then
+			if execute "cp -r '$HOME/.codex/agents'/* '$SCRIPT_DIR/configs/codex/agents'/ 2>/dev/null"; then
+				log_success "Codex CLI agents exported"
+			fi
+		fi
+	fi
+
 	log_success "Codex CLI configs generated"
 }
 
@@ -397,6 +407,16 @@ generate_pi_configs() {
 	else
 		log_warning "Pi MCP config not found: $HOME/.pi/agent/mcp.json"
 	fi
+
+	# Export agents
+	if [ -d "$HOME/.pi/agent/agents" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/pi/agents"
+		if [ -n "$(ls -A "$HOME/.pi/agent/agents" 2>/dev/null)" ]; then
+			if execute "cp -r '$HOME/.pi/agent/agents'/* '$SCRIPT_DIR/configs/pi/agents'/ 2>/dev/null"; then
+				log_success "Pi agents exported"
+			fi
+		fi
+	fi
 }
 
 generate_commandcode_configs() {
@@ -481,6 +501,16 @@ generate_copilot_configs() {
 		copy_single "$HOME/.copilot/mcp-config.json" "$SCRIPT_DIR/configs/copilot/mcp-config.json"
 	else
 		log_warning "GitHub Copilot MCP config not found: $HOME/.copilot/mcp-config.json"
+	fi
+
+	# Export agents
+	if [ -d "$HOME/.copilot/agents" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/copilot/agents"
+		if [ -n "$(ls -A "$HOME/.copilot/agents" 2>/dev/null)" ]; then
+			if execute "cp -r '$HOME/.copilot/agents'/* '$SCRIPT_DIR/configs/copilot/agents'/ 2>/dev/null"; then
+				log_success "GitHub Copilot agents exported"
+			fi
+		fi
 	fi
 
 	log_success "GitHub Copilot CLI configs generated"
@@ -717,6 +747,26 @@ generate_kiro_configs() {
 	copy_single "$HOME/.kiro/settings.json" "$SCRIPT_DIR/configs/kiro/settings.json"
 	copy_single "$HOME/.kiro/settings/mcp.json" "$SCRIPT_DIR/configs/kiro/mcp.json"
 	copy_single "$HOME/.kiro/settings/cli.json" "$SCRIPT_DIR/configs/kiro/cli.json"
+
+	# Export agents (JSON configs)
+	if [ -d "$HOME/.kiro/agents" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/kiro/agents"
+		for agent_file in "$HOME/.kiro/agents"/*.json; do
+			[ -f "$agent_file" ] || continue
+			copy_single "$agent_file" "$SCRIPT_DIR/configs/kiro/agents/$(basename "$agent_file")"
+		done
+		log_success "Kiro agent configs exported"
+	fi
+
+	# Export shared prompts
+	if [ -d "$HOME/.kiro/shared" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/kiro/shared"
+		if [ -n "$(ls -A "$HOME/.kiro/shared" 2>/dev/null)" ]; then
+			if execute "cp -r '$HOME/.kiro/shared'/* '$SCRIPT_DIR/configs/kiro/shared'/ 2>/dev/null"; then
+				log_success "Kiro shared prompts exported"
+			fi
+		fi
+	fi
 
 	log_success "Kiro CLI configs generated"
 }

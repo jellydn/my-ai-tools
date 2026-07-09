@@ -1046,6 +1046,12 @@ copy_codex_configs() {
 		safe_copy_dir "$SCRIPT_DIR/configs/codex/themes" "$HOME/.codex/themes"
 	fi
 
+	if [ -d "$SCRIPT_DIR/configs/codex/agents" ]; then
+		execute_quoted rm -rf "$HOME/.codex/agents"
+		safe_copy_dir "$SCRIPT_DIR/configs/codex/agents" "$HOME/.codex/agents"
+		log_success "Codex CLI agents copied"
+	fi
+
 	log_success "Codex CLI configs copied"
 }
 
@@ -1330,6 +1336,12 @@ copy_pi_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/pi/models.json" "$HOME/.pi/agent/" || true
 
+	if [ -d "$SCRIPT_DIR/configs/pi/agents" ]; then
+		execute_quoted rm -rf "$HOME/.pi/agent/agents"
+		safe_copy_dir "$SCRIPT_DIR/configs/pi/agents" "$HOME/.pi/agent/agents"
+		log_success "Pi agents copied"
+	fi
+
 	log_success "Pi configs copied"
 }
 
@@ -1396,6 +1408,21 @@ copy_copilot_configs() {
 	if [ -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ]; then
 		execute_quoted cp "$SCRIPT_DIR/configs/copilot/mcp-config.json" "$HOME/.copilot/mcp-config.json"
 		log_success "GitHub Copilot MCP config copied"
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/copilot/agents" ]; then
+		execute_quoted rm -rf "$HOME/.copilot/agents"
+		safe_copy_dir "$SCRIPT_DIR/configs/copilot/agents" "$HOME/.copilot/agents"
+		log_success "GitHub Copilot agents copied"
+	fi
+
+	# Also copy to .github/agents/ for workspace-level discovery
+	if [ -d "$SCRIPT_DIR/configs/copilot/agents" ]; then
+		execute_quoted mkdir -p "$HOME/.github/agents"
+		for agent_file in "$SCRIPT_DIR/configs/copilot/agents"/*.agent.md; do
+			[ -f "$agent_file" ] || continue
+			copy_config_file "$agent_file" "$HOME/.github/agents/" || true
+		done
 	fi
 }
 
@@ -1518,6 +1545,21 @@ copy_kiro_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/kiro/AGENTS.md" "$HOME/.kiro/" || true
 	copy_config_file "$SCRIPT_DIR/configs/kiro/settings.json" "$HOME/.kiro/" || true
+
+	# Install agent JSON configs and shared prompts
+	if [ -d "$SCRIPT_DIR/configs/kiro/agents" ]; then
+		execute_quoted mkdir -p "$HOME/.kiro/agents"
+		for agent_file in "$SCRIPT_DIR/configs/kiro/agents"/*.json; do
+			[ -f "$agent_file" ] || continue
+			copy_config_file "$agent_file" "$HOME/.kiro/agents/" || true
+		done
+		log_success "Kiro agent configs copied"
+	fi
+	if [ -d "$SCRIPT_DIR/configs/kiro/shared" ]; then
+		execute_quoted rm -rf "$HOME/.kiro/shared"
+		safe_copy_dir "$SCRIPT_DIR/configs/kiro/shared" "$HOME/.kiro/shared"
+		log_success "Kiro shared prompts copied"
+	fi
 
 	# Merge cli.json settings (repo defaults win, user state keys like mcp.loadedBefore are preserved)
 	local src_cli="$SCRIPT_DIR/configs/kiro/cli.json"

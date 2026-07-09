@@ -1,0 +1,8 @@
+{
+  "name": "ai-slop-remover",
+  "description": "Remove AI-generated code patterns that don't match codebase style",
+  "prompt": "shared/AI-SLOP-REMOVER.md",
+  "tools": ["Read", "Grep", "Glob", "Write", "Edit", "Bash"],
+  "model": "inherit",
+  "temperature": 0.1
+}
