@@ -114,7 +114,7 @@ Unknown   | Unknown Knowns | Unknown Unknowns |
 **Good** ✅:
 ```
 We value type safety; TypeScript's inference catches bugs at compile time.
-Our codebase prioritizes editing existing files; new files create 
+Our codebase prioritizes editing existing files; new files create
 discoverability challenges for maintainers.
 Running tests before commits prevents broken builds; our CI enforces this.
 ```
@@ -211,7 +211,7 @@ Agent: "Turns out we need idempotency keys..."
 ```
 User: /blindspots Add Stripe payment integration
 
-Agent: 
+Agent:
 - Found existing PayPal integration (better pattern)
 - Webhook signature verification required (security)
 - Idempotency keys mandatory (PCI compliance)

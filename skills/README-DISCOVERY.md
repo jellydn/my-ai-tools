@@ -12,7 +12,7 @@ Advanced models can traverse vast solution spaces, making unknown discovery crit
 
 ```text
 1. blindspot-pass → Identify unknown unknowns
-2. spec-interview → Clarify requirements  
+2. spec-interview → Clarify requirements
 3. [Implementation with logging]
 4. quiz-me → Verify understanding
 ```markdown

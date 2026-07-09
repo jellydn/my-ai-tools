@@ -464,52 +464,52 @@ For Fable/advanced models, generate interactive quiz:
 <form id="implementation-quiz">
   <fieldset>
     <legend>Section 1: Core Decisions</legend>
-    
+
     <div class="question">
       <h3>Q1: Why did we use GitHub App Installation flow?</h3>
-      
+
       <label>
         <input type="radio" name="q1" value="a">
         OAuth is deprecated
       </label>
-      
+
       <label>
         <input type="radio" name="q1" value="b">
         Installation flow provides org-level access
       </label>
-      
+
       <label>
         <input type="radio" name="q1" value="c">
         Installation flow is easier
       </label>
-      
+
       <details class="hint">
         <summary>Hint</summary>
         Check implementation log decision #1
       </details>
     </div>
-    
+
     <div class="question">
       <h3>Q2: Token Lifespan</h3>
       <p>Fill in the blanks:</p>
-      
+
       <label>
-        User OAuth tokens last: 
+        User OAuth tokens last:
         <input type="text" name="q2a" placeholder="Duration">
       </label>
-      
+
       <label>
-        Installation tokens last: 
+        Installation tokens last:
         <input type="text" name="q2b" placeholder="Duration">
       </label>
-      
+
       <label>
-        We cache for: 
+        We cache for:
         <input type="text" name="q2c" placeholder="Duration">
       </label>
     </div>
   </fieldset>
-  
+
   <button type="submit">Check Answers</button>
 </form>
 
@@ -520,7 +520,7 @@ For Fable/advanced models, generate interactive quiz:
     const answers = {
       q1: 'b',
       q2a: '6 months',
-      q2b: '1 hour', 
+      q2b: '1 hour',
       q2c: '55 minutes'
     };
     // Grade and show feedback...

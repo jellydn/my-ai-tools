@@ -266,23 +266,23 @@ For Fable/advanced models, generate interactive questionnaires:
 <form id="spec-interview">
   <fieldset>
     <legend>Architecture-Changing Questions</legend>
-    
+
     <div class="question">
       <h3>1. Where should the export process run?</h3>
       <p class="context">Large exports could time out or block web process.</p>
-      
+
       <label>
         <input type="radio" name="q1" value="sync">
         Synchronous HTTP response
         <span class="impact">Simple, but risky for large datasets</span>
       </label>
-      
+
       <label>
         <input type="radio" name="q1" value="async">
         Background job + email link
         <span class="impact">Requires job queue + storage</span>
       </label>
-      
+
       <label>
         <input type="radio" name="q1" value="stream">
         Streaming download
@@ -290,7 +290,7 @@ For Fable/advanced models, generate interactive questionnaires:
       </label>
     </div>
   </fieldset>
-  
+
   <button type="submit">Submit Answers</button>
 </form>
 ```markdown
