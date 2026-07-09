@@ -124,6 +124,9 @@ curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --backup
 # Skip backup prompt
 curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --no-backup
 
+# Non-interactive mode (auto-approve, only processes your active tools)
+curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --yes
+
 # One-step Gemini→Antigravity CLI migration
 curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --migrate-gemini
 ```
@@ -143,6 +146,7 @@ cd my-ai-tools
 - `--dry-run` - Preview changes without making them
 - `--backup` - Backup existing configs before installing
 - `--no-backup` - Skip backup prompt
+- `-y` / `--yes` - Non-interactive mode; only installs/configures your active tool set (amp, codex, cursor, kilo, opencode, pi, antigravity, ai-switcher). Shared infra (plugins, skills, global tools) still installed. Auto-activated in CI/piped input.
 - `--migrate-gemini` - One-step Gemini→Antigravity CLI migration
 
 ## 🔄 Bidirectional Config Sync
@@ -152,7 +156,7 @@ cd my-ai-tools
 Copy configurations from this repository to your home directory (`~/.claude/`, `~/.config/opencode/`, etc.):
 
 ```bash
-./cli.sh [--dry-run] [--backup] [--no-backup] [--migrate-gemini]
+./cli.sh [--dry-run] [--backup] [--no-backup] [-y|--yes] [--migrate-gemini]
 ```
 
 ### Reverse: Generate from Home (`generate.sh`)
