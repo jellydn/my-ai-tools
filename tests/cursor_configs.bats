@@ -5,14 +5,14 @@ CLI_FILE="$REPO_ROOT/cli.sh"
 GENERATE_FILE="$REPO_ROOT/generate.sh"
 README_FILE="$REPO_ROOT/README.md"
 CURSOR_AGENT_FILE="$REPO_ROOT/configs/cursor/agents/code-quality-review.md"
-THERMO_SKILL_FILE="$REPO_ROOT/skills/code-quality-review/SKILL.md"
+QUALITY_REVIEW_SKILL_FILE="$REPO_ROOT/skills/code-quality-review/SKILL.md"
 
-@test "Cursor thermo-nuclear review agent file exists" {
+@test "Cursor code-quality-review agent file exists" {
     [ -f "$CURSOR_AGENT_FILE" ]
 }
 
-@test "thermo-nuclear code quality skill file exists" {
-    [ -f "$THERMO_SKILL_FILE" ]
+@test "code-quality-review skill file exists" {
+    [ -f "$QUALITY_REVIEW_SKILL_FILE" ]
 }
 
 @test "cli.sh installs Cursor custom agents" {
@@ -25,7 +25,7 @@ THERMO_SKILL_FILE="$REPO_ROOT/skills/code-quality-review/SKILL.md"
     [ "$status" -eq 0 ]
 }
 
-@test "README.md documents Cursor thermo-nuclear review agent" {
+@test "README.md documents Cursor code-quality-review agent" {
     run grep -F 'code-quality-review' "$README_FILE"
     [ "$status" -eq 0 ]
 }

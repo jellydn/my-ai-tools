@@ -5,10 +5,8 @@ license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when performing a deep, unusually strict code quality review focused on maintainability, abstraction quality, and eliminating complexity
 user-invocable: true
-metadata:
-  audience: all
-  workflow: code-quality
 disable-model-invocation: true
+metadata:
 ---
 
 # Code Quality Review
