@@ -17,7 +17,7 @@
 			}
 		]
 	},
-	"model": "Gemini 3.5 Flash (High)",
+	"model": "Claude Opus 4.6 (Thinking)",
 	"notifications": true,
 	"permissions": {
 		"allow": [
@@ -118,14 +118,13 @@
 			"unsandboxed(kubectl kustomize)",
 			"unsandboxed(jq)",
 			"unsandboxed(kubectl patch)",
-			"unsandboxed(git checkout)",
-			"mcp(codebase-memory-mcp/list_projects)",
-			"mcp(codebase-memory-mcp/search_graph)",
-			"unsandboxed(~/.gemini/skills/qmd-knowledge/scripts/record.sh)",
-			"unsandboxed(qmd)",
-			"unsandboxed(./node_modules/.bin/biome)"
+			"unsandboxed(git checkout)"
 		],
-		"deny": ["command(git reset --hard)", "command(git push --force)", "command(rm -rf)"]
+		"deny": [
+			"command(git reset --hard)",
+			"command(git push --force)",
+			"command(rm -rf)"
+		]
 	},
 	"runningLightSpeed": "off",
 	"showFeedbackSurvey": false,
@@ -137,8 +136,6 @@
 	},
 	"toolPermission": "proceed-in-sandbox",
 	"trustedWorkspaces": [
-		"/Users/huynhdung/src/tries/2026-07-08-gmail-cli",
-		"/Users/huynhdung/conductor/workspaces/2026-03-03-aircarbon-ac-monorepo2/migrate-to-vps",
-		"/Users/huynhdung/conductor/workspaces/2026-03-03-aircarbon-ac-monorepo2/worcester"
+		"/Users/huynhdung/src/tries/2026-07-08-gmail-cli"
 	]
 }
