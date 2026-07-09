@@ -96,7 +96,7 @@ echo "  Storage: ~/.ai-knowledges/$PROJECT_NAME"
 
 - Discoveries made in _this_ run: "the build is blocked on env var `X`", "branch Y has a WIP constraint", "the failing test depends on fixture Z"
 - Pre-commit / post-commit style findings the _current_ agent wants to surface to itself on the next pass
-- Hints the next session today will need but no one will need in a month
+- Hints the next session today will need, but no one will need in a month
 
 ### Do NOT use `agentmemory` for
 
@@ -166,7 +166,7 @@ Instead, use the `qmd-knowledge` skill:
 
 ### 🧭 Implementation notes workflow
 
-Use `agent-memory.md` as the working rule for implementation notes:
+Use @./`agent-memory.md` as the working rule for implementation notes:
 
 - capture what was learned
 - capture blockers and issues
@@ -207,7 +207,7 @@ The record script automatically runs `qmd embed` after each write, ensuring the 
 
 ## 📖 Quick Reference
 
-All tools are MCP-style names so agents can call them by exact string.
+All tools are MCP-style names so agents can call them by an exact string.
 
 ### qmd (durable)
 
@@ -234,7 +234,7 @@ All tools are MCP-style names so agents can call them by exact string.
 
 ## 🔍 Project Detection
 
-The `qmd-knowledge` skill auto-detects project from:
+The `qmd-knowledge` skill auto-detects the project from:
 
 1. `QMD_PROJECT` env var (if set)
 2. Git repository name
