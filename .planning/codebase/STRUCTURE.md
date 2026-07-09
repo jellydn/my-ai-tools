@@ -1,235 +1,193 @@
-# Directory Structure: my-ai-tools
+# Directory Structure
 
-## Root Layout
+**Analysis Date:** 2026-07-10
+
+---
+
+## Top-Level Layout
 
 ```
-my-ai-tools/
-├── .changeset/                  # Changeset release notes (22 markdown files)
-├── .claude-plugin/              # Claude Code marketplace definition
-│   └── marketplace.json         # Plugin registry for Claude marketplace
-├── .commandcode/                # Command Code config
-│   └── taste/                   # Taste preferences
-├── .conductor/                  # Conductor macOS app config
-│   └── settings.toml
-├── .github/                     # GitHub CI/CD
-│   └── workflows/
-│       ├── deploy-pages.yml     # GitHub Pages deployment
-│       └── test.yml             # BATS + jq config validation
-├── .planning/                   # Planning artifacts (codemap output target)
-│   └── codebase/                # Architecture/Structure docs destination
-├── configs/                     # ★ Core: tool config templates (25+ tool dirs)
-│   ├── ai-launcher/
-│   ├── amp/
-│   ├── antigravity-cli/
-│   ├── ccs/
-│   ├── claude/
-│   ├── cline/
-│   ├── codiff/
-│   ├── codex/
-│   ├── commandcode/
-│   ├── conductor/
-│   ├── copilot/
-│   ├── cursor/
-│   ├── ctx/
-│   ├── factory/
-│   ├── gemini/
-│   ├── grok/
-│   ├── herdr/
-│   ├── kilo/
-│   ├── kimi-code/
-│   ├── kiro/
-│   ├── mimo/
-│   ├── opencode/
-│   ├── orca/
-│   ├── pi/
-│   ├── qodercli/
-│   ├── agent-memory-guidelines.md
-│   ├── best-practices.md
-│   ├── git-guidelines.md
-│   ├── mcp-registry.json
-│   └── recommend-skills.json
-├── docs/                        # Documentation
-│   ├── adr/                     # Architecture Decision Records
-│   ├── agent-teams-examples.md
-│   ├── claude-code-teams.md
-│   ├── learning-stories.md
-│   └── qmd-knowledge-management.md
-├── lib/                         # ★ Shared shell libraries
-│   ├── common.sh                # Core utilities (867 lines)
-│   ├── install.sh               # Tool installation functions (1103 lines)
-│   └── require_bash.sh          # Bash re-exec guard (33 lines)
-├── skills/                      # ★ Local skill marketplace (19 skills)
-│   ├── adr/
-│   ├── codemap/
-│   ├── commit-atomic/
-│   ├── docs-update/
-│   ├── draft-pull-request/
-│   ├── handoffs/
-│   ├── llm-wiki/
-│   ├── pickup/
-│   ├── plannotator-setup-goal/
-│   ├── portless-local/
-│   ├── pr-review/
-│   ├── prd/
-│   ├── qmd-knowledge/
-│   ├── ralph/
-│   ├── slop/
-│   ├── tdd/
-│   ├── code-quality-review/
-│   └── tmux/
-├── tests/                       # BATS functional test suite (23 files)
-│   ├── helpers.bash             # Shared test utilities
-│   ├── cli.bats
-│   ├── generate.bats
-│   ├── install.bats
-│   ├── cursor_configs.bats
-│   ├── lib_common.bats
-│   ├── recommend_skills.bats
-│   ├── sh_reexec.bats
-│   └── pr_*.bats                # Per-tool config validation tests (15 files)
-├── wiki/                        # LLM Wiki (persistent knowledge base)
-│   ├── wiki/                    # Wiki content directory
-│   ├── raw/                     # Immutable raw source documents
-│   ├── AGENTS.md                # Wiki-specific agent instructions
-│   └── CLAUDE.md                # Wiki-specific Claude instructions
-├── AGENTS.md                    # ★ Primary agent instructions (117 lines)
-├── GEMINI.md                    # Gemini-specific agent instructions
-├── MEMORY.md                    # Project memory / context
-├── CONTRIBUTING.md              # Contributor guide
-├── LICENSE                      # License file
-├── README.md                    # Project README
-├── TESTING.md                   # Testing guide
-├── cli.sh                       # ★ Main installer (2283 lines)
-├── generate.sh                  # ★ Config exporter (907 lines)
-├── install.sh                   # Bootstrap installer (90 lines)
-├── install.ps1                  # Windows PowerShell bootstrap
-├── biome.json                   # Biome formatter config
-├── .editorconfig                # Editor settings
-├── .gitignore
-├── .nojekyll                    # GitHub Pages config
-├── .pre-commit-config.yaml      # Pre-commit hooks (trailing-whitespace, yaml, oxfmt)
-├── helmor.json                  # Helmor script runner config
-├── renovate.json                # Renovate dependency bot config
-├── CNAME                        # GitHub Pages custom domain
-└── index.html                   # GitHub Pages landing page
+cli.sh                  # Install configs from repo → $HOME (2,574 lines)
+generate.sh             # Export configs from $HOME → repo (961 lines)
+install.sh              # Quick-start bootstrap installer
+install.ps1             # Windows PowerShell installer
+lib/                    # Shell script libraries
+configs/                # Per-tool configuration directories (20+ tools)
+skills/                 # Reusable skill plugins (30+ skills)
+tests/                  # BATS functional tests (23 test files)
+wiki/                   # LLM Wiki knowledge base
+docs/                   # User-facing documentation
+.planning/              # Codemap and planning artifacts
+.github/                # CI/CD workflows
 ```
 
-## Key Locations
+---
 
-### Entry Points (where execution begins)
+## `lib/` — Core Libraries
 
-| Path          | Purpose                           | Lines |
-| ------------- | --------------------------------- | ----- |
-| `cli.sh`      | Install configs from repo to home | 2283  |
-| `generate.sh` | Export configs from home to repo  | 907   |
-| `install.sh`  | Bootstrap: git clone + run cli.sh | 90    |
-| `install.ps1` | Windows PowerShell bootstrap      | —     |
+| File | Lines | Purpose |
+|------|-------|---------|
+| `require_bash.sh` | 32 | POSIX re-exec guard — sources first in every entry script |
+| `common.sh` | 866 | Shared utilities: logging, dry-run, paths, validation, retry |
+| `install.sh` | 1,102 | Tool detection and installation for 20+ CLIs |
 
-### Core Library (`lib/`)
+---
 
-| Path                  | Purpose                                                      | Lines |
-| --------------------- | ------------------------------------------------------------ | ----- |
-| `lib/common.sh`       | Logging, dry-run, paths, validation, safe-copy, transactions | 867   |
-| `lib/install.sh`      | Tool installers (25+ tools), package manager detection       | 1103  |
-| `lib/require_bash.sh` | POSIX re-exec guard for sh→bash                              | 33    |
+## `configs/` — Per-Tool Configurations
 
-### Config Templates (`configs/`)
+Each subdirectory contains tool-native configuration files:
 
-Each tool directory follows a consistent pattern:
+```
+configs/
+├── ai-launcher/           # AI Launcher config.json
+├── amp/                   # Amp settings.json, AGENTS.md
+├── antigravity-cli/       # Antigravity CLI settings.json, statusline.sh
+├── ccs/                   # CCS config.yaml
+├── claude/                # Claude Code settings.json, CLAUDE.md, agents/, hooks/
+├── cline/                 # Cline skills/ (SKILL.md format)
+├── codex/                 # Codex CLI config.json, config.toml, AGENTS.md, agents/
+├── codiff/                # Codiff codiff.jsonc
+├── commandcode/           # CommandCode settings.json, AGENTS.md, mcp.json, agents/
+├── conductor/             # Conductor settings.toml, AGENTS.md
+├── copilot/               # Copilot AGENTS.md, mcp-config.json, agents/
+├── ctx/                   # ctx config.toml
+├── cursor/                # Cursor AGENTS.md, mcp.json, agents/
+├── factory/               # Factory settings.json, config.json, AGENTS.md, droids/
+├── grok/                  # Grok config.toml, AGENTS.md, hooks/
+├── herdr/                 # Herdr AGENTS.md
+├── kimi-code/             # Kimi Code skills/, AGENTS.md
+├── kiro/                  # Kiro settings.json, cli.json, AGENTS.md, mcp.json, agents/, shared/
+├── opencode/              # OpenCode agent/ (subagents), opencode.json
+├── pi/                    # Pi settings.json, AGENTS.md, mcp.json, agents/, models.json
+├── qodercli/              # Qoder CLI config
+├── agent-memory-guidelines.md   # Memory storage scoping (qmd, agentmemory, handoffs)
+├── best-practices.md             # Tidy First philosophy, testing strategy
+├── fable-guide.md                # Working with next-gen AI models
+├── git-guidelines.md             # Git safety rules
+├── mcp-registry.json             # Central MCP server install registry
+└── recommend-skills.json         # Community skill recommendations
+```
 
-- **AGENTS.md** — Agent instructions (shared across tools via `~/.agents/AGENTS.md`)
-- **settings.json** — Tool-specific settings (some use TOML)
-- _*mcp*.json_* — MCP server configuration
-- **skills/** — Tool-specific skills (symlinked to `~/.agents/skills/` at install time)
-- **commands/** — Custom slash commands
-- **agents/** — Custom agent definitions
-- **plugins/** — Tool plugins
-- **themes/** — UI themes
-- **hooks/** — Event hooks
+---
 
-Not all tools have all directories — each has only what's applicable.
+## `skills/` — Skill Plugins
 
-### Skills (`skills/`)
+30+ reusable skills, each in its own directory with a `SKILL.md`:
 
-19 local skill plugins, each a directory containing:
+```
+skills/
+├── adr/                          # Architecture Decision Records
+├── blindspot-pass/               # Find unknown unknowns
+├── capability-experiments/       # Experiment with model capabilities
+├── code-review/                  # Two-axis code review (Conventions + Intent)
+├── codemap/                      # Map codebase structure
+├── commit-atomic/                # Group changes into atomic commits
+├── context-discovery/            # Discover context via MCP tools
+├── doc-search/                   # Search project documentation
+├── docs-update/                  # Sync docs with code changes
+├── draft-pull-request/           # Draft PRs with structured descriptions
+├── git-context/                  # Search git history for context
+├── handoffs/                     # Create handoff plans across sessions
+├── implementation-logger/        # Track implementation decisions
+├── llm-wiki/                     # Build compounding wiki from raw sources
+├── plannotator-setup-goal/       # Turn ideas into executable goal packages
+├── portless-local/               # Replace ports with .localhost URLs
+├── prd/                          # Generate Product Requirements Documents
+├── pr-review/                    # Fix PR review comments
+├── pickup/                       # Resume work from previous handoffs
+├── qmd-knowledge/                # Manage project knowledge with qmd
+├── quiz-me/                      # Verify understanding with quizzes
+├── ralph/                        # Convert PRDs to ralph format
+├── slop/                         # Remove AI-generated code slop
+├── spec-interview/               # Clarify requirements through questions
+├── tdd/                          # Red-Green-Refactor cycle
+├── thermo-nuclear-code-quality-review/  # Strict structural code quality review
+├── tmux/                         # Control tmux sessions remotely
+└── README-DISCOVERY.md           # Skill discovery guide
+```
 
-- `SKILL.md` — Skill definition with frontmatter (name, description, allowed-tools, model)
-- Supporting files as needed by the skill
+---
 
-Skills are also listed in `.claude-plugin/marketplace.json` for Claude Code plugin marketplace discovery and installable via `bunx/npx skills add`.
+## `tests/` — Test Suite
 
-### Tests (`tests/`)
+23 BATS test files organized by feature:
 
-Naming convention: `pr_<tool>.bats` for per-tool PR config validation, `<feature>.bats` for feature tests.
+```
+tests/
+├── cli.bats                      # Core CLI tests
+├── helpers.bash                  # Shared test helpers
+├── install.bats                  # Installation tests
+├── cursor_configs.bats           # Cursor config tests
+├── generate.bats                 # Generate script tests
+├── lib_common.bats               # lib/common.sh tests
+├── pr_ai_launcher.bats           # AI Launcher tests
+├── pr_antigravity.bats           # Antigravity CLI tests
+├── pr_claude.bats                # Claude Code tests
+├── pr_cline.bats                 # Cline tests
+├── pr_codebase_memory_mcp.bats   # Codebase memory MCP tests
+├── pr_codiff.bats                # Codiff tests
+├── pr_copilot.bats               # Copilot tests
+├── pr_ctx.bats                   # ctx tests
+├── pr_grok.bats                  # Grok tests
+├── pr_kimi_code.bats             # Kimi Code tests
+├── pr_kiro.bats                  # Kiro tests
+├── pr_pi_models.bats             # Pi models tests
+├── pr_pi_settings.bats           # Pi settings tests
+├── pr_pre_commit.bats            # Pre-commit hooks tests
+├── pr_qodercli.bats              # Qoder CLI tests
+├── pr_readme.bats                # README validation tests
+├── recommend_skills.bats         # Skill recommendation tests (47 tests — largest)
+└── sh_reexec.bats                # Shell re-exec guard tests
+```
 
-| Pattern                 | What it tests                                                     |
-| ----------------------- | ----------------------------------------------------------------- |
-| `pr_*.bats`             | Config validation: file existence, JSON validity, required fields |
-| `cli.bats`              | CLI behavior, backup, dry-run                                     |
-| `generate.bats`         | Config export functionality                                       |
-| `install.bats`          | Installation flow                                                 |
-| `lib_common.bats`       | Shared library functions                                          |
-| `recommend_skills.bats` | Skill recommendations                                             |
-| `sh_reexec.bats`        | Re-exec guard behavior                                            |
-| `helpers.bash`          | Test utilities (require_jq helper)                                |
+---
+
+## `docs/` and `wiki/`
+
+```
+docs/
+├── agent-teams-examples.md       # Multi-agent team examples
+├── claude-code-teams.md          # Claude Code team patterns
+├── fable-quick-start.md          # Fable Field Guide quick start
+├── learning-stories.md           # Learning stories from usage
+└── qmd-knowledge-management.md   # QMD knowledge management guide
+
+wiki/
+└── raw/                          # LLM Wiki raw source files
+```
+
+---
 
 ## Naming Conventions
 
-### Scripts & Libraries
+| Category | Convention | Examples |
+|----------|-----------|----------|
+| **Entry scripts** | Short lowercase | `cli.sh`, `generate.sh` |
+| **Libraries** | `kebab-case.sh` | `common.sh`, `require_bash.sh` |
+| **Config dirs** | Lowercase tool names | `claude/`, `codex/`, `factory/` |
+| **Agent files** | `kebab-case.md` | `code-reviewer.md`, `test-generator.md` |
+| **Skill files** | Always `SKILL.md` | `skills/code-review/SKILL.md` |
+| **Top-level docs** | `UPPERCASE.md` | `AGENTS.md`, `MEMORY.md`, `README.md` |
+| **Guide docs** | `kebab-case.md` | `best-practices.md`, `git-guidelines.md` |
+| **JSON configs** | `camelCase` keys | `mcpServers`, `defaultModel` |
+| **Test files** | `<feature>.bats` | `pr_claude.bats`, `cli.bats` |
 
-| Convention                             | Example                                         |
-| -------------------------------------- | ----------------------------------------------- |
-| Entry-point scripts: `*.sh` at root    | `cli.sh`, `generate.sh`, `install.sh`           |
-| Libraries: `lib/*.sh`, snake_case      | `lib/common.sh`, `lib/require_bash.sh`          |
-| Test files: `tests/*.bats`, snake_case | `tests/pr_claude.bats`, `tests/lib_common.bats` |
-| Test helpers: `tests/helpers.bash`     | `tests/helpers.bash`                            |
+---
 
-### Shell Functions
+## Key Locations
 
-| Convention                                            | Example                                                      |
-| ----------------------------------------------------- | ------------------------------------------------------------ |
-| Public functions: `snake_case`                        | `copy_configurations`, `detect_tool`, `safe_copy_dir`        |
-| Private helpers: `_prefix` underscore                 | `_detect_os`, `_verify_package_manager`, `_run_kiro_install` |
-| Tool installers: `install_<tool>`                     | `install_claude_code`, `install_amp`, `install_kiro`         |
-| Tool handlers: `handle_<tool>_installation_if_needed` | `handle_qmd_installation_if_needed`                          |
-| Config generators: `generate_<tool>_configs`          | `generate_claude_configs`, `generate_grok_configs`           |
-| Config copiers: `copy_<tool>_configs`                 | `copy_claude_configs`, `copy_mimo_configs`                   |
-| Logging: `log_<level>`                                | `log_info`, `log_success`, `log_warning`, `log_error`        |
+| What | Where |
+|------|-------|
+| Re-exec guard | `lib/require_bash.sh` |
+| Logging functions | `lib/common.sh` |
+| Dry-run wrappers | `lib/common.sh` (`execute()`, `execute_quoted()`) |
+| Tool detection | `lib/install.sh` (`detect_tool()`) |
+| Config install dispatch | `cli.sh` (`copy_configurations()`) |
+| Config export dispatch | `generate.sh` (`generate_configurations()`) |
+| MCP server registry | `configs/mcp-registry.json` |
+| Central skill index | `skills/README-DISCOVERY.md` |
+| Agent instructions | `AGENTS.md`, `GEMINI.md` |
+| Conventions docs | `.planning/codebase/CONVENTIONS.md` |
+| CI config | `.github/workflows/test.yml` |
 
-### Config Directories
-
-| Convention                                      | Example                                          |
-| ----------------------------------------------- | ------------------------------------------------ |
-| Tool names in `configs/`: lowercase, hyphenated | `configs/antigravity-cli/`, `configs/kimi-code/` |
-| Home-dir configs: dot-prefixed, lowercase       | `~/.claude/`, `~/.cursor/`, `~/.commandcode/`    |
-| Universal agents: `~/.agents/`                  | `~/.agents/skills/`, `~/.agents/AGENTS.md`       |
-| Backup pattern: `ai-tools-backup-{timestamp}`   | `~/ai-tools-backup-20260704-120000`              |
-
-### Config Files
-
-| Convention                            | Example                                                 |
-| ------------------------------------- | ------------------------------------------------------- |
-| Agent instructions: `AGENTS.md`       | `configs/claude/CLAUDE.md` (also copied as `AGENTS.md`) |
-| Settings: `settings.json`             | `configs/claude/settings.json`                          |
-| MCP config: `mcp*.json`               | `mcp-servers.json`, `mcp.json`, `mcp-config.json`       |
-| Tool-specific config: per-tool format | `config.toml`, `opencode.json`, `mimocode.jsonc`        |
-| CI config: `.yml`                     | `.github/workflows/test.yml`                            |
-
-## File Size Summary
-
-| File                  | Lines     | Role            |
-| --------------------- | --------- | --------------- |
-| `cli.sh`              | 2283      | Main installer  |
-| `lib/install.sh`      | 1103      | Tool installers |
-| `generate.sh`         | 907       | Config exporter |
-| `lib/common.sh`       | 867       | Core utilities  |
-| `lib/require_bash.sh` | 33        | Re-exec guard   |
-| `install.sh`          | 90        | Bootstrap       |
-| **Total Shell**       | **~5283** |                 |
-
-## Change Management
-
-- **Changesets**: 22 markdown files in `.changeset/` tracking feature additions (tool support, skill additions, CLI fixes)
-- **Pre-commit hooks**: trailing-whitespace, YAML check, oxfmt formatting
-- **Biome**: Formatter config with tabs, 120 line width, double quotes
-- **Renovate**: Automated dependency updates
+_Last updated: 2026-07-10_
