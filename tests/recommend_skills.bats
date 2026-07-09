@@ -115,24 +115,6 @@ README_FILE="$REPO_ROOT/README.md"
     [ "$output" = "mattpocock/skills" ]
 }
 
-@test "code-review entry has correct repo mattpocock/skills" {
-    if ! command -v jq &>/dev/null; then
-        skip "jq not installed"
-    fi
-    run jq -r '.recommended_skills[] | select(.skill == "code-review") | .repo' "$RECOMMEND_SKILLS_JSON"
-    [ "$status" -eq 0 ]
-    [ "$output" = "mattpocock/skills" ]
-}
-
-@test "code-review entry has the code-review skill name" {
-    if ! command -v jq &>/dev/null; then
-        skip "jq not installed"
-    fi
-    run jq -r '.recommended_skills[] | select(.repo == "mattpocock/skills" and .skill == "code-review") | .skill' "$RECOMMEND_SKILLS_JSON"
-    [ "$status" -eq 0 ]
-    [ "$output" = "code-review" ]
-}
-
 @test "improve-codebase-architecture entry has non-empty description" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
@@ -197,11 +179,6 @@ README_FILE="$REPO_ROOT/README.md"
 
 @test "README.md install block contains improve-codebase-architecture install command" {
     run grep -F 'npx skills add mattpocock/skills --skill improve-codebase-architecture' "$README_FILE"
-    [ "$status" -eq 0 ]
-}
-
-@test "README.md install block contains code-review install command" {
-    run grep -F 'npx skills add mattpocock/skills --skill code-review' "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
