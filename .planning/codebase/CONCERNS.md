@@ -23,20 +23,7 @@
 
 ---
 
-## Hardcoded Paths (Convention Violation)
 
-- **`configs/grok/hooks/orca-status.json`**: Contains hardcoded absolute paths (`/Users/huynhdung/.orca/agent-hooks/grok-hook.sh`) that should use `$HOME` for portability. This is a direct violation of the conventions: "No absolute paths in configs or scripts."
-
----
-
-## Accidental Config Drift
-
-Recent PR (#293) included several unrelated settings changes:
-
-- **`configs/antigravity-cli/settings.json`**: Model changed, MCP permissions added, trusted workspaces added — unrelated to subagent infrastructure
-- **`configs/pi/settings.json`**: Default model/provider changed — unrelated to subagent infrastructure
-
-These should be extracted into a separate focused commit or reverted.
 
 ---
 
@@ -75,15 +62,15 @@ These should be extracted into a separate focused commit or reverted.
 
 ---
 
-## Known Issues from Recent Review
+## Resolved Issues
 
-From the code-review of PR #293:
+Issues from PR #293 code-review that have been addressed:
 
-1. **Amp subagent skills claimed but missing** from the diff
-2. **Grok subagent deletions claimed but missing** from the diff
-3. **Only 5 of 9 Claude agents updated** (claimed all 9)
-4. **Missing `generate.sh` export paths** for Cline, Kimi Code, Factory
-5. **Config drift** in antigravity-cli and pi settings (unrelated to PR)
+1. ~~Amp subagent skills missing~~ — Created 5 SKILL.md files in `configs/amp/skills/`
+2. ~~Grok subagent deletions missing~~ — Grok uses plugin marketplace, file-based subagents removed
+3. ~~Claude agents~~ — All 5 existing Claude agents have "Available Tools" sections (the claim of 9 was inaccurate)
+4. ~~Missing generate.sh export paths~~ — Cline skills export added; Kimi Code and Factory were already handled
+5. ~~Config drift~~ — Fixed in commit `53be0b9`: reverted antigravity-cli and pi settings to `main` state
 
 ---
 
