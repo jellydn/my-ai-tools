@@ -1235,6 +1235,16 @@ CODEX_HOME = "$HOME/.codex"
 NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/node"
 ```
 
+### Custom Agents
+
+Located in [`configs/codex/agents/`](configs/codex/agents/):
+
+- `code-reviewer` - Comprehensive code quality and security review
+- `test-generator` - Generate meaningful tests with edge case coverage
+- `documentation-writer` - Create clear, helpful documentation
+- `ai-slop-remover` - Remove AI-generated boilerplate and improve code quality
+- `security-audit` - Security vulnerability assessment
+
 ### Usage
 
 ```bash
@@ -1592,6 +1602,16 @@ Installer copies the repo-managed files `configs/pi/settings.json` and `configs/
 - **Quiet Startup**: Enabled (skips changelog on launch)
 - **Hide Thinking Block**: Enabled (hides thinking process)
 
+### Custom Agents
+
+Located in [`configs/pi/agents/`](configs/pi/agents/):
+
+- `code-reviewer` - Comprehensive code quality and security review
+- `test-generator` - Generate meaningful tests with edge case coverage
+- `documentation-writer` - Create clear, helpful documentation
+- `ai-slop-remover` - Remove AI-generated boilerplate and improve code quality
+- `security-audit` - Security vulnerability assessment
+
 ### Pi Packages
 
 Pi uses a package-based extension system (not MCP). Install packages with:
@@ -1767,6 +1787,16 @@ Copilot CLI configs are stored in [`configs/copilot/`](configs/copilot/) and ins
 	}
 }
 ```
+
+### Custom Agents
+
+Located in [`configs/copilot/agents/`](configs/copilot/agents/):
+
+- `code-reviewer` - Comprehensive code quality and security review
+- `test-generator` - Generate meaningful tests with edge case coverage
+- `documentation-writer` - Create clear, helpful documentation
+- `ai-slop-remover` - Remove AI-generated boilerplate and improve code quality
+- `security-audit` - Security vulnerability assessment
 
 ### Usage
 
