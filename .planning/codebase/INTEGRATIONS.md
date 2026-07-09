@@ -63,7 +63,7 @@ Configured in `configs/claude/settings.json` via `extraKnownMarketplaces`:
 
 ## Custom Plugin Marketplace (This Repo)
 
-Defined in `.claude-plugin/marketplace.json` — 18 local skills published as Claude Code plugins:
+Defined in `.claude-plugin/marketplace.json` — 19 local skills published as Claude Code plugins:
 
 | Plugin                             | Category            | Description                                          |
 | ---------------------------------- | ------------------- | ---------------------------------------------------- |

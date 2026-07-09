@@ -58,7 +58,7 @@ my-ai-tools/
 │   ├── common.sh                # Core utilities (867 lines)
 │   ├── install.sh               # Tool installation functions (1103 lines)
 │   └── require_bash.sh          # Bash re-exec guard (33 lines)
-├── skills/                      # ★ Local skill marketplace (18 skills)
+├── skills/                      # ★ Local skill marketplace (19 skills)
 │   ├── adr/
 │   ├── codemap/
 │   ├── commit-atomic/
@@ -151,7 +151,7 @@ Not all tools have all directories — each has only what's applicable.
 
 ### Skills (`skills/`)
 
-18 local skill plugins, each a directory containing:
+19 local skill plugins, each a directory containing:
 
 - `SKILL.md` — Skill definition with frontmatter (name, description, allowed-tools, model)
 - Supporting files as needed by the skill
