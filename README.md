@@ -147,7 +147,7 @@ cd my-ai-tools
 - `--dry-run` - Preview changes without making them
 - `--backup` - Backup existing configs before installing
 - `--no-backup` - Skip backup prompt
-- `-y` / `--yes` - Non-interactive mode; only installs/configures your active tool set (amp, codex, cursor, kilo, opencode, pi, antigravity, ai-switcher). Shared infra (plugins, skills, global tools) still installed. Auto-activated in CI/piped input.
+- `-y` / `--yes` - Non-interactive mode; only installs/configures your active tool set (amp, codex, ctx, cursor, kilo, opencode, open_code_review, pi, antigravity, ai-switcher). Shared infra (plugins, skills, global tools) still installed. Auto-activated in CI/piped input.
 - `--migrate-gemini` - One-step Gemini→Antigravity CLI migration
 
 ## 🔄 Bidirectional Config Sync

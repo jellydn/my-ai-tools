@@ -150,7 +150,7 @@ setup() {
 @test "tool_allowed gates correctly under YES_TO_ALL" {
     # Under YES_TO_ALL=true: only the 8 allowed tools return 0
     export YES_TO_ALL=true
-    for tool in amp codex cursor kilo opencode pi antigravity ai-switcher; do
+    for tool in amp codex ctx cursor kilo opencode open_code_review pi antigravity ai-switcher; do
         run tool_allowed "$tool"
         [ "$status" -eq 0 ]
     done

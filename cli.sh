@@ -13,7 +13,7 @@ source "$SCRIPT_DIR/lib/install.sh"
 # Core tools installed/configured when -y (YES_TO_ALL) is active.
 # This is your personal active tool set. When YES_TO_ALL is false
 # (interactive mode), tool_allowed returns true for everything.
-TOOL_ALLOWLIST_YES=(amp codex cursor kilo opencode pi antigravity ai-switcher)
+TOOL_ALLOWLIST_YES=(amp codex ctx cursor kilo opencode open_code_review pi antigravity ai-switcher)
 
 tool_allowed() {
 	local name="$1"
