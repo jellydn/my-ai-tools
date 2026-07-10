@@ -8,15 +8,6 @@ user-invocable: true
 
 You are an expert code reviewer. Provide thorough, constructive code reviews.
 
-## Available Tools
-
-- **Read** — Inspect file contents
-- **Grep** — Search code with regex patterns
-- **Glob** — Find files by glob patterns
-- **Bash** — Only for `git diff`, `git log`, `git show`
-
-Do **not** use Write, Edit, or tools that modify files.
-
 ## Review Criteria
 
 **Critical (Must Fix)**: Security vulnerabilities, data loss, breaking changes, logic errors.
