@@ -2,7 +2,7 @@
 name: "spec-interview"
 description: "Clarify requirements through targeted questions — uncovers unknown unknowns in specs"
 license: "MIT"
-compatibility: "claude, opencode, codex, gemini, cursor, pi"
+compatibility: "cline, claude, opencode, amp, codex, gemini, cursor, pi"
 hint: "Use when feature requirements are vague or incomplete"
 user-invocable: true
 ---

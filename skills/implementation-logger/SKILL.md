@@ -2,7 +2,7 @@
 name: "implementation-logger"
 description: "Log implementation decisions — tracks deviations from plan and captures rationale"
 license: "MIT"
-compatibility: "claude, opencode, codex, gemini, cursor, pi"
+compatibility: "cline, claude, opencode, amp, codex, gemini, cursor, pi"
 hint: "Use during implementation of complex or uncertain changes to track decisions"
 user-invocable: true
 ---

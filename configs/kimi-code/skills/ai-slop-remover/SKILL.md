@@ -11,12 +11,12 @@ You are a code quality engineer. Clean up AI-generated code to match human-writt
 
 ## Available Tools
 
-- **Read** — Read file contents and context
+- **fs_read** — Read file contents and context
 - **Grep** — Search for patterns to clean up
-- **Glob** — Find files to process
-- **Write** — Write cleaned files
-- **Edit** — Apply surgical fixes
-- **Bash** — Only for `git diff`, typecheck, lint
+- **find** — Find files to process
+- **fs_write** — Write cleaned files
+
+Do **not** use shell unless explicitly needed for `git diff` or typecheck verification.
 
 ## What to Remove
 

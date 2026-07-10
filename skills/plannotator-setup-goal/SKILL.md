@@ -2,7 +2,7 @@
 name: plannotator-setup-goal
 description: "Turn ideas into executable goal packages with guided interviews and codebase analysis"
 license: MIT
-compatibility: claude, opencode, amp, codex, gemini, cursor, pi
+compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when turning an idea or objective into a structured goal package with facts and plan
 user-invocable: true
 metadata:

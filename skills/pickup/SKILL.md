@@ -2,7 +2,7 @@
 name: pickup
 description: "Resume work from previous handoff sessions stored in .planning/handoffs/"
 license: MIT
-compatibility: claude, opencode, codex, gemini, cursor, pi
+compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when resuming work from a previous handoff session
 user-invocable: true
 disable-model-invocation: true

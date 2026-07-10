@@ -2,7 +2,7 @@
 name: "doc-search"
 description: "Search project documentation — ADRs, wiki entries, conventions via ripgrep, qmd, fff, and ctx"
 license: "MIT"
-compatibility: "claude, opencode, codex, gemini, cursor, pi"
+compatibility: "cline, claude, opencode, amp, codex, gemini, cursor, pi"
 hint: "Use when you need to find existing documentation before writing new docs"
 user-invocable: true
 ---

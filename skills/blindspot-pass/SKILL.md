@@ -2,7 +2,7 @@
 name: "blindspot-pass"
 description: "Find unknown unknowns before starting implementation — searches git history, patterns, and architecture for hidden gotchas"
 license: "MIT"
-compatibility: "claude, opencode, codex, gemini, cursor, pi"
+compatibility: "cline, claude, opencode, amp, codex, gemini, cursor, pi"
 hint: "Use before starting complex or unfamiliar work to identify hidden issues"
 user-invocable: true
 ---

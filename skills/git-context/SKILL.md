@@ -2,7 +2,7 @@
 name: "git-context"
 description: "Search git history for context — commit messages, blame, related changes, impact analysis"
 license: "MIT"
-compatibility: "claude, opencode, codex, gemini, cursor, pi"
+compatibility: "cline, claude, opencode, amp, codex, gemini, cursor, pi"
 hint: "Use to understand why code was written a certain way or find related changes"
 user-invocable: true
 ---
