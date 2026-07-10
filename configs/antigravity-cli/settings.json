@@ -136,6 +136,6 @@
 	},
 	"toolPermission": "proceed-in-sandbox",
 	"trustedWorkspaces": [
-		"/Users/huynhdung/src/tries/2026-07-08-gmail-cli"
+		"$HOME/src/tries/2026-07-08-gmail-cli"
 	]
 }
