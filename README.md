@@ -29,7 +29,8 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **codemap**                            | Parallel codebase analysis producing 7 structured documents                     | Onboarding to a new project, or before major refactoring — gives you the full picture fast                      |
 | **code-quality-review** | Extremely strict maintainability and structural code quality review             | Before merging PRs — catches issues that regular linters miss                                                   |
 | **babysit-pr**                         | Continuously monitor open PRs, auto-fix CI failures, surface review feedback    | After pushing a PR — hands-off monitoring until it's ready to merge                                             |
-| **improve**                            | Audit any codebase and write implementation plans for cheaper models to execute | When you want a senior-level code review with actionable, self-contained plans                                  |
+| **improve-code-architect**            | Frontier model plans, cheap model executes — audit and plan improvements         | When you need senior-level analysis with actionable plans for cheaper models to run (from shadcn)                |
+| **improve-codebase-architecture**     | Codebase architecture deepening — find structural improvement opportunities       | When you want to improve modularity, patterns, and architecture of an existing codebase (from Matt Pocock)      |
 
 ## 🔌 MCP Servers & Plugins Overview
 
@@ -717,7 +718,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Plannotator Setup Goal** | [backnotprop/plannotator](https://github.com/backnotprop/plannotator)                                         | Turn ideas into structured goal packages with fact sheets and execution plans, gated by Plannotator annotation                                                                                                                 |
 | **Codex PR Babysitter**    | [openai/codex](https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md)                   | Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required                                 |
 | **Last 30 Days**           | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill)                                     | Research what people actually say about any topic in the last 30 days. Pulls from Reddit, X, YouTube, TikTok, HN, Polymarket, GitHub, and the web.                                                                             |
-| **Improve**                | [shadcn/improve](https://github.com/shadcn/improve)                                                           | Audit any codebase and write implementation plans for cheaper models to execute. Uses expensive model for planning, cheap model for execution.                                                                                 |
+| **Improve Code Architect**    | [shadcn/improve](https://github.com/shadcn/improve)                                                           | Frontier model plans, cheap model executes — audit any codebase and produce implementation plans for cheaper models to run.                                                              |
 | **Engram**                 | [Gentleman-Programming/engram](https://github.com/Gentleman-Programming/engram)                               | Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, and git-based cross-machine sync.                                                                                          |
 | **mac-OCR**                | [privatenumber/mac-ocr](https://github.com/privatenumber/mac-ocr)                                             | macOS CLI for OCR and searchable PDFs using Apple's Vision framework                                                                                                                                                           |
 
@@ -1235,6 +1236,16 @@ CODEX_HOME = "$HOME/.codex"
 NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/node"
 ```
 
+### Custom Agents
+
+Located in [`configs/codex/agents/`](configs/codex/agents/):
+
+- `code-reviewer` - Comprehensive code quality and security review
+- `test-generator` - Generate meaningful tests with edge case coverage
+- `documentation-writer` - Create clear, helpful documentation
+- `ai-slop-remover` - Remove AI-generated boilerplate and improve code quality
+- `security-audit` - Security vulnerability assessment
+
 ### Usage
 
 ```bash
@@ -1592,6 +1603,16 @@ Installer copies the repo-managed files `configs/pi/settings.json` and `configs/
 - **Quiet Startup**: Enabled (skips changelog on launch)
 - **Hide Thinking Block**: Enabled (hides thinking process)
 
+### Custom Agents
+
+Located in [`configs/pi/agents/`](configs/pi/agents/):
+
+- `code-reviewer` - Comprehensive code quality and security review
+- `test-generator` - Generate meaningful tests with edge case coverage
+- `documentation-writer` - Create clear, helpful documentation
+- `ai-slop-remover` - Remove AI-generated boilerplate and improve code quality
+- `security-audit` - Security vulnerability assessment
+
 ### Pi Packages
 
 Pi uses a package-based extension system (not MCP). Install packages with:
@@ -1767,6 +1788,16 @@ Copilot CLI configs are stored in [`configs/copilot/`](configs/copilot/) and ins
 	}
 }
 ```
+
+### Custom Agents
+
+Located in [`configs/copilot/agents/`](configs/copilot/agents/):
+
+- `code-reviewer` - Comprehensive code quality and security review
+- `test-generator` - Generate meaningful tests with edge case coverage
+- `documentation-writer` - Create clear, helpful documentation
+- `ai-slop-remover` - Remove AI-generated boilerplate and improve code quality
+- `security-audit` - Security vulnerability assessment
 
 ### Usage
 

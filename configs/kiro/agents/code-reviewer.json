@@ -1,0 +1,8 @@
+{
+  "name": "code-reviewer",
+  "description": "Review code for quality, security, and best practices — read-only analysis",
+  "prompt": "shared/CODE-REVIEWER.md",
+  "tools": ["Read", "Grep", "Glob"],
+  "model": "inherit",
+  "temperature": 0.2
+}

@@ -2,7 +2,7 @@
 name: "git-context"
 description: "Search git history for context — commit messages, blame, related changes, impact analysis"
 license: "MIT"
-compatibility: "claude, opencode, codex, gemini, cursor, pi"
+compatibility: "cline, claude, opencode, amp, codex, gemini, cursor, pi"
 hint: "Use to understand why code was written a certain way or find related changes"
 user-invocable: true
 ---
@@ -21,19 +21,6 @@ Use this skill when:
 ## What It Does
 
 Searches git history to build context about the codebase, using a combination of native git commands and the `sem` MCP tool for deeper analysis. Helps answer "why was this done this way?" and "what changed recently in this area?"
-
-## Available Tools
-
-| Tool | What It Does | Best For |
-|------|-------------|----------|
-| `git log` | Commit history with messages | Recent changes, who changed what |
-| `git log -S` | History-aware content search | Finding when a function/string was introduced |
-| `git blame` | Line-by-line attribution | Who last changed each line and why |
-| `git diff` | Compare branches/commits | What changed between versions |
-| `sem blame` | Entity-level blame (function/class) | Why a specific function changed |
-| `sem diff` | Entity-level diff | What changed in a function specifically |
-| `sem impact` | Impact analysis for a change | What would be affected by a change |
-| `ctx search` | Past agent sessions | Previous discussions about this code |
 
 ## How to Execute
 

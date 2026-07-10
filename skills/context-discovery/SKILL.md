@@ -2,7 +2,7 @@
 name: "context-discovery"
 description: "Discover context using MCP tools — fff, sem, ctx, qmd, codebase-memory-mcp for codebase understanding"
 license: "MIT"
-compatibility: "claude, opencode, codex, gemini, cursor, pi"
+compatibility: "cline, claude, opencode, amp, codex, gemini, cursor, pi"
 hint: "Use before starting work to understand codebase context via available MCP tools"
 user-invocable: true
 ---
@@ -21,19 +21,6 @@ Use this skill **before and during implementation** when:
 ## What It Does
 
 Leverages available MCP tools to proactively discover context about the codebase, existing patterns, decisions, and related work. Instead of relying solely on grep/read cycles, it uses purpose-built discovery tools.
-
-## Available Tools
-
-This repo configures several MCP servers that support context discovery:
-
-| Tool | What It Finds | Best For |
-|------|--------------|----------|
-| **fff** | Files by name/path with frecency ranking | "Where is the auth module?" |
-| **sem** | Entity-level git history, blame, impact | "Who changed this function and why?" |
-| **ctx** | Past agent sessions about this topic | "Have we solved this before?" |
-| **qmd** | Durable project knowledge, ADRs, learnings | "What decisions were made about X?" |
-| **codebase-memory-mcp** | Code graph: functions, classes, call chains | "What calls this function?" |
-| **agentmemory** | Cross-session memory | "What happened in previous sessions?" |
 
 ## Discovery Workflow
 

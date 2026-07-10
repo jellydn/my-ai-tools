@@ -1,165 +1,93 @@
-# External Integrations
+# Integrations
 
-## AI Coding Tools (Direct Config Management)
+**Analysis Date:** 2026-07-10
 
-This project manages configurations for 23+ AI coding assistants, deploying configs to their respective config directories and installing them via package managers:
+---
 
-| Tool                 | Install Source                                                            | Config Home                           | Status                                    |
-| -------------------- | ------------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------- |
-| **Claude Code**      | `npm install -g @anthropic-ai/claude-code`                                | `~/.claude/`                          | Primary                                   |
-| **OpenCode**         | `https://opencode.ai/install`                                             | `~/.config/opencode/`                 | Active                                    |
-| **Amp**              | `https://ampcode.com/install.sh`                                          | `~/.config/amp/`                      | Active                                    |
-| **Codex CLI**        | `npm install -g @openai/codex`                                            | `~/.codex/`                           | Active                                    |
-| **Kimi Code**        | `https://code.kimi.com/kimi-code/install.sh` (or `.ps1`)                  | `~/.kimi-code/`                       | Active                                    |
-| **Gemini CLI**       | `npm install -g @google/gemini-cli`                                       | `~/.gemini/`                          | Deprecated (free tier ends June 18, 2026) |
-| **Antigravity CLI**  | `https://antigravity.google/cli/install.sh` (or `.ps1`)                   | `~/.gemini/antigravity-cli/`          | Migration target                          |
-| **Kilo CLI**         | `npm install -g @kilocode/cli`                                            | `~/.config/kilo/`                     | Active                                    |
-| **Pi**               | `npm install -g @mariozechner/pi-coding-agent`                            | `~/.pi/`                              | Active                                    |
-| **Command Code**     | `npm install -g command-code`                                             | `~/.commandcode/`                     | Active                                    |
-| **Copilot CLI**      | `npm install -g @github/copilot`                                          | `~/.copilot/`                         | Active                                    |
-| **Cursor**           | `curl https://cursor.com/install \| bash`                                 | `~/.cursor/`                          | Active                                    |
-| **Factory Droid**    | `npm install -g @factory/cli`                                             | `~/.factory/`                         | Active                                    |
-| **Cline**            | `npm install -g cline`                                                    | `~/.cline/`                           | Active                                    |
-| **Grok CLI**         | `npm install -g @xai-official/grok` or `curl https://x.ai/cli/install.sh` | `~/.grok/`                            | Active                                    |
-| **MiMo-Code**        | `npm install -g @mimo-ai/cli` or `curl https://mimo.xiaomi.com/install`   | `~/.config/mimocode/`                 | Active                                    |
-| **CCS**              | `npm install -g @kaitranntt/ccs`                                          | (managed separately)                  | Active                                    |
-| **Qoder CLI**        | `https://qoder.com/install`                                               | `~/.qoder/`                           | Active                                    |
-| **Kiro CLI**         | `https://cli.kiro.dev/install`                                            | `~/.kiro/`                            | Active                                    |
-| **Codiff**           | `brew install --cask nkzw-tech/tap/codiff` (macOS only)                   | `~/.codiff/`                          | Active                                    |
-| **ctx**              | `https://ctx.rs/install`                                                  | `~/.ctx/`                             | Active                                    |
-| **herdr**            | `https://herdr.dev/install.sh`                                            | `~/.config/herdr/`                    | Active                                    |
-| **Open Code Review** | `npm install -g @alibaba-group/open-code-review`                          | —                                     | Active                                    |
-| **AI Launcher**      | `https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh`   | `~/.config/ai-launcher/`              | Active                                    |
-| **Conductor**        | macOS app from `https://www.conductor.build`                              | `~/.conductor/`                       | Active                                    |
-| **Orca**             | macOS app                                                                 | `~/Library/Application Support/orca/` | Active                                    |
+## MCP Servers (Central Registry)
 
-## MCP (Model Context Protocol) Servers
+The central MCP registry at `configs/mcp-registry.json` defines all MCP server installations. Key servers include:
 
-Central registry at `configs/mcp-registry.json` with 9 servers, installed via `claude mcp add --scope user --transport stdio`:
+| Server | Purpose | Install Method |
+|--------|---------|---------------|
+| `ctx` | Coding-agent history search | `npm install -g @anthropic-ai/ctx` |
+| `sem` | Semantic code understanding | `npm install -g @anthropic-ai/sem` |
+| `codebase-memory-mcp` | Codebase knowledge graph | `npx` registry |
+| `github` | GitHub API (issues, PRs, code search) | Built-in MCP |
+| `playwright` | Browser automation | `npx @anthropic-ai/mcp-playwright` |
+| `qmd` | Knowledge management | `bun add` |
+| `fff` | Fast file finder | Platform-specific install |
+| `logpilot` | AI log analysis | Community install |
 
-| Server                  | Command                                                   | Category                 | Requires       |
-| ----------------------- | --------------------------------------------------------- | ------------------------ | -------------- |
-| **context7**            | `npx -y @upstash/context7-mcp@latest`                     | Documentation            | —              |
-| **sequential-thinking** | `npx -y @modelcontextprotocol/server-sequential-thinking` | Reasoning                | —              |
-| **qmd**                 | `qmd mcp`                                                 | Knowledge                | `qmd` CLI      |
-| **fff**                 | `fff-mcp`                                                 | Search                   | `fff-mcp` CLI  |
-| **react-grab-mcp**      | `npx -y @react-grab/mcp --stdio`                          | Frontend                 | —              |
-| **logpilot**            | `logpilot mcp-server`                                     | Monitoring               | `logpilot` CLI |
-| **agentmemory**         | `npx -y @agentmemory/mcp`                                 | Knowledge (session)      | —              |
-| **sem**                 | `sem-mcp`                                                 | Version Control          | `sem-mcp` CLI  |
-| **ctx**                 | `ctx mcp serve`                                           | Search (session history) | `ctx` CLI      |
+See `configs/mcp-registry.json` for the complete list and full install configuration.
 
-## Claude Code Plugin Marketplaces
+---
 
-Configured in `configs/claude/settings.json` via `extraKnownMarketplaces`:
+## External CLIs Managed
 
-| Marketplace                 | GitHub Repo                          | Plugins                                                                                                                                                     |
-| --------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **claude-plugins-official** | `anthropics/claude-plugins-official` | typescript-lsp, pyright-lsp, context7, frontend-design, learning-output-style, swift-lsp, lua-lsp, code-simplifier, rust-analyzer-lsp, claude-md-management |
-| **plannotator**             | `backnotprop/plannotator`            | plannotator, plannotator-copilot                                                                                                                            |
-| **claude-hud**              | `jarrodwatts/claude-hud`             | claude-hud                                                                                                                                                  |
-| **worktrunk**               | `max-sixty/worktrunk`                | worktrunk                                                                                                                                                   |
-| **openai-codex**            | `openai/codex-plugin-cc`             | codex                                                                                                                                                       |
+The repo installs and configures 20+ AI coding tool CLIs. The `lib/install.sh` library handles detection and installation for each:
 
-## Custom Plugin Marketplace (This Repo)
+| Tool CLI | Config Dir | Native Path | Install Method |
+|----------|-----------|-------------|---------------|
+| **Claude Code** | `configs/claude/` | `~/.claude/` | `npm install -g @anthropic-ai/claude-code` |
+| **OpenCode** | `configs/opencode/` | `~/.config/opencode/` | `npm install -g @opencode-ai/cli` |
+| **Amp** | `configs/amp/` | `~/.amp/` | `npm install -g @anthropic-ai/amp` |
+| **Pi** | `configs/pi/` | `~/.pi/agent/` | `npm install -g @anthropic-ai/pi` |
+| **Codex CLI** | `configs/codex/` | `~/.codex/` | `npm install -g @openai/codex` |
+| **Antigravity CLI** | `configs/antigravity-cli/` | `~/.gemini/` | `npm install -g @anthropic-ai/antigravity-cli` |
+| **Kiro CLI** | `configs/kiro/` | `~/.kiro/` | `npm install -g @kiro-ai/cli` |
+| **Kimi Code** | `configs/kimi-code/` | `~/.kimi-code/` | `npm install -g @moonshot-ai/kimi-code` |
+| **Factory Droid** | `configs/factory/` | `~/.factory/` | `npm install -g @factory-ai/cli` |
+| **CommandCode** | `configs/commandcode/` | `~/.commandcode/` | `npm install -g commandcode` |
+| **Cursor** | `configs/cursor/` | `~/.cursor/` | VS Code extension (system-level) |
+| **Cline** | `configs/cline/` | `~/.cline/` | VS Code extension (system-level) |
+| **Copilot CLI** | `configs/copilot/` | `~/.copilot/` | `npm install -g @github/copilot-cli` |
+| **Grok CLI** | `configs/grok/` | `~/.grok/` | `npm install -g @xai/grok-cli` |
+| **CCS** | `configs/ccs/` | `~/.ccs/` | `npm install -g @anthropic-ai/ccs` |
+| **Conductor** | `configs/conductor/` | `~/.conductor/` | `npm install -g @conductor-ai/cli` |
+| **Orca** | `configs/orca/` | `~/.orca/` | `npm install -g @orca/cli` |
+| **AI Launcher** | `configs/ai-launcher/` | `~/.ai-launcher/` | `npm install -g ai-launcher` |
+| **Codiff** | `configs/codiff/` | `~/.codiff/` | `brew install codiff` |
+| **CTX** | `configs/ctx/` | `~/.ctx/` | `npm install -g @anthropic-ai/ctx` |
+| **Herdr** | `configs/herdr/` | `~/.herdr/` | `npm install -g @herdr/cli` |
+| **Qoder CLI** | `configs/qodercli/` | `~/.qoder/` | `npm install -g @qoder/cli` |
+| **Mimo** | `configs/mimo/` | `~/.mimo/` | `npm install -g @mimo-ai/cli` |
 
-Defined in `.claude-plugin/marketplace.json` — 19 local skills published as Claude Code plugins:
+---
 
-| Plugin                             | Category            | Description                                          |
-| ---------------------------------- | ------------------- | ---------------------------------------------------- |
-| adr                                | productivity        | Architecture Decision Records management             |
-| codemap                            | productivity        | Parallel codebase analysis → .planning/codebase/     |
-| commit-atomic                      | productivity        | Atomic commits with commitizen convention            |
-| docs-update                        | productivity        | Automated documentation updates                      |
-| draft-pull-request                 | productivity        | Creates draft PRs with what/why/how                  |
-| handoffs                           | productivity        | Session handoff plans for continuation               |
-| llm-wiki                           | productivity        | Persistent compounding knowledge wiki                |
-| pickup                             | productivity        | Resume from previous handoff sessions                |
-| plannotator-setup-goal             | productivity        | Turn ideas into structured Plannotator goal packages |
-| portless-local                     | productivity        | Named .localhost URLs for local dev                  |
-| pr-review                          | productivity        | Fix PR review comments                               |
-| prd                                | productivity        | Generate Product Requirements Documents              |
-| qmd-knowledge                      | productivity        | Knowledge management via qmd MCP                     |
-| ralph                              | productivity        | Convert PRDs to Ralph agent JSON format              |
-| slop                               | productivity        | Remove AI-generated code slop from diffs             |
-| tdd                                | productivity        | Red-Green-Refactor TDD workflow                      |
-| code-quality-review | code-quality        | Strict maintainability review                        |
-| tmux                               | terminal-automation | Remote control tmux sessions, LogPilot integration   |
+## GitHub Integration
 
-## Recommended Community Skills
+- **GitHub CLI** (`gh`): Used by skills (`draft-pull-request`, `babysit-pr`, `gh-stack`) and the `autoreview` workflow
+- **GitHub MCP**: Issues, PRs, commits, code search, file contents access
+- **CI/CD**: `.github/workflows/test.yml` (test on push/PR), `.github/workflows/deploy-pages.yml` (GitHub Pages)
+- **Renovate**: Automated dependency bumps via `renovate.json`
 
-From `configs/recommend-skills.json` — 16 recommended skills from GitHub:
+---
 
-- `shadcn/improve` — Plan-then-execute architecture for cheap models
-- `mvanhorn/last30days-skill` — Research what people say in last 30 days
-- `vercel-labs/agent-skills` — Vercel's Next.js/React skills
-- `factory-ai/factory-plugins` → `no-use-effect` — Replace useEffect patterns
-- `mattpocock/skills` → `grill-with-docs`, `improve-codebase-architecture`
-- `github/gh-stack` — Stacked branches and PRs
-- `expo/skills` — React Native development
-- `blader/humanizer` — Remove AI-generated writing patterns
-- `jezweb/claude-skills` — 97 production-ready skills
-- `openclaw/agent-skills` → `autoreview` — Automated PR review
-- `av/facts` — Track project specs with lifecycle stages
-- `privatenumber/mac-ocr` — macOS OCR via Vision framework
-- `GoogleChrome/modern-web-guidance` → `modern-web-guidance`
-- `openai/codex` → `babysit-pr` — Automated PR monitoring
-- `Gentleman-Programming/engram` → `engram-memory` — Persistent agent memory
+## Package Managers
 
-## External APIs & Services
+| Manager | Preference | Usage |
+|---------|-----------|-------|
+| **Bun** | Preferred | `bunx` for script running, `bun add` for packages |
+| **npm** | Fallback | `npx` when bun unavailable |
+| **Homebrew** | macOS | `brew install` for tools like bats, codiff |
+| **cargo** | Rust | `sem-mcp` and Rust-based tools |
 
-| Service          | Usage                                | Details                                                                  |
-| ---------------- | ------------------------------------ | ------------------------------------------------------------------------ |
-| **GitHub API**   | PR management, repository operations | Via `gh` CLI (allowed in Claude permissions)                             |
-| **npm registry** | Package installation                 | `@anthropic-ai/claude-code`, `@openai/codex`, `@google/gemini-cli`, etc. |
-| **GitHub Pages** | Documentation hosting                | `ai-tools.itman.fyi` — deployed on push to main                          |
-| **jsDelivr CDN** | Frontend dependencies                | Docsify v4, Prism.js, docsify-copy-code, docsify zoom-image              |
+The `_detect_package_manager()` and `_detect_script_runner()` helpers in `lib/install.sh` implement the bun→npm fallback pattern.
 
-## Knowledge Management
+---
 
-| System          | Storage                             | Purpose                                  | Protocol                  |
-| --------------- | ----------------------------------- | ---------------------------------------- | ------------------------- |
-| **qmd**         | `~/.ai-knowledges/{project-name}/`  | Durable, project-specific knowledge base | MCP (`qmd mcp`)           |
-| **agentmemory** | Per-session, per-project            | Session-only learnings                   | MCP (`@agentmemory/mcp`)  |
-| **LLM Wiki**    | `wiki/` in repo                     | Compounding knowledge from raw sources   | Slash command `/llm-wiki` |
-| **MEMORY.md**   | Repo root + `~/.ai-tools/MEMORY.md` | Agent memory/knowledge guidelines        | File-based                |
+## Cross-Platform Support
 
-## External CLI Tool Dependencies (Installed by Setup)
+- **macOS**: Homebrew (primary), cargo (fallback)
+- **Linux**: `apt-get`, cargo, curl piped installers
+- **Windows**: PowerShell (`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm ... | iex"`), `winget` for jq
+- **Windows detection**: `IS_WINDOWS` flag via `uname -s` (MINGW*, MSYS*, CYGWIN*) + `MSYSTEM` env var
 
-| Tool              | Install Method                                 | Purpose                                  |
-| ----------------- | ---------------------------------------------- | ---------------------------------------- |
-| **jq**            | brew/apt/winget                                | JSON parsing (required)                  |
-| **Bun**           | `https://bun.sh/install`                       | JavaScript runtime (preferred over Node) |
-| **biome**         | npm/bun global install                         | Formatting hook                          |
-| **ruff**          | pipx/pip3/pip                                  | Python formatting hook                   |
-| **rustfmt**       | rustup                                         | Rust formatting hook                     |
-| **shfmt**         | brew/go install                                | Shell formatting hook                    |
-| **stylua**        | brew/cargo                                     | Lua formatting hook                      |
-| **qmd**           | `npm install -g @tobilu/qmd`                   | Knowledge management                     |
-| **fff-mcp**       | `https://dmtrkovalenko.dev/install-fff-mcp.sh` | Fast file search                         |
-| **logpilot**      | `cargo install logpilot`                       | Log analysis                             |
-| **sem / sem-mcp** | install script + cargo                         | Semantic version control                 |
-| **backlog.md**    | npm/bun global install                         | Amp backlog integration                  |
-| **Plannotator**   | `https://plannotator.ai/install.sh`            | Project planning                         |
-| **Worktrunk**     | `brew install worktrunk`                       | Git worktree management                  |
+---
 
-## Version Control Hosting
+## External Documentation Platforms
 
-| Platform           | Details                                           |
-| ------------------ | ------------------------------------------------- |
-| **GitHub**         | Primary repo: `github.com/jellydn/my-ai-tools`    |
-| **GitHub Actions** | CI: bats tests + jq validation on PR/push to main |
-| **GitHub Pages**   | Documentation site deployment on push to main     |
+The repo's own documentation is deployed via **GitHub Pages** (`.github/workflows/deploy-pages.yml`). The `.nojekyll` file and `CNAME` file indicate custom domain configuration.
 
-## Webhooks & Automation
-
-| System                      | File                                 | Trigger                                                          |
-| --------------------------- | ------------------------------------ | ---------------------------------------------------------------- |
-| **GitHub Actions (CI)**     | `.github/workflows/test.yml`         | Push/PR to main                                                  |
-| **GitHub Actions (Deploy)** | `.github/workflows/deploy-pages.yml` | Push to main + manual dispatch                                   |
-| **Pre-commit hooks**        | `.pre-commit-config.yaml`            | Git commit (trailing-whitespace, end-of-file, check-yaml, oxfmt) |
-| **Renovate**                | `renovate.json`                      | Automated dependency PRs (config:recommended)                    |
-| **Conductor**               | `.conductor/settings.toml`           | Repo setup via `prek install && prek run`                        |
-| **Changesets**              | `.changeset/*.md`                    | 22 tracked changeset entries                                     |
-
-_Last updated: 2026-07-04_
+_Last updated: 2026-07-10_

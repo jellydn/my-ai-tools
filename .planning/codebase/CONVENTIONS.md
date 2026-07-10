@@ -1,6 +1,6 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-07-04
+**Analysis Date:** 2026-07-10
 
 ---
 
@@ -120,19 +120,6 @@ source "$BATS_TEST_DIRNAME/../cli.sh"
 export DRY_RUN=false            # always reset after sourcing
 ```
 
-### `lib/require_bash.sh` (POSIX-compatible)
-
-```bash
-if [ -z "${BASH_VERSION:-}" ] || shopt -oq posix 2>/dev/null; then
-    if command -v bash >/dev/null 2>&1; then
-        exec bash "$0" "$@"
-    else
-        echo "Error: $0 requires bash, but bash was not found in PATH" >&2
-        exit 1
-    fi
-fi
-```
-
 ---
 
 ## Error Handling
@@ -140,7 +127,6 @@ fi
 ### Patterns
 
 1. **Guard clauses** — check preconditions first, return/exit early:
-
    ```bash
    if [ ! -f "$source_file" ]; then return 1; fi
    if ! command -v jq &>/dev/null; then skip "jq not installed"; fi
@@ -236,18 +222,6 @@ fi
 
 ---
 
-## Cross-Platform
-
-- `IS_WINDOWS` detected via `uname -s` (MINGW*, MSYS*, CYGWIN*) + `MSYSTEM` env var
-- Windows: PowerShell installers (`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm ... | iex"`)
-- macOS: Homebrew (`brew install`), Cask apps
-- Linux: `apt-get`, cargo, curl piped installers
-- `_detect_package_manager()`: bun preferred → npm fallback
-- `_detect_script_runner()`: bunx preferred → npx fallback
-- `resolve_installer_checksum()`: optional SHA-256 verification for trusted installers (bun, rust, plannotator, sem)
-
----
-
 ## Documentation Conventions
 
 - **`AGENTS.md`**: root-level agent instructions for this repository (CI commands, merge checklist, testing guide)
@@ -259,4 +233,4 @@ fi
 
 ---
 
-_Last updated: 2026-07-04_
+_Last updated: 2026-07-10_

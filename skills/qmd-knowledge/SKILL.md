@@ -2,7 +2,7 @@
 name: qmd-knowledge
 description: "Manage project knowledge with qmd — captures learnings, decisions, and conventions"
 license: MIT
-compatibility: opencode, claude, amp, codex, gemini, cursor, pi
+compatibility: cline, opencode, claude, amp, codex, gemini, cursor, pi
 hint: Use when recording or retrieving project knowledge, learnings, and issue notes
 user-invocable: true
 metadata:

@@ -2,7 +2,7 @@
 name: "capability-experiments"
 description: "Experiment with model capabilities — HTML reports, embedded questionnaires, proactive research, multi-step reasoning"
 license: "MIT"
-compatibility: "claude, opencode, codex, gemini, cursor, pi"
+compatibility: "cline, claude, opencode, amp, codex, gemini, cursor, pi"
 hint: "Use for rich outputs, interactive forms, or exploring what next-gen models can do"
 user-invocable: true
 ---

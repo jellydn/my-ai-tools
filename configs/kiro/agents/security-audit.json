@@ -1,0 +1,8 @@
+{
+  "name": "security-audit",
+  "description": "Audit code for security vulnerabilities — read-only analysis",
+  "prompt": "shared/SECURITY-AUDIT.md",
+  "tools": ["Read", "Grep", "Glob"],
+  "model": "inherit",
+  "temperature": 0.2
+}
