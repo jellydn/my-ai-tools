@@ -26,7 +26,7 @@
     "commandcode/MiniMaxAI/MiniMax-M3"
   ],
   "hideThinkingBlock": true,
-  "lastChangelogVersion": "0.80.3",
+  "lastChangelogVersion": "0.80.6",
   "packages": [
     {
       "skills": [],

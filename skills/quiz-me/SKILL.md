@@ -61,270 +61,202 @@ Create questions across difficulty levels:
 - What could go wrong?
 - What would you change if requirements changed?
 
-### Step 3: Format Quiz
+### Step 3: Conduct Quiz (One Question at a Time)
 
-Present questions with:
-- Clear question text
-- Multiple choice options (when appropriate)
-- Space for open-ended answers
-- Reference to code for verification
+Use the `ask_user_question` tool for each quiz question. Ask **one question at a time** — present it, wait for the answer, provide feedback, then move to the next. This makes the quiz feel like a conversation, not a test.
+
+**Flow for each question:**
+
+1. **Ask** using `ask_user_question` with the question and options
+2. **Read the answer** the user selected or typed
+3. **Provide feedback**: tell them the correct answer, explain why, link to code
+4. **Track correctness** mentally (or note it)
+5. **Proceed** to the next question
+
+**Guidelines for using `ask_user_question`:**
+- Set `header` to a short label (max 16 chars) like `"Architecture"`, `"Trade-offs"`, `"Edge Cases"`
+- Write a clear `question` with context and any hint references
+- Provide 2-4 concrete `options` — concise `label` (1-5 words) with descriptive `description`
+- After the user answers, give the correct answer with explanation and code references
 
 ### Step 4: Review Answers
 
-After user responds:
-- Validate answers
-- Provide corrections if needed
-- Link to specific code/commits
-- Suggest areas for deeper review
+After each question response:
+- **If correct**: Confirm and reinforce with additional context
+- **If incorrect**: Gently correct, explain why, point to the relevant code/commit
+- **If open-ended**: Evaluate against expected key points, fill in gaps
 
-## Question Templates
+### Step 5: Summarise Results
 
-### Architectural Decision Questions
+After all questions are answered:
+- Report overall understanding level
+- Highlight strong areas
+- Flag areas to review with code references
+- Extract PR description material
 
-```
-**Q1: Why did we use [Pattern/Approach]?**
+## Question Templates (Mapped to ask_user_question)
 
-Context: In [file/module], we implemented [feature] using [approach].
-
-Options:
-a) [Reason 1]
-b) [Reason 2]
-c) [Reason 3]
-
-Hint: Look at the implementation log at [timestamp]
-```
-
-### Trade-off Questions
+### Multiple Choice — Architectural Decision
 
 ```
-**Q2: What are the trade-offs of [Decision]?**
+// Ask one at a time
+ask_user_question(questions: [{
+  header: "Architecture",
+  question: "Why did we use GitHub App Installation flow instead of OAuth for this integration? (Hint: check auth/github/installation.ts for the decision)",
+  options: [
+    {
+      label: "OAuth is deprecated",
+      description: "GitHub still supports OAuth, so this isn't the reason"
+    },
+    {
+      label: "Org-level access",
+      description: "Installation flow provides org-level access — OAuth Apps can't access org repos"
+    },
+    {
+      label: "Easier to implement",
+      description: "Installation flow is actually more complex to set up than basic OAuth"
+    }
+  ]
+}])
 
-We chose to [decision]. What are the benefits and costs?
-
-Benefits:
-- [Your answer]
-
-Costs:
-- [Your answer]
-
-Alternative we didn't choose: [Alternative]
-Why we rejected it: [Your answer]
+// After answer — provide feedback:
+// "Correct! OAuth Apps can't access organization repositories, which is a GitHub limitation.
+// Installation tokens authenticate as the app installation, giving org-level scope.
+// See: auth/github/installation.ts:42-58"
 ```
 
-### Integration Questions
+### Fill in the Blank (using open-ended)
 
 ```
-**Q3: How does [Component] integrate with [Existing System]?**
-
-Describe the data flow and interaction points.
-
-[Your answer]
-
-Hint: Trace through [file.ts] starting at [function]
+ask_user_question(questions: [{
+  header: "Implementation",
+  question: "What are the token lifespans in our GitHub auth? Fill in:\n- User OAuth tokens last: ______\n- Installation tokens last: ______\n- We cache installation tokens for: ______\n(Hint: check auth/github/token-cache.ts)",
+  options: [
+    {
+      label: "6mo / 1hr / 55min",
+      description: "User OAuth=6 months, Installation tokens=1 hour, Cache TTL=55 minutes (5 min buffer)"
+    },
+    {
+      label: "1yr / 8hr / 7hr",
+      description: "Incorrect — installation tokens only last 1 hour, we need a 5-minute buffer before expiry"
+    },
+    {
+      label: "Permanent / 24hr / 23hr",
+      description: "Incorrect — GitHub installation tokens have a 1-hour expiry, not 24 hours"
+    }
+  ]
+}])
 ```
 
-### Edge Case Questions
+### Trade-off Analysis
 
 ```
-**Q4: What happens when [Edge Case]?**
-
-We handle [edge case] in [location]. Describe:
-1. How we detect it
-2. How we handle it
-3. What the user experiences
-
-[Your answer]
+ask_user_question(questions: [{
+  header: "Trade-offs",
+  question: "What's the main trade-off of our token caching strategy? We cache installation tokens with a 55-minute TTL.",
+  options: [
+    {
+      label: "Speed vs staleness",
+      description: "Correct — caching avoids rate limits (5000/hr) but a token could be stale for up to 5 minutes before natural expiry"
+    },
+    {
+      label: "Memory vs latency",
+      description: "The token cache is small (Redis, key pattern github:install:{id}:token) — memory isn't the constraint here"
+    },
+    {
+      label: "Security vs simplicity",
+      description: "Tokens are encrypted in Redis — security wasn't the trade-off driver for the TTL decision"
+    }
+  ]
+}])
 ```
 
-### Debugging Questions
+### Edge Case Question
 
 ```
-**Q5: If [Error] occurs, how would you debug it?**
-
-Error: [Description]
-
-Your debugging approach:
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
-
-Where would you start looking? [Your answer]
+ask_user_question(questions: [{
+  header: "Edge Cases",
+  question: "What happens when a user uninstalls the GitHub App? How does our system respond?",
+  options: [
+    {
+      label: "Hard delete record",
+      description: "We soft delete instead to preserve audit trail and cascading session cleanup"
+    },
+    {
+      label: "Soft delete + audit",
+      description: "Correct — we soft delete the installation record and cascade to invalidate all user sessions, preserving the audit trail"
+    },
+    {
+      label: "Nothing, tokens work",
+      description: "Incorrect — when uninstalled, tokens immediately stop working. We must clean up sessions"
+    }
+  ]
+}])
 ```
 
-## Example Usage
+### Code Reading Question
 
-````
-Agent: "Implementation complete! Let me quiz you to verify understanding.
-This will help you write the PR description and prepare for review.
+```
+ask_user_question(questions: [{
+  header: "Code Reading",
+  question: "In the token refresh logic, why do we compare the cached token's expiry against a 55-minute threshold instead of the full 60 minutes?",
+  options: [
+    {
+      label: "5-min safety buffer",
+      description: "Correct! The 5-minute buffer prevents edge-case race conditions where a token expires between the cache check and the API call"
+    },
+    {
+      label: "Rate limit overhead",
+      description: "Rate limits are 5000/hr — the buffer isn't about rate limits, it's about preventing stale token usage"
+    },
+    {
+      label: "Clock drift compensation",
+      description: "While clock drift is a real concern, the primary reason is preventing token expiry during the request window"
+    }
+  ]
+}])
+```
 
-# Quiz: GitHub OAuth Integration
+## Complete Quiz Interaction Flow
 
-## Section 1: Core Decisions (Understanding)
+For a typical 4-6 question quiz, the flow looks like:
 
-**Q1: Why did we use GitHub App Installation flow instead of OAuth?**
+```
+1. Agent: "Let me quiz you on the GitHub OAuth implementation.
+   I'll ask one question at a time and give feedback after each."
 
-Options:
-a) OAuth is deprecated
-b) Installation flow provides org-level access
-c) Installation flow is easier to implement
-d) Requirement from product spec
+2. ask_user_question → Q1 (Architecture question)
+   User answers
+   Agent feedback: "Correct! ... See auth/github/installation.ts:42"
 
-<details>
-<summary>Hint</summary>
-Check the implementation log decision #1
-</details>
+3. ask_user_question → Q2 (Implementation question)
+   User answers
+   Agent feedback: "Almost — the cache TTL is 55 minutes, not 50..."
 
----
+4. ask_user_question → Q3 (Edge case question)
+   User answers
+   Agent feedback: "Right!..."
 
-**Q2: What are the main differences in token lifespan?**
+5. ask_user_question → Q4 (Trade-off question)
+   User answers
+   Agent feedback: "Good analysis..."
 
-Fill in the blanks:
-- User OAuth tokens last: ______
-- Installation tokens last: ______
-- We cache installation tokens for: ______
-
----
-
-## Section 2: Implementation Details (Application)
-
-**Q3: Describe the token caching strategy**
-
-In your own words, explain:
-1. Why we cache tokens
-2. Where they're cached
-3. What the TTL is and why
-4. When cache is invalidated
-
----
-
-**Q4: Draw the installation flow**
-
-Sketch the sequence when a user installs the GitHub App:
-
-User → GitHub → [Your answer] → [Your answer] → Database
-
-Include: webhook call, token request, database update
-
----
-
-## Section 3: Edge Cases (Analysis)
-
-**Q5: What happens when a user uninstalls the GitHub App?**
-
-a) Nothing, tokens keep working
-b) Hard delete installation record
-c) Soft delete, preserve audit trail
-d) Cascade delete all user sessions
-
-Explain why we chose this approach: [Your answer]
-
----
-
-**Q6: What could go wrong with token caching?**
-
-List 3 potential failure modes:
-1. [Your answer]
-2. [Your answer]
-3. [Your answer]
-
-How do we handle each? [Your answer]
-
----
-
-## Section 4: Review Preparation (Application)
-
-**Q7: How would you explain this PR to a reviewer?**
-
-Write a 2-3 sentence summary:
-
-[Your answer]
-
----
-
-**Q8: What questions might a reviewer ask?**
-
-List 3 questions a thorough reviewer would ask:
-1. [Your answer]
-2. [Your answer]
-3. [Your answer]
-
-Your answers:
-1. [Your answer]
-2. [Your answer]
-3. [Your answer]
-
----
-
-## Section 5: Trade-offs (Analysis)
-
-**Q9: Installation Flow vs User OAuth - Trade-off Analysis**
-
-Complete the table:
-
-| Factor | Installation Flow | User OAuth |
-|--------|------------------|------------|
-| Org access | ✅ [Why?] | ❌ [Why?] |
-| Setup complexity | [Your answer] | [Your answer] |
-| Token lifespan | [Your answer] | [Your answer] |
-| Rate limits | [Your answer] | [Your answer] |
-
-Given our use case, why is Installation Flow better? [Your answer]
-
----
-
-## Section 6: Future Considerations (Analysis)
-
-**Q10: If we needed to support GitLab tomorrow, what would we reuse?**
-
-Reusable patterns:
-- [Your answer]
-
-What would be different:
-- [Your answer]
-
-Where would you start: [Your answer]
-
----
-
-# Answer Key
-
-<details>
-<summary>Expand to check your answers</summary>
-
-**Q1**: b) Installation flow provides org-level access
-- OAuth Apps can't access org repos (GitHub limitation)
-- See: auth/github/installation.ts
-
-**Q2**:
-- User OAuth: 6 months
-- Installation tokens: 1 hour
-- Cache TTL: 55 minutes
-- See: auth/github/token-cache.ts
-
-**Q3**: Should mention:
-- Why: Avoid rate limits (5000/hr token requests)
-- Where: Redis with key pattern github:install:{id}:token
-- TTL: 55 minutes (5min buffer before 1hr expiry)
-- Invalidation: On installation deletion webhook
-- See: Implementation log decision #2
-
-[Continue for all questions...]
-</details>
-
----
-
-Take your time. You can check hints and code. The goal is understanding,
-not memorization. Let me know when you're done!"
-````
+6. Agent: "Here's your summary:
+   - Strong on architecture decisions
+   - Review token caching details (auth/github/token-cache.ts)
+   - PR description material from Q1 and Q4..."
+```
 
 ## Best Practices
 
-1. **Match complexity**: Quiz difficulty should match implementation complexity
-2. **Test reasoning**: Don't just ask "what", ask "why" and "how"
-3. **Include context**: Reference specific code/commits for verification
-4. **Provide hints**: Help without giving answers
-5. **Review together**: Go through answers and fill gaps
-6. **Extract value**: Use quiz prep to write PR description
+1. **One question per call**: Always use `ask_user_question` with a single-question array. Never batch questions.
+2. **Give feedback immediately**: After each answer, confirm or correct with code references.
+3. **Match complexity**: Quiz difficulty should match implementation complexity.
+4. **Test reasoning**: Don't just ask "what", ask "why" and "how".
+5. **Include context**: Reference specific code/commits for verification.
+6. **Provide hints**: Include hints in the question text (not as tool hints, just inline).
+7. **Wrong-answer options are educational**: Each incorrect option's description should explain why it's wrong.
+8. **Limit to 4-7 questions**: Too many exhausts. Quality over quantity.
 
 ## Integration with Other Skills
 
@@ -333,70 +265,16 @@ not memorization. Let me know when you're done!"
 - **With Implementation Log**: Quiz questions based on logged decisions
 - **For Documentation**: Questions reveal what needs better docs
 
-## Quiz Formats
-
-### Multiple Choice
-```
-**Q: [Question]**
-
-a) [Option A]
-b) [Option B]
-c) [Option C]
-d) [Option D]
-
-Explain your choice: [Answer]
-```
-
-### Fill in Blank
-```
-**Q: [Question]**
-
-[Statement with _______] because [______].
-
-Hint: [Hint if needed]
-```
-
-### Open-Ended
-```
-**Q: [Question]**
-
-Your answer (3-4 sentences):
-
-[Answer]
-```
-
-### Diagram/Sketch
-```
-**Q: Draw the data flow for [Feature]**
-
-[Your diagram/pseudocode]
-
-Key components to include: A, B, C
-```
-
-### Code Reading
-```
-**Q: What does this code do and why?**
-
-```typescript
-[Code snippet]
-```
-
-Explanation: [Your answer]
-
-Alternative approach: [Your answer]
-
-Why didn't we use alternative: [Your answer]
-```
-
 ## Success Criteria
 
 A good quiz:
 - Tests understanding at multiple levels (recall → analysis)
+- Uses `ask_user_question` for focused, one-at-a-time questioning
+- Provides immediate feedback with code references after each answer
 - Reveals gaps in knowledge
 - Helps you articulate decisions
 - Prepares you for code review
-- Takes 10-20 minutes to complete
+- Takes 5-15 minutes to complete
 - Results in better PR description
 - Identifies documentation needs
 
@@ -404,37 +282,17 @@ A good quiz:
 
 - **Too easy**: Only testing recall ("what did we do?")
 - **Too hard**: Testing minutiae not worth remembering
-- **No answers**: User can't verify their understanding
+- **No feedback**: User doesn't learn from wrong answers
 - **No context**: Questions without code references
 - **Too long**: Exhausting instead of enlightening
+- **Batching questions**: Asking multiple questions at once defeats the one-at-a-time flow
 
 ## Output Format
 
-### During Quiz
-
-```markdown
-# Quiz: [Feature Name]
-
-[Instructions and context]
-
-## Section 1: [Category]
-[Questions 1-3]
-
-## Section 2: [Category]
-[Questions 4-6]
-
-...
-
-# Answer Key
-[Spoiler-protected answers with explanations]
-```
-
-### After Quiz - Knowledge Gaps
+### Summary After Quiz
 
 ```markdown
 # Quiz Results: [Feature Name]
-
-**Score**: X/Y correct (understanding level: Good/Needs Review)
 
 ## Strong Areas
 - [Area 1]: Solid understanding of X
@@ -453,98 +311,7 @@ A good quiz:
 Based on your answers, include in PR:
 - [Key point 1 from quiz]
 - [Key point 2 from quiz]
-- [Trade-off explanation from Q5]
-```
-
-## Advanced: Embedded HTML Quiz
-
-For Fable/advanced models, generate interactive quiz:
-
-```html
-<form id="implementation-quiz">
-  <fieldset>
-    <legend>Section 1: Core Decisions</legend>
-
-    <div class="question">
-      <h3>Q1: Why did we use GitHub App Installation flow?</h3>
-
-      <label>
-        <input type="radio" name="q1" value="a">
-        OAuth is deprecated
-      </label>
-
-      <label>
-        <input type="radio" name="q1" value="b">
-        Installation flow provides org-level access
-      </label>
-
-      <label>
-        <input type="radio" name="q1" value="c">
-        Installation flow is easier
-      </label>
-
-      <details class="hint">
-        <summary>Hint</summary>
-        Check implementation log decision #1
-      </details>
-    </div>
-
-    <div class="question">
-      <h3>Q2: Token Lifespan</h3>
-      <p>Fill in the blanks:</p>
-
-      <label>
-        User OAuth tokens last:
-        <input type="text" name="q2a" placeholder="Duration">
-      </label>
-
-      <label>
-        Installation tokens last:
-        <input type="text" name="q2b" placeholder="Duration">
-      </label>
-
-      <label>
-        We cache for:
-        <input type="text" name="q2c" placeholder="Duration">
-      </label>
-    </div>
-  </fieldset>
-
-  <button type="submit">Check Answers</button>
-</form>
-
-<script>
-  // Auto-grade and provide feedback
-  document.getElementById('implementation-quiz').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const answers = {
-      q1: 'b',
-      q2a: '6 months',
-      q2b: '1 hour',
-      q2c: '55 minutes'
-    };
-    // Grade and show feedback...
-  });
-</script>
-```
-
-This provides immediate feedback and better UX than plain text quizzes.
-
-## Integration with PR Workflow
-
-```bash
-# After implementation
-quiz-me [feature]
-
-# Use results to write PR
-# Include: key decisions, trade-offs, edge cases from quiz
-
-# Example PR description structure from quiz:
-# - Summary (from Q7)
-# - Key Decisions (from Q1, Q9)
-# - Trade-offs (from Q9)
-# - Testing (from Q6)
-# - Review Notes (from Q8)
+- [Trade-off explanation from Qx]
 ```
 
 The quiz becomes your PR description outline.
