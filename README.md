@@ -3060,6 +3060,7 @@ Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/
 | `opencode` | `o`, `oc` | OpenCode AI assistant |
 | `amp`      | `a`       | Amp by Modular        |
 | `pi`       | `p`       | Pi coding agent       |
+| `ccs`      | `switch`  | Claude Code Switch    |
 
 **Templates:**
 
@@ -3083,6 +3084,12 @@ Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/
 | `simplify`                      | `simple`                   | Simplify over-engineered code          |
 | `simplifier`                    | `simplify-code`            | Code simplification plugin             |
 | `logical-grouping-pull-request` | `split-pr`                 | Create PR with logical commit grouping |
+
+Template metadata now distinguishes read-only from mutating actions:
+
+- `mode: read-only` and `requiresConfirmation: false` for review/explain templates
+- `mode: write` and `requiresConfirmation: true` for templates that edit files, create commits, or open pull requests
+- Aliases are kept unique so resolution stays unambiguous
 
 </details>
 
