@@ -258,6 +258,47 @@ README_FILE="$REPO_ROOT/README.md"
 }
 
 # ---------------------------------------------------------------------------
+# modem-dev/hunk hunk-review entry (newly added)
+# ---------------------------------------------------------------------------
+
+@test "recommend-skills.json contains modem-dev/hunk hunk-review skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "modem-dev/hunk" and .skill == "hunk-review")] | length > 0' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "hunk-review entry has non-empty description" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.skill == "hunk-review")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
+@test "hunk-review description mentions diff or review" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.skill == "hunk-review")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"diff"* ]] || [[ "$output" == *"review"* ]]
+}
+
+@test "README.md install block contains modem-dev/hunk hunk-review install command" {
+    run grep -F 'npx skills add modem-dev/hunk --skill hunk-review' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md table row references modem-dev/hunk hunk-review SKILL.md URL" {
+    run grep -F 'https://github.com/modem-dev/hunk/blob/main/skills/hunk-review/SKILL.md' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+# ---------------------------------------------------------------------------
 # openai/codex babysit-pr entry (newly added)
 # ---------------------------------------------------------------------------
 
