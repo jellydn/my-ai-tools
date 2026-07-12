@@ -171,6 +171,22 @@ Export your current configurations back to this repository for version control:
 
 > **Tip:** Use `generate.sh` after customizing your local setup to save changes back to this repo.
 
+## 🤖 Chat with the repo
+
+The landing page includes a repository assistant that answers questions from the indexed README, docs, configs, and scripts.
+
+To run it locally:
+
+```bash
+cp .env.example .env
+# Add OPENAI_API_KEY to .env
+bun install
+bun run index   # build data/index.json
+bun run dev     # serve http://localhost:3000
+```
+
+The assistant only answers from the retrieved repository excerpts, cites the source file paths, and says "This is not documented in the repository." when the context is insufficient.
+
 ## 🐚 Shell Interpreter
 
 `cli.sh` and `generate.sh` use bash-only syntax (process substitution, arrays, pattern-parameter expansion) and **require bash**. Both scripts `source` [`lib/require_bash.sh`](./lib/require_bash.sh) as their first non-shebang line; that shim is intentionally POSIX-compatible so `sh`/`dash` can source it and transparently re-launch the script under `bash` before `lib/common.sh` is reached. Prefer one of these invocations for clarity:
