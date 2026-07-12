@@ -26,6 +26,49 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     [[ "$output" != *"big-pickle"* ]]
 }
 
+@test "configs/ai-launcher/config.json ccs tool is registered" {
+    require_jq
+    run jq -r '[.tools[] | select(.name == "ccs")][0].command' "$AI_LAUNCHER_CONFIG"
+    [ "$status" -eq 0 ]
+    [[ "$output" == "ccs" ]]
+}
+
+@test "configs/ai-launcher/config.json review template is read-only" {
+    require_jq
+    run jq -r '[.templates[] | select(.name == "review")][0] | "\(.mode) \(.requiresConfirmation)"' "$AI_LAUNCHER_CONFIG"
+    [ "$status" -eq 0 ]
+    [[ "$output" == "read-only false" ]]
+}
+
+@test "configs/ai-launcher/config.json commit-atomic template requires confirmation" {
+    require_jq
+    run jq -r '[.templates[] | select(.name == "commit-atomic")][0] | "\(.mode) \(.requiresConfirmation)"' "$AI_LAUNCHER_CONFIG"
+    [ "$status" -eq 0 ]
+    [[ "$output" == "write true" ]]
+}
+
+@test "configs/ai-launcher/config.json all templates declare mode metadata" {
+    require_jq
+    run jq -e 'all(.templates[]; has("mode") and has("requiresConfirmation"))' "$AI_LAUNCHER_CONFIG"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "configs/ai-launcher/config.json template aliases are unique" {
+    require_jq
+    run jq -e '
+      [
+        .templates[]
+        | .aliases[]?
+      ]
+      | group_by(.)
+      | map(select(length > 1))
+      | length == 0
+    ' "$AI_LAUNCHER_CONFIG"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
 @test "configs/ai-launcher/config.json review template command no longer uses --model flag" {
     require_jq
     run jq -r '[.templates[] | select(.name == "review")][0].command' "$AI_LAUNCHER_CONFIG"

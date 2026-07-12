@@ -29,7 +29,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **codemap**                            | Parallel codebase analysis producing 7 structured documents                     | Onboarding to a new project, or before major refactoring — gives you the full picture fast                      |
 | **code-quality-review** | Extremely strict maintainability and structural code quality review             | Before merging PRs — catches issues that regular linters miss                                                   |
 | **babysit-pr**                         | Continuously monitor open PRs, auto-fix CI failures, surface review feedback    | After pushing a PR — hands-off monitoring until it's ready to merge                                             |
-| **improve-code-architect**            | Frontier model plans, cheap model executes — audit and plan improvements         | When you need senior-level analysis with actionable plans for cheaper models to run (from shadcn)                |
+| **improve**                            | Frontier model plans, cheap model executes — audit and plan improvements         | When you need senior-level analysis with actionable plans for cheaper models to run (from shadcn)                |
 | **improve-codebase-architecture**     | Codebase architecture deepening — find structural improvement opportunities       | When you want to improve modularity, patterns, and architecture of an existing codebase (from Matt Pocock)      |
 
 ## 🔌 MCP Servers & Plugins Overview
@@ -3060,6 +3060,7 @@ Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/
 | `opencode` | `o`, `oc` | OpenCode AI assistant |
 | `amp`      | `a`       | Amp by Modular        |
 | `pi`       | `p`       | Pi coding agent       |
+| `ccs`      | `switch`  | Claude Code Switch    |
 
 **Templates:**
 
@@ -3083,6 +3084,12 @@ Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/
 | `simplify`                      | `simple`                   | Simplify over-engineered code          |
 | `simplifier`                    | `simplify-code`            | Code simplification plugin             |
 | `logical-grouping-pull-request` | `split-pr`                 | Create PR with logical commit grouping |
+
+Template metadata now distinguishes read-only from mutating actions:
+
+- `mode: read-only` and `requiresConfirmation: false` for review/explain templates
+- `mode: write` and `requiresConfirmation: true` for templates that edit files, create commits, or open pull requests
+- Aliases are kept unique so resolution stays unambiguous
 
 </details>
 
