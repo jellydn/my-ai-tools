@@ -189,7 +189,7 @@ npm run dev            # serve http://localhost:3000
 
 The assistant only answers from the retrieved repository excerpts, cites the source file paths, and says "This is not documented in the repository." when the context is insufficient.
 
-The landing page also has a browser mode that runs the embedding and Gemma-2B-IT model in the browser via WebGPU. Browser mode downloads the ~9 MB index and the ~1.3 GB model on the user's device.
+The landing page also has a browser mode that runs the embedding and a small instruction-tuned model (SmolLM-135M) in the browser via WebGPU. Browser mode downloads the ~9 MB index and the ~100 MB model on the user's device.
 
 ## 🐚 Shell Interpreter
 

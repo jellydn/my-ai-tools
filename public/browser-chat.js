@@ -1,7 +1,7 @@
 import { env, pipeline, TextStreamer } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/+esm";
 
 const EMBEDDING_MODEL = "Xenova/all-MiniLM-L6-v2";
-const LLM_MODEL = "onnx-community/gemma-2-2b-it";
+const LLM_MODEL = "onnx-community/SmolLM-135M-Instruct-ONNX";
 const INDEX_PATH = "/public/index-browser.json";
 
 let indexData = null;
@@ -118,7 +118,7 @@ export async function runBrowserChat(question, callbacks) {
 	updateStatus(callbacks, "Retrieving chunks...");
 	const topChunks = retrieveTopK(queryEmbedding, index.chunks, 5);
 
-	updateStatus(callbacks, "Loading Gemma model...");
+	updateStatus(callbacks, "Loading language model...");
 	const generator = await getGenerator();
 
 	updateStatus(callbacks, "Generating answer...");
