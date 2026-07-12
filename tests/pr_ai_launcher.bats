@@ -19,6 +19,13 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     [[ "$output" == "opencode run" ]]
 }
 
+@test "configs/ai-launcher/config.json opencode tool promptCommand no longer references big-pickle" {
+    require_jq
+    run jq -r '[.tools[] | select(.name == "opencode")][0].promptCommand' "$AI_LAUNCHER_CONFIG"
+    [ "$status" -eq 0 ]
+    [[ "$output" != *"big-pickle"* ]]
+}
+
 @test "configs/ai-launcher/config.json ccs tool is registered" {
     require_jq
     run jq -r '[.tools[] | select(.name == "ccs")][0].command' "$AI_LAUNCHER_CONFIG"
