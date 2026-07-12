@@ -2536,6 +2536,13 @@ main() {
 	fi
 	echo
 
+	if tool_allowed "devin"; then
+		install_devin
+	else
+		log_info "Skipping devin installer (not in -y allowlist)"
+	fi
+	echo
+
 	if tool_allowed "factory"; then
 		install_factory
 	else
