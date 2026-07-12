@@ -287,6 +287,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.qoder" "$BACKUP_DIR" "qodercli"
 		copy_config_dir "$HOME/.kiro" "$BACKUP_DIR" "kiro"
 		copy_config_dir "$HOME/.codiff" "$BACKUP_DIR" "codiff"
+		copy_config_dir "$HOME/.config/devin" "$BACKUP_DIR" "devin"
 		copy_config_dir "$HOME/.ctx" "$BACKUP_DIR" "ctx"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
@@ -519,6 +520,11 @@ copy_configurations() {
 		copy_codiff_configs
 	else
 		log_info "Skipping codiff config install (not in -y allowlist)"
+	fi
+	if tool_allowed "devin"; then
+		copy_devin_configs
+	else
+		log_info "Skipping devin config install (not in -y allowlist)"
 	fi
 	if tool_allowed "factory"; then
 		copy_factory_configs
@@ -1619,6 +1625,23 @@ copy_codiff_configs() {
 	log_success "Codiff configs copied"
 }
 
+copy_devin_configs() {
+	local devin_status
+	devin_status=$(detect_tool --detailed "devin" "$HOME/.config/devin") || devin_status="missing"
+	if [ "$devin_status" = "missing" ]; then
+		log_info "Devin CLI not detected - skipping Devin config installation"
+		return 0
+	fi
+
+	log_info "Detected Devin CLI (via $devin_status)"
+	execute_quoted mkdir -p "$HOME/.config/devin"
+
+	copy_config_file "$SCRIPT_DIR/configs/devin/AGENTS.md" "$HOME/.config/devin/" || true
+	copy_config_file "$SCRIPT_DIR/configs/devin/config.json" "$HOME/.config/devin/" || true
+
+	log_success "Devin CLI configs copied"
+}
+
 copy_factory_configs() {
 	local factory_status
 	factory_status=$(detect_tool --detailed "droid" "$HOME/.factory") || factory_status="missing"
@@ -2351,7 +2374,7 @@ main() {
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Kimi Code • Gemini          ║"
 	echo "║  Antigravity • Pi • Kilo • Copilot • Cursor • Command Code           ║"
 	echo "║  Factory Droid • Cline • Grok • MiMo-Code • herdr                    ║"
-	echo "║  Qoder CLI • Kiro • Codiff                                           ║"
+	echo "║  Qoder CLI • Kiro • Codiff • Devin                                   ║"
 	echo "║  ctx                                                                 ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo

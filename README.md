@@ -19,12 +19,102 @@
 - 📦 **Plugin support** - Official and community plugins
 - 🛡️ **Git Guard Hook** - Prevents dangerous git commands (force push, hard reset, etc.)
 
-## Devin CLI
+## 🖥️ Devin CLI (Optional)
 
-Devin CLI is a local command-line coding agent with deep Devin Cloud integration.
+Cognition AI's autonomous coding agent with deep cloud integration. [Homepage](https://devin.ai) | [Docs](https://docs.devin.ai)
 
-- Install: `curl -fsSL https://cli.devin.ai/install.sh | bash`
-- Run: `devin -- "check out this code and suggest a feasible, helpful feature"`
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Installation
+
+```bash
+curl -fsSL https://cli.devin.ai/install.sh | bash
+```
+
+### Configuration
+
+Run the setup script to install configurations to `~/.config/devin/`:
+
+```bash
+./cli.sh
+```
+
+The setup script automatically deploys MCP servers and agent guidelines.
+
+### MCP Servers
+
+Configuration in [`configs/devin/config.json`](configs/devin/config.json):
+
+```json
+{
+	"mcpServers": {
+		"context7": {
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@latest"]
+		},
+		"sequential-thinking": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
+		},
+		"fff": {
+			"type": "stdio",
+			"command": "fff-mcp",
+			"args": []
+		},
+		"react-grab-mcp": {
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
+		},
+		"logpilot": {
+			"command": "logpilot",
+			"args": ["mcp-server"]
+		},
+		"agentmemory": {
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"]
+		},
+		"sem": {
+			"command": "sem-mcp",
+			"args": []
+		},
+		"ctx": {
+			"command": "ctx",
+			"args": ["mcp", "serve"]
+		},
+		"codebase-memory-mcp": {
+			"command": "codebase-memory-mcp",
+			"args": []
+		}
+	}
+}
+```
+
+### Agent Guidelines
+
+Installed to `~/.config/devin/AGENTS.md` with instructions for:
+
+- Session management with tmux
+- Using fff MCP for file search
+- Following best practices from `~/.ai-tools/best-practices.md`
+- qmd knowledge management integration
+- Git safety guidelines
+
+### Usage
+
+```bash
+# Start Devin CLI
+devin
+
+# Run with a specific task
+devin -- "check out this code and suggest a feasible, helpful feature"
+```
+
+</details>
 
 ## ⭐ Top 5 Skills
 
