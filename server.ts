@@ -97,9 +97,10 @@ app.use("/*", serveStatic({ root: "./" }));
 
 const port = Number.parseInt(process.env.PORT ?? "3000", 10);
 
-console.log(`Server running at http://localhost:${port}`);
-
-export default {
+const server = Bun.serve({
 	port,
+	hostname: "0.0.0.0",
 	fetch: app.fetch,
-};
+});
+
+console.log(`Server running at http://${server.hostname}:${server.port}`);
