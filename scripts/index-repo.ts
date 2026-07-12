@@ -256,15 +256,11 @@ async function main() {
 	mkdirSync(DATA_DIR, { recursive: true });
 	writeFileSync(
 		INDEX_PATH,
-		JSON.stringify(
-			{
-				generatedAt: new Date().toISOString(),
-				model: EMBEDDING_MODEL,
-				chunks: indexedChunks,
-			},
-			null,
-			2,
-		),
+		JSON.stringify({
+			generatedAt: new Date().toISOString(),
+			model: EMBEDDING_MODEL,
+			chunks: indexedChunks,
+		}),
 		"utf-8",
 	);
 

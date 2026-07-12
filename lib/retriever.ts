@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import OpenAI from "openai";
@@ -28,6 +27,7 @@ export type Index = {
 };
 
 let openai: OpenAI | null = null;
+let indexCache: Index | null = null;
 
 function getClient(): OpenAI {
 	if (!openai) {
@@ -40,9 +40,16 @@ function getClient(): OpenAI {
 	return openai;
 }
 
-export function loadIndex(): Index {
-	const raw = readFileSync(INDEX_PATH, "utf-8");
+async function loadIndex(): Promise<Index> {
+	const raw = await Bun.file(INDEX_PATH).text();
 	return JSON.parse(raw) as Index;
+}
+
+async function getIndex(): Promise<Index> {
+	if (!indexCache) {
+		indexCache = await loadIndex();
+	}
+	return indexCache;
 }
 
 function cosineSimilarity(a: number[], b: number[]): number {
@@ -73,7 +80,7 @@ export async function embed(text: string): Promise<number[]> {
 }
 
 export async function retrieve(query: string, topK: number): Promise<RetrievedChunk[]> {
-	const index = loadIndex();
+	const index = await getIndex();
 	if (index.chunks.length === 0) {
 		return [];
 	}
