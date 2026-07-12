@@ -31,11 +31,7 @@ function rateLimitMiddleware(c: Context, next: Next) {
 	}
 
 	recent.push(now);
-	if (recent.length === 0) {
-		requestTimestamps.delete(key);
-	} else {
-		requestTimestamps.set(key, recent);
-	}
+	requestTimestamps.set(key, recent);
 	return next();
 }
 
