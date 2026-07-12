@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const INDEX_PATH = resolve(__dirname, "..", "data", "index.json");
 
-const EMBEDDING_MODEL = "text-embedding-3-small";
+const EMBEDDING_MODEL = process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small";
 
 export type Chunk = {
 	path: string;

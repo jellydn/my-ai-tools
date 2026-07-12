@@ -12,7 +12,7 @@ const INDEX_PATH = resolve(DATA_DIR, "index.json");
 const MAX_CHUNK_SIZE = 1000;
 const CHUNK_OVERLAP = 200;
 const EMBEDDING_BATCH_SIZE = 100;
-const EMBEDDING_MODEL = "text-embedding-3-small";
+const EMBEDDING_MODEL = process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small";
 
 const SUPPORTED_EXTS = new Set([".md", ".txt", ".json", ".yaml", ".yml", ".sh", ".ps1"]);
 
