@@ -180,9 +180,9 @@ To run it locally:
 ```bash
 cp .env.example .env
 # Add OPENAI_API_KEY to .env
-bun install
-bun run index   # build data/index.json
-bun run dev     # serve http://localhost:3000
+npm install
+npm run index   # build data/index.json
+npm run dev     # serve http://localhost:3000
 ```
 
 The assistant only answers from the retrieved repository excerpts, cites the source file paths, and says "This is not documented in the repository." when the context is insufficient.
