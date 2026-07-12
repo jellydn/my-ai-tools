@@ -1,10 +1,33 @@
 import { readFile } from "node:fs/promises";
 import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
+import type { Context, Next } from "hono";
 import { Hono } from "hono";
 import { stream } from "hono/streaming";
 import OpenAI from "openai";
 import { z } from "zod";
 import { type RetrievedChunk, retrieve } from "./lib/retriever.ts";
+
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 30;
+const requestTimestamps = new Map<string, number[]>();
+
+function rateLimitMiddleware(c: Context, next: Next) {
+	const forwarded = c.req.header("x-forwarded-for");
+	const clientIp = c.req.header("fly-client-ip") || (forwarded ? forwarded.split(",")[0]?.trim() : undefined);
+	const key = clientIp ?? "unknown";
+	const now = Date.now();
+	const timestamps = requestTimestamps.get(key) ?? [];
+	const recent = timestamps.filter((timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS);
+
+	if (recent.length >= RATE_LIMIT_MAX) {
+		return c.json({ error: "Rate limit exceeded. Try again later." }, 429);
+	}
+
+	recent.push(now);
+	requestTimestamps.set(key, recent);
+	return next();
+}
 
 const app = new Hono();
 
@@ -38,8 +61,13 @@ ${context}`;
 
 app.use("/data/*", async (c) => c.text("Forbidden", 403));
 
-app.post("/api/chat", async (c) => {
-	const body = await c.req.json();
+app.post("/api/chat", rateLimitMiddleware, async (c) => {
+	let body: unknown;
+	try {
+		body = await c.req.json();
+	} catch {
+		return c.json({ error: "Invalid request body" }, 400);
+	}
 	const parsed = chatRequestSchema.safeParse(body);
 	if (!parsed.success) {
 		return c.json({ error: "Invalid request body" }, 400);
@@ -89,6 +117,8 @@ app.post("/api/chat", async (c) => {
 		await stream.write(`${JSON.stringify({ type: "sources", paths: sourcePaths })}\n`);
 	});
 });
+
+app.use("/public/*", serveStatic({ root: "./" }));
 
 app.get("/", async (c) => c.html(await readFile("index.html", "utf-8")));
 app.get("/index.html", async (c) => c.redirect("/"));

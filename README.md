@@ -179,13 +179,17 @@ To run it locally:
 
 ```bash
 cp .env.example .env
-# Add OPENAI_API_KEY to .env
+# Add OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_MODEL, and OPENAI_EMBEDDING_MODEL to .env
 npm install
-npm run index   # build data/index.json
-npm run dev     # serve http://localhost:3000
+npm run index          # build data/index.json (server mode)
+npm run index:browser  # build public/index-browser.json (browser mode)
+source .env            # load OPENAI_BASE_URL for server mode
+npm run dev            # serve http://localhost:3000
 ```
 
 The assistant only answers from the retrieved repository excerpts, cites the source file paths, and says "This is not documented in the repository." when the context is insufficient.
+
+The landing page also has a browser mode that runs the embedding and Gemma-2B-IT model in the browser via WebGPU. Browser mode downloads the ~9 MB index and the ~1.3 GB model on the user's device.
 
 ## 🐚 Shell Interpreter
 

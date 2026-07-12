@@ -16,7 +16,8 @@ ENV OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL}
 
 RUN --mount=type=secret,id=OPENAI_API_KEY \
 	export OPENAI_API_KEY=$(cat /run/secrets/OPENAI_API_KEY) && \
-	npm run index
+	npm run index && \
+	npm run index:browser
 
 ENV NODE_ENV=production
 ENV NODE_OPTIONS=--max-old-space-size=512
