@@ -171,6 +171,26 @@ Export your current configurations back to this repository for version control:
 
 > **Tip:** Use `generate.sh` after customizing your local setup to save changes back to this repo.
 
+## 🤖 Chat with the repo
+
+The landing page includes a repository assistant that answers questions from the indexed README, docs, configs, and scripts.
+
+To run it locally:
+
+```bash
+cp .env.example .env
+# Add OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_MODEL, and OPENAI_EMBEDDING_MODEL to .env
+npm install
+npm run index          # build data/index.json (server mode)
+npm run index:browser  # build public/index-browser.json (browser mode)
+source .env            # load OPENAI_BASE_URL for server mode
+npm run dev            # serve http://localhost:3000
+```
+
+The assistant only answers from the retrieved repository excerpts, cites the source file paths, and says "This is not documented in the repository." when the context is insufficient.
+
+The landing page also has a browser mode that runs the embedding and an instruction-tuned model (Qwen2.5-Coder-0.5B-Instruct) in the browser via WebGPU. Browser mode downloads the ~9 MB index and the ~300 MB model on the user's device.
+
 ## 🐚 Shell Interpreter
 
 `cli.sh` and `generate.sh` use bash-only syntax (process substitution, arrays, pattern-parameter expansion) and **require bash**. Both scripts `source` [`lib/require_bash.sh`](./lib/require_bash.sh) as their first non-shebang line; that shim is intentionally POSIX-compatible so `sh`/`dash` can source it and transparently re-launch the script under `bash` before `lib/common.sh` is reached. Prefer one of these invocations for clarity:
