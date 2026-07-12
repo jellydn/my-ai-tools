@@ -49,6 +49,11 @@
 			"description": "Automatic code review skill for structured pull request feedback"
 		},
 		{
+			"repo": "modem-dev/hunk",
+			"skill": "hunk-review",
+			"description": "Interactive terminal diff viewer for agent-authored changesets with live review sessions and inline comments"
+		},
+		{
 			"repo": "av/facts",
 			"description": "Track project specs and facts in a .facts file with lifecycle stages (draft, spec, implemented) and shell-command verification"
 		},
