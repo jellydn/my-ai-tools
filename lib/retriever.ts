@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import OpenAI from "openai";
@@ -29,6 +29,8 @@ export type Index = {
 
 let openai: OpenAI | null = null;
 let indexCache: Index | null = null;
+let indexCacheMtime = 0;
+let indexCacheSize = 0;
 
 function getClient(): OpenAI {
 	if (!openai) {
@@ -47,8 +49,11 @@ async function loadIndex(): Promise<Index> {
 }
 
 async function getIndex(): Promise<Index> {
-	if (!indexCache) {
+	const stats = await stat(INDEX_PATH);
+	if (!indexCache || stats.mtimeMs !== indexCacheMtime || stats.size !== indexCacheSize) {
 		indexCache = await loadIndex();
+		indexCacheMtime = stats.mtimeMs;
+		indexCacheSize = stats.size;
 	}
 	return indexCache;
 }

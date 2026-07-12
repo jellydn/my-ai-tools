@@ -1,22 +1,22 @@
+import { readFile } from "node:fs/promises";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { stream } from "hono/streaming";
-import { readFile } from "node:fs/promises";
 import OpenAI from "openai";
 import { z } from "zod";
 import { type RetrievedChunk, retrieve } from "./lib/retriever.ts";
 
 const app = new Hono();
 
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY,
-});
-
 if (!process.env.OPENAI_API_KEY) {
 	console.error("OPENAI_API_KEY is not set. Copy .env.example to .env and add your key.");
 	process.exit(1);
 }
+
+const openai = new OpenAI({
+	apiKey: process.env.OPENAI_API_KEY,
+});
 
 const chatRequestSchema = z.object({
 	message: z.string().min(1).max(4000),
@@ -58,9 +58,10 @@ app.post("/api/chat", async (c) => {
 	}
 
 	if (chunks.length === 0) {
-		return c.json({
-			answer: "This is not documented in the repository.",
-			sources: [],
+		c.header("Content-Type", "text/plain; charset=utf-8");
+		return stream(c, async (stream) => {
+			await stream.write(`${JSON.stringify({ type: "text", content: "This is not documented in the repository." })}\n`);
+			await stream.write(`${JSON.stringify({ type: "sources", paths: [] })}\n`);
 		});
 	}
 

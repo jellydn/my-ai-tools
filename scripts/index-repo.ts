@@ -48,8 +48,7 @@ const EXCLUDED_DIRS = new Set([
 ]);
 
 const EXCLUDED_FILE_PATTERNS = [
-	/\.env/,
-	/\.env\./,
+	/(?:^|\/)\.env(?:$|\.)/,
 	/\.secret/,
 	/\.key/,
 	/\.pem/,
@@ -196,7 +195,7 @@ async function createEmbeddings(chunks: string[]): Promise<number[][]> {
 			input: batch,
 			encoding_format: "float",
 		});
-		for (const item of response.data) {
+		for (const item of [...response.data].sort((a, b) => (a.index ?? 0) - (b.index ?? 0))) {
 			embeddings.push(item.embedding);
 		}
 	}
