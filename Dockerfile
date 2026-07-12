@@ -1,10 +1,9 @@
-FROM oven/bun
+FROM node:20-slim
 
 WORKDIR /app
 
 COPY package.json .
-COPY bun.lock .
-RUN bun install
+RUN npm install
 
 COPY . .
 
@@ -17,10 +16,10 @@ ENV OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL}
 
 RUN --mount=type=secret,id=OPENAI_API_KEY \
 	export OPENAI_API_KEY=$(cat /run/secrets/OPENAI_API_KEY) && \
-	bun run index
+	npm run index
 
 ENV NODE_ENV=production
 
 EXPOSE 3000
 
-CMD ["bun", "server.ts"]
+CMD ["npm", "start"]

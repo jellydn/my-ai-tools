@@ -1,6 +1,8 @@
+import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
-import { serveStatic } from "hono/bun";
 import { stream } from "hono/streaming";
+import { readFile } from "node:fs/promises";
 import OpenAI from "openai";
 import { z } from "zod";
 import { type RetrievedChunk, retrieve } from "./lib/retriever.ts";
@@ -88,19 +90,19 @@ app.post("/api/chat", async (c) => {
 	});
 });
 
-app.get("/", async (c) => {
-	const file = Bun.file("index.html");
-	return c.html(await file.text());
-});
+app.get("/", async (c) => c.html(await readFile("index.html", "utf-8")));
 
 app.use("/*", serveStatic({ root: "./" }));
 
 const port = Number.parseInt(process.env.PORT ?? "3000", 10);
 
-const server = Bun.serve({
-	port,
-	hostname: "0.0.0.0",
-	fetch: app.fetch,
-});
-
-console.log(`Server running at http://${server.hostname}:${server.port}`);
+serve(
+	{
+		fetch: app.fetch,
+		port,
+		hostname: "0.0.0.0",
+	},
+	(info) => {
+		console.log(`Server running at http://${info.address}:${info.port}`);
+	},
+);

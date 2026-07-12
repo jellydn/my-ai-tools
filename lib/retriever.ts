@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import OpenAI from "openai";
@@ -41,7 +42,7 @@ function getClient(): OpenAI {
 }
 
 async function loadIndex(): Promise<Index> {
-	const raw = await Bun.file(INDEX_PATH).text();
+	const raw = await readFile(INDEX_PATH, "utf-8");
 	return JSON.parse(raw) as Index;
 }
 

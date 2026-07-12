@@ -7,14 +7,16 @@
 		"node": ">=18.0.0"
 	},
 	"scripts": {
-		"index": "bun scripts/index-repo.ts",
-		"dev": "bun server.ts",
-		"start": "bun server.ts",
+		"index": "tsx scripts/index-repo.ts",
+		"dev": "tsx server.ts",
+		"start": "tsx server.ts",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@hono/node-server": "^2.0.8",
 		"hono": "^4.6.3",
 		"openai": "^4.65.0",
+		"tsx": "^4.23.0",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
