@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Kimi Code, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,12 +12,19 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, codebase-memory-mcp, agentmemory, sem, ctx
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
 - 📦 **Plugin support** - Official and community plugins
 - 🛡️ **Git Guard Hook** - Prevents dangerous git commands (force push, hard reset, etc.)
+
+## Devin CLI
+
+Devin CLI is a local command-line coding agent with deep Devin Cloud integration.
+
+- Install: `curl -fsSL https://cli.devin.ai/install.sh | bash`
+- Run: `devin -- "check out this code and suggest a feasible, helpful feature"`
 
 ## ⭐ Top 5 Skills
 
