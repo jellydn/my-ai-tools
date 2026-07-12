@@ -1,6 +1,5 @@
 import { readFile } from "node:fs/promises";
 import { serve } from "@hono/node-server";
-import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { stream } from "hono/streaming";
 import OpenAI from "openai";
@@ -92,8 +91,7 @@ app.post("/api/chat", async (c) => {
 });
 
 app.get("/", async (c) => c.html(await readFile("index.html", "utf-8")));
-
-app.use("/*", serveStatic({ root: "./" }));
+app.get("/index.html", async (c) => c.redirect("/"));
 
 const port = Number.parseInt(process.env.PORT ?? "3000", 10);
 
