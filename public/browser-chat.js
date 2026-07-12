@@ -19,9 +19,17 @@ function encodeSourcePath(path) {
 	return path.split("/").map(encodeURIComponent).join("/");
 }
 
+function escapeHtml(text) {
+	return text
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
+}
+
 export function linkifySource(path) {
-	const safe = document.createTextNode(path).textContent;
-	return `<a href="https://github.com/jellydn/my-ai-tools/blob/main/${encodeSourcePath(path)}" target="_blank" rel="noopener">${safe}</a>`;
+	return `<a href="https://github.com/jellydn/my-ai-tools/blob/main/${encodeSourcePath(path)}" target="_blank" rel="noopener">${escapeHtml(path)}</a>`;
 }
 
 async function getIndex() {

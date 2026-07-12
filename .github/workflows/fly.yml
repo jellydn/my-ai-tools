@@ -33,5 +33,6 @@ jobs:
       - name: Deploy to Fly.io
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          flyctl deploy --remote-only --build-secret OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          flyctl deploy --remote-only --build-secret "OPENAI_API_KEY=$OPENAI_API_KEY"

@@ -25,9 +25,27 @@ function rateLimitMiddleware(c: Context, next: Next) {
 	}
 
 	recent.push(now);
-	requestTimestamps.set(key, recent);
+	if (recent.length === 0) {
+		requestTimestamps.delete(key);
+	} else {
+		requestTimestamps.set(key, recent);
+	}
 	return next();
 }
+
+function pruneRateLimitMap() {
+	const now = Date.now();
+	for (const [key, timestamps] of requestTimestamps.entries()) {
+		const recent = timestamps.filter((timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS);
+		if (recent.length === 0) {
+			requestTimestamps.delete(key);
+		} else {
+			requestTimestamps.set(key, recent);
+		}
+	}
+}
+
+setInterval(pruneRateLimitMap, 5 * 60 * 1000);
 
 const app = new Hono();
 
@@ -94,27 +112,38 @@ app.post("/api/chat", rateLimitMiddleware, async (c) => {
 
 	const CHAT_MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 	const systemPrompt = buildSystemPrompt(chunks);
-	const completion = await openai.chat.completions.create({
-		model: CHAT_MODEL,
-		messages: [
-			{ role: "system", content: systemPrompt },
-			{ role: "user", content: message },
-		],
-		stream: true,
-		temperature: 0.2,
-	});
+	let completion;
+	try {
+		completion = await openai.chat.completions.create({
+			model: CHAT_MODEL,
+			messages: [
+				{ role: "system", content: systemPrompt },
+				{ role: "user", content: message },
+			],
+			stream: true,
+			temperature: 0.2,
+		});
+	} catch {
+		return c.json({ error: "The language model is unavailable. Please try again later." }, 502);
+	}
 
 	c.header("Content-Type", "text/plain; charset=utf-8");
 	return stream(c, async (stream) => {
-		for await (const part of completion) {
-			const content = part.choices[0]?.delta?.content;
-			if (content) {
-				await stream.write(`${JSON.stringify({ type: "text", content })}\n`);
+		try {
+			for await (const part of completion) {
+				const content = part.choices[0]?.delta?.content;
+				if (content) {
+					await stream.write(`${JSON.stringify({ type: "text", content })}\n`);
+				}
 			}
-		}
 
-		const sourcePaths = [...new Set(chunks.map((chunk) => chunk.path))];
-		await stream.write(`${JSON.stringify({ type: "sources", paths: sourcePaths })}\n`);
+			const sourcePaths = [...new Set(chunks.map((chunk) => chunk.path))];
+			await stream.write(`${JSON.stringify({ type: "sources", paths: sourcePaths })}\n`);
+		} catch {
+			await stream.write(
+				`${JSON.stringify({ type: "error", message: "Response generation failed. Please try again later." })}\n`,
+			);
+		}
 	});
 });
 
