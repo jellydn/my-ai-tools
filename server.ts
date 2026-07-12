@@ -8,6 +8,12 @@ import OpenAI from "openai";
 import { z } from "zod";
 import { type RetrievedChunk, retrieve } from "./lib/retriever.ts";
 
+const [indexHtml, installSh, installPs1] = await Promise.all([
+	readFile("index.html", "utf-8"),
+	readFile("install.sh", "utf-8"),
+	readFile("install.ps1", "utf-8"),
+]);
+
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX = 30;
 const requestTimestamps = new Map<string, number[]>();
@@ -147,10 +153,24 @@ app.post("/api/chat", rateLimitMiddleware, async (c) => {
 	});
 });
 
-app.use("/public/*", serveStatic({ root: "./" }));
+app.use(
+	"/public/*",
+	serveStatic({
+		root: "./public",
+		rewriteRequestPath: (path) => {
+			const prefix = "/public";
+			if (path.startsWith(prefix)) {
+				return path.slice(prefix.length) || "/";
+			}
+			return path;
+		},
+	}),
+);
 
-app.get("/", async (c) => c.html(await readFile("index.html", "utf-8")));
-app.get("/index.html", async (c) => c.redirect("/"));
+app.get("/", (c) => c.html(indexHtml));
+app.get("/index.html", (c) => c.redirect("/"));
+app.get("/install.sh", (c) => c.text(installSh));
+app.get("/install.ps1", (c) => c.text(installPs1));
 
 const port = Number.parseInt(process.env.PORT ?? "3000", 10);
 
