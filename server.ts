@@ -35,6 +35,8 @@ Retrieved repository excerpts:
 ${context}`;
 }
 
+app.use("/data/*", async (c) => c.text("Forbidden", 403));
+
 app.post("/api/chat", async (c) => {
 	const body = await c.req.json();
 	const parsed = chatRequestSchema.safeParse(body);
