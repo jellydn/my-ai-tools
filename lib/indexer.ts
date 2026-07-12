@@ -14,6 +14,7 @@ export const EXCLUDED_DIRS = new Set([
 	"coverage",
 	".cache",
 	"data",
+	"public",
 	"auth",
 	".changeset",
 	".codex",
