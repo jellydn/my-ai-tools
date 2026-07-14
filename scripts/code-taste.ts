@@ -2,13 +2,18 @@
 
 import { writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
-import { fetchRepositoryChunks, parseRepositorySort, resolveRepositories } from "../lib/code-taste/github.ts";
+import {
+	fetchRepositoryChunks,
+	parseRepositoryLanguage,
+	parseRepositorySort,
+	resolveRepositories,
+} from "../lib/code-taste/github.ts";
 import { buildProfile, loadProfile, profileToMarkdown, saveProfile } from "../lib/code-taste/profile.ts";
 
 const HELP = `GitHub Coding Taste Generator
 
 Usage:
-  code-taste analyze <github-user|owner/repository> [--repos 3] [--max-chunks 40] [--sort representative]
+  code-taste analyze <github-user|owner/repository> [--repos 3] [--max-chunks 40] [--sort representative] [--language TypeScript]
   code-taste export [--format markdown|json] [--output CODING_TASTE.md]
 
 Environment:
@@ -19,6 +24,7 @@ Environment:
   GITHUB_TOKEN            Optional; increases GitHub API rate limits
 
   --sort                  representative (default), stars, updated, size, name
+  --language              Primary GitHub language (e.g. TypeScript, JavaScript, Python; aliases ts, js, py)
 
   See docs/code-taste-openrouter.md for OpenRouter setup (.env.example has sample values).
 `;
@@ -38,6 +44,7 @@ async function analyze(args: string[]): Promise<void> {
 			repos: { type: "string" },
 			"max-chunks": { type: "string" },
 			sort: { type: "string" },
+			language: { type: "string" },
 		},
 	});
 	const target = parsed.positionals[0];
@@ -45,9 +52,11 @@ async function analyze(args: string[]): Promise<void> {
 	const repositoryLimit = positiveInteger(parsed.values.repos, 3, "--repos");
 	const maximumChunks = positiveInteger(parsed.values["max-chunks"], 40, "--max-chunks");
 	const repositorySort = parseRepositorySort(parsed.values.sort);
+	const repositoryLanguage = parseRepositoryLanguage(parsed.values.language);
 
-	console.log(`Selecting up to ${repositoryLimit} repositories for ${target} (sort: ${repositorySort})...`);
-	const repositories = await resolveRepositories(target, repositoryLimit, repositorySort);
+	const filterNote = repositoryLanguage ? `, language: ${repositoryLanguage}` : "";
+	console.log(`Selecting up to ${repositoryLimit} repositories for ${target} (sort: ${repositorySort}${filterNote})...`);
+	const repositories = await resolveRepositories(target, repositoryLimit, repositorySort, repositoryLanguage);
 	if (repositories.length === 0) throw new Error("No representative public repositories found.");
 	console.log(`Selected: ${repositories.map((repo) => repo.fullName).join(", ")}`);
 	console.log(`Analyzing ${repositories.map((repo) => repo.fullName).join(", ")}...`);
@@ -76,7 +85,7 @@ async function analyze(args: string[]): Promise<void> {
 	const profile = await buildProfile(target, repositories, chunks, maximumChunks);
 	await saveProfile(profile);
 	await writeFile("CODING_TASTE.md", profileToMarkdown(profile), "utf-8");
-	console.log(`Generated ${profile.preferences.length} evidence-backed preferences in CODING_TASTE.md.`);
+	console.log(`Generated ${profile.preferences.length} preferences in CODING_TASTE.md.`);
 }
 
 async function exportProfile(args: string[]): Promise<void> {

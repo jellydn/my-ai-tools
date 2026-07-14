@@ -126,6 +126,38 @@ function representativeScore(repo: GitHubRepository): number {
 	);
 }
 
+const LANGUAGE_ALIASES: Record<string, string> = {
+	ts: "typescript",
+	js: "javascript",
+	py: "python",
+	rb: "ruby",
+	cs: "c#",
+	"c++": "c++",
+	cpp: "c++",
+	sh: "shell",
+	bash: "shell",
+};
+
+/** Normalizes GitHub primary language labels for case-insensitive comparison. */
+export function canonicalRepositoryLanguage(label: string): string {
+	const key = label.trim().toLowerCase();
+	return LANGUAGE_ALIASES[key] ?? key;
+}
+
+export function parseRepositoryLanguage(value: string | undefined): string | undefined {
+	if (!value?.trim()) return undefined;
+	return canonicalRepositoryLanguage(value);
+}
+
+export function repositoryMatchesLanguage(
+	repoLanguage: string | null | undefined,
+	filter: string | undefined,
+): boolean {
+	if (!filter) return true;
+	if (!repoLanguage) return false;
+	return canonicalRepositoryLanguage(repoLanguage) === canonicalRepositoryLanguage(filter);
+}
+
 export function parseRepositorySort(value: string | undefined): RepositorySort {
 	const normalized = value?.trim().toLowerCase();
 	switch (normalized) {
@@ -257,22 +289,31 @@ export async function resolveRepositories(
 	target: string,
 	limit: number,
 	sort: RepositorySort = "representative",
+	language?: string,
 ): Promise<Repository[]> {
 	const parts = target.split("/").filter(Boolean);
 	if (parts.length === 2) {
-		return [toRepository(await github<GitHubRepository>(`/repos/${parts[0]}/${parts[1]}`))];
+		const repo = await github<GitHubRepository>(`/repos/${parts[0]}/${parts[1]}`);
+		if (language && !repositoryMatchesLanguage(repo.language, language)) {
+			throw new Error(
+				`${repo.full_name} primary language is ${repo.language ?? "unknown"}; does not match --language ${language}.`,
+			);
+		}
+		return [toRepository(repo)];
 	}
 	if (parts.length !== 1) throw new Error("Target must be a GitHub user or owner/repository.");
 	const username = parts[0];
 	if (!username) throw new Error("Target must be a GitHub user or owner/repository.");
 
 	const repos = await listUserRepositories(username);
-	return rankRepositories(
-		repos.filter((repo) => !repo.fork && !repo.archived && repo.size > 0),
-		sort,
-	)
-		.slice(0, limit)
-		.map(toRepository);
+	const eligible = repos.filter(
+		(repo) =>
+			!repo.fork &&
+			!repo.archived &&
+			repo.size > 0 &&
+			repositoryMatchesLanguage(repo.language, language),
+	);
+	return rankRepositories(eligible, sort).slice(0, limit).map(toRepository);
 }
 
 async function fetchText(repo: Repository, path: string): Promise<string> {

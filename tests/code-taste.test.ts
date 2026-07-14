@@ -1,8 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { chunkMarkdown, chunkTypeScript } from "../lib/code-taste/chunker.ts";
 import {
+	canonicalRepositoryLanguage,
 	compareRepositoriesForSort,
 	fetchRepositoryChunks,
+	repositoryMatchesLanguage,
 	resolveRepositories,
 	selectRepositoryFiles,
 } from "../lib/code-taste/github.ts";
@@ -126,6 +128,15 @@ test("representative selection prefers central chunks and balances repositories"
 		1,
 	);
 	expect(central[0]?.symbol).toBe("two");
+});
+
+test("language filter matches GitHub primary language case-insensitively", () => {
+	expect(canonicalRepositoryLanguage("TypeScript")).toBe("typescript");
+	expect(canonicalRepositoryLanguage("ts")).toBe("typescript");
+	expect(repositoryMatchesLanguage("TypeScript", "ts")).toBe(true);
+	expect(repositoryMatchesLanguage("JavaScript", "TypeScript")).toBe(false);
+	expect(repositoryMatchesLanguage(null, "TypeScript")).toBe(false);
+	expect(repositoryMatchesLanguage("Python", undefined)).toBe(true);
 });
 
 test("repository sort orders by stars when requested", () => {
@@ -293,8 +304,8 @@ test("mocked pipeline rejects invalid evidence and exports a valid preference", 
 		const profile = await buildProfile("owner/repo", repositories, chunks, chunks.length, mockAnalysisClient(response));
 		expect(profile.preferences.map((preference) => preference.preference)).toEqual(["Prefer focused functions"]);
 		const markdown = profileToMarkdown(profile);
-		expect(markdown).toContain("`owner/repo` · `src/a.ts` · `run`");
-		expect(markdown).toContain("`owner/repo` · `src/b.ts` · `main`");
+		expect(markdown).toContain("Prefer focused functions");
+		expect(markdown).not.toContain("Evidence:");
 	} finally {
 		globalThis.fetch = originalFetch;
 	}
@@ -451,7 +462,7 @@ test("pipeline rejects malformed model output", async () => {
 	).rejects.toBeDefined();
 });
 
-test("Markdown export includes confidence and citations", () => {
+test("Markdown export includes confidence without evidence lines", () => {
 	const profile: TasteProfile = {
 		name: "jellydn",
 		githubTarget: "jellydn",
@@ -470,5 +481,5 @@ test("Markdown export includes confidence and citations", () => {
 	const markdown = profileToMarkdown(profile);
 	expect(markdown).toContain("# jellydn's Coding Taste");
 	expect(markdown).toContain("confidence: 0.91");
-	expect(markdown).toContain("`jellydn/a` · `src/a.ts` · `run`");
+	expect(markdown).not.toContain("Evidence:");
 });

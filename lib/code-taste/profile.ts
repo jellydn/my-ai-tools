@@ -379,7 +379,7 @@ export function profileToMarkdown(profile: TasteProfile): string {
 	const lines = [
 		`# ${title(profile.name)}`,
 		"",
-		`> Generated from ${profile.repositories.length} public repositories on ${profile.generatedAt.slice(0, 10)}. Every rule has at least two cited occurrences.`,
+		`> Generated from ${profile.repositories.length} public repositories on ${profile.generatedAt.slice(0, 10)}.`,
 		"",
 	];
 	for (const [category, preferences] of categories) {
@@ -388,11 +388,6 @@ export function profileToMarkdown(profile: TasteProfile): string {
 			lines.push(
 				`- **${preference.preference}** (confidence: ${preference.confidence.toFixed(2)})`,
 			);
-			for (const evidence of preference.evidence) {
-				lines.push(
-					`  - Evidence: \`${evidence.repo}\` · \`${evidence.file}\` · \`${evidence.symbol}\``,
-				);
-			}
 		}
 		lines.push("");
 	}
