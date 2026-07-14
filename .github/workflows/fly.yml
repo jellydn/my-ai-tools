@@ -14,18 +14,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-
-      - name: Install dependencies
-        run: bun install
-
       - name: Setup flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Validate required secrets
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           missing=0
@@ -35,11 +30,14 @@ jobs:
             missing=1
           fi
 
-          if [ -z "$OPENAI_API_KEY" ]; then
-            echo "::error::GitHub secret OPENAI_API_KEY is not set. Add your OpenRouter key (sk-or-v1-...) as OPENAI_API_KEY."
+          EFFECTIVE_OPENAI_API_KEY="${OPENROUTER_API_KEY:-$OPENAI_API_KEY}"
+          EFFECTIVE_OPENAI_API_KEY="$(printf '%s' "$EFFECTIVE_OPENAI_API_KEY" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+          if [ -z "$EFFECTIVE_OPENAI_API_KEY" ]; then
+            echo "::error::Set GitHub secret OPENROUTER_API_KEY (recommended) or OPENAI_API_KEY to your OpenRouter key (sk-or-v1-...)."
             missing=1
-          elif ! printf '%s' "$OPENAI_API_KEY" | grep -q '^sk-or-v1-'; then
-            echo "::error::OPENAI_API_KEY must be an OpenRouter key (prefix sk-or-v1-). fly.toml uses https://openrouter.ai/api/v1 — an OpenAI sk-proj- key will fail with 401 during image build."
+          elif ! printf '%s' "$EFFECTIVE_OPENAI_API_KEY" | grep -q '^sk-or-v1-'; then
+            echo "::error::The configured OpenRouter secret must start with sk-or-v1-. fly.toml uses https://openrouter.ai/api/v1 — an OpenAI sk-proj- key in OPENAI_API_KEY will fail here and with 401 during image build."
             missing=1
           fi
 
@@ -48,12 +46,19 @@ jobs:
       - name: Import OpenRouter API key to Fly
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: flyctl secrets set OPENAI_API_KEY="$OPENAI_API_KEY"
+        run: |
+          EFFECTIVE_OPENAI_API_KEY="${OPENROUTER_API_KEY:-$OPENAI_API_KEY}"
+          EFFECTIVE_OPENAI_API_KEY="$(printf '%s' "$EFFECTIVE_OPENAI_API_KEY" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+          flyctl secrets set OPENAI_API_KEY="$EFFECTIVE_OPENAI_API_KEY"
 
       - name: Deploy to Fly.io
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          flyctl deploy --remote-only --build-secret "OPENAI_API_KEY=${OPENAI_API_KEY}"
+          EFFECTIVE_OPENAI_API_KEY="${OPENROUTER_API_KEY:-$OPENAI_API_KEY}"
+          EFFECTIVE_OPENAI_API_KEY="$(printf '%s' "$EFFECTIVE_OPENAI_API_KEY" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+          flyctl deploy --remote-only --build-secret "OPENAI_API_KEY=${EFFECTIVE_OPENAI_API_KEY}"

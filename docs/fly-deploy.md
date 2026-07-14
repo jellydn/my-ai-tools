@@ -9,9 +9,10 @@ Configure these under **Settings → Secrets and variables → Actions** for the
 | Secret | Value |
 |--------|--------|
 | `FLY_API_TOKEN` | Fly **deploy** token (not your personal login). Create with: `fly tokens create deploy` (while logged in with `flyctl auth login` locally). |
-| `OPENAI_API_KEY` | Your [OpenRouter](https://openrouter.ai/) API key (`sk-or-v1-...`). **Not** an OpenAI `sk-proj-...` key — the app talks to `https://openrouter.ai/api/v1` (see `fly.toml`). |
+| `OPENROUTER_API_KEY` | **Recommended.** Your [OpenRouter](https://openrouter.ai/) API key (`sk-or-v1-...`). |
+| `OPENAI_API_KEY` | **Optional (legacy).** Same OpenRouter key if you already use this name. If both are set, `OPENROUTER_API_KEY` wins. The app and Fly runtime still use the env name `OPENAI_API_KEY` (OpenAI-compatible client). **Not** an OpenAI `sk-proj-...` key. |
 
-If either secret is missing, or `OPENAI_API_KEY` is not an OpenRouter key (`sk-or-v1-...`), the workflow fails at **Validate required secrets** with an explicit error. A **401 Missing Authentication header** during Docker build almost always means the GitHub secret is still an OpenAI `sk-proj-...` key or the build secret was empty — fix the secret, then re-run **Fly Deploy**. The message `no access token available. Please login with 'flyctl auth login'` means **`FLY_API_TOKEN` was empty** in CI — do not add an interactive `flyctl auth login` step; use the deploy token secret instead.
+If `FLY_API_TOKEN` is missing, or neither OpenRouter secret is set, or the chosen key does not start with `sk-or-v1-`, the workflow fails at **Validate required secrets** (~12s on push). A **401 Missing Authentication header** during Docker build means the key was wrong or empty in the build secret — fix the GitHub secret, then re-run **Fly Deploy**. The message `no access token available. Please login with 'flyctl auth login'` means **`FLY_API_TOKEN` was empty** in CI — use the deploy token secret instead of interactive login.
 
 ## Runtime model configuration (already in repo)
 
