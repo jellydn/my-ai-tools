@@ -77,25 +77,15 @@ function startWithComments(node: SyntaxNode): number {
 function supportingTypes(node: SyntaxNode, declarations: SyntaxNode[], source: string): string[] {
 	const nodeText = source.slice(node.startIndex, node.endIndex);
 	return declarations.flatMap((candidate) => {
-		if (
-			!new Set(["interface_declaration", "type_alias_declaration", "enum_declaration"]).has(
-				candidate.type,
-			)
-		)
-			return [];
+		if (!new Set(["interface_declaration", "type_alias_declaration", "enum_declaration"]).has(candidate.type)) return [];
 		const name = declarationName(candidate, source);
-		if (
-			candidate === node ||
-			!new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(nodeText)
-		)
+		if (candidate === node || !new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(nodeText))
 			return [];
 		return [source.slice(startWithComments(candidate), candidate.endIndex).trim()];
 	});
 }
 
-function fenceDelimiter(
-	line: string,
-): { marker: "`" | "~"; length: number; rest: string } | undefined {
+function fenceDelimiter(line: string): { marker: "`" | "~"; length: number; rest: string } | undefined {
 	const match = /^\s*(`{3,}|~{3,})(.*)$/.exec(line);
 	const delimiter = match?.[1];
 	if (!delimiter) return undefined;
@@ -104,10 +94,7 @@ function fenceDelimiter(
 
 function closesFence(delimiter: ReturnType<typeof fenceDelimiter>, fence: MarkdownFence): boolean {
 	return Boolean(
-		delimiter &&
-		delimiter.marker === fence.marker &&
-		delimiter.length >= fence.length &&
-		delimiter.rest.trim() === "",
+		delimiter && delimiter.marker === fence.marker && delimiter.length >= fence.length && delimiter.rest.trim() === "",
 	);
 }
 
@@ -174,9 +161,7 @@ export async function chunkTypeScript(
 		const chunks: SemanticChunk[] = [];
 		const nodes = tree.rootNode.namedChildren.flatMap((node) => {
 			const declaration = node.type === "export_statement" ? node.namedChildren.at(-1) : node;
-			return declaration && DECLARATION_TYPES.has(declaration.type)
-				? [{ wrapper: node, declaration }]
-				: [];
+			return declaration && DECLARATION_TYPES.has(declaration.type) ? [{ wrapper: node, declaration }] : [];
 		});
 		const declarations = nodes.map((item) => item.declaration);
 		for (const { wrapper, declaration } of nodes) {
@@ -205,12 +190,7 @@ export async function chunkTypeScript(
 	}
 }
 
-export function chunkMarkdown(
-	repo: string,
-	path: string,
-	source: string,
-	stats?: ChunkingStats,
-): SemanticChunk[] {
+export function chunkMarkdown(repo: string, path: string, source: string, stats?: ChunkingStats): SemanticChunk[] {
 	const lines = source.replace(/\r\n/g, "\n").split("\n");
 	const sections: Array<{ heading: string; lines: string[] }> = [];
 	let current = { heading: "Introduction", lines: [] as string[] };

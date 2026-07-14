@@ -1,10 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { chunkMarkdown, chunkTypeScript } from "../lib/code-taste/chunker.ts";
-import {
-	fetchRepositoryChunks,
-	resolveRepositories,
-	selectRepositoryFiles,
-} from "../lib/code-taste/github.ts";
+import { fetchRepositoryChunks, resolveRepositories, selectRepositoryFiles } from "../lib/code-taste/github.ts";
 import {
 	type AnalysisClient,
 	buildProfile,
@@ -18,9 +14,7 @@ function mockAnalysisClient(content: string): AnalysisClient {
 	return {
 		embeddings: {
 			create: async (request) => ({
-				data: request.input
-					.map((_, index) => ({ index, embedding: [1 - index * 0.1, index * 0.1] }))
-					.reverse(),
+				data: request.input.map((_, index) => ({ index, embedding: [1 - index * 0.1, index * 0.1] })).reverse(),
 			}),
 		},
 		chat: {
@@ -51,11 +45,7 @@ export function run(options: Options) {
 	});
 
 	test("does not treat headings inside fenced Markdown as sections", () => {
-		const chunks = chunkMarkdown(
-			"owner/repo",
-			"README.md",
-			"# Usage\n\n```md\n# Example\n```\n\n# API\nDetails",
-		);
+		const chunks = chunkMarkdown("owner/repo", "README.md", "# Usage\n\n```md\n# Example\n```\n\n# API\nDetails");
 		expect(chunks.map((chunk) => chunk.symbol)).toEqual(["Usage", "API"]);
 	});
 
@@ -266,16 +256,8 @@ test("mocked pipeline rejects invalid evidence and exports a valid preference", 
 				{ category: "TypeScript", preference: "Prefer focused functions", evidence: ["E2", "E3"] },
 			],
 		})}\n\`\`\``;
-		const profile = await buildProfile(
-			"owner/repo",
-			repositories,
-			chunks,
-			chunks.length,
-			mockAnalysisClient(response),
-		);
-		expect(profile.preferences.map((preference) => preference.preference)).toEqual([
-			"Prefer focused functions",
-		]);
+		const profile = await buildProfile("owner/repo", repositories, chunks, chunks.length, mockAnalysisClient(response));
+		expect(profile.preferences.map((preference) => preference.preference)).toEqual(["Prefer focused functions"]);
 		const markdown = profileToMarkdown(profile);
 		expect(markdown).toContain("`owner/repo` · `src/a.ts` · `run`");
 		expect(markdown).toContain("`owner/repo` · `src/b.ts` · `main`");

@@ -193,7 +193,7 @@ The landing page also has a browser mode that runs the embedding and an instruct
 
 ## 🎨 GitHub Coding Taste Generator
 
-`code-taste` analyzes public GitHub repositories and produces a reusable, evidence-backed coding preference profile. It uses Tree-sitter to keep TypeScript functions, components, classes, and their supporting types together, while Markdown is split by headings without breaking fenced code blocks.
+`code-taste` analyzes public GitHub repositories and produces a reusable, evidence-backed coding preference profile. It uses Tree-sitter to keep TypeScript functions, components, classes, and their supporting types together, while Markdown is split by headings without breaking fenced code blocks. **Requires Bun** (`package.json` `engines.bun`); the `code-taste` bin is not a Node/`tsx` entrypoint like `index` or `dev`.
 
 ```bash
 bun install

@@ -13,3 +13,4 @@ repos:
     rev: v0.51.0
     hooks:
       - id: oxfmt
+        exclude: ^(lib/code-taste/|scripts/code-taste\.ts|tests/code-taste\.test\.ts)$

@@ -3,12 +3,7 @@
 import { writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import { fetchRepositoryChunks, resolveRepositories } from "../lib/code-taste/github.ts";
-import {
-	buildProfile,
-	loadProfile,
-	profileToMarkdown,
-	saveProfile,
-} from "../lib/code-taste/profile.ts";
+import { buildProfile, loadProfile, profileToMarkdown, saveProfile } from "../lib/code-taste/profile.ts";
 
 const HELP = `GitHub Coding Taste Generator
 
@@ -27,8 +22,7 @@ Environment:
 function positiveInteger(value: string | undefined, fallback: number, option: string): number {
 	if (value === undefined) return fallback;
 	const parsed = Number(value);
-	if (!Number.isInteger(parsed) || parsed < 1)
-		throw new Error(`${option} must be a positive integer.`);
+	if (!Number.isInteger(parsed) || parsed < 1) throw new Error(`${option} must be a positive integer.`);
 	return parsed;
 }
 
@@ -57,8 +51,7 @@ async function analyze(args: string[]): Promise<void> {
 		const stats = { oversizedUnits: 0 };
 		try {
 			const repositoryChunks = await fetchRepositoryChunks(repository, stats);
-			const skipped =
-				stats.oversizedUnits > 0 ? `, ${stats.oversizedUnits} oversized units skipped` : "";
+			const skipped = stats.oversizedUnits > 0 ? `, ${stats.oversizedUnits} oversized units skipped` : "";
 			console.log(`  ${repository.fullName}: ${repositoryChunks.length} semantic chunks${skipped}`);
 			oversizedUnits += stats.oversizedUnits;
 			chunks.push(...repositoryChunks);
@@ -69,20 +62,14 @@ async function analyze(args: string[]): Promise<void> {
 	}
 	if (chunks.length === 0) throw new Error("No TypeScript, TSX, or Markdown chunks found.");
 	if (oversizedUnits > 0) {
-		console.warn(
-			`Skipped ${oversizedUnits} oversized semantic units; large-unit fallback is not yet supported.`,
-		);
+		console.warn(`Skipped ${oversizedUnits} oversized semantic units; large-unit fallback is not yet supported.`);
 	}
 
-	console.log(
-		`Embedding ${chunks.length} chunks and analyzing up to ${maximumChunks} representative chunks...`,
-	);
+	console.log(`Embedding ${chunks.length} chunks and analyzing up to ${maximumChunks} representative chunks...`);
 	const profile = await buildProfile(target, repositories, chunks, maximumChunks);
 	await saveProfile(profile);
 	await writeFile("CODING_TASTE.md", profileToMarkdown(profile), "utf-8");
-	console.log(
-		`Generated ${profile.preferences.length} evidence-backed preferences in CODING_TASTE.md.`,
-	);
+	console.log(`Generated ${profile.preferences.length} evidence-backed preferences in CODING_TASTE.md.`);
 }
 
 async function exportProfile(args: string[]): Promise<void> {
@@ -95,12 +82,9 @@ async function exportProfile(args: string[]): Promise<void> {
 	});
 	const profile = await loadProfile();
 	const format = parsed.values.format;
-	if (format !== "markdown" && format !== "json")
-		throw new Error("--format must be markdown or json.");
-	const output =
-		parsed.values.output ?? (format === "markdown" ? "CODING_TASTE.md" : "CODING_TASTE.json");
-	const content =
-		format === "markdown" ? profileToMarkdown(profile) : `${JSON.stringify(profile, null, 2)}\n`;
+	if (format !== "markdown" && format !== "json") throw new Error("--format must be markdown or json.");
+	const output = parsed.values.output ?? (format === "markdown" ? "CODING_TASTE.md" : "CODING_TASTE.json");
+	const content = format === "markdown" ? profileToMarkdown(profile) : `${JSON.stringify(profile, null, 2)}\n`;
 	await writeFile(output, content, "utf-8");
 	console.log(`Exported ${output}.`);
 }
