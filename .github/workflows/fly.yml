@@ -23,7 +23,26 @@ jobs:
       - name: Setup flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master
 
-      - name: Import runtime secrets
+      - name: Validate required secrets
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          missing=0
+
+          if [ -z "$FLY_API_TOKEN" ]; then
+            echo "::error::GitHub secret FLY_API_TOKEN is not set. Add a Fly deploy token in Settings → Secrets and variables → Actions."
+            missing=1
+          fi
+
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::error::GitHub secret OPENAI_API_KEY is not set. Add your OpenRouter key (sk-or-v1-...) as OPENAI_API_KEY."
+            missing=1
+          fi
+
+          exit "$missing"
+
+      - name: Import OpenRouter API key to Fly
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
