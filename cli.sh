@@ -272,6 +272,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/opencode" "$BACKUP_DIR" "opencode"
 		copy_config_dir "$HOME/.config/amp" "$BACKUP_DIR" "amp"
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
+		copy_config_dir "$HOME/.openinterpreter" "$BACKUP_DIR" "openinterpreter"
 		copy_config_dir "$HOME/.kimi-code" "$BACKUP_DIR" "kimi-code"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
 		copy_config_dir "$HOME/.config/kilo" "$BACKUP_DIR" "kilo"
@@ -450,6 +451,11 @@ copy_configurations() {
 		copy_codex_configs
 	else
 		log_info "Skipping codex config install (not in -y allowlist)"
+	fi
+	if tool_allowed "openinterpreter"; then
+		copy_openinterpreter_configs
+	else
+		log_info "Skipping openinterpreter config install (not in -y allowlist)"
 	fi
 	if tool_allowed "kimi_code"; then
 		copy_kimi_code_configs
@@ -1059,6 +1065,34 @@ copy_codex_configs() {
 	fi
 
 	log_success "Codex CLI configs copied"
+}
+
+copy_openinterpreter_configs() {
+	local oi_status
+	oi_status=$(detect_tool --detailed "interpreter" "$HOME/.openinterpreter") || oi_status="missing"
+	if [ "$oi_status" = "missing" ]; then
+		log_info "Open Interpreter not detected - skipping Open Interpreter config installation"
+		return 0
+	fi
+
+	log_info "Detected Open Interpreter (via $oi_status)"
+	execute_quoted mkdir -p "$HOME/.openinterpreter"
+
+	copy_config_file "$SCRIPT_DIR/configs/openinterpreter/AGENTS.md" "$HOME/.openinterpreter/" || true
+	copy_config_file "$SCRIPT_DIR/configs/openinterpreter/config.toml" "$HOME/.openinterpreter/" || true
+
+	if [ -d "$SCRIPT_DIR/configs/openinterpreter/themes" ]; then
+		execute_quoted mkdir -p "$HOME/.openinterpreter/themes"
+		safe_copy_dir "$SCRIPT_DIR/configs/openinterpreter/themes" "$HOME/.openinterpreter/themes"
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/openinterpreter/agents" ]; then
+		execute_quoted rm -rf "$HOME/.openinterpreter/agents"
+		safe_copy_dir "$SCRIPT_DIR/configs/openinterpreter/agents" "$HOME/.openinterpreter/agents"
+		log_success "Open Interpreter agents copied"
+	fi
+
+	log_success "Open Interpreter configs copied"
 }
 
 copy_kimi_code_configs() {
@@ -2253,7 +2287,7 @@ install_local_skills() {
 	done
 
 	log_success "Skills installed to universal directory: $UNIVERSAL_SKILLS_DIR"
-	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Kimi Code, Gemini, Antigravity, Cursor, Pi, Command Code, Grok, MiMo-Code, Cline, and more"
+	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Open Interpreter, Kimi Code, Gemini, Antigravity, Cursor, Pi, Command Code, Grok, MiMo-Code, Cline, and more"
 
 	# Create symlinks from tool-specific directories to universal directory
 	create_tool_skills_symlinks "$UNIVERSAL_SKILLS_DIR"
@@ -2371,9 +2405,9 @@ main() {
 
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
-	echo "║  Claude • OpenCode • Amp • CCS • Codex • Kimi Code • Gemini          ║"
-	echo "║  Antigravity • Pi • Kilo • Copilot • Cursor • Command Code           ║"
-	echo "║  Factory Droid • Cline • Grok • MiMo-Code • herdr                    ║"
+	echo "║  Claude • OpenCode • Amp • CCS • Codex • Open Interpreter            ║"
+	echo "║  Kimi Code • Gemini • Antigravity • Pi • Kilo • Copilot • Cursor     ║"
+	echo "║  Command Code • Factory Droid • Cline • Grok • MiMo-Code • herdr     ║"
 	echo "║  Qoder CLI • Kiro • Codiff • Devin                                   ║"
 	echo "║  ctx                                                                 ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
