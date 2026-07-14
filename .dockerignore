@@ -1,0 +1,9 @@
+.env
+.env.example
+node_modules
+data/
+.git
+.github
+.pre-commit-config.yaml
+biome.json
+.editorconfig

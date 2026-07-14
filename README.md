@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Kimi Code, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,12 +12,109 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, codebase-memory-mcp, agentmemory, sem, ctx
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
 - 📦 **Plugin support** - Official and community plugins
 - 🛡️ **Git Guard Hook** - Prevents dangerous git commands (force push, hard reset, etc.)
+
+## 🖥️ Devin CLI (Optional)
+
+Cognition AI's autonomous coding agent with deep cloud integration. [Homepage](https://devin.ai) | [Docs](https://docs.devin.ai)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Installation
+
+```bash
+curl -fsSL https://cli.devin.ai/install.sh | bash
+```
+
+### Configuration
+
+Run the setup script to install configurations to `~/.config/devin/`:
+
+```bash
+./cli.sh
+```
+
+The setup script automatically deploys MCP servers and agent guidelines.
+
+### MCP Servers
+
+Configuration in [`configs/devin/config.json`](configs/devin/config.json):
+
+```json
+{
+	"mcpServers": {
+		"context7": {
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@latest"]
+		},
+		"sequential-thinking": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
+		},
+		"fff": {
+			"type": "stdio",
+			"command": "fff-mcp",
+			"args": []
+		},
+		"react-grab-mcp": {
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
+		},
+		"logpilot": {
+			"command": "logpilot",
+			"args": ["mcp-server"]
+		},
+		"agentmemory": {
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"]
+		},
+		"sem": {
+			"command": "sem-mcp",
+			"args": []
+		},
+		"ctx": {
+			"command": "ctx",
+			"args": ["mcp", "serve"]
+		},
+		"codebase-memory-mcp": {
+			"command": "codebase-memory-mcp",
+			"args": []
+		}
+	}
+}
+```
+
+### Agent Guidelines
+
+Installed to `~/.config/devin/AGENTS.md` with instructions for:
+
+- Session management with tmux
+- Using fff MCP for file search
+- Following best practices from `~/.ai-tools/best-practices.md`
+- qmd knowledge management integration
+- Git safety guidelines
+
+### Usage
+
+```bash
+# Start Devin CLI
+devin
+
+# Run with a specific task
+devin -- "check out this code and suggest a feasible, helpful feature"
+```
+
+</details>
 
 ## ⭐ Top 5 Skills
 
@@ -29,7 +126,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **codemap**                            | Parallel codebase analysis producing 7 structured documents                     | Onboarding to a new project, or before major refactoring — gives you the full picture fast                      |
 | **code-quality-review** | Extremely strict maintainability and structural code quality review             | Before merging PRs — catches issues that regular linters miss                                                   |
 | **babysit-pr**                         | Continuously monitor open PRs, auto-fix CI failures, surface review feedback    | After pushing a PR — hands-off monitoring until it's ready to merge                                             |
-| **improve-code-architect**            | Frontier model plans, cheap model executes — audit and plan improvements         | When you need senior-level analysis with actionable plans for cheaper models to run (from shadcn)                |
+| **improve**                            | Frontier model plans, cheap model executes — audit and plan improvements         | When you need senior-level analysis with actionable plans for cheaper models to run (from shadcn)                |
 | **improve-codebase-architecture**     | Codebase architecture deepening — find structural improvement opportunities       | When you want to improve modularity, patterns, and architecture of an existing codebase (from Matt Pocock)      |
 
 ## 🔌 MCP Servers & Plugins Overview
@@ -170,6 +267,26 @@ Export your current configurations back to this repository for version control:
 ```
 
 > **Tip:** Use `generate.sh` after customizing your local setup to save changes back to this repo.
+
+## 🤖 Chat with the repo
+
+The landing page includes a repository assistant that answers questions from the indexed README, docs, configs, and scripts.
+
+To run it locally:
+
+```bash
+cp .env.example .env
+# Add OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_MODEL, and OPENAI_EMBEDDING_MODEL to .env
+npm install
+npm run index          # build data/index.json (server mode)
+npm run index:browser  # build public/index-browser.json (browser mode)
+source .env            # load OPENAI_BASE_URL for server mode
+npm run dev            # serve http://localhost:3000
+```
+
+The assistant only answers from the retrieved repository excerpts, cites the source file paths, and says "This is not documented in the repository." when the context is insufficient.
+
+The landing page also has a browser mode that runs the embedding and an instruction-tuned model (Qwen2.5-Coder-0.5B-Instruct) in the browser via WebGPU. Browser mode downloads the ~9 MB index and the ~300 MB model on the user's device.
 
 ## 🐚 Shell Interpreter
 
@@ -3062,6 +3179,7 @@ Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/
 | `opencode` | `o`, `oc` | OpenCode AI assistant |
 | `amp`      | `a`       | Amp by Modular        |
 | `pi`       | `p`       | Pi coding agent       |
+| `ccs`      | `switch`  | Claude Code Switch    |
 
 **Templates:**
 
@@ -3085,6 +3203,12 @@ Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/
 | `simplify`                      | `simple`                   | Simplify over-engineered code          |
 | `simplifier`                    | `simplify-code`            | Code simplification plugin             |
 | `logical-grouping-pull-request` | `split-pr`                 | Create PR with logical commit grouping |
+
+Template metadata now distinguishes read-only from mutating actions:
+
+- `mode: read-only` and `requiresConfirmation: false` for review/explain templates
+- `mode: write` and `requiresConfirmation: true` for templates that edit files, create commits, or open pull requests
+- Aliases are kept unique so resolution stays unambiguous
 
 </details>
 

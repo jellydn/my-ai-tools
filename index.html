@@ -628,6 +628,143 @@
           flex-direction: column;
         }
       }
+    .chat-panel {
+      max-width: 760px;
+      margin: 34px auto 0;
+      border: 2px solid var(--ink);
+      background: var(--panel);
+      box-shadow: 8px 8px 0 var(--gold);
+      overflow: hidden;
+    }
+
+    .chat-messages {
+      min-height: 320px;
+      max-height: 520px;
+      padding: 24px;
+      overflow-y: auto;
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .chat-message {
+      max-width: 85%;
+      padding: 16px 18px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .chat-message p {
+      margin: 0;
+    }
+
+    .chat-message p + p {
+      margin-top: 12px;
+    }
+
+    .chat-message.user {
+      justify-self: end;
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .chat-message.assistant {
+      justify-self: start;
+      border: 1px solid var(--line);
+      background: #f9fbfb;
+    }
+
+    .chat-mode {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px 18px;
+      border-top: 1px solid var(--line);
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .chat-mode select {
+      font: inherit;
+      padding: 4px 8px;
+      border: 2px solid var(--line);
+      background: var(--panel);
+      cursor: pointer;
+    }
+
+    .chat-form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 18px;
+      border-top: 2px solid var(--ink);
+    }
+
+    .chat-input {
+      min-height: 44px;
+      padding: 0 14px;
+      border: 2px solid var(--line);
+      background: var(--panel);
+      font: inherit;
+      outline: none;
+    }
+
+    .chat-input:focus {
+      border-color: var(--teal);
+    }
+
+    .chat-submit {
+      min-height: 44px;
+      padding: 0 22px;
+      border: 2px solid var(--ink);
+      background: var(--ink);
+      color: #fff;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .chat-submit:hover {
+      background: var(--teal);
+      border-color: var(--teal);
+    }
+
+    .chat-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .chat-sources {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .chat-sources strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--ink);
+    }
+
+    .chat-sources a {
+      display: inline-block;
+      margin-right: 10px;
+      font-weight: 700;
+    }
+
+    .chat-status {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 620px) {
+      .chat-message {
+        max-width: 100%;
+      }
+    }
     </style>
   </head>
   <body>
@@ -641,6 +778,7 @@
           <a href="#why">Why</a>
           <a href="#flow">Flow</a>
           <a href="#install">Install</a>
+          <a href="#chat">Ask</a>
           <a href="https://github.com/jellydn/my-ai-tools">GitHub</a>
         </div>
       </nav>
@@ -829,9 +967,39 @@ cd my-ai-tools
           </p>
           <div class="hero-actions" style="justify-content: center">
             <a class="button" href="https://github.com/jellydn/my-ai-tools">Open on GitHub</a>
-            <a class="button secondary" href="README.md">Read the docs</a>
+            <a class="button secondary" href="https://github.com/jellydn/my-ai-tools/blob/main/README.md">Read the docs</a>
           </div>
         </section>
+      <section id="chat" class="section">
+        <div class="section-heading">
+          <h2>Ask the repo.</h2>
+          <p class="section-copy">
+            Ask a question about the repository. The assistant answers only from the indexed README, docs, configs, and scripts, and cites the source paths.
+          </p>
+        </div>
+        <div class="chat-panel">
+          <div class="chat-messages" id="chat-messages" aria-live="polite"></div>
+          <div class="chat-mode">
+            <label for="chat-mode-select">Mode</label>
+            <select id="chat-mode-select" aria-label="Chat mode">
+              <option value="server">Server (OpenRouter)</option>
+              <option value="browser">Browser (Qwen2.5 Coder + WebGPU)</option>
+            </select>
+            <span style="font-size: 0.8rem">Browser mode downloads ~9 MB index and ~300 MB model.</span>
+          </div>
+          <form class="chat-form" id="chat-form" aria-label="Ask the repository">
+            <input
+              class="chat-input"
+              id="chat-input"
+              type="text"
+              placeholder="e.g. How do I preview the install before applying it?"
+              autocomplete="off"
+              required
+            />
+            <button class="chat-submit" type="submit" id="chat-submit" aria-label="Send question">Ask</button>
+          </form>
+        </div>
+      </section>
       </main>
 
       <footer class="footer">
@@ -839,5 +1007,182 @@ cd my-ai-tools
         <a href="https://github.com/jellydn/my-ai-tools">github.com/jellydn/my-ai-tools</a>
       </footer>
     </div>
+  <script type="module">
+    import { linkifySource, runBrowserChat } from "./public/browser-chat.js";
+
+    (function () {
+      const messagesEl = document.getElementById("chat-messages");
+      const form = document.getElementById("chat-form");
+      const input = document.getElementById("chat-input");
+      const submit = document.getElementById("chat-submit");
+      const modeSelect = document.getElementById("chat-mode-select");
+
+      function appendMessage(role, html) {
+        const div = document.createElement("div");
+        div.className = `chat-message ${role}`;
+        div.innerHTML = html;
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        return div;
+      }
+
+      function escapeHtml(text) {
+        return text
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      async function runServerChat(question, answerEl) {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: question }),
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          answerEl.innerHTML = `<span class="chat-status">Sorry, something went wrong. ${escapeHtml(error)}</span>`;
+          return;
+        }
+
+        if (!response.body) {
+          answerEl.innerHTML = '<span class="chat-status">No response from the assistant.</span>';
+          return;
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let answerText = "";
+        let sources = "";
+
+        answerEl.innerHTML = "";
+        const textP = document.createElement("p");
+        answerEl.appendChild(textP);
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const event = JSON.parse(line);
+              if (event.type === "text" && event.content) {
+                answerText += event.content;
+                textP.textContent = answerText;
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+              } else if (event.type === "sources" && Array.isArray(event.paths)) {
+                sources = event.paths.map(linkifySource).join("\n");
+              } else if (event.type === "error" && event.message) {
+                answerText = event.message;
+                textP.textContent = answerText;
+              }
+            } catch {
+              // ignore malformed lines
+            }
+          }
+        }
+
+        if (buffer.trim()) {
+          try {
+            const event = JSON.parse(buffer.trim());
+            if (event.type === "text" && event.content) {
+              answerText += event.content;
+              textP.textContent = answerText;
+            } else if (event.type === "sources" && Array.isArray(event.paths)) {
+              sources = event.paths.map(linkifySource).join("\n");
+            } else if (event.type === "error" && event.message) {
+              answerText = event.message;
+              textP.textContent = answerText;
+            }
+          } catch {
+            // ignore
+          }
+        }
+
+        if (sources) {
+          const sourcesDiv = document.createElement("div");
+          sourcesDiv.className = "chat-sources";
+          sourcesDiv.innerHTML = `<strong>Source:</strong>\n${sources}`;
+          answerEl.appendChild(sourcesDiv);
+        }
+
+        if (!answerText) {
+          answerEl.innerHTML = '<span class="chat-status">No answer was generated.</span>';
+        }
+      }
+
+      async function runBrowserChatLocal(question, answerEl) {
+        answerEl.innerHTML = "";
+        const statusP = document.createElement("p");
+        statusP.className = "chat-status";
+        answerEl.appendChild(statusP);
+        const textP = document.createElement("p");
+        answerEl.appendChild(textP);
+
+        let sources = "";
+        let started = false;
+
+        await runBrowserChat(question, {
+          onStatus: (text) => {
+            statusP.textContent = text;
+          },
+          onToken: (token) => {
+            if (!started) {
+              statusP.style.display = "none";
+              started = true;
+            }
+            textP.textContent += token;
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+          },
+          onSource: (paths) => {
+            sources = paths.map(linkifySource).join("\n");
+          },
+        });
+
+        if (sources) {
+          const sourcesDiv = document.createElement("div");
+          sourcesDiv.className = "chat-sources";
+          sourcesDiv.innerHTML = `<strong>Source:</strong>\n${sources}`;
+          answerEl.appendChild(sourcesDiv);
+        }
+
+        if (!textP.textContent.trim()) {
+          answerEl.innerHTML = '<span class="chat-status">No answer was generated.</span>';
+        }
+      }
+
+      form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const question = input.value.trim();
+        if (!question) return;
+
+        appendMessage("user", escapeHtml(question));
+        input.value = "";
+        submit.disabled = true;
+
+        const answerEl = appendMessage("assistant", '<span class="chat-status">Thinking...</span>');
+
+        try {
+          if (modeSelect.value === "browser") {
+            await runBrowserChatLocal(question, answerEl);
+          } else {
+            await runServerChat(question, answerEl);
+          }
+        } catch (error) {
+          answerEl.innerHTML = `<span class="chat-status">Sorry, something went wrong. ${escapeHtml(error.message)}</span>`;
+        } finally {
+          submit.disabled = false;
+          input.focus();
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+      });
+    })();
+  </script>
   </body>
 </html>
