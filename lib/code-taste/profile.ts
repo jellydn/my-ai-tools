@@ -19,7 +19,9 @@ export type AnalysisClient = {
 	};
 	chat: {
 		completions: {
-			create: (request: unknown) => Promise<{ choices: Array<{ message: { content: string | null } }> }>;
+			create: (
+				request: unknown,
+			) => Promise<{ choices: Array<{ message: { content: string | null } }> }>;
 		};
 	};
 };
@@ -29,7 +31,7 @@ const llmResultSchema = z.object({
 		z.object({
 			category: z.string().min(1),
 			preference: z.string().min(1),
-			evidence: z.array(z.string()).min(2),
+			evidence: z.array(z.string()),
 		}),
 	),
 });
@@ -57,14 +59,19 @@ export type TasteProfile = {
 };
 
 function client(): AnalysisClient {
-	if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is required to embed and analyze code.");
+	if (!process.env.OPENAI_API_KEY)
+		throw new Error("OPENAI_API_KEY is required to embed and analyze code.");
 	return new OpenAI({
 		apiKey: process.env.OPENAI_API_KEY,
 		baseURL: process.env.OPENAI_BASE_URL,
 	}) as unknown as AnalysisClient;
 }
 
-async function embedChunks(chunks: SemanticChunk[], model: string, openai: AnalysisClient): Promise<number[][]> {
+async function embedChunks(
+	chunks: SemanticChunk[],
+	model: string,
+	openai: AnalysisClient,
+): Promise<number[][]> {
 	const embeddings: number[][] = [];
 	for (let index = 0; index < chunks.length; index += EMBEDDING_BATCH_SIZE) {
 		const batch = chunks.slice(index, index + EMBEDDING_BATCH_SIZE);
@@ -73,12 +80,17 @@ async function embedChunks(chunks: SemanticChunk[], model: string, openai: Analy
 			input: batch.map((chunk) => `${chunk.repo}\n${chunk.path}\n${chunk.symbol}\n${chunk.text}`),
 			encoding_format: "float",
 		});
-		embeddings.push(...[...response.data].sort((a, b) => a.index - b.index).map((item) => item.embedding));
+		embeddings.push(
+			...[...response.data].sort((a, b) => a.index - b.index).map((item) => item.embedding),
+		);
 	}
 	return embeddings;
 }
 
-function embeddingCentroidsByRepo(chunks: SemanticChunk[], embeddings: number[][]): Map<string, number[]> {
+function embeddingCentroidsByRepo(
+	chunks: SemanticChunk[],
+	embeddings: number[][],
+): Map<string, number[]> {
 	const centroids = new Map<string, number[]>();
 	for (const repo of new Set(chunks.map((chunk) => chunk.repo))) {
 		const vectors = chunks.flatMap((chunk, index) =>
@@ -90,7 +102,8 @@ function embeddingCentroidsByRepo(chunks: SemanticChunk[], embeddings: number[][
 			repo,
 			Array.from(
 				{ length: dimensions },
-				(_, dimension) => vectors.reduce((sum, vector) => sum + (vector[dimension] ?? 0), 0) / vectors.length,
+				(_, dimension) =>
+					vectors.reduce((sum, vector) => sum + (vector[dimension] ?? 0), 0) / vectors.length,
 			),
 		);
 	}
@@ -109,7 +122,9 @@ function repositoriesBelowQuota(
 		[...repositories].filter(
 			(repo) =>
 				(repoCounts.get(repo) ?? 0) < repositoryQuota &&
-				chunks.some((chunk, index) => chunk.repo === repo && embeddings[index] && !selected.has(index)),
+				chunks.some(
+					(chunk, index) => chunk.repo === repo && embeddings[index] && !selected.has(index),
+				),
 		),
 	);
 }
@@ -129,12 +144,26 @@ function scoreChunkCandidate(
 	const representativeness = (cosineSimilarity(embedding, centroids.get(chunk.repo) ?? []) + 1) / 2;
 	const repositoryBalance = 1 - Math.min((repoCounts.get(chunk.repo) ?? 0) / repositoryQuota, 1);
 	const diversity = selected.length
-		? 1 - Math.max(...selected.map((selectedIndex) => cosineSimilarity(embedding, embeddings[selectedIndex] ?? [])))
+		? 1 -
+			Math.max(
+				...selected.map((selectedIndex) =>
+					cosineSimilarity(embedding, embeddings[selectedIndex] ?? []),
+				),
+			)
 		: 1;
-	return representativeness * 0.4 + repositoryBalance * 0.2 + fileImportance(chunk.path) * 0.2 + diversity * 0.2;
+	return (
+		representativeness * 0.4 +
+		repositoryBalance * 0.2 +
+		fileImportance(chunk.path) * 0.2 +
+		diversity * 0.2
+	);
 }
 
-export function selectDiverseChunks(chunks: SemanticChunk[], embeddings: number[][], maximum: number): SemanticChunk[] {
+export function selectDiverseChunks(
+	chunks: SemanticChunk[],
+	embeddings: number[][],
+	maximum: number,
+): SemanticChunk[] {
 	if (chunks.length <= maximum) return chunks;
 	const selected: number[] = [];
 	const selectedSet = new Set<number>();
@@ -144,7 +173,14 @@ export function selectDiverseChunks(chunks: SemanticChunk[], embeddings: number[
 	const centroids = embeddingCentroidsByRepo(chunks, embeddings);
 
 	while (selected.length < maximum) {
-		const belowQuota = repositoriesBelowQuota(repositories, chunks, embeddings, selectedSet, repoCounts, repositoryQuota);
+		const belowQuota = repositoriesBelowQuota(
+			repositories,
+			chunks,
+			embeddings,
+			selectedSet,
+			repoCounts,
+			repositoryQuota,
+		);
 		let bestIndex = -1;
 		let bestScore = Number.NEGATIVE_INFINITY;
 		for (let index = 0; index < chunks.length; index++) {
@@ -152,7 +188,15 @@ export function selectDiverseChunks(chunks: SemanticChunk[], embeddings: number[
 			const embedding = embeddings[index];
 			if (!chunk || !embedding || selectedSet.has(index)) continue;
 			if (belowQuota.size > 0 && !belowQuota.has(chunk.repo)) continue;
-			const score = scoreChunkCandidate(index, chunks, embeddings, selected, centroids, repoCounts, repositoryQuota);
+			const score = scoreChunkCandidate(
+				index,
+				chunks,
+				embeddings,
+				selected,
+				centroids,
+				repoCounts,
+				repositoryQuota,
+			);
 			if (score > bestScore) {
 				bestScore = score;
 				bestIndex = index;
@@ -165,16 +209,24 @@ export function selectDiverseChunks(chunks: SemanticChunk[], embeddings: number[
 		if (repo) repoCounts.set(repo, (repoCounts.get(repo) ?? 0) + 1);
 	}
 
-	return selected.map((index) => chunks[index]).filter((chunk): chunk is SemanticChunk => Boolean(chunk));
+	return selected
+		.map((index) => chunks[index])
+		.filter((chunk): chunk is SemanticChunk => Boolean(chunk));
 }
 
 export function hasDistinctEvidence(evidence: Evidence[]): boolean {
-	const distinctLocations = new Set(evidence.map(({ repo, file, symbol }) => `${repo}:${file}:${symbol}`));
+	const distinctLocations = new Set(
+		evidence.map(({ repo, file, symbol }) => `${repo}:${file}:${symbol}`),
+	);
 	const distinctFiles = new Set(evidence.map(({ repo, file }) => `${repo}:${file}`));
 	return distinctLocations.size >= 2 && distinctFiles.size >= 2;
 }
 
-function confidence(evidence: Evidence[], chunksById: Map<string, SemanticChunk>, repositories: Repository[]): number {
+function confidence(
+	evidence: Evidence[],
+	chunksById: Map<string, SemanticChunk>,
+	repositories: Repository[],
+): number {
 	const distinctRepos = new Set(evidence.map((item) => item.repo)).size;
 	const repositoryDiversity = Math.min(distinctRepos / 3, 1);
 	const occurrenceFrequency = Math.min(evidence.length / 5, 1);
@@ -189,13 +241,19 @@ function confidence(evidence: Evidence[], chunksById: Map<string, SemanticChunk>
 	const explicitDocumentation =
 		evidence.filter((item) => {
 			const key = [...chunksById.entries()].find(
-				([, chunk]) => chunk.repo === item.repo && chunk.path === item.file && chunk.symbol === item.symbol,
+				([, chunk]) =>
+					chunk.repo === item.repo && chunk.path === item.file && chunk.symbol === item.symbol,
 			)?.[0];
 			return key ? chunksById.get(key)?.kind === "documentation" : false;
 		}).length / evidence.length;
 
 	return Number(
-		(repositoryDiversity * 0.4 + occurrenceFrequency * 0.3 + recency * 0.2 + explicitDocumentation * 0.1).toFixed(2),
+		(
+			repositoryDiversity * 0.4 +
+			occurrenceFrequency * 0.3 +
+			recency * 0.2 +
+			explicitDocumentation * 0.1
+		).toFixed(2),
 	);
 }
 
@@ -206,7 +264,11 @@ function parseModelResult(content: string): z.infer<typeof llmResultSchema> {
 }
 
 function escapeXmlText(value: string): string {
-	return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+	return value
+		.replace(/&/g, "&amp;")
+		.replace(/"/g, "&quot;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;");
 }
 
 function escapeXmlAttribute(value: string): string {
@@ -323,9 +385,13 @@ export function profileToMarkdown(profile: TasteProfile): string {
 	for (const [category, preferences] of categories) {
 		lines.push(`## ${category}`, "");
 		for (const preference of preferences) {
-			lines.push(`- **${preference.preference}** (confidence: ${preference.confidence.toFixed(2)})`);
+			lines.push(
+				`- **${preference.preference}** (confidence: ${preference.confidence.toFixed(2)})`,
+			);
 			for (const evidence of preference.evidence) {
-				lines.push(`  - Evidence: \`${evidence.repo}\` · \`${evidence.file}\` · \`${evidence.symbol}\``);
+				lines.push(
+					`  - Evidence: \`${evidence.repo}\` · \`${evidence.file}\` · \`${evidence.symbol}\``,
+				);
 			}
 		}
 		lines.push("");
