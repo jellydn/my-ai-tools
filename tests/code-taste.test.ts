@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { chunkMarkdown, chunkTypeScript } from "../lib/code-taste/chunker.ts";
-import { fetchRepositoryChunks, resolveRepositories, selectRepositoryFiles } from "../lib/code-taste/github.ts";
+import {
+	compareRepositoriesForSort,
+	fetchRepositoryChunks,
+	resolveRepositories,
+	selectRepositoryFiles,
+} from "../lib/code-taste/github.ts";
 import {
 	type AnalysisClient,
 	buildProfile,
@@ -121,6 +126,35 @@ test("representative selection prefers central chunks and balances repositories"
 		1,
 	);
 	expect(central[0]?.symbol).toBe("two");
+});
+
+test("repository sort orders by stars when requested", () => {
+	const repos = [
+		{
+			full_name: "owner/small",
+			default_branch: "main",
+			description: null,
+			language: "TypeScript",
+			stargazers_count: 10,
+			pushed_at: "2026-01-01T00:00:00Z",
+			fork: false,
+			archived: false,
+			size: 1000,
+		},
+		{
+			full_name: "owner/big",
+			default_branch: "main",
+			description: null,
+			language: "TypeScript",
+			stargazers_count: 500,
+			pushed_at: "2025-01-01T00:00:00Z",
+			fork: false,
+			archived: false,
+			size: 1000,
+		},
+	];
+	const sorted = [...repos].sort((a, b) => compareRepositoriesForSort(a, b, "stars"));
+	expect(sorted[0]?.full_name).toBe("owner/big");
 });
 
 test("repository file selection samples important buckets instead of tiny files", () => {
