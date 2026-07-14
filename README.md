@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Open Interpreter, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Codex, Open Interpreter, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, codebase-memory-mcp, agentmemory, sem, ctx
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -136,6 +136,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **Claude Code** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                                          |
 | **OpenCode**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                         |
 | **Codex**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl, ctx | -                                                                                                                                                                                         |
+| **Open Interpreter** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx                         | Codex/OpenCode-style TUI; config in `~/.openinterpreter/`                                                                                                                                 |
 | **Kimi Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, logpilot, sem, ctx                                              | Skills, MCP servers, and hooks via `~/.kimi-code/`                                                                                                                                        |
 | **Pi**          | context7, sequential-thinking, qmd, codebase-memory-mcp, fff, react-grab-mcp, agentmemory, sem, ctx                   | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, pi-web-access, footer, tps-meter) |
 | **Amp**         | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | -                                                                                                                                                                                         |
@@ -1377,6 +1378,55 @@ codex --oss
 # Use with a specific task
 codex "Explain this code"
 ```
+
+</details>
+
+---
+
+## 🤖 Open Interpreter (Optional)
+
+Terminal-native coding agent (OpenCode/Codex-style harness) focused on open models and lightweight workflows. [Homepage](https://www.openinterpreter.com/) | [CLI config](https://www.openinterpreter.com/cli/docs/config) | [MCP](https://www.openinterpreter.com/docs/terminal/mcp)
+
+<details>
+<summary><strong>Installation & Configuration</strong></summary>
+
+### Installation
+
+```bash
+curl -fsSL https://www.openinterpreter.com/install | sh
+```
+
+The CLI command is `interpreter`. User config lives in `~/.openinterpreter/` (not `~/.config/`).
+
+### Configuration
+
+Located in [`configs/openinterpreter/`](configs/openinterpreter/):
+
+- [`config.toml`](configs/openinterpreter/config.toml) - MCP servers and harness settings
+- [`AGENTS.md`](configs/openinterpreter/AGENTS.md) - Agent guidelines (same conventions as Codex/Grok)
+
+Run `./cli.sh` to install into `~/.openinterpreter/`. Use `./generate.sh` to export local changes back into this repo (same flow as Codex).
+
+### MCP Servers
+
+Configured under `[mcp_servers.<name>]` in `config.toml` (see [`configs/openinterpreter/config.toml`](configs/openinterpreter/config.toml)). Manage from the CLI:
+
+```bash
+interpreter mcp list
+interpreter mcp add myserver -- npx -y @example/mcp-server
+```
+
+### Usage
+
+```bash
+# Interactive TUI
+interpreter
+
+# Inspect effective config (inside TUI)
+/debug-config
+```
+
+`auth.json`, SQLite state, and caches under `~/.openinterpreter/` are **not** copied by `generate.sh` — only shareable config (`config.toml`, `AGENTS.md`, optional `themes/` and `agents/`).
 
 </details>
 
