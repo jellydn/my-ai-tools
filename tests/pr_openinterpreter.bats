@@ -62,3 +62,17 @@ OI_CONFIG_DIR="$REPO_ROOT/configs/openinterpreter"
 	run grep -F "Open Interpreter" "$REPO_ROOT/README.md"
 	[ "$status" -eq 0 ]
 }
+
+@test "configs/openinterpreter/agents includes code-reviewer" {
+	[ -f "$OI_CONFIG_DIR/agents/code-reviewer.toml" ]
+}
+
+@test "cli.sh supports migrate-codex flag" {
+	run grep -F "migrate-codex" "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+}
+
+@test "cli.sh defines migrate_codex_to_openinterpreter" {
+	run grep -F "migrate_codex_to_openinterpreter()" "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+}

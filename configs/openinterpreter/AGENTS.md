@@ -33,6 +33,9 @@ See @~/.ai-tools/best-practices.md for full details.
 - Read @~/.ai-tools/agent-memory.md — auto-capture learnings, persist bug fixes, keep memories concise. After fixing a bug (confirmed by human), introducing a new tech choice, or encountering something important, ask: "Would you like me to record this as a learning?"
 - Follow git safety guidelines @~/.ai-tools/git-guidelines.md
 - Keep responses concise and actionable.
+- Always propose a plan before edits. Use phases to break down tasks into manageable steps.
+- Run typecheck, lint and biome on js/ts file changes after finish
+- Prefer to use Bun to run scripts if possible, otherwise use tsx to run ts files.
 - Ask before destructive operations — don't guess safety
 - Code is communication — prefer clarity and simplicity
 - Self-documenting code through meaningful names and structure

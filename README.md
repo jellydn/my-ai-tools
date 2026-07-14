@@ -1407,6 +1407,29 @@ Located in [`configs/openinterpreter/`](configs/openinterpreter/):
 
 Run `./cli.sh` to install into `~/.openinterpreter/`. Use `./generate.sh` to export local changes back into this repo (same flow as Codex).
 
+### Migrate from Codex
+
+Open Interpreter is a Codex-fork harness. Typical mapping:
+
+| Codex / shared source | Open Interpreter destination |
+| --------------------- | ---------------------------- |
+| `AGENTS.md` | `~/.openinterpreter/AGENTS.md` (or project `AGENTS.md`) |
+| `~/.codex/config.toml` | `~/.openinterpreter/config.toml` or `.openinterpreter/config.toml` |
+| Skills | `~/.agents/skills/` (universal; same as Codex) |
+| `[mcp_servers]` | `[mcp_servers]` in `config.toml` |
+| `hooks.json` | `~/.openinterpreter/hooks.json` or inline `[hooks]` |
+| Subagents | `~/.openinterpreter/agents/` (`[agents]` TOML/MD) |
+
+One-shot migration from your machine (backs up nothing extra; does **not** copy `auth.json` or SQLite state):
+
+```bash
+./cli.sh --migrate-codex
+```
+
+This installs `interpreter`, copies portable files from `~/.codex/` (`AGENTS.md`, `agents/`, `hooks.json`, `themes/`), then overlays [`configs/openinterpreter/`](configs/openinterpreter/) from this repo. **`~/.codex/` is left intact** — compare both homes before deleting anything.
+
+**Review after import:** MCP auth/headers, hook shell commands, skill scripts, agent tool restrictions, and any path placeholders that still say `~/.codex`.
+
 ### MCP Servers
 
 Configured under `[mcp_servers.<name>]` in `config.toml` (see [`configs/openinterpreter/config.toml`](configs/openinterpreter/config.toml)). Manage from the CLI:
@@ -1426,7 +1449,7 @@ interpreter
 /debug-config
 ```
 
-`auth.json`, SQLite state, and caches under `~/.openinterpreter/` are **not** copied by `generate.sh` — only shareable config (`config.toml`, `AGENTS.md`, optional `themes/` and `agents/`).
+`auth.json`, SQLite state, and caches under `~/.openinterpreter/` are **not** copied by `generate.sh` — only shareable config (`config.toml`, `AGENTS.md`, optional `themes/`, `agents/`, `hooks.json`).
 
 </details>
 

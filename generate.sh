@@ -316,6 +316,8 @@ generate_openinterpreter_configs() {
 		fi
 	fi
 
+	copy_single "$HOME/.openinterpreter/hooks.json" "$SCRIPT_DIR/configs/openinterpreter/hooks.json"
+
 	log_success "Open Interpreter configs generated"
 }
 

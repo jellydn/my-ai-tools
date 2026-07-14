@@ -1,5 +1,19 @@
 # Open Interpreter user config (~/.openinterpreter/config.toml)
 # Docs: https://www.openinterpreter.com/cli/docs/config
+# Codex fork: enable the same harness features you used in ~/.codex/
+
+[features]
+hooks = true
+multi_agent = true
+shell_snapshot = true
+unified_exec = true
+memories = true
+personality = true
+steer = true
+goals = true
+
+[sandbox_workspace_write]
+network_access = true
 
 [mcp_servers.context7]
 command = "npx"
