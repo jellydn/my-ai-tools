@@ -1,0 +1,40 @@
+# 🤖 Open Interpreter Agent Guidelines
+
+## Session Management with tmux
+
+Run dev servers, tests, and interactive CLIs inside tmux with the **current directory name as the session name** for easy debugging:
+
+```bash
+SESSION=$(basename "$PWD")
+tmux new -d -s "$SESSION" 2>/dev/null || true
+
+# Run dev server with portless if available, otherwise fallback to npm
+if command -v portless &>/dev/null; then
+    tmux send-keys -t "$SESSION" 'portless run npm run dev' Enter
+else
+    tmux send-keys -t "$SESSION" 'npm run dev' Enter
+fi
+
+tmux capture-pane -p -t "$SESSION" -S -20  # check output
+```
+
+See @~/.ai-tools/best-practices.md for full details.
+
+## AI Tool Guidelines
+
+- Use the fff MCP tools for all file search operations instead of default tools.
+- Use the sem MCP tools for semantic version control and git operations.
+- When using bash commands for file/content search, prefer `fd` (fdfind) and `rg` (ripgrep) over standard `find` and `grep` for better performance and git-awareness.
+
+## General Practices
+
+- Follow my software development practice @~/.ai-tools/best-practices.md
+- Read @~/.ai-tools/MEMORY.md first — qmd (durable) vs agentmemory (session); follow the decision rule there
+- Read @~/.ai-tools/agent-memory.md — auto-capture learnings, persist bug fixes, keep memories concise. After fixing a bug (confirmed by human), introducing a new tech choice, or encountering something important, ask: "Would you like me to record this as a learning?"
+- Follow git safety guidelines @~/.ai-tools/git-guidelines.md
+- Keep responses concise and actionable.
+- Ask before destructive operations — don't guess safety
+- Code is communication — prefer clarity and simplicity
+- Self-documenting code through meaningful names and structure
+- Modular design that can evolve
+- Comments explain why, not what
