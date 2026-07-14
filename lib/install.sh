@@ -729,6 +729,19 @@ install_codex() {
 		"npm install -g @openai/codex"
 }
 
+install_openinterpreter() {
+	_run_openinterpreter_install() {
+		if command -v interpreter &>/dev/null; then
+			log_warning "Open Interpreter is already installed"
+			return 0
+		fi
+
+		execute_installer "https://www.openinterpreter.com/install" "" "Open Interpreter"
+		log_success "Open Interpreter installed"
+	}
+	run_installer "Open Interpreter" "_run_openinterpreter_install" "command -v interpreter" "interpreter --version 2>/dev/null || true"
+}
+
 install_kimi_code() {
 	_run_kimi_code_install() {
 		if command -v kimi &>/dev/null; then

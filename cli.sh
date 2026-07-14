@@ -1068,14 +1068,19 @@ copy_codex_configs() {
 }
 
 copy_openinterpreter_configs() {
-	local oi_status
-	oi_status=$(detect_tool --detailed "interpreter" "$HOME/.openinterpreter") || oi_status="missing"
-	if [ "$oi_status" = "missing" ]; then
-		log_info "Open Interpreter not detected - skipping Open Interpreter config installation"
+	if [ ! -f "$SCRIPT_DIR/configs/openinterpreter/config.toml" ] && [ ! -f "$SCRIPT_DIR/configs/openinterpreter/AGENTS.md" ]; then
+		log_info "No Open Interpreter configs in repo - skipping"
 		return 0
 	fi
 
-	log_info "Detected Open Interpreter (via $oi_status)"
+	local oi_status
+	oi_status=$(detect_tool --detailed "interpreter" "$HOME/.openinterpreter") || oi_status="missing"
+	if [ "$oi_status" = "missing" ]; then
+		log_info "Open Interpreter CLI not detected - copying repo configs to ~/.openinterpreter"
+	else
+		log_info "Detected Open Interpreter (via $oi_status)"
+	fi
+
 	execute_quoted mkdir -p "$HOME/.openinterpreter"
 
 	copy_config_file "$SCRIPT_DIR/configs/openinterpreter/AGENTS.md" "$HOME/.openinterpreter/" || true
@@ -2472,6 +2477,13 @@ main() {
 	fi
 	echo
 
+	if tool_allowed "openinterpreter"; then
+		install_openinterpreter
+	else
+		log_info "Skipping openinterpreter installer (not in -y allowlist)"
+	fi
+	echo
+
 	if tool_allowed "kimi_code"; then
 		install_kimi_code
 	else
@@ -2623,7 +2635,7 @@ main() {
 	echo "Next steps:"
 	echo "  1. Restart your terminal"
 	echo "  2. Run 'claude' to start Claude Code"
-	echo "     Other CLIs: 'kimi' (Kimi Code), 'agy' (Antigravity), 'cmd' (Command Code), 'grok', 'mimo', 'ctx'"
+	echo "     Other CLIs: 'interpreter' (Open Interpreter), 'kimi', 'agy', 'cmd', 'grok', 'mimo', 'ctx'"
 	echo "  3. Enable plugins with 'claude plugin enable <plugin-name>'"
 	echo "  4. Check out the README.md for more information"
 	echo

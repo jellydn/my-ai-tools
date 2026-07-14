@@ -23,6 +23,16 @@ OI_CONFIG_DIR="$REPO_ROOT/configs/openinterpreter"
 	[ "$status" -eq 0 ]
 }
 
+@test "lib/install.sh has install_openinterpreter function" {
+	run grep -F "install_openinterpreter()" "$REPO_ROOT/lib/install.sh"
+	[ "$status" -eq 0 ]
+}
+
+@test "cli.sh calls install_openinterpreter in main" {
+	run grep -F "install_openinterpreter" "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+}
+
 @test "cli.sh has copy_openinterpreter_configs function" {
 	run grep -F "copy_openinterpreter_configs()" "$REPO_ROOT/cli.sh"
 	[ "$status" -eq 0 ]
