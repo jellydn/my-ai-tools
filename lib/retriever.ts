@@ -1,7 +1,8 @@
 import { readFile, stat } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import OpenAI from "openai";
+import type OpenAI from "openai";
+import { createOpenAIClient } from "./openai-client.ts";
 import { cosineSimilarity } from "./vector-similarity.ts";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -35,11 +36,7 @@ let indexCacheSize = 0;
 
 function getClient(): OpenAI {
 	if (!openai) {
-		const apiKey = process.env.OPENAI_API_KEY;
-		if (!apiKey) {
-			throw new Error("OPENAI_API_KEY is not set");
-		}
-		openai = new OpenAI({ apiKey });
+		openai = createOpenAIClient();
 	}
 	return openai;
 }

@@ -4,8 +4,8 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import type { Context, Next } from "hono";
 import { Hono } from "hono";
 import { stream } from "hono/streaming";
-import OpenAI from "openai";
 import { z } from "zod";
+import { createOpenAIClient } from "./lib/openai-client.ts";
 import { type RetrievedChunk, retrieve } from "./lib/retriever.ts";
 
 const [indexHtml, installSh, installPs1] = await Promise.all([
@@ -57,9 +57,7 @@ if (!process.env.OPENAI_API_KEY) {
 	process.exit(1);
 }
 
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY,
-});
+const openai = createOpenAIClient();
 
 const chatRequestSchema = z.object({
 	message: z.string().min(1).max(4000),

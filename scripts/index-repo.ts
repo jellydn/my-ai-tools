@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import OpenAI from "openai";
+import { createOpenAIClient } from "../lib/openai-client.ts";
 import { indexRepository } from "../lib/indexer.ts";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,12 +14,7 @@ const EMBEDDING_BATCH_SIZE = 100;
 const EMBEDDING_MODEL = process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small";
 
 async function createEmbeddings(chunks: string[]): Promise<number[][]> {
-	const apiKey = process.env.OPENAI_API_KEY;
-	if (!apiKey) {
-		throw new Error("OPENAI_API_KEY is not set");
-	}
-
-	const openai = new OpenAI({ apiKey });
+	const openai = createOpenAIClient();
 	const embeddings: number[][] = [];
 
 	for (let i = 0; i < chunks.length; i += EMBEDDING_BATCH_SIZE) {
