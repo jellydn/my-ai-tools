@@ -36,7 +36,7 @@ biome check .                  # Format check repo-wide
 - `*.test.ts` for Bun unit tests
 
 **Structure:**
-```
+```text
 tests/
   helpers.bash          # REPO_ROOT, require_jq, shared helpers
   cli.bats              # cli.sh / install behaviors

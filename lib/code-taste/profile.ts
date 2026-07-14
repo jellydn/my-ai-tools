@@ -24,12 +24,18 @@ export type AnalysisClient = {
 	};
 };
 
+const boundedSingleLine = z
+	.string()
+	.min(1)
+	.max(500)
+	.refine((value) => !/[\r\n]/.test(value), "must be a single line");
+
 const llmResultSchema = z.object({
 	preferences: z.array(
 		z.object({
-			category: z.string().min(1),
-			preference: z.string().min(1),
-			evidence: z.array(z.string()),
+			category: boundedSingleLine,
+			preference: boundedSingleLine,
+			evidence: z.array(z.string().max(32)),
 		}),
 	),
 });
@@ -56,12 +62,16 @@ export type TasteProfile = {
 	preferences: Preference[];
 };
 
+let cachedAnalysisClient: AnalysisClient | undefined;
+
 function client(): AnalysisClient {
+	if (cachedAnalysisClient) return cachedAnalysisClient;
 	if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is required to embed and analyze code.");
-	return new OpenAI({
+	cachedAnalysisClient = new OpenAI({
 		apiKey: process.env.OPENAI_API_KEY,
 		baseURL: process.env.OPENAI_BASE_URL,
 	}) as unknown as AnalysisClient;
+	return cachedAnalysisClient;
 }
 
 async function embedChunks(chunks: SemanticChunk[], model: string, openai: AnalysisClient): Promise<number[][]> {
@@ -297,8 +307,18 @@ export async function loadProfile(path = STATE_PATH): Promise<TasteProfile> {
 	}
 }
 
+function escapeMarkdownInline(value: string): string {
+	return value
+		.replace(/\\/g, "\\\\")
+		.replace(/[\r\n]/g, " ")
+		.replace(/\*/g, "\\*")
+		.replace(/#/g, "\\#")
+		.replace(/`/g, "\\`")
+		.replace(/\[/g, "\\[");
+}
+
 function title(name: string): string {
-	const displayName = name.trim() || "GitHub";
+	const displayName = escapeMarkdownInline(name.trim() || "GitHub");
 	return `${displayName}${displayName.endsWith("s") ? "'" : "'s"} Coding Taste`;
 }
 
@@ -321,9 +341,9 @@ export function profileToMarkdown(profile: TasteProfile): string {
 		"",
 	];
 	for (const [category, preferences] of categories) {
-		lines.push(`## ${category}`, "");
+		lines.push(`## ${escapeMarkdownInline(category)}`, "");
 		for (const preference of preferences) {
-			lines.push(`- **${preference.preference}** (confidence: ${preference.confidence.toFixed(2)})`);
+			lines.push(`- **${escapeMarkdownInline(preference.preference)}** (confidence: ${preference.confidence.toFixed(2)})`);
 		}
 		lines.push("");
 	}

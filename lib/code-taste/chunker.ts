@@ -196,9 +196,11 @@ function declarationName(node: SyntaxNode, source: string): string {
 
 function startWithComments(node: SyntaxNode): number {
 	let start = node.startIndex;
+	let boundaryRow = node.startPosition.row;
 	let previous = node.previousNamedSibling;
-	while (previous?.type === "comment" && node.startPosition.row - previous.endPosition.row <= 2) {
+	while (previous?.type === "comment" && boundaryRow - previous.endPosition.row <= 2) {
 		start = previous.startIndex;
+		boundaryRow = previous.startPosition.row;
 		previous = previous.previousNamedSibling;
 	}
 	return start;

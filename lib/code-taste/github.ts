@@ -35,6 +35,8 @@ const EXCLUDED_PATHS =
 const SUPPORTED_FILE = /\.(?:ts|tsx|md)$/i;
 const MAX_FILE_SIZE = 100_000;
 const MAX_FILES_PER_REPOSITORY = 100;
+const GITHUB_REQUEST_TIMEOUT_MS = 60_000;
+
 const BUCKET_LIMITS: Record<FileBucket, number> = {
 	core: 30,
 	tests: 20,
@@ -55,8 +57,16 @@ function headers(): Record<string, string> {
 	return result;
 }
 
+async function githubFetch(url: string, init: RequestInit = {}): Promise<Response> {
+	return fetch(url, {
+		...init,
+		headers: { ...headers(), ...(init.headers as Record<string, string> | undefined) },
+		signal: init.signal ?? AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
+	});
+}
+
 async function github<T>(path: string): Promise<T> {
-	const response = await fetch(`https://api.github.com${path}`, { headers: headers() });
+	const response = await githubFetch(`https://api.github.com${path}`);
 	if (!response.ok) {
 		const rateLimit =
 			response.headers.get("x-ratelimit-remaining") === "0" ? " Set GITHUB_TOKEN for a higher limit." : "";
@@ -76,7 +86,7 @@ async function listUserRepositories(username: string): Promise<GitHubRepository[
 	let url: string | undefined =
 		`https://api.github.com/users/${encodeURIComponent(username)}/repos?per_page=100&sort=pushed`;
 	while (url) {
-		const response = await fetch(url, { headers: headers() });
+		const response = await githubFetch(url);
 		if (!response.ok) {
 			const rateLimit =
 				response.headers.get("x-ratelimit-remaining") === "0" ? " Set GITHUB_TOKEN for a higher limit." : "";
@@ -286,7 +296,10 @@ async function fetchText(repo: Repository, path: string): Promise<string> {
 		.map((part) => encodeURIComponent(part))
 		.join("/");
 	const url = `https://raw.githubusercontent.com/${repo.fullName}/${encodeURIComponent(repo.defaultBranch)}/${encodedPath}`;
-	const response = await fetch(url, { headers: { "User-Agent": "code-taste" } });
+	const response = await fetch(url, {
+		headers: { "User-Agent": "code-taste" },
+		signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
+	});
 	if (!response.ok) throw new Error(`Could not download ${repo.fullName}/${path}`);
 	return response.text();
 }
