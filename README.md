@@ -197,12 +197,16 @@ The landing page also has a browser mode that runs the embedding and an instruct
 
 ```bash
 bun install
-export OPENAI_API_KEY="..."
+cp .env.example .env   # optional: OpenRouter defaults (see docs/code-taste-openrouter.md)
+# Set OPENAI_API_KEY; for OpenRouter also set OPENAI_BASE_URL, OPENAI_MODEL, OPENAI_EMBEDDING_MODEL
+set -a && source .env && set +a
 
 bun run code-taste analyze jellydn
 bun run code-taste analyze jellydn/my-ai-tools
 bun run code-taste export --format markdown
 ```
+
+**OpenRouter:** `code-taste` uses the OpenAI-compatible API. Point it at OpenRouter with `OPENAI_BASE_URL=https://openrouter.ai/api/v1` and an OpenRouter API key (`sk-or-v1-...`). Defaults in `.env.example` match the repo chat stack. Step-by-step: [docs/code-taste-openrouter.md](docs/code-taste-openrouter.md).
 
 User analysis selects three representative repositories by default. Use `--repos` and `--max-chunks` to adjust repository coverage and the number of embedding-ranked chunks sent for preference analysis. `GITHUB_TOKEN` is optional but recommended to avoid GitHub's anonymous API rate limit. Analysis state is saved under `.code-taste/`, and Markdown output is written to `CODING_TASTE.md` with confidence scores and repository, file, and symbol citations.
 

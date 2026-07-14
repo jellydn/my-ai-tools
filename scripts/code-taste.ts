@@ -12,11 +12,13 @@ Usage:
   code-taste export [--format markdown|json] [--output CODING_TASTE.md]
 
 Environment:
-  OPENAI_API_KEY          Required
+  OPENAI_API_KEY          Required (OpenAI or OpenRouter sk-or-v1-...)
+  OPENAI_BASE_URL         Optional; e.g. https://openrouter.ai/api/v1 for OpenRouter
   OPENAI_MODEL            Analysis model (default: gpt-4o-mini)
   OPENAI_EMBEDDING_MODEL  Embedding model (default: text-embedding-3-small)
-  OPENAI_BASE_URL         Optional OpenAI-compatible endpoint
   GITHUB_TOKEN            Optional; increases GitHub API rate limits
+
+  See docs/code-taste-openrouter.md for OpenRouter setup (.env.example has sample values).
 `;
 
 function positiveInteger(value: string | undefined, fallback: number, option: string): number {
