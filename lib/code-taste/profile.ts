@@ -8,6 +8,21 @@ import { fileImportance, type Repository } from "./github.ts";
 const STATE_PATH = resolve(".code-taste", "profile.json");
 const EMBEDDING_BATCH_SIZE = 100;
 
+export type AnalysisClient = {
+	embeddings: {
+		create: (request: {
+			model: string;
+			input: string[];
+			encoding_format: "float";
+		}) => Promise<{ data: Array<{ index: number; embedding: number[] }> }>;
+	};
+	chat: {
+		completions: {
+			create: (request: unknown) => Promise<{ choices: Array<{ message: { content: string | null } }> }>;
+		};
+	};
+};
+
 const llmResultSchema = z.object({
 	preferences: z.array(
 		z.object({
@@ -40,13 +55,15 @@ export type TasteProfile = {
 	preferences: Preference[];
 };
 
-function client(): OpenAI {
+function client(): AnalysisClient {
 	if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is required to embed and analyze code.");
-	return new OpenAI({ apiKey: process.env.OPENAI_API_KEY, baseURL: process.env.OPENAI_BASE_URL });
+	return new OpenAI({
+		apiKey: process.env.OPENAI_API_KEY,
+		baseURL: process.env.OPENAI_BASE_URL,
+	}) as unknown as AnalysisClient;
 }
 
-async function embedChunks(chunks: SemanticChunk[], model: string): Promise<number[][]> {
-	const openai = client();
+async function embedChunks(chunks: SemanticChunk[], model: string, openai: AnalysisClient): Promise<number[][]> {
 	const embeddings: number[][] = [];
 	for (let index = 0; index < chunks.length; index += EMBEDDING_BATCH_SIZE) {
 		const batch = chunks.slice(index, index + EMBEDDING_BATCH_SIZE);
@@ -79,6 +96,7 @@ export function selectDiverseChunks(chunks: SemanticChunk[], embeddings: number[
 	const selected: number[] = [];
 	const repoCounts = new Map<string, number>();
 	const repositoryCount = new Set(chunks.map((chunk) => chunk.repo)).size;
+	const repositories = new Set(chunks.map((chunk) => chunk.repo));
 	const repositoryQuota = Math.max(1, Math.ceil(maximum / repositoryCount));
 	const centroids = new Map<string, number[]>();
 	for (const repo of new Set(chunks.map((chunk) => chunk.repo))) {
@@ -96,12 +114,25 @@ export function selectDiverseChunks(chunks: SemanticChunk[], embeddings: number[
 	}
 
 	while (selected.length < maximum) {
+		const repositoriesBelowQuota = new Set(
+			[...repositories].filter(
+				(repo) =>
+					(repoCounts.get(repo) ?? 0) < repositoryQuota &&
+					chunks.some((chunk, index) => chunk.repo === repo && embeddings[index] && !selected.includes(index)),
+			),
+		);
 		let bestIndex = -1;
 		let bestScore = Number.NEGATIVE_INFINITY;
 		for (let index = 0; index < chunks.length; index++) {
 			const chunk = chunks[index];
 			const embedding = embeddings[index];
-			if (!chunk || !embedding || selected.includes(index)) continue;
+			if (
+				!chunk ||
+				!embedding ||
+				selected.includes(index) ||
+				(repositoriesBelowQuota.size > 0 && !repositoriesBelowQuota.has(chunk.repo))
+			)
+				continue;
 			const representativeness = (similarity(embedding, centroids.get(chunk.repo) ?? []) + 1) / 2;
 			const repositoryBalance = 1 - Math.min((repoCounts.get(chunk.repo) ?? 0) / repositoryQuota, 1);
 			const diversity = selected.length
@@ -154,10 +185,17 @@ function confidence(evidence: Evidence[], chunksById: Map<string, SemanticChunk>
 	);
 }
 
+function parseModelResult(content: string): z.infer<typeof llmResultSchema> {
+	const trimmed = content.trim();
+	const fenced = /^```(?:json)?\s*([\s\S]*?)\s*```$/i.exec(trimmed);
+	return llmResultSchema.parse(JSON.parse(fenced?.[1] ?? trimmed));
+}
+
 async function inferPreferences(
 	chunks: SemanticChunk[],
 	repositories: Repository[],
 	model: string,
+	openai: AnalysisClient,
 ): Promise<Preference[]> {
 	const chunksById = new Map(chunks.map((chunk, index) => [`E${index + 1}`, chunk]));
 	const evidenceText = [...chunksById]
@@ -166,7 +204,7 @@ async function inferPreferences(
 				`<chunk id="${id}" repo="${chunk.repo}" file="${chunk.path}" symbol="${chunk.symbol}">\n${chunk.text}\n</chunk>`,
 		)
 		.join("\n\n");
-	const response = await client().chat.completions.create({
+	const response = await openai.chat.completions.create({
 		model,
 		response_format: { type: "json_object" },
 		temperature: 0.1,
@@ -179,7 +217,7 @@ async function inferPreferences(
 			{ role: "user", content: evidenceText },
 		],
 	});
-	const parsed = llmResultSchema.parse(JSON.parse(response.choices[0]?.message.content ?? "{}"));
+	const parsed = parseModelResult(response.choices[0]?.message.content ?? "{}");
 
 	return parsed.preferences.flatMap((candidate) => {
 		const uniqueIds = [...new Set(candidate.evidence)];
@@ -204,12 +242,13 @@ export async function buildProfile(
 	repositories: Repository[],
 	chunks: SemanticChunk[],
 	maximumChunks: number,
+	openai = client(),
 ): Promise<TasteProfile> {
 	const embeddingModel = process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small";
 	const analysisModel = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
-	const embeddings = await embedChunks(chunks, embeddingModel);
+	const embeddings = await embedChunks(chunks, embeddingModel, openai);
 	const selected = selectDiverseChunks(chunks, embeddings, maximumChunks);
-	const preferences = await inferPreferences(selected, repositories, analysisModel);
+	const preferences = await inferPreferences(selected, repositories, analysisModel, openai);
 	return {
 		name: target.split("/")[0] ?? target,
 		githubTarget: target,

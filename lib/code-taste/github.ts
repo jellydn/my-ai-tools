@@ -1,4 +1,4 @@
-import type { SemanticChunk } from "./chunker.ts";
+import type { ChunkingStats, SemanticChunk } from "./chunker.ts";
 import { chunkFile } from "./chunker.ts";
 
 export type Repository = {
@@ -175,7 +175,7 @@ async function fetchText(repo: Repository, path: string): Promise<string> {
 	return response.text();
 }
 
-export async function fetchRepositoryChunks(repo: Repository): Promise<SemanticChunk[]> {
+export async function fetchRepositoryChunks(repo: Repository, stats?: ChunkingStats): Promise<SemanticChunk[]> {
 	const tree = await github<{ tree: RepositoryFile[]; truncated: boolean }>(
 		`/repos/${repo.fullName}/git/trees/${encodeURIComponent(repo.defaultBranch)}?recursive=1`,
 	);
@@ -187,7 +187,7 @@ export async function fetchRepositoryChunks(repo: Repository): Promise<SemanticC
 	for (let index = 0; index < files.length; index += 8) {
 		const batch = files.slice(index, index + 8);
 		const results = await Promise.all(
-			batch.map(async (file) => chunkFile(repo.fullName, file.path, await fetchText(repo, file.path))),
+			batch.map(async (file) => chunkFile(repo.fullName, file.path, await fetchText(repo, file.path), stats)),
 		);
 		chunks.push(...results.flat());
 	}

@@ -1,12 +1,29 @@
 import { describe, expect, test } from "bun:test";
 import { chunkMarkdown, chunkTypeScript } from "../lib/code-taste/chunker.ts";
-import { selectRepositoryFiles } from "../lib/code-taste/github.ts";
+import { fetchRepositoryChunks, resolveRepositories, selectRepositoryFiles } from "../lib/code-taste/github.ts";
 import {
+	type AnalysisClient,
+	buildProfile,
 	hasDistinctEvidence,
 	profileToMarkdown,
 	selectDiverseChunks,
 	type TasteProfile,
 } from "../lib/code-taste/profile.ts";
+
+function mockAnalysisClient(content: string): AnalysisClient {
+	return {
+		embeddings: {
+			create: async (request) => ({
+				data: request.input.map((_, index) => ({ index, embedding: [1 - index * 0.1, index * 0.1] })).reverse(),
+			}),
+		},
+		chat: {
+			completions: {
+				create: async () => ({ choices: [{ message: { content } }] }),
+			},
+		},
+	};
+}
 
 describe("semantic chunking", () => {
 	test("keeps TypeScript declarations intact", async () => {
@@ -63,12 +80,15 @@ export function run(options: Options) {
 	});
 
 	test("omits oversized functions instead of splitting their bodies", async () => {
+		const stats = { oversizedUnits: 0 };
 		const chunks = await chunkTypeScript(
 			"owner/repo",
 			"src/large.ts",
 			`export function generated() {\n${"console.log(1);\n".repeat(600)}}`,
+			stats,
 		);
 		expect(chunks).toEqual([]);
+		expect(stats.oversizedUnits).toBe(1);
 	});
 });
 
@@ -134,6 +154,78 @@ test("evidence must span distinct files", () => {
 			{ repo: "owner/repo", file: "src/b.ts", symbol: "main" },
 		]),
 	).toBe(true);
+});
+
+test("mocked pipeline rejects invalid evidence and exports a valid preference", async () => {
+	const originalFetch = globalThis.fetch;
+	globalThis.fetch = (async (input) => {
+		const url = typeof input === "string" || input instanceof URL ? String(input) : input.url;
+		if (url.endsWith("/repos/owner/repo")) {
+			return Response.json({
+				full_name: "owner/repo",
+				default_branch: "main",
+				description: "Fixture",
+				language: "TypeScript",
+				stargazers_count: 1,
+				pushed_at: "2026-07-01T00:00:00Z",
+				fork: false,
+				archived: false,
+				size: 10,
+			});
+		}
+		if (url.includes("/git/trees/main")) {
+			return Response.json({
+				tree: [
+					{ path: "src/a.ts", type: "blob", size: 120 },
+					{ path: "src/b.ts", type: "blob", size: 80 },
+				],
+				truncated: false,
+			});
+		}
+		if (url.endsWith("/src/a.ts")) {
+			return new Response(
+				"interface Options { dryRun: boolean }\nexport function run(options: Options) { return options.dryRun; }",
+			);
+		}
+		if (url.endsWith("/src/b.ts")) return new Response("export function main() { return true; }");
+		return new Response("Not found", { status: 404 });
+	}) as typeof fetch;
+
+	try {
+		const repositories = await resolveRepositories("owner/repo", 1);
+		const chunks = await fetchRepositoryChunks(repositories[0]!);
+		const response = `\`\`\`json\n${JSON.stringify({
+			preferences: [
+				{ category: "Invalid", preference: "Hallucinated evidence", evidence: ["E1", "E99"] },
+				{ category: "Invalid", preference: "One-file evidence", evidence: ["E1", "E2"] },
+				{ category: "TypeScript", preference: "Prefer focused functions", evidence: ["E2", "E3"] },
+			],
+		})}\n\`\`\``;
+		const profile = await buildProfile("owner/repo", repositories, chunks, chunks.length, mockAnalysisClient(response));
+		expect(profile.preferences.map((preference) => preference.preference)).toEqual(["Prefer focused functions"]);
+		const markdown = profileToMarkdown(profile);
+		expect(markdown).toContain("`owner/repo` · `src/a.ts` · `run`");
+		expect(markdown).toContain("`owner/repo` · `src/b.ts` · `main`");
+	} finally {
+		globalThis.fetch = originalFetch;
+	}
+});
+
+test("pipeline rejects malformed model output", async () => {
+	const repository = {
+		fullName: "owner/repo",
+		defaultBranch: "main",
+		description: null,
+		language: "TypeScript",
+		stars: 0,
+		pushedAt: "2026-07-01T00:00:00Z",
+	};
+	const chunks = [
+		{ repo: "owner/repo", path: "src/a.ts", symbol: "run", kind: "code" as const, text: "function run() {}" },
+	];
+	await expect(
+		buildProfile("owner/repo", [repository], chunks, 1, mockAnalysisClient("not JSON")),
+	).rejects.toBeDefined();
 });
 
 test("Markdown export includes confidence and citations", () => {

@@ -10,6 +10,10 @@ export type SemanticChunk = {
 	text: string;
 };
 
+export type ChunkingStats = {
+	oversizedUnits: number;
+};
+
 const DECLARATION_TYPES = new Set([
 	"class_declaration",
 	"enum_declaration",
@@ -138,7 +142,12 @@ function splitMarkdownSection(text: string): string[] {
 	return chunks;
 }
 
-export async function chunkTypeScript(repo: string, path: string, source: string): Promise<SemanticChunk[]> {
+export async function chunkTypeScript(
+	repo: string,
+	path: string,
+	source: string,
+	stats?: ChunkingStats,
+): Promise<SemanticChunk[]> {
 	const language = await languageFor(path);
 	const parser = new Parser();
 	parser.setLanguage(language);
@@ -166,6 +175,8 @@ export async function chunkTypeScript(repo: string, path: string, source: string
 				kind: "code",
 				text,
 			});
+		} else if (stats) {
+			stats.oversizedUnits += 1;
 		}
 	}
 
@@ -174,7 +185,7 @@ export async function chunkTypeScript(repo: string, path: string, source: string
 	return chunks;
 }
 
-export function chunkMarkdown(repo: string, path: string, source: string): SemanticChunk[] {
+export function chunkMarkdown(repo: string, path: string, source: string, stats?: ChunkingStats): SemanticChunk[] {
 	const lines = source.replace(/\r\n/g, "\n").split("\n");
 	const sections: Array<{ heading: string; lines: string[] }> = [];
 	let current = { heading: "Introduction", lines: [] as string[] };
@@ -202,7 +213,7 @@ export function chunkMarkdown(repo: string, path: string, source: string): Seman
 	}
 	if (current.lines.some((item) => item.trim().length > 0)) sections.push(current);
 
-	return sections.flatMap((section) =>
+	const chunks = sections.flatMap((section) =>
 		splitMarkdownSection(section.lines.join("\n").trim())
 			.map((text, index) => ({
 				repo,
@@ -211,10 +222,22 @@ export function chunkMarkdown(repo: string, path: string, source: string): Seman
 				kind: "documentation" as const,
 				text,
 			}))
-			.filter((chunk) => chunk.text.length <= MAX_SEMANTIC_CHUNK_LENGTH),
+			.filter((chunk) => {
+				if (chunk.text.length <= MAX_SEMANTIC_CHUNK_LENGTH) return true;
+				if (stats) stats.oversizedUnits += 1;
+				return false;
+			}),
 	);
+	return chunks;
 }
 
-export async function chunkFile(repo: string, path: string, source: string): Promise<SemanticChunk[]> {
-	return extname(path).toLowerCase() === ".md" ? chunkMarkdown(repo, path, source) : chunkTypeScript(repo, path, source);
+export async function chunkFile(
+	repo: string,
+	path: string,
+	source: string,
+	stats?: ChunkingStats,
+): Promise<SemanticChunk[]> {
+	return extname(path).toLowerCase() === ".md"
+		? chunkMarkdown(repo, path, source, stats)
+		: chunkTypeScript(repo, path, source, stats);
 }

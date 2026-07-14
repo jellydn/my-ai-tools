@@ -46,12 +46,19 @@ async function analyze(args: string[]): Promise<void> {
 	console.log(`Analyzing ${repositories.map((repo) => repo.fullName).join(", ")}...`);
 
 	const chunks = [];
+	let oversizedUnits = 0;
 	for (const repository of repositories) {
-		const repositoryChunks = await fetchRepositoryChunks(repository);
-		console.log(`  ${repository.fullName}: ${repositoryChunks.length} semantic chunks`);
+		const stats = { oversizedUnits: 0 };
+		const repositoryChunks = await fetchRepositoryChunks(repository, stats);
+		const skipped = stats.oversizedUnits > 0 ? `, ${stats.oversizedUnits} oversized units skipped` : "";
+		console.log(`  ${repository.fullName}: ${repositoryChunks.length} semantic chunks${skipped}`);
+		oversizedUnits += stats.oversizedUnits;
 		chunks.push(...repositoryChunks);
 	}
 	if (chunks.length === 0) throw new Error("No TypeScript, TSX, or Markdown chunks found.");
+	if (oversizedUnits > 0) {
+		console.warn(`Skipped ${oversizedUnits} oversized semantic units; large-unit fallback is not yet supported.`);
+	}
 
 	console.log(`Embedding ${chunks.length} chunks and analyzing up to ${maximumChunks} representative chunks...`);
 	const profile = await buildProfile(target, repositories, chunks, maximumChunks);
