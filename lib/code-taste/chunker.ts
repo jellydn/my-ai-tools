@@ -22,6 +22,7 @@ const DECLARATION_TYPES = new Set([
 
 const TARGET_MARKDOWN_CHUNK_LENGTH = 4_000;
 export const MAX_SEMANTIC_CHUNK_LENGTH = 8_000;
+type MarkdownFence = { marker: "`" | "~"; length: number };
 let initialized: Promise<void> | undefined;
 let typescriptLanguage: Promise<Language> | undefined;
 let tsxLanguage: Promise<Language> | undefined;
@@ -80,9 +81,50 @@ function supportingTypes(node: SyntaxNode, declarations: SyntaxNode[], source: s
 	});
 }
 
+function fenceDelimiter(line: string): { marker: "`" | "~"; length: number; rest: string } | undefined {
+	const match = /^\s*(`{3,}|~{3,})(.*)$/.exec(line);
+	const delimiter = match?.[1];
+	if (!delimiter) return undefined;
+	return { marker: delimiter[0] as "`" | "~", length: delimiter.length, rest: match[2] ?? "" };
+}
+
+function closesFence(delimiter: ReturnType<typeof fenceDelimiter>, fence: MarkdownFence): boolean {
+	return Boolean(
+		delimiter && delimiter.marker === fence.marker && delimiter.length >= fence.length && delimiter.rest.trim() === "",
+	);
+}
+
+function markdownBlocks(text: string): string[] {
+	const blocks: string[] = [];
+	let lines: string[] = [];
+	let fence: MarkdownFence | undefined;
+
+	for (const line of text.split("\n")) {
+		const delimiter = fenceDelimiter(line);
+		if (fence) {
+			lines.push(line);
+			if (closesFence(delimiter, fence)) fence = undefined;
+			continue;
+		}
+		if (delimiter) {
+			fence = { marker: delimiter.marker, length: delimiter.length };
+			lines.push(line);
+			continue;
+		}
+		if (line.trim() === "") {
+			if (lines.length > 0) blocks.push(lines.join("\n"));
+			lines = [];
+			continue;
+		}
+		lines.push(line);
+	}
+	if (lines.length > 0) blocks.push(lines.join("\n"));
+	return blocks;
+}
+
 function splitMarkdownSection(text: string): string[] {
 	if (text.length <= TARGET_MARKDOWN_CHUNK_LENGTH) return [text];
-	const blocks = text.split(/\n\n+(?=(?:[^`]|`(?!``))*$)/s);
+	const blocks = markdownBlocks(text);
 	const chunks: string[] = [];
 	let current = "";
 	for (const block of blocks) {
@@ -136,11 +178,21 @@ export function chunkMarkdown(repo: string, path: string, source: string): Seman
 	const lines = source.replace(/\r\n/g, "\n").split("\n");
 	const sections: Array<{ heading: string; lines: string[] }> = [];
 	let current = { heading: "Introduction", lines: [] as string[] };
-	let inFence = false;
+	let fence: MarkdownFence | undefined;
 
 	for (const line of lines) {
-		if (/^\s*(```|~~~)/.test(line)) inFence = !inFence;
-		const heading = !inFence ? /^(#{1,6})\s+(.+?)\s*$/.exec(line) : null;
+		const delimiter = fenceDelimiter(line);
+		if (fence) {
+			current.lines.push(line);
+			if (closesFence(delimiter, fence)) fence = undefined;
+			continue;
+		}
+		if (delimiter) {
+			fence = { marker: delimiter.marker, length: delimiter.length };
+			current.lines.push(line);
+			continue;
+		}
+		const heading = /^(#{1,6})\s+(.+?)\s*$/.exec(line);
 		if (heading) {
 			if (current.lines.some((item) => item.trim().length > 0)) sections.push(current);
 			current = { heading: heading[2] ?? "Section", lines: [line] };

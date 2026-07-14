@@ -22,17 +22,28 @@ type GitHubRepository = {
 	size: number;
 };
 
-type TreeEntry = {
+export type RepositoryFile = {
 	path: string;
 	type: "blob" | "tree";
 	size?: number;
 };
+
+type FileBucket = "architecture" | "cli" | "configuration" | "core" | "documentation" | "other" | "tests";
 
 const EXCLUDED_PATHS =
 	/(^|\/)(node_modules|dist|build|coverage|vendor|\.next|\.git|fixtures?|snapshots?|generated)(\/|$)/;
 const SUPPORTED_FILE = /\.(?:ts|tsx|md)$/i;
 const MAX_FILE_SIZE = 100_000;
 const MAX_FILES_PER_REPOSITORY = 100;
+const BUCKET_LIMITS: Record<FileBucket, number> = {
+	core: 30,
+	tests: 20,
+	cli: 10,
+	configuration: 10,
+	documentation: 15,
+	architecture: 10,
+	other: 5,
+};
 
 function headers(): Record<string, string> {
 	const result: Record<string, string> = {
@@ -72,6 +83,72 @@ function representativeScore(repo: GitHubRepository): number {
 	return language * 3 + Math.log10(repo.stargazers_count + 1) + recency + Math.min(repo.size / 10_000, 1);
 }
 
+function fileBucket(file: RepositoryFile): FileBucket {
+	const path = file.path.toLowerCase();
+	if (/\.(?:test|spec)\.tsx?$|(^|\/)tests?\//.test(path)) return "tests";
+	if (/^readme\.md$|(^|\/)(?:docs?|wiki)\//.test(path)) return "documentation";
+	if (/(^|\/)(?:cli|commands?|bin|scripts?)(\/|\.)/.test(path)) return "cli";
+	if (/(^|\/)(?:config|configs|settings)(\/|\.)|\.config\.tsx?$/.test(path)) return "configuration";
+	if ((file.size ?? 0) >= 12_000) return "architecture";
+	if (/(^|\/)(?:src|lib|app|packages)\//.test(path)) return "core";
+	return "other";
+}
+
+export function fileImportance(path: string): number {
+	const lower = path.toLowerCase();
+	let score = 0.35;
+	if (/(^|\/)(?:src|lib|app|packages)\//.test(lower)) score += 0.25;
+	if (/\.(?:test|spec)\.tsx?$|(^|\/)tests?\//.test(lower)) score += 0.2;
+	if (/^readme\.md$|(^|\/)(?:docs?|wiki)\//.test(lower)) score += 0.2;
+	if (/(^|\/)(?:cli|commands?|bin)(\/|\.)/.test(lower)) score += 0.15;
+	if (/(^|\/)index\.tsx?$/.test(lower)) score -= 0.25;
+	return Math.max(0, Math.min(score, 1));
+}
+
+function fileScore(file: RepositoryFile): number {
+	const size = file.size ?? 0;
+	const moderateSize = size >= 1_000 && size <= 30_000 ? 1 - Math.abs(size - 10_000) / 20_000 : 0;
+	return fileImportance(file.path) * 3 + moderateSize;
+}
+
+export function selectRepositoryFiles(files: RepositoryFile[], maximum = MAX_FILES_PER_REPOSITORY): RepositoryFile[] {
+	const candidates = files.filter(
+		(entry) =>
+			entry.type === "blob" &&
+			SUPPORTED_FILE.test(entry.path) &&
+			!EXCLUDED_PATHS.test(entry.path) &&
+			(entry.size ?? 0) <= MAX_FILE_SIZE,
+	);
+	const selected: RepositoryFile[] = [];
+	const selectedPaths = new Set<string>();
+	const buckets = (Object.entries(BUCKET_LIMITS) as Array<[FileBucket, number]>).map(([bucket, limit]) => ({
+		files: candidates
+			.filter((file) => fileBucket(file) === bucket)
+			.sort((a, b) => fileScore(b) - fileScore(a) || a.path.localeCompare(b.path)),
+		limit,
+		selected: 0,
+	}));
+
+	while (selected.length < maximum) {
+		let added = false;
+		for (const bucket of buckets) {
+			const file = bucket.selected < bucket.limit ? bucket.files[bucket.selected] : undefined;
+			if (!file) continue;
+			selected.push(file);
+			selectedPaths.add(file.path);
+			bucket.selected += 1;
+			added = true;
+			if (selected.length === maximum) return selected;
+		}
+		if (!added) break;
+	}
+
+	const remaining = candidates
+		.filter((file) => !selectedPaths.has(file.path))
+		.sort((a, b) => fileScore(b) - fileScore(a) || a.path.localeCompare(b.path));
+	return [...selected, ...remaining].slice(0, maximum);
+}
+
 export async function resolveRepositories(target: string, limit: number): Promise<Repository[]> {
 	const parts = target.split("/").filter(Boolean);
 	if (parts.length === 2) {
@@ -99,24 +176,12 @@ async function fetchText(repo: Repository, path: string): Promise<string> {
 }
 
 export async function fetchRepositoryChunks(repo: Repository): Promise<SemanticChunk[]> {
-	const tree = await github<{ tree: TreeEntry[]; truncated: boolean }>(
+	const tree = await github<{ tree: RepositoryFile[]; truncated: boolean }>(
 		`/repos/${repo.fullName}/git/trees/${encodeURIComponent(repo.defaultBranch)}?recursive=1`,
 	);
 	if (tree.truncated) throw new Error(`${repo.fullName} has too many files for the GitHub tree API.`);
 
-	const files = tree.tree
-		.filter(
-			(entry) =>
-				entry.type === "blob" &&
-				SUPPORTED_FILE.test(entry.path) &&
-				!EXCLUDED_PATHS.test(entry.path) &&
-				(entry.size ?? 0) <= MAX_FILE_SIZE,
-		)
-		.sort((a, b) => {
-			const readmeDifference = Number(/^README\.md$/i.test(b.path)) - Number(/^README\.md$/i.test(a.path));
-			return readmeDifference || (a.size ?? 0) - (b.size ?? 0);
-		})
-		.slice(0, MAX_FILES_PER_REPOSITORY);
+	const files = selectRepositoryFiles(tree.tree);
 
 	const chunks: SemanticChunk[] = [];
 	for (let index = 0; index < files.length; index += 8) {
