@@ -2,13 +2,13 @@
 
 import { writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
-import { fetchRepositoryChunks, resolveRepositories } from "../lib/code-taste/github.ts";
+import { fetchRepositoryChunks, parseRepositorySort, resolveRepositories } from "../lib/code-taste/github.ts";
 import { buildProfile, loadProfile, profileToMarkdown, saveProfile } from "../lib/code-taste/profile.ts";
 
 const HELP = `GitHub Coding Taste Generator
 
 Usage:
-  code-taste analyze <github-user|owner/repository> [--repos 3] [--max-chunks 40]
+  code-taste analyze <github-user|owner/repository> [--repos 3] [--max-chunks 40] [--sort representative]
   code-taste export [--format markdown|json] [--output CODING_TASTE.md]
 
 Environment:
@@ -17,6 +17,8 @@ Environment:
   OPENAI_MODEL            Analysis model (default: gpt-4o-mini)
   OPENAI_EMBEDDING_MODEL  Embedding model (default: text-embedding-3-small)
   GITHUB_TOKEN            Optional; increases GitHub API rate limits
+
+  --sort                  representative (default), stars, updated, size, name
 
   See docs/code-taste-openrouter.md for OpenRouter setup (.env.example has sample values).
 `;
@@ -35,16 +37,19 @@ async function analyze(args: string[]): Promise<void> {
 		options: {
 			repos: { type: "string" },
 			"max-chunks": { type: "string" },
+			sort: { type: "string" },
 		},
 	});
 	const target = parsed.positionals[0];
 	if (!target) throw new Error("Missing GitHub user or owner/repository.");
 	const repositoryLimit = positiveInteger(parsed.values.repos, 3, "--repos");
 	const maximumChunks = positiveInteger(parsed.values["max-chunks"], 40, "--max-chunks");
+	const repositorySort = parseRepositorySort(parsed.values.sort);
 
-	console.log(`Selecting repositories for ${target}...`);
-	const repositories = await resolveRepositories(target, repositoryLimit);
+	console.log(`Selecting up to ${repositoryLimit} repositories for ${target} (sort: ${repositorySort})...`);
+	const repositories = await resolveRepositories(target, repositoryLimit, repositorySort);
 	if (repositories.length === 0) throw new Error("No representative public repositories found.");
+	console.log(`Selected: ${repositories.map((repo) => repo.fullName).join(", ")}`);
 	console.log(`Analyzing ${repositories.map((repo) => repo.fullName).join(", ")}...`);
 
 	const chunks = [];
@@ -104,7 +109,9 @@ async function main(): Promise<void> {
 
 main().catch((error) => {
 	if (error instanceof Error && error.name === "ZodError") {
-		console.error("code-taste: model returned JSON that failed validation. Try a stronger OPENAI_MODEL or increase --max-chunks.");
+		console.error(
+			"code-taste: model returned JSON that failed validation. Try a stronger OPENAI_MODEL or increase --max-chunks.",
+		);
 	} else {
 		console.error(`code-taste: ${error instanceof Error ? error.message : String(error)}`);
 	}

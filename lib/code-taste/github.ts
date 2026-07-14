@@ -28,7 +28,14 @@ export type RepositoryFile = {
 	size?: number;
 };
 
-type FileBucket = "architecture" | "cli" | "configuration" | "core" | "documentation" | "other" | "tests";
+type FileBucket =
+	| "architecture"
+	| "cli"
+	| "configuration"
+	| "core"
+	| "documentation"
+	| "other"
+	| "tests";
 
 const EXCLUDED_PATHS =
 	/(^|\/)(node_modules|dist|build|coverage|vendor|\.next|\.git|fixtures?|snapshots?|generated)(\/|$)/;
@@ -59,8 +66,12 @@ async function github<T>(path: string): Promise<T> {
 	const response = await fetch(`https://api.github.com${path}`, { headers: headers() });
 	if (!response.ok) {
 		const rateLimit =
-			response.headers.get("x-ratelimit-remaining") === "0" ? " Set GITHUB_TOKEN for a higher limit." : "";
-		throw new Error(`GitHub request failed (${response.status} ${response.statusText}).${rateLimit}`);
+			response.headers.get("x-ratelimit-remaining") === "0"
+				? " Set GITHUB_TOKEN for a higher limit."
+				: "";
+		throw new Error(
+			`GitHub request failed (${response.status} ${response.statusText}).${rateLimit}`,
+		);
 	}
 	return (await response.json()) as T;
 }
@@ -79,8 +90,12 @@ async function listUserRepositories(username: string): Promise<GitHubRepository[
 		const response = await fetch(url, { headers: headers() });
 		if (!response.ok) {
 			const rateLimit =
-				response.headers.get("x-ratelimit-remaining") === "0" ? " Set GITHUB_TOKEN for a higher limit." : "";
-			throw new Error(`GitHub request failed (${response.status} ${response.statusText}).${rateLimit}`);
+				response.headers.get("x-ratelimit-remaining") === "0"
+					? " Set GITHUB_TOKEN for a higher limit."
+					: "";
+			throw new Error(
+				`GitHub request failed (${response.status} ${response.statusText}).${rateLimit}`,
+			);
 		}
 		collected.push(...((await response.json()) as GitHubRepository[]));
 		url = nextGitHubPage(response.headers.get("link"));
@@ -99,11 +114,72 @@ function toRepository(repo: GitHubRepository): Repository {
 	};
 }
 
+/** How to rank a user's public repos before taking the first `--repos` entries. */
+export type RepositorySort = "representative" | "stars" | "updated" | "size" | "name";
+
 function representativeScore(repo: GitHubRepository): number {
 	const ageInDays = (Date.now() - Date.parse(repo.pushed_at)) / 86_400_000;
 	const recency = Math.max(0, 365 - ageInDays) / 365;
 	const language = repo.language === "TypeScript" ? 1 : 0;
-	return language * 3 + Math.log10(repo.stargazers_count + 1) + recency + Math.min(repo.size / 10_000, 1);
+	return (
+		language * 3 + Math.log10(repo.stargazers_count + 1) + recency + Math.min(repo.size / 10_000, 1)
+	);
+}
+
+export function parseRepositorySort(value: string | undefined): RepositorySort {
+	const normalized = value?.trim().toLowerCase();
+	switch (normalized) {
+		case undefined:
+		case "":
+		case "representative":
+		case "default":
+			return "representative";
+		case "stars":
+		case "star":
+			return "stars";
+		case "updated":
+		case "pushed":
+		case "recent":
+		case "activity":
+			return "updated";
+		case "size":
+			return "size";
+		case "name":
+		case "alphabetical":
+			return "name";
+		default:
+			throw new Error(
+				`Unknown --sort "${value}". Use representative, stars, updated, size, or name.`,
+			);
+	}
+}
+
+/** For tests and tooling: compare two GitHub repo payloads using the same rules as resolveRepositories. */
+export function compareRepositoriesForSort(
+	a: GitHubRepository,
+	b: GitHubRepository,
+	sort: RepositorySort,
+): number {
+	switch (sort) {
+		case "stars":
+			return b.stargazers_count - a.stargazers_count || a.full_name.localeCompare(b.full_name);
+		case "updated":
+			return (
+				Date.parse(b.pushed_at) - Date.parse(a.pushed_at) || a.full_name.localeCompare(b.full_name)
+			);
+		case "size":
+			return b.size - a.size || a.full_name.localeCompare(b.full_name);
+		case "name":
+			return a.full_name.localeCompare(b.full_name);
+		default:
+			return (
+				representativeScore(b) - representativeScore(a) || a.full_name.localeCompare(b.full_name)
+			);
+	}
+}
+
+function rankRepositories(repos: GitHubRepository[], sort: RepositorySort): GitHubRepository[] {
+	return [...repos].sort((a, b) => compareRepositoriesForSort(a, b, sort));
 }
 
 function fileBucket(file: RepositoryFile): FileBucket {
@@ -134,7 +210,10 @@ function fileScore(file: RepositoryFile): number {
 	return fileImportance(file.path) * 3 + moderateSize;
 }
 
-export function selectRepositoryFiles(files: RepositoryFile[], maximum = MAX_FILES_PER_REPOSITORY): RepositoryFile[] {
+export function selectRepositoryFiles(
+	files: RepositoryFile[],
+	maximum = MAX_FILES_PER_REPOSITORY,
+): RepositoryFile[] {
 	const candidates = files.filter(
 		(entry) =>
 			entry.type === "blob" &&
@@ -144,13 +223,15 @@ export function selectRepositoryFiles(files: RepositoryFile[], maximum = MAX_FIL
 	);
 	const selected: RepositoryFile[] = [];
 	const selectedPaths = new Set<string>();
-	const buckets = (Object.entries(BUCKET_LIMITS) as Array<[FileBucket, number]>).map(([bucket, limit]) => ({
-		files: candidates
-			.filter((file) => fileBucket(file) === bucket)
-			.sort((a, b) => fileScore(b) - fileScore(a) || a.path.localeCompare(b.path)),
-		limit,
-		selected: 0,
-	}));
+	const buckets = (Object.entries(BUCKET_LIMITS) as Array<[FileBucket, number]>).map(
+		([bucket, limit]) => ({
+			files: candidates
+				.filter((file) => fileBucket(file) === bucket)
+				.sort((a, b) => fileScore(b) - fileScore(a) || a.path.localeCompare(b.path)),
+			limit,
+			selected: 0,
+		}),
+	);
 
 	while (selected.length < maximum) {
 		let added = false;
@@ -172,7 +253,11 @@ export function selectRepositoryFiles(files: RepositoryFile[], maximum = MAX_FIL
 	return [...selected, ...remaining].slice(0, maximum);
 }
 
-export async function resolveRepositories(target: string, limit: number): Promise<Repository[]> {
+export async function resolveRepositories(
+	target: string,
+	limit: number,
+	sort: RepositorySort = "representative",
+): Promise<Repository[]> {
 	const parts = target.split("/").filter(Boolean);
 	if (parts.length === 2) {
 		return [toRepository(await github<GitHubRepository>(`/repos/${parts[0]}/${parts[1]}`))];
@@ -182,9 +267,10 @@ export async function resolveRepositories(target: string, limit: number): Promis
 	if (!username) throw new Error("Target must be a GitHub user or owner/repository.");
 
 	const repos = await listUserRepositories(username);
-	return repos
-		.filter((repo) => !repo.fork && !repo.archived && repo.size > 0)
-		.sort((a, b) => representativeScore(b) - representativeScore(a))
+	return rankRepositories(
+		repos.filter((repo) => !repo.fork && !repo.archived && repo.size > 0),
+		sort,
+	)
 		.slice(0, limit)
 		.map(toRepository);
 }
@@ -200,12 +286,17 @@ async function fetchText(repo: Repository, path: string): Promise<string> {
 	return response.text();
 }
 
-export async function fetchRepositoryChunks(repo: Repository, stats?: ChunkingStats): Promise<SemanticChunk[]> {
+export async function fetchRepositoryChunks(
+	repo: Repository,
+	stats?: ChunkingStats,
+): Promise<SemanticChunk[]> {
 	const tree = await github<{ tree: RepositoryFile[]; truncated: boolean }>(
 		`/repos/${repo.fullName}/git/trees/${encodeURIComponent(repo.defaultBranch)}?recursive=1`,
 	);
 	if (tree.truncated) {
-		console.warn(`${repo.fullName}: GitHub tree listing was truncated; analyzing a partial file set only.`);
+		console.warn(
+			`${repo.fullName}: GitHub tree listing was truncated; analyzing a partial file set only.`,
+		);
 	}
 
 	const files = selectRepositoryFiles(tree.tree);
