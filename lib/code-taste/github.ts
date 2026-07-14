@@ -28,7 +28,14 @@ export type RepositoryFile = {
 	size?: number;
 };
 
-type FileBucket = "architecture" | "cli" | "configuration" | "core" | "documentation" | "other" | "tests";
+type FileBucket =
+	| "architecture"
+	| "cli"
+	| "configuration"
+	| "core"
+	| "documentation"
+	| "other"
+	| "tests";
 
 const EXCLUDED_PATHS =
 	/(^|\/)(node_modules|dist|build|coverage|vendor|\.next|\.git|fixtures?|snapshots?|generated)(\/|$)/;
@@ -59,8 +66,12 @@ async function github<T>(path: string): Promise<T> {
 	const response = await fetch(`https://api.github.com${path}`, { headers: headers() });
 	if (!response.ok) {
 		const rateLimit =
-			response.headers.get("x-ratelimit-remaining") === "0" ? " Set GITHUB_TOKEN for a higher limit." : "";
-		throw new Error(`GitHub request failed (${response.status} ${response.statusText}).${rateLimit}`);
+			response.headers.get("x-ratelimit-remaining") === "0"
+				? " Set GITHUB_TOKEN for a higher limit."
+				: "";
+		throw new Error(
+			`GitHub request failed (${response.status} ${response.statusText}).${rateLimit}`,
+		);
 	}
 	return (await response.json()) as T;
 }
@@ -80,7 +91,9 @@ function representativeScore(repo: GitHubRepository): number {
 	const ageInDays = (Date.now() - Date.parse(repo.pushed_at)) / 86_400_000;
 	const recency = Math.max(0, 365 - ageInDays) / 365;
 	const language = repo.language === "TypeScript" ? 1 : 0;
-	return language * 3 + Math.log10(repo.stargazers_count + 1) + recency + Math.min(repo.size / 10_000, 1);
+	return (
+		language * 3 + Math.log10(repo.stargazers_count + 1) + recency + Math.min(repo.size / 10_000, 1)
+	);
 }
 
 function fileBucket(file: RepositoryFile): FileBucket {
@@ -111,7 +124,10 @@ function fileScore(file: RepositoryFile): number {
 	return fileImportance(file.path) * 3 + moderateSize;
 }
 
-export function selectRepositoryFiles(files: RepositoryFile[], maximum = MAX_FILES_PER_REPOSITORY): RepositoryFile[] {
+export function selectRepositoryFiles(
+	files: RepositoryFile[],
+	maximum = MAX_FILES_PER_REPOSITORY,
+): RepositoryFile[] {
 	const candidates = files.filter(
 		(entry) =>
 			entry.type === "blob" &&
@@ -121,13 +137,15 @@ export function selectRepositoryFiles(files: RepositoryFile[], maximum = MAX_FIL
 	);
 	const selected: RepositoryFile[] = [];
 	const selectedPaths = new Set<string>();
-	const buckets = (Object.entries(BUCKET_LIMITS) as Array<[FileBucket, number]>).map(([bucket, limit]) => ({
-		files: candidates
-			.filter((file) => fileBucket(file) === bucket)
-			.sort((a, b) => fileScore(b) - fileScore(a) || a.path.localeCompare(b.path)),
-		limit,
-		selected: 0,
-	}));
+	const buckets = (Object.entries(BUCKET_LIMITS) as Array<[FileBucket, number]>).map(
+		([bucket, limit]) => ({
+			files: candidates
+				.filter((file) => fileBucket(file) === bucket)
+				.sort((a, b) => fileScore(b) - fileScore(a) || a.path.localeCompare(b.path)),
+			limit,
+			selected: 0,
+		}),
+	);
 
 	while (selected.length < maximum) {
 		let added = false;
@@ -156,7 +174,9 @@ export async function resolveRepositories(target: string, limit: number): Promis
 	}
 	if (parts.length !== 1) throw new Error("Target must be a GitHub user or owner/repository.");
 
-	const repos = await github<GitHubRepository[]>(`/users/${parts[0]}/repos?per_page=100&sort=pushed`);
+	const repos = await github<GitHubRepository[]>(
+		`/users/${parts[0]}/repos?per_page=100&sort=pushed`,
+	);
 	return repos
 		.filter((repo) => !repo.fork && !repo.archived && repo.size > 0)
 		.sort((a, b) => representativeScore(b) - representativeScore(a))
@@ -175,21 +195,38 @@ async function fetchText(repo: Repository, path: string): Promise<string> {
 	return response.text();
 }
 
-export async function fetchRepositoryChunks(repo: Repository, stats?: ChunkingStats): Promise<SemanticChunk[]> {
+export async function fetchRepositoryChunks(
+	repo: Repository,
+	stats?: ChunkingStats,
+): Promise<SemanticChunk[]> {
 	const tree = await github<{ tree: RepositoryFile[]; truncated: boolean }>(
 		`/repos/${repo.fullName}/git/trees/${encodeURIComponent(repo.defaultBranch)}?recursive=1`,
 	);
-	if (tree.truncated) throw new Error(`${repo.fullName} has too many files for the GitHub tree API.`);
+	if (tree.truncated)
+		throw new Error(`${repo.fullName} has too many files for the GitHub tree API.`);
 
 	const files = selectRepositoryFiles(tree.tree);
 
 	const chunks: SemanticChunk[] = [];
 	for (let index = 0; index < files.length; index += 8) {
 		const batch = files.slice(index, index + 8);
-		const results = await Promise.all(
-			batch.map(async (file) => chunkFile(repo.fullName, file.path, await fetchText(repo, file.path), stats)),
+		const results = await Promise.allSettled(
+			batch.map(async (file) => ({
+				file,
+				chunks: await chunkFile(repo.fullName, file.path, await fetchText(repo, file.path), stats),
+			})),
 		);
-		chunks.push(...results.flat());
+		for (let offset = 0; offset < results.length; offset++) {
+			const result = results[offset]!;
+			const file = batch[offset]!;
+			if (result.status === "fulfilled") {
+				chunks.push(...result.value.chunks);
+				continue;
+			}
+			const reason = result.reason;
+			const message = reason instanceof Error ? reason.message : String(reason);
+			console.warn(`Skipping ${repo.fullName}/${file.path}: ${message}`);
+		}
 	}
 	return chunks;
 }

@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { chunkMarkdown, chunkTypeScript } from "../lib/code-taste/chunker.ts";
-import { fetchRepositoryChunks, resolveRepositories, selectRepositoryFiles } from "../lib/code-taste/github.ts";
+import {
+	fetchRepositoryChunks,
+	resolveRepositories,
+	selectRepositoryFiles,
+} from "../lib/code-taste/github.ts";
 import {
 	type AnalysisClient,
 	buildProfile,
@@ -14,7 +18,9 @@ function mockAnalysisClient(content: string): AnalysisClient {
 	return {
 		embeddings: {
 			create: async (request) => ({
-				data: request.input.map((_, index) => ({ index, embedding: [1 - index * 0.1, index * 0.1] })).reverse(),
+				data: request.input
+					.map((_, index) => ({ index, embedding: [1 - index * 0.1, index * 0.1] }))
+					.reverse(),
 			}),
 		},
 		chat: {
@@ -45,7 +51,11 @@ export function run(options: Options) {
 	});
 
 	test("does not treat headings inside fenced Markdown as sections", () => {
-		const chunks = chunkMarkdown("owner/repo", "README.md", "# Usage\n\n```md\n# Example\n```\n\n# API\nDetails");
+		const chunks = chunkMarkdown(
+			"owner/repo",
+			"README.md",
+			"# Usage\n\n```md\n# Example\n```\n\n# API\nDetails",
+		);
 		expect(chunks.map((chunk) => chunk.symbol)).toEqual(["Usage", "API"]);
 	});
 
@@ -131,7 +141,11 @@ test("repository file selection samples important buckets instead of tiny files"
 		{ path: "src/commands/run.ts", type: "blob" as const, size: 4_000 },
 		{ path: "README.md", type: "blob" as const, size: 6_000 },
 		{ path: "src/application.ts", type: "blob" as const, size: 15_000 },
-		...Array.from({ length: 20 }, (_, index) => ({ path: `tiny-${index}.ts`, type: "blob" as const, size: 20 })),
+		...Array.from({ length: 20 }, (_, index) => ({
+			path: `tiny-${index}.ts`,
+			type: "blob" as const,
+			size: 20,
+		})),
 	];
 	const selected = selectRepositoryFiles(files, 5).map((file) => file.path);
 	expect(selected).toContain("src/domain/service.ts");
@@ -154,6 +168,57 @@ test("evidence must span distinct files", () => {
 			{ repo: "owner/repo", file: "src/b.ts", symbol: "main" },
 		]),
 	).toBe(true);
+});
+
+test("fetchRepositoryChunks continues when one file download fails", async () => {
+	const originalFetch = globalThis.fetch;
+	const warnings: string[] = [];
+	const warn = console.warn;
+	console.warn = (...args: unknown[]) => {
+		warnings.push(args.map(String).join(" "));
+	};
+
+	globalThis.fetch = (async (input) => {
+		const url = typeof input === "string" || input instanceof URL ? String(input) : input.url;
+		if (url.endsWith("/repos/owner/repo")) {
+			return Response.json({
+				full_name: "owner/repo",
+				default_branch: "main",
+				description: "Fixture",
+				language: "TypeScript",
+				stargazers_count: 1,
+				pushed_at: "2026-07-01T00:00:00Z",
+				fork: false,
+				archived: false,
+				size: 10,
+			});
+		}
+		if (url.includes("/git/trees/main")) {
+			return Response.json({
+				tree: [
+					{ path: "src/a.ts", type: "blob", size: 120 },
+					{ path: "src/missing.ts", type: "blob", size: 80 },
+				],
+				truncated: false,
+			});
+		}
+		if (url.endsWith("/src/a.ts")) {
+			return new Response("export function run() { return 1; }");
+		}
+		if (url.endsWith("/src/missing.ts")) return new Response("Not found", { status: 404 });
+		return new Response("Not found", { status: 404 });
+	}) as typeof fetch;
+
+	try {
+		const repositories = await resolveRepositories("owner/repo", 1);
+		const chunks = await fetchRepositoryChunks(repositories[0]!);
+		expect(chunks.length).toBeGreaterThan(0);
+		expect(chunks.some((chunk) => chunk.path === "src/a.ts")).toBe(true);
+		expect(warnings.some((message) => message.includes("src/missing.ts"))).toBe(true);
+	} finally {
+		globalThis.fetch = originalFetch;
+		console.warn = warn;
+	}
 });
 
 test("mocked pipeline rejects invalid evidence and exports a valid preference", async () => {
@@ -201,14 +266,86 @@ test("mocked pipeline rejects invalid evidence and exports a valid preference", 
 				{ category: "TypeScript", preference: "Prefer focused functions", evidence: ["E2", "E3"] },
 			],
 		})}\n\`\`\``;
-		const profile = await buildProfile("owner/repo", repositories, chunks, chunks.length, mockAnalysisClient(response));
-		expect(profile.preferences.map((preference) => preference.preference)).toEqual(["Prefer focused functions"]);
+		const profile = await buildProfile(
+			"owner/repo",
+			repositories,
+			chunks,
+			chunks.length,
+			mockAnalysisClient(response),
+		);
+		expect(profile.preferences.map((preference) => preference.preference)).toEqual([
+			"Prefer focused functions",
+		]);
 		const markdown = profileToMarkdown(profile);
 		expect(markdown).toContain("`owner/repo` · `src/a.ts` · `run`");
 		expect(markdown).toContain("`owner/repo` · `src/b.ts` · `main`");
 	} finally {
 		globalThis.fetch = originalFetch;
 	}
+});
+
+test("LLM evidence payload escapes XML attribute characters", async () => {
+	let userContent = "";
+	const openai = {
+		embeddings: {
+			create: async (request: { input: string[] }) => ({
+				data: request.input.map((_, index) => ({ index, embedding: [1, 0] })),
+			}),
+		},
+		chat: {
+			completions: {
+				create: async (request: { messages?: Array<{ role: string; content: string }> }) => {
+					userContent = request.messages?.find((message) => message.role === "user")?.content ?? "";
+					return {
+						choices: [
+							{
+								message: {
+									content: JSON.stringify({
+										preferences: [
+											{
+												category: "TypeScript",
+												preference: "Escape paths",
+												evidence: ["E1", "E2"],
+											},
+										],
+									}),
+								},
+							},
+						],
+					};
+				},
+			},
+		},
+	} satisfies AnalysisClient;
+
+	const repository = {
+		fullName: 'owner/"repo"',
+		defaultBranch: "main",
+		description: null,
+		language: "TypeScript",
+		stars: 0,
+		pushedAt: "2026-07-01T00:00:00Z",
+	};
+	const chunks = [
+		{
+			repo: 'owner/"repo"',
+			path: 'src/"a".ts',
+			symbol: 'run<"x">',
+			kind: "code" as const,
+			text: "export function run() {}",
+		},
+		{
+			repo: 'owner/"repo"',
+			path: "src/b.ts",
+			symbol: "main",
+			kind: "code" as const,
+			text: "export function main() {}",
+		},
+	];
+	await buildProfile('owner/"repo"', [repository], chunks, 2, openai);
+	expect(userContent).toContain('repo="owner/&quot;repo&quot;"');
+	expect(userContent).toContain('file="src/&quot;a&quot;.ts"');
+	expect(userContent).toContain('symbol="run&lt;&quot;x&quot;&gt;"');
 });
 
 test("pipeline rejects malformed model output", async () => {
@@ -221,7 +358,13 @@ test("pipeline rejects malformed model output", async () => {
 		pushedAt: "2026-07-01T00:00:00Z",
 	};
 	const chunks = [
-		{ repo: "owner/repo", path: "src/a.ts", symbol: "run", kind: "code" as const, text: "function run() {}" },
+		{
+			repo: "owner/repo",
+			path: "src/a.ts",
+			symbol: "run",
+			kind: "code" as const,
+			text: "function run() {}",
+		},
 	];
 	await expect(
 		buildProfile("owner/repo", [repository], chunks, 1, mockAnalysisClient("not JSON")),
@@ -245,7 +388,7 @@ test("Markdown export includes confidence and citations", () => {
 		],
 	};
 	const markdown = profileToMarkdown(profile);
-	expect(markdown).toContain("# Dung's Coding Taste");
+	expect(markdown).toContain("# jellydn's Coding Taste");
 	expect(markdown).toContain("confidence: 0.91");
 	expect(markdown).toContain("`jellydn/a` · `src/a.ts` · `run`");
 });

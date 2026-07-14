@@ -5,6 +5,7 @@ dist
 *.tgz
 .code-taste/
 CODING_TASTE.json
+CODING_TASTE.md
 
 coverage
 *.lcov
