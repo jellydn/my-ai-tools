@@ -103,6 +103,10 @@ async function main(): Promise<void> {
 }
 
 main().catch((error) => {
-	console.error(`code-taste: ${error instanceof Error ? error.message : String(error)}`);
+	if (error instanceof Error && error.name === "ZodError") {
+		console.error("code-taste: model returned JSON that failed validation. Try a stronger OPENAI_MODEL or increase --max-chunks.");
+	} else {
+		console.error(`code-taste: ${error instanceof Error ? error.message : String(error)}`);
+	}
 	process.exitCode = 1;
 });
