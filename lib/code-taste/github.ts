@@ -76,6 +76,33 @@ async function github<T>(path: string): Promise<T> {
 	return (await response.json()) as T;
 }
 
+function nextGitHubPage(linkHeader: string | null): string | undefined {
+	if (!linkHeader) return undefined;
+	const match = /<([^>]+)>;\s*rel="next"/.exec(linkHeader);
+	return match?.[1];
+}
+
+async function listUserRepositories(username: string): Promise<GitHubRepository[]> {
+	const collected: GitHubRepository[] = [];
+	let url: string | undefined =
+		`https://api.github.com/users/${encodeURIComponent(username)}/repos?per_page=100&sort=pushed`;
+	while (url) {
+		const response = await fetch(url, { headers: headers() });
+		if (!response.ok) {
+			const rateLimit =
+				response.headers.get("x-ratelimit-remaining") === "0"
+					? " Set GITHUB_TOKEN for a higher limit."
+					: "";
+			throw new Error(
+				`GitHub request failed (${response.status} ${response.statusText}).${rateLimit}`,
+			);
+		}
+		collected.push(...((await response.json()) as GitHubRepository[]));
+		url = nextGitHubPage(response.headers.get("link"));
+	}
+	return collected;
+}
+
 function toRepository(repo: GitHubRepository): Repository {
 	return {
 		fullName: repo.full_name,
@@ -173,10 +200,10 @@ export async function resolveRepositories(target: string, limit: number): Promis
 		return [toRepository(await github<GitHubRepository>(`/repos/${parts[0]}/${parts[1]}`))];
 	}
 	if (parts.length !== 1) throw new Error("Target must be a GitHub user or owner/repository.");
+	const username = parts[0];
+	if (!username) throw new Error("Target must be a GitHub user or owner/repository.");
 
-	const repos = await github<GitHubRepository[]>(
-		`/users/${parts[0]}/repos?per_page=100&sort=pushed`,
-	);
+	const repos = await listUserRepositories(username);
 	return repos
 		.filter((repo) => !repo.fork && !repo.archived && repo.size > 0)
 		.sort((a, b) => representativeScore(b) - representativeScore(a))
@@ -202,8 +229,11 @@ export async function fetchRepositoryChunks(
 	const tree = await github<{ tree: RepositoryFile[]; truncated: boolean }>(
 		`/repos/${repo.fullName}/git/trees/${encodeURIComponent(repo.defaultBranch)}?recursive=1`,
 	);
-	if (tree.truncated)
-		throw new Error(`${repo.fullName} has too many files for the GitHub tree API.`);
+	if (tree.truncated) {
+		console.warn(
+			`${repo.fullName}: GitHub tree listing was truncated; analyzing a partial file set only.`,
+		);
+	}
 
 	const files = selectRepositoryFiles(tree.tree);
 

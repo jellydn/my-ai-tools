@@ -230,12 +230,16 @@ function parseModelResult(content: string): z.infer<typeof llmResultSchema> {
 	return llmResultSchema.parse(JSON.parse(fenced?.[1] ?? trimmed));
 }
 
-function escapeXmlAttribute(value: string): string {
+function escapeXmlText(value: string): string {
 	return value
 		.replace(/&/g, "&amp;")
 		.replace(/"/g, "&quot;")
 		.replace(/</g, "&lt;")
 		.replace(/>/g, "&gt;");
+}
+
+function escapeXmlAttribute(value: string): string {
+	return escapeXmlText(value);
 }
 
 async function inferPreferences(
@@ -248,7 +252,7 @@ async function inferPreferences(
 	const evidenceText = [...chunksById]
 		.map(
 			([id, chunk]) =>
-				`<chunk id="${escapeXmlAttribute(id)}" repo="${escapeXmlAttribute(chunk.repo)}" file="${escapeXmlAttribute(chunk.path)}" symbol="${escapeXmlAttribute(chunk.symbol)}">\n${chunk.text}\n</chunk>`,
+				`<chunk id="${escapeXmlAttribute(id)}" repo="${escapeXmlAttribute(chunk.repo)}" file="${escapeXmlAttribute(chunk.path)}" symbol="${escapeXmlAttribute(chunk.symbol)}">\n${escapeXmlText(chunk.text)}\n</chunk>`,
 		)
 		.join("\n\n");
 	const response = await openai.chat.completions.create({

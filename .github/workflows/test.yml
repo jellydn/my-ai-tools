@@ -36,5 +36,11 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Biome check (code-taste)
+        run: bunx biome check lib/code-taste scripts/code-taste.ts tests/code-taste.test.ts
+
       - name: Run code taste tests
         run: bun test tests/code-taste.test.ts

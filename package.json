@@ -6,8 +6,7 @@
 		"code-taste": "./scripts/code-taste.ts"
 	},
 	"engines": {
-		"bun": ">=1.0.0",
-		"node": ">=18.0.0"
+		"bun": ">=1.0.0"
 	},
 	"scripts": {
 		"code-taste": "bun scripts/code-taste.ts",
