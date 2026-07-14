@@ -208,7 +208,7 @@ bun run code-taste export --format markdown
 
 **OpenRouter:** `code-taste` uses the OpenAI-compatible API. Point it at OpenRouter with `OPENAI_BASE_URL=https://openrouter.ai/api/v1` and an OpenRouter API key (`sk-or-v1-...`). Defaults in `.env.example` match the repo chat stack. Step-by-step: [docs/code-taste-openrouter.md](docs/code-taste-openrouter.md).
 
-User analysis selects three representative repositories by default. Use `--repos` and `--max-chunks` to adjust repository coverage and the number of embedding-ranked chunks sent for preference analysis. `GITHUB_TOKEN` is optional but recommended to avoid GitHub's anonymous API rate limit. Analysis state is saved under `.code-taste/`, and Markdown output is written to `CODING_TASTE.md` with confidence scores and repository, file, and symbol citations.
+User analysis selects three repositories by default, ranked with a **representative** blend (TypeScript preference, stars, recency, size). Use `--repos` and `--max-chunks` to adjust coverage; use `--sort stars|updated|size|name|representative` to change ranking. **Commit count** is not available from the list API (would require one request per repo); `updated` uses last push time (`pushed_at`). `GITHUB_TOKEN` is optional but recommended to avoid GitHub's anonymous API rate limit. Analysis state is saved under `.code-taste/`, and Markdown output is written to `CODING_TASTE.md` with confidence scores and repository, file, and symbol citations.
 
 ## 🐚 Shell Interpreter
 
