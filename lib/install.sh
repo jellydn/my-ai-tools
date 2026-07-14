@@ -1100,3 +1100,29 @@ install_codiff() {
 	}
 	run_installer "Codiff" "_run_codiff_install" "command -v codiff" "codiff --version 2>/dev/null || true"
 }
+
+# ─── devin installation ───────────────────────────────────────────
+
+install_devin() {
+	_run_devin_install() {
+		if command -v devin &>/dev/null; then
+			log_warning "Devin CLI is already installed"
+			return 0
+		fi
+
+		if [ "$IS_WINDOWS" = true ]; then
+			if command -v powershell.exe &>/dev/null; then
+				execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://static.devin.ai/cli/setup.ps1 | iex\""
+			else
+				log_error "PowerShell is required to install Devin CLI on Windows."
+				log_info "Install manually: https://docs.devin.ai"
+				return 1
+			fi
+		else
+			execute_installer "https://cli.devin.ai/install.sh" "" "Devin CLI"
+		fi
+
+		log_success "Devin CLI installed"
+	}
+	run_installer "Devin CLI" "_run_devin_install" "command -v devin" "devin --version 2>/dev/null || true"
+}

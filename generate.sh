@@ -786,6 +786,22 @@ generate_codiff_configs() {
 	log_success "Codiff configs generated"
 }
 
+generate_devin_configs() {
+	log_info "Generating Devin CLI configs..."
+
+	if [ ! -d "$HOME/.config/devin" ]; then
+		log_warning "Devin CLI config directory not found: $HOME/.config/devin"
+		return 0
+	fi
+
+	execute "mkdir -p \"$SCRIPT_DIR/configs/devin\""
+
+	copy_single "$HOME/.config/devin/AGENTS.md" "$SCRIPT_DIR/configs/devin/AGENTS.md"
+	copy_single "$HOME/.config/devin/config.json" "$SCRIPT_DIR/configs/devin/config.json"
+
+	log_success "Devin CLI configs generated"
+}
+
 generate_cline_configs() {
 	log_info "Generating Cline configs..."
 
@@ -949,6 +965,9 @@ main() {
 	echo
 
 	generate_codiff_configs
+	echo
+
+	generate_devin_configs
 	echo
 
 	generate_best_practices
