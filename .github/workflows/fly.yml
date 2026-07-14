@@ -38,6 +38,9 @@ jobs:
           if [ -z "$OPENAI_API_KEY" ]; then
             echo "::error::GitHub secret OPENAI_API_KEY is not set. Add your OpenRouter key (sk-or-v1-...) as OPENAI_API_KEY."
             missing=1
+          elif ! printf '%s' "$OPENAI_API_KEY" | grep -q '^sk-or-v1-'; then
+            echo "::error::OPENAI_API_KEY must be an OpenRouter key (prefix sk-or-v1-). fly.toml uses https://openrouter.ai/api/v1 — an OpenAI sk-proj- key will fail with 401 during image build."
+            missing=1
           fi
 
           exit "$missing"
@@ -53,4 +56,4 @@ jobs:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          flyctl deploy --remote-only --build-secret "OPENAI_API_KEY=$OPENAI_API_KEY"
+          flyctl deploy --remote-only --build-secret "OPENAI_API_KEY=${OPENAI_API_KEY}"

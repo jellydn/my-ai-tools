@@ -11,7 +11,7 @@ Configure these under **Settings → Secrets and variables → Actions** for the
 | `FLY_API_TOKEN` | Fly **deploy** token (not your personal login). Create with: `fly tokens create deploy` (while logged in with `flyctl auth login` locally). |
 | `OPENAI_API_KEY` | Your [OpenRouter](https://openrouter.ai/) API key (`sk-or-v1-...`). **Not** an OpenAI `sk-proj-...` key — the app talks to `https://openrouter.ai/api/v1` (see `fly.toml`). |
 
-If either secret is missing, the workflow fails at **Validate required secrets** with an explicit error. The message `no access token available. Please login with 'flyctl auth login'` means **`FLY_API_TOKEN` was empty** in CI — do not add an interactive `flyctl auth login` step; use the deploy token secret instead.
+If either secret is missing, or `OPENAI_API_KEY` is not an OpenRouter key (`sk-or-v1-...`), the workflow fails at **Validate required secrets** with an explicit error. A **401 Missing Authentication header** during Docker build almost always means the GitHub secret is still an OpenAI `sk-proj-...` key or the build secret was empty — fix the secret, then re-run **Fly Deploy**. The message `no access token available. Please login with 'flyctl auth login'` means **`FLY_API_TOKEN` was empty** in CI — do not add an interactive `flyctl auth login` step; use the deploy token secret instead.
 
 ## Runtime model configuration (already in repo)
 

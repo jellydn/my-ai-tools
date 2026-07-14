@@ -14,8 +14,10 @@ ENV OPENAI_BASE_URL=${OPENAI_BASE_URL}
 ENV OPENAI_MODEL=${OPENAI_MODEL}
 ENV OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL}
 
-RUN --mount=type=secret,id=OPENAI_API_KEY \
-	export OPENAI_API_KEY=$(cat /run/secrets/OPENAI_API_KEY) && \
+# Secret is only visible in this RUN; pass via env prefix so npm inherits a trimmed key.
+RUN --mount=type=secret,id=OPENAI_API_KEY,required=true \
+	OPENAI_API_KEY="$(tr -d '\r\n' < /run/secrets/OPENAI_API_KEY | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')" \
+	test -n "$OPENAI_API_KEY" && \
 	npm run index && \
 	npm run index:browser
 

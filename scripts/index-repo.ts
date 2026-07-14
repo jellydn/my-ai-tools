@@ -33,7 +33,7 @@ async function createEmbeddings(chunks: string[]): Promise<number[][]> {
 }
 
 async function main() {
-	const apiKey = process.env.OPENAI_API_KEY;
+	const apiKey = process.env.OPENAI_API_KEY?.trim();
 	if (!apiKey) {
 		console.error("OPENAI_API_KEY is not set. Copy .env.example to .env and add your key.");
 		process.exit(1);
