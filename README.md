@@ -191,6 +191,21 @@ The assistant only answers from the retrieved repository excerpts, cites the sou
 
 The landing page also has a browser mode that runs the embedding and an instruction-tuned model (Qwen2.5-Coder-0.5B-Instruct) in the browser via WebGPU. Browser mode downloads the ~9 MB index and the ~300 MB model on the user's device.
 
+## 🎨 GitHub Coding Taste Generator
+
+`code-taste` analyzes public GitHub repositories and produces a reusable, evidence-backed coding preference profile. It uses Tree-sitter to keep TypeScript functions, components, classes, and their supporting types together, while Markdown is split by headings without breaking fenced code blocks.
+
+```bash
+bun install
+export OPENAI_API_KEY="..."
+
+bun run code-taste analyze jellydn
+bun run code-taste analyze jellydn/my-ai-tools
+bun run code-taste export --format markdown
+```
+
+User analysis selects three representative repositories by default. Use `--repos` and `--max-chunks` to adjust repository coverage and the number of embedding-ranked chunks sent for preference analysis. `GITHUB_TOKEN` is optional but recommended to avoid GitHub's anonymous API rate limit. Analysis state is saved under `.code-taste/`, and Markdown output is written to `CODING_TASTE.md` with confidence scores and repository, file, and symbol citations.
+
 ## 🐚 Shell Interpreter
 
 `cli.sh` and `generate.sh` use bash-only syntax (process substitution, arrays, pattern-parameter expansion) and **require bash**. Both scripts `source` [`lib/require_bash.sh`](./lib/require_bash.sh) as their first non-shebang line; that shim is intentionally POSIX-compatible so `sh`/`dash` can source it and transparently re-launch the script under `bash` before `lib/common.sh` is reached. Prefer one of these invocations for clarity:
