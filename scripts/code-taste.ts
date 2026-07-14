@@ -62,14 +62,17 @@ async function analyze(args: string[]): Promise<void> {
 	console.log(`Analyzing ${repositories.map((repo) => repo.fullName).join(", ")}...`);
 
 	const chunks = [];
-	let oversizedUnits = 0;
+	let splitUnits = 0;
+	let droppedUnits = 0;
 	for (const repository of repositories) {
-		const stats = { oversizedUnits: 0 };
+		const stats = { splitUnits: 0, droppedUnits: 0 };
 		try {
 			const repositoryChunks = await fetchRepositoryChunks(repository, stats);
-			const skipped = stats.oversizedUnits > 0 ? `, ${stats.oversizedUnits} oversized units skipped` : "";
-			console.log(`  ${repository.fullName}: ${repositoryChunks.length} semantic chunks${skipped}`);
-			oversizedUnits += stats.oversizedUnits;
+			const extra =
+				stats.splitUnits > 0 || stats.droppedUnits > 0 ? `, ${stats.splitUnits} split, ${stats.droppedUnits} dropped` : "";
+			console.log(`  ${repository.fullName}: ${repositoryChunks.length} semantic chunks${extra}`);
+			splitUnits += stats.splitUnits;
+			droppedUnits += stats.droppedUnits;
 			chunks.push(...repositoryChunks);
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);
@@ -77,8 +80,11 @@ async function analyze(args: string[]): Promise<void> {
 		}
 	}
 	if (chunks.length === 0) throw new Error("No TypeScript, TSX, or Markdown chunks found.");
-	if (oversizedUnits > 0) {
-		console.warn(`Skipped ${oversizedUnits} oversized semantic units; large-unit fallback is not yet supported.`);
+	if (splitUnits > 0) {
+		console.warn(`Split ${splitUnits} oversized semantic unit(s) into smaller chunks.`);
+	}
+	if (droppedUnits > 0) {
+		console.warn(`Dropped ${droppedUnits} semantic unit(s) that could not be split within size limits.`);
 	}
 
 	console.log(`Embedding ${chunks.length} chunks and analyzing up to ${maximumChunks} representative chunks...`);

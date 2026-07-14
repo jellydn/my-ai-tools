@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { chunkMarkdown, chunkTypeScript } from "../lib/code-taste/chunker.ts";
+import {
+	chunkMarkdown,
+	chunkTypeScript,
+	MAX_SEMANTIC_CHUNK_LENGTH,
+	splitTextToMaxLength,
+} from "../lib/code-taste/chunker.ts";
 import {
 	canonicalRepositoryLanguage,
 	compareRepositoriesForSort,
@@ -86,16 +91,41 @@ export function run(options: Options) {
 		expect(chunks[0]?.text).toContain("const afterBlank = 2;");
 	});
 
-	test("omits oversized functions instead of splitting their bodies", async () => {
-		const stats = { oversizedUnits: 0 };
+	test("splits oversized functions into parts within max length", async () => {
+		const stats = { splitUnits: 0, droppedUnits: 0 };
 		const chunks = await chunkTypeScript(
 			"owner/repo",
 			"src/large.ts",
 			`export function generated() {\n${"console.log(1);\n".repeat(600)}}`,
 			stats,
 		);
-		expect(chunks).toEqual([]);
-		expect(stats.oversizedUnits).toBe(1);
+		expect(chunks.length).toBeGreaterThan(1);
+		expect(chunks.every((chunk) => chunk.text.length <= MAX_SEMANTIC_CHUNK_LENGTH)).toBe(true);
+		expect(chunks[0]?.symbol).toBe("generated");
+		expect(chunks.some((chunk) => chunk.symbol.includes("part"))).toBe(true);
+		expect(stats.splitUnits).toBe(1);
+		expect(stats.droppedUnits).toBe(0);
+	});
+
+	test("splitTextToMaxLength prefers paragraph and line breaks", () => {
+		const paragraph = "a".repeat(100);
+		const text = `${paragraph}\n\n${paragraph}\n\n${paragraph}`;
+		const parts = splitTextToMaxLength(text, 150);
+		expect(parts.length).toBeGreaterThan(1);
+		expect(parts.every((part) => part.length <= 150)).toBe(true);
+	});
+
+	test("splits oversized markdown sections while keeping fences closed", () => {
+		const stats = { splitUnits: 0, droppedUnits: 0 };
+		const body = `${"line inside fence\n".repeat(700)}`;
+		const fenced = `\`\`\`ts\n${body}\`\`\``;
+		const chunks = chunkMarkdown("owner/repo", "README.md", `# Huge\n\n${fenced}`, stats);
+		expect(chunks.length).toBeGreaterThan(1);
+		expect(chunks.every((chunk) => chunk.text.length <= MAX_SEMANTIC_CHUNK_LENGTH)).toBe(true);
+		const fencedChunks = chunks.filter((chunk) => chunk.text.includes("```ts"));
+		expect(fencedChunks.length).toBeGreaterThan(0);
+		expect(fencedChunks.every((chunk) => chunk.text.trim().endsWith("```"))).toBe(true);
+		expect(stats.splitUnits).toBeGreaterThan(0);
 	});
 });
 
