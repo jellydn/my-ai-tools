@@ -20,7 +20,8 @@ const requestTimestamps = new Map<string, number[]>();
 
 function rateLimitMiddleware(c: Context, next: Next) {
 	const forwarded = c.req.header("x-forwarded-for");
-	const clientIp = c.req.header("fly-client-ip") || (forwarded ? forwarded.split(",")[0]?.trim() : undefined);
+	const clientIp =
+		c.req.header("fly-client-ip") || (forwarded ? forwarded.split(",")[0]?.trim() : undefined);
 	const key = clientIp ?? "unknown";
 	const now = Date.now();
 	const timestamps = requestTimestamps.get(key) ?? [];
@@ -98,8 +99,16 @@ app.post("/api/chat", rateLimitMiddleware, async (c) => {
 	try {
 		chunks = await retrieve(message, 5);
 	} catch (error) {
-		if (error && typeof error === "object" && "code" in error && (error as { code: unknown }).code === "ENOENT") {
-			return c.json({ error: "Index not found. Run `bun run index` to build data/index.json." }, 503);
+		if (
+			error &&
+			typeof error === "object" &&
+			"code" in error &&
+			(error as { code: unknown }).code === "ENOENT"
+		) {
+			return c.json(
+				{ error: "Index not found. Run `bun run index` to build data/index.json." },
+				503,
+			);
 		}
 		return c.json({ error: "Failed to retrieve context from the index." }, 500);
 	}
@@ -107,7 +116,9 @@ app.post("/api/chat", rateLimitMiddleware, async (c) => {
 	if (chunks.length === 0) {
 		c.header("Content-Type", "text/plain; charset=utf-8");
 		return stream(c, async (stream) => {
-			await stream.write(`${JSON.stringify({ type: "text", content: "This is not documented in the repository." })}\n`);
+			await stream.write(
+				`${JSON.stringify({ type: "text", content: "This is not documented in the repository." })}\n`,
+			);
 			await stream.write(`${JSON.stringify({ type: "sources", paths: [] })}\n`);
 		});
 	}
