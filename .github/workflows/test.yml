@@ -40,7 +40,7 @@ jobs:
         run: bun run typecheck
 
       - name: Biome check (code-taste)
-        run: bunx biome check lib/code-taste scripts/code-taste.ts tests/code-taste.test.ts
+        run: bunx biome check lib/code-taste lib/vector-similarity.ts lib/retriever.ts scripts/code-taste.ts tests/code-taste.test.ts
 
       - name: Run code taste tests
         run: bun test tests/code-taste.test.ts

@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import OpenAI from "openai";
 import { z } from "zod";
+import { cosineSimilarity } from "../vector-similarity.ts";
 import type { SemanticChunk } from "./chunker.ts";
 import { fileImportance, type Repository } from "./github.ts";
 
@@ -77,33 +78,14 @@ async function embedChunks(chunks: SemanticChunk[], model: string, openai: Analy
 	return embeddings;
 }
 
-function similarity(a: number[], b: number[]): number {
-	let dot = 0;
-	let left = 0;
-	let right = 0;
-	for (let index = 0; index < a.length; index++) {
-		const x = a[index] ?? 0;
-		const y = b[index] ?? 0;
-		dot += x * y;
-		left += x * x;
-		right += y * y;
-	}
-	return dot / (Math.sqrt(left) * Math.sqrt(right) || 1);
-}
-
-export function selectDiverseChunks(chunks: SemanticChunk[], embeddings: number[][], maximum: number): SemanticChunk[] {
-	if (chunks.length <= maximum) return chunks;
-	const selected: number[] = [];
-	const repoCounts = new Map<string, number>();
-	const repositoryCount = new Set(chunks.map((chunk) => chunk.repo)).size;
-	const repositories = new Set(chunks.map((chunk) => chunk.repo));
-	const repositoryQuota = Math.max(1, Math.ceil(maximum / repositoryCount));
+function embeddingCentroidsByRepo(chunks: SemanticChunk[], embeddings: number[][]): Map<string, number[]> {
 	const centroids = new Map<string, number[]>();
 	for (const repo of new Set(chunks.map((chunk) => chunk.repo))) {
 		const vectors = chunks.flatMap((chunk, index) =>
 			chunk.repo === repo && embeddings[index] ? [embeddings[index]] : [],
 		);
 		const dimensions = vectors[0]?.length ?? 0;
+		if (dimensions === 0 || vectors.length === 0) continue;
 		centroids.set(
 			repo,
 			Array.from(
@@ -112,34 +94,65 @@ export function selectDiverseChunks(chunks: SemanticChunk[], embeddings: number[
 			),
 		);
 	}
+	return centroids;
+}
+
+function repositoriesBelowQuota(
+	repositories: Set<string>,
+	chunks: SemanticChunk[],
+	embeddings: number[][],
+	selected: Set<number>,
+	repoCounts: Map<string, number>,
+	repositoryQuota: number,
+): Set<string> {
+	return new Set(
+		[...repositories].filter(
+			(repo) =>
+				(repoCounts.get(repo) ?? 0) < repositoryQuota &&
+				chunks.some((chunk, index) => chunk.repo === repo && embeddings[index] && !selected.has(index)),
+		),
+	);
+}
+
+function scoreChunkCandidate(
+	index: number,
+	chunks: SemanticChunk[],
+	embeddings: number[][],
+	selected: number[],
+	centroids: Map<string, number[]>,
+	repoCounts: Map<string, number>,
+	repositoryQuota: number,
+): number {
+	const chunk = chunks[index];
+	const embedding = embeddings[index];
+	if (!chunk || !embedding) return Number.NEGATIVE_INFINITY;
+	const representativeness = (cosineSimilarity(embedding, centroids.get(chunk.repo) ?? []) + 1) / 2;
+	const repositoryBalance = 1 - Math.min((repoCounts.get(chunk.repo) ?? 0) / repositoryQuota, 1);
+	const diversity = selected.length
+		? 1 - Math.max(...selected.map((selectedIndex) => cosineSimilarity(embedding, embeddings[selectedIndex] ?? [])))
+		: 1;
+	return representativeness * 0.4 + repositoryBalance * 0.2 + fileImportance(chunk.path) * 0.2 + diversity * 0.2;
+}
+
+export function selectDiverseChunks(chunks: SemanticChunk[], embeddings: number[][], maximum: number): SemanticChunk[] {
+	if (chunks.length <= maximum) return chunks;
+	const selected: number[] = [];
+	const selectedSet = new Set<number>();
+	const repoCounts = new Map<string, number>();
+	const repositories = new Set(chunks.map((chunk) => chunk.repo));
+	const repositoryQuota = Math.max(1, Math.ceil(maximum / repositories.size));
+	const centroids = embeddingCentroidsByRepo(chunks, embeddings);
 
 	while (selected.length < maximum) {
-		const repositoriesBelowQuota = new Set(
-			[...repositories].filter(
-				(repo) =>
-					(repoCounts.get(repo) ?? 0) < repositoryQuota &&
-					chunks.some((chunk, index) => chunk.repo === repo && embeddings[index] && !selected.includes(index)),
-			),
-		);
+		const belowQuota = repositoriesBelowQuota(repositories, chunks, embeddings, selectedSet, repoCounts, repositoryQuota);
 		let bestIndex = -1;
 		let bestScore = Number.NEGATIVE_INFINITY;
 		for (let index = 0; index < chunks.length; index++) {
 			const chunk = chunks[index];
 			const embedding = embeddings[index];
-			if (
-				!chunk ||
-				!embedding ||
-				selected.includes(index) ||
-				(repositoriesBelowQuota.size > 0 && !repositoriesBelowQuota.has(chunk.repo))
-			)
-				continue;
-			const representativeness = (similarity(embedding, centroids.get(chunk.repo) ?? []) + 1) / 2;
-			const repositoryBalance = 1 - Math.min((repoCounts.get(chunk.repo) ?? 0) / repositoryQuota, 1);
-			const diversity = selected.length
-				? 1 - Math.max(...selected.map((selectedIndex) => similarity(embedding, embeddings[selectedIndex] ?? [])))
-				: 1;
-			const score =
-				representativeness * 0.4 + repositoryBalance * 0.2 + fileImportance(chunk.path) * 0.2 + diversity * 0.2;
+			if (!chunk || !embedding || selectedSet.has(index)) continue;
+			if (belowQuota.size > 0 && !belowQuota.has(chunk.repo)) continue;
+			const score = scoreChunkCandidate(index, chunks, embeddings, selected, centroids, repoCounts, repositoryQuota);
 			if (score > bestScore) {
 				bestScore = score;
 				bestIndex = index;
@@ -147,6 +160,7 @@ export function selectDiverseChunks(chunks: SemanticChunk[], embeddings: number[
 		}
 		if (bestIndex === -1) break;
 		selected.push(bestIndex);
+		selectedSet.add(bestIndex);
 		const repo = chunks[bestIndex]?.repo;
 		if (repo) repoCounts.set(repo, (repoCounts.get(repo) ?? 0) + 1);
 	}
