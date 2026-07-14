@@ -28,6 +28,6 @@ No workflow change is required for OpenRouter free models once `OPENAI_API_KEY` 
 ```bash
 flyctl auth login
 export OPENAI_API_KEY="sk-or-v1-..."
-flyctl secrets import < <(printf 'OPENAI_API_KEY=%s\n' "$OPENAI_API_KEY")
+flyctl secrets set OPENAI_API_KEY="$OPENAI_API_KEY"
 flyctl deploy --remote-only --build-secret "OPENAI_API_KEY=$OPENAI_API_KEY"
 ```

@@ -46,8 +46,7 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          printf "OPENAI_API_KEY=%s\n" "$OPENAI_API_KEY" | flyctl secrets import
+        run: flyctl secrets set OPENAI_API_KEY="$OPENAI_API_KEY"
 
       - name: Deploy to Fly.io
         env:
