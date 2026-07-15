@@ -10,6 +10,10 @@
   Detailed documentation on how documents are split into nodes (chunks) structurally. Use for: programmatic node-parsing architectures.
 - [Docs: LangChain Text Splitters](https://python.langchain.com/docs/concepts/text_splitters/)
   Detailed overview of different splitting techniques (Recursive Character, Token, HTML, Markdown). Use for: understanding character-based splitting heuristics.
+- [Guide: OpenAI RAG Concepts](https://platform.openai.com/docs/guides/retrieval)
+  Overview of context injection and prompt structure. Use for: learning system prompts for grounding.
+- [Guide: Pinecone RAG Guide](https://www.pinecone.io/learn/retrieval-augmented-generation/)
+  Complete primer on retrieval-augmented generation pipelines, from ingest to generation. Use for: RAG pipeline reference.
 
 ## Wisdom (Communities)
 

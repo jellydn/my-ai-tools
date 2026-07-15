@@ -19,3 +19,11 @@ _Avoid_: Fixed-size parsing, hard-splitting
 **Vector Embedding**:
 A numerical array representing the semantic meaning of a chunk, allowing mathematical similarity calculations.
 _Avoid_: Word score, encoding
+
+**RAG (Retrieval-Augmented Generation)**:
+A pattern that enhances LLM responses by retrieving relevant documents from an external corpus and injecting them into the prompt before generating the final answer.
+_Avoid_: Prompt tuning, direct LLM generation
+
+**Grounding Prompt**:
+A system prompt that directs the model to answer questions strictly using the provided context and reject queries unsupported by retrieved facts.
+_Avoid_: Alignment prompt, system instruction
