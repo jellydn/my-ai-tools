@@ -15,7 +15,7 @@ Advanced models can traverse vast solution spaces, making unknown discovery crit
 2. spec-interview → Clarify requirements
 3. [Implementation with logging]
 4. quiz-me → Verify understanding
-```markdown
+```
 
 ## Skills
 
@@ -32,10 +32,9 @@ Searches for unknown unknowns before starting work:
 - Architectural considerations
 
 **Example**:
+
 ```text
 /blindspots Add webhook support for third-party integrations
-```markdown
-
 Returns structured analysis with:
 - Context sources checked
 - Key architectural patterns
@@ -43,6 +42,7 @@ Returns structured analysis with:
 - Testing requirements
 - Questions to answer
 - Recommended approach
+```
 
 ### 2. Spec Interview
 
@@ -58,13 +58,13 @@ Generates targeted questions to fill specification gaps:
 **Example**:
 ```text
 /interview-me Add real-time collaboration to document editor
-```markdown
 
 Returns prioritized questionnaire with:
 - Context for each question
 - Multiple choice options
 - Impact explanation
 - Implementation implications
+```
 
 **Advanced**: For Fable/4.8+, can generate embedded HTML questionnaires with radio buttons and instant feedback.
 
@@ -106,7 +106,7 @@ Creates `.implementation-log.md` during work, then extracts to:
 
 ## Learnings
 [What worked, what surprised us, what to do differently]
-```markdown
+```
 
 ### 4. Quiz Me
 
@@ -190,13 +190,13 @@ Q2: Describe the token caching strategy
 [Open-ended answer]
 
 [Continue through multiple levels of questions]
-```markdown
+```
 
+```markdown
 ## Integration Example
 
 ### Before Implementation
 
-```bash
 # 1. Discover unknowns
 /blindspots Add GitHub OAuth integration
 
@@ -212,11 +212,11 @@ Q2: Describe the token caching strategy
 # 3. Start implementation with logging
 # Agent creates .implementation-log.md
 # Tracks decisions as reality diverges from plan
-```markdown
+```
 
+```markdown
 ### During Implementation
 
-```markdown
 # .implementation-log.md
 
 ### Decision 1: Use GitHub App Installation Flow
@@ -228,11 +228,11 @@ Q2: Describe the token caching strategy
 **Decision**: Implement GitHub App Installation flow
 **Rationale**: Only way to get org-level repo access
 **Impact**: Added webhook endpoint, installation table, token caching
-```markdown
+```
 
+```markdown
 ### After Implementation
 
-```bash
 # 4. Verify understanding
 /quiz-me
 
@@ -246,8 +246,9 @@ Q2: Describe the token caching strategy
 # - MEMORY.md
 # - ADRs
 # - Updated documentation
-```markdown
+```
 
+```markdown
 ## Benefits
 
 ### 1. Reduced Failed Implementations
@@ -264,6 +265,7 @@ Systematic unknown discovery creates compounding knowledge over time.
 
 ### 5. Faster Iteration
 Frontloading discovery means smoother implementation with fewer surprises.
+```
 
 ## The Four Unknowns
 
@@ -271,13 +273,15 @@ Frontloading discovery means smoother implementation with fewer surprises.
                 Known to You    Unknown to You
 Known Exists    Known Knowns    Known Unknowns
 Unknown Exists  Unknown Knowns  Unknown Unknowns
+```
+
 ```markdown
 
 **Known Knowns**: What's explicit in your prompt
 **Known Unknowns**: Questions you know you need to answer
 **Unknown Knowns**: Obvious to you but not written down
 **Unknown Unknowns**: What you haven't considered at all
-
+```
 These skills help surface all four categories before implementation.
 
 ## When to Use
