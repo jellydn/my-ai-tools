@@ -974,7 +974,7 @@ cd my-ai-tools
         <div class="section-heading">
           <h2>Ask the repo.</h2>
           <p class="section-copy">
-            Ask a question about the repository. The assistant answers only from the indexed README, docs, configs, and scripts, and cites the source paths.
+            Ask a question about the repository. The grounding prompt limits answers to indexed repository context, and the retrieval trace links the supporting README, docs, configs, scripts, Issues, or Pull Requests.
           </p>
         </div>
         <div class="chat-panel">
@@ -1076,8 +1076,8 @@ cd my-ai-tools
                 answerText += event.content;
                 textP.textContent = answerText;
                 messagesEl.scrollTop = messagesEl.scrollHeight;
-              } else if (event.type === "sources" && Array.isArray(event.paths)) {
-                sources = event.paths.map(linkifySource).join("\n");
+              } else if (event.type === "sources" && Array.isArray(event.sources)) {
+                sources = event.sources.map(linkifySource).join("\n");
               } else if (event.type === "error" && event.message) {
                 answerText = event.message;
                 textP.textContent = answerText;
@@ -1094,8 +1094,8 @@ cd my-ai-tools
             if (event.type === "text" && event.content) {
               answerText += event.content;
               textP.textContent = answerText;
-            } else if (event.type === "sources" && Array.isArray(event.paths)) {
-              sources = event.paths.map(linkifySource).join("\n");
+            } else if (event.type === "sources" && Array.isArray(event.sources)) {
+              sources = event.sources.map(linkifySource).join("\n");
             } else if (event.type === "error" && event.message) {
               answerText = event.message;
               textP.textContent = answerText;
@@ -1108,7 +1108,7 @@ cd my-ai-tools
         if (sources) {
           const sourcesDiv = document.createElement("div");
           sourcesDiv.className = "chat-sources";
-          sourcesDiv.innerHTML = `<strong>Source:</strong>\n${sources}`;
+          sourcesDiv.innerHTML = `<strong>Retrieved sources:</strong>\n${sources}`;
           answerEl.appendChild(sourcesDiv);
         }
 
@@ -1140,15 +1140,15 @@ cd my-ai-tools
             textP.textContent += token;
             messagesEl.scrollTop = messagesEl.scrollHeight;
           },
-          onSource: (paths) => {
-            sources = paths.map(linkifySource).join("\n");
+          onSource: (retrievedSources) => {
+            sources = retrievedSources.map(linkifySource).join("\n");
           },
         });
 
         if (sources) {
           const sourcesDiv = document.createElement("div");
           sourcesDiv.className = "chat-sources";
-          sourcesDiv.innerHTML = `<strong>Source:</strong>\n${sources}`;
+          sourcesDiv.innerHTML = `<strong>Retrieved sources:</strong>\n${sources}`;
           answerEl.appendChild(sourcesDiv);
         }
 

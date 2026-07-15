@@ -66,6 +66,10 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 			MIGRATE_GEMINI=true
 			shift
 			;;
+		-h | --help)
+			echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback]"
+			exit 0
+			;;
 		--rollback)
 			log_info "Rolling back last transaction..."
 			rollback_transaction

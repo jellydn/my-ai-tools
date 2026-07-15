@@ -270,7 +270,7 @@ Export your current configurations back to this repository for version control:
 
 ## 🤖 Chat with the repo
 
-The landing page includes a repository assistant that answers questions from the indexed README, docs, configs, and scripts.
+The landing page includes a repository assistant that answers questions from the repository knowledge base: README, `docs/`, CLI scripts, source files, example configs, and the 100 most recent GitHub Issues and Pull Requests. `CHANGELOG*` and `SOUL.md` are automatically included when present (this repository does not currently have either file).
 
 To run it locally:
 
@@ -284,7 +284,13 @@ source .env            # load OPENAI_BASE_URL for server mode
 npm run dev            # serve http://localhost:3000
 ```
 
-The assistant only answers from the retrieved repository excerpts, cites the source file paths, and says "This is not documented in the repository." when the context is insufficient.
+The grounding prompt directs the assistant to answer only from retrieved repository excerpts and to say "This is not documented in the repository." when the context is insufficient. The UI separately displays the five retrieved sources as a verifiable retrieval trace; it does not claim to validate every generated statement against a citation.
+
+The implementation intentionally avoids LangChain: the document loader, 1,000-character chunking with 150-character overlap, embedding calls, cosine retrieval (top 5), prompt assembly, and source-link handling are explicit TypeScript modules. GitHub documents carry `type`, `author`, and canonical URL metadata so metadata filtering can be added without rebuilding the index format. Set `GITHUB_TOKEN` while indexing to avoid anonymous GitHub API limits; `GITHUB_REPOSITORY` defaults to `jellydn/my-ai-tools`.
+
+Each server request writes one structured `rag_request` JSON log containing the question, five retrieved chunks and similarity scores, prompt/response tokens reported by the model provider, total latency, and any failure stage. Browser mode records equivalent diagnostics in the browser console.
+
+See [`docs/rag-architecture.md`](docs/rag-architecture.md) for the architecture, indexing policy, observability fields, and planned production upgrades.
 
 The landing page also has a browser mode that runs the embedding and an instruction-tuned model (Qwen2.5-Coder-0.5B-Instruct) in the browser via WebGPU. Browser mode downloads the ~9 MB index and the ~300 MB model on the user's device.
 

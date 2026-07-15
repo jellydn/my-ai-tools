@@ -16,7 +16,9 @@ ENV OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL}
 
 # Secret is only visible in this RUN; export so npm run index inherits a trimmed key.
 RUN --mount=type=secret,id=OPENAI_API_KEY,required=true \
+	--mount=type=secret,id=GITHUB_TOKEN \
 	export OPENAI_API_KEY="$(tr -d '\r\n' < /run/secrets/OPENAI_API_KEY | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')" && \
+	if [ -f /run/secrets/GITHUB_TOKEN ]; then export GITHUB_TOKEN="$(cat /run/secrets/GITHUB_TOKEN)"; fi && \
 	test -n "$OPENAI_API_KEY" && \
 	npm run index && \
 	npm run index:browser

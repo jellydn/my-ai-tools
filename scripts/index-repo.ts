@@ -1,8 +1,8 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { indexKnowledgeBase } from "../lib/indexer.ts";
 import { createOpenAIClient } from "../lib/openai-client.ts";
-import { indexRepository } from "../lib/indexer.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -39,7 +39,7 @@ async function main() {
 		process.exit(1);
 	}
 
-	const chunks = indexRepository(REPO_ROOT);
+	const chunks = await indexKnowledgeBase(REPO_ROOT);
 	if (chunks.length === 0) {
 		console.error("No chunks found to index.");
 		process.exit(1);
@@ -51,6 +51,7 @@ async function main() {
 	const indexedChunks = chunks.map((chunk, index) => ({
 		path: chunk.path,
 		text: chunk.text,
+		metadata: chunk.metadata,
 		embedding: embeddings[index],
 	}));
 
@@ -58,6 +59,7 @@ async function main() {
 	writeFileSync(
 		INDEX_PATH,
 		JSON.stringify({
+			schemaVersion: 2,
 			generatedAt: new Date().toISOString(),
 			model: EMBEDDING_MODEL,
 			chunks: indexedChunks,
