@@ -1,0 +1,29 @@
+{
+  "skill": "prd",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Turn this feature idea into a PRD with goals, requirements, and constraints.",
+      "should_trigger": true,
+      "expected_behavior": "Produces a structured product requirements document."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Draft a PRD for the new workflow and keep it practical and specific.",
+      "should_trigger": true,
+      "expected_behavior": "Creates a clear PRD rather than a vague concept note."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Implement the workflow.",
+      "should_trigger": false,
+      "expected_behavior": "This asks for code, not a PRD."
+    },
+    {
+      "id": "case-4",
+      "prompt": "I only have a rough idea and some constraints; create a PRD that clarifies the scope and success criteria.",
+      "should_trigger": true,
+      "expected_behavior": "Expands a vague idea into explicit product requirements."
+    }
+  ]
+}

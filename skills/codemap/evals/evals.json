@@ -1,0 +1,29 @@
+{
+  "skill": "codemap",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Map the architecture of this repo and explain the main boundaries and responsibilities.",
+      "should_trigger": true,
+      "expected_behavior": "Produces a structured code map of the repository."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Create the set of docs that describe the codebase concerns and conventions.",
+      "should_trigger": true,
+      "expected_behavior": "Generates an overview of codebase structure and design themes."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Find the function that formats dates.",
+      "should_trigger": false,
+      "expected_behavior": "This is a targeted search request, not a full codemap."
+    },
+    {
+      "id": "case-4",
+      "prompt": "I need a quick map of the repo before making changes in three different areas.",
+      "should_trigger": true,
+      "expected_behavior": "Builds an architecture-level orientation map across areas of the codebase."
+    }
+  ]
+}

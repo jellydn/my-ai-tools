@@ -1,0 +1,29 @@
+{
+  "skill": "tdd",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Guide me through a full Red-Green-Refactor cycle for this new behavior.",
+      "should_trigger": true,
+      "expected_behavior": "Runs TDD with failing test, minimal fix, and refactor guidance."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Help me write the first failing test and then get to green step by step.",
+      "should_trigger": true,
+      "expected_behavior": "Supports the classic TDD loop."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Write the feature directly without tests.",
+      "should_trigger": false,
+      "expected_behavior": "This is opposite of TDD."
+    },
+    {
+      "id": "case-4",
+      "prompt": "I already have a failing test; now help me move through green and refactor safely.",
+      "should_trigger": true,
+      "expected_behavior": "Continues an existing TDD cycle and keeps the steps disciplined."
+    }
+  ]
+}

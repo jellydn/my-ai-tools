@@ -1,0 +1,29 @@
+{
+  "skill": "ralph",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Convert this PRD into prd.json for the Ralph autonomous agent system.",
+      "should_trigger": true,
+      "expected_behavior": "Transforms the PRD into the required structured JSON format."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Take the product spec and emit the Ralph-compatible prd.json file.",
+      "should_trigger": true,
+      "expected_behavior": "Generates the agent-ready JSON representation."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Write a PRD for me.",
+      "should_trigger": false,
+      "expected_behavior": "This is spec writing, not conversion to prd.json."
+    },
+    {
+      "id": "case-4",
+      "prompt": "The PRD is messy and long; normalize it into prd.json while preserving the key requirements.",
+      "should_trigger": true,
+      "expected_behavior": "Extracts structured fields from a noisy PRD."
+    }
+  ]
+}

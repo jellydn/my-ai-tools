@@ -1,0 +1,29 @@
+{
+  "skill": "adr",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Write an ADR for choosing PostgreSQL over SQLite for the production app.",
+      "should_trigger": true,
+      "expected_behavior": "Produces an ADR that records the decision, alternatives considered, and consequences."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Capture the decision to keep the current cache strategy and note why we are not changing it.",
+      "should_trigger": true,
+      "expected_behavior": "Produces an ADR-style decision record with rationale and trade-offs."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Summarize the database options in one paragraph.",
+      "should_trigger": false,
+      "expected_behavior": "This is a general summary request, not an architecture decision record."
+    },
+    {
+      "id": "case-4",
+      "prompt": "We already decided on the API gateway last week. Create an ADR that reflects the final choice and the rejected options.",
+      "should_trigger": true,
+      "expected_behavior": "Handles an already-made decision and still documents context, alternatives, and consequences."
+    }
+  ]
+}
