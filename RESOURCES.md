@@ -14,6 +14,10 @@
   Overview of context injection and prompt structure. Use for: learning system prompts for grounding.
 - [Guide: Pinecone RAG Guide](https://www.pinecone.io/learn/retrieval-augmented-generation/)
   Complete primer on retrieval-augmented generation pipelines, from ingest to generation. Use for: RAG pipeline reference.
+- [Guide: Sentence Transformers Reranking](https://www.sbert.net/examples/applications/retrieve_rerank/README.html)
+  Guide on using Cross-Encoder models to rerank candidates retrieved via Bi-Encoders. Use for: learning reranking concepts.
+- [Docs: Vespa Relevance Docs](https://docs.vespa.ai/en/relevance.html)
+  Comprehensive resource on engineering search relevance and evaluating ranking metrics. Use for: query evaluation reference.
 
 ## Wisdom (Communities)
 

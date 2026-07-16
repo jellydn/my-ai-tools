@@ -27,3 +27,15 @@ _Avoid_: Prompt tuning, direct LLM generation
 **Grounding Prompt**:
 A system prompt that directs the model to answer questions strictly using the provided context and reject queries unsupported by retrieved facts.
 _Avoid_: Alignment prompt, system instruction
+
+**Top-K**:
+The number of highest-scoring retrieved document chunks passed as context to the LLM.
+_Avoid_: Cutoff size, match count
+
+**Metadata Filtering**:
+Applying pre-filters (such as file type, date, or author) to candidates before performing vector similarity search.
+_Avoid_: Post-hoc ranking, list sorting
+
+**Reranking**:
+Using a secondary, highly precise model (like a Cross-Encoder) to re-evaluate the relevance of a larger pool of retrieved chunks (e.g. Top-20) and select the best few (e.g. Top-5).
+_Avoid_: Initial vector search, dot-product scoring
