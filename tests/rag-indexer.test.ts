@@ -5,7 +5,7 @@ import { join } from "node:path";
 import test from "node:test";
 import { CHUNK_OVERLAP, chunkMarkdown, chunkText, indexRepository, MAX_CHUNK_SIZE } from "../lib/indexer.ts";
 import { buildContextMessage, RAG_SYSTEM_PROMPT } from "../lib/rag-prompt.ts";
-import { validateIndex } from "../lib/retriever.ts";
+import { type Chunk, rankChunks, validateIndex } from "../lib/retriever.ts";
 
 test("chunkText enforces the target size and overlap", () => {
 	const text = Array.from({ length: 2400 }, (_, index) => String.fromCharCode(33 + (index % 90))).join("");
@@ -69,8 +69,29 @@ test("server index validation rejects stale schemas and dimensions", () => {
 	);
 });
 
+test("retrieval supports top-k and metadata pre-filtering", () => {
+	const chunks: Chunk[] = [
+		{ path: "docs/guide.md", text: "guide", metadata: { type: "documentation" }, embedding: [1, 0] },
+		{ path: "server.ts", text: "server", metadata: { type: "source" }, embedding: [0.9, 0.1] },
+		{ path: "pull/315", text: "pull", metadata: { type: "pull_request" }, embedding: [0.8, 0.2] },
+		{ path: "issues/1", text: "issue", metadata: { type: "issue" }, embedding: [0.7, 0.3] },
+	];
+
+	assert.deepEqual(
+		rankChunks([1, 0], chunks, { topK: 3 }).map((chunk) => chunk.path),
+		["docs/guide.md", "server.ts", "pull/315"],
+	);
+	assert.deepEqual(
+		rankChunks([1, 0], chunks, { topK: 5, types: ["pull_request"] }).map((chunk) => chunk.path),
+		["pull/315"],
+	);
+	assert.equal(rankChunks([0, 0], chunks, { topK: 3 })[0]?.score, 0);
+});
+
 test("indexRepository classifies documentation, CLI help, configs, and source", () => {
 	const root = mkdtempSync(join(tmpdir(), "rag-indexer-"));
+	const originalSourceRef = process.env.GITHUB_SOURCE_REF;
+	process.env.GITHUB_SOURCE_REF = "abc123";
 	try {
 		mkdirSync(join(root, "docs"));
 		mkdirSync(join(root, "configs"));
@@ -88,7 +109,10 @@ test("indexRepository classifies documentation, CLI help, configs, and source", 
 		assert.equal(typesByPath["configs/agent.toml"], "example_config");
 		assert.equal(typesByPath["cli.sh"], "cli_help");
 		assert.equal(typesByPath["server.ts"], "source");
+		assert.match(chunks.find((chunk) => chunk.path === "README.md")?.metadata.url ?? "", /blob\/abc123\/README\.md$/);
 	} finally {
+		if (originalSourceRef === undefined) delete process.env.GITHUB_SOURCE_REF;
+		else process.env.GITHUB_SOURCE_REF = originalSourceRef;
 		rmSync(root, { recursive: true, force: true });
 	}
 });

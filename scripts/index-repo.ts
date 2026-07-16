@@ -62,6 +62,8 @@ async function main() {
 			schemaVersion: 2,
 			generatedAt: new Date().toISOString(),
 			model: EMBEDDING_MODEL,
+			repository: process.env.GITHUB_REPOSITORY ?? "jellydn/my-ai-tools",
+			sourceRef: process.env.GITHUB_SOURCE_REF?.trim() || "main",
 			chunks: indexedChunks,
 		}),
 		"utf-8",

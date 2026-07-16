@@ -3,6 +3,7 @@ import { env, pipeline, TextStreamer } from "https://cdn.jsdelivr.net/npm/@huggi
 const EMBEDDING_MODEL = "Xenova/all-MiniLM-L6-v2";
 const LLM_MODEL = "onnx-community/Qwen2.5-Coder-0.5B-Instruct";
 const INDEX_PATH = "/public/index-browser.json";
+const DOCUMENT_TYPES = new Set(["documentation", "source", "issue", "pull_request", "cli_help", "example_config"]);
 
 let indexData = null;
 let extractorPromise = null;
@@ -107,8 +108,10 @@ function dotProduct(a, b) {
 	return sum;
 }
 
-function retrieveTopK(queryEmbedding, chunks, k) {
-	const scored = chunks.map((chunk) => ({ chunk, score: dotProduct(queryEmbedding, chunk.embedding) }));
+function retrieveTopK(queryEmbedding, chunks, k, types = []) {
+	const allowedTypes = types.length > 0 ? new Set(types) : null;
+	const candidates = allowedTypes ? chunks.filter((chunk) => allowedTypes.has(chunk.metadata?.type)) : chunks;
+	const scored = candidates.map((chunk) => ({ chunk, score: dotProduct(queryEmbedding, chunk.embedding) }));
 	scored.sort((a, b) => b.score - a.score);
 	return scored.slice(0, k).map((item) => ({ ...item.chunk, score: item.score }));
 }
@@ -140,8 +143,14 @@ function updateStatus(callbacks, text) {
 	if (callbacks.onStatus) callbacks.onStatus(text);
 }
 
-export async function runBrowserChat(question, callbacks) {
+export async function runBrowserChat(question, callbacks, options = {}) {
 	const startedAt = performance.now();
+	const topK = options.topK === undefined ? 5 : options.topK;
+	const types = options.types === undefined ? [] : options.types;
+	if (![3, 5, 10, 20].includes(topK)) throw new Error("topK must be 3, 5, 10, or 20");
+	if (!Array.isArray(types) || types.length > 6 || types.some((type) => !DOCUMENT_TYPES.has(type))) {
+		throw new Error("types contains an unsupported document type");
+	}
 	updateStatus(callbacks, "Loading index...");
 	const index = await getIndex();
 
@@ -153,7 +162,14 @@ export async function runBrowserChat(question, callbacks) {
 	const queryEmbedding = queryOutput.data;
 
 	updateStatus(callbacks, "Retrieving chunks...");
-	const topChunks = retrieveTopK(queryEmbedding, index.chunks, 5);
+	const retrievalStartedAt = performance.now();
+	const topChunks = retrieveTopK(queryEmbedding, index.chunks, topK, types);
+	const retrievalLatencyMs = Math.round(performance.now() - retrievalStartedAt);
+	if (topChunks.length === 0) {
+		if (callbacks.onToken) callbacks.onToken("This is not documented in the repository.");
+		if (callbacks.onSource) callbacks.onSource([]);
+		return;
+	}
 
 	updateStatus(callbacks, "Loading language model...");
 	const generator = await getGenerator();
@@ -180,13 +196,16 @@ export async function runBrowserChat(question, callbacks) {
 		streamer,
 	});
 	console.info("rag_request", {
-		question,
+		questionLength: question.length,
+		topK,
+		filters: { types },
 		retrievedChunks: topChunks.map((chunk) => ({
 			path: chunk.path,
 			type: chunk.metadata?.type,
 			author: chunk.metadata?.author,
 			score: Number(chunk.score.toFixed(4)),
 		})),
+		retrievalLatencyMs,
 		promptTokens: generator.tokenizer.apply_chat_template(messages, {
 			add_generation_prompt: true,
 			tokenize: true,
