@@ -194,8 +194,9 @@ function classifyPath(path: string): DocumentType {
 
 function localSourceUrl(path: string): string {
 	const repo = process.env.GITHUB_REPOSITORY ?? "jellydn/my-ai-tools";
+	const sourceRef = process.env.GITHUB_SOURCE_REF?.trim() || "main";
 	const encodedPath = path.split("/").map(encodeURIComponent).join("/");
-	return `https://github.com/${repo}/blob/main/${encodedPath}`;
+	return `https://github.com/${repo}/blob/${encodeURIComponent(sourceRef)}/${encodedPath}`;
 }
 
 export function indexRepository(repoRoot: string): Chunk[] {

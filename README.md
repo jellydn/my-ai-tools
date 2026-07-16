@@ -284,13 +284,13 @@ source .env            # load OPENAI_BASE_URL for server mode
 npm run dev            # serve http://localhost:3000
 ```
 
-The grounding prompt directs the assistant to answer only from retrieved repository excerpts and to say "This is not documented in the repository." when the context is insufficient. The UI separately displays the five retrieved sources as a verifiable retrieval trace; it does not claim to validate every generated statement against a citation.
+The grounding prompt directs the assistant to answer only from retrieved repository excerpts and to say "This is not documented in the repository." when the context is insufficient. The UI separately displays the retrieved sources as a verifiable retrieval trace; it does not claim to validate every generated statement against a citation.
 
-The implementation intentionally avoids LangChain: the document loader, 1,000-character chunking with 150-character overlap, embedding calls, cosine retrieval (top 5), prompt assembly, and source-link handling are explicit TypeScript modules. GitHub documents carry `type`, `author`, and canonical URL metadata so metadata filtering can be added without rebuilding the index format. Set `GITHUB_TOKEN` while indexing to avoid anonymous GitHub API limits; `GITHUB_REPOSITORY` defaults to `jellydn/my-ai-tools`.
+The implementation intentionally avoids LangChain: the document loader, 1,000-character chunking with 150-character overlap, embedding calls, cosine retrieval, prompt assembly, and source-link handling are explicit TypeScript modules. `POST /api/chat` accepts `topK` (`3`, `5`, `10`, or `20`, default `5`) and an optional `types` array containing `documentation`, `source`, `issue`, `pull_request`, `cli_help`, or `example_config`. Metadata is filtered before vector scoring. Set `GITHUB_TOKEN` while indexing to avoid anonymous GitHub API limits; `GITHUB_REPOSITORY` defaults to `jellydn/my-ai-tools`.
 
-Each server request writes one structured `rag_request` JSON log containing the question, five retrieved chunks and similarity scores, prompt/response tokens reported by the model provider, total latency, and any failure stage. Browser mode records equivalent diagnostics in the browser console.
+Each server request writes one structured `rag_request` JSON log containing question length, retrieval settings, retrieved chunks and similarity scores, retrieval and total latency, prompt/response tokens reported by the model provider, and any failure stage. Raw questions, hashes, embeddings, and credentials are not logged. Browser mode records equivalent diagnostics in the browser console.
 
-See [`docs/rag-architecture.md`](docs/rag-architecture.md) for the architecture, indexing policy, observability fields, and planned production upgrades.
+Run `npm run eval:retrieval` after building the browser index to reproduce the top-k, filtering, and trace benchmark. See [`docs/rag-retrieval-quality.md`](docs/rag-retrieval-quality.md) for results and [`docs/rag-architecture.md`](docs/rag-architecture.md) for the architecture and indexing policy.
 
 The landing page also has a browser mode that runs the embedding and an instruction-tuned model (Qwen2.5-Coder-0.5B-Instruct) in the browser via WebGPU. Browser mode downloads the ~9 MB index and the ~300 MB model on the user's device.
 

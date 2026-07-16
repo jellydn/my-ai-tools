@@ -10,9 +10,11 @@ COPY . .
 ARG OPENAI_BASE_URL=https://openrouter.ai/api/v1
 ARG OPENAI_MODEL=openrouter/free
 ARG OPENAI_EMBEDDING_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free
+ARG GITHUB_SOURCE_REF=main
 ENV OPENAI_BASE_URL=${OPENAI_BASE_URL}
 ENV OPENAI_MODEL=${OPENAI_MODEL}
 ENV OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL}
+ENV GITHUB_SOURCE_REF=${GITHUB_SOURCE_REF}
 
 # Secret is only visible in this RUN; export so npm run index inherits a trimmed key.
 RUN --mount=type=secret,id=OPENAI_API_KEY,required=true \
