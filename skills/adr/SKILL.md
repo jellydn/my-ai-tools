@@ -12,6 +12,18 @@ metadata:
 
 # Architecture Decision Records (ADR)
 
+## What
+
+- Record architecture decisions with ADRs — captures why, alternatives considered, and consequences
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Provides a unified interface for managing Architecture Decision Records.
 
 ## Usage
