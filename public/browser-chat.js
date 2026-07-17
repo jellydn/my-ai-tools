@@ -1,4 +1,8 @@
-import { env, pipeline, TextStreamer } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/+esm";
+import {
+	env,
+	pipeline,
+	TextStreamer,
+} from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/+esm";
 
 const EMBEDDING_MODEL = "Xenova/all-MiniLM-L6-v2";
 const LLM_MODEL = "onnx-community/Qwen2.5-Coder-0.5B-Instruct";
@@ -87,7 +91,10 @@ function dotProduct(a, b) {
 }
 
 function retrieveTopK(queryEmbedding, chunks, k) {
-	const scored = chunks.map((chunk) => ({ chunk, score: dotProduct(queryEmbedding, chunk.embedding) }));
+	const scored = chunks.map((chunk) => ({
+		chunk,
+		score: dotProduct(queryEmbedding, chunk.embedding),
+	}));
 	scored.sort((a, b) => b.score - a.score);
 	return scored.slice(0, k).map((item) => item.chunk);
 }

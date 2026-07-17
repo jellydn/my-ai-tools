@@ -3,6 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type OpenAI from "openai";
 import { createOpenAIClient } from "./openai-client.ts";
+import { cosineSimilarity } from "./vector-similarity.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -53,20 +54,6 @@ async function getIndex(): Promise<Index> {
 		indexCacheSize = stats.size;
 	}
 	return indexCache;
-}
-
-function cosineSimilarity(a: number[], b: number[]): number {
-	let dot = 0;
-	let aNorm = 0;
-	let bNorm = 0;
-	for (let index = 0; index < a.length; index++) {
-		const aValue = a[index] ?? 0;
-		const bValue = b[index] ?? 0;
-		dot += aValue * bValue;
-		aNorm += aValue * aValue;
-		bNorm += bValue * bValue;
-	}
-	return dot / (Math.sqrt(aNorm) * Math.sqrt(bNorm));
 }
 
 export async function embed(text: string): Promise<number[]> {

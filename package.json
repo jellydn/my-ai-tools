@@ -2,24 +2,30 @@
 	"name": "my-ai-tools",
 	"version": "1.0.0",
 	"type": "module",
+	"bin": {
+		"code-taste": "./scripts/code-taste.ts"
+	},
 	"engines": {
-		"bun": ">=1.0.0",
-		"node": ">=18.0.0"
+		"bun": ">=1.0.0"
 	},
 	"scripts": {
+		"code-taste": "bun scripts/code-taste.ts",
 		"index": "tsx scripts/index-repo.ts",
 		"index:browser": "tsx scripts/index-browser.ts",
 		"dev": "tsx server.ts",
 		"start": "tsx server.ts",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"test:code-taste": "bun test tests/code-taste.test.ts"
 	},
 	"dependencies": {
 		"@hono/node-server": "^2.0.8",
 		"@huggingface/transformers": "^4.2.0",
+		"@vscode/tree-sitter-wasm": "0.3.1",
 		"hono": "^4.6.3",
 		"onnxruntime-node": "^1.27.0",
 		"openai": "^6.0.0",
 		"tsx": "^4.23.0",
+		"web-tree-sitter": "0.26.11",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {

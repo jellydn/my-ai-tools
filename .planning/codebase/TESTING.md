@@ -1,193 +1,183 @@
-# Testing
+# Testing Patterns
 
-**Analysis Date:** 2026-07-10
+**Analysis Date:** 2026-07-14
 
----
+## Test Framework
 
-## Framework
+**Runner:**
+- **BATS** (Bash Automated Testing System) for shell/config validation — system package (`bats-core` / `apt-get install bats`)
+- **Bun test** for TypeScript unit tests (`bun:test`)
 
-| Aspect | Detail |
-|--------|--------|
-| **Framework** | [bats-core](https://github.com/bats-core/bats-core) — Bash Automated Testing System |
-| **Install** | `brew install bats-core` (macOS), `apt-get install bats` (Linux) |
-| **Test runner** | `bats tests/` (all), `bats tests/cli.bats` (single file) |
-| **CI** | `.github/workflows/test.yml` — runs `bash -n` + `bats tests/` + `biome check .` |
+**Assertion Library:**
+- BATS: built-in `run`, `[ "$status" -eq 0 ]`, `[[ "$output" == *"..."* ]]`, `grep` / `jq` in tests
+- Bun: `describe`, `test`, `expect` from `bun:test`
 
----
+**Run Commands:**
+```bash
+bash -n cli.sh generate.sh     # Shell syntax (cheap CI gate)
+bats tests/                    # All BATS tests locally
+bats tests/cli.bats            # Single BATS file
+bats tests/pr_*.bats tests/generate.bats tests/sh_reexec.bats   # CI subset
+bun run typecheck              # TypeScript strict check
+bunx biome check lib/code-taste lib/vector-similarity.ts lib/retriever.ts scripts/code-taste.ts tests/code-taste.test.ts
+bun test tests/code-taste.test.ts   # or: bun run test:code-taste
+pre-commit run --all-files     # Hooks (whitespace, yaml, oxfmt, etc.)
+biome check .                  # Format check repo-wide
+```
+
+## Test File Organization
+
+**Location:**
+- BATS: dedicated `tests/` directory at repo root (not co-located with shell sources)
+- TypeScript: `tests/code-taste.test.ts` alongside `lib/code-taste/` implementation
+
+**Naming:**
+- `*.bats` for shell tests; `pr_<feature>.bats` for config contract tests per tool/PR
+- `*.test.ts` for Bun unit tests
+
+**Structure:**
+```text
+tests/
+  helpers.bash          # REPO_ROOT, require_jq, shared helpers
+  cli.bats              # cli.sh / install behaviors
+  lib_common.bats       # execute, validate_json, backups
+  generate.bats
+  sh_reexec.bats        # require_bash.sh POSIX + re-exec
+  pr_*.bats             # JSON/config invariants per tool
+  code-taste.test.ts    # chunking / profile logic
+```
 
 ## Test Structure
 
-### Directory Layout
-
-```
-tests/
-├── helpers.bash          # Shared test helpers (loaded via `load helpers`)
-├── cli.bats              # Core CLI workflow tests
-├── lib_common.bats       # Library unit tests (lib/common.sh)
-├── generate.bats         # Generate script tests
-├── install.bats          # Installation tests
-├── sh_reexec.bats        # Shell re-exec guard tests
-├── pr_*.bats             # Per-tool config-gating PR tests (16 files)
-└── recommend_skills.bats # Skill recommendation tests (47 tests — largest)
-```
-
-### Test Counts
-
-| File | Tests |
-|------|-------|
-| `recommend_skills.bats` | 47 |
-| `pr_ctx.bats` | 31 |
-| `pr_cline.bats` | 29 |
-| `pr_kiro.bats` | 25 |
-| `pr_claude.bats` | 20 |
-| `pr_grok.bats` | 19 |
-| `pr_kimi_code.bats` | 17 |
-| `pr_copilot.bats` | 15 |
-| `cli.bats` | 15 |
-| Others | 5–14 each |
-
-Total: ~280 tests across 23 files.
-
----
-
-## Test Patterns
-
-### Setup Pattern
-
-Every test file follows this setup:
-
+**Suite Organization:**
 ```bash
 #!/usr/bin/env bats
 
-setup() {
-    # Source libraries
-    source "$BATS_TEST_DIRNAME/../lib/common.sh"
-    source "$BATS_TEST_DIRNAME/../lib/install.sh"
-    source "$BATS_TEST_DIRNAME/../cli.sh"
+load helpers
 
-    # Export control variables (always reset after sourcing)
+setup() {
+    source "$BATS_TEST_DIRNAME/../lib/common.sh"
     export DRY_RUN=false
-    export YES_TO_ALL=false
-    export SCRIPT_DIR="$BATS_TEST_DIRNAME/.."
+}
+
+@test "configs/claude/settings.json is valid JSON" {
+    require_jq
+    run jq empty "$CLAUDE_SETTINGS"
+    [ "$status" -eq 0 ]
 }
 ```
 
-### Test Naming
+```typescript
+import { describe, expect, test } from "bun:test";
 
-- Descriptive names: `@test "should detect claude code CLI when installed"`
-- Pattern: `should <expected behavior> when <condition>`
-- No generic names like `test1` or `works`
+describe("semantic chunking", () => {
+	test("keeps TypeScript declarations intact", async () => {
+		const chunks = await chunkTypeScript(/* ... */);
+		expect(chunks.map((chunk) => chunk.symbol)).toEqual(["Options", "run"]);
+	});
+});
+```
 
-### Assertion Patterns
+**Patterns:**
+- **Setup:** `setup()` sources libs and sets `DRY_RUN`, `SCRIPT_DIR`, or isolated `HOME` for copy tests (`AGENTS.md` pattern)
+- **Teardown:** `rm -rf` temp dirs in-test; BATS runs each test in subprocess
+- **Assertion:** BATS `run` captures status/output; strip ANSI in some tests with `sed` when matching log text
 
+## Mocking
+
+**Framework:** Manual stubs in TypeScript (`mockAnalysisClient` in `tests/code-taste.test.ts`); shell tests mock environment (`PATH` without `jq`, temp `HOME`, `DRY_RUN=true`)
+
+**Patterns:**
+```typescript
+function mockAnalysisClient(content: string): AnalysisClient {
+	return {
+		embeddings: { create: async (request) => ({ /* fixed vectors */ }) },
+		chat: { completions: { create: async () => ({ choices: [{ message: { content } }] }) } },
+	};
+}
+```
+
+**What to Mock:**
+- External APIs (OpenAI embeddings/chat) in code-taste tests
+- Filesystem layout under `mktemp` / fixture dirs for `copy_configurations`
+- `command -v` behavior via `PATH` manipulation for missing-tool cases
+
+**What NOT to Mock:**
+- `jq` validation when installed — prefer real `jq empty` on committed JSON configs
+- `lib/require_bash.sh` behavior — tested with real `sh -n` and static grep assertions
+
+## Fixtures and Factories
+
+**Test Data:**
+- Inline strings for markdown/TypeScript chunk fixtures in `code-taste.test.ts`
+- Ephemeral dirs: `/tmp/test-backup-$$`, `mktemp -d` for install/copy tests
+- `tests/fixtures/` referenced in some `cli.bats` cases (created in-test)
+
+**Location:**
+- No large shared fixture tree; config truth is `configs/` validated by `pr_*.bats`
+
+## Coverage
+
+**Requirements:** None enforced in CI (no coverage threshold in workflows)
+
+**View Coverage:**
 ```bash
-# Exit code assertions
-run some_function
-[ "$status" -eq 0 ]
-
-# Output assertions
-[ "${lines[0]}" = "Expected output" ]
-
-# Regex assertions
-[[ "$output" =~ "expected pattern" ]]
-
-# Multi-line assertions
-[ "${#lines[@]}" -eq 3 ]
-[ "${lines[1]}" = "line two" ]
+# Not configured — add bun coverage flags locally if needed
+bun test tests/code-taste.test.ts
 ```
 
-### Tool-Specific Test Patterns
+## Test Types
 
-PR tests (`pr_*.bats`) test config installation end-to-end:
+**Unit Tests:**
+- `lib_common.bats`, `sh_reexec.bats`: isolated shell helpers and guard
+- `code-taste.test.ts`: chunker, profile selection, GitHub file selection with mocked client
 
+**Integration Tests:**
+- `cli.bats`, `install.bats`, `generate.bats`: source real scripts, exercise copy/backup/preflight with temp HOME
+- `pr_*.bats`: integration with committed config files + `jq` schema checks
+
+**E2E Tests:**
+- Not used; no browser/server E2E in CI (`server.ts` dev is manual)
+
+## CI (GitHub Actions)
+
+**Workflow:** `.github/workflows/test.yml`
+
+- **bats job:** `bats tests/pr_*.bats tests/generate.bats tests/sh_reexec.bats` on `ubuntu-latest` with `jq` + `bats`
+- **code-taste job:** `bun install --frozen-lockfile`, `bun run typecheck`, scoped `biome check`, `bun test tests/code-taste.test.ts`
+
+Local `bats tests/` runs **more** files than CI (e.g. `cli.bats`, `install.bats`, skill-specific tests) — do not assume CI runs full suite (`AGENTS.md`).
+
+## Common Patterns
+
+**Async Testing:**
+```typescript
+test("keeps TypeScript declarations intact", async () => {
+	const chunks = await chunkTypeScript("owner/repo", "src/example.ts", source);
+	expect(chunks[1]?.text).toContain("interface Options");
+});
+```
+
+**Error Testing:**
 ```bash
-# Create temp home with pre-existing tool config dirs
-H=$(mktemp -d)
-mkdir -p "$H/.claude" "$H/.config/opencode"
-
-# Source scripts against the temp home, call copy functions
-( export HOME="$H" DRY_RUN=false YES_TO_ALL=false
-  source ./cli.sh
-  copy_claude_configs )
-
-# Assert files landed correctly
-[ -f "$H/.claude/settings.json" ]
+@test "preflight_check fails on missing jq" {
+    PATH=$(echo "$PATH" | tr ':' '\n' | grep -v '/jq' | tr '\n' ':')
+    run preflight_check
+    [ "$status" -ne 0 ]
+}
 ```
 
----
-
-## Test Helpers (`tests/helpers.bash`)
-
-| Helper | Purpose |
-|--------|---------|
-| `skip_if_missing` | Skip test if a required tool is not installed |
-| Shared setup | Common environment variable exports |
-
----
-
-## CI Testing
-
-### GitHub Actions (`test.yml`)
-
-```yaml
-# Runs on push and PR
-# Steps:
-# 1. Checkout
-# 2. Setup bun
-# 3. bash -n cli.sh generate.sh lib/*.sh   # Syntax validation
-# 4. bats tests/                            # Functional tests
-# 5. biome check .                          # Code formatting
-```
-
-### Pre-commit Hooks
-
-```yaml
-# .pre-commit-config.yaml
-- trailing-whitespace    # Remove trailing whitespace
-- end-of-file-fixer      # Ensure files end with newline
-- check-yaml             # Validate YAML syntax
-- check-added-large-files # Prevent large file commits
-- oxfmt                  # Format TypeScript/JavaScript
-```
-
----
-
-## Test Culture
-
-- **All new features should have tests** — CONTRIBUTING.md: "Test changes with `./cli.sh --dry-run` first"
-- **Tests reset global state**: `export DRY_RUN=false` after every `source`
-- **Tests use temp directories**: Never mutate the real `$HOME`
-- **Color output stripped in assertions**: `sed -E 's/\x1B\[[0-9;]*m//g'`
-- **Tests run in isolation**: Each `@test` block is a subshell
-
----
-
-## Testing the App Safely
-
-Never run `./cli.sh` directly during development — use temp homes:
-
+**Skip when tool missing:**
 ```bash
-H=$(mktemp -d)
-mkdir -p "$H/.claude" "$H/.config/opencode" "$H/.codex"
-( export HOME="$H" DRY_RUN=false YES_TO_ALL=false
-  source ./cli.sh
-  copy_configurations )
-find "$H" -type f   # verify configs landed
+require_jq() {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+}
 ```
 
-Or use `./cli.sh --dry-run` for a side-effect-free preview.
+**macOS note:** Host BATS may fail on directory issues; use microsandbox per `AGENTS.md` — cloud VM runs `bats tests/` directly.
 
 ---
 
-## microsandbox Testing
-
-For macOS users, bats tests can fail due to `getcwd` restrictions. Use microsandbox:
-
-```bash
-msb run -m 512M -v "$(pwd):/project:ro" ubuntu -- \
-  bash -c 'apt-get update -qq && apt-get install -y -qq bats && cd /project && bats tests/'
-```
-
-The `:ro` mount keeps the project read-only inside the sandbox, preventing accidental writes.
-
-_Last updated: 2026-07-10_
+*Testing analysis: 2026-07-14*

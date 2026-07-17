@@ -288,6 +288,25 @@ The assistant only answers from the retrieved repository excerpts, cites the sou
 
 The landing page also has a browser mode that runs the embedding and an instruction-tuned model (Qwen2.5-Coder-0.5B-Instruct) in the browser via WebGPU. Browser mode downloads the ~9 MB index and the ~300 MB model on the user's device.
 
+## 🎨 GitHub Coding Taste Generator
+
+`code-taste` analyzes public GitHub repositories and produces a reusable, evidence-backed coding preference profile. It uses Tree-sitter to keep TypeScript functions, components, classes, and their supporting types together, while Markdown is split by headings without breaking fenced code blocks. **Requires Bun** (`package.json` `engines.bun`); the `code-taste` bin is not a Node/`tsx` entrypoint like `index` or `dev`.
+
+```bash
+bun install
+cp .env.example .env   # optional: OpenRouter defaults (see docs/code-taste-openrouter.md)
+# Set OPENAI_API_KEY; for OpenRouter also set OPENAI_BASE_URL, OPENAI_MODEL, OPENAI_EMBEDDING_MODEL
+set -a && source .env && set +a
+
+bun run code-taste analyze jellydn
+bun run code-taste analyze jellydn/my-ai-tools
+bun run code-taste export --format markdown
+```
+
+**OpenRouter:** `code-taste` uses the OpenAI-compatible API. Point it at OpenRouter with `OPENAI_BASE_URL=https://openrouter.ai/api/v1` and an OpenRouter API key (`sk-or-v1-...`). Defaults in `.env.example` match the repo chat stack. Step-by-step: [docs/code-taste-openrouter.md](docs/code-taste-openrouter.md).
+
+User analysis selects three repositories by default, ranked with a **representative** blend (TypeScript preference, stars, recency, size). Use `--repos` and `--max-chunks` to adjust coverage; use `--sort stars|updated|size|name|representative` to change ranking; use `--language TypeScript` (or `ts`, `JavaScript`, `Python`, etc.) to keep only repos whose GitHub **primary language** matches. **Commit count** is not available from the list API (would require one request per repo); `updated` uses last push time (`pushed_at`). `GITHUB_TOKEN` is optional but recommended to avoid GitHub's anonymous API rate limit. Analysis state is saved under `.code-taste/`, and Markdown output is written to `CODING_TASTE.md` with confidence scores (full evidence stays in `.code-taste/profile.json` when you export JSON).
+
 ## 🐚 Shell Interpreter
 
 `cli.sh` and `generate.sh` use bash-only syntax (process substitution, arrays, pattern-parameter expansion) and **require bash**. Both scripts `source` [`lib/require_bash.sh`](./lib/require_bash.sh) as their first non-shebang line; that shim is intentionally POSIX-compatible so `sh`/`dash` can source it and transparently re-launch the script under `bash` before `lib/common.sh` is reached. Prefer one of these invocations for clarity:

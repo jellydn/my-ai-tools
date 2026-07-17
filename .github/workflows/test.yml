@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Install bats
         run: sudo apt-get update && sudo apt-get install -y bats
@@ -22,3 +24,27 @@ jobs:
 
       - name: Run config validation tests
         run: bats tests/pr_*.bats tests/generate.bats tests/sh_reexec.bats
+
+  code-taste:
+    name: Code Taste Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Biome check (code-taste)
+        run: bunx biome check lib/code-taste lib/vector-similarity.ts lib/retriever.ts scripts/code-taste.ts tests/code-taste.test.ts
+
+      - name: Run code taste tests
+        run: bun test tests/code-taste.test.ts
