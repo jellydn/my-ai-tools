@@ -137,8 +137,8 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **OpenCode**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                         |
 | **Codex**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl, ctx | -                                                                                                                                                                                         |
 | **Kimi Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, logpilot, sem, ctx                                              | Skills, MCP servers, and hooks via `~/.kimi-code/`                                                                                                                                        |
-| **Pi**          | context7, sequential-thinking, qmd, codebase-memory-mcp, fff, react-grab-mcp, agentmemory, sem, ctx                   | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, pi-web-access, footer, tps-meter) |
-| **Amp**         | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | -                                                                                                                                                                                         |
+| **Pi**          | context7, sequential-thinking, qmd, codebase-memory-mcp, fff, react-grab-mcp, agentmemory, sem, ctx                   | Packages (pi-extension, autoresearch, fff, mcp-adapter, simplify, rpiv-todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, pi-web-access, footer, tps-meter, pi-xai-oauth) |
+| **Amp**         | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | Agent modes: glm-5.2, grok45, inkling, cursor-composer-2.5; plannotator; orca-agent-status                                                                                                  |
 | **Gemini**      | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                            |
 | **Antigravity** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx (via plugin) | my-ai-tools-gemini-migration                                                                                                                                                              |
 | **Kilo**        | (uses OpenCode config)                                                                                                | (uses OpenCode plugins)                                                                                                                                                                   |
@@ -149,7 +149,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **Factory**     | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | core, security-engineer, droid-evolved, autoresearch                                                                                                                                      |
 | **Orca**        | -                                                                                                                     | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                                        |
 | **Cline**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | Global rules (AGENTS.md → ~/.cline/rules/, ~~/.agents/AGENTS.md), universal skills (~~/.agents/skills)                                                                                    |
-| **Grok**        | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | Kanagawa palette staged (`tokyonight` until built-in)                                                                                                                                     |
+| **Grok**        | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | Default model `grok-4.5` (high reasoning); UI auto + `rosepine-moon`; Kanagawa theme staged                                                                                               |
 | **MiMo-Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                         |
 | **Qoder CLI**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | -                                                                                                                                                                                         |
 | **Kiro CLI**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | Steering files (AGENTS.md), slash commands, MCP servers, ACP                                                                                                                              |
@@ -1218,6 +1218,19 @@ Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/
 }
 ```
 
+### Agent Modes (plugins)
+
+Custom Amp agent modes live in [`configs/amp/plugins/`](configs/amp/plugins/) and are installed with the rest of the Amp config:
+
+| Plugin | Mode key | Model | Notes |
+| ------ | -------- | ----- | ----- |
+| `glm-52-mode.ts` | `glm-5.2` | `amp/glm-5.2` | Experimental GLM 5.2 agent mode |
+| `grok-45-mode.ts` | `grok45` | `xai/grok-4.5` | Grok 4.5 with deep-mode tools |
+| `inkling-mode.ts` | `inkling` | `baseten/thinkingmachines/inkling` | Thinking Machines Inkling agent mode |
+| `cursor-composer-2.5.ts` | `cursor-comp-2.5` | `openai/gpt-5.2-codex` | Cursor Composer-style editing mode |
+| `plannotator.ts` | — | — | Interactive plan annotation |
+| `orca-agent-status.ts` | — | — | Orca agent status integration |
+
 See [`configs/amp/AGENTS.md`](configs/amp/AGENTS.md) for agent guidelines.
 
 </details>
@@ -1586,6 +1599,14 @@ agy
 - `~/.gemini/antigravity-cli/keybindings.json` - optional keybindings
 - `~/.gemini/antigravity-cli/plugins/<plugin_name>/` - plugins with `plugin.json`, `mcp_config.json`, agents, skills, hooks, and rules
 
+Key defaults from [`configs/antigravity-cli/settings.json`](configs/antigravity-cli/settings.json):
+
+- **Default model**: `Gemini 3.5 Flash (High)`
+- **Tool permission**: `proceed-in-sandbox`
+- **Allowlist additions**: codebase-memory MCP tools (`search_graph`, `list_projects`, `get_code_snippet`, `trace_path`, `search_code`), GitHub PR lookup, `bun test`, `qmd`, `git worktree`
+- **Deny list**: `git reset --hard`, `git push --force`, `rm -rf`
+- **Trusted workspaces**: empty by default (add local paths as needed)
+
 If you already use CCS in this repository, you can launch the Antigravity profile directly:
 
 ```bash
@@ -1710,12 +1731,12 @@ Located in [`configs/pi/`](configs/pi/):
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 - [`models.json`](configs/pi/models.json) - Provider and model definitions (google-antigravity, ollama)
 
-Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `clinepass` as the default provider with `deepseek-v4-flash` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `xai-auth` as the default provider with `grok-composer-2.5-fast` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `deepseek-v4-flash`
-- **Default Provider**: `clinepass`
+- **Default Model**: `grok-composer-2.5-fast`
+- **Default Provider**: `xai-auth`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
@@ -1754,7 +1775,6 @@ Then register them in `~/.pi/agent/settings.json`:
 		"npm:@ff-labs/pi-fff",
 		"npm:pi-mcp-adapter",
 		"npm:pi-simplify",
-		"npm:pi-manage-todo-list",
 		"npm:pi-btw",
 		"npm:pi-code-previews",
 		"npm:pi-codex-goal",
@@ -1767,7 +1787,9 @@ Then register them in `~/.pi/agent/settings.json`:
 		"npm:pi-web-access",
 		"npm:pi-clinepass-provider",
 		"npm:@juicesharp/rpiv-ask-user-question",
-		"npm:@yofriadi/pi-antigravity-oauth"
+		"npm:@yofriadi/pi-antigravity-oauth",
+		"npm:pi-xai-oauth",
+		"npm:@juicesharp/rpiv-todo"
 	]
 }
 ```
@@ -1781,7 +1803,6 @@ Then register them in `~/.pi/agent/settings.json`:
 | `@ff-labs/pi-fff`                    | FFF-powered fuzzy file and content search                          |
 | `pi-mcp-adapter`                     | MCP (Model Context Protocol) adapter for Pi                        |
 | `pi-simplify`                        | Reviews changed code for clarity, consistency, and maintainability |
-| `pi-manage-todo-list`                | GitHub Copilot-style todo list management tool                     |
 | `pi-btw`                             | Parallel side conversations with `/btw` command                    |
 | `pi-code-previews`                   | Live previews of code changes during editing                       |
 | `pi-codex-goal`                      | Codex-style goal management integration                            |
@@ -1795,6 +1816,8 @@ Then register them in `~/.pi/agent/settings.json`:
 | `pi-clinepass-provider`              | ClinePass model provider for Pi                                    |
 | `@juicesharp/rpiv-ask-user-question` | Structured question-asking tool for user clarification             |
 | `@yofriadi/pi-antigravity-oauth`     | Antigravity OAuth authentication for Pi; see the caveat below      |
+| `pi-xai-oauth`                       | xAI OAuth authentication (`xai-auth`) for Grok models in Pi        |
+| `@juicesharp/rpiv-todo`              | Todo list management tool (replaces `pi-manage-todo-list`)         |
 
 > **Antigravity OAuth caveat:** If you're experimenting with Pi, there's an OAuth plugin available for Antigravity. Be aware that Google currently states that using third-party software with Antigravity OAuth may violate its Terms of Service and could result in account restrictions. For the lowest-risk setup, prefer an official API key from AI Studio or Vertex AI when Pi supports it, and avoid OAuth plugins that reuse an Antigravity login in third-party clients unless Google changes its policy.
 
@@ -1808,7 +1831,8 @@ Pi is configured with multi-provider model access (`settings.json` `enabledModel
 | openai-codex       | `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.3-codex-spark`, `gpt-5.5`                                                                   |
 | clinepass          | `deepseek-v4-pro`, `deepseek-v4-flash`, `kimi-k2.7-code`, `glm-5.2`, `kimi-k2.6`, `minimax-m3`, `qwen3.7-max`, `qwen3.7-plus` |
 | google-antigravity | `gemini-3.5-flash`, `gemini-3-pro`, `claude-opus-4-6`                                                                         |
-| commandcode        | `deepseek/deepseek-v4-pro`                                                                                                    |
+| commandcode        | `deepseek/deepseek-v4-pro`, `MiniMaxAI/MiniMax-M3`                                                                            |
+| xai-auth           | `grok-4.5`, `grok-composer-2.5-fast` (default)                                                                                |
 
 ### Pi Antigravity Rotator
 
@@ -2460,19 +2484,40 @@ args = ["mcp-server"]
 command = "npx"
 args = ["-y", "@agentmemory/mcp"]
 
+[mcp_servers.sem]
+command = "sem-mcp"
+args = []
+
+[mcp_servers.ctx]
+command = "ctx"
+args = ["mcp", "serve"]
+
+[mcp_servers.codebase-memory-mcp]
+type = "stdio"
+command = "codebase-memory-mcp"
+
+[models]
+default = "grok-4.5"
+default_reasoning_effort = "high"
+
 [ui]
 theme = "auto"
-auto_dark_theme = "tokyonight"
+auto_dark_theme = "rosepine-moon"
 auto_light_theme = "grokday"
 ```
 
-### 🎨 Theme (Kanagawa)
+### 🎨 Theme
 
-Grok Build 0.2.22 ships five built-in dark themes (`groknight`, `tokyonight`, `rosepine-moon`, `oscura-midnight`, plus `grokday` for light). It does not include Kanagawa yet.
+Grok Build ships built-in dark themes (`groknight`, `tokyonight`, `rosepine-moon`, `oscura-midnight`, plus `grokday` for light).
 
 This repo stages the **Kanagawa Wave** palette under [`configs/grok/themes/`](configs/grok/themes/) (`kanagawa.toml` + `kanagawa.tmTheme`, shared with Codex/Pi). `cli.sh` installs them to `~/.grok/themes/`.
 
-Until Grok adds a `kanagawa` built-in (or loads custom theme files), `[ui]` uses `theme = "auto"` with `auto_dark_theme = "tokyonight"` — the closest Japanese-inspired built-in. Switch themes in the TUI with `/theme` or set `theme = "tokyonight"` directly in `config.toml`.
+Current defaults in `config.toml`:
+
+- **Default model**: `grok-4.5` with `default_reasoning_effort = "high"`
+- **UI theme**: `theme = "auto"` with `auto_dark_theme = "rosepine-moon"`
+
+Switch themes in the TUI with `/theme` or edit `[ui]` in `config.toml`.
 
 ### 📖 Agent Guidelines
 
@@ -3187,13 +3232,14 @@ Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/
 | ------------------------------- | -------------------------- | -------------------------------------- |
 | `review`                        | `rev`, `code-review`       | Code review with OpenCode              |
 | `commit-zen`                    | `zen`, `logical-commit`    | Generate commitizen commit messages    |
+| `commit-staged`                 | `gd`, `git-diff`           | Atomic commit for staged changes       |
 | `commit-atomic`                 | `ac`, `auto-commit`        | Atomic commit messages                 |
 | `architecture-explanation`      | `arch`, `arch-explanation` | Explain codebase architecture          |
 | `draft-pull-request`            | `pr`, `draft-pr`           | Create draft PR via gh CLI             |
 | `types`                         | `typescript`               | Enhance TypeScript types               |
 | `test`                          | `spec`, `tests`            | Generate tests (Arrange-Act-Assert)    |
 | `docs`                          | `document`                 | Add JSDoc documentation                |
-| `explain`                       | `wtf`, `explain-code`      | Explain code in detail                 |
+| `explain`                       | `explain-code`             | Explain code in detail                 |
 | `review-security`               | `sec`, `security`          | Security-focused review                |
 | `review-refactor`               | `refactor`                 | Refactoring recommendations            |
 | `review-performance`            | `perf`, `optimize`         | Performance analysis                   |
@@ -3201,14 +3247,9 @@ Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/
 | `remove-ai-slop`                | `slop`, `clean-ai`         | Remove AI-generated code patterns      |
 | `tidy-first`                    | `tidy`                     | Apply Tidy First principles            |
 | `simplify`                      | `simple`                   | Simplify over-engineered code          |
-| `simplifier`                    | `simplify-code`            | Code simplification plugin             |
+| `simplifier`                    | `simplify-code`, `simplify`| Code simplification plugin             |
 | `logical-grouping-pull-request` | `split-pr`                 | Create PR with logical commit grouping |
-
-Template metadata now distinguishes read-only from mutating actions:
-
-- `mode: read-only` and `requiresConfirmation: false` for review/explain templates
-- `mode: write` and `requiresConfirmation: true` for templates that edit files, create commits, or open pull requests
-- Aliases are kept unique so resolution stays unambiguous
+| `summary`                       | `sum`, `summarize`         | Summarize content via OpenCode (free)  |
 
 </details>
 
