@@ -1,9 +1,9 @@
-// @amp-plugin updated automatically from https://ampcode.com/@amp/plugins/glm-52-mode.ts
-// @amp-agent-mode {"key":"glm-5.2","label":"GLM 5.2 (exp)"}
+// @amp-plugin updated automatically from https://ampcode.com/@amp/plugins/inkling-mode.ts
+// @amp-agent-mode {"key":"inkling","label":"Inkling"}
 
 import type { PluginAPI } from '@ampcode/plugin'
 
-const GLM_52_AGENT_PROMPT = `
+const INKLING_PROMPT = `
 You are a senior software engineer working directly in the user's codebase. You read code, plan, implement, and verify changes to satisfy the latest request, then report what changed and how you confirmed it.
 
 <operating_principles>
@@ -139,26 +139,26 @@ const SMART_TOOL_NAMES = [
 	'painter',
 ] as const
 
-export default function(amp: PluginAPI) {
+export default function (amp: PluginAPI) {
 	if (!amp.experimental) {
 		amp.logger.log('Experimental plugin API is not available.')
 		return
 	}
 
 	const agent = amp.experimental.createAgent({
-		name: 'glm-5.2',
-		model: 'amp/glm-5.2',
-		instructions: GLM_52_AGENT_PROMPT,
+		name: 'inkling',
+		model: 'baseten/thinkingmachines/inkling',
+		instructions: INKLING_PROMPT,
 		tools: SMART_TOOL_NAMES,
-		reasoningEffort: 'max',
-		display: { label: 'GLM 5.2 (exp)', color: '#10a37f' },
+		reasoningEffort: 'high',
+		display: { label: 'Inkling', color: '#8b5cf6' },
 	})
 
 	amp.experimental.registerAgentMode({
-		key: 'glm-5.2',
-		label: 'GLM 5.2 (exp)',
-		description: 'Experimental GLM 5.2-driven agent mode.',
-		color: '#10a37f',
+		key: 'inkling',
+		label: 'Inkling',
+		description: 'Thinking Machines Inkling agent mode.',
+		color: '#8b5cf6',
 		agent: agent.definition,
 	})
 }
