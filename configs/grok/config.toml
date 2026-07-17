@@ -39,8 +39,24 @@ args = [
     "@agentmemory/mcp",
 ]
 
+[mcp_servers.sem]
+command = "sem-mcp"
+args = []
+
+[mcp_servers.ctx]
+command = "ctx"
+args = [
+    "mcp",
+    "serve",
+]
+
+[mcp_servers.codebase-memory-mcp]
+type = "stdio"
+command = "codebase-memory-mcp"
+
 [models]
-default = "grok-composer-2.5-fast"
+default = "grok-4.5"
+default_reasoning_effort = "high"
 
 [ui]
 theme = "auto"
@@ -65,15 +81,3 @@ official_marketplace_auto_installed = true
 [[marketplace.sources]]
 name = "xAI Official"
 git = "https://github.com/xai-org/plugin-marketplace.git"
-
-[mcp_servers.sem]
-command = "sem-mcp"
-args = []
-
-[mcp_servers.ctx]
-command = "ctx"
-args = ["mcp", "serve"]
-
-[mcp_servers.codebase-memory-mcp]
-type = "stdio"
-command = "codebase-memory-mcp"
