@@ -11,11 +11,18 @@ ANTIGRAVITY_SETTINGS="$REPO_ROOT/configs/antigravity-cli/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/antigravity-cli/settings.json model is Claude Opus 4.6 (Thinking)" {
+@test "configs/antigravity-cli/settings.json model is Gemini 3.5 Flash (High)" {
     require_jq
     run jq -r '.model' "$ANTIGRAVITY_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "Claude Opus 4.6 (Thinking)" ]
+    [ "$output" = "Gemini 3.5 Flash (High)" ]
+}
+
+@test "configs/antigravity-cli/settings.json permissions.allow contains codebase-memory-mcp tools" {
+    require_jq
+    run jq -e '[.permissions.allow[] | select(startswith("mcp(codebase-memory-mcp/"))] | length > 0' "$ANTIGRAVITY_SETTINGS"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
 }
 
 @test "configs/antigravity-cli/settings.json permissions.allow contains autoreview script" {
