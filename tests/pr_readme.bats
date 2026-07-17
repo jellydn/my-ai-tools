@@ -5,12 +5,22 @@ load helpers
 
 README_FILE="$REPO_ROOT/README.md"
 
-@test "README.md references commandcode as Pi default provider" {
+@test "README.md references xai-auth as Pi default provider" {
+    run grep -F "**Default Provider**: \`xai-auth\`" "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md mentions grok-composer-2.5-fast as Pi default model" {
+    run grep -F "**Default Model**: \`grok-composer-2.5-fast\`" "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md still references commandcode provider for Pi" {
     run grep -F "commandcode" "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
-@test "README.md mentions deepseek/deepseek-v4-pro as Pi default model" {
+@test "README.md still mentions deepseek/deepseek-v4-pro among Pi models" {
     run grep -F "deepseek/deepseek-v4-pro" "$README_FILE"
     [ "$status" -eq 0 ]
 }

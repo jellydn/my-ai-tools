@@ -51,7 +51,24 @@ jobs:
         run: |
           EFFECTIVE_OPENAI_API_KEY="${OPENROUTER_API_KEY:-$OPENAI_API_KEY}"
           EFFECTIVE_OPENAI_API_KEY="$(printf '%s' "$EFFECTIVE_OPENAI_API_KEY" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
-          flyctl secrets set OPENAI_API_KEY="$EFFECTIVE_OPENAI_API_KEY"
+
+          # Fly control plane occasionally returns transient 5xx/503 on secrets set.
+          attempt=1
+          max_attempts=5
+          delay=5
+          while true; do
+            if flyctl secrets set OPENAI_API_KEY="$EFFECTIVE_OPENAI_API_KEY"; then
+              break
+            fi
+            if [ "$attempt" -ge "$max_attempts" ]; then
+              echo "::error::flyctl secrets set failed after ${max_attempts} attempts"
+              exit 1
+            fi
+            echo "flyctl secrets set failed (attempt ${attempt}/${max_attempts}); retrying in ${delay}s..."
+            sleep "$delay"
+            attempt=$((attempt + 1))
+            delay=$((delay * 2))
+          done
 
       - name: Deploy to Fly.io
         env:
@@ -61,4 +78,20 @@ jobs:
         run: |
           EFFECTIVE_OPENAI_API_KEY="${OPENROUTER_API_KEY:-$OPENAI_API_KEY}"
           EFFECTIVE_OPENAI_API_KEY="$(printf '%s' "$EFFECTIVE_OPENAI_API_KEY" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
-          flyctl deploy --remote-only --build-secret "OPENAI_API_KEY=${EFFECTIVE_OPENAI_API_KEY}"
+
+          attempt=1
+          max_attempts=3
+          delay=10
+          while true; do
+            if flyctl deploy --remote-only --build-secret "OPENAI_API_KEY=${EFFECTIVE_OPENAI_API_KEY}"; then
+              break
+            fi
+            if [ "$attempt" -ge "$max_attempts" ]; then
+              echo "::error::flyctl deploy failed after ${max_attempts} attempts"
+              exit 1
+            fi
+            echo "flyctl deploy failed (attempt ${attempt}/${max_attempts}); retrying in ${delay}s..."
+            sleep "$delay"
+            attempt=$((attempt + 1))
+            delay=$((delay * 2))
+          done

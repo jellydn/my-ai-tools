@@ -14,6 +14,8 @@ Configure these under **Settings → Secrets and variables → Actions** for the
 
 If `FLY_API_TOKEN` is missing, or neither OpenRouter secret is set, or the chosen key does not start with `sk-or-v1-`, the workflow fails at **Validate required secrets** (~12s on push). A **401 Missing Authentication header** during Docker build means the key was wrong or empty in the build secret — fix the GitHub secret, then re-run **Fly Deploy**. The message `no access token available. Please login with 'flyctl auth login'` means **`FLY_API_TOKEN` was empty** in CI — use the deploy token secret instead of interactive login.
 
+`flyctl secrets set` and `flyctl deploy` retry on transient Fly control-plane errors (for example HTTP 503). Secrets set retries up to 5 times with exponential backoff; deploy retries up to 3 times.
+
 ## Runtime model configuration (already in repo)
 
 Non-secret OpenAI-compatible settings are in [`fly.toml`](../fly.toml) and match [`.env.example`](../.env.example):
