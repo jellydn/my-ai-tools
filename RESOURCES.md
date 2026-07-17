@@ -18,6 +18,10 @@
   Guide on using Cross-Encoder models to rerank candidates retrieved via Bi-Encoders. Use for: learning reranking concepts.
 - [Docs: Vespa Relevance Docs](https://docs.vespa.ai/en/relevance.html)
   Comprehensive resource on engineering search relevance and evaluating ranking metrics. Use for: query evaluation reference.
+- [Docs: LangChain Prompt Templates](https://python.langchain.com/docs/concepts/prompt_templates/)
+  Concept guide on variable substitution, formatting, and structured instruction composition. Use for: learning template architectures.
+- [Docs: Jinja Template Engine](https://jinja.palletsprojects.com/)
+  Reference manual for the widely used Jinja engine, detailing conditional blocks and filters. Use for: understanding rendering engines.
 
 ## Wisdom (Communities)
 

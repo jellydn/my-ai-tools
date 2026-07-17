@@ -39,3 +39,11 @@ _Avoid_: Post-hoc ranking, list sorting
 **Reranking**:
 Using a secondary, highly precise model (like a Cross-Encoder) to re-evaluate the relevance of a larger pool of retrieved chunks (e.g. Top-20) and select the best few (e.g. Top-5).
 _Avoid_: Initial vector search, dot-product scoring
+
+**Prompt Template**:
+A reusable prompt structure with placeholders or variables that are dynamically populated with user or context data at runtime.
+_Avoid_: Static instruction, raw query
+
+**Prompt Registry**:
+A central catalog mapping prompt identifiers and versions to their respective schemas, variables, and render functions.
+_Avoid_: Hardcoded message collection, prompt directory
