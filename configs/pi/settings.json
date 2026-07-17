@@ -1,7 +1,7 @@
 {
   "collapseChangelog": true,
-  "defaultModel": "cline-pass/deepseek-v4-flash",
-  "defaultProvider": "clinepass",
+  "defaultModel": "grok-composer-2.5-fast",
+  "defaultProvider": "xai-auth",
   "defaultThinkingLevel": "high",
   "editorPaddingX": 1,
   "enabledModels": [
@@ -23,10 +23,12 @@
     "google-antigravity/gemini-3-pro",
     "google-antigravity/claude-opus-4-6",
     "commandcode/deepseek/deepseek-v4-pro",
-    "commandcode/MiniMaxAI/MiniMax-M3"
+    "commandcode/MiniMaxAI/MiniMax-M3",
+    "xai-auth/grok-4.5",
+    "xai-auth/grok-composer-2.5-fast"
   ],
   "hideThinkingBlock": true,
-  "lastChangelogVersion": "0.80.6",
+  "lastChangelogVersion": "0.80.10",
   "packages": [
     {
       "skills": [],
@@ -36,7 +38,6 @@
     "npm:@ff-labs/pi-fff",
     "npm:pi-mcp-adapter",
     "npm:pi-simplify",
-    "npm:pi-manage-todo-list",
     "npm:pi-btw",
     "npm:pi-code-previews",
     "npm:pi-codex-goal",
@@ -49,7 +50,9 @@
     "npm:pi-web-access",
     "npm:pi-clinepass-provider",
     "npm:@juicesharp/rpiv-ask-user-question",
-    "npm:@yofriadi/pi-antigravity-oauth"
+    "npm:@yofriadi/pi-antigravity-oauth",
+    "npm:pi-xai-oauth",
+    "npm:@juicesharp/rpiv-todo"
   ],
   "permissionLevel": "high",
   "quietStartup": true,
@@ -61,3 +64,4 @@
   "enableInstallTelemetry": false,
   "defaultProjectTrust": "always"
 }
+
