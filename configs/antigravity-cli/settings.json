@@ -17,7 +17,7 @@
 			}
 		]
 	},
-	"model": "Claude Opus 4.6 (Thinking)",
+	"model": "Gemini 3.5 Flash (High)",
 	"notifications": true,
 	"permissions": {
 		"allow": [
@@ -118,13 +118,20 @@
 			"unsandboxed(kubectl kustomize)",
 			"unsandboxed(jq)",
 			"unsandboxed(kubectl patch)",
-			"unsandboxed(git checkout)"
+			"unsandboxed(git checkout)",
+			"mcp(codebase-memory-mcp/search_graph)",
+			"unsandboxed(bun test)",
+			"unsandboxed(qmd)",
+			"unsandboxed(~/.gemini/skills/qmd-knowledge/scripts/record.sh)",
+			"mcp(codebase-memory-mcp/list_projects)",
+			"mcp(codebase-memory-mcp/get_code_snippet)",
+			"mcp(codebase-memory-mcp/trace_path)",
+			"mcp(github/get_pull_request)",
+			"mcp(codebase-memory-mcp/search_code)",
+			"unsandboxed(git worktree)",
+			"unsandboxed(read)"
 		],
-		"deny": [
-			"command(git reset --hard)",
-			"command(git push --force)",
-			"command(rm -rf)"
-		]
+		"deny": ["command(git reset --hard)", "command(git push --force)", "command(rm -rf)"]
 	},
 	"runningLightSpeed": "off",
 	"showFeedbackSurvey": false,
@@ -135,7 +142,5 @@
 		"enabled": true
 	},
 	"toolPermission": "proceed-in-sandbox",
-	"trustedWorkspaces": [
-		"$HOME/src/tries/2026-07-08-gmail-cli"
-	]
+	"trustedWorkspaces": []
 }
