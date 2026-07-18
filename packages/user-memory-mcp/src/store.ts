@@ -1,9 +1,14 @@
 import { randomUUID } from "node:crypto";
-import { appendFile, chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { appendFile, chmod, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import lockfile from "proper-lockfile";
-import { emptyUserMemory, type UserMemory, type UserPreference, userMemorySchema } from "./schema.js";
+import {
+	emptyUserMemory,
+	type UserMemory,
+	type UserPreference,
+	userMemorySchema,
+} from "./schema.js";
 
 const KEY_PATTERN = /^[A-Za-z][A-Za-z0-9._-]{0,99}$/;
 const MAX_VALUE_LENGTH = 1_000;
@@ -55,32 +60,32 @@ export class PreferenceStore {
 	private readonly now: () => Date;
 
 	constructor(options: PreferenceStoreOptions = {}) {
-		this.directory = options.directory ?? process.env.USER_MEMORY_HOME ?? join(homedir(), ".ai-tools", "user-memory");
+		this.directory =
+			options.directory ??
+			process.env.USER_MEMORY_HOME ??
+			join(homedir(), ".ai-tools", "user-memory");
 		this.memoryPath = join(this.directory, "preferences.json");
 		this.auditPath = join(this.directory, "audit.jsonl");
 		this.lockPath = join(this.directory, ".lock");
 		this.now = options.now ?? (() => new Date());
 	}
 
-	async set(key: string, value: string, explicit: boolean): Promise<UserPreference> {
-		if (!explicit) {
-			throw new Error("Preferences may only be stored after the user explicitly states or confirms them.");
-		}
+	async set(key: string, value: string): Promise<UserPreference> {
 		this.validatePreference(key, value);
 
 		return this.withLock(async () => {
 			const memory = await this.readMemory();
 			const timestamp = this.now().toISOString();
-			const existing = memory.preferences.find((preference) => preference.key === key);
-			const preference: UserPreference = existing
-				? { ...existing, value, updatedAt: timestamp }
-				: { key, value, source: "explicit", createdAt: timestamp, updatedAt: timestamp };
+			const previous = memory.preferences[key];
+			const preference: UserPreference = previous
+				? { key, value, createdAt: previous.createdAt, updatedAt: timestamp }
+				: { key, value, createdAt: timestamp, updatedAt: timestamp };
 
-			if (existing) {
-				memory.preferences[memory.preferences.indexOf(existing)] = preference;
-			} else {
-				memory.preferences.push(preference);
-			}
+			memory.preferences[key] = {
+				value: preference.value,
+				createdAt: preference.createdAt,
+				updatedAt: preference.updatedAt,
+			};
 
 			await this.writeMemory(memory);
 			await this.appendAuditBestEffort({ operation: "set", key, timestamp });
@@ -90,23 +95,25 @@ export class PreferenceStore {
 
 	async get(key: string): Promise<UserPreference | undefined> {
 		const memory = await this.readMemory();
-		return memory.preferences.find((preference) => preference.key === key);
+		const preference = memory.preferences[key];
+		return preference ? { key, ...preference } : undefined;
 	}
 
 	async list(): Promise<UserPreference[]> {
 		const memory = await this.readMemory();
-		return [...memory.preferences].sort((left, right) => left.key.localeCompare(right.key));
+		return Object.entries(memory.preferences)
+			.map(([key, preference]) => ({ key, ...preference }))
+			.sort((left, right) => left.key.localeCompare(right.key));
 	}
 
 	async delete(key: string): Promise<boolean> {
 		return this.withLock(async () => {
 			const memory = await this.readMemory();
-			const remaining = memory.preferences.filter((preference) => preference.key !== key);
-			if (remaining.length === memory.preferences.length) {
+			if (!(key in memory.preferences)) {
 				return false;
 			}
 
-			memory.preferences = remaining;
+			delete memory.preferences[key];
 			const timestamp = this.now().toISOString();
 			await this.writeMemory(memory);
 			await this.appendAuditBestEffort({ operation: "delete", key, timestamp });
@@ -117,7 +124,7 @@ export class PreferenceStore {
 	async reset(): Promise<number> {
 		return this.withLock(async () => {
 			const memory = await this.readMemory();
-			const deleted = memory.preferences.length;
+			const deleted = Object.keys(memory.preferences).length;
 			const timestamp = this.now().toISOString();
 			await this.writeMemory(emptyUserMemory());
 			await this.appendAuditBestEffort({ operation: "reset", timestamp });
@@ -132,7 +139,9 @@ export class PreferenceStore {
 			);
 		}
 		if (value.length === 0 || value.length > MAX_VALUE_LENGTH) {
-			throw new Error(`Preference values must contain between 1 and ${MAX_VALUE_LENGTH} characters.`);
+			throw new Error(
+				`Preference values must contain between 1 and ${MAX_VALUE_LENGTH} characters.`,
+			);
 		}
 
 		const normalizedKey = key.toLowerCase().replaceAll(/[^a-z0-9]/g, "");
@@ -140,7 +149,9 @@ export class PreferenceStore {
 			SECRET_KEY_PARTS.some((part) => normalizedKey.includes(part)) ||
 			SECRET_VALUE_PATTERNS.some((pattern) => pattern.test(value))
 		) {
-			throw new Error("Secrets, credentials, API keys, tokens, and passwords cannot be stored as preferences.");
+			throw new Error(
+				"Secrets, credentials, API keys, tokens, and passwords cannot be stored as preferences.",
+			);
 		}
 	}
 
@@ -164,18 +175,32 @@ export class PreferenceStore {
 	private async writeMemory(memory: UserMemory): Promise<void> {
 		await this.ensureDirectory();
 		const temporaryPath = `${this.memoryPath}.${process.pid}.${randomUUID()}.tmp`;
-		await writeFile(temporaryPath, `${JSON.stringify(memory, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
-		await rename(temporaryPath, this.memoryPath);
-		await chmod(this.memoryPath, 0o600);
+		try {
+			await writeFile(temporaryPath, `${JSON.stringify(memory, null, 2)}\n`, {
+				encoding: "utf8",
+				mode: 0o600,
+			});
+			await rename(temporaryPath, this.memoryPath);
+			await chmod(this.memoryPath, 0o600);
+		} catch (error) {
+			await unlink(temporaryPath).catch(() => undefined);
+			throw error;
+		}
 	}
 
 	private async appendAuditBestEffort(entry: AuditEntry): Promise<void> {
 		try {
 			await this.ensureDirectory();
-			await appendFile(this.auditPath, `${JSON.stringify(entry)}\n`, { encoding: "utf8", mode: 0o600 });
+			await appendFile(this.auditPath, `${JSON.stringify(entry)}\n`, {
+				encoding: "utf8",
+				mode: 0o600,
+			});
 			await chmod(this.auditPath, 0o600);
 		} catch (error) {
-			console.error("user-memory: preference was saved, but its audit entry could not be written", error);
+			console.error(
+				"user-memory: preference was saved, but its audit entry could not be written",
+				error,
+			);
 		}
 	}
 

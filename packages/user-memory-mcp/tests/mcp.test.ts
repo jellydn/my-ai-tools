@@ -10,7 +10,11 @@ import { createServer } from "../src/server.js";
 const temporaryDirectories: string[] = [];
 
 afterEach(async () => {
-	await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
+	await Promise.all(
+		temporaryDirectories
+			.splice(0)
+			.map((directory) => rm(directory, { recursive: true, force: true })),
+	);
 });
 
 async function connect(directory: string) {
@@ -64,15 +68,15 @@ test("persists an explicit preference across independent MCP sessions", async ()
 	});
 	const preference = textContent(result) as Record<string, unknown>;
 	assert.deepEqual(
-		{ key: preference.key, value: preference.value, source: preference.source },
+		{ key: preference.key, value: preference.value },
 		{
 			key: "responseStyle",
 			value: "concise",
-			source: "explicit",
 		},
 	);
 	assert.match(String(preference.createdAt), /^\d{4}-\d{2}-\d{2}T/);
 	assert.match(String(preference.updatedAt), /^\d{4}-\d{2}-\d{2}T/);
+	assert.equal("source" in preference, false);
 
 	await second.client.close();
 	await second.server.close();

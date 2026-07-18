@@ -12,8 +12,9 @@
 	],
 	"scripts": {
 		"build": "tsc -p tsconfig.json",
-		"test": "tsx --test tests/*.test.ts",
-		"prepack": "npm run build"
+		"test": "node --import tsx --test tests/*.test.ts",
+		"prepack": "npm run build",
+		"prelink": "npm run build"
 	},
 	"engines": {
 		"node": ">=18"

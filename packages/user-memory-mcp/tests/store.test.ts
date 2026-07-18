@@ -14,18 +14,25 @@ async function makeStore(now?: () => Date): Promise<{ directory: string; store: 
 }
 
 afterEach(async () => {
-	await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
+	await Promise.all(
+		temporaryDirectories
+			.splice(0)
+			.map((directory) => rm(directory, { recursive: true, force: true })),
+	);
 });
 
 test("stores, retrieves, and updates a preference across store instances", async () => {
 	const timestamps = [new Date("2026-07-18T10:00:00.000Z"), new Date("2026-07-18T11:00:00.000Z")];
-	const { directory, store } = await makeStore(() => timestamps.shift() ?? new Date("2026-07-18T12:00:00.000Z"));
+	const { directory, store } = await makeStore(
+		() => timestamps.shift() ?? new Date("2026-07-18T12:00:00.000Z"),
+	);
 
-	const created = await store.set("responseStyle", "concise", true);
-	assert.equal(created.source, "explicit");
+	const created = await store.set("responseStyle", "concise");
+	assert.equal(created.key, "responseStyle");
+	assert.equal(created.value, "concise");
 	assert.equal((await new PreferenceStore({ directory }).get("responseStyle"))?.value, "concise");
 
-	const updated = await store.set("responseStyle", "detailed", true);
+	const updated = await store.set("responseStyle", "detailed");
 	assert.equal(updated.value, "detailed");
 	assert.equal(updated.createdAt, created.createdAt);
 	assert.notEqual(updated.updatedAt, created.updatedAt);
@@ -33,8 +40,8 @@ test("stores, retrieves, and updates a preference across store instances", async
 
 test("lists exactly the stored preferences in deterministic order", async () => {
 	const { store } = await makeStore();
-	await store.set("testRunner", "vitest", true);
-	await store.set("packageManager", "pnpm", true);
+	await store.set("testRunner", "vitest");
+	await store.set("packageManager", "pnpm");
 
 	assert.deepEqual(
 		(await store.list()).map(({ key, value }) => ({ key, value })),
@@ -47,8 +54,8 @@ test("lists exactly the stored preferences in deterministic order", async () => 
 
 test("deletes one preference and resets all preferences", async () => {
 	const { store } = await makeStore();
-	await store.set("responseStyle", "concise", true);
-	await store.set("packageManager", "pnpm", true);
+	await store.set("responseStyle", "concise");
+	await store.set("packageManager", "pnpm");
 
 	assert.equal(await store.delete("responseStyle"), true);
 	assert.equal(await store.delete("responseStyle"), false);
@@ -57,23 +64,23 @@ test("deletes one preference and resets all preferences", async () => {
 	assert.deepEqual(await store.list(), []);
 });
 
-test("rejects implicit or inferred preferences", async () => {
-	const { store } = await makeStore();
-	await assert.rejects(store.set("responseStyle", "concise", false), /explicitly states or confirms/);
-	assert.deepEqual(await store.list(), []);
-});
-
 test("rejects secrets in preference keys and values", async () => {
 	const { store } = await makeStore();
-	await assert.rejects(store.set("openaiApiKey", "not-even-a-real-key", true), /cannot be stored/);
-	await assert.rejects(store.set("preferredHeader", "Bearer abcdefghijklmnopqrstuvwxyz", true), /cannot be stored/);
-	await assert.rejects(store.set("credentialExample", "sk-or-v1-abcdefghijklmnop", true), /cannot be stored/);
+	await assert.rejects(store.set("openaiApiKey", "not-even-a-real-key"), /cannot be stored/);
+	await assert.rejects(
+		store.set("preferredHeader", "Bearer abcdefghijklmnopqrstuvwxyz"),
+		/cannot be stored/,
+	);
+	await assert.rejects(
+		store.set("credentialExample", "sk-or-v1-abcdefghijklmnop"),
+		/cannot be stored/,
+	);
 	assert.deepEqual(await store.list(), []);
 });
 
 test("writes value-free audit entries for mutations", async () => {
 	const { directory, store } = await makeStore();
-	await store.set("responseStyle", "concise", true);
+	await store.set("responseStyle", "concise");
 	await store.delete("responseStyle");
 	await store.reset();
 
@@ -96,7 +103,7 @@ test("serializes concurrent writers without losing preferences", async () => {
 	const { directory } = await makeStore();
 	await Promise.all(
 		Array.from({ length: 20 }, (_, index) =>
-			new PreferenceStore({ directory }).set(`preference${index}`, `value${index}`, true),
+			new PreferenceStore({ directory }).set(`preference${index}`, `value${index}`),
 		),
 	);
 

@@ -1,22 +1,23 @@
 import { z } from "zod";
 
-export const userPreferenceSchema = z.object({
-	key: z.string(),
+export const preferenceValueSchema = z.object({
 	value: z.string(),
-	source: z.literal("explicit"),
 	createdAt: z.string().datetime(),
 	updatedAt: z.string().datetime(),
 });
 
 export const userMemorySchema = z.object({
 	version: z.literal(1),
-	preferences: z.array(userPreferenceSchema),
+	preferences: z.record(z.string(), preferenceValueSchema),
 });
 
-export type UserPreference = z.infer<typeof userPreferenceSchema>;
+export type PreferenceValue = z.infer<typeof preferenceValueSchema>;
 export type UserMemory = z.infer<typeof userMemorySchema>;
+
+/** Preference as returned to MCP callers (map key reattached). */
+export type UserPreference = PreferenceValue & { key: string };
 
 export const emptyUserMemory = (): UserMemory => ({
 	version: 1,
-	preferences: [],
+	preferences: {},
 });
