@@ -47,3 +47,19 @@ _Avoid_: Static instruction, raw query
 **Prompt Registry**:
 A central catalog mapping prompt identifiers and versions to their respective schemas, variables, and render functions.
 _Avoid_: Hardcoded message collection, prompt directory
+
+**Short-Term Memory**:
+Conversation-scoped state that holds recent messages, context, and transient variables for the duration of a single session.
+_Avoid_: Chat history, message buffer
+
+**Long-Term Memory**:
+Persistent user preferences and facts stored across sessions and projects, surviving restarts and context window resets.
+_Avoid_: Permanent storage, database record
+
+**Explicit Consent Gate**:
+A design pattern requiring the user to explicitly state or confirm a preference before it is persisted, preventing inferred or hallucinated memory writes.
+_Avoid_: Auto-save, implicit capture
+
+**Audit Trail**:
+A value-free append-only log recording which keys were mutated and when, without storing the preference values themselves, for accountability and debugging.
+_Avoid_: Change log, history file

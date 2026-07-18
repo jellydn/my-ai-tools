@@ -22,6 +22,10 @@
   Concept guide on variable substitution, formatting, and structured instruction composition. Use for: learning template architectures.
 - [Docs: Jinja Template Engine](https://jinja.palletsprojects.com/)
   Reference manual for the widely used Jinja engine, detailing conditional blocks and filters. Use for: understanding rendering engines.
+- [Code: MemGPT Concept Overview](https://github.com/deductive-ai/MemGPT)
+  Reference architecture for tiered LLM memory (core memory, archival memory, recall memory) with self-editing capabilities. Use for: understanding long-term memory design patterns.
+- [Docs: LangGraph Memory](https://langchain-ai.github.io/langgraph/)
+  Documentation for stateful graph-based agent workflows with built-in short-term and long-term memory persistence. Use for: learning state management in agent pipelines.
 
 ## Wisdom (Communities)
 
