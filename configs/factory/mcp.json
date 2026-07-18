@@ -41,6 +41,12 @@
 			"args": ["-y", "@agentmemory/mcp"],
 			"disabled": false
 		},
+		"user-memory": {
+			"type": "stdio",
+			"command": "npx",
+			"args": ["-y", "@jellydn/user-memory-mcp@latest"],
+			"disabled": false
+		},
 		"sem": {
 			"type": "stdio",
 			"command": "sem-mcp",

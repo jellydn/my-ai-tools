@@ -9,6 +9,7 @@
 		"fff": { "command": "fff-mcp", "args": [] },
 		"logpilot": { "command": "logpilot", "args": ["mcp-server"] },
 		"agentmemory": { "command": "npx", "args": ["-y", "@agentmemory/mcp@latest"] },
+		"user-memory": { "command": "npx", "args": ["-y", "@jellydn/user-memory-mcp@latest"] },
 		"sem": { "command": "sem-mcp", "args": [] },
 		"ctx": { "command": "ctx", "args": ["mcp", "serve"] },
 		"codebase-memory-mcp": { "command": "codebase-memory-mcp", "args": [] }

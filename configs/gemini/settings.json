@@ -11,6 +11,12 @@
 			},
 			"timeout": 60000
 		},
+		"user-memory": {
+			"command": "npx",
+			"args": ["-y", "@jellydn/user-memory-mcp@latest"],
+			"env": {},
+			"timeout": 60000
+		},
 		"qmd": {
 			"env": {},
 			"command": "qmd",

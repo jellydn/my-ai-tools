@@ -53,6 +53,13 @@
 			},
 			"tools": ["*"]
 		},
+		"user-memory": {
+			"type": "local",
+			"command": "npx",
+			"args": ["-y", "@jellydn/user-memory-mcp@latest"],
+			"env": {},
+			"tools": ["*"]
+		},
 		"sem": {
 			"type": "local",
 			"transport": "stdio",

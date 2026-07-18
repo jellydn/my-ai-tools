@@ -3,6 +3,7 @@ FROM node:24-slim
 WORKDIR /app
 
 COPY package.json package-lock.json ./
+COPY packages/user-memory-mcp/package.json ./packages/user-memory-mcp/package.json
 RUN npm ci
 
 COPY . .

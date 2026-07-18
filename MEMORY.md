@@ -1,6 +1,8 @@
 # 🚀 MEMORY.md - AI Agent Knowledge Management
 
-**Purpose**: Tell agents when to use **qmd** (durable project KB), when to use **agentmemory** (session-only learnings), and when to skip recording entirely. Cross-session task continuity goes through `/handoffs` + `/pickup`, not these stores.
+**Purpose**: Tell agents when to use **qmd** (durable project KB), **agentmemory** (session-only learnings),
+**user-memory** (explicit cross-project preferences), or no memory at all. Cross-session task continuity goes through
+`/handoffs` + `/pickup`, not these stores.
 
 ---
 
@@ -109,22 +111,49 @@ echo "  Storage: ~/.ai-knowledges/$PROJECT_NAME"
 
 ### Decision rule (apply before every record)
 
-> "Will the next agent working on this project benefit from this in 3 months?"
+> Is this an explicit user preference that should apply across projects and tools?
 >
-> - **Yes** → `mcp__qmd__*` (`/qmd-knowledge` skill)
-> - **No, but the next session today might** → `mcp__agentmemory__memory_save`
-> - **No at all** → don't record
+> - **Yes, explicitly stated or confirmed** → `mcp__user-memory__memory_preference_set`
+> - **No; another agent on this project will benefit in 3 months** → `mcp__qmd__*` (`/qmd-knowledge` skill)
+> - **No; only the next session today might benefit** → `mcp__agentmemory__memory_save`
+> - **No benefit later** → don't record
 > - **"I need to keep working on this tomorrow"** → write a `/handoffs` plan, not a memory note
 
-### Three memory lanes
+### Four memory lanes
 
-| Lane          | Horizon             | Tool                                              |
-| ------------- | ------------------- | ------------------------------------------------- |
-| `qmd`         | Months              | `mcp__qmd__save` via `/qmd-knowledge` skill       |
-| `agentmemory` | Today, same project | `mcp__agentmemory__memory_save`                   |
-| `/handoffs`   | Cross-session task  | `/handoffs` slash command → resume with `/pickup` |
+| Lane          | Scope and horizon                     | Tool                                                    |
+| ------------- | ------------------------------------- | ------------------------------------------------------- |
+| `user-memory` | Durable, all projects and tools       | `mcp__user-memory__memory_preference_set`               |
+| `qmd`         | Durable project knowledge             | `mcp__qmd__save` via `/qmd-knowledge` skill             |
+| `agentmemory` | Today, same session/project           | `mcp__agentmemory__memory_save`                         |
+| `/handoffs`   | Continue a task in a future session   | `/handoffs` slash command → resume with `/pickup`       |
 
 If you find yourself wanting both "remember this for me next time" and "let me continue this tomorrow" — that is two separate stores; pick the lane that matches the actual horizon.
+
+---
+
+## 👤 User memory (explicit cross-project preferences)
+
+`user-memory` stores structured user preferences in `~/.ai-tools/user-memory/preferences.json`. It is independent of
+the current project, uses deterministic key/value lookup, and writes value-free mutation records to `audit.jsonl`.
+
+### Use `user-memory` for
+
+- Preferences the user explicitly states, such as `responseStyle = concise` or `packageManager = pnpm`
+- Preferences the agent proposes and the user explicitly confirms
+- Defaults that should follow the user across projects and supported coding tools
+
+### Never use `user-memory` for
+
+- Inferred preferences based on behavior, repetition, or repository conventions
+- Project architecture or conventions — use qmd
+- Session discoveries — use agentmemory
+- Work-in-progress state — use `/handoffs`
+- Secrets, API keys, tokens, passwords, credentials, or private data
+
+Before calling `memory_preference_set`, the user must have explicitly stated or confirmed the preference. The tool's
+`confirmed: true` argument records that consent; it is not permission for an agent to infer consent. Users can inspect
+all stored state with `memory_preference_list`, delete one key, or reset all preferences.
 
 ---
 
@@ -229,6 +258,16 @@ All tools are MCP-style names so agents can call them by an exact string.
 | Export memory            | `mcp__agentmemory__memory_export`            |
 | Audit memory             | `mcp__agentmemory__memory_audit`             |
 | Delete a specific memory | `mcp__agentmemory__memory_governance_delete` |
+
+### user-memory (cross-project preferences)
+
+| Task                    | Tool                                                   |
+| ----------------------- | ------------------------------------------------------ |
+| Store/update preference | `mcp__user-memory__memory_preference_set`              |
+| Get one preference      | `mcp__user-memory__memory_preference_get`              |
+| List remembered state   | `mcp__user-memory__memory_preference_list`             |
+| Delete one preference   | `mcp__user-memory__memory_preference_delete`           |
+| Reset all preferences   | `mcp__user-memory__memory_preference_reset`            |
 
 ---
 

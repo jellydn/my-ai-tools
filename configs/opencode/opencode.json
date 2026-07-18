@@ -58,6 +58,11 @@
 			},
 			"type": "local"
 		},
+		"user-memory": {
+			"command": ["npx", "-y", "@jellydn/user-memory-mcp@latest"],
+			"enabled": true,
+			"type": "local"
+		},
 		"context7": {
 			"command": ["npx", "-y", "@upstash/context7-mcp@latest"],
 			"enabled": true,

@@ -39,6 +39,11 @@
 			"command": ["npx", "-y", "@agentmemory/mcp"],
 			"enabled": true
 		},
+		"user-memory": {
+			"type": "local",
+			"command": ["npx", "-y", "@jellydn/user-memory-mcp@latest"],
+			"enabled": true
+		},
 		"sem": {
 			"type": "local",
 			"command": ["sem-mcp"],

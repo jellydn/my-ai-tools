@@ -39,6 +39,13 @@ args = [
     "@agentmemory/mcp",
 ]
 
+[mcp_servers.user-memory]
+command = "npx"
+args = [
+    "-y",
+    "@jellydn/user-memory-mcp@latest",
+]
+
 [mcp_servers.sem]
 command = "sem-mcp"
 args = []

@@ -59,6 +59,15 @@
         "@agentmemory/mcp"
       ]
     },
+    "user-memory": {
+      "transport": "stdio",
+      "enabled": true,
+      "command": "npx",
+      "args": [
+        "-y",
+        "@jellydn/user-memory-mcp@latest"
+      ]
+    },
     "sem": {
       "transport": "stdio",
       "enabled": true,

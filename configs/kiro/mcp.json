@@ -55,6 +55,13 @@
         "@agentmemory/mcp@latest"
       ]
     },
+    "user-memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@jellydn/user-memory-mcp@latest"
+      ]
+    },
     "sem": {
       "command": "sem-mcp",
       "args": []
