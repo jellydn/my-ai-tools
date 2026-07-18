@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feat/30-day-ai-learning
   workflow_dispatch:
 
 permissions:
