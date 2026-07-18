@@ -412,6 +412,58 @@ handle_sem_installation_if_needed() {
 	handle_tool_installation "sem" "install_sem_now" "command -v sem-mcp" "sem" "Semantic version control MCP"
 }
 
+# ─── user-memory-mcp installation (npm link from this monorepo) ────
+
+install_user_memory_mcp_now() {
+	if command -v user-memory-mcp &>/dev/null; then
+		log_success "user-memory-mcp already installed"
+		return 0
+	fi
+
+	local repo_root="${SCRIPT_DIR:-}"
+	if [ -z "$repo_root" ] || [ ! -f "$repo_root/packages/user-memory-mcp/package.json" ]; then
+		log_error "user-memory-mcp package not found in this checkout."
+		log_info "From the my-ai-tools repo root, run: npm run link:user-memory"
+		return 1
+	fi
+
+	if ! command -v npm &>/dev/null; then
+		log_error "npm not found. Cannot link user-memory-mcp."
+		return 1
+	fi
+
+	log_info "Building and npm-linking user-memory-mcp from monorepo..."
+	# Build + link from repo root so the bin `user-memory-mcp` lands on the global PATH.
+	if (
+		cd "$repo_root" &&
+			execute "npm run build --workspace @jellydn/user-memory-mcp" &&
+			execute "npm link --workspace @jellydn/user-memory-mcp"
+	); then
+		# Global npm bin dir may not already be on PATH in this shell (npm bin -g was removed).
+		local npm_prefix npm_bin
+		npm_prefix=$(npm prefix -g 2>/dev/null || true)
+		npm_bin="${npm_prefix:+$npm_prefix/bin}"
+		if [ -n "$npm_bin" ] && case ":$PATH:" in *":$npm_bin:"*) false ;; *) true ;; esac; then
+			export PATH="$npm_bin:$PATH"
+		fi
+		if command -v user-memory-mcp &>/dev/null; then
+			log_success "user-memory-mcp linked successfully"
+			return 0
+		fi
+		log_warning "npm link finished but user-memory-mcp is not on PATH yet"
+		log_info "Ensure \\$(npm prefix -g)/bin is on your PATH, then re-open the shell"
+		return 1
+	fi
+
+	log_error "Failed to link user-memory-mcp"
+	log_info "You can install manually from the repo root: npm run link:user-memory"
+	return 1
+}
+
+handle_user_memory_mcp_installation_if_needed() {
+	handle_tool_installation "user-memory-mcp" "install_user_memory_mcp_now" "command -v user-memory-mcp" "user-memory-mcp" "Cross-project user preference MCP"
+}
+
 # ─── Global tooling (jq, biome, gofmt, ruff, rustfmt, shfmt, stylua, backlog) ──
 
 install_global_tools() {

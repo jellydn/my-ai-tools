@@ -32,10 +32,23 @@ Files are written with user-only permissions. Best-effort audit entries contain 
 never the preference value. Preference state is committed atomically; an audit write failure does not roll back or
 misreport a successful preference update. Set `USER_MEMORY_HOME` to override the storage directory, including for tests.
 
+## Install (npm link)
+
+Until the package is published to npm, install the binary from this monorepo:
+
+```bash
+# from the my-ai-tools repo root
+npm install
+npm run link:user-memory
+# exposes `user-memory-mcp` on your PATH via npm link
+```
+
+`./cli.sh` also auto-links the binary when the MCP registry prerequisite `user-memory-mcp` is missing.
+
 ## Run
 
 ```bash
-npx -y @jellydn/user-memory-mcp@latest
+user-memory-mcp
 ```
 
 For local development:

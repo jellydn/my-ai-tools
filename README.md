@@ -164,7 +164,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | `qmd`                 | Knowledge management with AI-powered search                                               | `qmd`                                                                   |
 | `codebase-memory-mcp` | High-performance code intelligence and structural search                                  | `codebase-memory-mcp`                                                   |
 | `agentmemory`         | "Persistent memory" per the tool; we use it session-only (qmd = durable; see `MEMORY.md`) | `@agentmemory/mcp`                                                      |
-| `user-memory`         | Explicit, durable user preferences shared across projects and coding agents                | `@jellydn/user-memory-mcp`                                              |
+| `user-memory`         | Explicit, durable user preferences shared across projects and coding agents                | `user-memory-mcp` (npm link from monorepo)                              |
 | `fff`                 | Fast file search with frecency ranking                                                    | `fff-mcp`                                                               |
 | `react-grab-mcp`      | React component capture and inspection                                                    | `@react-grab/mcp`                                                       |
 | `logpilot`            | AI-powered log analysis and tmux monitoring                                               | `logpilot`                                                              |
@@ -406,8 +406,8 @@ Configuration in [`~/.claude/mcp-servers.json`](configs/claude/mcp-servers.json)
 			"args": ["-y", "@agentmemory/mcp"]
 		},
 		"user-memory": {
-			"command": "npx",
-			"args": ["-y", "@jellydn/user-memory-mcp@latest"]
+			"command": "user-memory-mcp",
+			"args": []
 		},
 		"fff": {
 			"type": "stdio",
@@ -433,7 +433,7 @@ claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/contex
 claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
 claude mcp add --scope user --transport stdio qmd -- qmd mcp
 claude mcp add --scope user --transport stdio agentmemory -- npx -y @agentmemory/mcp
-claude mcp add --scope user --transport stdio user-memory -- npx -y @jellydn/user-memory-mcp@latest
+claude mcp add --scope user --transport stdio user-memory -- user-memory-mcp  # Requires: npm run link:user-memory
 claude mcp add --scope user --transport stdio fff -- fff-mcp  # Requires: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
 claude mcp add --scope user --transport stdio logpilot -- logpilot mcp-server  # Requires: cargo install logpilot
 claude mcp add --scope user --transport stdio sem -- sem-mcp  # Requires: cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp

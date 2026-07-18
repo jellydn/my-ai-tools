@@ -72,8 +72,8 @@ AGENTMEMORY_TOOLS = "${AGENTMEMORY_TOOLS:-all}"
 
 [mcp_servers.user-memory]
 type = "stdio"
-command = "npx"
-args = ["-y", "@jellydn/user-memory-mcp@latest"]
+command = "user-memory-mcp"
+args = []
 
 [mcp_servers.ctx]
 type = "stdio"

@@ -55,8 +55,8 @@
 		},
 		"user-memory": {
 			"type": "local",
-			"command": "npx",
-			"args": ["-y", "@jellydn/user-memory-mcp@latest"],
+			"command": "user-memory-mcp",
+			"args": [],
 			"env": {},
 			"tools": ["*"]
 		},

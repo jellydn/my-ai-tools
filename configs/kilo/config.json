@@ -41,7 +41,7 @@
 		},
 		"user-memory": {
 			"type": "local",
-			"command": ["npx", "-y", "@jellydn/user-memory-mcp@latest"],
+			"command": ["user-memory-mcp"],
 			"enabled": true
 		},
 		"sem": {

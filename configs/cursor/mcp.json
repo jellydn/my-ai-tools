@@ -7,7 +7,7 @@
 		"react-grab-mcp": { "command": "npx", "args": ["-y", "@react-grab/mcp", "--stdio"] },
 		"logpilot": { "command": "logpilot", "args": ["mcp-server"] },
 		"agentmemory": { "command": "npx", "args": ["-y", "@agentmemory/mcp"] },
-		"user-memory": { "command": "npx", "args": ["-y", "@jellydn/user-memory-mcp@latest"] },
+		"user-memory": { "command": "user-memory-mcp", "args": [] },
 		"sem": { "command": "sem-mcp", "args": [] },
 		"ctx": { "command": "ctx", "args": ["mcp", "serve"] },
 		"codebase-memory-mcp": { "command": "codebase-memory-mcp", "args": [] }

@@ -43,8 +43,8 @@
 		},
 		"user-memory": {
 			"type": "stdio",
-			"command": "npx",
-			"args": ["-y", "@jellydn/user-memory-mcp@latest"],
+			"command": "user-memory-mcp",
+			"args": [],
 			"disabled": false
 		},
 		"sem": {

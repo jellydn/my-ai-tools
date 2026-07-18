@@ -66,10 +66,10 @@
 		},
 		"user-memory": {
 			"name": "user-memory",
-			"description": "persistent user memory for AI coding agents",
-			"command": "npx",
-			"args": ["-y", "@jellydn/user-memory-mcp@latest"],
-			"requires": [],
+			"description": "explicit cross-project user preferences for AI coding agents",
+			"command": "user-memory-mcp",
+			"args": [],
+			"requires": ["user-memory-mcp"],
 			"category": "knowledge"
 		},
 		"sem": {

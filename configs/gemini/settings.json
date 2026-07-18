@@ -12,8 +12,8 @@
 			"timeout": 60000
 		},
 		"user-memory": {
-			"command": "npx",
-			"args": ["-y", "@jellydn/user-memory-mcp@latest"],
+			"command": "user-memory-mcp",
+			"args": [],
 			"env": {},
 			"timeout": 60000
 		},
