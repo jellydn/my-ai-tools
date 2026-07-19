@@ -31,6 +31,9 @@ def test_citation_validation_fails_closed_for_missing_or_unknown_sources() -> No
 	chunks = [retrieved("guide.md", 1)]
 	assert validate_citations("An answer without a citation.", chunks) == (INSUFFICIENT_ANSWER, [])
 	assert validate_citations("Claim [unknown.md#chunk-9]", chunks) == (INSUFFICIENT_ANSWER, [])
+	# Mixed cited and uncited claims
+	assert validate_citations("An uncited claim. A cited claim [guide.md#chunk-1]", chunks) == (INSUFFICIENT_ANSWER, [])
+	assert validate_citations("A cited claim [guide.md#chunk-1]. And another uncited claim.", chunks) == (INSUFFICIENT_ANSWER, [])
 
 
 def test_citation_validation_returns_only_citations_used_in_answer() -> None:

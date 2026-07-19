@@ -23,6 +23,7 @@ class FaissVectorStore:
 		self.embedding_model = embedding_model
 		self._index: faiss.Index | None = None
 		self._chunks: list[DocumentChunk] = []
+		self._lock = threading.RLock()
 
 	@property
 	def size(self) -> int:
@@ -60,8 +61,8 @@ class FaissVectorStore:
 			temporary_manifest = self.directory / f".{generation}.manifest.tmp"
 			temporary_manifest.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 			os.replace(temporary_manifest, self.manifest_path)
-		self._index = index
-		self._chunks = chunks
+			self._index = index
+			self._chunks = chunks
 		logger.info("faiss_index_built", extra={"chunk_count": len(chunks), "generation": generation})
 
 	def search(
@@ -71,19 +72,22 @@ class FaissVectorStore:
 		min_relevance: float,
 		filters: RetrievalFilters,
 	) -> list[RetrievedChunk]:
-		self._ensure_loaded()
-		if self._index is None or not self._chunks:
-			return []
+		with self._lock:
+			self._ensure_loaded()
+			if self._index is None or not self._chunks:
+				return []
+			index = self._index
+			chunks = self._chunks
 		query = np.asarray([query_embedding], dtype="float32")
-		if query.shape[1] != self._index.d:
-			raise ValueError(f"Query embedding has dimension {query.shape[1]}, expected {self._index.d}")
+		if query.shape[1] != index.d:
+			raise ValueError(f"Query embedding has dimension {query.shape[1]}, expected {index.d}")
 		faiss.normalize_L2(query)
-		scores, indices = self._index.search(query, len(self._chunks))
+		scores, indices = index.search(query, len(chunks))
 		results: list[RetrievedChunk] = []
-		for score, index in zip(scores[0], indices[0], strict=True):
-			if index < 0 or float(score) < min_relevance:
+		for score, idx in zip(scores[0], indices[0], strict=True):
+			if idx < 0 or float(score) < min_relevance:
 				continue
-			chunk = self._chunks[int(index)]
+			chunk = chunks[int(idx)]
 			metadata = chunk.metadata
 			if filters.filename and metadata.filename != filters.filename:
 				continue
@@ -97,19 +101,22 @@ class FaissVectorStore:
 	def _ensure_loaded(self) -> None:
 		if self._index is not None:
 			return
-		if not self.manifest_path.exists():
-			return
-		try:
-			manifest = json.loads(self.manifest_path.read_text(encoding="utf-8"))
-			if manifest.get("embedding_model") != self.embedding_model:
-				raise RuntimeError("The embedding model changed; rebuild the index")
-			generation = manifest["generation"]
-			index = faiss.read_index(str(self.directory / f"{generation}.faiss"))
-			raw_chunks = json.loads((self.directory / f"{generation}.json").read_text(encoding="utf-8"))
-			chunks = [DocumentChunk.model_validate(chunk) for chunk in raw_chunks]
-		except (KeyError, OSError, ValueError, json.JSONDecodeError, RuntimeError) as exc:
-			raise RuntimeError(f"Could not load FAISS index: {exc}") from exc
-		if index.ntotal != len(chunks) or manifest.get("count") != len(chunks) or manifest.get("dimension") != index.d:
-			raise RuntimeError("FAISS index and chunk metadata are out of sync; rebuild the index")
-		self._index = index
-		self._chunks = chunks
+		with self._lock:
+			if self._index is not None:
+				return
+			if not self.manifest_path.exists():
+				return
+			try:
+				manifest = json.loads(self.manifest_path.read_text(encoding="utf-8"))
+				if manifest.get("embedding_model") != self.embedding_model:
+					raise RuntimeError("The embedding model changed; rebuild the index")
+				generation = manifest["generation"]
+				index = faiss.read_index(str(self.directory / f"{generation}.faiss"))
+				raw_chunks = json.loads((self.directory / f"{generation}.json").read_text(encoding="utf-8"))
+				chunks = [DocumentChunk.model_validate(chunk) for chunk in raw_chunks]
+			except (KeyError, OSError, ValueError, json.JSONDecodeError, RuntimeError) as exc:
+				raise RuntimeError(f"Could not load FAISS index: {exc}") from exc
+			if index.ntotal != len(chunks) or manifest.get("count") != len(chunks) or manifest.get("dimension") != index.d:
+				raise RuntimeError("FAISS index and chunk metadata are out of sync; rebuild the index")
+			self._index = index
+			self._chunks = chunks

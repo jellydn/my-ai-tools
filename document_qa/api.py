@@ -6,6 +6,8 @@ import re
 from contextlib import asynccontextmanager
 from typing import Annotated
 
+from pathlib import Path
+
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -13,7 +15,7 @@ from document_qa.answering import AnswerGenerator, validate_citations
 from document_qa.config import Settings
 from document_qa.documents import SUPPORTED_EXTENSIONS, list_documents
 from document_qa.embeddings import OpenAIEmbedder
-from document_qa.models import AnswerResponse, DocumentInfo, IndexRequest, IndexResponse, PublicConfig, RetrievalRequest, RetrievedChunk
+from document_qa.models import AnswerResponse, DocumentInfo, IndexRequest, IndexResponse, PublicConfig, RetrievalRequest, RetrievedChunk, document_type_for_path
 from document_qa.retrieval import Retriever
 from document_qa.service import IndexingService
 from document_qa.vector_store import FaissVectorStore
@@ -60,18 +62,24 @@ app.add_middleware(
 )
 
 
+_cached_components: tuple[FaissVectorStore, OpenAIEmbedder, Retriever, AnswerGenerator] | None = None
+
+
 def _components() -> tuple[FaissVectorStore, OpenAIEmbedder, Retriever, AnswerGenerator]:
-	try:
-		embedder = OpenAIEmbedder(settings.openai_api_key, settings.openai_base_url, settings.embedding_model)
-		store = FaissVectorStore(settings.index_dir, settings.embedding_model)
-		return (
-			store,
-			embedder,
-			Retriever(embedder, store, settings.min_relevance),
-			AnswerGenerator(settings.openai_api_key, settings.openai_base_url, settings.chat_model),
-		)
-	except ValueError as exc:
-		raise HTTPException(status_code=503, detail=str(exc)) from exc
+	global _cached_components
+	if _cached_components is None:
+		try:
+			embedder = OpenAIEmbedder(settings.openai_api_key, settings.openai_base_url, settings.embedding_model)
+			store = FaissVectorStore(settings.index_dir, settings.embedding_model)
+			_cached_components = (
+				store,
+				embedder,
+				Retriever(embedder, store, settings.min_relevance),
+				AnswerGenerator(settings.openai_api_key, settings.openai_base_url, settings.chat_model),
+			)
+		except ValueError as exc:
+			raise HTTPException(status_code=503, detail=str(exc)) from exc
+	return _cached_components
 
 
 @app.get("/health")
@@ -100,11 +108,18 @@ async def upload_document(file: Annotated[UploadFile, File()]) -> DocumentInfo:
 	path = settings.documents_dir / filename
 	try:
 		path.parent.mkdir(parents=True, exist_ok=True)
-		path.write_bytes(content)
+		with path.open("xb") as destination:
+			destination.write(content)
+	except FileExistsError as exc:
+		raise HTTPException(status_code=409, detail="A document with this filename already exists") from exc
 	except OSError as exc:
 		logger.exception("upload_failed", extra={"upload_filename": filename})
 		raise HTTPException(status_code=500, detail="Could not save uploaded document") from exc
-	return next(document for document in list_documents(settings.documents_dir) if document.path == filename)
+	return DocumentInfo(
+		filename=filename,
+		path=filename,
+		document_type=document_type_for_path(Path(filename)),
+	)
 
 
 @app.post("/index/rebuild", response_model=IndexResponse)

@@ -18,13 +18,54 @@ def unique_citations(chunks: list[RetrievedChunk]) -> list[str]:
 	return list(dict.fromkeys(format_citation(chunk) for chunk in chunks))
 
 
+def split_into_sentences(text: str) -> list[str]:
+	paragraphs = text.replace("\r\n", "\n").split("\n\n")
+	sentences = []
+	leading_citations_pattern = re.compile(r"^(\s*\[[^\[\]\n]+#chunk-\d+\])+")
+	for para in paragraphs:
+		if not para.strip():
+			continue
+		segments = []
+		current = []
+		in_brackets = 0
+		for char in para:
+			current.append(char)
+			if char == "[":
+				in_brackets += 1
+			elif char == "]":
+				in_brackets = max(0, in_brackets - 1)
+			elif char in ".!?" and in_brackets == 0:
+				segments.append("".join(current))
+				current = []
+		if current:
+			segments.append("".join(current))
+
+		for seg in segments:
+			if not seg.strip():
+				continue
+			match = leading_citations_pattern.match(seg)
+			if match and sentences:
+				sentences[-1] += match.group(0)
+				rest = seg[match.end() :]
+				if rest.strip():
+					sentences.append(rest)
+			else:
+				sentences.append(seg)
+	return sentences
+
+
 def validate_citations(answer: str, chunks: list[RetrievedChunk]) -> tuple[str, list[str]]:
 	if answer.strip() == INSUFFICIENT_ANSWER:
 		return INSUFFICIENT_ANSWER, []
 	allowed = set(unique_citations(chunks))
-	mentioned = list(dict.fromkeys(CITATION_PATTERN.findall(answer)))
-	if not mentioned or any(citation not in allowed for citation in mentioned):
+	sentences = split_into_sentences(answer)
+	if not sentences:
 		return INSUFFICIENT_ANSWER, []
+	for s in sentences:
+		s_mentioned = CITATION_PATTERN.findall(s)
+		if not s_mentioned or any(citation not in allowed for citation in s_mentioned):
+			return INSUFFICIENT_ANSWER, []
+	mentioned = list(dict.fromkeys(CITATION_PATTERN.findall(answer)))
 	return answer.strip(), mentioned
 
 

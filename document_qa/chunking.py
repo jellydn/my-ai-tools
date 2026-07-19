@@ -72,7 +72,7 @@ def chunk_document(
 					text=chunk_text,
 					metadata=ChunkMetadata(
 						filename=path.name,
-						document_path=str(path),
+						document_path=path.as_posix(),
 						chunk_index=len(chunks),
 						document_type=document_type,
 						heading=section.heading,
