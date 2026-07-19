@@ -1,0 +1,13 @@
+faiss-cpu>=1.8.0,<2
+fastapi>=0.115.0,<1
+numpy>=1.26.0,<3
+openai>=1.52.0,<2
+pydantic>=2.9.0,<3
+pypdf>=5.0.0,<6
+python-multipart>=0.0.12,<1
+requests>=2.32.0,<3
+streamlit>=1.39.0,<2
+uvicorn[standard]>=0.31.0,<1
+
+# Development
+pytest>=8.3.0,<9
