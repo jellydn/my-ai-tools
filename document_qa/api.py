@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from typing import Annotated
 
 from pathlib import Path
+import threading
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -62,23 +63,26 @@ app.add_middleware(
 )
 
 
+_COMPONENTS_LOCK = threading.Lock()
 _cached_components: tuple[FaissVectorStore, OpenAIEmbedder, Retriever, AnswerGenerator] | None = None
 
 
 def _components() -> tuple[FaissVectorStore, OpenAIEmbedder, Retriever, AnswerGenerator]:
 	global _cached_components
 	if _cached_components is None:
-		try:
-			embedder = OpenAIEmbedder(settings.openai_api_key, settings.openai_base_url, settings.embedding_model)
-			store = FaissVectorStore(settings.index_dir, settings.embedding_model)
-			_cached_components = (
-				store,
-				embedder,
-				Retriever(embedder, store, settings.min_relevance),
-				AnswerGenerator(settings.openai_api_key, settings.openai_base_url, settings.chat_model),
-			)
-		except ValueError as exc:
-			raise HTTPException(status_code=503, detail=str(exc)) from exc
+		with _COMPONENTS_LOCK:
+			if _cached_components is None:
+				try:
+					embedder = OpenAIEmbedder(settings.openai_api_key, settings.openai_base_url, settings.embedding_model)
+					store = FaissVectorStore(settings.index_dir, settings.embedding_model)
+					_cached_components = (
+						store,
+						embedder,
+						Retriever(embedder, store, settings.min_relevance),
+						AnswerGenerator(settings.openai_api_key, settings.openai_base_url, settings.chat_model),
+					)
+				except ValueError as exc:
+					raise HTTPException(status_code=503, detail=str(exc)) from exc
 	return _cached_components
 
 

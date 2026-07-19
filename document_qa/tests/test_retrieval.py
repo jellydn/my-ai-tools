@@ -51,3 +51,29 @@ def test_persisted_index_reloads_in_a_new_store(tmp_path: Path) -> None:
 	results = reopened.search([1.0, 0.0], 1, 0.9, RetrievalFilters())
 
 	assert [item.metadata.filename for item in results] == ["guide.md"]
+
+
+def test_concurrent_searches_and_size_checks(tmp_path: Path) -> None:
+	import threading
+
+	store = build_store(tmp_path)
+
+	errors = []
+
+	def run_concurrent() -> None:
+		try:
+			# Verify read works safely from multiple threads
+			assert store.size == 3
+			results = store.search([1.0, 0.0], 1, 0.9, RetrievalFilters())
+			assert len(results) == 1
+			assert results[0].metadata.filename == "guide.md"
+		except Exception as e:
+			errors.append(e)
+
+	threads = [threading.Thread(target=run_concurrent) for _ in range(10)]
+	for t in threads:
+		t.start()
+	for t in threads:
+		t.join()
+
+	assert not errors

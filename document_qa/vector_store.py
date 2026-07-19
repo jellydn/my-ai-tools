@@ -27,8 +27,9 @@ class FaissVectorStore:
 
 	@property
 	def size(self) -> int:
-		self._ensure_loaded()
-		return len(self._chunks)
+		with self._lock:
+			self._ensure_loaded()
+			return len(self._chunks)
 
 	def build(self, chunks: list[DocumentChunk], embeddings: list[list[float]]) -> None:
 		if not chunks:
@@ -61,8 +62,9 @@ class FaissVectorStore:
 			temporary_manifest = self.directory / f".{generation}.manifest.tmp"
 			temporary_manifest.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 			os.replace(temporary_manifest, self.manifest_path)
-			self._index = index
-			self._chunks = chunks
+			with self._lock:
+				self._index = index
+				self._chunks = chunks
 		logger.info("faiss_index_built", extra={"chunk_count": len(chunks), "generation": generation})
 
 	def search(
