@@ -7,6 +7,8 @@ import { stream } from "hono/streaming";
 import { z } from "zod";
 import { createOpenAIClient } from "./lib/openai-client.ts";
 import { type RetrievedChunk, retrieve } from "./lib/retriever.ts";
+import { installGitHubBot } from "./src/github-bot/app.ts";
+import { botConfigFromEnv } from "./src/github-bot/config.ts";
 
 const [indexHtml, installSh, installPs1] = await Promise.all([
 	readFile("index.html", "utf-8"),
@@ -20,8 +22,7 @@ const requestTimestamps = new Map<string, number[]>();
 
 function rateLimitMiddleware(c: Context, next: Next) {
 	const forwarded = c.req.header("x-forwarded-for");
-	const clientIp =
-		c.req.header("fly-client-ip") || (forwarded ? forwarded.split(",")[0]?.trim() : undefined);
+	const clientIp = c.req.header("fly-client-ip") || (forwarded ? forwarded.split(",")[0]?.trim() : undefined);
 	const key = clientIp ?? "unknown";
 	const now = Date.now();
 	const timestamps = requestTimestamps.get(key) ?? [];
@@ -48,16 +49,22 @@ function pruneRateLimitMap() {
 	}
 }
 
-setInterval(pruneRateLimitMap, 5 * 60 * 1000);
+const pruneTimer = setInterval(pruneRateLimitMap, 5 * 60 * 1000);
+pruneTimer.unref();
 
 const app = new Hono();
 
-if (!process.env.OPENAI_API_KEY) {
-	console.error("OPENAI_API_KEY is not set. Copy .env.example to .env and add your key.");
-	process.exit(1);
-}
+const openai = process.env.OPENAI_API_KEY ? createOpenAIClient() : undefined;
+const botConfig = botConfigFromEnv(process.env);
+const bot = botConfig ? await installGitHubBot(app, botConfig) : undefined;
 
-const openai = createOpenAIClient();
+app.get("/healthz", (c) => c.json({ status: "ok" }));
+app.get("/readyz", (c) =>
+	c.json(
+		{ status: bot?.ready() === false ? "not-ready" : "ready", bot: Boolean(bot) },
+		bot?.ready() === false ? 503 : 200,
+	),
+);
 
 const chatRequestSchema = z.object({
 	message: z.string().min(1).max(4000),
@@ -81,6 +88,7 @@ ${context}`;
 app.use("/data/*", async (c) => c.text("Forbidden", 403));
 
 app.post("/api/chat", rateLimitMiddleware, async (c) => {
+	if (!openai) return c.json({ error: "Chat is not configured." }, 503);
 	let body: unknown;
 	try {
 		body = await c.req.json();
@@ -97,16 +105,8 @@ app.post("/api/chat", rateLimitMiddleware, async (c) => {
 	try {
 		chunks = await retrieve(message, 5);
 	} catch (error) {
-		if (
-			error &&
-			typeof error === "object" &&
-			"code" in error &&
-			(error as { code: unknown }).code === "ENOENT"
-		) {
-			return c.json(
-				{ error: "Index not found. Run `bun run index` to build data/index.json." },
-				503,
-			);
+		if (error && typeof error === "object" && "code" in error && (error as { code: unknown }).code === "ENOENT") {
+			return c.json({ error: "Index not found. Run `bun run index` to build data/index.json." }, 503);
 		}
 		return c.json({ error: "Failed to retrieve context from the index." }, 500);
 	}
@@ -114,9 +114,7 @@ app.post("/api/chat", rateLimitMiddleware, async (c) => {
 	if (chunks.length === 0) {
 		c.header("Content-Type", "text/plain; charset=utf-8");
 		return stream(c, async (stream) => {
-			await stream.write(
-				`${JSON.stringify({ type: "text", content: "This is not documented in the repository." })}\n`,
-			);
+			await stream.write(`${JSON.stringify({ type: "text", content: "This is not documented in the repository." })}\n`);
 			await stream.write(`${JSON.stringify({ type: "sources", paths: [] })}\n`);
 		});
 	}
@@ -179,7 +177,7 @@ app.get("/install.ps1", (c) => c.text(installPs1));
 
 const port = Number.parseInt(process.env.PORT ?? "3000", 10);
 
-serve(
+const server = serve(
 	{
 		fetch: app.fetch,
 		port,
@@ -189,3 +187,18 @@ serve(
 		console.log(`Server running at http://${info.address}:${info.port}`);
 	},
 );
+
+let shuttingDown = false;
+async function shutdown() {
+	if (shuttingDown) return;
+	shuttingDown = true;
+	const forcedExit = setTimeout(() => process.exit(1), 10_000);
+	forcedExit.unref();
+	clearInterval(pruneTimer);
+	server.close();
+	await bot?.shutdown();
+	clearTimeout(forcedExit);
+	process.exit(0);
+}
+process.once("SIGTERM", () => void shutdown());
+process.once("SIGINT", () => void shutdown());
