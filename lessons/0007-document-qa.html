@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 14/30: Document Q&A App & Review</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="day-badge">Day 14/30 — Mini Project & Review</span>
+      <h1>Building a Local Document Q&A App</h1>
+      <p>Assembling chunking, vector embeddings, pre-filtering, grounding prompts, templates, and memory into a complete production-ready application.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1. Week 2 Review: The Architecture</h2>
+        <p>In Week 2, we covered the core building blocks of production retrieval architectures. A robust Document Q&A application integrates all of these steps:</p>
+        <ol>
+          <li><strong>Document Ingestion & Chunking (Day 9):</strong> Documents are loaded and split by natural headings with a 1,000-char window and 150-char overlap to preserve boundary context.</li>
+          <li><strong>Vector Space Representation (Day 8):</strong> Text segments are converted to mathematical coordinate vectors to calculate similarities.</li>
+          <li><strong>Metadata Filtering & Retrieval (Day 11):</strong> Unrelated document types (like log outputs) are filtered out before scoring, retrieving only the most relevant Top-K candidates.</li>
+          <li><strong>Grounded Prompts (Day 10):</strong> System instructions force the model to answer <em>only</em> from the excerpts and refuse queries with insufficient references.</li>
+          <li><strong>Prompt Registry (Day 12):</strong> System and User prompt templates are compiled using Zod schemas to ensure input variables are valid at runtime.</li>
+          <li><strong>Stateful Memory (Day 13):</strong> Durable user preferences (like concise vs detailed styles) are loaded from a secure preference store and injected into the prompt.</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>2. Connecting to the Document Q&A Branch</h2>
+        <p>On the <code>feat/document-qa</code> branch of <code>my-ai-tools</code>, we implemented this architecture in a modular Python project (in `document_qa/`):</p>
+        <ul>
+          <li><strong>FastAPI Backend (api.py):</strong> Exposes endpoints to upload documents, rebuild the local FAISS index, execute similarity retrieval, and ask questions.</li>
+          <li><strong>Streamlit Frontend (streamlit_app.py):</strong> Provides a beautiful dashboard to manage uploaded files, tune Top-K/similarity thresholds, and converse with the document corpus with dynamic sources previews.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>3. Document Q&A Pipeline Simulator</h2>
+        <p>Select a document, customize search parameters, and run the Q&A engine to inspect how each step of the pipeline processes data in real-time.</p>
+
+        <div class="simulator-layout">
+          <div class="simulator-controls">
+            <div class="control-group">
+              <label class="control-label" for="doc-select">1. Select Target Document</label>
+              <select id="doc-select" class="control-input">
+                <option value="postgres">postgres.md (Database connection config)</option>
+                <option value="style">style.md (Dashboard CSS styles)</option>
+                <option value="auth">auth.md (Authentication API fixes)</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="question-input">2. Ask Question</label>
+              <input type="text" id="question-input" class="control-input" value="How do I configure the PostgreSQL pool?">
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="top-k-select">3. Tune Top-K</label>
+              <select id="top-k-select" class="control-input">
+                <option value="1">Top-1</option>
+                <option value="2">Top-2</option>
+                <option value="3" selected>Top-3</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="pref-select">4. User Preference Memory</label>
+              <select id="pref-select" class="control-input">
+                <option value="default">Default Response Style</option>
+                <option value="concise">Concise Response Style</option>
+                <option value="detailed">Detailed Response Style</option>
+              </select>
+            </div>
+
+            <button class="quiz-option" style="width: 100%; margin-top: 1rem;" onclick="runQA()">Execute Q&A Pipeline</button>
+          </div>
+
+          <div class="simulator-output">
+            <div style="display: flex; gap: 0.5rem; border-bottom: 2px solid var(--border-color); margin-bottom: 1rem;">
+              <button class="quiz-option active-tab" id="tab-chunks" onclick="switchTab('chunks')">1. Chunks</button>
+              <button class="quiz-option" id="tab-retrieval" onclick="switchTab('retrieval')">2. Retrieval</button>
+              <button class="quiz-option" id="tab-prompt" onclick="switchTab('prompt')">3. Prompt</button>
+              <button class="quiz-option" id="tab-answer" onclick="switchTab('answer')">4. Answer</button>
+            </div>
+
+            <div id="content-chunks" class="tab-panel">
+              <div class="control-label">Document Chunks Parsed:</div>
+              <div id="chunks-list" class="chunks-container">Select a document to inspect chunks...</div>
+            </div>
+
+            <div id="content-retrieval" class="tab-panel" style="display: none;">
+              <div class="control-label">Matching Similarity Scores:</div>
+              <div id="retrieval-list" class="chunks-container">Execute pipeline to retrieve...</div>
+            </div>
+
+            <div id="content-prompt" class="tab-panel" style="display: none;">
+              <div class="control-label">Compiled Grounded Prompt:</div>
+              <pre><code id="prompt-display" style="white-space: pre-wrap; font-size: 0.8rem;">Execute pipeline to compile prompt...</code></pre>
+            </div>
+
+            <div id="content-answer" class="tab-panel" style="display: none;">
+              <div class="control-label">Model Output:</div>
+              <div class="chunk-card" style="border-color: var(--success-text); background-color: var(--success-bg); padding: 1rem;">
+                <p id="answer-display" style="font-size: 0.95rem; font-weight: 700; color: var(--success-text); margin: 0;"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>4. Retrieval Practice</h2>
+        <p>Test your understanding of Q&A application boundaries:</p>
+        <h3>Which architecture pattern cleanly separates LLM generation from context matching in RAG?</h3>
+
+        <div id="quiz-options">
+          <button class="quiz-option" onclick="selectOption(this, true, 'Correct! Querying the vector store separates the retrieval index matching from the LLM prompt completion step.')">
+            It matches vector files before running local code query tools.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Writing to databases and logging events are observability functions, not retrieval interfaces.')">
+            It writes structured query execution events to database logs.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Similarity checks between chunks are internal retrieval computations, not prompt integrations.')">
+            It runs standard vector search tests between separate chunks.
+          </button>
+        </div>
+        <div id="quiz-feedback" class="quiz-feedback"></div>
+      </section>
+
+      <section class="card">
+        <h2>5. Next Step: Test the Document Q&A CLI</h2>
+        <p>We created a command-line script demonstrating the end-to-end Document Q&A integration. Run the evaluator in your terminal:</p>
+        <pre><code>bun run scripts/evaluate-qa.ts</code></pre>
+        <p>Review the log outputs to trace how the document is chunked, matched, validated, styled by memory, and answered with citations.</p>
+      </section>
+    </main>
+
+    <footer>
+      <p>30-Day AI Learning Journey • Ask your AI teacher any follow-up questions! • <a href="0006-memory.html">Go to Day 13: Memory</a></p>
+    </footer>
+  </div>
+
+  <script>
+    const DOCUMENTS = {
+      postgres: {
+        name: "postgres.md",
+        chunks: [
+          { index: 1, text: "Configure PostgreSQL connection pool for backend server using max connections threshold of 20.", vector: [0.95, 0.1, 0.0] },
+          { index: 2, text: "Always verify database health status endpoints before starting integration runs.", vector: [0.6, 0.2, 0.0] }
+        ]
+      },
+      style: {
+        name: "style.md",
+        chunks: [
+          { index: 1, text: "Style the dashboard using CSS grid and dark theme variables to ensure WCAG accessibility compliance.", vector: [0.1, 0.95, 0.0] },
+          { index: 2, text: "Use curate colors for charts and buttons rather than defaulting to browser templates.", vector: [0.2, 0.7, 0.0] }
+        ]
+      },
+      auth: {
+        name: "auth.md",
+        chunks: [
+          { index: 1, text: "Fix null pointer exception crash in API auth handler by verifying token presence beforehand.", vector: [0.3, 0.0, 0.95] },
+          { index: 2, text: "Ensure tokens are cleared during logout workflows to prevent session leaks.", vector: [0.2, 0.0, 0.8] }
+        ]
+      }
+    };
+
+    const docSelect = document.getElementById('doc-select');
+    const questionInput = document.getElementById('question-input');
+    const topKSelect = document.getElementById('top-k-select');
+    const prefSelect = document.getElementById('pref-select');
+
+    const chunksList = document.getElementById('chunks-list');
+    const retrievalList = document.getElementById('retrieval-list');
+    const promptDisplay = document.getElementById('prompt-display');
+    const answerDisplay = document.getElementById('answer-display');
+
+    function renderDocumentChunks() {
+      const doc = DOCUMENTS[docSelect.value];
+      chunksList.innerHTML = doc.chunks.map(c => `
+        <div class="chunk-card" style="padding: 0.5rem 0.75rem;">
+          <div style="font-size: 0.8rem; font-weight: bold; color: var(--text-muted);">[${doc.name}#chunk-${c.index}]</div>
+          <p style="margin: 0.25rem 0 0; font-size: 0.85rem;">${c.text}</p>
+        </div>
+      `).join("");
+    }
+
+    docSelect.addEventListener('change', renderDocumentChunks);
+    renderDocumentChunks();
+
+    function runQA() {
+      const doc = DOCUMENTS[docSelect.value];
+      const question = questionInput.value.trim();
+      const topK = parseInt(topKSelect.value);
+      const pref = prefSelect.value;
+
+      // Simulate vector matches
+      let queryVec = [0.0, 0.0, 0.0];
+      const qLower = question.toLowerCase();
+      if (qLower.includes("postgres") || qLower.includes("pool") || qLower.includes("database")) queryVec = [1.0, 0.0, 0.0];
+      else if (qLower.includes("style") || qLower.includes("css") || qLower.includes("dashboard")) queryVec = [0.0, 1.0, 0.0];
+      else if (qLower.includes("auth") || qLower.includes("crash") || qLower.includes("token")) queryVec = [0.0, 0.0, 1.0];
+
+      // Math
+      const dot = (a, b) => a.reduce((sum, v, i) => sum + v * b[i], 0);
+      const mag = (v) => Math.sqrt(v.reduce((sum, v) => sum + v * v, 0));
+      const cosine = (a, b) => mag(a) === 0 || mag(b) === 0 ? 0 : dot(a, b) / (mag(a) * mag(b));
+
+      const ranked = doc.chunks.map(c => ({
+        ...c,
+        score: cosine(queryVec, c.vector)
+      }))
+      .filter(c => c.score > 0.25)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, topK);
+
+      // Render tab 2: Retrieval
+      if (ranked.length === 0) {
+        retrievalList.innerHTML = '<div class="chunk-card" style="text-align: center; color: var(--error-text);">No relevant chunks matched the threshold (0.25).</div>';
+      } else {
+        retrievalList.innerHTML = ranked.map(c => `
+          <div class="chunk-card" style="padding: 0.5rem 0.75rem; border-color: var(--success-text);">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: bold;">
+              <span>[${doc.name}#chunk-${c.index}]</span>
+              <span style="color: var(--success-text);">Score: ${c.score.toFixed(4)}</span>
+            </div>
+            <p style="margin: 0.25rem 0 0; font-size: 0.85rem;">${c.text}</p>
+          </div>
+        `).join("");
+      }
+
+      // Render tab 3: Prompt Construction
+      const systemPrompt = `You answer questions strictly using the retrieved excerpts below.\nIf context is insufficient, reply: "This is not documented."\n${pref !== 'default' ? `Response Preference Style: ${pref}` : ''}`;
+      const userPayload = ranked.map(r => `Source: ${doc.name}#chunk-${r.index}\nContent: ${r.text}`).join("\n\n");
+      promptDisplay.textContent = `SYSTEM DIRECTIVE:\n${systemPrompt}\n\nRETRIVED EXCERPTS:\n${userPayload || 'No excerpts retrieved.'}\n\nUSER QUESTION: ${question}`;
+
+      // Render tab 4: Grounded Answer
+      let answer = "";
+      if (ranked.length === 0) {
+        answer = "This is not documented.";
+      } else {
+        const topMatch = ranked[0];
+        if (docSelect.value === 'postgres' && qLower.includes("postgres")) {
+          answer = `Configure the PostgreSQL connection pool for the backend server with a limit of 20 maximum connections. [Source: ${doc.name}#chunk-${topMatch.index}]`;
+        } else if (docSelect.value === 'style' && qLower.includes("style")) {
+          answer = `Style the dashboard using CSS grid and dark theme variables to align with accessibility compliance. [Source: ${doc.name}#chunk-${topMatch.index}]`;
+        } else if (docSelect.value === 'auth' && qLower.includes("auth")) {
+          answer = `Resolve the null pointer exception crash in the auth handler by checking for token presence beforehand. [Source: ${doc.name}#chunk-${topMatch.index}]`;
+        } else {
+          answer = "This is not documented.";
+        }
+
+        if (pref === 'concise' && answer !== "This is not documented.") {
+          answer = `[concise] Configure max connections to 20. [Source: ${doc.name}#chunk-${topMatch.index}]`;
+        } else if (pref === 'detailed' && answer !== "This is not documented.") {
+          answer = `[detailed] According to the documentation retrieved from ${doc.name}: You must instantiate a pool with a max connections property set to 20, keeping the database backend performant.`;
+        }
+      }
+      answerDisplay.textContent = answer;
+
+      // Automatically switch to Answer tab
+      switchTab('answer');
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+      document.querySelectorAll('.active-tab').forEach(b => b.classList.remove('active-tab'));
+
+      document.getElementById(`content-${tabId}`).style.display = 'block';
+      document.getElementById(`tab-${tabId}`).classList.add('active-tab');
+    }
+
+    // Quiz logic
+    function selectOption(button, isCorrect, feedback) {
+      const options = document.querySelectorAll('.quiz-option');
+      options.forEach(opt => {
+        if (opt.closest('#quiz-options')) {
+          opt.disabled = true;
+          if (opt === button) {
+            opt.className = 'quiz-option ' + (isCorrect ? 'correct' : 'incorrect');
+          }
+        }
+      });
+      const feedbackDiv = document.getElementById('quiz-feedback');
+      feedbackDiv.style.display = 'block';
+      feedbackDiv.style.color = isCorrect ? 'var(--accent-color)' : 'red';
+      feedbackDiv.textContent = feedback;
+    }
+  </script>
+</body>
+</html>

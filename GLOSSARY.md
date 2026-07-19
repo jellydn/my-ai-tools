@@ -63,3 +63,15 @@ _Avoid_: Auto-save, implicit capture
 **Audit Trail**:
 A value-free append-only log recording which keys were mutated and when, without storing the preference values themselves, for accountability and debugging.
 _Avoid_: Change log, history file
+
+**FastAPI**:
+A modern, high-performance web framework for building APIs with Python, featuring automatic validation and interactive docs.
+_Avoid_: Django API, Flask microservice
+
+**Streamlit**:
+An open-source Python framework that allows developers to build interactive frontend UIs and data dashboards in minutes.
+_Avoid_: Custom React client, templates-based frontend
+
+**Document Q&A**:
+An end-to-end RAG system that ingests document files, indexes their chunks into a vector store, retrieves relevant matches for user queries, and compiles grounded responses with source citations.
+_Avoid_: Search engine, simple chat completion

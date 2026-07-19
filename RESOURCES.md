@@ -26,6 +26,10 @@
   Reference architecture for tiered LLM memory (core memory, archival memory, recall memory) with self-editing capabilities. Use for: understanding long-term memory design patterns.
 - [Docs: LangGraph Memory](https://langchain-ai.github.io/langgraph/)
   Documentation for stateful graph-based agent workflows with built-in short-term and long-term memory persistence. Use for: learning state management in agent pipelines.
+- [Docs: FastAPI Documentation](https://fastapi.tiangolo.com/)
+  Reference manual for building REST APIs with automatic OpenAPI docs and type validation using Pydantic. Use for: backend integration.
+- [Docs: Streamlit Documentation](https://docs.streamlit.io/)
+  Getting started guide for creating interactive frontend data dashboards in Python. Use for: frontend UI client development.
 
 ## Wisdom (Communities)
 
