@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 15/30: Agent Basics — Observe, Act, Reflect</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="day-badge">Day 15/30 — Agent Basics</span>
+      <h1>AI Agents: Observe, Act, and Reflect</h1>
+      <p>How controlled loops around LLM calls enable autonomous tool usage, step budgeting, and safe stopping.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1. What is an AI Agent?</h2>
+        <p>While a standard LLM completion generates text in a single pass, an <strong>AI Agent</strong> operates in a controlled, iterative loop. The agent evaluates the current goal, selects tools to execute, receives observations, and reflects on whether it has sufficient evidence to finish.</p>
+        <p>The core execution pattern follows three stages proposed in the <a href="https://arxiv.org/abs/2210.03629" target="_blank">ReAct (Reasoning + Acting)</a> paradigm:</p>
+        <ol>
+          <li><strong>Observe:</strong> Examine the user request, past conversation context, and latest tool results.</li>
+          <li><strong>Act:</strong> Decide whether to call a tool (e.g., list files, read code, search) or deliver the final answer to the user.</li>
+          <li><strong>Reflect:</strong> Evaluate the tool response, update internal state, and check safety bounds like remaining step budget.</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>2. Connecting to flue-repo-assistant</h2>
+        <p>In the <code>flue-repo-assistant</code> codebase (<code>agents/repo-assistant.ts</code>), we built a bounded repository analysis agent using these exact principles:</p>
+        <ul>
+          <li><strong>Step Budgeting (createStepBudget):</strong> The agent is assigned a strict step limit (default: 8 steps). Every tool invocation consumes 1 budget unit. When budget hits 0, tool calls are blocked and the agent must answer with existing evidence.</li>
+          <li><strong>Read-Only Tools:</strong> The agent interacts through constrained tools (<code>list_files</code>, <code>read_file</code>, <code>search_code</code>) operating inside a restricted repository sandbox.</li>
+          <li><strong>Safe Stopping:</strong> Instructions require the agent to stop calling tools as soon as evidence is sufficient and fail cleanly if budget is exhausted without hallucinating missing data.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>3. Interactive Agent Loop Simulator</h2>
+        <p>Experience how an agent loop executes step-by-step. Select a goal, set the max step budget, and step through the Observe → Act → Reflect loop.</p>
+
+        <div class="simulator-layout">
+          <div class="simulator-controls">
+            <div class="control-group">
+              <label class="control-label" for="goal-select">1. Select User Goal</label>
+              <select id="goal-select" class="control-input">
+                <option value="direct">"What is TypeScript?" (Direct Answer - 0 tools)</option>
+                <option value="search">"Find the authentication handler file" (1-2 tools)</option>
+                <option value="budget">"Exhaust step budget searching for nonexistent feature" (Exhaustion)</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="budget-input">2. Step Budget (Max Steps)</label>
+              <input type="number" id="budget-input" class="control-input" value="3" min="1" max="10">
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+              <button class="quiz-option" style="flex: 1;" onclick="resetAgent()">Reset Agent</button>
+              <button class="quiz-option" style="flex: 1; border-color: var(--accent-color);" id="btn-next" onclick="stepAgent()">Next Step ▶</button>
+            </div>
+          </div>
+
+          <div class="simulator-output">
+            <div class="simulator-controls" style="background-color: var(--card-bg); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span>Loop State:</span>
+                <strong id="state-label" style="color: var(--accent-color);">READY</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span>Step Count:</span>
+                <strong id="step-count">0</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span>Budget Remaining:</span>
+                <strong id="budget-remaining" style="color: var(--success-text);">3 / 3</strong>
+              </div>
+            </div>
+
+            <div class="control-label">Agent Execution Trace</div>
+            <div id="trace-log" class="chunks-container" style="max-height: 250px;">
+              <div class="chunk-card" style="text-align: center; color: var(--text-muted);">Press "Next Step" to start loop...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>4. Retrieval Practice</h2>
+        <p>Test your understanding of agent loop boundaries:</p>
+        <h3>Why is setting a strict step budget essential in an agent loop?</h3>
+
+        <div id="quiz-options">
+          <button class="quiz-option" onclick="selectOption(this, true, 'Correct! A step budget guarantees that an agent loop cannot run infinitely, forcing it to stop safely and summarize available evidence.')">
+            It stops execution loops when tool steps reach maximum limits.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Logging event traces is an observability mechanism, not a loop bounding technique.')">
+            It writes structured events when logs retry failed action traces.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Evaluating vector scores is part of semantic retrieval, not loop step budgeting.')">
+            It checks vector scores when rank tests select single chunks.
+          </button>
+        </div>
+        <div id="quiz-feedback" class="quiz-feedback"></div>
+      </section>
+
+      <section class="card">
+        <h2>5. Next Step: Test the Agent CLI</h2>
+        <p>We created a command-line script demonstrating the Observe-Act-Reflect loop with step budgeting. Run it in your terminal:</p>
+        <pre><code>bun run scripts/evaluate-agent.ts</code></pre>
+        <p>Observe the execution trace to verify:
+          <ul>
+            <li>How the agent chooses between direct response vs. tool execution.</li>
+            <li>How step budgeting enforces clean termination when tool limits are hit.</li>
+          </ul>
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>30-Day AI Learning Journey • Ask your AI teacher any follow-up questions! • <a href="0007-document-qa.html">Go to Day 14: Document Q&A App</a></p>
+    </footer>
+  </div>
+
+  <script>
+    let currentStep = 0;
+    let maxBudget = 3;
+    let isFinished = false;
+
+    const goalSelect = document.getElementById('goal-select');
+    const budgetInput = document.getElementById('budget-input');
+    const stateLabel = document.getElementById('state-label');
+    const stepCountLabel = document.getElementById('step-count');
+    const budgetRemainingLabel = document.getElementById('budget-remaining');
+    const traceLog = document.getElementById('trace-log');
+    const btnNext = document.getElementById('btn-next');
+
+    function resetAgent() {
+      currentStep = 0;
+      maxBudget = parseInt(budgetInput.value) || 3;
+      isFinished = false;
+      stateLabel.textContent = 'READY';
+      stateLabel.style.color = 'var(--accent-color)';
+      stepCountLabel.textContent = '0';
+      budgetRemainingLabel.textContent = `${maxBudget} / ${maxBudget}`;
+      budgetRemainingLabel.style.color = 'var(--success-text)';
+      traceLog.innerHTML = '<div class="chunk-card" style="text-align: center; color: var(--text-muted);">Press "Next Step" to start loop...</div>';
+      btnNext.disabled = false;
+    }
+
+    function stepAgent() {
+      if (isFinished) return;
+
+      const goal = goalSelect.value;
+      currentStep++;
+      const remaining = maxBudget - currentStep;
+
+      stepCountLabel.textContent = currentStep;
+      budgetRemainingLabel.textContent = `${Math.max(0, remaining)} / ${maxBudget}`;
+      if (remaining <= 0) budgetRemainingLabel.style.color = 'var(--error-text)';
+
+      if (currentStep === 1) {
+        traceLog.innerHTML = ''; // clear initial placeholder
+      }
+
+      if (goal === 'direct') {
+        // Direct answer scenario
+        addTraceCard('OBSERVE', `User request: "${goalSelect.options[goalSelect.selectedIndex].text}". Evaluated parametric knowledge: sufficient to answer directly without tools.`, 'var(--border-color)');
+        addTraceCard('ACT', 'Final Action: Generate direct response without tool invocation.', 'var(--success-text)');
+        addTraceCard('REFLECT', 'Goal achieved in 1 step. Execution completed safely.', 'var(--success-text)');
+        stateLabel.textContent = 'FINISHED (SUCCESS)';
+        stateLabel.style.color = 'var(--success-text)';
+        isFinished = true;
+        btnNext.disabled = true;
+        return;
+      }
+
+      if (goal === 'search') {
+        if (currentStep === 1) {
+          addTraceCard('OBSERVE', 'User request requires repository inspection. Checking tool capabilities.', 'var(--border-color)');
+          addTraceCard('ACT', 'Tool Call: search_code({ query: "auth" }) [Budget used: 1]', 'var(--accent-color)');
+          addTraceCard('REFLECT', 'Tool result: Found 1 match in src/auth.ts:12. Budget remaining: ' + remaining, 'var(--text-muted)');
+          stateLabel.textContent = 'LOOPING (STEP 1)';
+        } else {
+          addTraceCard('OBSERVE', 'Evaluating search results from step 1. Found exact target file src/auth.ts.', 'var(--border-color)');
+          addTraceCard('ACT', 'Final Action: Return answer citing src/auth.ts:12 with evidence.', 'var(--success-text)');
+          addTraceCard('REFLECT', 'Goal satisfied. Stopping agent loop.', 'var(--success-text)');
+          stateLabel.textContent = 'FINISHED (SUCCESS)';
+          stateLabel.style.color = 'var(--success-text)';
+          isFinished = true;
+          btnNext.disabled = true;
+        }
+        return;
+      }
+
+      if (goal === 'budget') {
+        if (remaining > 0) {
+          addTraceCard('OBSERVE', `Step ${currentStep}: Request requires deep search for nonexistent feature.`, 'var(--border-color)');
+          addTraceCard('ACT', `Tool Call: search_code({ query: "nonexistent_${currentStep}" }) [Budget used: ${currentStep}]`, 'var(--accent-color)');
+          addTraceCard('REFLECT', `Tool result: 0 matches found. Remaining budget: ${remaining}`, 'var(--text-muted)');
+          stateLabel.textContent = `LOOPING (STEP ${currentStep})`;
+        } else {
+          addTraceCard('OBSERVE', `Step ${currentStep}: Budget limit (${maxBudget}) reached!`, 'var(--error-text)');
+          addTraceCard('ACT', 'Safety Intercept: Step budget exhausted! Blocking further tool execution.', 'var(--error-text)');
+          addTraceCard('REFLECT', 'Final Answer: "Budget exhausted after ' + maxBudget + ' steps. Feature was not found in searched files."', 'var(--success-text)');
+          stateLabel.textContent = 'FINISHED (BUDGET EXHAUSTED)';
+          stateLabel.style.color = 'var(--error-text)';
+          isFinished = true;
+          btnNext.disabled = true;
+        }
+      }
+    }
+
+    function addTraceCard(stage, text, color) {
+      const card = document.createElement('div');
+      card.className = 'chunk-card';
+      card.style.padding = '0.6rem 0.8rem';
+      card.style.borderColor = color;
+      card.innerHTML = `
+        <div style="font-size: 0.75rem; font-weight: bold; color: ${color}; text-transform: uppercase;">${stage}</div>
+        <div style="font-size: 0.85rem; margin-top: 0.2rem;">${text}</div>
+      `;
+      traceLog.appendChild(card);
+      traceLog.scrollTop = traceLog.scrollHeight;
+    }
+
+    budgetInput.addEventListener('change', resetAgent);
+    goalSelect.addEventListener('change', resetAgent);
+
+    // Quiz logic
+    function selectOption(button, isCorrect, feedback) {
+      const options = document.querySelectorAll('#quiz-options .quiz-option');
+      options.forEach(opt => {
+        opt.disabled = true;
+        if (opt === button) {
+          opt.className = 'quiz-option ' + (isCorrect ? 'correct' : 'incorrect');
+        }
+      });
+      const feedbackDiv = document.getElementById('quiz-feedback');
+      feedbackDiv.style.display = 'block';
+      feedbackDiv.style.color = isCorrect ? 'var(--accent-color)' : 'red';
+      feedbackDiv.textContent = feedback;
+    }
+  </script>
+</body>
+</html>

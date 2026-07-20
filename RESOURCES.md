@@ -30,6 +30,10 @@
   Reference manual for building REST APIs with automatic OpenAPI docs and type validation using Pydantic. Use for: backend integration.
 - [Docs: Streamlit Documentation](https://docs.streamlit.io/)
   Getting started guide for creating interactive frontend data dashboards in Python. Use for: frontend UI client development.
+- [Paper: ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629)
+  Foundational research paper introducing the Thought-Action-Observation loop for LLMs. Use for: understanding agent reasoning loops.
+- [Guide: OpenAI Agents Guide](https://platform.openai.com/docs/guides/agents)
+  Overview of agent design patterns, tool calling capabilities, and workflow control strategies. Use for: learning practical agent loop architectures.
 
 ## Wisdom (Communities)
 

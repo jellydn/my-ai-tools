@@ -75,3 +75,19 @@ _Avoid_: Custom React client, templates-based frontend
 **Document Q&A**:
 An end-to-end RAG system that ingests document files, indexes their chunks into a vector store, retrieves relevant matches for user queries, and compiles grounded responses with source citations.
 _Avoid_: Search engine, simple chat completion
+
+**Agent Loop**:
+An execution loop around an LLM that iteratively observes context, decides whether to execute a tool or return a final answer, and reflects on tool results.
+_Avoid_: Linear chain, single-shot prompt
+
+**Observe-Act-Reflect**:
+The core design pattern of AI agents: Observe inputs and tool outputs, Act by invoking a tool or returning a response, and Reflect on remaining state and safety constraints.
+_Avoid_: Uncontrolled generation, static completion
+
+**Step Budget**:
+A strict limit on the maximum number of tool execution steps an agent may perform before it must stop and produce a final answer using already-collected evidence.
+_Avoid_: Infinite loop, unconstrained recursion
+
+**Bounded Execution**:
+Configuring strict step budgets, timeouts, read-only permissions, and sandbox constraints to guarantee that an agent stops safely and cannot run indefinitely.
+_Avoid_: Autonomous runaway process, unmonitored loop
