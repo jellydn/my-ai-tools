@@ -18,6 +18,7 @@ export const EXCLUDED_DIRS = new Set([
 	"auth",
 	".changeset",
 	".codex",
+	".openinterpreter",
 	".antigravitycli",
 	".claude",
 	".cline",

@@ -290,6 +290,37 @@ generate_codex_configs() {
 	log_success "Codex CLI configs generated"
 }
 
+generate_openinterpreter_configs() {
+	log_info "Generating Open Interpreter configs..."
+
+	if [ ! -d "$HOME/.openinterpreter" ]; then
+		log_warning "Open Interpreter config directory not found: $HOME/.openinterpreter"
+		return 0
+	fi
+
+	execute "mkdir -p $SCRIPT_DIR/configs/openinterpreter"
+	copy_single "$HOME/.openinterpreter/AGENTS.md" "$SCRIPT_DIR/configs/openinterpreter/AGENTS.md"
+	copy_single "$HOME/.openinterpreter/config.toml" "$SCRIPT_DIR/configs/openinterpreter/config.toml"
+
+	if [ -d "$HOME/.openinterpreter/themes" ]; then
+		copy_directory "$HOME/.openinterpreter/themes" "$SCRIPT_DIR/configs/openinterpreter/themes"
+		log_success "Open Interpreter themes generated"
+	fi
+
+	if [ -d "$HOME/.openinterpreter/agents" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/openinterpreter/agents"
+		if [ -n "$(ls -A "$HOME/.openinterpreter/agents" 2>/dev/null)" ]; then
+			if execute "cp -r '$HOME/.openinterpreter/agents'/* '$SCRIPT_DIR/configs/openinterpreter/agents'/ 2>/dev/null"; then
+				log_success "Open Interpreter agents exported"
+			fi
+		fi
+	fi
+
+	copy_single "$HOME/.openinterpreter/hooks.json" "$SCRIPT_DIR/configs/openinterpreter/hooks.json"
+
+	log_success "Open Interpreter configs generated"
+}
+
 generate_kimi_code_configs() {
 	log_info "Generating Kimi Code CLI configs..."
 
@@ -911,6 +942,9 @@ main() {
 	echo
 
 	generate_codex_configs
+	echo
+
+	generate_openinterpreter_configs
 	echo
 
 	generate_kimi_code_configs

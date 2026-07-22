@@ -38,6 +38,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 	AMP_INSTALLED=false
 	# Track whether --migrate-gemini flag was passed (standalone Gemini→Antigravity migration)
 	MIGRATE_GEMINI=false
+	MIGRATE_CODEX=false
 	for arg in "$@"; do
 		case $arg in
 		--dry-run)
@@ -66,6 +67,10 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 			MIGRATE_GEMINI=true
 			shift
 			;;
+		--migrate-codex)
+			MIGRATE_CODEX=true
+			shift
+			;;
 		--rollback)
 			log_info "Rolling back last transaction..."
 			rollback_transaction
@@ -73,7 +78,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 			;;
 		*)
 			echo "Unknown option: $arg"
-			echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback]"
+			echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--migrate-codex] [--rollback]"
 			exit 1
 			;;
 		esac
@@ -272,6 +277,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/opencode" "$BACKUP_DIR" "opencode"
 		copy_config_dir "$HOME/.config/amp" "$BACKUP_DIR" "amp"
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
+		copy_config_dir "$HOME/.openinterpreter" "$BACKUP_DIR" "openinterpreter"
 		copy_config_dir "$HOME/.kimi-code" "$BACKUP_DIR" "kimi-code"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
 		copy_config_dir "$HOME/.config/kilo" "$BACKUP_DIR" "kilo"
@@ -450,6 +456,11 @@ copy_configurations() {
 		copy_codex_configs
 	else
 		log_info "Skipping codex config install (not in -y allowlist)"
+	fi
+	if tool_allowed "openinterpreter"; then
+		copy_openinterpreter_configs
+	else
+		log_info "Skipping openinterpreter config install (not in -y allowlist)"
 	fi
 	if tool_allowed "kimi_code"; then
 		copy_kimi_code_configs
@@ -1061,6 +1072,43 @@ copy_codex_configs() {
 	log_success "Codex CLI configs copied"
 }
 
+copy_openinterpreter_configs() {
+	if [ ! -f "$SCRIPT_DIR/configs/openinterpreter/config.toml" ] && [ ! -f "$SCRIPT_DIR/configs/openinterpreter/AGENTS.md" ]; then
+		log_info "No Open Interpreter configs in repo - skipping"
+		return 0
+	fi
+
+	local oi_status
+	oi_status=$(detect_tool --detailed "interpreter" "$HOME/.openinterpreter") || oi_status="missing"
+	if [ "$oi_status" = "missing" ]; then
+		log_info "Open Interpreter CLI not detected - copying repo configs to ~/.openinterpreter"
+	else
+		log_info "Detected Open Interpreter (via $oi_status)"
+	fi
+
+	execute_quoted mkdir -p "$HOME/.openinterpreter"
+
+	copy_config_file "$SCRIPT_DIR/configs/openinterpreter/AGENTS.md" "$HOME/.openinterpreter/" || true
+	copy_config_file "$SCRIPT_DIR/configs/openinterpreter/config.toml" "$HOME/.openinterpreter/" || true
+
+	if [ -d "$SCRIPT_DIR/configs/openinterpreter/themes" ]; then
+		execute_quoted mkdir -p "$HOME/.openinterpreter/themes"
+		safe_copy_dir "$SCRIPT_DIR/configs/openinterpreter/themes" "$HOME/.openinterpreter/themes"
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/openinterpreter/agents" ]; then
+		execute_quoted rm -rf "$HOME/.openinterpreter/agents"
+		safe_copy_dir "$SCRIPT_DIR/configs/openinterpreter/agents" "$HOME/.openinterpreter/agents"
+		log_success "Open Interpreter agents copied"
+	fi
+
+	if [ -f "$SCRIPT_DIR/configs/openinterpreter/hooks.json" ]; then
+		copy_config_file "$SCRIPT_DIR/configs/openinterpreter/hooks.json" "$HOME/.openinterpreter/" || true
+	fi
+
+	log_success "Open Interpreter configs copied"
+}
+
 copy_kimi_code_configs() {
 	local kimi_status
 	kimi_status=$(detect_tool --detailed "kimi" "$HOME/.kimi-code") || kimi_status="missing"
@@ -1185,6 +1233,88 @@ configure_antigravity_statusline() {
 		log_warning "Failed to configure Antigravity status line"
 	fi
 	rm -f "$updated_file"
+}
+
+# Copy portable Codex home artifacts into ~/.openinterpreter (no auth.json / sqlite).
+# Does not copy secrets; re-auth MCP providers after migration.
+_migrate_codex_home_to_openinterpreter() {
+	local codex_home="$HOME/.codex"
+	local oi_home="$HOME/.openinterpreter"
+
+	if [ ! -d "$codex_home" ]; then
+		log_info "No ~/.codex directory — skipping local Codex home import"
+		return 0
+	fi
+
+	log_info "Importing portable files from ~/.codex into ~/.openinterpreter..."
+	execute_quoted mkdir -p "$oi_home"
+
+	if [ -f "$codex_home/AGENTS.md" ]; then
+		copy_config_file "$codex_home/AGENTS.md" "$oi_home/" || true
+		log_success "Copied AGENTS.md from Codex home"
+	fi
+
+	if [ -d "$codex_home/agents" ] && [ -n "$(ls -A "$codex_home/agents" 2>/dev/null)" ]; then
+		execute_quoted mkdir -p "$oi_home/agents"
+		safe_copy_dir "$codex_home/agents" "$oi_home/agents"
+		log_success "Copied agents/ from Codex home"
+	fi
+
+	if [ -f "$codex_home/hooks.json" ]; then
+		copy_config_file "$codex_home/hooks.json" "$oi_home/" || true
+		log_success "Copied hooks.json from Codex home (review hook commands before use)"
+	fi
+
+	if [ -d "$codex_home/themes" ]; then
+		execute_quoted mkdir -p "$oi_home/themes"
+		safe_copy_dir "$codex_home/themes" "$oi_home/themes"
+		log_success "Copied themes/ from Codex home"
+	fi
+
+	log_warning "Skipped from ~/.codex: auth.json, config.json, SQLite DBs, cache, plugins cache"
+	log_warning "Repo MCP baseline is applied in the next step (config.toml from configs/openinterpreter/)"
+}
+
+# Standalone Codex → Open Interpreter migration (Codex fork)
+# Triggered by --migrate-codex. Installs interpreter, imports portable ~/.codex
+# files, then applies this repo's configs/openinterpreter/ overlay.
+migrate_codex_to_openinterpreter() {
+	echo "╔══════════════════════════════════════════════════════════════╗"
+	echo "║        Codex CLI → Open Interpreter Migration                ║"
+	echo "╚══════════════════════════════════════════════════════════════╝"
+	echo
+
+	log_info "Open Interpreter is a Codex-fork harness; inspect both homes:"
+	log_info "  ~/.codex/              (preserved — not deleted)"
+	log_info "  ~/.openinterpreter/    (target)"
+	echo
+
+	log_info "Step 1/3: Installing Open Interpreter..."
+	install_openinterpreter
+	echo
+
+	log_info "Step 2/3: Importing portable Codex home files..."
+	_migrate_codex_home_to_openinterpreter
+	echo
+
+	log_info "Step 3/3: Applying my-ai-tools Open Interpreter configs..."
+	copy_openinterpreter_configs
+	echo
+
+	log_success "Migration complete!"
+	echo
+	echo "Review before relying on this setup:"
+	echo "  • MCP servers with custom auth, headers, or transports"
+	echo "  • hooks.json commands (paths may still reference ~/.codex)"
+	echo "  • Skill scripts under ~/.agents/skills/ (shared with Codex)"
+	echo "  • Agent permissions in ~/.openinterpreter/agents/"
+	echo "  • Do not copy auth.json blindly — re-authenticate providers"
+	echo
+	echo "Next steps:"
+	echo "  1. Run 'interpreter' and use /debug-config in the TUI"
+	echo "  2. Compare: diff <(rg -n mcp_servers ~/.codex/config.toml 2>/dev/null) <(rg -n mcp_servers ~/.openinterpreter/config.toml 2>/dev/null) || true"
+	echo "  3. Docs: https://www.openinterpreter.com/docs/terminal/mcp"
+	echo
 }
 
 # Standalone Gemini CLI → Antigravity CLI migration
@@ -2253,7 +2383,7 @@ install_local_skills() {
 	done
 
 	log_success "Skills installed to universal directory: $UNIVERSAL_SKILLS_DIR"
-	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Kimi Code, Gemini, Antigravity, Cursor, Pi, Command Code, Grok, MiMo-Code, Cline, and more"
+	log_info "This directory is automatically used by: Claude, OpenCode, Amp, Codex, Open Interpreter, Kimi Code, Gemini, Antigravity, Cursor, Pi, Command Code, Grok, MiMo-Code, Cline, and more"
 
 	# Create symlinks from tool-specific directories to universal directory
 	create_tool_skills_symlinks "$UNIVERSAL_SKILLS_DIR"
@@ -2369,11 +2499,18 @@ main() {
 		exit 0
 	fi
 
+	if [ "$MIGRATE_CODEX" = true ]; then
+		preflight_check
+		echo
+		migrate_codex_to_openinterpreter
+		exit 0
+	fi
+
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
-	echo "║  Claude • OpenCode • Amp • CCS • Codex • Kimi Code • Gemini          ║"
-	echo "║  Antigravity • Pi • Kilo • Copilot • Cursor • Command Code           ║"
-	echo "║  Factory Droid • Cline • Grok • MiMo-Code • herdr                    ║"
+	echo "║  Claude • OpenCode • Amp • CCS • Codex • Open Interpreter            ║"
+	echo "║  Kimi Code • Gemini • Antigravity • Pi • Kilo • Copilot • Cursor     ║"
+	echo "║  Command Code • Factory Droid • Cline • Grok • MiMo-Code • herdr     ║"
 	echo "║  Qoder CLI • Kiro • Codiff • Devin                                   ║"
 	echo "║  ctx                                                                 ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
@@ -2435,6 +2572,13 @@ main() {
 		install_codex
 	else
 		log_info "Skipping codex installer (not in -y allowlist)"
+	fi
+	echo
+
+	if tool_allowed "openinterpreter"; then
+		install_openinterpreter
+	else
+		log_info "Skipping openinterpreter installer (not in -y allowlist)"
 	fi
 	echo
 
@@ -2589,7 +2733,7 @@ main() {
 	echo "Next steps:"
 	echo "  1. Restart your terminal"
 	echo "  2. Run 'claude' to start Claude Code"
-	echo "     Other CLIs: 'kimi' (Kimi Code), 'agy' (Antigravity), 'cmd' (Command Code), 'grok', 'mimo', 'ctx'"
+	echo "     Other CLIs: 'interpreter' (Open Interpreter), 'kimi', 'agy', 'cmd', 'grok', 'mimo', 'ctx'"
 	echo "  3. Enable plugins with 'claude plugin enable <plugin-name>'"
 	echo "  4. Check out the README.md for more information"
 	echo
