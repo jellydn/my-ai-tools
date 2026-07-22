@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 12/30: Prompt Templates & registries</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="day-badge">Day 12/30 — Prompt Templates</span>
+      <h1>Reusable & Type-Safe Prompt Templates</h1>
+      <p>How constructing prompt templates with schemas and centralized registries keeps AI features maintainable and safe.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1. The Problem with Inline Prompts</h2>
+        <p>Hardcoding prompt strings directly inside application business logic is an AI development anti-pattern. It makes prompts difficult to version, impossible to test in isolation, and vulnerable to runtime errors when required parameters are missing or malformed.</p>
+        <p>A <strong>Prompt Template</strong> solves this by separating system directives from dynamic variables. Centralizing templates inside a <strong>Prompt Registry</strong> with validation schemas ensures prompt rendering is predictable, modular, and testable.</p>
+      </section>
+
+      <section class="card">
+        <h2>2. Connecting to jellydn-ai-launcher PR 78</h2>
+        <p>In <strong>PR 78</strong> of the AI Launcher, we replaced hardcoded summary prompts with a modular prompt registry:</p>
+        <ul>
+          <li><strong>Type-Safe Validation:</strong> Every prompt template is defined using a <strong>Zod schema</strong>. Inputs are parsed and validated at runtime before prompt compilation.</li>
+          <li><strong>Central Registry:</strong> Prompts are indexed by ID and version (e.g. <code>summarize-content v1.0.0</code>), supporting formatted inspection and auto-generation listing options.</li>
+          <li><strong>Grounded Variables:</strong> Dynamic options like <code>maxLength</code>, <code>audience</code>, or <code>mode</code> (TL;DR vs. technical) compile instructions programmatically to keep inputs consistent.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>3. Prompt Registry Builder Simulator</h2>
+        <p>Configure the variables below to watch the Zod validation engine parsing inputs and dynamically compiling System and User prompts.</p>
+
+        <div class="simulator-layout">
+          <div class="simulator-controls">
+            <div class="control-group">
+              <label class="control-label" for="prompt-select">Select Prompt Template</label>
+              <select id="prompt-select" class="control-input">
+                <option value="summarize">summarize-content (v1.0.0)</option>
+                <option value="classify">classify-input (v1.0.0)</option>
+                <option value="extract">extract-meeting (v1.0.0)</option>
+              </select>
+            </div>
+
+            <!-- Dynamic Variables Group -->
+            <div id="variables-inputs">
+              <div class="control-group">
+                <label class="control-label" for="input-content">Content (Required)</label>
+                <textarea id="input-content" class="control-input" style="height: 60px; font-size: 0.9rem;">TypeScript is a strongly typed programming language built on JavaScript.</textarea>
+              </div>
+
+              <div class="control-group" id="group-mode">
+                <label class="control-label" for="input-mode">Summary Mode</label>
+                <select id="input-mode" class="control-input">
+                  <option value="tldr">TL;DR (Short Summary)</option>
+                  <option value="technical" selected>Technical (Keep Code/Terms)</option>
+                </select>
+              </div>
+
+              <div class="control-group" id="group-audience">
+                <label class="control-label" for="input-audience">Audience (Optional)</label>
+                <input type="text" id="input-audience" class="control-input" value="TypeScript Developers">
+              </div>
+            </div>
+
+            <!-- Live Validation Box -->
+            <div id="validation-box" class="chunk-card" style="border-color: var(--success-text); background-color: var(--success-bg); margin-top: 1rem; padding: 0.5rem 1rem;">
+              <span id="validation-text" style="font-size: 0.85rem; font-weight: bold; color: var(--success-text);">✓ Inputs valid (Zod validation passed)</span>
+            </div>
+          </div>
+
+          <div class="simulator-output">
+            <div class="control-label">Compiled Prompt Messages</div>
+
+            <div class="chunk-card" style="border-color: var(--accent-color); background-color: var(--card-bg);">
+              <div class="chunk-header">
+                <span>System Directive</span>
+              </div>
+              <pre><code id="system-display" style="white-space: pre-wrap; font-size: 0.8rem;">System instructions...</code></pre>
+            </div>
+
+            <div class="chunk-card" style="border-color: var(--border-color); background-color: var(--card-bg);">
+              <div class="chunk-header">
+                <span>User Input Payload</span>
+              </div>
+              <pre><code id="user-display" style="white-space: pre-wrap; font-size: 0.8rem;">User inputs...</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>4. Retrieval Practice</h2>
+        <p>Test your understanding of prompt registry design:</p>
+        <h3>Why does validating prompt variables with Zod improve AI feature safety?</h3>
+
+        <div id="quiz-options">
+          <button class="quiz-option" onclick="selectOption(this, true, 'Correct! Validating variables at runtime rejects invalid values before communicating with external LLM APIs.')">
+            It rejects bad input values before launching remote LLM calls.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Structured log traces are handled by observability modules rather than prompt schemas.')">
+            It writes structured query execution events to database logs.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Similarity distance calculations are the retriever\'s job, not the prompt validation\'s.')">
+            It runs standard vector search tests between separate chunks.
+          </button>
+        </div>
+        <div id="quiz-feedback" class="quiz-feedback"></div>
+      </section>
+
+      <section class="card">
+        <h2>5. Next Step: Test the Prompt Registry</h2>
+        <p>We created a CLI script implementing the modular prompt registry design. Try running the template tester:</p>
+        <pre><code>bun run scripts/evaluate-templates.ts</code></pre>
+        <p>Check the console printout to see:
+          <ul>
+            <li>How empty required variables trigger detailed runtime validation messages.</li>
+            <li>How the classify and extract outputs are structured for clean JSON parsing.</li>
+          </ul>
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>30-Day AI Learning Journey • Ask your AI teacher any follow-up questions! • <a href="0004-retrieval-quality.html">Go to Day 11: Retrieval Quality</a></p>
+    </footer>
+  </div>
+
+  <script>
+    const promptSelect = document.getElementById('prompt-select');
+    const inputContent = document.getElementById('input-content');
+    const inputMode = document.getElementById('input-mode');
+    const inputAudience = document.getElementById('input-audience');
+
+    const groupMode = document.getElementById('group-mode');
+    const groupAudience = document.getElementById('group-audience');
+
+    const validationBox = document.getElementById('validation-box');
+    const validationText = document.getElementById('validation-text');
+    const systemDisplay = document.getElementById('system-display');
+    const userDisplay = document.getElementById('user-display');
+
+    function updateSimulation() {
+      const selected = promptSelect.value;
+      const content = inputContent.value.trim();
+
+      // Show/hide relevant inputs based on template type
+      if (selected === 'summarize') {
+        groupMode.style.display = 'block';
+        groupAudience.style.display = 'block';
+      } else {
+        groupMode.style.display = 'none';
+        groupAudience.style.display = 'none';
+      }
+
+      // Input validation check (reproducing zod's behavior)
+      if (content.length === 0) {
+        validationBox.style.borderColor = 'var(--error-text)';
+        validationBox.style.backgroundColor = 'var(--error-bg)';
+        validationText.style.color = 'var(--error-text)';
+        validationText.textContent = `✗ ZodError: [content] is required.`;
+        systemDisplay.textContent = 'Validation error - fix inputs to render.';
+        userDisplay.textContent = 'Validation error - fix inputs to render.';
+        return;
+      }
+
+      validationBox.style.borderColor = 'var(--success-text)';
+      validationBox.style.backgroundColor = 'var(--success-bg)';
+      validationText.style.color = 'var(--success-text)';
+      validationText.textContent = `✓ Inputs valid (Zod validation passed)`;
+
+      if (selected === 'summarize') {
+        const mode = inputMode.value;
+        const audience = inputAudience.value.trim();
+        systemDisplay.textContent = `You are a summarization assistant. Return only a JSON object matching this schema:\n{\n  "title": "...",\n  "summary": "...",\n  "key_points": []\n}`;
+        userDisplay.textContent = `Summarize the following content.\n\nMode: ${mode}\nConstraints: ${audience ? `Write for ${audience}.` : 'None'}\n\nContent:\n---\n${content}\n---`;
+      } else if (selected === 'classify') {
+        systemDisplay.textContent = `You classify content for an AI workflow router.\nReturn JSON mapping to: article, meeting, git-diff, email, code, or unknown.`;
+        userDisplay.textContent = `Classify this content:\n\n---\n${content}\n---`;
+      } else {
+        systemDisplay.textContent = `You are a structured meeting assistant.\nExtract summary, action items (owner, task, due), and risks.`;
+        userDisplay.textContent = `Transcript:\n"""\n${content}\n"""`;
+      }
+    }
+
+    promptSelect.addEventListener('change', updateSimulation);
+    inputContent.addEventListener('input', updateSimulation);
+    inputMode.addEventListener('change', updateSimulation);
+    inputAudience.addEventListener('input', updateSimulation);
+
+    updateSimulation();
+
+    // Quiz logic
+    function selectOption(button, isCorrect, feedback) {
+      const options = document.querySelectorAll('.quiz-option');
+      options.forEach(opt => {
+        opt.disabled = true;
+        if (opt === button) {
+          opt.className = 'quiz-option ' + (isCorrect ? 'correct' : 'incorrect');
+        }
+      });
+      const feedbackDiv = document.getElementById('quiz-feedback');
+      feedbackDiv.style.display = 'block';
+      feedbackDiv.style.color = isCorrect ? 'var(--accent-color)' : 'red';
+      feedbackDiv.textContent = feedback;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 8/30: Embeddings & Vector Search</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="day-badge">Day 8/30 — Embeddings</span>
+      <h1>Vector Embeddings and Semantic Search</h1>
+      <p>How representing text as coordinates in space allows computers to search by concept rather than keywords.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1. What is an Embedding?</h2>
+        <p>A computer cannot read meaning, but it excels at geometry. An <strong>embedding</strong> is a process that translates text (words, sentences, or code chunks) into a list of numbers called a <strong>vector</strong>. This vector represents coordinates in a high-dimensional space.</p>
+        <p>If two pieces of text share a similar meaning, their coordinates will be close to each other. By computing the angle or distance between these vectors, we perform <strong>semantic search</strong>.</p>
+        <blockquote>
+          <p>Key Idea: "Feline" and "Cat" share no characters, but in embedding space, their vector angles point in almost the same direction.</p>
+        </blockquote>
+      </section>
+
+      <section class="card">
+        <h2>2. Interactive Vector Similarity Simulator</h2>
+        <p>To keep the geometry easy to visualize, this simulator uses a <strong>4-Dimensional Vector Space</strong>:</p>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">
+          Coordinates represent: <code>[Database-ness, Frontend-ness, Errors/Bugs, Animal-ness]</code>
+        </p>
+
+        <div class="simulator-layout">
+          <div class="simulator-controls">
+            <div class="control-group">
+              <label class="control-label" for="query-select">Choose a Semantic Query</label>
+              <select id="query-select" class="control-input">
+                <option value="relational">"relational" -> [1.0, 0.0, 0.0, 0.0]</option>
+                <option value="visual">"visual" -> [0.0, 1.0, 0.0, 0.0]</option>
+                <option value="crash">"crash" -> [0.0, 0.0, 1.0, 0.0]</option>
+                <option value="feline">"feline" -> [0.0, 0.0, 0.0, 1.0]</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label">Computed Query Vector</label>
+              <pre><code id="query-vector-display">[0.0, 0.0, 0.0, 0.0]</code></pre>
+            </div>
+          </div>
+
+          <div class="simulator-output">
+            <div class="control-label">Ranked Notes (Similarity Rank)</div>
+            <div id="notes-list" class="chunks-container">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>3. The Mathematics of Cosine Similarity</h2>
+        <p>To find how close two vectors $A$ and $B$ are, we calculate their <strong>Cosine Similarity</strong>. This measures the cosine of the angle between them, returning a score between $-1$ (opposite direction) and $1$ (same direction):</p>
+        <pre><code>Cosine Similarity = (A • B) / (||A|| * ||B||)</code></pre>
+        <ul>
+          <li><strong>Dot Product (A • B):</strong> Multiply matching coordinates and sum them: <code>(A[0]*B[0]) + (A[1]*B[1]) + ...</code></li>
+          <li><strong>Magnitude (||A||):</strong> The length of the vector, calculated using the Pythagorean theorem: <code>sqrt(sum(coords^2))</code></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>4. Retrieval Practice</h2>
+        <p>Test your understanding of vector similarity:</p>
+        <h3>How does semantic search differ from keyword-based search?</h3>
+
+        <div id="quiz-options">
+          <button class="quiz-option" onclick="selectOption(this, true, 'Correct! Semantic search evaluates vectors of meaning rather than matching characters.')">
+            It matches semantic concepts instead of literal characters.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Relational columns are standard database structures; embeddings map coordinates.')">
+            It indexes structural database columns instead of contents.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Calculating cosine similarity is a mathematical function, not binary sorting.')">
+            It runs similarity calculations instead of binary matching.
+          </button>
+        </div>
+        <div id="quiz-feedback" class="quiz-feedback"></div>
+      </section>
+
+      <section class="card">
+        <h2>5. Next Step: Run the CLI Semantic Search Tool</h2>
+        <p>We created a command-line script demonstrating the vector math of cosine similarity on these local notes. Run it in your terminal:</p>
+        <pre><code>bun run scripts/semantic-search.ts</code></pre>
+        <p>Review the printed results and document your answers for your learning record:</p>
+        <ul>
+          <li>Did the query "feline" retrieve the note about kittens, despite sharing zero words?</li>
+          <li>Why is cosine similarity preferred over simple dot product when vectors have different lengths?</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <p>30-Day AI Learning Journey • Ask your AI teacher any follow-up questions! • <a href="0002-chunking.html">Go to Day 9: Chunking</a></p>
+    </footer>
+  </div>
+
+  <script>
+    // Simulator target notes
+    const TARGET_NOTES = [
+      {
+        text: "Configure PostgreSQL connection pool for backend server.",
+        vector: [0.9, 0.1, 0.0, 0.0],
+        displayVec: "[0.9, 0.1, 0.0, 0.0]"
+      },
+      {
+        text: "Style the dashboard using CSS grid and dark theme variables.",
+        vector: [0.1, 0.9, 0.0, 0.0],
+        displayVec: "[0.1, 0.9, 0.0, 0.0]"
+      },
+      {
+        text: "Fix null pointer exception crash in API auth handler.",
+        vector: [0.3, 0.0, 0.9, 0.0],
+        displayVec: "[0.3, 0.0, 0.9, 0.0]"
+      },
+      {
+        text: "Adopted a stray kitten from the animal rescue shelter.",
+        vector: [0.0, 0.0, 0.0, 1.0],
+        displayVec: "[0.0, 0.0, 0.0, 1.0]"
+      }
+    ];
+
+    const QUERY_VECTORS = {
+      relational: [1.0, 0.0, 0.0, 0.0],
+      visual: [0.0, 1.0, 0.0, 0.0],
+      crash: [0.0, 0.0, 1.0, 0.0],
+      feline: [0.0, 0.0, 0.0, 1.0]
+    };
+
+    const querySelect = document.getElementById('query-select');
+    const queryDisplay = document.getElementById('query-vector-display');
+    const notesList = document.getElementById('notes-list');
+
+    function dotProduct(vecA, vecB) {
+      return vecA.reduce((sum, val, idx) => sum + val * vecB[idx], 0);
+    }
+
+    function magnitude(vec) {
+      return Math.sqrt(vec.reduce((sum, val) => sum + val * val, 0));
+    }
+
+    function cosineSimilarity(vecA, vecB) {
+      const dot = dotProduct(vecA, vecB);
+      const magA = magnitude(vecA);
+      const magB = magnitude(vecB);
+      if (magA === 0 || magB === 0) return 0;
+      return dot / (magA * magB);
+    }
+
+    function updateSimulation() {
+      const selectedQuery = querySelect.value;
+      const queryVec = QUERY_VECTORS[selectedQuery];
+
+      queryDisplay.textContent = JSON.stringify(queryVec);
+
+      // Rank notes by similarity score
+      const ranked = TARGET_NOTES.map(note => {
+        const score = cosineSimilarity(queryVec, note.vector);
+        return { ...note, score };
+      }).sort((a, b) => b.score - a.score);
+
+      notesList.innerHTML = '';
+      ranked.forEach((note, index) => {
+        const isMatch = note.score > 0;
+        const card = document.createElement('div');
+        card.className = 'chunk-card';
+        if (isMatch) {
+          card.style.borderColor = 'var(--accent-color)';
+          card.style.backgroundColor = 'var(--accent-bg)';
+        }
+
+        card.innerHTML = `
+          <div class="chunk-header">
+            <span>Rank #${index + 1}</span>
+            <span style="font-size: 0.85rem; font-weight: bold; color: var(--accent-color)">
+              Similarity: ${note.score.toFixed(4)}
+            </span>
+          </div>
+          <p style="margin-bottom: 0.5rem; font-size: 0.9rem;">${note.text}</p>
+          <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted)">
+            Vector: ${note.displayVec}
+          </div>
+        `;
+        notesList.appendChild(card);
+      });
+    }
+
+    querySelect.addEventListener('change', updateSimulation);
+    updateSimulation();
+
+    // Quiz logic
+    function selectOption(button, isCorrect, feedback) {
+      const options = document.querySelectorAll('.quiz-option');
+      options.forEach(opt => {
+        opt.disabled = true;
+        if (opt === button) {
+          opt.className = 'quiz-option ' + (isCorrect ? 'correct' : 'incorrect');
+        }
+      });
+      const feedbackDiv = document.getElementById('quiz-feedback');
+      feedbackDiv.style.display = 'block';
+      feedbackDiv.style.color = isCorrect ? 'var(--accent-color)' : 'red';
+      feedbackDiv.textContent = feedback;
+    }
+  </script>
+</body>
+</html>
