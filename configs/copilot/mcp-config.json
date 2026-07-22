@@ -53,6 +53,13 @@
 			},
 			"tools": ["*"]
 		},
+		"user-memory": {
+			"type": "local",
+			"command": "user-memory-mcp",
+			"args": [],
+			"env": {},
+			"tools": ["*"]
+		},
 		"sem": {
 			"type": "local",
 			"transport": "stdio",

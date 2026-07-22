@@ -2,6 +2,9 @@
 	"name": "my-ai-tools",
 	"version": "1.0.0",
 	"type": "module",
+	"workspaces": [
+		"packages/*"
+	],
 	"engines": {
 		"bun": ">=1.0.0",
 		"node": ">=18.0.0"
@@ -11,7 +14,11 @@
 		"index:browser": "tsx scripts/index-browser.ts",
 		"dev": "tsx server.ts",
 		"start": "tsx server.ts",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"build:packages": "npm run build --workspaces --if-present",
+		"test:packages": "npm test --workspaces --if-present",
+		"link:user-memory": "npm run build --workspace @jellydn/user-memory-mcp && npm link --workspace @jellydn/user-memory-mcp",
+		"test:user-memory": "npm test --workspace @jellydn/user-memory-mcp"
 	},
 	"dependencies": {
 		"@hono/node-server": "^2.0.8",

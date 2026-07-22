@@ -58,6 +58,11 @@
 			},
 			"type": "local"
 		},
+		"user-memory": {
+			"command": ["user-memory-mcp"],
+			"enabled": true,
+			"type": "local"
+		},
 		"context7": {
 			"command": ["npx", "-y", "@upstash/context7-mcp@latest"],
 			"enabled": true,

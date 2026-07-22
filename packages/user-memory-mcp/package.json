@@ -1,0 +1,37 @@
+{
+	"name": "@jellydn/user-memory-mcp",
+	"version": "0.1.0",
+	"description": "Explicit, cross-project user preference memory for MCP clients",
+	"type": "module",
+	"bin": {
+		"user-memory-mcp": "dist/server.js"
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"test": "node --import tsx --test tests/*.test.ts",
+		"prepack": "npm run build",
+		"prelink": "npm run build"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.29.0",
+		"proper-lockfile": "^4.1.2",
+		"zod": "^4.0.0"
+	},
+	"devDependencies": {
+		"@types/node": "^24.0.0",
+		"@types/proper-lockfile": "^4.1.4",
+		"tsx": "^4.23.0",
+		"typescript": "^7.0.0"
+	},
+	"license": "MIT",
+	"publishConfig": {
+		"access": "public"
+	}
+}

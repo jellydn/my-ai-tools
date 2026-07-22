@@ -3,6 +3,8 @@ FROM node:24-slim
 WORKDIR /app
 
 COPY package.json package-lock.json ./
+# Workspace package manifests must exist before npm ci (covers packages/*).
+COPY packages/ ./packages/
 RUN npm ci
 
 COPY . .

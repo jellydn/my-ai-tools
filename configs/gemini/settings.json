@@ -11,6 +11,12 @@
 			},
 			"timeout": 60000
 		},
+		"user-memory": {
+			"command": "user-memory-mcp",
+			"args": [],
+			"env": {},
+			"timeout": 60000
+		},
 		"qmd": {
 			"env": {},
 			"command": "qmd",

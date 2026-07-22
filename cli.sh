@@ -748,6 +748,10 @@ install_mcp_servers_from_registry() {
 						log_info "Auto-installing prerequisite: $prereq"
 						install_sem_now && continue
 						;;
+					"user-memory-mcp")
+						log_info "Auto-installing prerequisite: $prereq"
+						install_user_memory_mcp_now && continue
+						;;
 					esac
 					prereqs_met=false
 					missing_prereqs+=("$prereq")

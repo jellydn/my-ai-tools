@@ -64,6 +64,14 @@
 			"requires": [],
 			"category": "knowledge"
 		},
+		"user-memory": {
+			"name": "user-memory",
+			"description": "explicit cross-project user preferences for AI coding agents",
+			"command": "user-memory-mcp",
+			"args": [],
+			"requires": ["user-memory-mcp"],
+			"category": "knowledge"
+		},
 		"sem": {
 			"name": "sem",
 			"description": "semantic version control - entity-level diffs, blame, and impact analysis on top of git",

@@ -35,6 +35,11 @@
 			"command": "npx",
 			"args": ["-y", "@agentmemory/mcp"]
 		},
+		"user-memory": {
+			"alwaysAllow": [],
+			"command": "user-memory-mcp",
+			"args": []
+		},
 		"sem": {
 			"alwaysAllow": [],
 			"command": "sem-mcp",
