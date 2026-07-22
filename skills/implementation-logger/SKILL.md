@@ -337,7 +337,7 @@ like user tokens. This wasn't in our initial spec.
 
 **Temporary logs** (during work):
 ```text
-.implementation-log.md  # Git ignored, working file
+.planning/.implementation-log-[current-date]-[slug].md  # Git ignored, working file
 ```
 
 **Permanent documentation** (after completion):
