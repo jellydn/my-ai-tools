@@ -1,29 +1,18 @@
-FROM node:24-slim
-
+FROM oven/bun:1 AS build
 WORKDIR /app
-
-COPY package.json package-lock.json ./
-RUN npm ci
-
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 COPY . .
+RUN --mount=type=secret,id=OPENAI_API_KEY,env=OPENAI_API_KEY \
+    if [ -n "$OPENAI_API_KEY" ]; then bun run index && bun run index:browser; fi
 
-ARG OPENAI_BASE_URL=https://openrouter.ai/api/v1
-ARG OPENAI_MODEL=openrouter/free
-ARG OPENAI_EMBEDDING_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free
-ENV OPENAI_BASE_URL=${OPENAI_BASE_URL}
-ENV OPENAI_MODEL=${OPENAI_MODEL}
-ENV OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL}
-
-# Secret is only visible in this RUN; export so npm run index inherits a trimmed key.
-RUN --mount=type=secret,id=OPENAI_API_KEY,required=true \
-	export OPENAI_API_KEY="$(tr -d '\r\n' < /run/secrets/OPENAI_API_KEY | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')" && \
-	test -n "$OPENAI_API_KEY" && \
-	npm run index && \
-	npm run index:browser
-
-ENV NODE_ENV=production
-ENV NODE_OPTIONS=--max-old-space-size=512
-
+FROM oven/bun:1-slim
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=build --chown=bun:bun /app /app
+RUN mkdir -p /var/lib/my-ai-bot /tmp/my-ai-bot && chown bun:bun /var/lib/my-ai-bot /tmp/my-ai-bot
+ENV NODE_ENV=production BOT_DATA_DIR=/var/lib/my-ai-bot BOT_WORKSPACE_ROOT=/tmp/my-ai-bot
+USER bun
+VOLUME ["/var/lib/my-ai-bot"]
 EXPOSE 3000
-
-CMD ["npm", "start"]
+CMD ["bun", "run", "server.ts"]

@@ -7,11 +7,13 @@
 		"node": ">=18.0.0"
 	},
 	"scripts": {
+		"test": "bun test",
 		"index": "tsx scripts/index-repo.ts",
 		"index:browser": "tsx scripts/index-browser.ts",
 		"dev": "tsx server.ts",
+		"bot:dev": "tsx --watch server.ts",
 		"start": "tsx server.ts",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "bun node_modules/typescript/lib/tsc.js --noEmit"
 	},
 	"dependencies": {
 		"@hono/node-server": "^2.0.8",
@@ -20,6 +22,7 @@
 		"onnxruntime-node": "^1.27.0",
 		"openai": "^6.0.0",
 		"tsx": "^4.23.0",
+		"yaml": "^2.9.0",
 		"zod": "^4.0.0"
 	},
 	"devDependencies": {
