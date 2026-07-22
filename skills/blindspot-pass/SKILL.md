@@ -9,6 +9,18 @@ user-invocable: true
 
 # Blind Spot Pass
 
+## What
+
+- Find unknown unknowns before starting implementation — searches git history, patterns, and architecture for hidden gotchas
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 ## When to Use
 
 Use this skill **before starting implementation** when:

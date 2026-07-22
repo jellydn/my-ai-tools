@@ -1,0 +1,29 @@
+{
+  "skill": "quiz-me",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Quiz me on the implementation so I can verify I understand the important parts.",
+      "should_trigger": true,
+      "expected_behavior": "Generates targeted questions to test understanding."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Ask me a short set of questions about the feature I just built.",
+      "should_trigger": true,
+      "expected_behavior": "Creates a focused comprehension quiz."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Explain the feature to me again.",
+      "should_trigger": false,
+      "expected_behavior": "This is explanation, not quiz generation."
+    },
+    {
+      "id": "case-4",
+      "prompt": "Make the quiz harder by including edge cases and trade-offs, not just definitions.",
+      "should_trigger": true,
+      "expected_behavior": "Tests deeper understanding and not just recall."
+    }
+  ]
+}

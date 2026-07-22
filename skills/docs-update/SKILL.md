@@ -13,6 +13,18 @@ metadata:
 
 # Documentation Bot
 
+## What
+
+- Update docs when code changes — reviews commits and syncs user-facing documentation
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Automatically review code changes and update user-facing documentation to keep it synchronized with the codebase. Works across documentation platforms (Mintlify, Docusaurus, GitBook, Fumadocs, etc.) and supports both monorepo and multi-repo setups.
 
 ## Workflow

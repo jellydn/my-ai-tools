@@ -12,6 +12,18 @@ metadata:
 
 # Setup Goal
 
+## What
+
+- Turn ideas into executable goal packages with guided interviews and codebase analysis
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Turn an idea into a goal package at `goals/<slug>/` through structured discovery, user interview, and codebase exploration.
 
 ## Phases

@@ -1,0 +1,29 @@
+{
+  "skill": "git-context",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Search git history for a similar bug fix and tell me how it was handled.",
+      "should_trigger": true,
+      "expected_behavior": "Uses git history, commits, or blame to find related context."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Find the commit that introduced this pattern and explain why.",
+      "should_trigger": true,
+      "expected_behavior": "Surfaces relevant historical context and intent."
+    },
+    {
+      "id": "case-3",
+      "prompt": "What branch am I on?",
+      "should_trigger": false,
+      "expected_behavior": "This is a simple git status request, not context mining."
+    },
+    {
+      "id": "case-4",
+      "prompt": "Before editing this code, check whether we solved a similar issue elsewhere in history.",
+      "should_trigger": true,
+      "expected_behavior": "Looks for precedent in past commits and related changes."
+    }
+  ]
+}
