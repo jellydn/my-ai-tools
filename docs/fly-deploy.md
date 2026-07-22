@@ -24,7 +24,7 @@ Non-secret OpenAI-compatible settings are in [`fly.toml`](../fly.toml) and match
 - `OPENAI_MODEL` = `openrouter/free` ([free models collection](https://openrouter.ai/collections/free-models))
 - `OPENAI_EMBEDDING_MODEL` = `nvidia/llama-nemotron-embed-vl-1b-v2:free`
 
-No workflow change is required for OpenRouter free models once `OPENAI_API_KEY` is set.
+No workflow change is required for OpenRouter free models once `OPENAI_API_KEY` is set. Fly builds fetch the bounded GitHub corpus anonymously; custom builds can provide an optional `GITHUB_TOKEN` BuildKit secret to raise the API rate limit. The token is used only during indexing and is not stored in the image.
 
 ## Local deploy (optional)
 

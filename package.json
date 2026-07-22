@@ -11,6 +11,7 @@
 		"index:browser": "tsx scripts/index-browser.ts",
 		"dev": "tsx server.ts",
 		"start": "tsx server.ts",
+		"test:rag": "tsx --test tests/rag-indexer.test.ts",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {

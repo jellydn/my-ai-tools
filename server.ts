@@ -6,6 +6,7 @@ import { Hono } from "hono";
 import { stream } from "hono/streaming";
 import { z } from "zod";
 import { createOpenAIClient } from "./lib/openai-client.ts";
+import { buildContextMessage, RAG_SYSTEM_PROMPT } from "./lib/rag-prompt.ts";
 import { type RetrievedChunk, retrieve } from "./lib/retriever.ts";
 
 const [indexHtml, installSh, installPs1] = await Promise.all([
@@ -20,8 +21,7 @@ const requestTimestamps = new Map<string, number[]>();
 
 function rateLimitMiddleware(c: Context, next: Next) {
 	const forwarded = c.req.header("x-forwarded-for");
-	const clientIp =
-		c.req.header("fly-client-ip") || (forwarded ? forwarded.split(",")[0]?.trim() : undefined);
+	const clientIp = c.req.header("fly-client-ip") || (forwarded ? forwarded.split(",")[0]?.trim() : undefined);
 	const key = clientIp ?? "unknown";
 	const now = Date.now();
 	const timestamps = requestTimestamps.get(key) ?? [];
@@ -63,24 +63,10 @@ const chatRequestSchema = z.object({
 	message: z.string().min(1).max(4000),
 });
 
-function buildSystemPrompt(chunks: { path: string; text: string }[]): string {
-	const context = chunks.map((chunk) => `--- ${chunk.path} ---\n${chunk.text}`).join("\n\n");
-
-	return `You are the my-ai-tools repository assistant.
-
-Answer only from the retrieved repository excerpts below.
-Do not invent commands, supported tools, or configuration.
-If the retrieved context is insufficient, say exactly: "This is not documented in the repository."
-Include the relevant source file paths in your answer.
-Keep answers concise and grounded.
-
-Retrieved repository excerpts:
-${context}`;
-}
-
 app.use("/data/*", async (c) => c.text("Forbidden", 403));
 
 app.post("/api/chat", rateLimitMiddleware, async (c) => {
+	const startedAt = performance.now();
 	let body: unknown;
 	try {
 		body = await c.req.json();
@@ -97,62 +83,111 @@ app.post("/api/chat", rateLimitMiddleware, async (c) => {
 	try {
 		chunks = await retrieve(message, 5);
 	} catch (error) {
-		if (
-			error &&
-			typeof error === "object" &&
-			"code" in error &&
-			(error as { code: unknown }).code === "ENOENT"
-		) {
-			return c.json(
-				{ error: "Index not found. Run `bun run index` to build data/index.json." },
-				503,
-			);
+		console.error(
+			JSON.stringify({
+				event: "rag_request",
+				question: message,
+				retrievedChunks: [],
+				latencyMs: Math.round(performance.now() - startedAt),
+				error: "retrieval_failed",
+			}),
+		);
+		if (error && typeof error === "object" && "code" in error && (error as { code: unknown }).code === "ENOENT") {
+			return c.json({ error: "Index not found. Run `bun run index` to build data/index.json." }, 503);
 		}
 		return c.json({ error: "Failed to retrieve context from the index." }, 500);
 	}
 
 	if (chunks.length === 0) {
+		console.log(
+			JSON.stringify({
+				event: "rag_request",
+				question: message,
+				retrievedChunks: [],
+				promptTokens: 0,
+				responseTokens: 0,
+				latencyMs: Math.round(performance.now() - startedAt),
+			}),
+		);
 		c.header("Content-Type", "text/plain; charset=utf-8");
 		return stream(c, async (stream) => {
-			await stream.write(
-				`${JSON.stringify({ type: "text", content: "This is not documented in the repository." })}\n`,
-			);
-			await stream.write(`${JSON.stringify({ type: "sources", paths: [] })}\n`);
+			await stream.write(`${JSON.stringify({ type: "text", content: "This is not documented in the repository." })}\n`);
+			await stream.write(`${JSON.stringify({ type: "sources", sources: [] })}\n`);
 		});
 	}
 
 	const CHAT_MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
-	const systemPrompt = buildSystemPrompt(chunks);
 	let completion;
 	try {
 		completion = await openai.chat.completions.create({
 			model: CHAT_MODEL,
 			messages: [
-				{ role: "system", content: systemPrompt },
-				{ role: "user", content: message },
+				{ role: "system", content: RAG_SYSTEM_PROMPT },
+				{ role: "user", content: buildContextMessage(message, chunks) },
 			],
 			stream: true,
+			stream_options: { include_usage: true },
 			temperature: 0.2,
 		});
 	} catch {
+		console.error(
+			JSON.stringify({
+				event: "rag_request",
+				question: message,
+				retrievedChunks: chunks.map((chunk) => ({
+					path: chunk.path,
+					type: chunk.metadata.type,
+					score: Number(chunk.score.toFixed(4)),
+				})),
+				latencyMs: Math.round(performance.now() - startedAt),
+				error: "generation_unavailable",
+			}),
+		);
 		return c.json({ error: "The language model is unavailable. Please try again later." }, 502);
 	}
 
 	c.header("Content-Type", "text/plain; charset=utf-8");
 	return stream(c, async (stream) => {
+		let promptTokens: number | null = null;
+		let responseTokens: number | null = null;
+		let streamError = false;
 		try {
 			for await (const part of completion) {
+				if (part.usage) {
+					promptTokens = part.usage.prompt_tokens;
+					responseTokens = part.usage.completion_tokens;
+				}
 				const content = part.choices[0]?.delta?.content;
 				if (content) {
 					await stream.write(`${JSON.stringify({ type: "text", content })}\n`);
 				}
 			}
 
-			const sourcePaths = [...new Set(chunks.map((chunk) => chunk.path))];
-			await stream.write(`${JSON.stringify({ type: "sources", paths: sourcePaths })}\n`);
+			const sources = [
+				...new Map(chunks.map((chunk) => [chunk.path, { path: chunk.path, url: chunk.metadata.url }])).values(),
+			];
+			await stream.write(`${JSON.stringify({ type: "sources", sources })}\n`);
 		} catch {
+			streamError = true;
 			await stream.write(
 				`${JSON.stringify({ type: "error", message: "Response generation failed. Please try again later." })}\n`,
+			);
+		} finally {
+			console.log(
+				JSON.stringify({
+					event: "rag_request",
+					question: message,
+					retrievedChunks: chunks.map((chunk) => ({
+						path: chunk.path,
+						type: chunk.metadata.type,
+						author: chunk.metadata.author,
+						score: Number(chunk.score.toFixed(4)),
+					})),
+					promptTokens,
+					responseTokens,
+					latencyMs: Math.round(performance.now() - startedAt),
+					...(streamError ? { error: "generation_failed" } : {}),
+				}),
 			);
 		}
 	});
