@@ -1,4 +1,8 @@
 node_modules
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
 
 out
 dist
@@ -31,6 +35,8 @@ configs/ccs/cliproxy/accounts.json
 # agentmemory runtime state (created by `npx @agentmemory/agentmemory` at the repo root)
 data/
 public/index-browser.json
+document_qa/data/
+document_qa/documents/
 configs/ccs/cliproxy/config.yaml
 configs/ccs/cliproxy/sessions.json
 configs/ccs/cliproxy/auth/antigravity-dunghd_it_gmail_com.json
