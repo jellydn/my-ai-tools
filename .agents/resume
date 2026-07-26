@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Orb resume for my-ai-tools — fast, idempotent checks run on every wake.
+# Target completion within 10 seconds. Never install dependencies here.
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_root"
+
+log() { printf '[resume] %s\n' "$*"; }
+
+# Assert the toolchain installed by .agents/setup is still present. These are
+# read-only checks; repair belongs in setup, not here.
+status=0
+command -v bats >/dev/null 2>&1 || { log "WARNING: bats missing"; status=1; }
+command -v jq  >/dev/null 2>&1 || { log "WARNING: jq missing";  status=1; }
+[ -d node_modules ]             || { log "WARNING: node_modules missing"; status=1; }
+
+if [ "$status" -eq 0 ]; then
+  log "Toolchain OK"
+else
+  log "Toolchain incomplete — re-run .agents/setup to repair"
+  exit 1
+fi

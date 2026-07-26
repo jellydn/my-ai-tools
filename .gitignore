@@ -4,6 +4,9 @@ out
 dist
 *.tgz
 
+# Amp runtime directory (local plugin copies, portals, artifacts)
+.amp/
+
 coverage
 *.lcov
 
