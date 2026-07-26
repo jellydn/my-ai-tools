@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Orb setup for my-ai-tools — runs once per fresh orb (and after snapshot restore).
+# Installs the system + Node toolchain needed to build, test, and run this repo.
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_root"
+
+log() { printf '[setup] %s\n' "$*"; }
+
+# --- System packages -------------------------------------------------------
+# bats is required for the test suite; jq is preinstalled on the base orb but
+# is cheap to assert. Node and bun are preinstalled and left alone.
+if ! command -v bats >/dev/null 2>&1; then
+  log "Installing bats via apt-get"
+  sudo apt-get update -qq
+  sudo apt-get install -y -qq bats
+else
+  log "bats already installed ($(bats --version))"
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+  log "Installing jq via apt-get"
+  sudo apt-get update -qq
+  sudo apt-get install -y -qq jq
+else
+  log "jq already installed ($(jq --version))"
+fi
+
+# --- Node dependencies -----------------------------------------------------
+# bun is the preferred runtime (bun.lock is the source of truth). tsx, tsc,
+# and biome are devDependencies that land in node_modules/.bin. Try a frozen
+# install first for reproducibility; fall back to a regular install if the
+# committed lockfile is slightly out of sync so setup never dead-ends.
+if [ ! -d node_modules ]; then
+  log "Installing Node dependencies (bun install)"
+  if ! bun install --frozen-lockfile 2>/dev/null; then
+    log "Frozen install failed (lockfile drift); falling back to bun install"
+    bun install
+  fi
+else
+  log "node_modules present; running bun install to reconcile"
+  bun install
+fi
+
+# --- Environment -----------------------------------------------------------
+# Copy the env template without clobbering an existing .env. The server needs
+# these vars; real API keys must be supplied separately.
+if [ ! -f .env ]; then
+  log "Copying .env.example -> .env"
+  cp -- .env.example .env
+else
+  log ".env already present; leaving untouched"
+fi
+
+log "Setup complete"
