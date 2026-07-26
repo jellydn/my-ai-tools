@@ -1230,6 +1230,7 @@ Custom Amp agent modes live in [`configs/amp/plugins/`](configs/amp/plugins/) an
 | `cursor-composer-2.5.ts` | `cursor-comp-2.5` | `openai/gpt-5.2-codex` | Cursor Composer-style editing mode |
 | `plannotator.ts` | — | — | Interactive plan annotation |
 | `orca-agent-status.ts` | — | — | Orca agent status integration |
+| `external-provider.ts` | — | — | External model delegation (OpenRouter/Cline) via `external_ask`, `external_code_review`, `external_implement` tools |
 
 See [`configs/amp/AGENTS.md`](configs/amp/AGENTS.md) for agent guidelines.
 
