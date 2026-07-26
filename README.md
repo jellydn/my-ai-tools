@@ -1231,6 +1231,7 @@ Custom Amp agent modes live in [`configs/amp/plugins/`](configs/amp/plugins/) an
 | `plannotator.ts` | — | — | Interactive plan annotation |
 | `orca-agent-status.ts` | — | — | Orca agent status integration |
 | `external-provider.ts` | — | — | External model delegation (OpenRouter/Cline) via `external_ask`, `external_code_review`, `external_implement` tools |
+| `signal-filter.ts` | — | — | Event interception middleware: tool-call filtering, slash-command routing (`/openrouter`, `/clinepass`, `/opencode`), audit logging |
 
 See [`configs/amp/AGENTS.md`](configs/amp/AGENTS.md) for agent guidelines.
 
