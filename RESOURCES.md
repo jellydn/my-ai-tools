@@ -34,6 +34,10 @@
   Foundational research paper introducing the Thought-Action-Observation loop for LLMs. Use for: understanding agent reasoning loops.
 - [Guide: OpenAI Agents Guide](https://platform.openai.com/docs/guides/agents)
   Overview of agent design patterns, tool calling capabilities, and workflow control strategies. Use for: learning practical agent loop architectures.
+- [Guide: OpenAI Function Calling & Tools](https://platform.openai.com/docs/guides/function-calling)
+  Detailed guide on defining structured tool schemas for LLM agent routing. Use for: tool definition standards.
+- [Docs: Anthropic Tool Use Documentation](https://docs.anthropic.com/en/docs/build-with-claude/tool-use)
+  Best practices for tool schema naming, parameter validation, and feedback formatting. Use for: agent tool design.
 
 ## Wisdom (Communities)
 

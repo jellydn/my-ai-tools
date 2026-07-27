@@ -91,3 +91,19 @@ _Avoid_: Infinite loop, unconstrained recursion
 **Bounded Execution**:
 Configuring strict step budgets, timeouts, read-only permissions, and sandbox constraints to guarantee that an agent stops safely and cannot run indefinitely.
 _Avoid_: Autonomous runaway process, unmonitored loop
+
+**Tool Schema**:
+A formal structural definition (e.g. Zod, Valibot, or JSON Schema) specifying a tool's name, description, input parameters, and types for LLM function calling.
+_Avoid_: Informal function spec, untyped parameter list
+
+**Tool Routing**:
+The LLM's process of evaluating a user prompt against available tool schemas to select the most appropriate tool and construct valid input arguments.
+_Avoid_: Manual function dispatch, static routing table
+
+**Tool Feedback Loop**:
+Formatting tool execution results (data, line numbers, path citations, or errors) into the conversation history so the LLM can observe the outcome in the next turn.
+_Avoid_: One-way call, unreturned output
+
+**File & Search Tools**:
+Read-only agent capabilities such as `list_files`, `read_file`, and `search_code` that enable safe inspection of repository file trees and text contents.
+_Avoid_: Arbitrary bash commands, unrestricted write tools
