@@ -38,6 +38,10 @@
   Detailed guide on defining structured tool schemas for LLM agent routing. Use for: tool definition standards.
 - [Docs: Anthropic Tool Use Documentation](https://docs.anthropic.com/en/docs/build-with-claude/tool-use)
   Best practices for tool schema naming, parameter validation, and feedback formatting. Use for: agent tool design.
+- [Guide: LangChain Plan-and-Execute Pattern](https://blog.langchain.dev/plan-and-execute-agents/)
+  Architecture guide on decoupling multi-step planning from tool execution to increase reliability. Use for: plan-and-execute design patterns.
+- [Docs: CrewAI Documentation](https://docs.crewai.com/)
+  Framework documentation for multi-agent task planning, role delegation, and step execution pipelines. Use for: structured planning frameworks.
 
 ## Wisdom (Communities)
 

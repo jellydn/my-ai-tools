@@ -107,3 +107,19 @@ _Avoid_: One-way call, unreturned output
 **File & Search Tools**:
 Read-only agent capabilities such as `list_files`, `read_file`, and `search_code` that enable safe inspection of repository file trees and text contents.
 _Avoid_: Arbitrary bash commands, unrestricted write tools
+
+**Plan-and-Execute**:
+An agent design pattern that decouples task planning (decomposing a complex goal into 3–5 steps) from tool execution, increasing reliability and predictability.
+_Avoid_: Unplanned tool chaining, reactive execution
+
+**Task Decomposition**:
+Breaking a complex user prompt into an ordered sequence of discrete, single-purpose sub-steps prior to initiating tool calls.
+_Avoid_: Monolithic query handling, single-step tool call
+
+**Dynamic Replanning**:
+Revising remaining plan steps on the fly when an intermediate step returns empty or unexpected results.
+_Avoid_: Rigid plan adherence, unhandled tool failures
+
+**Plan Reflection**:
+Analyzing executed steps after goal completion to determine if the plan was optimal, could be simplified, or contained redundant steps.
+_Avoid_: Unreviewed execution, silent task completion

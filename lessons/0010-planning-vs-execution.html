@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 17/30: Planning vs Execution — Task Decomposition & Replanning</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="day-badge">Day 17/30 — Planning vs Execution</span>
+      <h1>Decoupling Planning from Execution</h1>
+      <p>How task decomposition, plan execution, dynamic replanning, and reflection make multi-step AI agents predictable and reliable.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1. Why Separate Planning from Execution?</h2>
+        <p>When an LLM agent attempts to solve a complex multi-step request without a plan, it risks jumping straight to arbitrary tool calls, repeating searches, or skipping critical steps. <strong>Planning</strong> enforces structure before execution:</p>
+        <ul>
+          <li><strong>Task Decomposition:</strong> Breaking a complex user goal into an ordered 3–5 step plan before making any tool inspection calls.</li>
+          <li><strong>Deterministic Step Execution:</strong> Executing each planned step sequentially, attaching outputs to the observation history.</li>
+          <li><strong>Dynamic Replanning:</strong> Revising the remaining plan when an intermediate search step yields no matches.</li>
+          <li><strong>Plan Reflection:</strong> Analyzing executed steps after goal completion to determine if steps could be merged or simplified.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>2. Connecting to flue-repo-assistant (PR #9)</h2>
+        <p>In the <code>flue-repo-assistant</code> codebase (<code>planner/</code> module), planning is implemented via a decoupled architecture:</p>
+        <ul>
+          <li><strong>Planning Meta-Tools (<code>create_plan</code>, <code>replan</code>, <code>reflect_plan</code>):</strong> Tools that structure reasoning without inspecting the repository or consuming the shared inspection budget.</li>
+          <li><strong>Plan Execution Engine (<code>executor.ts</code>):</strong> Runs each step against the read-only inspection tools (<code>list_files</code>, <code>read_file</code>, <code>search_code</code>), tracking step statuses (<code>success</code>, <code>empty</code>, <code>skipped</code>, <code>error</code>).</li>
+          <li><strong>Replanning Triggers (<code>shouldReplan</code>):</strong> Detects empty search results and generates a revised plan before continuing execution.</li>
+          <li><strong>Reflection Summaries (<code>reflection.ts</code>):</strong> Evaluates total vs executed steps and records whether steps could be simplified.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>3. Interactive Plan & Execute Simulator</h2>
+        <p>Select a multi-step user goal, generate a structured plan, execute the steps, and observe dynamic replanning and reflection in action.</p>
+
+        <div class="simulator-layout">
+          <div class="simulator-controls">
+            <div class="control-group">
+              <label class="control-label" for="task-select">Select Test Goal</label>
+              <select id="task-select" class="control-input">
+                <option value="auth">Goal A: "Investigate how JWT auth is configured and implemented"</option>
+                <option value="empty">Goal B: "Search for legacy GraphQL schema (Triggers Replanning)"</option>
+                <option value="direct">Goal C: "What is TypeScript?" (Direct Answer)</option>
+              </select>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+              <button class="quiz-option" style="flex: 1;" onclick="generatePlan()">1. Generate Plan</button>
+              <button class="quiz-option" style="flex: 1; border-color: var(--accent-color);" id="btn-execute" onclick="executePlanSim()" disabled>2. Execute Plan ▶</button>
+            </div>
+          </div>
+
+          <div class="simulator-output">
+            <div class="control-label">1. Generated 3–5 Step Plan</div>
+            <div id="plan-display" class="chunks-container" style="max-height: 140px;">
+              <div class="chunk-card" style="text-align: center; color: var(--text-muted);">Click "Generate Plan" to decompose goal...</div>
+            </div>
+
+            <div class="control-label" style="margin-top: 1rem;">2. Execution & Reflection Log</div>
+            <div id="exec-display" class="chunks-container" style="max-height: 200px;">
+              <div class="chunk-card" style="text-align: center; color: var(--text-muted);">Execution log will appear here...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>4. Retrieval Practice</h2>
+        <p>Test your understanding of planning architecture:</p>
+        <h3>Why is writing a structured plan prior to tool execution effective?</h3>
+
+        <div id="quiz-options">
+          <button class="quiz-option" onclick="selectOption(this, true, 'Correct! Task decomposition creates structured step sequences before calling tool inspection functions.')">
+            It makes ordered plan steps before running local search tasks.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Logging event traces is an observability mechanism, not a planning pattern.')">
+            It writes structured query execution events to database logs.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Testing vector chunks is part of semantic retrieval, not task planning.')">
+            It runs standard vector search tests between separate chunks.
+          </button>
+        </div>
+        <div id="quiz-feedback" class="quiz-feedback"></div>
+      </section>
+
+      <section class="card">
+        <h2>5. Next Step: Run the Planner CLI</h2>
+        <p>We created a command-line script demonstrating the full Plan-Execute-Replan-Reflect pipeline. Run it in your terminal:</p>
+        <pre><code>bun run scripts/evaluate-planner.ts</code></pre>
+        <p>Review the logs to observe:
+          <ul>
+            <li>How goals decompose into sequential 3–5 step plans.</li>
+            <li>How empty tool results trigger dynamic replanning.</li>
+            <li>How reflection summaries evaluate whether execution could be simplified.</li>
+          </ul>
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>30-Day AI Learning Journey • Ask your AI teacher any follow-up questions! • <a href="0009-tools-for-agents.html">Go to Day 16: Tools for Agents</a></p>
+    </footer>
+  </div>
+
+  <script>
+    let currentPlan = null;
+    const taskSelect = document.getElementById('task-select');
+    const planDisplay = document.getElementById('plan-display');
+    const execDisplay = document.getElementById('exec-display');
+    const btnExecute = document.getElementById('btn-execute');
+
+    const PLANS = {
+      auth: {
+        steps: [
+          { id: 1, description: "Search for 'jwtSecret' across codebase", tool: "search_code" },
+          { id: 2, description: "Read configuration file src/config.ts", tool: "read_file" },
+          { id: 3, description: "Read auth implementation src/auth.ts", tool: "read_file" },
+          { id: 4, description: "Summarize JWT authentication findings", tool: "answer" }
+        ]
+      },
+      empty: {
+        steps: [
+          { id: 1, description: "Search for 'GraphQLSchema' in src/", tool: "search_code" },
+          { id: 2, description: "Read matched GraphQL schema file", tool: "read_file" },
+          { id: 3, description: "Explain schema structure", tool: "answer" }
+        ]
+      },
+      direct: {
+        steps: [
+          { id: 1, description: "Answer conceptual question using parametric knowledge", tool: "answer" }
+        ]
+      }
+    };
+
+    function generatePlan() {
+      const key = taskSelect.value;
+      currentPlan = PLANS[key];
+
+      planDisplay.innerHTML = currentPlan.steps.map(s => `
+        <div class="chunk-card" style="padding: 0.4rem 0.6rem; margin-bottom: 0.3rem;">
+          <strong style="color: var(--accent-color);">Step ${s.id}:</strong> ${s.description} <em>(${s.tool})</em>
+        </div>
+      `).join("");
+
+      execDisplay.innerHTML = '<div class="chunk-card" style="text-align: center; color: var(--text-muted);">Plan ready. Click "Execute Plan" to run.</div>';
+      btnExecute.disabled = false;
+    }
+
+    function executePlanSim() {
+      const key = taskSelect.value;
+      execDisplay.innerHTML = "";
+
+      if (key === 'direct') {
+        addExecCard("EXECUTE Step 1", "tool: answer -> Generated answer: 'TypeScript is a typed superset of JavaScript.'", "var(--success-text)");
+        addExecCard("REFLECTION", "Total Steps: 1, Successful: 1, Could Simplify: false. Note: Direct answer required 0 tools.", "var(--accent-color)");
+        btnExecute.disabled = true;
+        return;
+      }
+
+      if (key === 'auth') {
+        addExecCard("EXECUTE Step 1", "tool: search_code('jwtSecret') -> Found 2 matches (src/config.ts, src/auth.ts)", "var(--border-color)");
+        addExecCard("EXECUTE Step 2", "tool: read_file('src/config.ts', 1-5) -> Read 5 lines", "var(--border-color)");
+        addExecCard("EXECUTE Step 3", "tool: read_file('src/auth.ts', 1-10) -> Read 10 lines", "var(--border-color)");
+        addExecCard("EXECUTE Step 4", "tool: answer -> Final Answer: 'JWT auth is configured in src/config.ts and handled in src/auth.ts.'", "var(--success-text)");
+        addExecCard("REFLECTION", "Total Steps: 4, Successful: 4, Could Simplify: false. Note: Plan executed cleanly.", "var(--accent-color)");
+        btnExecute.disabled = true;
+        return;
+      }
+
+      if (key === 'empty') {
+        addExecCard("EXECUTE Step 1", "tool: search_code('GraphQLSchema') -> Returned 0 matches (Status: EMPTY)", "var(--error-text)");
+        addExecCard("DYNAMIC REPLANNING TRIGGERED", "Revising Plan: Step 1 -> list_files('src'), Step 2 -> answer", "var(--error-text)");
+        addExecCard("EXECUTE Revised Step 1", "tool: list_files('src') -> Found src/config.ts, src/auth.ts", "var(--border-color)");
+        addExecCard("EXECUTE Revised Step 2", "tool: answer -> Final Answer: 'No GraphQL schema found in src/ directory.'", "var(--success-text)");
+        addExecCard("REFLECTION", "Total Steps: 3, Executed: 3, Empty Results: 1, Could Simplify: true. Note: Replanned after empty search.", "var(--accent-color)");
+        btnExecute.disabled = true;
+      }
+    }
+
+    function addExecCard(header, text, color) {
+      const card = document.createElement('div');
+      card.className = 'chunk-card';
+      card.style.padding = '0.5rem 0.7rem';
+      card.style.borderColor = color;
+      card.innerHTML = `
+        <div style="font-size: 0.75rem; font-weight: bold; color: ${color};">${header}</div>
+        <div style="font-size: 0.85rem; margin-top: 0.2rem;">${text}</div>
+      `;
+      execDisplay.appendChild(card);
+    }
+
+    // Quiz logic
+    function selectOption(button, isCorrect, feedback) {
+      const options = document.querySelectorAll('#quiz-options .quiz-option');
+      options.forEach(opt => {
+        opt.disabled = true;
+        if (opt === button) {
+          opt.className = 'quiz-option ' + (isCorrect ? 'correct' : 'incorrect');
+        }
+      });
+      const feedbackDiv = document.getElementById('quiz-feedback');
+      feedbackDiv.style.display = 'block';
+      feedbackDiv.style.color = isCorrect ? 'var(--accent-color)' : 'red';
+      feedbackDiv.textContent = feedback;
+    }
+  </script>
+</body>
+</html>
