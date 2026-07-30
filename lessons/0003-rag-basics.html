@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 10/30: RAG Basics & Grounding</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="day-badge">Day 10/30 — RAG Basics</span>
+      <h1>Retrieval-Augmented Generation & Grounding</h1>
+      <p>How the Retrieve-Assemble-Generate pipeline keeps LLMs factually grounded in your local data.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1. The RAG Pipeline</h2>
+        <p>A standard LLM only knows the data it was trained on. To answer questions about local, private, or real-time data, we use <strong>Retrieval-Augmented Generation (RAG)</strong>. The process follows three distinct steps:</p>
+        <ol>
+          <li><strong>Retrieve:</strong> The system embeds the user's question, performs vector search (Day 8), and fetches the most relevant text chunks (Day 9).</li>
+          <li><strong>Assemble:</strong> The system wraps the retrieved text excerpts along with a strict system instruction (the grounding policy) and the user's query into a structured context message.</li>
+          <li><strong>Generate:</strong> The model generates the answer, drawing details exclusively from the assembled context.</li>
+        </ol>
+        <blockquote>
+          <p>Important: Grounding prompts instruct the model to act as a strict reader rather than using its own parametric memory. If the information is not in the text, it must refuse to answer.</p>
+        </blockquote>
+      </section>
+
+      <section class="card">
+        <h2>2. Connecting to PR 315</h2>
+        <p>In <strong>PR 315</strong> (<a href="https://github.com/jellydn/my-ai-tools/pull/315" target="_blank">feat: harden repository RAG knowledge base</a>), we implemented and hardened this pipeline directly in the codebase:</p>
+        <ul>
+          <li><strong>Grounded Prompting:</strong> The server uses the <code>RAG_SYSTEM_PROMPT</code> defined in <code>lib/rag-prompt.ts</code>, instructing the model to answer <em>only</em> from the excerpts and return <code>"This is not documented in the repository."</code> on failure.</li>
+          <li><strong>Zero-LangChain Transparency:</strong> The entire process—document loading, 1,000-char chunking, cosine retrieval (top 5), and streaming assembly—is written in clean, explicit TypeScript without third-party frameworks.</li>
+          <li><strong>Observability:</strong> Structured JSON logs trace query-to-chunk paths, similarity scores, token counts, and latency, making it simple to evaluate and debug.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>3. Interactive RAG Q&A Playground</h2>
+        <p>Choose a question below to see how the RAG pipeline compiles the prompt context and watch the grounded vs. ungrounded response outcomes.</p>
+
+        <div class="simulator-layout">
+          <div class="simulator-controls">
+            <div class="control-group">
+              <label class="control-label" for="question-select">Select Question</label>
+              <select id="question-select" class="control-input">
+                <option value="postgres">"How do I set up the PostgreSQL pool?"</option>
+                <option value="css">"How is the CSS dashboard styled?"</option>
+                <option value="weather">"What is the weather in Sydney today?"</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label">Assembled Prompt Context</label>
+              <pre><code id="context-display" style="white-space: pre-wrap; font-size: 0.8rem;">Select a question to build context...</code></pre>
+            </div>
+          </div>
+
+          <div class="simulator-output">
+            <div class="control-label">LLM Generation Outcomes</div>
+
+            <div class="chunk-card" style="border-color: var(--error-text); background-color: var(--error-bg);">
+              <div class="chunk-header" style="color: var(--error-text);">
+                <span>❌ Ungrounded Generation (Hallucinating)</span>
+              </div>
+              <p id="ungrounded-out" style="font-size: 0.9rem; font-weight: 600; color: var(--error-text);"></p>
+            </div>
+
+            <div class="chunk-card" style="border-color: var(--success-text); background-color: var(--success-bg);">
+              <div class="chunk-header" style="color: var(--success-text);">
+                <span>✅ Grounded Generation (Safe)</span>
+              </div>
+              <p id="grounded-out" style="font-size: 0.9rem; font-weight: 700; color: var(--success-text);"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>4. Retrieval Practice</h2>
+        <p>Test your understanding of RAG design decisions:</p>
+        <h3>What does a grounding prompt do in a RAG pipeline?</h3>
+
+        <div id="quiz-options">
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Logging queries and event latency is an observability function, not a prompt grounding policy.')">
+            It writes structured log events directly to database logs.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, true, 'Correct! Grounding limits the model\'s responses strictly to the retrieved facts to prevent hallucinations.')">
+            It limits model response text to retrieved document segments.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Calculating cosine similarity rankings between vector chunks is done by the retriever, not the prompt.')">
+            It runs standard vector search tests between separate chunks.
+          </button>
+        </div>
+        <div id="quiz-feedback" class="quiz-feedback"></div>
+      </section>
+
+      <section class="card">
+        <h2>5. Next Step: Run the Q&A Notes Script</h2>
+        <p>We created a command-line script demonstrating local Q&A grounding over your personal notes. Run it in your terminal:</p>
+        <pre><code>bun run scripts/qa-notes.ts</code></pre>
+        <p>Provide a query like "PostgreSQL config" or "Weather today" and review the prompt outputs. If you have an <code>OPENAI_API_KEY</code> set in your environment, the script will fetch a real answer from the model!</p>
+      </section>
+    </main>
+
+    <footer>
+      <p>30-Day AI Learning Journey • Ask your AI teacher any follow-up questions! • <a href="0002-chunking.html">Go to Day 9: Chunking</a></p>
+    </footer>
+  </div>
+
+  <script>
+    const TARGET_NOTES = {
+      postgres: "Configure PostgreSQL connection pool for backend server.",
+      css: "Style the dashboard using CSS grid and dark theme variables."
+    };
+
+    const QUESTIONS = {
+      postgres: {
+        text: "How do I set up the PostgreSQL pool?",
+        chunks: [{ path: "notes/postgres.md", text: TARGET_NOTES.postgres }],
+        ungrounded: "You can configure a PostgreSQL pool in Node.js by installing the 'pg' library, importing Pool from 'pg', and passing connection properties like host, port, database, user, and password to new Pool().",
+        grounded: "Based on the retrieved context, you should configure the PostgreSQL connection pool for the backend server. [Source: notes/postgres.md]"
+      },
+      css: {
+        text: "How is the CSS dashboard styled?",
+        chunks: [{ path: "notes/style.md", text: TARGET_NOTES.css }],
+        ungrounded: "CSS dashboards are commonly styled using Flexbox or CSS Grid, featuring utility frameworks like Tailwind or vanilla custom CSS containing design tokens for dark themes.",
+        grounded: "The dashboard is styled using CSS grid and dark theme variables. [Source: notes/style.md]"
+      },
+      weather: {
+        text: "What is the weather in Sydney today?",
+        chunks: [],
+        ungrounded: "Today in Sydney, it is currently sunny with a temperature of 22°C (72°F) and a light breeze from the northeast.",
+        grounded: "This is not documented in the repository."
+      }
+    };
+
+    const questionSelect = document.getElementById('question-select');
+    const contextDisplay = document.getElementById('context-display');
+    const ungroundedOut = document.getElementById('ungrounded-out');
+    const groundedOut = document.getElementById('grounded-out');
+
+    function updateSimulation() {
+      const selected = questionSelect.value;
+      const data = QUESTIONS[selected];
+
+      const excerpts = data.chunks.length > 0
+        ? data.chunks.map(c => `Source: ${c.path}\nContent: ${c.text}`).join("\n\n")
+        : "No relevant excerpts found.";
+
+      const systemPrompt = `SYSTEM PROMPT:\nAnswer ONLY using the retrieved excerpts. If context is insufficient, reply: "This is not documented in the repository."\n\n`;
+      contextDisplay.textContent = `${systemPrompt}EXCERPTS:\n${excerpts}\n\nQUESTION: ${data.text}`;
+
+      ungroundedOut.textContent = data.ungrounded;
+      groundedOut.textContent = data.grounded;
+    }
+
+    questionSelect.addEventListener('change', updateSimulation);
+    updateSimulation();
+
+    // Quiz logic
+    function selectOption(button, isCorrect, feedback) {
+      const options = document.querySelectorAll('.quiz-option');
+      options.forEach(opt => {
+        opt.disabled = true;
+        if (opt === button) {
+          opt.className = 'quiz-option ' + (isCorrect ? 'correct' : 'incorrect');
+        }
+      });
+      const feedbackDiv = document.getElementById('quiz-feedback');
+      feedbackDiv.style.display = 'block';
+      feedbackDiv.style.color = isCorrect ? 'var(--accent-color)' : 'red';
+      feedbackDiv.textContent = feedback;
+    }
+  </script>
+</body>
+</html>

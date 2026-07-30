@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 11/30: Retrieval Quality Optimization</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="day-badge">Day 11/30 — Retrieval Quality</span>
+      <h1>Optimizing RAG Retrieval: Top-K & Pre-Filtering</h1>
+      <p>How tuning your search scope and applying metadata filters eliminates noise and saves prompt token costs.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1. The Retrieval Quality Problem</h2>
+        <p>A RAG application is only as good as the documents it retrieves. If the retrieval step fails to fetch the supporting facts, even the largest LLM will fail to answer correctly. However, optimizing retrieval is a balancing act:</p>
+        <ul>
+          <li><strong>Top-K Trade-off:</strong> Retrieving more chunks (higher K) increases the likelihood of finding the answer (answer-support rate), but floods the prompt with irrelevant noise and exponentially increases token billing.</li>
+          <li><strong>Relevance Density:</strong> The percentage of retrieved chunks that are actually relevant to the question. High density prevents LLM distraction and lowers costs.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>2. Connecting to PR 317</h2>
+        <p>In <strong>PR 317</strong> (<a href="https://github.com/jellydn/my-ai-tools/pull/317" target="_blank">feat: evaluate and improve RAG retrieval quality</a>), we implemented evaluation benchmarks and performance enhancements:</p>
+        <ul>
+          <li><strong>Metadata Pre-filtering:</strong> Enabled filtering by document type (e.g. <code>documentation</code>, <code>source</code>, <code>pull_request</code>) before computing vector similarities. This eliminates irrelevant directories (like logs or tests) completely.</li>
+          <li><strong>Evaluation Benchmark:</strong> Added a local reproducible benchmark in <code>scripts/evaluate-retrieval.ts</code> to measure metrics like relevance density and prompt token budgets across different Top-K values.</li>
+        </ul>
+        <blockquote>
+          <p>Key Finding: Moving from Top 3 to Top 5 improved answer support from 67% to 100%, but increasing K to 20 ballooned token consumption by 7.5× without yielding additional relevant details.</p>
+        </blockquote>
+      </section>
+
+      <section class="card">
+        <h2>3. Retrieval Tuning Playground</h2>
+        <p>Adjust Top-K and apply metadata filters below to see their effect on retrieval quality metrics based on our 2,234-chunk benchmark.</p>
+
+        <div class="simulator-layout">
+          <div class="simulator-controls">
+            <div class="control-group">
+              <label class="control-label" for="question-select">Select Benchmark Question</label>
+              <select id="question-select" class="control-input">
+                <option value="mcp">"How do I add an MCP server?" (Supports: README, mcp-registry.json)</option>
+                <option value="pr">"What changed in recent pull requests?" (Supports: pull/101, pull/102)</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="top-k-select">Select Top-K</label>
+              <select id="top-k-select" class="control-input">
+                <option value="3">Top-3 Chunks</option>
+                <option value="5" selected>Top-5 Chunks (Default)</option>
+                <option value="10">Top-10 Chunks</option>
+                <option value="20">Top-20 Chunks</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label">Metadata Pre-Filters</label>
+              <label style="font-size: 0.9rem; font-weight: normal; margin-bottom: 0.25rem;">
+                <input type="checkbox" id="filter-doc" checked> [documentation]
+              </label>
+              <label style="font-size: 0.9rem; font-weight: normal; margin-bottom: 0.25rem;">
+                <input type="checkbox" id="filter-config" checked> [example_config]
+              </label>
+              <label style="font-size: 0.9rem; font-weight: normal; margin-bottom: 0.25rem;">
+                <input type="checkbox" id="filter-pr" checked> [pull_request]
+              </label>
+            </div>
+          </div>
+
+          <div class="simulator-output">
+            <div class="control-label">Evaluation Metrics</div>
+
+            <div class="simulator-controls" style="background-color: var(--card-bg); padding: 1rem; border-radius: 8px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span>Relevance Density:</span>
+                <strong id="metric-density" style="color: var(--accent-color);">0%</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span>Answer Support Rate:</span>
+                <strong id="metric-support" style="color: var(--success-text);">0%</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span>Est. Prompt Tokens:</span>
+                <strong id="metric-tokens" style="color: var(--text-color);">0</strong>
+              </div>
+            </div>
+
+            <div class="control-label">Retrieved Chunks Trace</div>
+            <div id="chunks-trace-list" class="chunks-container" style="max-height: 250px;">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>4. Retrieval Practice</h2>
+        <p>Test your understanding of RAG retrieval tuning:</p>
+        <h3>Why is metadata pre-filtering highly efficient for improving RAG retrieval?</h3>
+
+        <div id="quiz-options">
+          <button class="quiz-option" onclick="selectOption(this, true, 'Correct! Pre-filtering restricts the search candidate pool first, completely blocking unrelated noise before computing similarities.')">
+            It filters noise files before running vector similarity math.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Logging queries and timing events is an observability tracking function, not a candidate pool filter.')">
+            It writes structured log events to database logs.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Executing vector queries against candidates is the dot-product similarity step itself.')">
+            It runs standard vector search tests between separate chunks.
+          </button>
+        </div>
+        <div id="quiz-feedback" class="quiz-feedback"></div>
+      </section>
+
+      <section class="card">
+        <h2>5. Next Step: Run the Retrieval Evaluator</h2>
+        <p>We have created a command-line script demonstrating local RAG retrieval evaluation. Try running the repository's evaluation suite:</p>
+        <pre><code>bun run scripts/evaluate-quality.ts</code></pre>
+        <p>Review the prints and note down:
+          <ul>
+            <li>Does filtering out code files improve the density when asking a setup question?</li>
+            <li>What happens to latency when K increases from 3 to 20?</li>
+          </ul>
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>30-Day AI Learning Journey • Ask your AI teacher any follow-up questions! • <a href="0003-rag-basics.html">Go to Day 10: RAG Basics</a></p>
+    </footer>
+  </div>
+
+  <script>
+    const MOCK_DB = {
+      mcp: [
+        { path: "README.md", type: "documentation", isRelevant: true },
+        { path: "configs/mcp-registry.json", type: "example_config", isRelevant: true },
+        { path: "lib/retriever.ts", type: "source", isRelevant: false },
+        { path: "pull/310", type: "pull_request", isRelevant: false },
+        { path: "pull/315", type: "pull_request", isRelevant: false }
+      ],
+      pr: [
+        { path: "pull/315", type: "pull_request", isRelevant: true },
+        { path: "pull/317", type: "pull_request", isRelevant: true },
+        { path: "README.md", type: "documentation", isRelevant: false },
+        { path: "lib/indexer.ts", type: "source", isRelevant: false },
+        { path: "configs/mcp-registry.json", type: "example_config", isRelevant: false }
+      ]
+    };
+
+    const questionSelect = document.getElementById('question-select');
+    const topKSelect = document.getElementById('top-k-select');
+    const filterDoc = document.getElementById('filter-doc');
+    const filterConfig = document.getElementById('filter-config');
+    const filterPr = document.getElementById('filter-pr');
+
+    const densityMetric = document.getElementById('metric-density');
+    const supportMetric = document.getElementById('metric-support');
+    const tokensMetric = document.getElementById('metric-tokens');
+    const traceList = document.getElementById('chunks-trace-list');
+
+    function updateSimulation() {
+      const selectedQ = questionSelect.value;
+      const topK = parseInt(topKSelect.value);
+
+      const enabledTypes = new Set();
+      if (filterDoc.checked) enabledTypes.add("documentation");
+      if (filterConfig.checked) enabledTypes.add("example_config");
+      if (filterPr.checked) enabledTypes.add("pull_request");
+
+      // Filter candidate pool
+      const pool = MOCK_DB[selectedQ];
+      const candidates = pool.filter(c => enabledTypes.has(c.type));
+
+      // Slice to topK
+      const results = candidates.slice(0, topK);
+
+      // Calculations
+      const relevantCount = results.filter(r => r.isRelevant).length;
+      const density = results.length > 0 ? (relevantCount / results.length) * 100 : 0;
+      const support = relevantCount > 0 ? 100 : 0;
+
+      // Token estimation
+      const tokenMultiplier = topK === 3 ? 529 : topK === 5 ? 866 : topK === 10 ? 1818 : 3993;
+      const estimatedTokens = results.length > 0 ? Math.round(tokenMultiplier * (results.length / topK)) : 0;
+
+      densityMetric.textContent = `${density.toFixed(0)}%`;
+      supportMetric.textContent = `${support.toFixed(0)}%`;
+      tokensMetric.textContent = estimatedTokens;
+
+      // Update Trace List UI
+      traceList.innerHTML = '';
+      if (results.length === 0) {
+        traceList.innerHTML = '<div class="chunk-card" style="text-align: center;">No chunks matching filters.</div>';
+        return;
+      }
+
+      results.forEach(res => {
+        const card = document.createElement('div');
+        card.className = 'chunk-card';
+        card.style.padding = '0.75rem';
+        if (res.isRelevant) {
+          card.style.borderColor = 'var(--success-text)';
+          card.style.backgroundColor = 'var(--success-bg)';
+        }
+
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+            <span>[${res.type}] <strong>${res.path}</strong></span>
+            <span style="font-weight: bold; color: ${res.isRelevant ? 'var(--success-text)' : 'var(--text-muted)'}">
+              ${res.isRelevant ? 'RELEVANT' : 'NOISE'}
+            </span>
+          </div>
+        `;
+        traceList.appendChild(card);
+      });
+    }
+
+    questionSelect.addEventListener('change', updateSimulation);
+    topKSelect.addEventListener('change', updateSimulation);
+    filterDoc.addEventListener('change', updateSimulation);
+    filterConfig.addEventListener('change', updateSimulation);
+    filterPr.addEventListener('change', updateSimulation);
+
+    updateSimulation();
+
+    // Quiz logic
+    function selectOption(button, isCorrect, feedback) {
+      const options = document.querySelectorAll('.quiz-option');
+      options.forEach(opt => {
+        opt.disabled = true;
+        if (opt === button) {
+          opt.className = 'quiz-option ' + (isCorrect ? 'correct' : 'incorrect');
+        }
+      });
+      const feedbackDiv = document.getElementById('quiz-feedback');
+      feedbackDiv.style.display = 'block';
+      feedbackDiv.style.color = isCorrect ? 'var(--accent-color)' : 'red';
+      feedbackDiv.textContent = feedback;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 9/30: Document Chunking and Overlap</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="day-badge">Day 9/30 — Chunking</span>
+      <h1>Document Splitting, Overlap, and Chunk Size</h1>
+      <p>Why bad chunking strategies silently destroy the quality of AI retrieval systems, and how to fix them.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1. The Retrieval Dilemma</h2>
+        <p>Large Language Models have finite context windows. To search a large corpus of text or a codebase, we must split it into smaller pieces called <strong>chunks</strong>. These chunks are embedded into vectors and stored for retrieval. However, splitting text introduces a tradeoff:</p>
+        <ul>
+          <li><strong>Too Large:</strong> Preserves broad context, but dilutes specific search terms. The model gets "distracted" by irrelevant text in the same chunk.</li>
+          <li><strong>Too Small:</strong> Pinpoints exact words, but loses the surrounding meaning. The model gets a single sentence without knowing the subject.</li>
+        </ul>
+        <blockquote>
+          <p>The goal is to produce chunks that are small enough to be semantically dense, but large enough to stand alone as a complete thought.</p>
+        </blockquote>
+      </section>
+
+      <section class="card">
+        <h2>2. Visual Chunking Simulator</h2>
+        <p>Experiment with chunk size and overlap below to see how character-based text splitting slices the document. Overlapping sections are highlighted in green.</p>
+
+        <div class="simulator-layout">
+          <div class="simulator-controls">
+            <div class="control-group">
+              <label class="control-label" for="sim-text">Source Document</label>
+              <textarea id="sim-text" class="control-input" rows="8"># Introduction to RAG
+
+Retrieval-Augmented Generation (RAG) is a technique that combines retrieval models with generative LLMs.
+By fetching relevant facts from a local dataset, we can ground LLM answers in verified facts.
+
+## Embeddings and Similarity
+
+We convert documents into numerical vectors called embeddings.
+When a user asks a query, we compute the distance between the query vector and document vectors.
+The closest matches are injected into the prompt.
+
+## Chunking Constraints
+
+If the chunk size is set too small, we might retrieve a sentence like: "The closest matches are injected."
+Without the preceding lines, we lose the fact that we are talking about vector embeddings.</textarea>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="chunk-size">Chunk Size (Characters)</label>
+              <input type="range" id="chunk-size" min="50" max="400" value="150" step="10">
+              <div class="range-values">
+                <span>50</span>
+                <span id="chunk-size-val">150</span>
+                <span>400</span>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="overlap-size">Overlap (Characters)</label>
+              <input type="range" id="overlap-size" min="0" max="150" value="40" step="5">
+              <div class="range-values">
+                <span>0</span>
+                <span id="overlap-val">40</span>
+                <span>150</span>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="search-query">Test Query (Mock Search)</label>
+              <input type="text" id="search-query" class="control-input" placeholder="Type to filter chunks..." value="vectors">
+            </div>
+          </div>
+
+          <div class="simulator-output">
+            <div class="control-label">Generated Chunks (<span id="chunk-count">0</span>)</div>
+            <div id="chunks-list" class="chunks-container">
+              <!-- Chunks loaded dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>3. Semantic Chunking (AST & Headings)</h2>
+        <p>Standard chunking slices text at arbitrary lengths (with minor adjustments for newlines). This often cuts code blocks, functions, or markdown sections in half.</p>
+        <p>In <strong>PR 309</strong>, we introduced a <strong>Semantic Chunker</strong> (<a href="file:///Users/huynhdung/src/tries/2026-07-14-my-ai-tools-pr-309/lib/code-taste/chunker.ts">lib/code-taste/chunker.ts</a>) that solves this for codebases:</p>
+        <ol>
+          <li><strong>TypeScript (AST):</strong> Uses <code>web-tree-sitter</code> to identify top-level nodes (class, function, interface). It keeps declarations intact and prepends supporting type interfaces if referenced in the function body.</li>
+          <li><strong>Markdown:</strong> Slices documents by heading blocks (e.g. <code># Heading 1</code>) to ensure sections remain together, while avoiding splitting code fences (<code>```</code>).</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>4. Retrieval Practice</h2>
+        <p>Test your understanding of chunking design choices:</p>
+        <h3>Why do we use overlap when chunking text for retrieval?</h3>
+
+        <div id="quiz-options">
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Embedding models perform vector distance calculations; overlap does not reduce or compress vector dimensional space.')">
+            To reduce storage for vectors stored inside vector databases.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, true, 'Correct! Overlap ensures that context near the boundary boundaries of a split is preserved in adjacent chunks.')">
+            To retain context for concepts split across chunk boundaries.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Overlap duplicates characters, which slightly increases computation load rather than accelerating search.')">
+            To speed up similarity calculations for running search query.
+          </button>
+        </div>
+        <div id="quiz-feedback" class="quiz-feedback"></div>
+      </section>
+
+      <section class="card">
+        <h2>5. Next Step: Run the CLI Compare Script</h2>
+        <p>We have created a command-line utility to compare chunking configurations using the project's own text chunker. Run it in your terminal:</p>
+        <pre><code>bun run scripts/compare-chunking.ts</code></pre>
+        <p>Examine the printed outputs and answer the following for your learning record:</p>
+        <ul>
+          <li>Does a large chunk size improve or degrade the precision of finding a specific term?</li>
+          <li>How does overlap prevent semantic loss?</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <p>30-Day AI Learning Journey • Ask your AI teacher any follow-up questions! • <a href="0001-embeddings.html">Go to Day 8: Embeddings</a></p>
+    </footer>
+  </div>
+
+  <script>
+    // Simulator code
+    const simText = document.getElementById('sim-text');
+    const chunkSizeSlider = document.getElementById('chunk-size');
+    const overlapSlider = document.getElementById('overlap-size');
+    const searchInput = document.getElementById('search-query');
+
+    const chunkSizeVal = document.getElementById('chunk-size-val');
+    const overlapVal = document.getElementById('overlap-val');
+    const chunkCount = document.getElementById('chunk-count');
+    const chunksList = document.getElementById('chunks-list');
+
+    function chunkText(text, maxSize, overlap) {
+      const normalized = text.replace(/\r\n/g, "\n").trim();
+      if (normalized.length === 0) return [];
+      if (normalized.length <= maxSize) return [{ text: normalized, overlapStart: 0, overlapEnd: 0 }];
+
+      const chunks = [];
+      let start = 0;
+
+      while (start < normalized.length) {
+        let end = Math.min(start + maxSize, normalized.length);
+        if (end < normalized.length) {
+          const nextBreak = normalized.lastIndexOf("\n\n", end);
+          if (nextBreak !== -1 && nextBreak > start) {
+            end = nextBreak + 2;
+          } else {
+            const nextLine = normalized.lastIndexOf("\n", end);
+            if (nextLine !== -1 && nextLine > start) {
+              end = nextLine + 1;
+            }
+          }
+        }
+
+        // Calculate overlap region for coloring
+        const chunkTextStr = normalized.slice(start, end).trim();
+        const prevOverlapLen = start > 0 ? overlap : 0;
+
+        chunks.push({
+          text: chunkTextStr,
+          overlapStart: 0,
+          overlapEnd: prevOverlapLen
+        });
+
+        start += maxSize - overlap;
+        if (start >= end) start = end;
+      }
+
+      return chunks;
+    }
+
+    function updateSimulation() {
+      const text = simText.value;
+      const maxSize = parseInt(chunkSizeSlider.value);
+      const overlap = parseInt(overlapSlider.value);
+      const searchQuery = searchInput.value.toLowerCase();
+
+      // Enforce overlap < chunk size
+      if (overlap >= maxSize) {
+        overlapSlider.value = maxSize - 10;
+        return updateSimulation();
+      }
+
+      chunkSizeVal.textContent = maxSize;
+      overlapVal.textContent = overlap;
+
+      const chunks = chunkText(text, maxSize, overlap);
+      chunkCount.textContent = chunks.length;
+
+      chunksList.innerHTML = '';
+      chunks.forEach((chunk, index) => {
+        const queryMatches = searchQuery && chunk.text.toLowerCase().includes(searchQuery);
+
+        // Highlight overlap at the beginning of the chunk if index > 0
+        let renderedText = chunk.text;
+        if (index > 0 && chunk.overlapEnd > 0) {
+          const overlapText = chunk.text.slice(0, chunk.overlapEnd);
+          const restText = chunk.text.slice(chunk.overlapEnd);
+          renderedText = `<span class="overlap-highlight">${escapeHtml(overlapText)}</span>${escapeHtml(restText)}`;
+        } else {
+          renderedText = escapeHtml(renderedText);
+        }
+
+        const card = document.createElement('div');
+        card.className = 'chunk-card';
+        if (queryMatches) {
+          card.style.borderColor = 'var(--accent-color)';
+          card.style.backgroundColor = 'var(--accent-bg)';
+        }
+
+        card.innerHTML = `
+          <div class="chunk-header">
+            <span>Chunk #${index + 1}</span>
+            <span style="font-size: 0.75rem; font-weight: normal; color: var(--text-muted)">
+              Length: ${chunk.text.length} chars
+            </span>
+          </div>
+          <div class="chunk-text">${renderedText}</div>
+        `;
+        chunksList.appendChild(card);
+      });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    simText.addEventListener('input', updateSimulation);
+    chunkSizeSlider.addEventListener('input', updateSimulation);
+    overlapSlider.addEventListener('input', updateSimulation);
+    searchInput.addEventListener('input', updateSimulation);
+
+    // Initial run
+    updateSimulation();
+
+    // Quiz logic
+    function selectOption(button, isCorrect, feedback) {
+      const options = document.querySelectorAll('.quiz-option');
+      options.forEach(opt => {
+        opt.disabled = true;
+        if (opt === button) {
+          opt.className = 'quiz-option ' + (isCorrect ? 'correct' : 'incorrect');
+        }
+      });
+      const feedbackDiv = document.getElementById('quiz-feedback');
+      feedbackDiv.style.display = 'block';
+      feedbackDiv.style.color = isCorrect ? 'var(--accent-color)' : 'red';
+      feedbackDiv.textContent = feedback;
+    }
+  </script>
+</body>
+</html>

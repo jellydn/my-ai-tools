@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 13/30: Memory — Short-Term & Long-Term State</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="day-badge">Day 13/30 — Memory</span>
+      <h1>Short-Term & Long-Term Memory for AI Apps</h1>
+      <p>How separating ephemeral conversation state from durable user preferences makes AI interactions personal, safe, and controllable.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1. Two Kinds of Memory</h2>
+        <p>Every useful AI application needs memory, but not all memory is equal. The critical design decision is <em>what to remember</em> and <em>for how long</em>:</p>
+        <ul>
+          <li><strong>Short-term memory</strong> holds the current conversation messages, tool results, and working variables. It lives inside the context window and vanishes when the session ends. Think of it as the AI's working memory.</li>
+          <li><strong>Long-term memory</strong> persists preferences, facts, and decisions across sessions and projects. It survives restarts, context window resets, and even tool changes. Think of it as the AI's notebook.</li>
+        </ul>
+        <blockquote>
+          <p>Key insight: short-term memory is cheap but fragile; long-term memory is durable but dangerous. Every preference you persist must pass through an <strong>explicit consent gate</strong> — the user must confirm it before it's stored. See <a href="https://github.com/deductive-ai/MemGPT" target="_blank">MemGPT</a> for a tiered memory architecture reference.</p>
+        </blockquote>
+      </section>
+
+      <section class="card">
+        <h2>2. Connecting to the User-Memory MCP</h2>
+        <p>On the <code>feat/user-preference-memory</code> branch, we built a cross-project <strong>user-memory MCP server</strong> that implements safe long-term memory:</p>
+        <ul>
+          <li><strong>Explicit-only writes:</strong> The <code>set()</code> method requires a <code>confirmed: true</code> flag. Calling with <code>false</code> throws: <em>"Preferences may only be stored after the user explicitly states or confirms them."</em></li>
+          <li><strong>Secret rejection:</strong> Keys matching patterns like <code>apiKey</code>, <code>token</code>, or <code>password</code> and values matching JWT, Bearer, or PEM patterns are blocked before they ever reach disk.</li>
+          <li><strong>Atomic file writes:</strong> Preferences are written to a temporary file, then atomically renamed to prevent corruption from concurrent writers or crashes.</li>
+          <li><strong>Value-free audit trail:</strong> Every mutation (set, delete, reset) is logged to <code>audit.jsonl</code> with the key name and timestamp but <em>never the value</em>, preserving accountability without leaking data.</li>
+          <li><strong>Full user control:</strong> Users can <code>list</code>, <code>delete</code> individual keys, or <code>reset</code> all preferences at any time.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>3. Memory Simulator</h2>
+        <p>Try the preference store below. Set a preference, observe the audit log, then try storing a secret — watch the safety gate reject it.</p>
+
+        <div class="simulator-layout">
+          <div class="simulator-controls">
+            <div class="control-group">
+              <label class="control-label" for="pref-key">Preference Key</label>
+              <input type="text" id="pref-key" class="control-input" value="responseStyle" placeholder="e.g. responseStyle">
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="pref-value">Preference Value</label>
+              <input type="text" id="pref-value" class="control-input" value="concise" placeholder="e.g. concise">
+            </div>
+
+            <div class="control-group">
+              <label class="control-label">
+                <input type="checkbox" id="pref-confirmed" checked> User explicitly confirmed
+              </label>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button class="quiz-option" style="flex: 1; min-width: 80px;" onclick="doSet()">Set</button>
+              <button class="quiz-option" style="flex: 1; min-width: 80px;" onclick="doGet()">Get</button>
+              <button class="quiz-option" style="flex: 1; min-width: 80px;" onclick="doDelete()">Delete</button>
+              <button class="quiz-option" style="flex: 1; min-width: 80px;" onclick="doReset()">Reset All</button>
+            </div>
+          </div>
+
+          <div class="simulator-output">
+            <div class="control-label">Stored Preferences</div>
+            <div id="pref-list" class="chunks-container" style="min-height: 60px; max-height: 180px;">
+              <div class="chunk-card" style="text-align: center; color: var(--text-muted);">No preferences stored yet.</div>
+            </div>
+
+            <div class="control-label" style="margin-top: 1rem;">Audit Log</div>
+            <pre><code id="audit-log" style="white-space: pre-wrap; font-size: 0.8rem; max-height: 140px; overflow-y: auto; display: block;">No audit entries.</code></pre>
+
+            <div id="result-box" class="chunk-card" style="margin-top: 1rem; display: none; padding: 0.75rem;">
+              <span id="result-text" style="font-size: 0.85rem;"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>4. Retrieval Practice</h2>
+        <p>Test your understanding of safe memory design:</p>
+        <h3>Why does the preference store require an explicit consent flag?</h3>
+
+        <div id="quiz-options">
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. File locking prevents data corruption from concurrent writers, not unauthorized preference storage.')">
+            It uses atomic file locks to prevent data write corruption.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, true, 'Correct! The consent gate ensures AI agents cannot silently infer and persist preferences without the user\'s knowledge.')">
+            It blocks agents from silently inferring and storing preferences.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Secret pattern detection rejects credentials and tokens, which is a different safety layer.')">
+            It rejects stored values matching known secret key token patterns.
+          </button>
+        </div>
+        <div id="quiz-feedback" class="quiz-feedback"></div>
+      </section>
+
+      <section class="card">
+        <h2>5. Next Step: Run the Memory CLI</h2>
+        <p>We created a command-line script demonstrating a stateful chat with persistent preference memory. Run it in your terminal:</p>
+        <pre><code>bun run scripts/memory-chat.ts</code></pre>
+        <p>Try these interactions:
+          <ul>
+            <li>Set a preference like <code>responseStyle = concise</code></li>
+            <li>Ask a question and see the preference injected into the system prompt</li>
+            <li>Reset all preferences and ask again to see the difference</li>
+          </ul>
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>30-Day AI Learning Journey • Ask your AI teacher any follow-up questions! • <a href="0005-prompt-templates.html">Go to Day 12: Prompt Templates</a></p>
+    </footer>
+  </div>
+
+  <script>
+    const SECRET_KEY_PARTS = [
+      "apikey", "accesskey", "authtoken", "cookie", "credential",
+      "password", "passphrase", "privatekey", "secret", "sessiontoken", "token"
+    ];
+    const SECRET_VALUE_PATTERNS = [
+      /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/i,
+      /\b(?:sk|pk|rk)-(?:live|test|or-v1|proj)-[A-Za-z0-9_-]{8,}\b/,
+      /\bBearer\s+[A-Za-z0-9._~+/-]+=*\b/i,
+      /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/
+    ];
+
+    let preferences = {};
+    let auditEntries = [];
+
+    function isSecretKey(key) {
+      const normalized = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+      return SECRET_KEY_PARTS.some(part => normalized.includes(part));
+    }
+
+    function isSecretValue(value) {
+      return SECRET_VALUE_PATTERNS.some(pattern => pattern.test(value));
+    }
+
+    function showResult(text, isError) {
+      const box = document.getElementById('result-box');
+      const span = document.getElementById('result-text');
+      box.style.display = 'block';
+      box.style.borderColor = isError ? 'var(--error-text)' : 'var(--success-text)';
+      box.style.backgroundColor = isError ? 'var(--error-bg)' : 'var(--success-bg)';
+      span.style.color = isError ? 'var(--error-text)' : 'var(--success-text)';
+      span.textContent = text;
+      setTimeout(() => { box.style.display = 'none'; }, 4000);
+    }
+
+    function addAudit(operation, key) {
+      const entry = { operation, key: key || undefined, timestamp: new Date().toISOString() };
+      auditEntries.push(entry);
+      document.getElementById('audit-log').textContent =
+        auditEntries.map(e => JSON.stringify(e)).join("\n");
+    }
+
+    function renderPreferences() {
+      const list = document.getElementById('pref-list');
+      const keys = Object.keys(preferences).sort();
+      if (keys.length === 0) {
+        list.innerHTML = '<div class="chunk-card" style="text-align: center; color: var(--text-muted);">No preferences stored yet.</div>';
+        return;
+      }
+      list.innerHTML = keys.map(k => {
+        const p = preferences[k];
+        return `<div class="chunk-card" style="padding: 0.5rem 0.75rem; border-color: var(--accent-color);">
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+            <strong>${k}</strong>
+            <span style="color: var(--text-muted);">${p.value}</span>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">source: explicit • updated: ${p.updatedAt}</div>
+        </div>`;
+      }).join("");
+    }
+
+    function doSet() {
+      const key = document.getElementById('pref-key').value.trim();
+      const value = document.getElementById('pref-value').value.trim();
+      const confirmed = document.getElementById('pref-confirmed').checked;
+
+      if (!confirmed) {
+        showResult("✗ Rejected: preferences may only be stored after explicit user confirmation.", true);
+        return;
+      }
+      if (!key || !value) {
+        showResult("✗ Both key and value are required.", true);
+        return;
+      }
+      if (isSecretKey(key) || isSecretValue(value)) {
+        showResult("✗ Rejected: secrets, credentials, API keys, and tokens cannot be stored as preferences.", true);
+        return;
+      }
+
+      const now = new Date().toISOString();
+      const existing = preferences[key];
+      preferences[key] = {
+        value,
+        source: "explicit",
+        createdAt: existing ? existing.createdAt : now,
+        updatedAt: now
+      };
+      addAudit("set", key);
+      renderPreferences();
+      showResult(`✓ Preference "${key}" set to "${value}".`, false);
+    }
+
+    function doGet() {
+      const key = document.getElementById('pref-key').value.trim();
+      if (!key) { showResult("✗ Enter a key to look up.", true); return; }
+      const pref = preferences[key];
+      if (pref) {
+        showResult(`✓ ${key} = "${pref.value}" (set ${pref.updatedAt})`, false);
+      } else {
+        showResult(`✗ No preference found for key "${key}".`, true);
+      }
+    }
+
+    function doDelete() {
+      const key = document.getElementById('pref-key').value.trim();
+      if (!key) { showResult("✗ Enter a key to delete.", true); return; }
+      if (preferences[key]) {
+        delete preferences[key];
+        addAudit("delete", key);
+        renderPreferences();
+        showResult(`✓ Preference "${key}" deleted.`, false);
+      } else {
+        showResult(`✗ Key "${key}" not found.`, true);
+      }
+    }
+
+    function doReset() {
+      const count = Object.keys(preferences).length;
+      preferences = {};
+      addAudit("reset");
+      renderPreferences();
+      showResult(`✓ Reset complete. ${count} preference(s) deleted.`, false);
+    }
+
+    renderPreferences();
+
+    // Quiz logic
+    function selectOption(button, isCorrect, feedback) {
+      const options = document.querySelectorAll('.quiz-option');
+      options.forEach(opt => {
+        if (opt.closest('#quiz-options')) {
+          opt.disabled = true;
+          if (opt === button) {
+            opt.className = 'quiz-option ' + (isCorrect ? 'correct' : 'incorrect');
+          }
+        }
+      });
+      const feedbackDiv = document.getElementById('quiz-feedback');
+      feedbackDiv.style.display = 'block';
+      feedbackDiv.style.color = isCorrect ? 'var(--accent-color)' : 'red';
+      feedbackDiv.textContent = feedback;
+    }
+  </script>
+</body>
+</html>

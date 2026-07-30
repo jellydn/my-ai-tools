@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 16/30: Tools for Agents — File, Search, and API Tools</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="day-badge">Day 16/30 — Tools for Agents</span>
+      <h1>Equipping Agents with Tools</h1>
+      <p>How structured schemas, read-only file/search tools, standardized metadata, and feedback loops give AI agents external capabilities.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1. Three Categories of Agent Tools</h2>
+        <p>An LLM on its own has parametric knowledge but no access to your live codebase or environment. <strong>Tools</strong> are typed functions exposed to the model via structured schemas:</p>
+        <ul>
+          <li><strong>File Tools (e.g. <code>list_files</code>, <code>read_file</code>):</strong> Allow the agent to explore file trees and inspect file lines with line-numbering for precise citations.</li>
+          <li><strong>Search Tools (e.g. <code>search_code</code>, <code>grep</code>):</strong> Perform fast literal or regex pattern matching across source files, returning repository-relative paths and line excerpts.</li>
+          <li><strong>API Tools (e.g. <code>http_get</code>, <code>query_db</code>):</strong> Interact with external REST services, databases, or local runtime environments under strict authorization bounds.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>2. Connecting to flue-repo-assistant (PR #7)</h2>
+        <p>In the <code>flue-repo-assistant</code> codebase (<code>tools/</code>), tools are defined using runtime schema validators (Valibot/Zod) and standardized metadata:</p>
+        <ul>
+          <li><strong>Tool Selection Rules:</strong>
+            <ul>
+              <li><code>list_files</code>: Use when directory structure or file path is unknown.</li>
+              <li><code>search_code</code>: Use when searching for a symbol, phrase, config key, or implementation whose file path is unknown.</li>
+              <li><code>read_file</code>: Use when the exact file path is known.</li>
+            </ul>
+          </li>
+          <li><strong>Standardized Result Metadata (<code>InspectionMetadata</code>):</strong> Every result returns <code>{ used, remaining, limit }</code> so the model can monitor budget consumption. Failures are wrapped with <code>wrapWithBudget</code> so remaining budget is visible even after errors.</li>
+          <li><strong>Truncation Accuracy:</strong> <code>read_file</code> sets <code>truncated = requestedEnd > endLine || endLine < lines.length</code> to accurately indicate unread lines.</li>
+          <li><strong>Safe Observability:</strong> <code>REPO_ASSISTANT_DEBUG=true</code> prints safe single-line summaries logging tool name, sanitized inputs, result counts, and budget snapshots without leaking file content or keys.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>3. Interactive Tool Router Simulator</h2>
+        <p>Select a user request to observe how the LLM evaluates tool schemas, validates inputs, executes the tool, and receives structured feedback.</p>
+
+        <div class="simulator-layout">
+          <div class="simulator-controls">
+            <div class="control-group">
+              <label class="control-label" for="task-select">Select Test Task</label>
+              <select id="task-select" class="control-input">
+                <option value="search">Task A: "Find where jwtSecret is configured in code"</option>
+                <option value="read">Task B: "Read lines 1-15 of src/auth.ts"</option>
+                <option value="list">Task C: "List files in the src/ directory"</option>
+                <option value="direct">Task D: "What is an HTTP status 200?" (No Tool Needed)</option>
+              </select>
+            </div>
+
+            <button class="quiz-option" style="width: 100%; margin-top: 1rem;" onclick="runToolSimulation()">Execute Tool Router</button>
+          </div>
+
+          <div class="simulator-output">
+            <div class="control-label">1. LLM Tool Selection & Schema Validation</div>
+            <pre><code id="schema-display" style="white-space: pre-wrap; font-size: 0.8rem; max-height: 120px;">Select a task to run simulation...</code></pre>
+
+            <div class="control-label" style="margin-top: 1rem;">2. Execution Result & Observation Feedback</div>
+            <div id="result-display" class="chunk-card" style="padding: 0.75rem; min-height: 60px; font-size: 0.85rem;">
+              <span style="color: var(--text-muted);">Execution feedback will appear here...</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>4. Retrieval Practice</h2>
+        <p>Test your understanding of tool schema design:</p>
+        <h3>Why must tool schemas include clear descriptions and parameter bounds?</h3>
+
+        <div id="quiz-options">
+          <button class="quiz-option" onclick="selectOption(this, true, 'Correct! Clear descriptions and strict bounds help the LLM select the right tool and provide valid input arguments.')">
+            It helps model tool choices before running local search tasks.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Logging event traces is an observability mechanism, not a tool routing schema constraint.')">
+            It writes structured query execution events to database logs.
+          </button>
+          <button class="quiz-option" onclick="selectOption(this, false, 'Incorrect. Testing vector chunks is part of semantic retrieval, not tool parameter schema validation.')">
+            It runs standard vector search tests between separate chunks.
+          </button>
+        </div>
+        <div id="quiz-feedback" class="quiz-feedback"></div>
+      </section>
+
+      <section class="card">
+        <h2>5. Next Step: Run the Tool CLI</h2>
+        <p>We created a command-line script demonstrating tool definitions, standardized <code>InspectionMetadata</code>, and execution. Run it in your terminal:</p>
+        <pre><code>bun run scripts/evaluate-tools.ts</code></pre>
+        <p>Review the logs to observe:
+          <ul>
+            <li>How <code>search_code</code>, <code>read_file</code>, and <code>list_files</code> process requests and return <code>{ used, remaining, limit }</code>.</li>
+            <li>How invalid parameters trigger schema validation errors wrapped with budget state.</li>
+          </ul>
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>30-Day AI Learning Journey • Ask your AI teacher any follow-up questions! • <a href="0008-agent-basics.html">Go to Day 15: Agent Basics</a></p>
+    </footer>
+  </div>
+
+  <script>
+    const TASKS = {
+      search: {
+        tool: "search_code",
+        args: { query: "jwtSecret", path: "." },
+        schema: '{\n  name: "search_code",\n  description: "Search first-party text for a literal string when symbol path is unknown.",\n  input: { query: "jwtSecret", path: "." },\n  validation: "PASSED (query minLength: 2)"\n}',
+        result: '{\n  "query": "jwtSecret",\n  "matches": [\n    { "path": "src/config.ts", "line": 14, "excerpt": "export const jwtSecret = process.env.JWT_SECRET;" }\n  ],\n  "filesSearched": 6,\n  "inspection": { "used": 1, "remaining": 7, "limit": 8 }\n}'
+      },
+      read: {
+        tool: "read_file",
+        args: { path: "src/auth.ts", startLine: 1, endLine: 15 },
+        schema: '{\n  name: "read_file",\n  description: "Read a bounded line range from one text file when exact path is known.",\n  input: { path: "src/auth.ts", startLine: 1, endLine: 15 },\n  validation: "PASSED (startLine >= 1)"\n}',
+        result: '{\n  "path": "src/auth.ts",\n  "startLine": 1,\n  "endLine": 15,\n  "totalLines": 42,\n  "content": "1: import { jwtSecret } from \'./config\';\\n2: export function authenticate(req) { ... }",\n  "truncated": true,\n  "inspection": { "used": 1, "remaining": 7, "limit": 8 }\n}'
+      },
+      list: {
+        tool: "list_files",
+        args: { path: "src", maxDepth: 2 },
+        schema: '{\n  name: "list_files",\n  description: "Discover structure below a directory when path/structure is unknown.",\n  input: { path: "src", maxDepth: 2 },\n  validation: "PASSED (path relative)"\n}',
+        result: '{\n  "path": "src",\n  "entries": [\n    { "path": "src/config.ts", "type": "file", "size": 340 },\n    { "path": "src/auth.ts", "type": "file", "size": 890 }\n  ],\n  "inspection": { "used": 1, "remaining": 7, "limit": 8 }\n}'
+      },
+      direct: {
+        tool: "NONE (Direct Answer)",
+        args: {},
+        schema: '{\n  name: "NONE",\n  reasoning: "Parametric knowledge is sufficient to explain HTTP status 200. No tool calls required."\n}',
+        result: 'Final Answer: HTTP 200 OK is the standard response for successful HTTP requests, indicating that the client request has succeeded.'
+      }
+    };
+
+    function runToolSimulation() {
+      const taskKey = document.getElementById('task-select').value;
+      const data = TASKS[taskKey];
+
+      document.getElementById('schema-display').textContent = data.schema;
+      document.getElementById('result-display').innerHTML = `<pre style="margin: 0; white-space: pre-wrap;">${data.result}</pre>`;
+    }
+
+    // Quiz logic
+    function selectOption(button, isCorrect, feedback) {
+      const options = document.querySelectorAll('#quiz-options .quiz-option');
+      options.forEach(opt => {
+        opt.disabled = true;
+        if (opt === button) {
+          opt.className = 'quiz-option ' + (isCorrect ? 'correct' : 'incorrect');
+        }
+      });
+      const feedbackDiv = document.getElementById('quiz-feedback');
+      feedbackDiv.style.display = 'block';
+      feedbackDiv.style.color = isCorrect ? 'var(--accent-color)' : 'red';
+      feedbackDiv.textContent = feedback;
+    }
+  </script>
+</body>
+</html>
