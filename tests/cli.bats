@@ -148,14 +148,14 @@ setup() {
 }
 
 @test "tool_allowed gates correctly under YES_TO_ALL" {
-    # Under YES_TO_ALL=true: only the 8 allowed tools return 0
+    # Under YES_TO_ALL=true: only the allowed tools return 0
     export YES_TO_ALL=true
-    for tool in amp codex ctx cursor kilo opencode open_code_review pi antigravity ai-switcher; do
+    for tool in amp codex ctx cursor kilo opencode open_code_review pi antigravity ai-switcher claude; do
         run tool_allowed "$tool"
         [ "$status" -eq 0 ]
     done
     # Non-allowed tools return 1
-    for tool in claude cline gemini grok mimo; do
+    for tool in cline gemini grok mimo; do
         run tool_allowed "$tool"
         [ "$status" -eq 1 ]
     done

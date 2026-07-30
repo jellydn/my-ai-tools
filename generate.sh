@@ -201,6 +201,7 @@ generate_opencode_configs() {
 
 	execute "mkdir -p $SCRIPT_DIR/configs/opencode"
 	copy_single "$HOME/.config/opencode/opencode.json" "$SCRIPT_DIR/configs/opencode/opencode.json"
+	copy_single "$HOME/.config/opencode/AGENTS.md" "$SCRIPT_DIR/configs/opencode/AGENTS.md"
 
 	# Copy skills with filtering
 	copy_skills_with_filter "$HOME/.config/opencode/skills" "$SCRIPT_DIR/configs/opencode/skills" "OpenCode"

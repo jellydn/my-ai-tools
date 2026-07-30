@@ -1,8 +1,8 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createOpenAIClient } from "../lib/openai-client.ts";
 import { indexRepository } from "../lib/indexer.ts";
+import { createOpenAIClient } from "../lib/openai-client.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

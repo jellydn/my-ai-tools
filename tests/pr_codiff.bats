@@ -44,7 +44,7 @@ README="$REPO_ROOT/README.md"
 }
 
 @test "cli.sh main() installs codiff" {
-	run grep -E '^[[:space:]]*install_codiff' "$CLI_SH"
+	run grep -F '"codiff:install_codiff"' "$CLI_SH"
 	[ "$status" -eq 0 ]
 	[ -n "$output" ]
 }

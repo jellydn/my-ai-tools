@@ -4,14 +4,18 @@
 load helpers
 
 README_FILE="$REPO_ROOT/README.md"
+PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
 
-@test "README.md references xai-auth as Pi default provider" {
-    run grep -F "**Default Provider**: \`xai-auth\`" "$README_FILE"
+@test "README.md Pi defaults match configs/pi/settings.json" {
+    require_jq
+    local provider model
+    provider=$(jq -r '.defaultProvider' "$PI_SETTINGS")
+    model=$(jq -r '.defaultModel' "$PI_SETTINGS")
+
+    run grep -F "**Default Provider**: \`$provider\`" "$README_FILE"
     [ "$status" -eq 0 ]
-}
 
-@test "README.md mentions grok-composer-2.5-fast as Pi default model" {
-    run grep -F "**Default Model**: \`grok-composer-2.5-fast\`" "$README_FILE"
+    run grep -F "**Default Model**: \`$model\`" "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
@@ -23,6 +27,29 @@ README_FILE="$REPO_ROOT/README.md"
 @test "README.md still mentions deepseek/deepseek-v4-pro among Pi models" {
     run grep -F "deepseek/deepseek-v4-pro" "$README_FILE"
     [ "$status" -eq 0 ]
+}
+
+@test "README.md Pi overview lists current packages" {
+    run grep -F "pi-qwencloud-provider" "$README_FILE"
+    [ "$status" -eq 0 ]
+    run grep -F "pi-cursor-sdk" "$README_FILE"
+    [ "$status" -eq 0 ]
+    run grep -F "dynamic-workflows" "$README_FILE"
+    [ "$status" -eq 1 ]
+    run grep -F "pi-xai-oauth" "$README_FILE"
+    [ "$status" -eq 1 ]
+}
+
+@test "README.md Auto-Install note is outside the bash fence" {
+    run bash -c '
+        awk "
+            /^```bash$/ { in_bash=1; next }
+            /^```$/ { in_bash=0; next }
+            in_bash && /Auto-Install/ { found=1 }
+            END { exit found ? 0 : 1 }
+        " "$1"
+    ' _ "$README_FILE"
+    [ "$status" -eq 1 ]
 }
 
 @test "README.md Pi section heading contains Antigravity Rotator" {

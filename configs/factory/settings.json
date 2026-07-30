@@ -39,6 +39,39 @@
 	"completionSound": "fx-ok01",
 	"customModels": [
 		{
+			"model": "paid",
+			"id": "custom:OmniRoute-0",
+			"index": 0,
+			"baseUrl": "http://localhost:20128/v1",
+			"apiKey": "sk_omniroute",
+			"displayName": "paid",
+			"maxOutputTokens": 131072,
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "free",
+			"id": "custom:OmniRoute-1",
+			"index": 1,
+			"baseUrl": "http://localhost:20128/v1",
+			"apiKey": "sk_omniroute",
+			"displayName": "free",
+			"maxOutputTokens": 131072,
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
+			"model": "premium",
+			"id": "custom:OmniRoute-2",
+			"index": 2,
+			"baseUrl": "http://localhost:20128/v1",
+			"apiKey": "sk_omniroute",
+			"displayName": "premium",
+			"maxOutputTokens": 131072,
+			"noImageSupport": false,
+			"provider": "openai"
+		},
+		{
 			"model": "qwen3-coder-next:cloud",
 			"displayName": "qwen3-coder-next:cloud",
 			"baseUrl": "http://127.0.0.1:11434/v1",
@@ -65,7 +98,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GH: GPT-5.4 (via Copilot)",
 			"id": "custom:GH:-GPT-5.4-(via-Copilot)-0",
-			"index": 1,
+			"index": 2,
 			"model": "gpt-5.4",
 			"noImageSupport": false,
 			"provider": "openai"
@@ -75,7 +108,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GH: Sonnet 4.6 (via Copilot)",
 			"id": "custom:GH:-Sonnet-4.6-(via-Copilot)-0",
-			"index": 2,
+			"index": 3,
 			"model": "claude-sonnet-4.6",
 			"noImageSupport": false,
 			"provider": "openai"
@@ -85,7 +118,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GH: Haiku 4.5 (via Copilot)",
 			"id": "custom:GH:-Haiku-4.5-(via-Copilot)-0",
-			"index": 3,
+			"index": 4,
 			"model": "claude-haiku-4.5",
 			"noImageSupport": false,
 			"provider": "openai"
@@ -95,7 +128,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GH: GPT-5.3-Codex (via Copilot)",
 			"id": "custom:GH:-GPT-5.3-Codex-(via-Copilot)-0",
-			"index": 4,
+			"index": 5,
 			"model": "gpt-5.3-codex",
 			"noImageSupport": false,
 			"provider": "openai"
@@ -105,7 +138,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GH: GPT-5 mini (via Copilot)",
 			"id": "custom:GH:-GPT-5-mini-(via-Copilot)-0",
-			"index": 5,
+			"index": 6,
 			"model": "gpt-5.4-mini",
 			"noImageSupport": false,
 			"provider": "openai"
@@ -115,7 +148,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GPT-5.3 Codex",
 			"id": "custom:GPT-5.3-Codex-0",
-			"index": 6,
+			"index": 7,
 			"model": "gpt-5.3-codex",
 			"noImageSupport": false,
 			"provider": "openai"
@@ -125,7 +158,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GPT-5.3 Codex (High)",
 			"id": "custom:GPT-5.3-Codex-(High)-0",
-			"index": 7,
+			"index": 8,
 			"model": "gpt-5.3-codex(high)",
 			"noImageSupport": false,
 			"provider": "openai"
@@ -135,7 +168,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GPT-5.3 Codex Spark",
 			"id": "custom:GPT-5.3-Codex-Spark-0",
-			"index": 8,
+			"index": 9,
 			"model": "gpt-5.3-codex-spark",
 			"noImageSupport": false,
 			"provider": "openai"
@@ -145,7 +178,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GPT-5.5",
 			"id": "custom:GPT-5.5-0",
-			"index": 9,
+			"index": 10,
 			"model": "gpt-5.5",
 			"noImageSupport": false,
 			"provider": "openai"
@@ -155,7 +188,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GPT-5.5 (Low)",
 			"id": "custom:GPT-5.5-(Low)-0",
-			"index": 10,
+			"index": 11,
 			"model": "gpt-5.5(low)",
 			"noImageSupport": false,
 			"provider": "openai"
@@ -165,7 +198,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GPT-5.5 (High)",
 			"id": "custom:GPT-5.5-(High)-0",
-			"index": 11,
+			"index": 12,
 			"model": "gpt-5.5(high)",
 			"noImageSupport": false,
 			"provider": "openai"
@@ -175,7 +208,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GPT-5.4",
 			"id": "custom:GPT-5.4-0",
-			"index": 12,
+			"index": 13,
 			"model": "gpt-5.4",
 			"noImageSupport": false,
 			"provider": "openai"
@@ -185,7 +218,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GPT-5.4 (High)",
 			"id": "custom:GPT-5.4-(High)-0",
-			"index": 13,
+			"index": 14,
 			"model": "gpt-5.4(high)",
 			"noImageSupport": false,
 			"provider": "openai"
@@ -195,7 +228,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GPT-5.4 Mini",
 			"id": "custom:GPT-5.4-Mini-0",
-			"index": 14,
+			"index": 15,
 			"model": "gpt-5.4-mini",
 			"noImageSupport": false,
 			"provider": "openai"
@@ -205,7 +238,7 @@
 			"baseUrl": "http://localhost:8317/v1",
 			"displayName": "GPT-5.4 Mini (High)",
 			"id": "custom:GPT-5.4-Mini-(High)-0",
-			"index": 15,
+			"index": 16,
 			"model": "gpt-5.4-mini(high)",
 			"noImageSupport": false,
 			"provider": "openai"

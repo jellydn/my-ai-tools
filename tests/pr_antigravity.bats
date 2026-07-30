@@ -11,11 +11,11 @@ ANTIGRAVITY_SETTINGS="$REPO_ROOT/configs/antigravity-cli/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/antigravity-cli/settings.json model is Gemini 3.5 Flash (High)" {
+@test "configs/antigravity-cli/settings.json model is Gemini 3.6 Flash (High)" {
     require_jq
     run jq -r '.model' "$ANTIGRAVITY_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "Gemini 3.5 Flash (High)" ]
+    [ "$output" = "Gemini 3.6 Flash (High)" ]
 }
 
 @test "configs/antigravity-cli/settings.json permissions.allow contains codebase-memory-mcp tools" {

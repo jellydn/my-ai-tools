@@ -13,6 +13,11 @@
 					"qmd search": "allow"
 				}
 			}
+		},
+		"explorer": {
+			"description": "Fast explorer subagent for codebase exploration",
+			"mode": "subagent",
+			"model": "omniroute/free"
 		}
 	},
 	"default_agent": "plan",
@@ -46,7 +51,6 @@
 			"extensions": [".lua"]
 		}
 	},
-	"instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md", "~/.ai-tools/agent-memory.md"],
 	"mcp": {
 		"agentmemory": {
 			"command": ["npx", "-y", "@agentmemory/mcp"],
@@ -104,71 +108,59 @@
 			"command": ["codebase-memory-mcp"]
 		}
 	},
-	"model": "opencode/big-pickle",
+	"model": "omniroute/free",
 	"plugin": ["@plannotator/opencode@latest", "opencode-chrome-annotation@latest"],
 	"provider": {
-		"cursorapi": {
+		"omniroute": {
+			"npm": "@ai-sdk/openai-compatible",
+			"name": "OmniRoute",
+			"options": {
+				"baseURL": "http://localhost:20128/v1",
+				"apiKey": "sk_omniroute"
+			},
 			"models": {
-				"composer-2.5": {
-					"cost": {
-						"input": 0.5,
-						"output": 2.5
-					},
-					"limit": {
-						"context": 200000,
-						"output": 65536
-					},
-					"name": "Composer 2.5"
+				"paid": {
+					"name": "paid",
+					"modalities": {
+						"input": ["text", "image"],
+						"output": ["text"]
+					}
 				},
-				"composer-2.5-fast": {
-					"cost": {
-						"input": 3,
-						"output": 15
-					},
-					"limit": {
-						"context": 200000,
-						"output": 65536
-					},
-					"name": "Composer 2.5 Fast"
+				"free": {
+					"name": "free",
+					"modalities": {
+						"input": ["text", "image"],
+						"output": ["text"]
+					}
+				},
+				"premium": {
+					"name": "premium",
+					"modalities": {
+						"input": ["text", "image"],
+						"output": ["text"]
+					}
+				},
+				"kc/openrouter/free": {
+					"name": "kc/openrouter/free"
+				},
+				"oc/deepseek-v4-flash-free": {
+					"name": "oc/deepseek-v4-flash-free"
+				},
+				"cu/auto": {
+					"name": "cu/auto"
+				},
+				"cmd/deepseek/deepseek-v4-pro": {
+					"name": "cmd/deepseek/deepseek-v4-pro"
+				},
+				"cmd/deepseek/deepseek-v4-flash": {
+					"name": "cmd/deepseek/deepseek-v4-flash"
+				},
+				"cp/cline-pass/deepseek-v4-pro": {
+					"name": "cp/cline-pass/deepseek-v4-pro"
+				},
+				"cp/cline-pass/deepseek-v4-flash": {
+					"name": "cp/cline-pass/deepseek-v4-flash"
 				}
-			},
-			"name": "API for Cursor",
-			"npm": "@ai-sdk/openai-compatible",
-			"options": {
-				"apiKey": "cursor-local",
-				"baseURL": "http://127.0.0.1:8788/v1"
-			}
-		},
-		"llama.cpp": {
-			"models": {
-				"glm": {
-					"limit": {
-						"context": 32768,
-						"output": 16384
-					},
-					"name": "GLM-4.7-Flash (local)"
-				}
-			},
-			"name": "llama-server (local)",
-			"npm": "@ai-sdk/openai-compatible",
-			"options": {
-				"baseURL": "http://192.168.1.11:8000/v1"
-			}
-		},
-		"ollama": {
-			"models": {
-				"minimax-m2.5:cloud": {
-					"limit": {
-						"context": 204800,
-						"output": 128000
-					},
-					"name": "minimax-m2.5:cloud"
-				}
-			},
-			"name": "Ollama (local)",
-			"npm": "@ai-sdk/openai-compatible",
-			"options": {
-				"baseURL": "http://127.0.0.1:11434/v1"
 			}
 		}
 	}

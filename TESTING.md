@@ -13,7 +13,7 @@ bash -n cli.sh
 For automated validation, check all scripts with syntax validation:
 
 ```bash
-bash -n cli.sh generate.sh && echo "All scripts valid"
+bash -n cli.sh generate.sh install.sh lib/*.sh scripts/*.sh && echo "All scripts valid"
 ```
 
 ## 🧹 Code Quality Checks

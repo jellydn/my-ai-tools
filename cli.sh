@@ -13,7 +13,7 @@ source "$SCRIPT_DIR/lib/install.sh"
 # Core tools installed/configured when -y (YES_TO_ALL) is active.
 # This is your personal active tool set. When YES_TO_ALL is false
 # (interactive mode), tool_allowed returns true for everything.
-TOOL_ALLOWLIST_YES=(amp codex ctx cursor kilo opencode open_code_review pi antigravity ai-switcher)
+TOOL_ALLOWLIST_YES=(amp codex ctx cursor kilo opencode open_code_review pi antigravity ai-switcher claude)
 
 tool_allowed() {
 	local name="$1"
@@ -23,6 +23,56 @@ tool_allowed() {
 		[ "$t" = "$name" ] && return 0
 	done
 	return 1
+}
+
+# Installers run in this order. Each entry is "<allowlist-key>:<installer>".
+# The "always" key marks cross-tool dependencies that are never gated by the
+# -y allowlist because every managed assistant relies on them.
+INSTALL_SEQUENCE=(
+	"claude:install_claude_code"
+	# RTK reduces shell-output context for every managed coding assistant.
+	"always:install_rtk"
+	"opencode:install_opencode"
+	"amp:install_amp"
+	"always:install_global_tools"
+	"ccs:install_ccs"
+	"ai-switcher:install_ai_switcher"
+	"codex:install_codex"
+	"kimi_code:install_kimi_code"
+	"gemini:install_gemini"
+	"antigravity:install_antigravity"
+	"kilo:install_kilo"
+	"pi:install_pi"
+	"commandcode:install_commandcode"
+	"copilot:install_copilot"
+	"cursor:install_cursor"
+	"conductor:install_conductor"
+	"herdr:install_herdr"
+	"ctx:install_ctx"
+	"qodercli:install_qodercli"
+	"kiro:install_kiro"
+	"codiff:install_codiff"
+	"devin:install_devin"
+	"factory:install_factory"
+	"cline:install_cline"
+	"grok:install_grok"
+	"mimo:install_mimo"
+	"open_code_review:install_open_code_review"
+)
+
+run_install_sequence() {
+	local entry key installer
+	for entry in "${INSTALL_SEQUENCE[@]}"; do
+		key="${entry%%:*}"
+		installer="${entry#*:}"
+
+		if [ "$key" = "always" ] || tool_allowed "$key"; then
+			"$installer"
+		else
+			log_info "Skipping $key installer (not in -y allowlist)"
+		fi
+		echo
+	done
 }
 
 # Parse command-line arguments first (only when executed, not sourced)
@@ -710,50 +760,60 @@ install_mcp_servers_from_registry() {
 
 	local summary_lines=()
 
-	# Extract all server data in a single jq call for efficiency
-	# Fields: server_name, name, description, command, args_delimited, requires_delimited, category
+	# Extract all server data as NDJSON (one object per line) for lossless field parsing
+	# Keys: key, name, description, command, args, requires, category
 	# Read from FD 3 so stdin stays attached to the terminal for prompt_yn.
-	while IFS=$'\t' read -r server_name name description command args_delimited requires_delimited category <&3; do
+	# One compact JSON object per line — lossless for newlines in fields,
+	# empty vs [""] args, and embedded delimiter characters.
+	while IFS= read -r record <&3; do
+		[ -n "$record" ] || continue
+
+		local server_name name description command category
+		server_name=$(jq -r '.key' <<<"$record")
+		name=$(jq -r '.name' <<<"$record")
+		description=$(jq -r '.description' <<<"$record")
+		command=$(jq -r '.command' <<<"$record")
+		category=$(jq -r '.category' <<<"$record")
+
 		# Substitute {{SCRIPT_RUNNER}} placeholder (POSIX: use sed, not ${}//)
 		command=$(printf '%s\n' "$command" | sed "s|{{SCRIPT_RUNNER}}|$script_runner|g")
 
-		# Parse args into array (args are delimited by SOH character)
+		# Parse args by JSON index so empty arrays and empty-string args stay distinct
 		local args_array=()
-		if [ -n "$args_delimited" ]; then
-			while IFS= read -r -d $'\x01' arg; do
-				args_array+=("$arg")
-			done <<<"$args_delimited"
-		fi
+		local args_len i
+		args_len=$(jq '.args | length' <<<"$record")
+		for ((i = 0; i < args_len; i++)); do
+			args_array+=("$(jq -r --argjson i "$i" '.args[$i]' <<<"$record")")
+		done
 
 		# Check prerequisites
 		local prereqs_met=true
 		local missing_prereqs=()
+		local requires_len prereq
+		requires_len=$(jq '.requires | length' <<<"$record")
+		for ((i = 0; i < requires_len; i++)); do
+			prereq=$(jq -r --argjson i "$i" '.requires[$i]' <<<"$record")
+			[ -z "$prereq" ] && continue
 
-		if [ -n "$requires_delimited" ]; then
-			local prereq
-			while IFS= read -r -d $'\x01' prereq; do
-				[ -z "$prereq" ] && continue
-
-				if ! command -v "$prereq" &>/dev/null; then
-					case "$prereq" in
-					"fff-mcp")
-						log_info "Auto-installing prerequisite: $prereq"
-						install_fff_mcp_now && continue
-						;;
-					"logpilot")
-						log_info "Auto-installing prerequisite: $prereq"
-						install_logpilot_now && continue
-						;;
-					"sem-mcp")
-						log_info "Auto-installing prerequisite: $prereq"
-						install_sem_now && continue
-						;;
-					esac
-					prereqs_met=false
-					missing_prereqs+=("$prereq")
-				fi
-			done <<<"$requires_delimited"
-		fi
+			if ! command -v "$prereq" &>/dev/null; then
+				case "$prereq" in
+				"fff-mcp")
+					log_info "Auto-installing prerequisite: $prereq"
+					install_fff_mcp_now && continue
+					;;
+				"logpilot")
+					log_info "Auto-installing prerequisite: $prereq"
+					install_logpilot_now && continue
+					;;
+				"sem-mcp")
+					log_info "Auto-installing prerequisite: $prereq"
+					install_sem_now && continue
+					;;
+				esac
+				prereqs_met=false
+				missing_prereqs+=("$prereq")
+			fi
+		done
 
 		if [ "$prereqs_met" = false ]; then
 			log_info "Skipping $name - requires: ${missing_prereqs[*]}"
@@ -814,17 +874,16 @@ install_mcp_servers_from_registry() {
 			failed_count=$((failed_count + 1))
 		fi
 		rm -f "$err_file"
-	done 3< <(jq -r '
-		.mcpServers | to_entries[] |
-		[
-			.key,
-			(.value.name // empty),
-			(.value.description // empty),
-			(.value.command // empty),
-			(.value.args | join("")),
-			(.value.requires | join("")),
-			(.value.category // empty)
-		] | @tsv
+	done 3< <(jq -c '
+		.mcpServers | to_entries[] | {
+			key: .key,
+			name: (.value.name // ""),
+			description: (.value.description // ""),
+			command: (.value.command // ""),
+			args: (.value.args // []),
+			requires: (.value.requires // []),
+			category: (.value.category // "")
+		}
 	' "$registry_file")
 
 	log_info ""
@@ -969,6 +1028,7 @@ copy_opencode_configs() {
 	log_info "Detected OpenCode (via $opencode_status)"
 	execute_quoted mkdir -p "$HOME/.config/opencode"
 	execute_quoted cp "$SCRIPT_DIR/configs/opencode/opencode.json" "$HOME/.config/opencode/"
+	copy_config_file "$SCRIPT_DIR/configs/opencode/AGENTS.md" "$HOME/.config/opencode/" || true
 
 	execute_quoted rm -rf "$HOME/.config/opencode/agent"
 	safe_copy_dir "$SCRIPT_DIR/configs/opencode/agent" "$HOME/.config/opencode/agent"
@@ -2001,6 +2061,7 @@ enable_plugins() {
 
 	# Community plugins: "name|plugin_spec|marketplace_repo|cli_tool"
 	community_plugins=(
+		"caveman|caveman@caveman|JuliusBrussee/caveman|claude"
 		"plannotator|plannotator@plannotator|backnotprop/plannotator|claude"
 		"plannotator-copilot|plannotator-copilot@plannotator|backnotprop/plannotator|copilot"
 		"plannotator-setup-goal|plannotator-setup-goal@my-ai-tools|$SCRIPT_DIR|claude"
@@ -2393,190 +2454,7 @@ main() {
 	backup_configs
 	echo
 
-	if tool_allowed "claude"; then
-		install_claude_code
-	else
-		log_info "Skipping claude installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "opencode"; then
-		install_opencode
-	else
-		log_info "Skipping opencode installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "amp"; then
-		install_amp
-	else
-		log_info "Skipping amp installer (not in -y allowlist)"
-	fi
-	echo
-
-	install_global_tools
-	echo
-
-	if tool_allowed "ccs"; then
-		install_ccs
-	else
-		log_info "Skipping ccs installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "ai-switcher"; then
-		install_ai_switcher
-	else
-		log_info "Skipping ai-switcher installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "codex"; then
-		install_codex
-	else
-		log_info "Skipping codex installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "kimi_code"; then
-		install_kimi_code
-	else
-		log_info "Skipping kimi_code installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "gemini"; then
-		install_gemini
-	else
-		log_info "Skipping gemini installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "antigravity"; then
-		install_antigravity
-	else
-		log_info "Skipping antigravity installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "kilo"; then
-		install_kilo
-	else
-		log_info "Skipping kilo installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "pi"; then
-		install_pi
-	else
-		log_info "Skipping pi installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "commandcode"; then
-		install_commandcode
-	else
-		log_info "Skipping commandcode installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "copilot"; then
-		install_copilot
-	else
-		log_info "Skipping copilot installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "cursor"; then
-		install_cursor
-	else
-		log_info "Skipping cursor installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "conductor"; then
-		install_conductor
-	else
-		log_info "Skipping conductor installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "herdr"; then
-		install_herdr
-	else
-		log_info "Skipping herdr installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "ctx"; then
-		install_ctx
-	else
-		log_info "Skipping ctx installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "qodercli"; then
-		install_qodercli
-	else
-		log_info "Skipping qodercli installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "kiro"; then
-		install_kiro
-	else
-		log_info "Skipping kiro installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "codiff"; then
-		install_codiff
-	else
-		log_info "Skipping codiff installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "devin"; then
-		install_devin
-	else
-		log_info "Skipping devin installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "factory"; then
-		install_factory
-	else
-		log_info "Skipping factory installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "cline"; then
-		install_cline
-	else
-		log_info "Skipping cline installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "grok"; then
-		install_grok
-	else
-		log_info "Skipping grok installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "mimo"; then
-		install_mimo
-	else
-		log_info "Skipping mimo installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "open_code_review"; then
-		install_open_code_review
-	else
-		log_info "Skipping open_code_review installer (not in -y allowlist)"
-	fi
-	echo
+	run_install_sequence
 
 	copy_configurations
 	echo

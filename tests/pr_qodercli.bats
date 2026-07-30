@@ -62,7 +62,7 @@ README="$REPO_ROOT/README.md"
 }
 
 @test "cli.sh main() installs qodercli" {
-    run grep -E '^\s*install_qodercli\b' "$CLI_SH"
+    run grep -F '"qodercli:install_qodercli"' "$CLI_SH"
     [ "$status" -eq 0 ]
     [ -n "$output" ]
 }

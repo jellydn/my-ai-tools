@@ -17,7 +17,7 @@
 			}
 		]
 	},
-	"model": "Gemini 3.5 Flash (High)",
+	"model": "Gemini 3.6 Flash (High)",
 	"notifications": true,
 	"permissions": {
 		"allow": [
@@ -122,14 +122,16 @@
 			"mcp(codebase-memory-mcp/search_graph)",
 			"unsandboxed(bun test)",
 			"unsandboxed(qmd)",
-			"unsandboxed(~/.gemini/skills/qmd-knowledge/scripts/record.sh)",
+			"unsandboxed($HOME/.gemini/skills/qmd-knowledge/scripts/record.sh)",
 			"mcp(codebase-memory-mcp/list_projects)",
 			"mcp(codebase-memory-mcp/get_code_snippet)",
 			"mcp(codebase-memory-mcp/trace_path)",
 			"mcp(github/get_pull_request)",
 			"mcp(codebase-memory-mcp/search_code)",
 			"unsandboxed(git worktree)",
-			"unsandboxed(read)"
+			"unsandboxed(read)",
+			"unsandboxed(grep -E \"body\"|\"html_url\"|\"title\"|\"state\"|\"draft\")",
+			"unsandboxed(command -v qmd || echo \"qmd not found\")"
 		],
 		"deny": ["command(git reset --hard)", "command(git push --force)", "command(rm -rf)"]
 	},
@@ -141,6 +143,5 @@
 		"command": "bash ~/.gemini/antigravity-cli/statusline.sh",
 		"enabled": true
 	},
-	"toolPermission": "proceed-in-sandbox",
-	"trustedWorkspaces": []
+	"toolPermission": "proceed-in-sandbox"
 }

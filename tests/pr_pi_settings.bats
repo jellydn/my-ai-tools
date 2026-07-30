@@ -11,18 +11,37 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/pi/settings.json defaultModel is grok-composer-2.5-fast" {
+@test "configs/pi/settings.json defaultModel is auto" {
     require_jq
     run jq -r '.defaultModel' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "grok-composer-2.5-fast" ]
+    [ "$output" = "auto" ]
 }
 
-@test "configs/pi/settings.json defaultProvider is xai-auth" {
+@test "configs/pi/settings.json defaultProvider is cursor" {
     require_jq
     run jq -r '.defaultProvider' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "xai-auth" ]
+    [ "$output" = "cursor" ]
+}
+
+@test "configs/pi/settings.json enables OmniRoute paid/free/premium models" {
+    require_jq
+    run jq -e '
+        (.enabledModels | index("omniroute/paid") != null) and
+        (.enabledModels | index("omniroute/free") != null) and
+        (.enabledModels | index("omniroute/premium") != null) and
+        ([.enabledModels[] | select(startswith("9router/"))] | length == 0)
+    ' "$PI_SETTINGS"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "configs/pi/settings.json default provider/model pair is enabled" {
+    require_jq
+    run jq -e '. as $s | $s.enabledModels | index($s.defaultProvider + "/" + $s.defaultModel) != null' "$PI_SETTINGS"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
 }
 
 @test "configs/pi/settings.json enabledModels no longer contains vibeproxy models" {
@@ -32,16 +51,16 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains xai-auth/grok-composer-2.5-fast" {
+@test "configs/pi/settings.json enabledModels contains clinepass/cline-pass/deepseek-v4-pro" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "xai-auth/grok-composer-2.5-fast")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "clinepass/cline-pass/deepseek-v4-pro")] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains xai-auth/grok-4.5" {
+@test "configs/pi/settings.json enabledModels contains qw/deepseek-v4-pro" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "xai-auth/grok-4.5")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "qw/deepseek-v4-pro")] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
@@ -88,9 +107,9 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json packages contains pi-dynamic-workflows" {
+@test "configs/pi/settings.json packages contains pi-cursor-sdk" {
     require_jq
-    run jq -e '[.packages[] | select(type == "string" and . == "npm:pi-dynamic-workflows")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.packages[] | select(type == "string" and . == "npm:pi-cursor-sdk")] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
@@ -102,9 +121,9 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json packages contains pi-xai-oauth" {
+@test "configs/pi/settings.json packages contains pi-qwencloud-provider" {
     require_jq
-    run jq -e '[.packages[] | select(type == "string" and . == "npm:pi-xai-oauth")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.packages[] | select(type == "string" and . == "npm:pi-qwencloud-provider")] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }

@@ -120,40 +120,40 @@ devin -- "check out this code and suggest a feasible, helpful feature"
 
 The most-used skills across Claude Code, OpenCode, and other AI tools:
 
-| Skill                                  | What it does                                                                    | When to use it                                                                                                  |
-| -------------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **adr**                                | Generate Architecture Decision Records from design discussions                  | Before implementing significant technical changes — captures the why, alternatives considered, and consequences |
-| **codemap**                            | Parallel codebase analysis producing 7 structured documents                     | Onboarding to a new project, or before major refactoring — gives you the full picture fast                      |
-| **code-quality-review** | Extremely strict maintainability and structural code quality review             | Before merging PRs — catches issues that regular linters miss                                                   |
-| **babysit-pr**                         | Continuously monitor open PRs, auto-fix CI failures, surface review feedback    | After pushing a PR — hands-off monitoring until it's ready to merge                                             |
-| **improve**                            | Frontier model plans, cheap model executes — audit and plan improvements         | When you need senior-level analysis with actionable plans for cheaper models to run (from shadcn)                |
-| **improve-codebase-architecture**     | Codebase architecture deepening — find structural improvement opportunities       | When you want to improve modularity, patterns, and architecture of an existing codebase (from Matt Pocock)      |
+| Skill                             | What it does                                                                 | When to use it                                                                                                  |
+| --------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| **adr**                           | Generate Architecture Decision Records from design discussions               | Before implementing significant technical changes — captures the why, alternatives considered, and consequences |
+| **codemap**                       | Parallel codebase analysis producing 7 structured documents                  | Onboarding to a new project, or before major refactoring — gives you the full picture fast                      |
+| **code-quality-review**           | Extremely strict maintainability and structural code quality review          | Before merging PRs — catches issues that regular linters miss                                                   |
+| **babysit-pr**                    | Continuously monitor open PRs, auto-fix CI failures, surface review feedback | After pushing a PR — hands-off monitoring until it's ready to merge                                             |
+| **improve**                       | Frontier model plans, cheap model executes — audit and plan improvements     | When you need senior-level analysis with actionable plans for cheaper models to run (from shadcn)               |
+| **improve-codebase-architecture** | Codebase architecture deepening — find structural improvement opportunities  | When you want to improve modularity, patterns, and architecture of an existing codebase (from Matt Pocock)      |
 
 ## 🔌 MCP Servers & Plugins Overview
 
-| Tool            | MCP Servers                                                                                                           | Plugins/Extensions                                                                                                                                                                        |
-| --------------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Claude Code** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                                          |
-| **OpenCode**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                         |
-| **Codex**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl, ctx | -                                                                                                                                                                                         |
-| **Kimi Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, logpilot, sem, ctx                                              | Skills, MCP servers, and hooks via `~/.kimi-code/`                                                                                                                                        |
-| **Pi**          | context7, sequential-thinking, qmd, codebase-memory-mcp, fff, react-grab-mcp, agentmemory, sem, ctx                   | Packages (pi-extension, autoresearch, fff, mcp-adapter, simplify, rpiv-todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, pi-web-access, footer, tps-meter, pi-xai-oauth) |
-| **Amp**         | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | Agent modes: glm-5.2, grok45, inkling, cursor-composer-2.5; plannotator; orca-agent-status                                                                                                  |
-| **Gemini**      | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                            |
-| **Antigravity** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx (via plugin) | my-ai-tools-gemini-migration                                                                                                                                                              |
-| **Kilo**        | (uses OpenCode config)                                                                                                | (uses OpenCode plugins)                                                                                                                                                                   |
-| **CommandCode** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | -                                                                                                                                                                                         |
-| **Copilot**     | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | -                                                                                                                                                                                         |
-| **Cursor**      | context7 (via bunx), sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx | -                                                                                                                                                                                         |
-| **Conductor**   | Per-harness (Claude Code, Codex, Cursor MCP configs)                                                                  | Orchestrates parallel agents in isolated workspaces                                                                                                                                       |
-| **Factory**     | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | core, security-engineer, droid-evolved, autoresearch                                                                                                                                      |
-| **Orca**        | -                                                                                                                     | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                                        |
-| **Cline**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | Global rules (AGENTS.md → ~/.cline/rules/, ~~/.agents/AGENTS.md), universal skills (~~/.agents/skills)                                                                                    |
-| **Grok**        | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | Default model `grok-4.5` (high reasoning); UI auto + `rosepine-moon`; Kanagawa theme staged                                                                                               |
-| **MiMo-Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                         |
-| **Qoder CLI**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | -                                                                                                                                                                                         |
-| **Kiro CLI**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx         | Steering files (AGENTS.md), slash commands, MCP servers, ACP                                                                                                                              |
-| **Codiff**      | — (desktop app — uses configured agent backend via settings)                                                          | —                                                                                                                                                                                         |
+| Tool            | MCP Servers                                                                                                                | Plugins/Extensions                                                                                                                                                                                    |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Claude Code** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                                                      |
+| **OpenCode**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                                     |
+| **Codex**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl, ctx   | -                                                                                                                                                                                                     |
+| **Kimi Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, logpilot, sem, ctx                              | Skills, MCP servers, and hooks via `~/.kimi-code/`                                                                                                                                                    |
+| **Pi**          | context7, sequential-thinking, qmd, codebase-memory-mcp, fff, react-grab-mcp, agentmemory, sem, ctx                        | Packages (pi-extension, autoresearch, fff, mcp-adapter, simplify, rpiv-todo, btw, code-previews, codex-goal, commandcode-provider, pi-web-access, footer, tps-meter, pi-qwencloud-provider, pi-cursor-sdk) |
+| **Amp**         | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Agent modes: glm-5.2, grok45, inkling, cursor-composer-2.5; plannotator; orca-agent-status                                                                                                            |
+| **Gemini**      | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                                        |
+| **Antigravity** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx (via plugin) | my-ai-tools-gemini-migration                                                                                                                                                                          |
+| **Kilo**        | (uses OpenCode config)                                                                                                     | (uses OpenCode plugins)                                                                                                                                                                               |
+| **CommandCode** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                                     |
+| **Copilot**     | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                                     |
+| **Cursor**      | context7 (via bunx), sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx   | -                                                                                                                                                                                                     |
+| **Conductor**   | Per-harness (Claude Code, Codex, Cursor MCP configs)                                                                       | Orchestrates parallel agents in isolated workspaces                                                                                                                                                   |
+| **Factory**     | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | core, security-engineer, droid-evolved, autoresearch                                                                                                                                                  |
+| **Orca**        | -                                                                                                                          | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                                                    |
+| **Cline**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Global rules (AGENTS.md → ~/.cline/rules/, ~~/.agents/AGENTS.md), universal skills (~~/.agents/skills)                                                                                                |
+| **Grok**        | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Default model `grok-4.5` (high reasoning); UI auto + `rosepine-moon`; Kanagawa theme staged                                                                                                           |
+| **MiMo-Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                                     |
+| **Qoder CLI**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                                     |
+| **Kiro CLI**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Steering files (AGENTS.md), slash commands, MCP servers, ACP                                                                                                                                          |
+| **Codiff**      | — (desktop app — uses configured agent backend via settings)                                                               | —                                                                                                                                                                                                     |
 
 ### 📋 MCP Server Details
 
@@ -432,6 +432,8 @@ claude mcp add --scope user --transport stdio logpilot -- logpilot mcp-server  #
 claude mcp add --scope user --transport stdio sem -- sem-mcp  # Requires: cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp
 ```
 
+> **Auto-Install:** `./cli.sh` automatically installs Rust via `rustup` when these cargo-dependent MCP servers are selected, so you don't need to install Rust manually beforehand (manual `claude mcp add` still requires a pre-installed Rust toolchain).
+
 > **MCP Scopes:**
 >
 > - `--scope user` (global): Available across all projects
@@ -523,6 +525,9 @@ claude plugin install worktrunk@worktrunk
 claude plugin marketplace add openai/codex-plugin-cc
 claude plugin install codex@openai-codex
 
+claude plugin marketplace add JuliusBrussee/caveman
+claude plugin install caveman@caveman
+
 # Install skills from this repository (jellydn/my-ai-tools)
 # Recommended: Install all skills at once using npx skills add
 npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
@@ -530,7 +535,7 @@ npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
 
-# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, tmux, blindspot-pass, implementation-logger, quiz-me, spec-interview
+# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, tmux, blindspot-pass, implementation-logger, quiz-me, spec-interview, capability-experiments, code-review, context-discovery, doc-search, git-context
 # Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
@@ -553,28 +558,29 @@ If you encounter issues:
 
 #### Plugin List
 
-| Plugin                               | Description                             | Source            |
-| ------------------------------------ | --------------------------------------- | ----------------- |
-| `typescript-lsp`                     | TypeScript language server              | Official          |
-| `pyright-lsp`                        | Python language server                  | Official          |
-| `context7`                           | Documentation lookup                    | Official          |
-| `frontend-design`                    | UI/UX design assistance                 | Official          |
-| `learning-output-style`              | Interactive learning mode               | Official          |
-| `swift-lsp`                          | Swift language support                  | Official          |
-| `lua-lsp`                            | Lua language support                    | Official          |
-| `code-simplifier`                    | Code simplification                     | Official          |
-| `rust-analyzer-lsp`                  | Rust language support                   | Official          |
-| `claude-md-management`               | Markdown management                     | Official          |
-| `plannotator`                        | Plan annotation tool                    | Community         |
-| `plannotator-setup-goal`             | Turn ideas into goal packages           | Local Marketplace |
-| `prd`                                | Product Requirements Documents          | Local Marketplace |
-| `ralph`                              | PRD to JSON converter                   | Local Marketplace |
-| `qmd-knowledge`                      | Project knowledge management            | Local Marketplace |
-| `codemap`                            | Parallel codebase analysis              | Local Marketplace |
-| `code-quality-review` | Extremely strict maintainability review | Local Marketplace |
-| `claude-hud`                         | Status line with usage monitoring       | Community         |
-| `worktrunk`                          | Work management                         | Community         |
-| `codex`                              | Codex code review & task delegation     | Community         |
+| Plugin                   | Description                             | Source            |
+| ------------------------ | --------------------------------------- | ----------------- |
+| `typescript-lsp`         | TypeScript language server              | Official          |
+| `pyright-lsp`            | Python language server                  | Official          |
+| `context7`               | Documentation lookup                    | Official          |
+| `frontend-design`        | UI/UX design assistance                 | Official          |
+| `learning-output-style`  | Interactive learning mode               | Official          |
+| `swift-lsp`              | Swift language support                  | Official          |
+| `lua-lsp`                | Lua language support                    | Official          |
+| `code-simplifier`        | Code simplification                     | Official          |
+| `rust-analyzer-lsp`      | Rust language support                   | Official          |
+| `claude-md-management`   | Markdown management                     | Official          |
+| `plannotator`            | Plan annotation tool                    | Community         |
+| `plannotator-setup-goal` | Turn ideas into goal packages           | Local Marketplace |
+| `prd`                    | Product Requirements Documents          | Local Marketplace |
+| `ralph`                  | PRD to JSON converter                   | Local Marketplace |
+| `qmd-knowledge`          | Project knowledge management            | Local Marketplace |
+| `codemap`                | Parallel codebase analysis              | Local Marketplace |
+| `code-quality-review`    | Extremely strict maintainability review | Local Marketplace |
+| `claude-hud`             | Status line with usage monitoring       | Community         |
+| `worktrunk`              | Work management                         | Community         |
+| `codex`                  | Codex code review & task delegation     | Community         |
+| `caveman`                | Concise, high-signal response mode      | Community         |
 
 #### Key Marketplace Plugins
 
@@ -826,9 +832,9 @@ Official and community-maintained skill collections for specific frameworks:
 | **Claude Skills**          | [jezweb/claude-skills](https://github.com/jezweb/claude-skills)                                               | 97 production-ready skills for Claude Code CLI including Cloudflare, React, AI integrations, and more. Includes context-mate for project analysis and workflow management.                                                     |
 | **OZ Skills**              | [warpdotdev/oz-skills](https://github.com/warpdotdev/oz-skills)                                               | 14 production-ready skills by Warp. Covers CI fix, PR creation, web testing, accessibility audits, and more.                                                                                                                   |
 | **Auto-Review**            | [openclaw/agent-skills](https://github.com/openclaw/agent-skills/blob/main/skills/autoreview/SKILL.md)        | Auto-review skill for structured and actionable pull request feedback workflows.                                                                                                                                               |
-| **Hunk Review**           | [modem-dev/hunk](https://github.com/modem-dev/hunk/blob/main/skills/hunk-review/SKILL.md)                    | Interactive terminal diff viewer for agent-authored changesets with live review sessions and inline comments.                                                                                                                 |
+| **Hunk Review**            | [modem-dev/hunk](https://github.com/modem-dev/hunk/blob/main/skills/hunk-review/SKILL.md)                     | Interactive terminal diff viewer for agent-authored changesets with live review sessions and inline comments.                                                                                                                  |
 | **Skills Discovery**       | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.                                                                                            |
-| **Matt Pocock**            | [mattpocock/skills](https://github.com/mattpocock/skills)                                                     | Community skills by Matt Pocock. Includes `grill-with-docs` for docs-grounded plan stress-testing, `improve-codebase-architecture` for finding deepening opportunities, and more.        |
+| **Matt Pocock**            | [mattpocock/skills](https://github.com/mattpocock/skills)                                                     | Community skills by Matt Pocock. Includes `grill-with-docs` for docs-grounded plan stress-testing, `improve-codebase-architecture` for finding deepening opportunities, and more.                                              |
 | **Mitsuhiko**              | [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff)                                             | Skills and extensions by Armin Ronacher. Includes tmux session control, GitHub CLI, web browser automation, Sentry integration, mermaid diagrams, and more.                                                                    |
 | **Git Stacked PRs**        | [github/gh-stack](https://github.com/github/gh-stack)                                                         | GitHub CLI extension for managing stacked branches and pull requests. Create, push, rebase, sync, and navigate stacks of dependent PRs for incremental code review workflows.                                                  |
 | **Facts**                  | [av/facts](https://github.com/av/facts)                                                                       | Track project specs and facts in a `.facts` file. Lifecycle stages (`@draft` → `@spec` → `@implemented`) with shell-command verification. Ships four skills: `facts`, `facts-discover`, `facts-refine`, and `facts-implement`. |
@@ -836,7 +842,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Plannotator Setup Goal** | [backnotprop/plannotator](https://github.com/backnotprop/plannotator)                                         | Turn ideas into structured goal packages with fact sheets and execution plans, gated by Plannotator annotation                                                                                                                 |
 | **Codex PR Babysitter**    | [openai/codex](https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md)                   | Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required                                 |
 | **Last 30 Days**           | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill)                                     | Research what people actually say about any topic in the last 30 days. Pulls from Reddit, X, YouTube, TikTok, HN, Polymarket, GitHub, and the web.                                                                             |
-| **Improve Code Architect**    | [shadcn/improve](https://github.com/shadcn/improve)                                                           | Frontier model plans, cheap model executes — audit any codebase and produce implementation plans for cheaper models to run.                                                              |
+| **Improve Code Architect** | [shadcn/improve](https://github.com/shadcn/improve)                                                           | Frontier model plans, cheap model executes — audit any codebase and produce implementation plans for cheaper models to run.                                                                                                    |
 | **Engram**                 | [Gentleman-Programming/engram](https://github.com/Gentleman-Programming/engram)                               | Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, and git-based cross-machine sync.                                                                                          |
 | **mac-OCR**                | [privatenumber/mac-ocr](https://github.com/privatenumber/mac-ocr)                                             | macOS CLI for OCR and searchable PDFs using Apple's Vision framework                                                                                                                                                           |
 
@@ -871,6 +877,7 @@ All configuration files are located in the [`configs/claude/`](configs/claude/) 
 
 - [`settings.json`](configs/claude/settings.json) - Main Claude Code settings
 - [`mcp-servers.json`](configs/claude/mcp-servers.json) - MCP server configurations
+- [`CLAUDE.md`](configs/claude/CLAUDE.md) - Token-efficient global instructions with conditional, on-demand guidance
 - [`commands/`](configs/claude/commands/) - Custom slash commands
 - [`agents/`](configs/claude/agents/) - Custom agent definitions
 
@@ -879,7 +886,9 @@ Local marketplace plugins are in [`skills/`](skills/).
 #### Tips & Tricks
 
 - **OpusPlan Mode**: Use opusplan mode to plan with Opus and implement with Sonnet, then use Plannotator to review plans
-- **Session Management**: Disable auto-compact in settings. Monitor context usage with `claude-hud`. Press `Ctrl+C` to quit or `/clear` to reset between coding sessions. Create a plan with `/handoffs` and resume with `/pickup` when approaching 90% context limit on big tasks.
+- **Efficient Model Routing**: The managed defaults use Sonnet at medium effort for daily work and an Opus advisor for difficult decisions. Run `/advisor` or `/effort` to override them when a task needs a different trade-off.
+- **Token-Efficient Context**: The global [`CLAUDE.md`](configs/claude/CLAUDE.md) keeps supplemental guidance conditional instead of using eager `@` imports. Keep prompts narrowly scoped, inspect loaded context with `/context`, limit shell output, and use `/clear` between unrelated tasks.
+- **Session Management**: Monitor context usage with `claude-hud`. Create a plan with `/handoffs` and resume with `/pickup` when approaching the context limit on big tasks.
 - **Git Worktree**: Use git worktree with `try` CLI. For tmux users, use `claude-squash` to manage sessions efficiently. Use [superset.sh](https://superset.sh/) to run multiple AI agents in parallel across worktrees
 - **Neovim Integration**: Check out [tiny-nvim](https://github.com/jellydn/tiny-nvim) for a complete setup with [sidekick.nvim](https://github.com/folke/sidekick.nvim) or [claudecode.nvim](https://github.com/coder/claudecode.nvim)
 - **Cost Optimization**: Use [CCS](https://ccs.kaitran.ca/) to switch between affordable providers.
@@ -1065,6 +1074,8 @@ Located in [`configs/opencode/command/`](configs/opencode/command/):
 
 - `simplify` - Simplify over-engineered code for clarity and maintainability
 - `batch` - Run multiple tasks in parallel as worker tasks
+- `happyhorse` - Generate a video with QwenCloud HappyHorse (async, may take minutes)
+- `wan` - Generate an image with QwenCloud Wan (wan2.7)
 
 </details>
 
@@ -1222,14 +1233,16 @@ Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/
 
 Custom Amp agent modes live in [`configs/amp/plugins/`](configs/amp/plugins/) and are installed with the rest of the Amp config:
 
-| Plugin | Mode key | Model | Notes |
-| ------ | -------- | ----- | ----- |
-| `glm-52-mode.ts` | `glm-5.2` | `amp/glm-5.2` | Experimental GLM 5.2 agent mode |
-| `grok-45-mode.ts` | `grok45` | `xai/grok-4.5` | Grok 4.5 with deep-mode tools |
-| `inkling-mode.ts` | `inkling` | `baseten/thinkingmachines/inkling` | Thinking Machines Inkling agent mode |
-| `cursor-composer-2.5.ts` | `cursor-comp-2.5` | `openai/gpt-5.2-codex` | Cursor Composer-style editing mode |
-| `plannotator.ts` | — | — | Interactive plan annotation |
-| `orca-agent-status.ts` | — | — | Orca agent status integration |
+| Plugin                   | Mode key          | Model                              | Notes                                |
+| ------------------------ | ----------------- | ---------------------------------- | ------------------------------------ |
+| `glm-52-mode.ts`         | `glm-5.2`         | `amp/glm-5.2`                      | Experimental GLM 5.2 agent mode      |
+| `grok-45-mode.ts`        | `grok45`          | `xai/grok-4.5`                     | Grok 4.5 with deep-mode tools        |
+| `inkling-mode.ts`        | `inkling`         | `baseten/thinkingmachines/inkling` | Thinking Machines Inkling agent mode |
+| `kimi-k3-mode.ts`        | `kimi-k3`         | —                                  | Senior engineering judgment mode     |
+| `cursor-composer-2.5.ts` | `cursor-comp-2.5` | `openai/gpt-5.2-codex`             | Cursor Composer-style editing mode   |
+| `opus-5-mode.ts`         | `opus-5`          | `anthropic/claude-opus-5`          | Opus 5 with configurable reasoning   |
+| `plannotator.ts`         | —                 | —                                  | Interactive plan annotation          |
+| `orca-agent-status.ts`   | —                 | —                                  | Orca agent status integration        |
 
 See [`configs/amp/AGENTS.md`](configs/amp/AGENTS.md) for agent guidelines.
 
@@ -1601,7 +1614,7 @@ agy
 
 Key defaults from [`configs/antigravity-cli/settings.json`](configs/antigravity-cli/settings.json):
 
-- **Default model**: `Gemini 3.5 Flash (High)`
+- **Default model**: `Gemini 3.6 Flash (High)`
 - **Tool permission**: `proceed-in-sandbox`
 - **Allowlist additions**: codebase-memory MCP tools (`search_graph`, `list_projects`, `get_code_snippet`, `trace_path`, `search_code`), GitHub PR lookup, `bun test`, `qmd`, `git worktree`
 - **Deny list**: `git reset --hard`, `git push --force`, `rm -rf`
@@ -1731,12 +1744,12 @@ Located in [`configs/pi/`](configs/pi/):
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 - [`models.json`](configs/pi/models.json) - Provider and model definitions (google-antigravity, ollama)
 
-Installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `xai-auth` as the default provider with `grok-composer-2.5-fast` as the default model. You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+The installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `cursor` as the default provider with `auto` as the default model (OmniRoute `paid`/`free`/`premium` remain available in `enabledModels`). You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `grok-composer-2.5-fast`
-- **Default Provider**: `xai-auth`
+- **Default Model**: `auto`
+- **Default Provider**: `cursor`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
@@ -1778,18 +1791,17 @@ Then register them in `~/.pi/agent/settings.json`:
 		"npm:pi-btw",
 		"npm:pi-code-previews",
 		"npm:pi-codex-goal",
-		"npm:pi-dynamic-workflows",
 		"npm:pi-commandcode-provider",
 		"npm:pi-footer",
 		"npm:pi-tps-meter",
 		"npm:@juicesharp/rpiv-advisor",
-		"npm:pi-cursor-sdk",
 		"npm:pi-web-access",
 		"npm:pi-clinepass-provider",
 		"npm:@juicesharp/rpiv-ask-user-question",
 		"npm:@yofriadi/pi-antigravity-oauth",
-		"npm:pi-xai-oauth",
-		"npm:@juicesharp/rpiv-todo"
+		"npm:@juicesharp/rpiv-todo",
+		"npm:pi-qwencloud-provider",
+		"npm:pi-cursor-sdk"
 	]
 }
 ```
@@ -1806,7 +1818,6 @@ Then register them in `~/.pi/agent/settings.json`:
 | `pi-btw`                             | Parallel side conversations with `/btw` command                    |
 | `pi-code-previews`                   | Live previews of code changes during editing                       |
 | `pi-codex-goal`                      | Codex-style goal management integration                            |
-| `pi-dynamic-workflows`               | Dynamic workflow automation for Pi                                 |
 | `pi-commandcode-provider`            | CommandCode model provider integration for Pi                      |
 | `pi-web-access`                      | Web access and content fetching for AI models                      |
 | `pi-footer`                          | Customizable status footer for the Pi TUI                          |
@@ -1816,8 +1827,8 @@ Then register them in `~/.pi/agent/settings.json`:
 | `pi-clinepass-provider`              | ClinePass model provider for Pi                                    |
 | `@juicesharp/rpiv-ask-user-question` | Structured question-asking tool for user clarification             |
 | `@yofriadi/pi-antigravity-oauth`     | Antigravity OAuth authentication for Pi; see the caveat below      |
-| `pi-xai-oauth`                       | xAI OAuth authentication (`xai-auth`) for Grok models in Pi        |
 | `@juicesharp/rpiv-todo`              | Todo list management tool (replaces `pi-manage-todo-list`)         |
+| `pi-qwencloud-provider`              | QwenCloud model provider integration for Pi                        |
 
 > **Antigravity OAuth caveat:** If you're experimenting with Pi, there's an OAuth plugin available for Antigravity. Be aware that Google currently states that using third-party software with Antigravity OAuth may violate its Terms of Service and could result in account restrictions. For the lowest-risk setup, prefer an official API key from AI Studio or Vertex AI when Pi supports it, and avoid OAuth plugins that reuse an Antigravity login in third-party clients unless Google changes its policy.
 
@@ -1825,14 +1836,14 @@ Then register them in `~/.pi/agent/settings.json`:
 
 Pi is configured with multi-provider model access (`settings.json` `enabledModels`):
 
-| Provider           | Models                                                                                                                        |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| cursor             | `auto`, `composer-2.5`                                                                                                        |
-| openai-codex       | `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.3-codex-spark`, `gpt-5.5`                                                                   |
-| clinepass          | `deepseek-v4-pro`, `deepseek-v4-flash`, `kimi-k2.7-code`, `glm-5.2`, `kimi-k2.6`, `minimax-m3`, `qwen3.7-max`, `qwen3.7-plus` |
-| google-antigravity | `gemini-3.5-flash`, `gemini-3-pro`, `claude-opus-4-6`                                                                         |
-| commandcode        | `deepseek/deepseek-v4-pro`, `MiniMaxAI/MiniMax-M3`                                                                            |
-| xai-auth           | `grok-4.5`, `grok-composer-2.5-fast` (default)                                                                                |
+| Provider           | Models                                                                                                                                             |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| cursor             | `auto`, `composer-2-5`, `grok-4.5`                                                                                                                 |
+| openai-codex       | `gpt-5.4-mini`, `gpt-5.5`, `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra`                                                                          |
+| clinepass          | `deepseek-v4-pro` (default), `deepseek-v4-flash`, `kimi-k2.7-code`, `glm-5.2`, `kimi-k2.6`, `kimi-k3`, `minimax-m3`, `qwen3.7-max`, `qwen3.7-plus` |
+| google-antigravity | `gemini-3.5-flash`, `gemini-3-pro`, `claude-opus-4-6`                                                                                              |
+| commandcode        | `deepseek/deepseek-v4-pro`, `MiniMaxAI/MiniMax-M3`, `poolside/laguna-s-2.1-free`                                                                   |
+| qw                 | `deepseek-v4-pro`, `glm-5.2`, `qwen3.8-max-preview`                                                                                                |
 
 ### Pi Antigravity Rotator
 
@@ -2109,10 +2120,10 @@ branch_prefix_type = "github_username"
 delete_branch_on_archive = false
 
 [models]
-default = "opencode:opencode/deepseek-v4-flash-free"
+default = "auto"
 default_plan_mode = true
-review = "gpt-5.5"
-visible_provider_models = "{\"claude\":[],\"codex\":[],\"cursor\":[],\"opencode\":[\"opencode:deepseek/deepseek-v4-flash\",\"opencode:deepseek/deepseek-v4-pro\",\"opencode:google/gemini-3.5-flash\",\"opencode:opencode/deepseek-v4-flash-free\"],\"pi\":[]}"
+review = "opencode:clinepass/cline-pass/glm-5.2"
+visible_provider_models = "{\"claude\":[],\"codex\":[],\"cursor\":[],\"opencode\":[\"opencode:openrouter/tencent/hy3:free\",\"opencode:opencode/deepseek-v4-flash-free\",\"opencode:opencode/hy3-free\",\"opencode:clinepass/cline-pass/deepseek-v4-flash\",\"opencode:clinepass/cline-pass/deepseek-v4-pro\",\"opencode:clinepass/cline-pass/glm-5.2\",\"opencode:alibaba-token-plan/qwen3.8-max-preview\"],\"pi\":[]}"
 
 [models.codex]
 default_thinking_level = "high"
@@ -3228,28 +3239,28 @@ Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/
 
 **Templates:**
 
-| Template                        | Aliases                    | Description                            |
-| ------------------------------- | -------------------------- | -------------------------------------- |
-| `review`                        | `rev`, `code-review`       | Code review with OpenCode              |
-| `commit-zen`                    | `zen`, `logical-commit`    | Generate commitizen commit messages    |
-| `commit-staged`                 | `gd`, `git-diff`           | Atomic commit for staged changes       |
-| `commit-atomic`                 | `ac`, `auto-commit`        | Atomic commit messages                 |
-| `architecture-explanation`      | `arch`, `arch-explanation` | Explain codebase architecture          |
-| `draft-pull-request`            | `pr`, `draft-pr`           | Create draft PR via gh CLI             |
-| `types`                         | `typescript`               | Enhance TypeScript types               |
-| `test`                          | `spec`, `tests`            | Generate tests (Arrange-Act-Assert)    |
-| `docs`                          | `document`                 | Add JSDoc documentation                |
-| `explain`                       | `explain-code`             | Explain code in detail                 |
-| `review-security`               | `sec`, `security`          | Security-focused review                |
-| `review-refactor`               | `refactor`                 | Refactoring recommendations            |
-| `review-performance`            | `perf`, `optimize`         | Performance analysis                   |
-| `remove-verbal`                 | `verbal`, `comments`       | Clean verbal comments                  |
-| `remove-ai-slop`                | `slop`, `clean-ai`         | Remove AI-generated code patterns      |
-| `tidy-first`                    | `tidy`                     | Apply Tidy First principles            |
-| `simplify`                      | `simple`                   | Simplify over-engineered code          |
-| `simplifier`                    | `simplify-code`, `simplify`| Code simplification plugin             |
-| `logical-grouping-pull-request` | `split-pr`                 | Create PR with logical commit grouping |
-| `summary`                       | `sum`, `summarize`         | Summarize content via OpenCode (free)  |
+| Template                        | Aliases                     | Description                            |
+| ------------------------------- | --------------------------- | -------------------------------------- |
+| `review`                        | `rev`, `code-review`        | Code review with OpenCode              |
+| `commit-zen`                    | `zen`, `logical-commit`     | Generate commitizen commit messages    |
+| `commit-staged`                 | `gd`, `git-diff`            | Atomic commit for staged changes       |
+| `commit-atomic`                 | `ac`, `auto-commit`         | Atomic commit messages                 |
+| `architecture-explanation`      | `arch`, `arch-explanation`  | Explain codebase architecture          |
+| `draft-pull-request`            | `pr`, `draft-pr`            | Create draft PR via gh CLI             |
+| `types`                         | `typescript`                | Enhance TypeScript types               |
+| `test`                          | `spec`, `tests`             | Generate tests (Arrange-Act-Assert)    |
+| `docs`                          | `document`                  | Add JSDoc documentation                |
+| `explain`                       | `explain-code`              | Explain code in detail                 |
+| `review-security`               | `sec`, `security`           | Security-focused review                |
+| `review-refactor`               | `refactor`                  | Refactoring recommendations            |
+| `review-performance`            | `perf`, `optimize`          | Performance analysis                   |
+| `remove-verbal`                 | `verbal`, `comments`        | Clean verbal comments                  |
+| `remove-ai-slop`                | `slop`, `clean-ai`          | Remove AI-generated code patterns      |
+| `tidy-first`                    | `tidy`                      | Apply Tidy First principles            |
+| `simplify`                      | `simple`                    | Simplify over-engineered code          |
+| `simplifier`                    | `simplify-code`, `simplify` | Code simplification plugin             |
+| `logical-grouping-pull-request` | `split-pr`                  | Create PR with logical commit grouping |
+| `summary`                       | `sum`, `summarize`          | Summarize content via OpenCode (free)  |
 
 </details>
 
@@ -3287,6 +3298,30 @@ See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for det
 # Inside Claude Code
 /claude-hud:setup
 ```
+
+### Token-Efficient AI Assistants
+
+The setup applies the approach from [How I Stopped Running out of Tokens](https://danielabaron.me/blog/how-i-stopped-running-out-of-tokens/) across the managed AI assistants without assuming that every tool supports Claude-specific hooks or commands:
+
+| Technique               | This repository's implementation                                                                                                                                                                                                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Compress command output | Installs [RTK](https://github.com/rtk-ai/rtk) once for all assistants. Every managed global instruction profile uses its stable `~/.local/bin/rtk` path when available; Claude additionally gets a managed hook-only integration without an always-loaded `@RTK.md`.           |
+| Keep responses concise  | Every managed `AGENTS.md`/`GEMINI.md` profile requests concise, high-signal output. Claude additionally enables the [Caveman](https://github.com/JuliusBrussee/caveman) plugin; use `normal mode` when full prose is preferable and `/caveman-stats` for its savings estimate. |
+| Query a code graph      | Uses the existing cross-agent `codebase-memory-mcp` integration instead of installing a redundant CodeGraph server.                                                                                                                                                            |
+| Use cheaper defaults    | Claude runs Sonnet at medium effort and configures Opus as the advisor model. Other tools retain their provider-specific defaults rather than receiving unsupported model settings.                                                                                            |
+| Control loaded context  | Replaces eager guidance imports in Claude, OpenCode, Kilo, MiMo-Code, Gemini, Antigravity, and the cross-tool profiles with conditional reads. All profiles request scoped discovery, bounded command output, and fresh sessions between unrelated tasks.                      |
+| Monitor context         | Claude uses Claude HUD in the status line. Other assistants can use their native context/session meters where available.                                                                                                                                                       |
+
+For a separate Claude rolling usage and burn-rate view, install [Claude Code Usage Monitor](https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor) and run it in another terminal so it does not replace the existing status line:
+
+```bash
+uv tool install claude-monitor
+claude-monitor --plan pro
+```
+
+RTK savings are available with `~/.local/bin/rtk gain --daily`. To temporarily bypass command rewriting, prefix a command with `RTK_DISABLED=1`.
+
+RTK is installed automatically on macOS, Linux, and WSL. Native Windows users should install a release binary manually; WSL is recommended for full hook support.
 
 ### Try
 
@@ -3339,6 +3374,14 @@ For React developers:
 
 - [**React Grab**](https://www.react-grab.com/) - MCP server for extracting and analyzing React components (`@react-grab/mcp`)
 - [**React Scan**](https://react-scan.com/) - Detect performance issues in your React app automatically
+
+### 9Router
+
+[**9Router**](https://9router.com) - Smart AI router connecting CLI/IDE tools to 60+ AI providers with 3-tier auto-fallback (subscription → cheap → free). Built-in RTK token compression and Caveman mode. Open-source (MIT). ([GitHub](https://github.com/decolua/9router))
+
+```bash
+npm install -g 9router
+```
 
 ### Orca
 
@@ -3398,6 +3441,7 @@ Best practices and memory guidelines are automatically referenced by all 15+ AI 
 - [xAI CLI](https://x.ai/cli) - Grok CLI official page
 - [Grok Build Docs](https://docs.x.ai/build/overview) - Getting started and configuration
 - [MiMo-Code](https://github.com/XiaomiMiMo/MiMo-Code) - MiMo-Code repository and documentation
+- [9Router](https://9router.com) - AI router with 60+ providers and 3-tier fallback
 
 ---
 

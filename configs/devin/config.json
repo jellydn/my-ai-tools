@@ -1,4 +1,5 @@
 {
+	"devin": {},
 	"mcpServers": {
 		"context7": {
 			"command": "npx",
@@ -41,5 +42,161 @@
 			"command": "codebase-memory-mcp",
 			"args": []
 		}
-	}
+	},
+	"hooks": {
+		"PermissionRequest": [
+			{
+				"hooks": [
+					{
+						"command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+						"timeout": 10,
+						"type": "command"
+					}
+				]
+			},
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+						"timeout": 10
+					}
+				]
+			}
+		],
+		"PostToolUse": [
+			{
+				"hooks": [
+					{
+						"command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+						"timeout": 10,
+						"type": "command"
+					}
+				]
+			},
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+						"timeout": 10
+					}
+				]
+			}
+		],
+		"PreToolUse": [
+			{
+				"hooks": [
+					{
+						"command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+						"timeout": 10,
+						"type": "command"
+					}
+				]
+			},
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+						"timeout": 10
+					}
+				]
+			}
+		],
+		"SessionStart": [
+			{
+				"hooks": [
+					{
+						"command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+						"timeout": 10,
+						"type": "command"
+					}
+				]
+			},
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+						"timeout": 10
+					}
+				]
+			}
+		],
+		"Stop": [
+			{
+				"hooks": [
+					{
+						"command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+						"timeout": 10,
+						"type": "command"
+					}
+				]
+			},
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+						"timeout": 10
+					}
+				]
+			}
+		],
+		"UserPromptSubmit": [
+			{
+				"hooks": [
+					{
+						"command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+						"timeout": 10,
+						"type": "command"
+					}
+				]
+			},
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+						"timeout": 10
+					}
+				]
+			}
+		],
+		"PostCompaction": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+						"timeout": 10
+					}
+				]
+			}
+		],
+		"SessionEnd": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+						"timeout": 10
+					}
+				]
+			}
+		]
+	},
+	"notify": "smart",
+	"respect_gitignore": true,
+	"shell": {
+		"setup_complete": true
+	},
+	"show_path": true,
+	"skip_home_directory_warning": true,
+	"skip_workspace_trust": false,
+	"theme_auto_detect": "always",
+	"theme_mode": "dark",
+	"unicode_mode": "auto",
+	"version": 1
 }

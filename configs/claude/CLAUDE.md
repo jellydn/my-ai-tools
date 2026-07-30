@@ -1,34 +1,41 @@
-# 🤖 Claude Code Agent Guidelines
+# Claude Code Guidelines
+
+Use judgment. These instructions define outcomes, not a mandatory workflow.
+
+## Token-Efficient Sessions
+
+- Keep responses concise and actionable. Lead with conclusions, file paths, and verification results.
+- Scope discovery to the task. Prefer targeted graph, `fff`, `rg`, or `fd` queries over broad searches and full-file dumps.
+- Limit command output with filters, path scopes, and line ranges. Do not load documentation until it is relevant.
+- Run `/context` during long sessions. Use `/clear` after finishing a task or when switching to unrelated work.
+- Use `/handoffs` and `/pickup` when useful context must survive a reset.
 
 ## Working with Advanced Models (Fable/4.8+)
 
-**Key shift**: You're more capable than the examples I give you. These guidelines provide context and outcomes, not prescriptive steps. Use judgment and discovery.
+- You are more capable than the examples given here. These guidelines provide context and outcomes, not prescriptive steps. Use judgment and discovery.
+- For a comprehensive guide on capability overhang, finding unknowns, and being unreasonable (in the best way), read `~/.ai-tools/fable-guide.md`. Do not load it for routine work.
 
-See @~/.ai-tools/fable-guide.md for comprehensive guide on capability overhang, finding unknowns, and being unreasonable (in the best way).
+## Discovery and Planning
 
-## Discovery-First Approach
+For familiar, focused work, proceed with existing patterns. For unfamiliar or complex work:
 
-Before jumping into implementation:
+1. Identify unknowns with `/blindspots` or the `blindspot-pass` skill.
+2. Use `context-discovery`, graph, git history, and documentation tools only as the task requires.
+3. Use `/interview-me` when an unanswered question would materially change the solution.
+4. Propose phased plans only for large or risky changes.
 
-**For unfamiliar/complex work**:
-1. Run a blind spot pass (@skills/blindspot-pass/) to identify unknowns
-2. Discover context using MCP tools (@skills/context-discovery/) — fff, sem, ctx, qmd
-3. Interview me (@skills/spec-interview/) if major decisions unclear
-4. Search git history for patterns
-5. Propose approach based on findings
-
-**Context over constraints**: These guidelines explain why, not just what. Apply reasoning to new situations.
+Apply reasoning to new situations (context over constraints).
 
 ## Tools for Discovery
 
 - `/blindspots [task]` - Find unknown unknowns before starting
 - `/interview-me [feature]` - Clarify spec gaps with targeted questions
 - `/map-from [reference]` - Learn from example code
-- Context discovery (@skills/context-discovery/) - Proactive MCP tool usage
-- Git history context (@skills/git-context/) - Commit history and patterns
-- Documentation search (@skills/doc-search/) - Find ADRs, wiki, conventions
-- Capability experiments (@skills/capability-experiments/) - HTML reports, proactive research
-- Implementation logging (@skills/implementation-logger/) - Track deviations
+- Context discovery (`context-discovery` skill) - Proactive MCP tool usage
+- Git history context (`git-context` skill) - Commit history and patterns
+- Documentation search (`doc-search` skill) - Find ADRs, wiki, conventions
+- Capability experiments (`capability-experiments` skill) - HTML reports, proactive research
+- Implementation logging (`implementation-logger` skill) - Track deviations
 - `/quiz-me` - Verify understanding after completion
 
 ## Session Management
@@ -44,13 +51,12 @@ tmux capture-pane -p -t "$SESSION" -S -20  # Check without attaching
 
 For AI-enhanced monitoring: `logpilot watch "$SESSION"`
 
-See @~/.ai-tools/best-practices.md for full details.
+For full details, read `~/.ai-tools/best-practices.md` only when the repository lacks equivalent guidance or the task needs its detailed development workflow.
 
 ## Search & Discovery Tools
 
-- Use fff MCP tools for file operations
-- Use sem MCP tools for semantic git operations
-- Prefer `fd` (fdfind) and `rg` (ripgrep) for searching
+- Prefer code graph tools for symbol relationships, `fff` for file discovery, and `sem` for semantic git context when available.
+- Prefer `rg` and `fd` over `grep` and `find` in shell searches.
 - Search git history for patterns: `git log --grep="term"`
 - Look for TODOs/gotchas: `rg "TODO|FIXME|HACK|XXX"`
 
@@ -64,15 +70,16 @@ See @~/.ai-tools/best-practices.md for full details.
 
 **Verification**:
 - Run typecheck, lint, biome on JS/TS changes
-- Prefer Bun for scripts, tsx for TS files
+- Prefer Bun for scripts, `tsx` for TS files when Bun is unsuitable
 - Test your changes before finishing
+
+Read `~/.ai-tools/git-guidelines.md` before destructive or history-changing git operations.
 
 ## Knowledge Management
 
-- @~/.ai-tools/MEMORY.md - Durable learnings (qmd) vs session notes (agentmemory)
-- @~/.ai-tools/agent-memory.md - Auto-capture learnings, persist fixes
-- Implementation logs - Track decisions during complex work
-- After fixing bugs: Offer to record learnings
+- Read `~/.ai-tools/MEMORY.md` (durable learnings/qmd) and `~/.ai-tools/agent-memory.md` (session notes/agentmemory) only when deciding whether or where to persist a learning.
+- Use implementation logs only for complex work with meaningful plan deviations.
+- After a confirmed bug fix or durable technical decision, offer to record the learning.
 
 ## Development Patterns
 
@@ -100,5 +107,4 @@ Don't assume tradeoffs. Challenge constraints:
 - Force reality to show you the bottleneck
 - Ask "what if we just did all of it?"
 - Use tools to make hard things easy
-
-See @~/.ai-tools/fable-guide.md section on "Being Unreasonable"
+- For more details, read `~/.ai-tools/fable-guide.md` section on "Being Unreasonable".

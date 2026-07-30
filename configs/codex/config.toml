@@ -1,11 +1,12 @@
 model_personality = "pragmatic"
-model = "gpt-5.5"
-model_reasoning_effort = "medium"
+model = "gpt-5.6-sol"
+model_reasoning_effort = "low"
 approvals_reviewer = "guardian_subagent"
 personality = "pragmatic"
 
 # Notify the Codex Computer Use client when a turn ends.
 # Restored to match the desktop app's --previous-notify protocol.
+
 
 notify = ["$HOME/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
 
@@ -108,7 +109,7 @@ status_line_use_colors = true
 "gpt-5.5" = 4
 
 [memories]
-disable_on_external_context = true
+disable_on_external_context = false
 
 [desktop]
 ambient-suggestions-enabled = true
@@ -131,7 +132,6 @@ conversationDetailMode = "STEPS_COMMANDS"
 show-context-window-usage = true
 composerEnterBehavior = "cmdIfMultiline"
 hotkey-window-projectless-default-enabled = true
-microphoneInputDeviceId = "7e75c40eb6416da40ab89dede65d7b2664b269fec7610267ea0ea58b41517ec7"
 
 [desktop.appearanceLightChromeTheme]
 accent = "#d7827e"
@@ -185,11 +185,29 @@ enabled = true
 [plugins."pdf@openai-primary-runtime"]
 enabled = true
 
-[plugins."browser@openai-bundled"]
-enabled = true
-
 [plugins."chrome@openai-bundled"]
 enabled = true
 
 [plugins."template-creator@openai-primary-runtime"]
 enabled = true
+
+[plugins."sites@openai-bundled"]
+enabled = true
+
+[plugins."visualize@openai-bundled"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[marketplaces.openai-bundled]
+source_type = "local"
+source = "$HOME/.codex/.tmp/bundled-marketplaces/openai-bundled"
+
+[marketplaces.openai-primary-runtime]
+source_type = "local"
+source = "$HOME/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
+
+[shell_environment_policy.set]
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+NODE_REPL_TRUSTED_CODE_PATHS = "$HOME/.codex"

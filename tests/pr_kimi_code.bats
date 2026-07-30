@@ -63,7 +63,7 @@ README="$REPO_ROOT/README.md"
 }
 
 @test "cli.sh main() installs kimi code" {
-    run grep -E '^\s*install_kimi_code\b' "$CLI_SH"
+    run grep -F '"kimi_code:install_kimi_code"' "$CLI_SH"
     [ "$status" -eq 0 ]
     [ -n "$output" ]
 }

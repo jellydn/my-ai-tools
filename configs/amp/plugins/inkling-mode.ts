@@ -1,7 +1,7 @@
 // @amp-plugin updated automatically from https://ampcode.com/@amp/plugins/inkling-mode.ts
 // @amp-agent-mode {"key":"inkling","label":"Inkling"}
 
-import type { PluginAPI } from '@ampcode/plugin'
+import type { PluginAPI } from "@ampcode/plugin";
 
 const INKLING_PROMPT = `
 You are a senior software engineer working directly in the user's codebase. You read code, plan, implement, and verify changes to satisfy the latest request, then report what changed and how you confirmed it.
@@ -119,46 +119,46 @@ Self-check before you call UI done — the AI-slop test: if someone could glance
 - Final replies start with the outcome, then mention changed behavior and verification.
 - Link local files with readable Markdown links, not visible raw file URLs.
 </communication>
-`
+`;
 
 const SMART_TOOL_NAMES = [
-	'Read',
-	'finder',
-	'shell_command',
-	'shell_command_status',
-	'create_file',
-	'edit_file',
-	'web_search',
-	'read_web_page',
-	'read_thread',
-	'find_thread',
-	'skill',
-	'oracle',
-	'librarian',
-	'view_media',
-	'painter',
-] as const
+	"Read",
+	"finder",
+	"shell_command",
+	"shell_command_status",
+	"create_file",
+	"edit_file",
+	"web_search",
+	"read_web_page",
+	"read_thread",
+	"find_thread",
+	"skill",
+	"oracle",
+	"librarian",
+	"view_media",
+	"painter",
+] as const;
 
 export default function (amp: PluginAPI) {
 	if (!amp.experimental) {
-		amp.logger.log('Experimental plugin API is not available.')
-		return
+		amp.logger.log("Experimental plugin API is not available.");
+		return;
 	}
 
 	const agent = amp.experimental.createAgent({
-		name: 'inkling',
-		model: 'baseten/thinkingmachines/inkling',
+		name: "inkling",
+		model: "baseten/thinkingmachines/inkling",
 		instructions: INKLING_PROMPT,
 		tools: SMART_TOOL_NAMES,
-		reasoningEffort: 'high',
-		display: { label: 'Inkling', color: '#8b5cf6' },
-	})
+		reasoningEffort: "high",
+		display: { label: "Inkling", color: "#8b5cf6" },
+	});
 
 	amp.experimental.registerAgentMode({
-		key: 'inkling',
-		label: 'Inkling',
-		description: 'Thinking Machines Inkling agent mode.',
-		color: '#8b5cf6',
+		key: "inkling",
+		label: "Inkling",
+		description: "Thinking Machines Inkling agent mode.",
+		color: "#8b5cf6",
 		agent: agent.definition,
-	})
+	});
 }

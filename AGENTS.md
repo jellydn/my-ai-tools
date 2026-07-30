@@ -7,8 +7,9 @@ Monorepo for **my-ai-tools** — source-of-truth configs for 14+ AI coding assis
 ## Essential Commands
 
 ```bash
-bash -n cli.sh generate.sh          # Syntax-validate shell scripts (CI runs this)
+bash -n cli.sh generate.sh lib/*.sh # Syntax-validate shell scripts (CI runs this)
 ./cli.sh --dry-run                  # Preview install plan (run this FIRST)
+./scripts/sync-token-efficiency.sh  # Regenerate the shared Token Efficiency section
 ./cli.sh                            # Install configs into $HOME
 ./generate.sh --dry-run             # Preview export
 ./generate.sh                       # Export local configs from $HOME back to repo
@@ -47,6 +48,9 @@ msb run -m 512M -v "$(pwd):/project:ro" ubuntu -- \
 
 - **Re-exec guard**: every entry point sources `lib/require_bash.sh` _before_ `lib/common.sh`. `common.sh` uses bash-only syntax (`<()`, arrays, `${var//pat/repl}`) that crashes under `sh`/`dash`.
 - `set -e` goes _after_ the re-exec guard.
+- **Installer layout**: AI coding tool installers live in `lib/install.sh`; prerequisites (runtimes, formatters, MCP binaries) live in `lib/install-deps.sh`, which `lib/install.sh` sources. `lib/` modules stay under 1000 lines — `tests/pr_install_deps.bats` enforces it.
+- **New installers** are registered in the ordered `INSTALL_SEQUENCE` table in `cli.sh` (`"<allowlist-key>:<installer>"`, or `always:` for cross-tool dependencies), not as another `if tool_allowed` block.
+- **PATH**: never `export PATH=` directly — call `ensure_dir_on_path "<dir>"` (`lib/install.sh`).
 - **Dry-run**: wrap every side-effecting command in `execute()` / `execute_quoted()` (defined in `lib/common.sh`). Never run destructive commands directly.
 - Paths: use `$HOME` / relative. **No absolute paths** in configs or scripts.
 - Quote all variables, use `local`, and use `log_info`/`log_success`/`log_warning`/`log_error` for output.
@@ -58,6 +62,7 @@ msb run -m 512M -v "$(pwd):/project:ro" ubuntu -- \
 - MCP servers come from the central registry `configs/mcp-registry.json`. Prefer it over the legacy fallback.
 - Configs are validated with `jq` before install; failures warn but don't block (unless you decline the prompt).
 - `safe_copy_dir()` (lib/common.sh) auto-excludes `node_modules`, `cache`, `*.sqlite`, etc.
+- The `## Token Efficiency` section in `configs/**/AGENTS.md` and `configs/**/GEMINI.md` is generated from `configs/token-efficiency.md`. Edit the canonical file and run `./scripts/sync-token-efficiency.sh` — the profiles stay standalone on purpose, since eager `@file.md` imports cost tokens every session.
 - Backups go to `$HOME/ai-tools-backup-{timestamp}`; last 5 are kept.
 - Gemini CLI is deprecated for Google One/unpaid tiers (June 18, 2026 cutoff). Migrate to Antigravity CLI.
 

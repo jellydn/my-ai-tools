@@ -32,7 +32,7 @@ README="$REPO_ROOT/README.md"
 }
 
 @test "cli.sh main() installs ctx" {
-	run grep -E '^[[:space:]]*install_ctx' "$CLI_SH"
+	run grep -F '"ctx:install_ctx"' "$CLI_SH"
 	[ "$status" -eq 0 ]
 	[ -n "$output" ]
 }

@@ -44,7 +44,7 @@ README="$REPO_ROOT/README.md"
 }
 
 @test "cli.sh main() installs kiro" {
-    run grep -E '^[[:space:]]*install_kiro' "$CLI_SH"
+    run grep -F '"kiro:install_kiro"' "$CLI_SH"
     [ "$status" -eq 0 ]
     [ -n "$output" ]
 }
