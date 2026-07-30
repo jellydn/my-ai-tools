@@ -1,0 +1,11 @@
+# jcode user config — safe defaults only (no secrets).
+# Provider credentials live in ~/.jcode auth files or ~/.config/jcode/*.env.
+# Docs: https://jcode.sh/docs
+
+[display]
+# Set emoji = false (or JCODE_NO_EMOJI=1) for ASCII-only TUI/CLI markers.
+emoji = true
+
+[features]
+memory = true
+swarm = true

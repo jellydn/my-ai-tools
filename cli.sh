@@ -50,6 +50,7 @@ INSTALL_SEQUENCE=(
 	"herdr:install_herdr"
 	"ctx:install_ctx"
 	"qodercli:install_qodercli"
+	"jcode:install_jcode"
 	"kiro:install_kiro"
 	"codiff:install_codiff"
 	"devin:install_devin"
@@ -335,6 +336,8 @@ backup_configs() {
 		copy_config_dir "$HOME/.grok" "$BACKUP_DIR" "grok"
 		copy_config_dir "$HOME/.config/mimocode" "$BACKUP_DIR" "mimocode"
 		copy_config_dir "$HOME/.qoder" "$BACKUP_DIR" "qodercli"
+		copy_config_dir "$HOME/.jcode" "$BACKUP_DIR" "jcode"
+		copy_config_file "$HOME/AGENTS.md" "$BACKUP_DIR/jcode" || true
 		copy_config_dir "$HOME/.kiro" "$BACKUP_DIR" "kiro"
 		copy_config_dir "$HOME/.codiff" "$BACKUP_DIR" "codiff"
 		copy_config_dir "$HOME/.config/devin" "$BACKUP_DIR" "devin"
@@ -561,6 +564,11 @@ copy_configurations() {
 	else
 		log_info "Skipping qodercli config install (not in -y allowlist)"
 	fi
+	if tool_allowed "jcode"; then
+		copy_jcode_configs
+	else
+		log_info "Skipping jcode config install (not in -y allowlist)"
+	fi
 	if tool_allowed "kiro"; then
 		copy_kiro_configs
 	else
@@ -616,6 +624,7 @@ _validate_config_tool_name() {
 		*antigravity-cli/settings.json*) echo "antigravity" ;;
 		*kilo/config.json*) echo "kilo" ;;
 		*kimi-code/mcp.json*) echo "kimi_code" ;;
+		*jcode/mcp.json*) echo "jcode" ;;
 		*pi/settings.json*) echo "pi" ;;
 		*commandcode/*.json*) echo "commandcode" ;;
 		*cline/*.json*) echo "cline" ;;
@@ -659,6 +668,7 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/antigravity-cli/settings.json" \
 		"$SCRIPT_DIR/configs/kilo/config.json" \
 		"$SCRIPT_DIR/configs/kimi-code/mcp.json" \
+		"$SCRIPT_DIR/configs/jcode/mcp.json" \
 		"$SCRIPT_DIR/configs/pi/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/mcp.json" \
@@ -1594,6 +1604,36 @@ copy_qodercli_configs() {
 	log_success "Qoder CLI configs copied"
 }
 
+copy_jcode_configs() {
+	local jcode_status
+	jcode_status=$(detect_tool --detailed "jcode" "$HOME/.jcode") || jcode_status="missing"
+	if [ "$jcode_status" = "missing" ]; then
+		log_info "jcode not detected - skipping jcode config installation"
+		return 0
+	fi
+
+	log_info "Detected jcode (via $jcode_status)"
+	execute_quoted mkdir -p "$HOME/.jcode"
+
+	# jcode loads machine-wide instructions from ~/AGENTS.md (not ~/.jcode/).
+	copy_config_file "$SCRIPT_DIR/configs/jcode/AGENTS.md" "$HOME/" || true
+	copy_config_file "$SCRIPT_DIR/configs/jcode/mcp.json" "$HOME/.jcode/" || true
+
+	# Preserve an existing config.toml so local provider profiles are not clobbered.
+	if [ ! -f "$HOME/.jcode/config.toml" ]; then
+		copy_config_file "$SCRIPT_DIR/configs/jcode/config.toml" "$HOME/.jcode/" || true
+	else
+		log_info "jcode config.toml already exists at ~/.jcode/, preserving existing config"
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/jcode/skills" ]; then
+		execute_quoted mkdir -p "$HOME/.jcode/skills"
+		safe_copy_dir "$SCRIPT_DIR/configs/jcode/skills" "$HOME/.jcode/skills"
+	fi
+
+	log_success "jcode configs copied"
+}
+
 copy_kiro_configs() {
 	local kiro_status
 	kiro_status=$(detect_tool --detailed "kiro" "$HOME/.kiro") || kiro_status="missing"
@@ -2435,7 +2475,7 @@ main() {
 	echo "║  Claude • OpenCode • Amp • CCS • Codex • Kimi Code • Gemini          ║"
 	echo "║  Antigravity • Pi • Kilo • Copilot • Cursor • Command Code           ║"
 	echo "║  Factory Droid • Cline • Grok • MiMo-Code • herdr                    ║"
-	echo "║  Qoder CLI • Kiro • Codiff • Devin                                   ║"
+	echo "║  Qoder CLI • jcode • Kiro • Codiff • Devin                           ║"
 	echo "║  ctx                                                                 ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo

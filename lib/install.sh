@@ -720,3 +720,36 @@ install_devin() {
 	}
 	run_installer "Devin CLI" "_run_devin_install" "command -v devin" "devin --version 2>/dev/null || true"
 }
+
+# ─── jcode installation ────────────────────────────────────────────
+
+install_jcode() {
+	_run_jcode_install() {
+		if command -v jcode &>/dev/null; then
+			log_warning "jcode is already installed"
+			return 0
+		fi
+
+		if [ "$IS_WINDOWS" = true ]; then
+			if command -v powershell.exe &>/dev/null; then
+				execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://jcode.sh/install.ps1 | iex\""
+			else
+				log_error "PowerShell is required to install jcode on Windows."
+				log_info "Install manually: https://jcode.sh/docs"
+				return 1
+			fi
+		elif command -v brew &>/dev/null; then
+			# Prefer Homebrew on macOS/Linux when available.
+			if ! brew tap 1jehuang/jcode &>/dev/null; then
+				log_error "Failed to tap 1jehuang/jcode"
+				return 1
+			fi
+			execute "brew install jcode"
+		else
+			execute_installer "https://jcode.sh/install" "" "jcode"
+		fi
+
+		log_success "jcode installed"
+	}
+	run_installer "jcode" "_run_jcode_install" "command -v jcode" "jcode --version 2>/dev/null || true"
+}

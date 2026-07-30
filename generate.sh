@@ -734,6 +734,31 @@ generate_qodercli_configs() {
 	log_success "Qoder CLI configs generated"
 }
 
+generate_jcode_configs() {
+	log_info "Generating jcode configs..."
+
+	if [ ! -d "$HOME/.jcode" ] && [ ! -f "$HOME/AGENTS.md" ]; then
+		log_warning "jcode config not found under ~/.jcode or ~/AGENTS.md"
+		return 0
+	fi
+
+	execute "mkdir -p \"$SCRIPT_DIR/configs/jcode\""
+
+	# Machine-wide instructions live at ~/AGENTS.md per jcode docs.
+	copy_single "$HOME/AGENTS.md" "$SCRIPT_DIR/configs/jcode/AGENTS.md"
+	copy_single "$HOME/.jcode/mcp.json" "$SCRIPT_DIR/configs/jcode/mcp.json"
+	copy_single "$HOME/.jcode/config.toml" "$SCRIPT_DIR/configs/jcode/config.toml"
+
+	if [ -d "$HOME/.jcode/skills" ]; then
+		copy_skills_with_filter "$HOME/.jcode/skills" "$SCRIPT_DIR/configs/jcode/skills" "jcode"
+		log_success "jcode skills generated"
+	else
+		log_warning "jcode skills directory not found: $HOME/.jcode/skills"
+	fi
+
+	log_success "jcode configs generated"
+}
+
 generate_kiro_configs() {
 	log_info "Generating Kiro CLI configs..."
 
@@ -960,6 +985,9 @@ main() {
 	echo
 
 	generate_qodercli_configs
+	echo
+
+	generate_jcode_configs
 	echo
 
 	generate_kiro_configs

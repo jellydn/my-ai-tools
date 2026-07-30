@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, jcode, Kiro CLI, Codiff, ctx, Open Code Review, and CCS with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, jcode, Kiro CLI, Codiff, ctx, Open Code Review, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, codebase-memory-mcp, agentmemory, sem, ctx
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -152,6 +152,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **Grok**        | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Default model `grok-4.5` (high reasoning); UI auto + `rosepine-moon`; Kanagawa theme staged                                                                                                           |
 | **MiMo-Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                                     |
 | **Qoder CLI**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                                     |
+| **jcode**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Skills via `~/.jcode/skills/`; machine-wide `~/AGENTS.md`                                                                                                                                             |
 | **Kiro CLI**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Steering files (AGENTS.md), slash commands, MCP servers, ACP                                                                                                                                          |
 | **Codiff**      | — (desktop app — uses configured agent backend via settings)                                                               | —                                                                                                                                                                                                     |
 
@@ -2884,6 +2885,109 @@ See the full [Qoder CLI docs](https://docs.qoder.com/en/cli/quick-start) for det
 
 ---
 
+## ⚡ jcode (Optional)
+
+RAM-efficient coding agent harness with subscription OAuth (Claude/OpenAI/Gemini/Copilot), swarm multi-agent sessions, semantic memory, and MCP. [Homepage](https://jcode.sh) | [Docs](https://jcode.sh/docs) | [GitHub](https://github.com/1jehuang/jcode)
+
+<details>
+<summary><strong>Installation &amp; Configuration</strong></summary>
+
+### Installation
+
+```bash
+# macOS with Homebrew
+brew tap 1jehuang/jcode
+brew install jcode
+
+# macOS / Linux install script
+curl -fsSL https://jcode.sh/install | bash
+```
+
+```powershell
+# Windows PowerShell
+irm https://jcode.sh/install.ps1 | iex
+```
+
+Or run this repo's installer:
+
+```bash
+./cli.sh
+```
+
+### Configuration
+
+jcode configs are stored in [`configs/jcode/`](configs/jcode/) and installed as:
+
+- [`AGENTS.md`](configs/jcode/AGENTS.md) — machine-wide agent guidelines (installed to `~/AGENTS.md`; project instructions stay in `<repo>/AGENTS.md`)
+- [`mcp.json`](configs/jcode/mcp.json) — global MCP servers (`~/.jcode/mcp.json`)
+- [`config.toml`](configs/jcode/config.toml) — safe display/feature defaults (`~/.jcode/config.toml`; existing local file is preserved)
+- [`skills/`](configs/jcode/skills/) — curated skills installed under `~/.jcode/skills/`
+
+### 🔌 MCP Servers
+
+```json
+{
+    "mcpServers": {
+        "context7": {
+            "command": "npx",
+            "args": ["-y", "@upstash/context7-mcp@latest"]
+        },
+        "sequential-thinking": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+        },
+        "qmd": { "command": "qmd", "args": ["mcp"] },
+        "fff": { "command": "fff-mcp", "args": [] },
+        "react-grab-mcp": {
+            "command": "npx",
+            "args": ["-y", "@react-grab/mcp", "--stdio"]
+        },
+        "logpilot": { "command": "logpilot", "args": ["mcp-server"] },
+        "agentmemory": { "command": "npx", "args": ["-y", "@agentmemory/mcp"] },
+        "sem": { "command": "sem-mcp", "args": [] },
+        "ctx": { "command": "ctx", "args": ["mcp", "serve"] },
+        "codebase-memory-mcp": { "command": "codebase-memory-mcp", "args": [] }
+    }
+}
+```
+
+> jcode accepts both `mcpServers` and the historical `servers` key. Only stdio MCP servers are supported today.
+
+**Config Locations:**
+
+| Scope | Path |
+| --- | --- |
+| User config | `~/.jcode/config.toml` |
+| User MCP | `~/.jcode/mcp.json` |
+| Project MCP | `<project>/.jcode/mcp.json` |
+| User AGENTS.md | `~/AGENTS.md` |
+| Project AGENTS.md | `<project>/AGENTS.md` |
+| Skills | `~/.jcode/skills/` |
+| Provider env files | `~/.config/jcode/*.env` |
+
+### Usage
+
+```bash
+# Start jcode TUI
+jcode
+
+# Non-interactive single prompt
+jcode run "say hello"
+
+# Verify configured providers
+jcode auth-test --all-configured
+
+# Browser automation status / setup
+jcode browser status
+jcode browser setup
+```
+
+See the full [jcode docs](https://jcode.sh/docs) for provider login and swarm features.
+
+</details>
+
+---
+
 ## 🥷 Kiro CLI (Optional)
 
 Kiro Dev's AI coding assistant with native MCP support, steering files (AGENTS.md), and ACP (Agent Client Protocol) integration. Ships with `/model`, `/editor`, `/usage`, and custom agents. [Homepage](https://kiro.dev/) | [Docs](https://kiro.dev/docs/cli/installation/) | [GitHub](https://github.com/kirodotdev/Kiro)
@@ -3070,7 +3174,7 @@ ctx mcp serve
 
 The ctx MCP server is configured for all supported AI tools via this repo's config files and the central MCP registry (`configs/mcp-registry.json`):
 
-- **Claude Code**, **Cursor**, **Cline**, **Factory Droid**, **Kimi Code**, **CommandCode**, **Kiro**, **Copilot**, **Qoder CLI**, **Pi**, **Antigravity** — registered in tool-specific `mcpServers` JSON config
+- **Claude Code**, **Cursor**, **Cline**, **Factory Droid**, **Kimi Code**, **CommandCode**, **Kiro**, **Copilot**, **Qoder CLI**, **jcode**, **Pi**, **Antigravity** — registered in tool-specific `mcpServers` JSON config
 - **OpenCode**, **Kilo** — registered in `mcp.ctx` (array-command format)
 - **Codex**, **Grok** — registered in TOML `[mcp_servers.ctx]` format
 - **Claude Code**, **OpenCode**, **Codex**, **Amp**, **Gemini**, **Antigravity**, **CommandCode**, **Copilot**, **Cursor**, **Factory**, **Cline**, **Grok**, **MiMo-Code**, **Qoder CLI**, **Kiro** — also covered by the central `mcp-registry.json` for automatic setup.
