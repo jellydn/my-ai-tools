@@ -1388,7 +1388,25 @@ copy_pi_configs() {
 	if [ ! -f "$HOME/.pi/agent/settings.json" ]; then
 		copy_config_file "$SCRIPT_DIR/configs/pi/settings.json" "$HOME/.pi/agent/" || true
 	else
-		log_info "Pi settings.json already exists at ~/.pi/agent/, preserving existing config"
+		local pi_settings="$HOME/.pi/agent/settings.json"
+		local fusion_package="npm:@tintinweb/pi-subagents"
+		if ! command -v jq >/dev/null 2>&1; then
+			log_warning "Pi settings.json exists but jq is unavailable; install $fusion_package manually to enable Fusion agents"
+		elif jq -e --arg package "$fusion_package" '(.packages // []) | index($package) != null' "$pi_settings" >/dev/null 2>&1; then
+			log_info "Pi settings.json already includes Fusion subagent support"
+		else
+			local merged_settings
+			merged_settings=$(make_temp_file "pi-settings" "json")
+			if jq --arg package "$fusion_package" '.packages = ((.packages // []) + [$package])' "$pi_settings" >"$merged_settings"; then
+				execute_quoted cp -p "$merged_settings" "$pi_settings" || return 1
+				log_success "Pi Fusion subagent support added to existing settings"
+			else
+				log_warning "Could not merge Fusion subagent support into existing Pi settings"
+				rm -f "$merged_settings"
+				return 1
+			fi
+			rm -f "$merged_settings"
+		fi
 	fi
 
 	if [ -d "$SCRIPT_DIR/configs/pi/themes" ]; then

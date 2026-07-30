@@ -129,6 +129,20 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **improve**                       | Frontier model plans, cheap model executes — audit and plan improvements     | When you need senior-level analysis with actionable plans for cheaper models to run (from shadcn)               |
 | **improve-codebase-architecture** | Codebase architecture deepening — find structural improvement opportunities  | When you want to improve modularity, patterns, and architecture of an existing codebase (from Matt Pocock)      |
 
+## 🧭 Fusion Orchestration
+
+Inspired by [opencode-fusion](https://github.com/mihneaptu/opencode-fusion) and complementary evidence-gating ideas from [Gentle AI](https://github.com/Gentleman-Programming/gentle-ai), the `orchestrating-fusion` skill separates senior planning and review from lower-cost mechanical implementation. The installer provides native `fusion-lead` and `fusion-executor` roles for active tools and shares the portable workflow with every assistant through `~/.agents/skills/`.
+
+| Tool         | Start Fusion                                                | Enforced boundary                                                                 |
+| ------------ | ----------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| **OpenCode** | Select the `fusion-lead` primary                            | Lead has no edit or shell permission and delegates directly to `fusion-executor`  |
+| **Amp**      | Select the `fusion` agent mode                              | Lead's tool surface omits mutation/shell and exposes `fusion_executor`             |
+| **Codex**    | Ask the root session to run `fusion_lead`, then its sibling `fusion_executor` | Lead uses a read-only sandbox; the writable root mediates sibling execution        |
+| **Pi**       | Ask the root `Agent` tool for `fusion-lead`, then `fusion-executor`           | `pi-subagents` enforces role tool allowlists; the root mediates sibling execution  |
+| **Others**   | Invoke the `orchestrating-fusion` skill                     | Uses native delegation when available; otherwise the split is prompt-advisory      |
+
+The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONSTRAINTS / VERIFICATION`. The executor returns an evidence envelope covering changes, verification, skills loaded, risks, questions, and key learnings. The lead reads artifacts back, permits one targeted correction, and stops rather than entering an unbounded fix loop. Durable PRDs or plans remain opt-in when they materially reduce ambiguity.
+
 ## 🔌 MCP Servers & Plugins Overview
 
 | Tool            | MCP Servers                                                                                                                | Plugins/Extensions                                                                                                                                                                                    |
@@ -137,8 +151,8 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **OpenCode**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                                     |
 | **Codex**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl, ctx   | -                                                                                                                                                                                                     |
 | **Kimi Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, logpilot, sem, ctx                              | Skills, MCP servers, and hooks via `~/.kimi-code/`                                                                                                                                                    |
-| **Pi**          | context7, sequential-thinking, qmd, codebase-memory-mcp, fff, react-grab-mcp, agentmemory, sem, ctx                        | Packages (pi-extension, autoresearch, fff, mcp-adapter, simplify, rpiv-todo, btw, code-previews, codex-goal, commandcode-provider, pi-web-access, footer, tps-meter, pi-qwencloud-provider, pi-cursor-sdk) |
-| **Amp**         | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Agent modes: glm-5.2, grok45, inkling, cursor-composer-2.5; plannotator; orca-agent-status                                                                                                            |
+| **Pi**          | context7, sequential-thinking, qmd, codebase-memory-mcp, fff, react-grab-mcp, agentmemory, sem, ctx                        | Packages (pi-extension, pi-subagents, autoresearch, fff, mcp-adapter, simplify, rpiv-todo, btw, code-previews, codex-goal, commandcode-provider, pi-web-access, footer, tps-meter, pi-qwencloud-provider, pi-cursor-sdk) |
+| **Amp**         | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Agent modes: fusion, glm-5.2, grok45, inkling, cursor-composer-2.5; plannotator; orca-agent-status                                                                                                    |
 | **Gemini**      | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                                        |
 | **Antigravity** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx (via plugin) | my-ai-tools-gemini-migration                                                                                                                                                                          |
 | **Kilo**        | (uses OpenCode config)                                                                                                     | (uses OpenCode plugins)                                                                                                                                                                               |
@@ -535,7 +549,7 @@ npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
 
-# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, tmux, blindspot-pass, implementation-logger, quiz-me, spec-interview, capability-experiments, code-review, context-discovery, doc-search, git-context
+# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, tmux, blindspot-pass, implementation-logger, quiz-me, spec-interview, capability-experiments, code-review, context-discovery, doc-search, git-context, orchestrating-fusion
 # Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
