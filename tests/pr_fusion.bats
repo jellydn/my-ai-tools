@@ -313,3 +313,21 @@ JSON
 	run grep -F 'refusing to install Fusion agents without permission enforcement' "$REPO_ROOT/cli.sh"
 	[ "$status" -eq 0 ]
 }
+
+@test "OpenCode ships open-cursor with cursor-acp provider and omniroute/free default" {
+	require_jq
+	run jq -e '
+		.model == "omniroute/free" and
+		.agent.explorer.model == "cursor-acp/auto" and
+		.provider["cursor-acp"].options.baseURL == "http://127.0.0.1:32124/v1" and
+		.provider["cursor-acp"].models.auto.name == "Auto" and
+		.provider["cursor-acp"].models["cursor-grok-4.5-medium"].name == "Grok 4.5 Medium"
+	' "$REPO_ROOT/configs/opencode/opencode.json"
+	[ "$status" -eq 0 ]
+	run grep -F 'opencode:install_open_cursor' "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+	run grep -F 'install_open_cursor()' "$REPO_ROOT/lib/install.sh"
+	[ "$status" -eq 0 ]
+	run grep -F '@rama_nigg/open-cursor' "$REPO_ROOT/lib/install.sh"
+	[ "$status" -eq 0 ]
+}

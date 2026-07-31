@@ -109,8 +109,8 @@
 			"command": ["codebase-memory-mcp"]
 		}
 	},
-	"model": "omniroute/cu/auto",
-	"plugin": ["@plannotator/opencode@latest", "opencode-chrome-annotation@latest"],
+	"model": "omniroute/free",
+	"plugin": ["@plannotator/opencode@latest"],
 	"provider": {
 		"cursor-acp": {
 			"name": "Cursor ACP",
