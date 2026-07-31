@@ -264,6 +264,17 @@ Skip style and minor issues - focus on critical security only.
    - Security review
 ```
 
+### Fusion Lead & Executor Orchestration
+
+In Amp, OpenCode, Pi, and Codex, use the `orchestrating-fusion` skill pattern to pair a strong read-only Lead agent (planning, verification) with a faster implementation Executor agent (code edits, unit tests). See [Fusion Orchestration Guide](./fusion-orchestration.md) for full details.
+
+```markdown
+1. Lead Agent: Analyzes codebase, generates phase plan and boundaries
+2. Executor Agent: Implements code changes for Phase 1 and runs verification tests
+3. Lead Agent: Reviews diff and test output independently
+4. Repeat phase-by-phase until verification passes
+```
+
 ### Pull Request Review & Fixes
 
 Use the `pr-review` skill to efficiently address review feedback. The skill supports auto-detection from your current branch, specific PR numbers, or full URLs.
