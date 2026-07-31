@@ -887,6 +887,75 @@ generate_ai_launcher_configs() {
 	fi
 }
 
+sanitize_absolute_paths() {
+	if [ "$DRY_RUN" = true ]; then
+		return 0
+	fi
+
+	log_info "Sanitizing absolute paths in exported configs..."
+	local target_dir="$SCRIPT_DIR/configs"
+	if [ ! -d "$target_dir" ]; then
+		return 0
+	fi
+
+	node -e '
+		const fs = require("fs");
+		const path = require("path");
+		const home = process.env.HOME;
+		if (!home) process.exit(0);
+
+		function walk(dir) {
+			const files = fs.readdirSync(dir);
+			for (const file of files) {
+				const fullPath = path.join(dir, file);
+				const stat = fs.statSync(fullPath);
+				if (stat.isDirectory()) {
+					walk(fullPath);
+				} else if (stat.isFile()) {
+					const ext = path.extname(file).toLowerCase();
+					if ([".json", ".toml", ".jsonc"].includes(ext)) {
+						try {
+							let content = fs.readFileSync(fullPath, "utf8");
+							let modified = false;
+							if (content.includes(home)) {
+								content = content.split(home).join("$HOME");
+								modified = true;
+							}
+							if (content.includes("\x27$HOME")) {
+								content = content.replace(/\x27\\$HOME\/([^\x27]*)\x27/g, `\\"$HOME/$1\\"`);
+								modified = true;
+							}
+							if (modified) {
+								fs.writeFileSync(fullPath, content, "utf8");
+								console.log("Sanitized: " + path.relative(process.cwd(), fullPath));
+							}
+							if (ext === ".json" || ext === ".jsonc") {
+								let parsed;
+								try {
+									const jsonText = content.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "$1");
+									parsed = JSON.parse(jsonText);
+								} catch (e) {}
+								if (parsed) {
+									const relativePath = path.relative(process.cwd(), fullPath);
+									const isMcpFile = file.includes("mcp") ||
+										(file === "config.json" && relativePath.includes("configs/devin/")) ||
+										(file === "settings.json" && (relativePath.includes("configs/kiro/") || relativePath.includes("configs/qodercli/")));
+									if (isMcpFile && (!parsed.mcpServers || typeof parsed.mcpServers !== "object")) {
+										console.warn("\x1b[33mWarning: " + relativePath + " is missing a valid \"mcpServers\" object!\x1b[0m");
+									}
+								}
+							}
+						} catch (e) {
+							console.error("Failed to sanitize " + fullPath + ": " + e.message);
+						}
+					}
+				}
+			}
+		}
+		walk(process.argv[2]);
+	' "$target_dir"
+}
+
 main() {
 	echo "╔══════════════════════════════════════════════════════════╗"
 	echo "║         Config Generator                                 ║"
@@ -978,6 +1047,9 @@ main() {
 	echo
 
 	generate_ai_launcher_configs
+	echo
+
+	sanitize_absolute_paths
 	echo
 
 	log_success "Config generation complete!"
