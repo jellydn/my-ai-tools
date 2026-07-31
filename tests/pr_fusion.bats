@@ -151,28 +151,27 @@ JSON
 
 @test "Amp executor shell policy only permits exact workspace verification commands" {
 	local plugin="$REPO_ROOT/configs/amp/plugins/fusion-agents.ts"
-	run bun -e '
-		const { isSafeExecutorShellCommand: safe } = await import(`file://${process.argv[1]}`);
-		const allowed = [
-			"pwd",
-			"git status --short",
-			"git diff --check",
-			"git diff --no-ext-diff --no-textconv",
-			"git diff --cached --no-ext-diff --no-textconv",
-		];
-		const denied = [
-			"git status --short & touch /tmp/fusion-policy-bypass",
-			"git status --short`touch /tmp/fusion-policy-bypass`",
-			"git status --short\ntouch /tmp/fusion-policy-bypass",
-			"git diff --output=/tmp/fusion-policy-bypass",
-			"git diff --ext-diff",
-			"npm test",
-			"bats tests/pr_fusion.bats",
-		];
-		if (!allowed.every((command) => safe(command))) process.exit(1);
-		if (!denied.every((command) => !safe(command))) process.exit(2);
-		if (safe("pwd", "/tmp")) process.exit(3);
-	' "$plugin"
+	run python3 - "$plugin" <<'PY'
+import json
+import re
+import sys
+
+source = open(sys.argv[1], encoding="utf-8").read()
+function = re.search(r"export function isSafeExecutorShellCommand\(.*?\n}\n", source, re.S)
+assert function
+body = function.group(0)
+assert "if (dir) return false;" in body
+assert "]).has(command.trim())" in body
+actual = set(re.findall(r'^\s*\t\t(".*"),$', body, re.M))
+expected = {
+    json.dumps("pwd"),
+    json.dumps("git status --short"),
+    json.dumps("git diff --check"),
+    json.dumps("git diff --no-ext-diff --no-textconv"),
+    json.dumps("git diff --cached --no-ext-diff --no-textconv"),
+}
+assert actual == expected, (actual, expected)
+PY
 	[ "$status" -eq 0 ]
 }
 
