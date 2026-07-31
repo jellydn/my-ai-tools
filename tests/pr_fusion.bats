@@ -36,9 +36,9 @@ load helpers
 	[ "$status" -eq 0 ]
 	run grep -F "    fusion-executor: allow" "$lead"
 	[ "$status" -eq 0 ]
-	run grep -F "model: omniroute/paid" "$lead"
+	run grep -F "model: cursor-acp/cursor-grok-4.5-medium" "$lead"
 	[ "$status" -eq 0 ]
-	run grep -F "model: omniroute/free" "$executor"
+	run grep -F "model: cursor-acp/auto" "$executor"
 	[ "$status" -eq 0 ]
 	run grep -F '    "*": ask' "$executor"
 	[ "$status" -eq 0 ]

@@ -1,7 +1,7 @@
 ---
 description: Plans, delegates, reviews, and verifies while remaining mechanically read-only
 mode: primary
-model: omniroute/paid
+model: cursor-acp/cursor-grok-4.5-medium
 temperature: 0.1
 permission:
   edit: deny

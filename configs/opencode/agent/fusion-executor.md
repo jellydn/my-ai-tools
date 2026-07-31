@@ -1,7 +1,7 @@
 ---
 description: Implements bounded specifications from the Fusion lead and reports verification
 mode: subagent
-model: omniroute/free
+model: cursor-acp/auto
 temperature: 0.1
 permission:
   task: deny
