@@ -28,11 +28,11 @@ load helpers
 	[ "$status" -eq 0 ]
 	run grep -F "    fusion-executor: allow" "$lead"
 	[ "$status" -eq 0 ]
-	run grep -F "model: omniroute/premium" "$lead"
+	run grep -F "model: omniroute/paid" "$lead"
 	[ "$status" -eq 0 ]
 	run grep -F "model: omniroute/free" "$executor"
 	[ "$status" -eq 0 ]
-	run grep -F '    "git push *": deny' "$executor"
+	run grep -F '    "*": deny' "$executor"
 	[ "$status" -eq 0 ]
 	run grep -F "SKILLS LOADED" "$executor"
 	[ "$status" -eq 0 ]
@@ -42,9 +42,17 @@ load helpers
 	require_jq
 	run jq -e '.packages | index("npm:@tintinweb/pi-subagents") != null' "$REPO_ROOT/configs/pi/settings.json"
 	[ "$status" -eq 0 ]
+	run jq -e '.packages | index("npm:pi-permission-system") != null' "$REPO_ROOT/configs/pi/settings.json"
+	[ "$status" -eq 0 ]
 	run grep -F 'tools: "read, grep, find"' "$REPO_ROOT/configs/pi/agents/fusion-lead.md"
 	[ "$status" -eq 0 ]
 	run grep -F 'tools: "read, grep, find, write, edit, bash"' "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
+	[ "$status" -eq 0 ]
+	run grep -F "    external_directory: deny" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
+	[ "$status" -eq 0 ]
+	run grep -F "model: openai-codex/gpt-5.6-tera" "$REPO_ROOT/configs/pi/agents/fusion-lead.md"
+	[ "$status" -eq 0 ]
+	run grep -F "model: omniroute/cu/auto" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
 	[ "$status" -eq 0 ]
 }
 
@@ -62,10 +70,13 @@ JSON
 		copy_pi_configs
 	'
 	[ "$status" -eq 0 ]
-	run jq -e '.theme == "custom" and (.packages | index("npm:existing-package") != null) and (.packages | index("npm:@tintinweb/pi-subagents") != null)' "$test_home/.pi/agent/settings.json"
+	run jq -e '.theme == "custom" and (.packages | index("npm:existing-package") != null) and (.packages | index("npm:@tintinweb/pi-subagents") != null) and (.packages | index("npm:pi-permission-system") != null)' "$test_home/.pi/agent/settings.json"
 	[ "$status" -eq 0 ]
 	run jq -e '[.packages[] | select(. == "npm:@tintinweb/pi-subagents")] | length == 1' "$test_home/.pi/agent/settings.json"
 	[ "$status" -eq 0 ]
+	run find "$test_home/.pi/agent" -maxdepth 1 -name '.settings.json.my-ai-tools.*'
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
 }
 
 @test "Pi installer dry-run does not modify existing settings" {
@@ -83,6 +94,26 @@ JSON
 	'
 	[ "$status" -eq 0 ]
 	[ "$(sha256sum "$test_home/.pi/agent/settings.json")" = "$before" ]
+	run find "$test_home/.pi/agent" -maxdepth 1 -name '.settings.json.my-ai-tools.*'
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
+}
+
+@test "Pi installer removes temporary settings after a merge failure" {
+	require_jq
+	local test_home="$BATS_TEST_TMPDIR/pi-invalid-home"
+	mkdir -p "$test_home/.pi/agent"
+	printf '%s\n' '{invalid json' >"$test_home/.pi/agent/settings.json"
+
+	run env HOME="$test_home" REPO_ROOT="$REPO_ROOT" bash -c '
+		export DRY_RUN=false YES_TO_ALL=false VERBOSE=false
+		source "$REPO_ROOT/cli.sh"
+		copy_pi_configs
+	'
+	[ "$status" -ne 0 ]
+	run find "$test_home/.pi/agent" -maxdepth 1 -name '.settings.json.my-ai-tools.*'
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
 }
 
 @test "Codex Fusion roles use native TOML sandbox policies" {
@@ -104,10 +135,56 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F '"fusion_executor",' "$plugin"
 	[ "$status" -eq 0 ]
+	run grep -F 'model: "amp/glm-5.2"' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'model: "xai/grok-4.5"' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'definition.name !== "fusion-executor"' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'isSafeExecutorShellCommand(shell.command, shell.dir)' "$plugin"
+	[ "$status" -eq 0 ]
 	run sed -n '/const LEAD_TOOLS = \[/,/\] as const;/p' "$plugin"
 	[ "$status" -eq 0 ]
 	[[ "$output" != *"apply_patch"* ]]
 	[[ "$output" != *"shell_command"* ]]
+}
+
+@test "Amp executor shell policy only permits exact workspace verification commands" {
+	local plugin="$REPO_ROOT/configs/amp/plugins/fusion-agents.ts"
+	run bun -e '
+		const { isSafeExecutorShellCommand: safe } = await import(`file://${process.argv[1]}`);
+		const allowed = [
+			"pwd",
+			"git status --short",
+			"git diff --check",
+			"git diff --no-ext-diff --no-textconv",
+			"git diff --cached --no-ext-diff --no-textconv",
+		];
+		const denied = [
+			"git status --short & touch /tmp/fusion-policy-bypass",
+			"git status --short`touch /tmp/fusion-policy-bypass`",
+			"git status --short\ntouch /tmp/fusion-policy-bypass",
+			"git diff --output=/tmp/fusion-policy-bypass",
+			"git diff --ext-diff",
+			"npm test",
+			"bats tests/pr_fusion.bats",
+		];
+		if (!allowed.every((command) => safe(command))) process.exit(1);
+		if (!denied.every((command) => !safe(command))) process.exit(2);
+		if (safe("pwd", "/tmp")) process.exit(3);
+	' "$plugin"
+	[ "$status" -eq 0 ]
+}
+
+@test "OpenCode and Pi executors use exact shell permissions" {
+	for agent in \
+		"$REPO_ROOT/configs/opencode/agent/fusion-executor.md" \
+		"$REPO_ROOT/configs/pi/agents/fusion-executor.md"; do
+		run grep -F '    "git diff --no-ext-diff --no-textconv": allow' "$agent"
+		[ "$status" -eq 0 ]
+		run grep -E '^    ".*\*.*": allow$' "$agent"
+		[ "$status" -ne 0 ]
+	done
 }
 
 @test "installers copy all native Fusion adapters" {

@@ -1,7 +1,7 @@
 ---
 description: Plans, delegates, reviews, and verifies while remaining mechanically read-only
 mode: primary
-model: omniroute/premium
+model: omniroute/paid
 temperature: 0.1
 permission:
   edit: deny

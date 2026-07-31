@@ -41,10 +41,40 @@ const EXECUTOR_TOOLS = [
 	"view_media",
 ] as const;
 
+export function isSafeExecutorShellCommand(command: string, dir?: string): boolean {
+	if (dir) return false;
+
+	return new Set([
+		"pwd",
+		"git status --short",
+		"git diff --check",
+		"git diff --no-ext-diff --no-textconv",
+		"git diff --cached --no-ext-diff --no-textconv",
+	]).has(command.trim());
+}
+
 export default function fusionAgents(amp: PluginAPI) {
+	amp.on("tool.call", async (event) => {
+		const shell = amp.helpers.shellCommandFromToolCall(event);
+		if (!shell) return { action: "allow" };
+
+		const agent = await amp.threads.get(event.thread.id).agent();
+		const definition = agent.definition;
+		if (definition.kind !== "agent-definition" || definition.name !== "fusion-executor") {
+			return { action: "allow" };
+		}
+
+		return isSafeExecutorShellCommand(shell.command, shell.dir)
+			? { action: "allow" }
+			: {
+					action: "reject-and-continue",
+					message: "Fusion executor shell policy rejected this command. Ask the user to run it explicitly.",
+				};
+	});
+
 	const executor = amp.createAgent({
 		name: "fusion-executor",
-		model: "anthropic/claude-sonnet-4-6",
+		model: "amp/glm-5.2",
 		instructions: EXECUTOR_INSTRUCTIONS,
 		tools: EXECUTOR_TOOLS,
 		reasoningEffort: "medium",
@@ -75,7 +105,7 @@ export default function fusionAgents(amp: PluginAPI) {
 
 	const lead = amp.createAgent({
 		name: "fusion-lead",
-		model: "anthropic/claude-opus-4-6",
+		model: "xai/grok-4.5",
 		instructions: LEAD_INSTRUCTIONS,
 		tools: LEAD_TOOLS,
 		reasoningEffort: "high",

@@ -1389,23 +1389,27 @@ copy_pi_configs() {
 		copy_config_file "$SCRIPT_DIR/configs/pi/settings.json" "$HOME/.pi/agent/" || true
 	else
 		local pi_settings="$HOME/.pi/agent/settings.json"
-		local fusion_package="npm:@tintinweb/pi-subagents"
+		local fusion_packages='["npm:@tintinweb/pi-subagents","npm:pi-permission-system"]'
 		if ! command -v jq >/dev/null 2>&1; then
-			log_warning "Pi settings.json exists but jq is unavailable; install $fusion_package manually to enable Fusion agents"
-		elif jq -e --arg package "$fusion_package" '(.packages // []) | index($package) != null' "$pi_settings" >/dev/null 2>&1; then
+			log_warning "Pi settings.json exists but jq is unavailable; install @tintinweb/pi-subagents and pi-permission-system manually to enable Fusion agents"
+		elif jq -e --argjson required "$fusion_packages" '(.packages // []) as $packages | $required | all(. as $package | $packages | index($package) != null)' "$pi_settings" >/dev/null 2>&1; then
 			log_info "Pi settings.json already includes Fusion subagent support"
+		elif [ "$DRY_RUN" = true ]; then
+			log_info "[DRY RUN] Would add Fusion subagent support to existing Pi settings"
 		else
 			local merged_settings
-			merged_settings=$(make_temp_file "pi-settings" "json")
-			if jq --arg package "$fusion_package" '.packages = ((.packages // []) + [$package])' "$pi_settings" >"$merged_settings"; then
-				execute_quoted cp -p "$merged_settings" "$pi_settings" || return 1
+			merged_settings=$(execute_quoted mktemp "$HOME/.pi/agent/.settings.json.my-ai-tools.XXXXXX") || return 1
+			if execute_quoted jq --argjson required "$fusion_packages" '(.packages // []) as $packages | .packages = (reduce $required[] as $package ($packages; if index($package) then . else . + [$package] end))' "$pi_settings" >"$merged_settings"; then
+				if ! execute_quoted mv -f "$merged_settings" "$pi_settings"; then
+					execute_quoted rm -f "$merged_settings"
+					return 1
+				fi
 				log_success "Pi Fusion subagent support added to existing settings"
 			else
 				log_warning "Could not merge Fusion subagent support into existing Pi settings"
-				rm -f "$merged_settings"
+				execute_quoted rm -f "$merged_settings"
 				return 1
 			fi
-			rm -f "$merged_settings"
 		fi
 	fi
 

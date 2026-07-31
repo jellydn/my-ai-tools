@@ -1,6 +1,6 @@
 ---
 description: Read-only lead that plans, delegates implementation, reviews, and verifies
-model: openai-codex/gpt-5.6-sol
+model: openai-codex/gpt-5.6-tera
 thinking: high
 tools: "read, grep, find"
 max_turns: 20
