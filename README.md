@@ -138,7 +138,7 @@ Inspired by [opencode-fusion](https://github.com/mihneaptu/opencode-fusion) and 
 | **OpenCode** | Select the `fusion-lead` primary                            | Lead has no edit or shell permission and delegates directly to `fusion-executor`  |
 | **Amp**      | Select the `fusion` agent mode                              | Lead's tool surface omits mutation/shell and exposes `fusion_executor`             |
 | **Codex**    | Ask the root session to run `fusion_lead`, then its sibling `fusion_executor` | Lead uses a read-only sandbox; the writable root mediates sibling execution        |
-| **Pi**       | Ask the root `Agent` tool for `fusion-lead`, then `fusion-executor`           | `pi-subagents` enforces role tool allowlists; the root mediates sibling execution  |
+| **Pi**       | Ask the root `Agent` tool for `fusion-lead`, then `fusion-executor`           | `pi-subagents` enforces role tool allowlists; the root mediates sibling execution and non-inspection verification |
 | **Others**   | Invoke the `orchestrating-fusion` skill                     | Uses native delegation when available; otherwise the split is prompt-advisory      |
 
 The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONSTRAINTS / VERIFICATION`. The executor returns an evidence envelope covering changes, verification, skills loaded, risks, questions, and key learnings. The lead reads artifacts back, permits one targeted correction, and stops rather than entering an unbounded fix loop. Durable PRDs or plans remain opt-in when they materially reduce ambiguity.

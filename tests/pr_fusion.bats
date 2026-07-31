@@ -32,7 +32,7 @@ load helpers
 	[ "$status" -eq 0 ]
 	run grep -F "model: omniroute/free" "$executor"
 	[ "$status" -eq 0 ]
-	run grep -F '    "*": deny' "$executor"
+	run grep -F '    "*": ask' "$executor"
 	[ "$status" -eq 0 ]
 	run grep -F "SKILLS LOADED" "$executor"
 	[ "$status" -eq 0 ]
@@ -143,6 +143,12 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'isSafeExecutorShellCommand(shell.command, shell.dir)' "$plugin"
 	[ "$status" -eq 0 ]
+	run grep -F 'await ctx.ui.confirm({' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'amp.activeThread.current?.id !== event.thread.id' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'show: true' "$plugin"
+	[ "$status" -eq 0 ]
 	run sed -n '/const LEAD_TOOLS = \[/,/\] as const;/p' "$plugin"
 	[ "$status" -eq 0 ]
 	[[ "$output" != *"apply_patch"* ]]
@@ -151,39 +157,37 @@ JSON
 
 @test "Amp executor shell policy only permits exact workspace verification commands" {
 	local plugin="$REPO_ROOT/configs/amp/plugins/fusion-agents.ts"
-	run python3 - "$plugin" <<'PY'
-import json
-import re
-import sys
-
-source = open(sys.argv[1], encoding="utf-8").read()
-function = re.search(r"export function isSafeExecutorShellCommand\(.*?\n}\n", source, re.S)
-assert function
-body = function.group(0)
-assert "if (dir) return false;" in body
-assert "]).has(command.trim())" in body
-actual = set(re.findall(r'^\s*\t\t(".*"),$', body, re.M))
-expected = {
-    json.dumps("pwd"),
-    json.dumps("git status --short"),
-    json.dumps("git diff --check"),
-    json.dumps("git diff --no-ext-diff --no-textconv"),
-    json.dumps("git diff --cached --no-ext-diff --no-textconv"),
-}
-assert actual == expected, (actual, expected)
-PY
+	run npx --yes tsx@4.23.0 -e '
+		(async () => {
+			const { isSafeExecutorShellCommand: safe } = await import(`file://${process.argv[1]}`);
+			if (!safe("git diff --check")) process.exit(1);
+			if (!safe(" git diff --check ")) process.exit(2);
+			if (safe("git diff --check && rm -rf /")) process.exit(3);
+			if (safe("npm test")) process.exit(4);
+			if (safe("git diff --check", "/tmp")) process.exit(5);
+		})().catch((error) => {
+			console.error(error);
+			process.exit(6);
+		});
+	' "$plugin"
 	[ "$status" -eq 0 ]
 }
 
-@test "OpenCode and Pi executors use exact shell permissions" {
-	for agent in \
-		"$REPO_ROOT/configs/opencode/agent/fusion-executor.md" \
-		"$REPO_ROOT/configs/pi/agents/fusion-executor.md"; do
+@test "OpenCode approval-gates and Pi root-mediates non-inspection verification" {
+	local opencode_agent="$REPO_ROOT/configs/opencode/agent/fusion-executor.md"
+	local pi_agent="$REPO_ROOT/configs/pi/agents/fusion-executor.md"
+	for agent in "$opencode_agent" "$pi_agent"; do
 		run grep -F '    "git diff --no-ext-diff --no-textconv": allow' "$agent"
 		[ "$status" -eq 0 ]
 		run grep -E '^    ".*\*.*": allow$' "$agent"
 		[ "$status" -ne 0 ]
 	done
+	run grep -F '    "*": ask' "$opencode_agent"
+	[ "$status" -eq 0 ]
+	run grep -F '    "*": deny' "$pi_agent"
+	[ "$status" -eq 0 ]
+	run grep -F 'report VERIFICATION REQUIRED with the exact command' "$pi_agent"
+	[ "$status" -eq 0 ]
 }
 
 @test "installers copy all native Fusion adapters" {

@@ -1374,6 +1374,13 @@ copy_kilo_configs() {
 	log_success "Kilo CLI configs copied"
 }
 
+write_merged_pi_settings() {
+	local source_settings="$1"
+	local destination_settings="$2"
+	local required_packages="$3"
+	jq --argjson required "$required_packages" '(.packages // []) as $packages | .packages = (reduce $required[] as $package ($packages; if index($package) then . else . + [$package] end))' "$source_settings" >"$destination_settings"
+}
+
 copy_pi_configs() {
 	local pi_status
 	pi_status=$(detect_tool --detailed "pi" "$HOME/.pi") || pi_status="missing"
@@ -1399,7 +1406,7 @@ copy_pi_configs() {
 		else
 			local merged_settings
 			merged_settings=$(execute_quoted mktemp "$HOME/.pi/agent/.settings.json.my-ai-tools.XXXXXX") || return 1
-			if execute_quoted jq --argjson required "$fusion_packages" '(.packages // []) as $packages | .packages = (reduce $required[] as $package ($packages; if index($package) then . else . + [$package] end))' "$pi_settings" >"$merged_settings"; then
+			if execute_quoted write_merged_pi_settings "$pi_settings" "$merged_settings" "$fusion_packages"; then
 				if ! execute_quoted mv -f "$merged_settings" "$pi_settings"; then
 					execute_quoted rm -f "$merged_settings"
 					return 1

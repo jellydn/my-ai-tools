@@ -15,7 +15,7 @@ Finish with the outcome, decisions, verification evidence, and unresolved gaps.
 const EXECUTOR_INSTRUCTIONS = `
 You are the Fusion executor. Implement only the bounded specification from the lead. Read targets and every listed exact skill path before editing, preserve unrelated work, and match repository patterns. Do not redesign or broaden scope. Never commit, push, deploy, perform destructive operations, or trigger external side effects.
 
-Persist requested artifacts before the final response, run requested checks, and return STATUS, EXECUTIVE SUMMARY, CHANGES, VERIFIED, SKILLS LOADED, RISKS, QUESTIONS, NEXT RECOMMENDED, and KEY LEARNINGS. Escalate missing interfaces, conflicting requirements, and consequential choices instead of guessing.
+Persist requested artifacts before the final response and run requested checks. Exact read-only inspection commands run directly; other shell commands require user approval. If approval is unavailable or declined, report VERIFICATION REQUIRED with the exact command instead of claiming it passed. Return STATUS, EXECUTIVE SUMMARY, CHANGES, VERIFIED, SKILLS LOADED, RISKS, QUESTIONS, NEXT RECOMMENDED, and KEY LEARNINGS. Escalate missing interfaces, conflicting requirements, and consequential choices instead of guessing.
 `;
 
 const LEAD_TOOLS = [
@@ -54,7 +54,7 @@ export function isSafeExecutorShellCommand(command: string, dir?: string): boole
 }
 
 export default function fusionAgents(amp: PluginAPI) {
-	amp.on("tool.call", async (event) => {
+	amp.on("tool.call", async (event, ctx) => {
 		const shell = amp.helpers.shellCommandFromToolCall(event);
 		if (!shell) return { action: "allow" };
 
@@ -64,12 +64,38 @@ export default function fusionAgents(amp: PluginAPI) {
 			return { action: "allow" };
 		}
 
-		return isSafeExecutorShellCommand(shell.command, shell.dir)
-			? { action: "allow" }
-			: {
-					action: "reject-and-continue",
-					message: "Fusion executor shell policy rejected this command. Ask the user to run it explicitly.",
-				};
+		if (isSafeExecutorShellCommand(shell.command, shell.dir)) return { action: "allow" };
+
+		const command = shell.command
+			.split("\n")
+			.map((line) => `    ${line}`)
+			.join("\n");
+		const directory = shell.dir ? `\n\nWorking directory:\n\n    ${shell.dir}` : "";
+		if (amp.activeThread.current?.id !== event.thread.id) {
+			return {
+				action: "reject-and-continue",
+				message: `VERIFICATION REQUIRED\n\nExact command:\n\n${command}${directory}`,
+			};
+		}
+
+		try {
+			const approved = await ctx.ui.confirm({
+				title: "Approve Fusion executor shell command?",
+				message: `The Fusion executor requested:\n\n${command}${directory}`,
+				confirmButtonText: "Run command",
+			});
+			return approved
+				? { action: "allow" }
+				: {
+						action: "reject-and-continue",
+						message: "Verification command was not approved. Report it as VERIFICATION REQUIRED.",
+					};
+		} catch {
+			return {
+				action: "reject-and-continue",
+				message: "Verification approval is unavailable. Report the exact command as VERIFICATION REQUIRED.",
+			};
+		}
 	});
 
 	const executor = amp.createAgent({
@@ -95,11 +121,16 @@ export default function fusionAgents(amp: PluginAPI) {
 			const task = typeof input.task === "string" ? input.task.trim() : "";
 			if (!task) return "Missing implementation specification.";
 
-			const result = await executor.run(task, {
+			const thread = await executor.createThread({
 				parentThreadID: ctx.thread.id,
-				timeoutMs: 20 * 60 * 1000,
+				show: true,
 			});
-			return result.text;
+			await thread.append([{ type: "user-message", content: task }]);
+			const response = await thread.waitForResponse({ timeoutMs: 20 * 60 * 1000 });
+			return response.content
+				.filter((block) => block.type === "text")
+				.map((block) => block.text)
+				.join("\n");
 		},
 	});
 
