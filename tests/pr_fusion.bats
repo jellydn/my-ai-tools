@@ -227,15 +227,7 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'event.tool === "fusion_executor"' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'isSafeExecutorShellCommand(shell.command, shell.dir)' "$plugin"
-	[ "$status" -eq 0 ]
-	run grep -F 'await ctx.ui.confirm({' "$plugin"
-	[ "$status" -eq 0 ]
-	run grep -F 'amp.activeThread.current?.id !== event.thread.id' "$plugin"
-	[ "$status" -eq 0 ]
 	run grep -F 'show: true' "$plugin"
-	[ "$status" -eq 0 ]
-	run grep -F 'shellApprovalRequests.set(event.thread.id, approvalRequest)' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'isActiveExecutor(event.thread.id)' "$plugin"
 	[ "$status" -eq 0 ]
@@ -249,32 +241,18 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'failedExecutorEnvelope' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'approvalRequestResult &&' "$plugin"
-	[ "$status" -eq 0 ]
 	run grep -F 'await thread.cancel()' "$plugin"
 	[ "$status" -eq 0 ]
 	run sed -n '/const LEAD_TOOLS = \[/,/\] as const;/p' "$plugin"
 	[ "$status" -eq 0 ]
 	[[ "$output" != *"apply_patch"* ]]
 	[[ "$output" != *"shell_command"* ]]
-}
-
-@test "Amp executor shell policy only permits exact workspace verification commands" {
-	local plugin="$REPO_ROOT/configs/amp/plugins/fusion-agents.ts"
-	run npx --yes tsx@4.23.0 -e '
-		(async () => {
-			const { isSafeExecutorShellCommand: safe } = await import(`file://${process.argv[1]}`);
-			if (!safe("git diff --check")) process.exit(1);
-			if (!safe(" git diff --check ")) process.exit(2);
-			if (safe("git diff --check && rm -rf /")) process.exit(3);
-			if (safe("npm test")) process.exit(4);
-			if (safe("git diff --check", "/tmp")) process.exit(5);
-		})().catch((error) => {
-			console.error(error);
-			process.exit(6);
-		});
-	' "$plugin"
+	[[ "$output" == *"Task"* ]]
+	run sed -n '/const EXECUTOR_TOOLS = \[/,/\] as const;/p' "$plugin"
 	[ "$status" -eq 0 ]
+	[[ "$output" == *"shell_command"* ]]
+	[[ "$output" == *"web_search"* ]]
+	[[ "$output" == *"mcp__*"* ]]
 }
 
 @test "OpenCode approval-gates and Pi root-mediates non-inspection verification" {

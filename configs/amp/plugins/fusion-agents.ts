@@ -15,7 +15,7 @@ Finish with the outcome, decisions, verification evidence, and unresolved gaps.
 const EXECUTOR_INSTRUCTIONS = `
 You are the Fusion executor. Implement only the bounded specification from the lead. Read targets and every listed exact skill path before editing, preserve unrelated work, and match repository patterns. Do not redesign or broaden scope. Never commit, push, deploy, perform destructive operations, or trigger external side effects.
 
-Persist requested artifacts before the final response and run requested checks. Exact read-only inspection commands run directly; the first other shell command requires user approval for the rest of this executor task. If approval is unavailable or declined, report VERIFICATION REQUIRED with the exact command instead of claiming it passed. Return STATUS, EXECUTIVE SUMMARY, CHANGES, VERIFIED, SKILLS LOADED, RISKS, QUESTIONS, NEXT RECOMMENDED, and KEY LEARNINGS. Escalate missing interfaces, conflicting requirements, and consequential choices instead of guessing.
+Persist requested artifacts before the final response and run requested checks directly. Never claim a check passed without its evidence. Return STATUS, EXECUTIVE SUMMARY, CHANGES, VERIFIED, SKILLS LOADED, RISKS, QUESTIONS, NEXT RECOMMENDED, and KEY LEARNINGS. Escalate missing interfaces, conflicting requirements, and consequential choices instead of guessing.
 `;
 
 const LEAD_TOOLS = [
@@ -25,6 +25,7 @@ const LEAD_TOOLS = [
 	"oracle",
 	"read_web_page",
 	"skill",
+	"Task",
 	"view_media",
 	"web_search",
 	"fusion_executor",
@@ -36,9 +37,14 @@ const EXECUTOR_TOOLS = [
 	"create_file",
 	"edit_file",
 	"finder",
+	"librarian",
+	"oracle",
 	"shell_command",
 	"shell_command_status",
+	"skill",
 	"view_media",
+	"web_search",
+	"mcp__*",
 ] as const;
 
 type ExecutorLifecycle = "active" | "closed";
@@ -57,18 +63,6 @@ function failedExecutorEnvelope(reason: string, verification = "none"): string {
 	].join("\n");
 }
 
-export function isSafeExecutorShellCommand(command: string, dir?: string): boolean {
-	if (dir) return false;
-
-	return new Set([
-		"pwd",
-		"git status --short",
-		"git diff --check",
-		"git diff --no-ext-diff --no-textconv",
-		"git diff --cached --no-ext-diff --no-textconv",
-	]).has(command.trim());
-}
-
 function isFusionLeadDefinition(definition: { kind: string; name?: string }): boolean {
 	return definition.kind === "agent-definition" && definition.name === "fusion-lead";
 }
@@ -81,8 +75,6 @@ export default function fusionAgents(amp: PluginAPI) {
 	// Exact thread IDs owned by this plugin instance. Name checks alone are not a unique principal.
 	const leadThreadIDs = new Set<string>();
 	const executorLifecycle = new Map<string, ExecutorLifecycle>();
-	const shellApprovalDecisions = new Map<string, boolean>();
-	const shellApprovalRequests = new Map<string, Promise<boolean>>();
 
 	const isActiveExecutor = (threadID: string) => executorLifecycle.get(threadID) === "active";
 	const isKnownExecutor = (threadID: string) => executorLifecycle.has(threadID);
@@ -91,11 +83,9 @@ export default function fusionAgents(amp: PluginAPI) {
 	const closeExecutor = (threadID: string) => {
 		if (!executorLifecycle.has(threadID)) return;
 		executorLifecycle.set(threadID, "closed");
-		shellApprovalDecisions.delete(threadID);
-		shellApprovalRequests.delete(threadID);
 	};
 
-	amp.on("tool.call", async (event, ctx) => {
+	amp.on("tool.call", async (event) => {
 		// Track the interactive Fusion lead thread when it uses its own tool surface.
 		const maybeLead = await amp.threads.get(event.thread.id).agent();
 		if (isFusionLeadDefinition(maybeLead.definition)) {
@@ -143,79 +133,9 @@ export default function fusionAgents(amp: PluginAPI) {
 						"Fusion executor task is no longer active. Stop tool use and wait for a new delegated task.",
 				};
 			}
-			return { action: "allow" };
 		}
 
-		const shell = amp.helpers.shellCommandFromToolCall(event);
-		if (!shell) return { action: "allow" };
-
-		if (isSafeExecutorShellCommand(shell.command, shell.dir)) return { action: "allow" };
-		const existingDecision = shellApprovalDecisions.get(event.thread.id);
-		if (existingDecision !== undefined) {
-			return existingDecision
-				? { action: "allow" }
-				: {
-						action: "reject-and-continue",
-						message:
-							"Shell access was not approved for this executor task. Report VERIFICATION REQUIRED.",
-					};
-		}
-
-		const command = shell.command
-			.split("\n")
-			.map((line) => `    ${line}`)
-			.join("\n");
-		const directory = shell.dir ? `\n\nWorking directory:\n\n    ${shell.dir}` : "";
-		if (amp.activeThread.current?.id !== event.thread.id) {
-			return {
-				action: "reject-and-continue",
-				message: `VERIFICATION REQUIRED\n\nExact command:\n\n${command}${directory}`,
-			};
-		}
-
-		let approvalRequest = shellApprovalRequests.get(event.thread.id);
-		if (!approvalRequest) {
-			approvalRequest = (async () => {
-				try {
-					const approved = await ctx.ui.confirm({
-						title: "Approve shell for this Fusion executor task?",
-						message: `The Fusion executor requested:\n\n${command}${directory}\n\nApproval allows subsequent shell commands in this executor task without more prompts.`,
-						confirmButtonText: "Allow for this task",
-					});
-					return (
-						approved &&
-						isActiveExecutor(event.thread.id) &&
-						amp.activeThread.current?.id === event.thread.id
-					);
-				} catch {
-					return false;
-				}
-			})();
-			shellApprovalRequests.set(event.thread.id, approvalRequest);
-		}
-
-		try {
-			const approvalRequestResult = await approvalRequest;
-			// Recheck lifecycle/focus immediately before allowing — a pending approval can resolve after cleanup.
-			const approved =
-				approvalRequestResult &&
-				isActiveExecutor(event.thread.id) &&
-				amp.activeThread.current?.id === event.thread.id;
-			if (isActiveExecutor(event.thread.id)) {
-				shellApprovalDecisions.set(event.thread.id, approved);
-			}
-			return approved
-				? { action: "allow" }
-				: {
-						action: "reject-and-continue",
-						message:
-							"Shell access was not approved for this executor task. Report VERIFICATION REQUIRED.",
-					};
-		} finally {
-			if (shellApprovalRequests.get(event.thread.id) === approvalRequest) {
-				shellApprovalRequests.delete(event.thread.id);
-			}
-		}
+		return { action: "allow" };
 	});
 
 	const executor = amp.createAgent({
