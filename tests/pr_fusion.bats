@@ -72,17 +72,17 @@ load helpers
 	[ "$status" -eq 0 ]
 	run grep -F "    external_directory: deny" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
 	[ "$status" -eq 0 ]
-	run grep -F "model: openai-codex/gpt-5.6-terra" "$REPO_ROOT/configs/pi/agents/fusion-lead.md"
+	run grep -F "model: cursor/grok-4.5" "$REPO_ROOT/configs/pi/agents/fusion-lead.md"
 	[ "$status" -eq 0 ]
-	run grep -F "model: omniroute/free" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
+	run grep -F "model: cursor/auto" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
 	[ "$status" -eq 0 ]
 	run grep -F "openai-codex/gpt-5.6-tera" "$REPO_ROOT/configs/pi/settings.json"
 	[ "$status" -ne 0 ]
 	run grep -F "omniroute/cu/auto" "$REPO_ROOT/configs/pi/settings.json"
 	[ "$status" -ne 0 ]
 	run jq -e '
-		(.enabledModels | index("openai-codex/gpt-5.6-terra") != null) and
-		(.enabledModels | index("omniroute/free") != null) and
+		(.enabledModels | index("cursor/grok-4.5") != null) and
+		(.enabledModels | index("cursor/auto") != null) and
 		(.enabledModels | index("openai-codex/gpt-5.6-tera") == null) and
 		(.enabledModels | index("omniroute/cu/auto") == null)
 	' "$REPO_ROOT/configs/pi/settings.json"
@@ -97,9 +97,8 @@ load helpers
 	[ "$status" -eq 0 ]
 	run jq -e --arg m "$executor_model" '
 		($m | split("/")) as $parts
-		| .providers[$parts[0]].models
-		| map(.id)
-		| index($parts[1]) != null
+		| (.providers[$parts[0]] == null)
+		  or (.providers[$parts[0]].models | map(.id) | index($parts[1]) != null)
 	' "$REPO_ROOT/configs/pi/models.json"
 	[ "$status" -eq 0 ]
 }

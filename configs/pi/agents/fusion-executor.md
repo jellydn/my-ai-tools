@@ -1,6 +1,6 @@
 ---
 description: Implements bounded Fusion specifications with a fast coding model
-model: omniroute/free
+model: cursor/auto
 thinking: medium
 tools: "read, grep, find, write, edit, bash"
 extensions: pi-permission-system
