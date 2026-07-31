@@ -48,7 +48,7 @@ SKILLS
 VERIFICATION
 ```
 
-5. The executor reads every listed skill from its exact path, implements the smallest complete change, persists artifacts before responding, runs requested checks, and returns a final text envelope:
+5. The executor reads every listed skill from its exact path, implements the smallest complete change, persists artifacts before responding, and returns a final text envelope:
 
 ```text
 STATUS
@@ -62,8 +62,10 @@ NEXT RECOMMENDED
 KEY LEARNINGS
 ```
 
+Verification contract: the executor runs only checks the runtime permits or the user has approved. Exact read-only inspection commands usually run directly. Other checks may require approval, root mediation, or may be denied (OpenCode denial can terminate the child before an envelope returns). When a check cannot run inside the executor, it must report `VERIFICATION REQUIRED` with the exact command; the interactive root then runs that exact command and supplies the evidence before acceptance. Never treat a missing, declined, timed-out, or root-only check as passed.
+
 6. The lead gates the handoff before claiming success:
-   - Validate that every required envelope section is present.
+   - Validate that every required envelope section is present (or that a structured failure envelope explains why it is not).
    - Read back every claimed changed path or artifact.
    - Confirm named paths and symbols exist and the changes remain in scope.
    - Inspect exact verification commands and outcomes; independently rerun the narrowest meaningful check when possible.
@@ -75,5 +77,9 @@ Run independent executor tasks in parallel only when their write targets do not 
 ## Capability Guarantees
 
 Prompt text is not a security boundary. Describe a role as enforced only when the harness removes mutation tools or applies a read-only sandbox. Shell access can bypass a missing edit tool, so a role with unrestricted shell is not mechanically read-only.
+
+**Pi skill paths:** Fusion on Pi supports project-local skills under the task working directory (for example `.agents/skills/.../SKILL.md` or `.pi/skills/...`). The executor denies external-directory reads, so globally installed skills under `~/.agents/skills` are not loadable inside the child. The interactive root mediates global skills when needed. Full dynamic global-skill support needs a larger adapter or upstream read-only external access.
+
+**Amp residuals:** Amp authorizes `fusion_executor` from plugin-owned lead thread IDs after the lead is observed; until then it falls back to the complete expected lead agent definition (`kind` + `name`), which is not documented as a unique authorization principal across third-party plugins.
 
 If the native executor is unavailable or its model/provider fails, report the blocker. Do not silently let a supposedly read-only lead edit as a fallback; ask the user to switch to normal unrestricted mode instead.
