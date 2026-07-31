@@ -41,6 +41,22 @@ const EXECUTOR_TOOLS = [
 	"view_media",
 ] as const;
 
+type ExecutorLifecycle = "active" | "closed";
+
+function failedExecutorEnvelope(reason: string, verification = "none"): string {
+	return [
+		"STATUS: failed",
+		"EXECUTIVE SUMMARY: Fusion executor did not complete successfully.",
+		"CHANGES: none",
+		`VERIFIED: ${verification}`,
+		"SKILLS LOADED: none",
+		`RISKS: ${reason}`,
+		"QUESTIONS: none",
+		"NEXT RECOMMENDED: Inspect the failure, then resend one targeted correction specification if still needed.",
+		"KEY LEARNINGS: Executor failures must surface as structured envelopes so the lead can gate without guessing.",
+	].join("\n");
+}
+
 export function isSafeExecutorShellCommand(command: string, dir?: string): boolean {
 	if (dir) return false;
 
@@ -53,35 +69,85 @@ export function isSafeExecutorShellCommand(command: string, dir?: string): boole
 	]).has(command.trim());
 }
 
+function isFusionLeadDefinition(definition: { kind: string; name?: string }): boolean {
+	return definition.kind === "agent-definition" && definition.name === "fusion-lead";
+}
+
+function isFusionExecutorDefinition(definition: { kind: string; name?: string }): boolean {
+	return definition.kind === "agent-definition" && definition.name === "fusion-executor";
+}
+
 export default function fusionAgents(amp: PluginAPI) {
-	const executorThreadIDs = new Set<string>();
+	// Exact thread IDs owned by this plugin instance. Name checks alone are not a unique principal.
+	const leadThreadIDs = new Set<string>();
+	const executorLifecycle = new Map<string, ExecutorLifecycle>();
 	const shellApprovalDecisions = new Map<string, boolean>();
 	const shellApprovalRequests = new Map<string, Promise<boolean>>();
 
+	const isActiveExecutor = (threadID: string) => executorLifecycle.get(threadID) === "active";
+	const isKnownExecutor = (threadID: string) => executorLifecycle.has(threadID);
+	const isClosedExecutor = (threadID: string) => executorLifecycle.get(threadID) === "closed";
+
+	const closeExecutor = (threadID: string) => {
+		if (!executorLifecycle.has(threadID)) return;
+		executorLifecycle.set(threadID, "closed");
+		shellApprovalDecisions.delete(threadID);
+		shellApprovalRequests.delete(threadID);
+	};
+
 	amp.on("tool.call", async (event, ctx) => {
+		// Track the interactive Fusion lead thread when it uses its own tool surface.
+		const maybeLead = await amp.threads.get(event.thread.id).agent();
+		if (isFusionLeadDefinition(maybeLead.definition)) {
+			leadThreadIDs.add(event.thread.id);
+		}
+
 		if (event.tool === "fusion_executor") {
+			// Prefer exact plugin-owned lead thread IDs. Until a lead thread is observed,
+			// fall back to the complete expected definition (kind + name) and document
+			// that residual limitation in the portable Fusion skill.
+			if (leadThreadIDs.has(event.thread.id)) {
+				return { action: "allow" };
+			}
 			const caller = await amp.threads.get(event.thread.id).agent();
 			const definition = caller.definition;
-			return definition.kind === "agent-definition" && definition.name === "fusion-lead"
-				? { action: "allow" }
-				: {
-						action: "reject-and-continue",
-						message: "Only the Fusion lead can delegate to the Fusion executor.",
-					};
+			if (isFusionLeadDefinition(definition)) {
+				leadThreadIDs.add(event.thread.id);
+				return { action: "allow" };
+			}
+			return {
+				action: "reject-and-continue",
+				message: "Only the Fusion lead can delegate to the Fusion executor.",
+			};
+		}
+
+		// Closed executor threads must not keep mutating after the delegated task ends.
+		if (
+			isClosedExecutor(event.thread.id) ||
+			(isKnownExecutor(event.thread.id) && !isActiveExecutor(event.thread.id))
+		) {
+			return {
+				action: "reject-and-continue",
+				message:
+					"Fusion executor task is no longer active. Stop tool use and wait for a new delegated task.",
+			};
+		}
+
+		// Also catch completed/orphaned executor threads identified only by agent definition.
+		if (!isActiveExecutor(event.thread.id)) {
+			const agent = await amp.threads.get(event.thread.id).agent();
+			if (isFusionExecutorDefinition(agent.definition)) {
+				return {
+					action: "reject-and-continue",
+					message:
+						"Fusion executor task is no longer active. Stop tool use and wait for a new delegated task.",
+				};
+			}
+			return { action: "allow" };
 		}
 
 		const shell = amp.helpers.shellCommandFromToolCall(event);
 		if (!shell) return { action: "allow" };
-		if (!executorThreadIDs.has(event.thread.id)) {
-			const agent = await amp.threads.get(event.thread.id).agent();
-			const definition = agent.definition;
-			return definition.kind === "agent-definition" && definition.name === "fusion-executor"
-				? {
-						action: "reject-and-continue",
-						message: "Fusion executor task is no longer active. Report VERIFICATION REQUIRED.",
-					}
-				: { action: "allow" };
-		}
 
 		if (isSafeExecutorShellCommand(shell.command, shell.dir)) return { action: "allow" };
 		const existingDecision = shellApprovalDecisions.get(event.thread.id);
@@ -90,7 +156,8 @@ export default function fusionAgents(amp: PluginAPI) {
 				? { action: "allow" }
 				: {
 						action: "reject-and-continue",
-						message: "Shell access was not approved for this executor task. Report VERIFICATION REQUIRED.",
+						message:
+							"Shell access was not approved for this executor task. Report VERIFICATION REQUIRED.",
 					};
 		}
 
@@ -115,7 +182,11 @@ export default function fusionAgents(amp: PluginAPI) {
 						message: `The Fusion executor requested:\n\n${command}${directory}\n\nApproval allows subsequent shell commands in this executor task without more prompts.`,
 						confirmButtonText: "Allow for this task",
 					});
-					return approved && executorThreadIDs.has(event.thread.id) && amp.activeThread.current?.id === event.thread.id;
+					return (
+						approved &&
+						isActiveExecutor(event.thread.id) &&
+						amp.activeThread.current?.id === event.thread.id
+					);
 				} catch {
 					return false;
 				}
@@ -124,15 +195,21 @@ export default function fusionAgents(amp: PluginAPI) {
 		}
 
 		try {
-			const approved = await approvalRequest;
-			if (executorThreadIDs.has(event.thread.id)) {
+			const approvalRequestResult = await approvalRequest;
+			// Recheck lifecycle/focus immediately before allowing — a pending approval can resolve after cleanup.
+			const approved =
+				approvalRequestResult &&
+				isActiveExecutor(event.thread.id) &&
+				amp.activeThread.current?.id === event.thread.id;
+			if (isActiveExecutor(event.thread.id)) {
 				shellApprovalDecisions.set(event.thread.id, approved);
 			}
 			return approved
 				? { action: "allow" }
 				: {
 						action: "reject-and-continue",
-						message: "Shell access was not approved for this executor task. Report VERIFICATION REQUIRED.",
+						message:
+							"Shell access was not approved for this executor task. Report VERIFICATION REQUIRED.",
 					};
 		} finally {
 			if (shellApprovalRequests.get(event.thread.id) === approvalRequest) {
@@ -165,35 +242,41 @@ export default function fusionAgents(amp: PluginAPI) {
 			if (!task) return "Missing implementation specification.";
 			const caller = await ctx.thread.agent();
 			const definition = caller.definition;
-			if (definition.kind !== "agent-definition" || definition.name !== "fusion-lead") {
+			if (!isFusionLeadDefinition(definition)) {
 				return "Only the Fusion lead can delegate to the Fusion executor.";
 			}
+			leadThreadIDs.add(ctx.thread.id);
 
 			const thread = await executor.createThread({
 				parentThreadID: ctx.thread.id,
 				show: true,
 			});
-			executorThreadIDs.add(thread.id);
-			let completed = false;
+			executorLifecycle.set(thread.id, "active");
 			try {
 				await thread.append([{ type: "user-message", content: task }]);
 				const response = await thread.waitForResponse({ timeoutMs: 20 * 60 * 1000 });
-				completed = true;
 				return response.content
 					.filter((block) => block.type === "text")
 					.map((block) => block.text)
 					.join("\n");
-			} finally {
-				if (!completed) {
-					try {
-						await thread.cancel();
-					} catch {
-						// Late calls still fail closed through the executor-definition fallback.
-					}
+			} catch (error) {
+				try {
+					await thread.cancel();
+				} catch {
+					// Late calls still fail closed through the closed-executor lifecycle.
 				}
-				executorThreadIDs.delete(thread.id);
-				shellApprovalDecisions.delete(thread.id);
-				shellApprovalRequests.delete(thread.id);
+				const reason =
+					error instanceof Error
+						? error.message
+						: typeof error === "string"
+							? error
+							: "Executor task failed or timed out.";
+				const verification = /timeout/i.test(reason)
+					? "timeout — unresolved verification commands were not completed"
+					: "failed — unresolved verification commands were not completed";
+				return failedExecutorEnvelope(reason, verification);
+			} finally {
+				closeExecutor(thread.id);
 			}
 		},
 	});
