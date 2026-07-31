@@ -3,6 +3,7 @@ description: Read-only lead that plans, delegates implementation, reviews, and v
 model: openai-codex/gpt-5.6-tera
 thinking: high
 tools: "read, grep, find"
+extensions: false
 max_turns: 20
 prompt_mode: replace
 ---

@@ -46,6 +46,8 @@ load helpers
 	[ "$status" -eq 0 ]
 	run grep -F 'tools: "read, grep, find"' "$REPO_ROOT/configs/pi/agents/fusion-lead.md"
 	[ "$status" -eq 0 ]
+	run grep -F 'extensions: false' "$REPO_ROOT/configs/pi/agents/fusion-lead.md"
+	[ "$status" -eq 0 ]
 	run grep -F 'tools: "read, grep, find, write, edit, bash"' "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
 	[ "$status" -eq 0 ]
 	run grep -F "    external_directory: deny" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
