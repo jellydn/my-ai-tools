@@ -24,7 +24,6 @@
 		"openai-codex/gpt-5.6-terra",
 		"openai-codex/gpt-5.6-luna",
 		"openai-codex/gpt-5.6-sol",
-		"openai-codex/gpt-5.6-tera",
 		"qw/qwen3.8-max-preview",
 		"qw/glm-5.2",
 		"qw/deepseek-v4-pro",
@@ -34,8 +33,7 @@
 		"commandcode/poolside/laguna-s-2.1-free",
 		"omniroute/paid",
 		"omniroute/free",
-		"omniroute/premium",
-		"omniroute/cu/auto"
+		"omniroute/premium"
 	],
 	"hideThinkingBlock": true,
 	"lastChangelogVersion": "0.82.1",
