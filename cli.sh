@@ -1382,13 +1382,13 @@ write_merged_pi_settings() {
 	local destination_settings="$2"
 	local required_packages="$3"
 	jq --argjson required "$required_packages" '
-		def package_source: if type == "object" then .source else . end;
+		def get_source: if type == "object" then .source else . end;
 		(.packages // []) as $packages
 		| .packages = (
-			reduce $required[] as $package (
+			reduce $required[] as $req (
 				$packages;
-				if any(.[]; package_source == $package) then .
-				else . + [$package]
+				if any(.[]; get_source == ($req | get_source)) then .
+				else . + [$req]
 				end
 			)
 		)
@@ -1399,10 +1399,10 @@ pi_settings_has_required_packages() {
 	local pi_settings="$1"
 	local required_packages="$2"
 	jq -e --argjson required "$required_packages" '
-		def package_source: if type == "object" then .source else . end;
+		def get_source: if type == "object" then .source else . end;
 		(.packages // []) as $packages
 		| $required
-		| all(. as $package | $packages | any(.[]; package_source == $package))
+		| all(. as $req | $packages | any(.[]; get_source == ($req | get_source)))
 	' "$pi_settings" >/dev/null 2>&1
 }
 

@@ -285,7 +285,7 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'pi_settings_has_required_packages' "$REPO_ROOT/cli.sh"
 	[ "$status" -eq 0 ]
-	run grep -F 'def package_source: if type == "object" then .source else . end' "$REPO_ROOT/cli.sh"
+	run grep -F 'def get_source: if type == "object" then .source else . end' "$REPO_ROOT/cli.sh"
 	[ "$status" -eq 0 ]
 	run grep -F 'refusing to install Fusion agents without permission enforcement' "$REPO_ROOT/cli.sh"
 	[ "$status" -eq 0 ]
