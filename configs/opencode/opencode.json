@@ -112,6 +112,21 @@
 	"model": "omniroute/cu/auto",
 	"plugin": ["@plannotator/opencode@latest", "opencode-chrome-annotation@latest"],
 	"provider": {
+		"cursor-acp": {
+			"name": "Cursor ACP",
+			"npm": "@ai-sdk/openai-compatible",
+			"options": {
+				"baseURL": "http://127.0.0.1:32124/v1"
+			},
+			"models": {
+				"auto": {
+					"name": "Auto"
+				},
+				"cursor-grok-4.5-medium": {
+					"name": "Grok 4.5 Medium"
+				}
+			}
+		},
 		"omniroute": {
 			"npm": "@ai-sdk/openai-compatible",
 			"name": "OmniRoute",

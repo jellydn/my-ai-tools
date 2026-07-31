@@ -288,6 +288,15 @@ install_opencode() {
 	run_installer "OpenCode" "_run_opencode_install" "command -v opencode" ""
 }
 
+# Cursor ACP bridge for OpenCode (https://github.com/Nomadcxx/opencode-cursor).
+# Config lives in configs/opencode/opencode.json — do not run `open-cursor install`
+# here; that CLI rewrites managed OpenCode config.
+install_open_cursor() {
+	install_npm_tool "open-cursor" "open-cursor" "@rama_nigg/open-cursor" \
+		"npm install -g @rama_nigg/open-cursor" \
+		"open-cursor --version"
+}
+
 install_amp() {
 	_run_amp_install() {
 		if command -v amp &>/dev/null; then

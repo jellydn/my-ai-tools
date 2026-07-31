@@ -33,6 +33,7 @@ INSTALL_SEQUENCE=(
 	# RTK reduces shell-output context for every managed coding assistant.
 	"always:install_rtk"
 	"opencode:install_opencode"
+	"opencode:install_open_cursor"
 	"amp:install_amp"
 	"always:install_global_tools"
 	"ccs:install_ccs"
