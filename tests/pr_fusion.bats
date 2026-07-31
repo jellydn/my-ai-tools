@@ -15,6 +15,14 @@ load helpers
 	[ "$status" -eq 0 ]
 	run grep -F "KEY LEARNINGS" "$skill"
 	[ "$status" -eq 0 ]
+	run grep -F "Verification contract:" "$skill"
+	[ "$status" -eq 0 ]
+	run grep -F "interactive root then runs that exact command" "$skill"
+	[ "$status" -eq 0 ]
+	run grep -F "project-local skills under the task working directory" "$skill"
+	[ "$status" -eq 0 ]
+	run grep -F "plugin-owned lead thread IDs" "$skill"
+	[ "$status" -eq 0 ]
 }
 
 @test "OpenCode Fusion lead is read-only and can only delegate named roles" {
@@ -36,13 +44,21 @@ load helpers
 	[ "$status" -eq 0 ]
 	run grep -F "SKILLS LOADED" "$executor"
 	[ "$status" -eq 0 ]
+	run grep -F "runtime may terminate the task when approval is denied" "$executor"
+	[ "$status" -eq 0 ]
 }
 
 @test "Pi installs subagent support and defines enforced Fusion tool surfaces" {
 	require_jq
-	run jq -e '.packages | index("npm:@tintinweb/pi-subagents") != null' "$REPO_ROOT/configs/pi/settings.json"
+	run jq -e '
+		def package_source: if type == "object" then .source else . end;
+		(.packages | map(package_source) | index("npm:@tintinweb/pi-subagents") != null)
+	' "$REPO_ROOT/configs/pi/settings.json"
 	[ "$status" -eq 0 ]
-	run jq -e '.packages | index("npm:pi-permission-system") != null' "$REPO_ROOT/configs/pi/settings.json"
+	run jq -e '
+		def package_source: if type == "object" then .source else . end;
+		(.packages | map(package_source) | index("npm:pi-permission-system") != null)
+	' "$REPO_ROOT/configs/pi/settings.json"
 	[ "$status" -eq 0 ]
 	run grep -F 'tools: "read, grep, find"' "$REPO_ROOT/configs/pi/agents/fusion-lead.md"
 	[ "$status" -eq 0 ]
@@ -50,11 +66,41 @@ load helpers
 	[ "$status" -eq 0 ]
 	run grep -F 'tools: "read, grep, find, write, edit, bash"' "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
 	[ "$status" -eq 0 ]
+	run grep -F "extensions: pi-permission-system" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
+	[ "$status" -eq 0 ]
+	run grep -F "skills: false" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
+	[ "$status" -eq 0 ]
 	run grep -F "    external_directory: deny" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
 	[ "$status" -eq 0 ]
-	run grep -F "model: openai-codex/gpt-5.6-tera" "$REPO_ROOT/configs/pi/agents/fusion-lead.md"
+	run grep -F "model: openai-codex/gpt-5.6-terra" "$REPO_ROOT/configs/pi/agents/fusion-lead.md"
 	[ "$status" -eq 0 ]
-	run grep -F "model: omniroute/cu/auto" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
+	run grep -F "model: omniroute/free" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
+	[ "$status" -eq 0 ]
+	run grep -F "openai-codex/gpt-5.6-tera" "$REPO_ROOT/configs/pi/settings.json"
+	[ "$status" -ne 0 ]
+	run grep -F "omniroute/cu/auto" "$REPO_ROOT/configs/pi/settings.json"
+	[ "$status" -ne 0 ]
+	run jq -e '
+		(.enabledModels | index("openai-codex/gpt-5.6-terra") != null) and
+		(.enabledModels | index("omniroute/free") != null) and
+		(.enabledModels | index("openai-codex/gpt-5.6-tera") == null) and
+		(.enabledModels | index("omniroute/cu/auto") == null)
+	' "$REPO_ROOT/configs/pi/settings.json"
+	[ "$status" -eq 0 ]
+	# Cross-file: agent model pins must resolve against enabledModels + models.json catalogue.
+	local lead_model executor_model
+	lead_model=$(sed -n 's/^model: //p' "$REPO_ROOT/configs/pi/agents/fusion-lead.md" | head -1)
+	executor_model=$(sed -n 's/^model: //p' "$REPO_ROOT/configs/pi/agents/fusion-executor.md" | head -1)
+	run jq -e --arg m "$lead_model" '.enabledModels | index($m) != null' "$REPO_ROOT/configs/pi/settings.json"
+	[ "$status" -eq 0 ]
+	run jq -e --arg m "$executor_model" '.enabledModels | index($m) != null' "$REPO_ROOT/configs/pi/settings.json"
+	[ "$status" -eq 0 ]
+	run jq -e --arg m "$executor_model" '
+		($m | split("/")) as $parts
+		| .providers[$parts[0]].models
+		| map(.id)
+		| index($parts[1]) != null
+	' "$REPO_ROOT/configs/pi/models.json"
 	[ "$status" -eq 0 ]
 }
 
@@ -72,13 +118,52 @@ JSON
 		copy_pi_configs
 	'
 	[ "$status" -eq 0 ]
-	run jq -e '.theme == "custom" and (.packages | index("npm:existing-package") != null) and (.packages | index("npm:@tintinweb/pi-subagents") != null) and (.packages | index("npm:pi-permission-system") != null)' "$test_home/.pi/agent/settings.json"
+	run jq -e '
+		def package_source: if type == "object" then .source else . end;
+		.theme == "custom" and
+		([.packages[] | package_source] | index("npm:existing-package") != null) and
+		([.packages[] | package_source] | index("npm:@tintinweb/pi-subagents") != null) and
+		([.packages[] | package_source] | index("npm:pi-permission-system") != null)
+	' "$test_home/.pi/agent/settings.json"
 	[ "$status" -eq 0 ]
-	run jq -e '[.packages[] | select(. == "npm:@tintinweb/pi-subagents")] | length == 1' "$test_home/.pi/agent/settings.json"
+	run jq -e '
+		def package_source: if type == "object" then .source else . end;
+		[.packages[] | select(package_source == "npm:@tintinweb/pi-subagents")] | length == 1
+	' "$test_home/.pi/agent/settings.json"
 	[ "$status" -eq 0 ]
 	run find "$test_home/.pi/agent" -maxdepth 1 -name '.settings.json.my-ai-tools.*'
 	[ "$status" -eq 0 ]
 	[ -z "$output" ]
+}
+
+@test "Pi installer recognizes object-form package entries without duplicating them" {
+	require_jq
+	local test_home="$BATS_TEST_TMPDIR/pi-object-packages"
+	mkdir -p "$test_home/.pi/agent"
+	cat >"$test_home/.pi/agent/settings.json" <<'JSON'
+{
+  "theme": "custom",
+  "packages": [
+    {"source": "npm:@tintinweb/pi-subagents", "skills": []},
+    {"source": "npm:pi-permission-system", "skills": []}
+  ]
+}
+JSON
+
+	run env HOME="$test_home" REPO_ROOT="$REPO_ROOT" bash -c '
+		export DRY_RUN=false YES_TO_ALL=false VERBOSE=false
+		source "$REPO_ROOT/cli.sh"
+		copy_pi_configs
+	'
+	[ "$status" -eq 0 ]
+	run jq -e '
+		def package_source: if type == "object" then .source else . end;
+		([.packages[] | select(package_source == "npm:@tintinweb/pi-subagents")] | length == 1) and
+		([.packages[] | select(package_source == "npm:pi-permission-system")] | length == 1) and
+		([.packages[] | select(type == "object" and .source == "npm:@tintinweb/pi-subagents")] | length == 1) and
+		([.packages[] | select(type == "string" and . == "npm:@tintinweb/pi-subagents")] | length == 0)
+	' "$test_home/.pi/agent/settings.json"
+	[ "$status" -eq 0 ]
 }
 
 @test "Pi installer dry-run does not modify existing settings" {
@@ -153,11 +238,21 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'shellApprovalRequests.set(event.thread.id, approvalRequest)' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'executorThreadIDs.has(event.thread.id)' "$plugin"
+	run grep -F 'isActiveExecutor(event.thread.id)' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'executorLifecycle.set(thread.id, "active")' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'closeExecutor(thread.id)' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'isClosedExecutor(event.thread.id)' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'leadThreadIDs.add' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'failedExecutorEnvelope' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'approvalRequestResult &&' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'await thread.cancel()' "$plugin"
-	[ "$status" -eq 0 ]
-	run grep -F 'shellApprovalDecisions.delete(thread.id)' "$plugin"
 	[ "$status" -eq 0 ]
 	run sed -n '/const LEAD_TOOLS = \[/,/\] as const;/p' "$plugin"
 	[ "$status" -eq 0 ]
@@ -198,6 +293,8 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'report VERIFICATION REQUIRED with the exact command' "$pi_agent"
 	[ "$status" -eq 0 ]
+	run grep -F 'project-local skill paths under the task working directory' "$pi_agent"
+	[ "$status" -eq 0 ]
 }
 
 @test "installers copy all native Fusion adapters" {
@@ -208,5 +305,11 @@ JSON
 	run grep -F 'safe_copy_dir "$SCRIPT_DIR/configs/codex/agents"' "$REPO_ROOT/cli.sh"
 	[ "$status" -eq 0 ]
 	run grep -F 'safe_copy_dir "$SCRIPT_DIR/configs/pi/agents"' "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+	run grep -F 'pi_settings_has_required_packages' "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+	run grep -F 'def package_source: if type == "object" then .source else . end' "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+	run grep -F 'refusing to install Fusion agents without permission enforcement' "$REPO_ROOT/cli.sh"
 	[ "$status" -eq 0 ]
 }
