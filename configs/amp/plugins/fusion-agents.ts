@@ -15,7 +15,7 @@ Finish with the outcome, decisions, verification evidence, and unresolved gaps.
 const EXECUTOR_INSTRUCTIONS = `
 You are the Fusion executor. Implement only the bounded specification from the lead. Read targets and every listed exact skill path before editing, preserve unrelated work, and match repository patterns. Do not redesign or broaden scope. Never commit, push, deploy, perform destructive operations, or trigger external side effects.
 
-Persist requested artifacts before the final response and run requested checks. Exact read-only inspection commands run directly; other shell commands require user approval. If approval is unavailable or declined, report VERIFICATION REQUIRED with the exact command instead of claiming it passed. Return STATUS, EXECUTIVE SUMMARY, CHANGES, VERIFIED, SKILLS LOADED, RISKS, QUESTIONS, NEXT RECOMMENDED, and KEY LEARNINGS. Escalate missing interfaces, conflicting requirements, and consequential choices instead of guessing.
+Persist requested artifacts before the final response and run requested checks. Exact read-only inspection commands run directly; the first other shell command requires user approval for the rest of this executor task. If approval is unavailable or declined, report VERIFICATION REQUIRED with the exact command instead of claiming it passed. Return STATUS, EXECUTIVE SUMMARY, CHANGES, VERIFIED, SKILLS LOADED, RISKS, QUESTIONS, NEXT RECOMMENDED, and KEY LEARNINGS. Escalate missing interfaces, conflicting requirements, and consequential choices instead of guessing.
 `;
 
 const LEAD_TOOLS = [
@@ -54,17 +54,45 @@ export function isSafeExecutorShellCommand(command: string, dir?: string): boole
 }
 
 export default function fusionAgents(amp: PluginAPI) {
+	const executorThreadIDs = new Set<string>();
+	const shellApprovalDecisions = new Map<string, boolean>();
+	const shellApprovalRequests = new Map<string, Promise<boolean>>();
+
 	amp.on("tool.call", async (event, ctx) => {
+		if (event.tool === "fusion_executor") {
+			const caller = await amp.threads.get(event.thread.id).agent();
+			const definition = caller.definition;
+			return definition.kind === "agent-definition" && definition.name === "fusion-lead"
+				? { action: "allow" }
+				: {
+						action: "reject-and-continue",
+						message: "Only the Fusion lead can delegate to the Fusion executor.",
+					};
+		}
+
 		const shell = amp.helpers.shellCommandFromToolCall(event);
 		if (!shell) return { action: "allow" };
-
-		const agent = await amp.threads.get(event.thread.id).agent();
-		const definition = agent.definition;
-		if (definition.kind !== "agent-definition" || definition.name !== "fusion-executor") {
-			return { action: "allow" };
+		if (!executorThreadIDs.has(event.thread.id)) {
+			const agent = await amp.threads.get(event.thread.id).agent();
+			const definition = agent.definition;
+			return definition.kind === "agent-definition" && definition.name === "fusion-executor"
+				? {
+						action: "reject-and-continue",
+						message: "Fusion executor task is no longer active. Report VERIFICATION REQUIRED.",
+					}
+				: { action: "allow" };
 		}
 
 		if (isSafeExecutorShellCommand(shell.command, shell.dir)) return { action: "allow" };
+		const existingDecision = shellApprovalDecisions.get(event.thread.id);
+		if (existingDecision !== undefined) {
+			return existingDecision
+				? { action: "allow" }
+				: {
+						action: "reject-and-continue",
+						message: "Shell access was not approved for this executor task. Report VERIFICATION REQUIRED.",
+					};
+		}
 
 		const command = shell.command
 			.split("\n")
@@ -78,23 +106,38 @@ export default function fusionAgents(amp: PluginAPI) {
 			};
 		}
 
+		let approvalRequest = shellApprovalRequests.get(event.thread.id);
+		if (!approvalRequest) {
+			approvalRequest = (async () => {
+				try {
+					const approved = await ctx.ui.confirm({
+						title: "Approve shell for this Fusion executor task?",
+						message: `The Fusion executor requested:\n\n${command}${directory}\n\nApproval allows subsequent shell commands in this executor task without more prompts.`,
+						confirmButtonText: "Allow for this task",
+					});
+					return approved && executorThreadIDs.has(event.thread.id) && amp.activeThread.current?.id === event.thread.id;
+				} catch {
+					return false;
+				}
+			})();
+			shellApprovalRequests.set(event.thread.id, approvalRequest);
+		}
+
 		try {
-			const approved = await ctx.ui.confirm({
-				title: "Approve Fusion executor shell command?",
-				message: `The Fusion executor requested:\n\n${command}${directory}`,
-				confirmButtonText: "Run command",
-			});
+			const approved = await approvalRequest;
+			if (executorThreadIDs.has(event.thread.id)) {
+				shellApprovalDecisions.set(event.thread.id, approved);
+			}
 			return approved
 				? { action: "allow" }
 				: {
 						action: "reject-and-continue",
-						message: "Verification command was not approved. Report it as VERIFICATION REQUIRED.",
+						message: "Shell access was not approved for this executor task. Report VERIFICATION REQUIRED.",
 					};
-		} catch {
-			return {
-				action: "reject-and-continue",
-				message: "Verification approval is unavailable. Report the exact command as VERIFICATION REQUIRED.",
-			};
+		} finally {
+			if (shellApprovalRequests.get(event.thread.id) === approvalRequest) {
+				shellApprovalRequests.delete(event.thread.id);
+			}
 		}
 	});
 
@@ -120,17 +163,38 @@ export default function fusionAgents(amp: PluginAPI) {
 		async execute(input, ctx) {
 			const task = typeof input.task === "string" ? input.task.trim() : "";
 			if (!task) return "Missing implementation specification.";
+			const caller = await ctx.thread.agent();
+			const definition = caller.definition;
+			if (definition.kind !== "agent-definition" || definition.name !== "fusion-lead") {
+				return "Only the Fusion lead can delegate to the Fusion executor.";
+			}
 
 			const thread = await executor.createThread({
 				parentThreadID: ctx.thread.id,
 				show: true,
 			});
-			await thread.append([{ type: "user-message", content: task }]);
-			const response = await thread.waitForResponse({ timeoutMs: 20 * 60 * 1000 });
-			return response.content
-				.filter((block) => block.type === "text")
-				.map((block) => block.text)
-				.join("\n");
+			executorThreadIDs.add(thread.id);
+			let completed = false;
+			try {
+				await thread.append([{ type: "user-message", content: task }]);
+				const response = await thread.waitForResponse({ timeoutMs: 20 * 60 * 1000 });
+				completed = true;
+				return response.content
+					.filter((block) => block.type === "text")
+					.map((block) => block.text)
+					.join("\n");
+			} finally {
+				if (!completed) {
+					try {
+						await thread.cancel();
+					} catch {
+						// Late calls still fail closed through the executor-definition fallback.
+					}
+				}
+				executorThreadIDs.delete(thread.id);
+				shellApprovalDecisions.delete(thread.id);
+				shellApprovalRequests.delete(thread.id);
+			}
 		},
 	});
 

@@ -141,7 +141,7 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'model: "xai/grok-4.5"' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'definition.name !== "fusion-executor"' "$plugin"
+	run grep -F 'event.tool === "fusion_executor"' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'isSafeExecutorShellCommand(shell.command, shell.dir)' "$plugin"
 	[ "$status" -eq 0 ]
@@ -150,6 +150,14 @@ JSON
 	run grep -F 'amp.activeThread.current?.id !== event.thread.id' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'show: true' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'shellApprovalRequests.set(event.thread.id, approvalRequest)' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'executorThreadIDs.has(event.thread.id)' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'await thread.cancel()' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'shellApprovalDecisions.delete(thread.id)' "$plugin"
 	[ "$status" -eq 0 ]
 	run sed -n '/const LEAD_TOOLS = \[/,/\] as const;/p' "$plugin"
 	[ "$status" -eq 0 ]
