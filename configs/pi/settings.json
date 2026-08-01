@@ -46,7 +46,6 @@
 		"npm:@ff-labs/pi-fff",
 		"npm:pi-mcp-adapter",
 		"npm:@tintinweb/pi-subagents",
-		"npm:pi-permission-system",
 		"npm:pi-simplify",
 		"npm:pi-btw",
 		"npm:pi-code-previews",

@@ -3,7 +3,7 @@ description: Implements bounded Fusion specifications with a fast coding model
 model: cursor/auto
 thinking: medium
 tools: "read, grep, find, write, edit, bash"
-extensions: pi-permission-system
+extensions: false
 skills: false
 max_turns: 30
 prompt_mode: replace

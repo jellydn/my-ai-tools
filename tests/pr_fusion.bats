@@ -55,18 +55,13 @@ load helpers
 		(.packages | map(package_source) | index("npm:@tintinweb/pi-subagents") != null)
 	' "$REPO_ROOT/configs/pi/settings.json"
 	[ "$status" -eq 0 ]
-	run jq -e '
-		def package_source: if type == "object" then .source else . end;
-		(.packages | map(package_source) | index("npm:pi-permission-system") != null)
-	' "$REPO_ROOT/configs/pi/settings.json"
-	[ "$status" -eq 0 ]
 	run grep -F 'tools: "read, grep, find"' "$REPO_ROOT/configs/pi/agents/fusion-lead.md"
 	[ "$status" -eq 0 ]
 	run grep -F 'extensions: false' "$REPO_ROOT/configs/pi/agents/fusion-lead.md"
 	[ "$status" -eq 0 ]
 	run grep -F 'tools: "read, grep, find, write, edit, bash"' "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
 	[ "$status" -eq 0 ]
-	run grep -F "extensions: pi-permission-system" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
+	run grep -F "extensions: false" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
 	[ "$status" -eq 0 ]
 	run grep -F "skills: false" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
 	[ "$status" -eq 0 ]
@@ -121,8 +116,7 @@ JSON
 		def package_source: if type == "object" then .source else . end;
 		.theme == "custom" and
 		([.packages[] | package_source] | index("npm:existing-package") != null) and
-		([.packages[] | package_source] | index("npm:@tintinweb/pi-subagents") != null) and
-		([.packages[] | package_source] | index("npm:pi-permission-system") != null)
+		([.packages[] | package_source] | index("npm:@tintinweb/pi-subagents") != null)
 	' "$test_home/.pi/agent/settings.json"
 	[ "$status" -eq 0 ]
 	run jq -e '
@@ -143,8 +137,7 @@ JSON
 {
   "theme": "custom",
   "packages": [
-    {"source": "npm:@tintinweb/pi-subagents", "skills": []},
-    {"source": "npm:pi-permission-system", "skills": []}
+    {"source": "npm:@tintinweb/pi-subagents", "skills": []}
   ]
 }
 JSON
@@ -158,7 +151,6 @@ JSON
 	run jq -e '
 		def package_source: if type == "object" then .source else . end;
 		([.packages[] | select(package_source == "npm:@tintinweb/pi-subagents")] | length == 1) and
-		([.packages[] | select(package_source == "npm:pi-permission-system")] | length == 1) and
 		([.packages[] | select(type == "object" and .source == "npm:@tintinweb/pi-subagents")] | length == 1) and
 		([.packages[] | select(type == "string" and . == "npm:@tintinweb/pi-subagents")] | length == 0)
 	' "$test_home/.pi/agent/settings.json"
@@ -300,8 +292,6 @@ JSON
 	run grep -F 'pi_settings_has_required_packages' "$REPO_ROOT/cli.sh"
 	[ "$status" -eq 0 ]
 	run grep -F 'def get_source: if type == "object" then .source else . end' "$REPO_ROOT/cli.sh"
-	[ "$status" -eq 0 ]
-	run grep -F 'refusing to install Fusion agents without permission enforcement' "$REPO_ROOT/cli.sh"
 	[ "$status" -eq 0 ]
 }
 

@@ -1420,18 +1420,17 @@ copy_pi_configs() {
 	log_info "Detected Pi (via $pi_status)"
 	execute_quoted mkdir -p "$HOME/.pi/agent"
 
-	local fusion_packages='["npm:@tintinweb/pi-subagents","npm:pi-permission-system"]'
-	local permission_package="npm:pi-permission-system"
+	local fusion_packages='["npm:@tintinweb/pi-subagents"]'
 
 	if [ ! -f "$HOME/.pi/agent/settings.json" ]; then
 		if ! copy_config_file "$SCRIPT_DIR/configs/pi/settings.json" "$HOME/.pi/agent/"; then
-			log_error "Failed to install Pi settings.json; Fusion executor permission enforcement requires pi-permission-system"
+			log_error "Failed to install Pi settings.json; Fusion subagent support requires @tintinweb/pi-subagents"
 			return 1
 		fi
 	else
 		local pi_settings="$HOME/.pi/agent/settings.json"
 		if ! command -v jq >/dev/null 2>&1; then
-			log_error "Pi settings.json exists but jq is unavailable; cannot ensure @tintinweb/pi-subagents and pi-permission-system for Fusion"
+			log_error "Pi settings.json exists but jq is unavailable; cannot ensure @tintinweb/pi-subagents for Fusion"
 			return 1
 		elif pi_settings_has_required_packages "$pi_settings" "$fusion_packages"; then
 			log_info "Pi settings.json already includes Fusion subagent support"
@@ -1442,29 +1441,19 @@ copy_pi_configs() {
 			merged_settings=$(execute_quoted mktemp "$HOME/.pi/agent/.settings.json.my-ai-tools.XXXXXX") || return 1
 			if execute_quoted write_merged_pi_settings "$pi_settings" "$merged_settings" "$fusion_packages"; then
 				if ! pi_settings_has_required_packages "$merged_settings" "$fusion_packages"; then
-					log_error "Merged Pi settings are missing required Fusion packages (including $permission_package); refusing to install an unenforced executor"
+					log_error "Merged Pi settings are missing required Fusion packages; refusing to install"
 					execute_quoted rm -f "$merged_settings"
 					return 1
 				fi
 				if ! execute_quoted mv -f "$merged_settings" "$pi_settings"; then
 					execute_quoted rm -f "$merged_settings"
-					log_error "Failed to install merged Pi settings with Fusion permission packages"
+					log_error "Failed to install merged Pi settings with Fusion subagent support"
 					return 1
 				fi
 				log_success "Pi Fusion subagent support added to existing settings"
 			else
-				log_error "Could not merge Fusion subagent support into existing Pi settings; refusing unenforced executor install"
+				log_error "Could not merge Fusion subagent support into existing Pi settings; refusing Fusion executor install"
 				execute_quoted rm -f "$merged_settings"
-				return 1
-			fi
-		fi
-	fi
-
-	# Fail closed: never leave Fusion agents installed without the permission package.
-	if [ "$DRY_RUN" != true ] && [ -f "$HOME/.pi/agent/settings.json" ]; then
-		if command -v jq >/dev/null 2>&1; then
-			if ! pi_settings_has_required_packages "$HOME/.pi/agent/settings.json" "[\"$permission_package\"]"; then
-				log_error "Pi settings lack $permission_package; refusing to install Fusion agents without permission enforcement"
 				return 1
 			fi
 		fi
