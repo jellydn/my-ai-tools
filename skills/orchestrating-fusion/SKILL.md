@@ -27,7 +27,7 @@ Prefer the installed native roles when the current tool exposes them:
 
 - **OpenCode:** run the `fusion-lead` primary; it can delegate to `fusion-executor` and cannot edit or run shell commands.
 - **Amp:** select the `fusion` agent mode; its restricted tool surface exposes `fusion_executor` for implementation.
-- **Codex:** from the writable root session, spawn `fusion_lead` for the specification, then spawn the sibling `fusion_executor`; a read-only child cannot safely escalate a nested child to workspace-write.
+- **Codex:** from the writable root session, spawn `fusion-lead` for the specification, then spawn the sibling `fusion-executor`; a read-only child cannot safely escalate a nested child to workspace-write.
 - **Pi:** from the root session, use the `Agent` tool to run `fusion-lead`, then run the sibling `fusion-executor`; `pi-subagents` enforces the lead's tool allowlist and intentionally disables nested delegation.
 
 For other assistants, apply the workflow below using their native subagent/task tool. Treat role separation as advisory unless the harness actually restricts each role's tools or sandbox.

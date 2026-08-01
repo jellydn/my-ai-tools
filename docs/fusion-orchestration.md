@@ -70,7 +70,7 @@ Native Fusion integration is available across multiple AI coding tools in this r
 
 ### 4. Codex
 - **Execution Pattern**: Sibling delegation.
-- **Behavior**: Root session invokes `fusion_lead` for plan and specification, then executes sibling `fusion_executor` with bounded file permissions.
+- **Behavior**: Root session invokes `fusion-lead` for plan and specification, then executes sibling `fusion-executor` with bounded file permissions.
 
 ---
 

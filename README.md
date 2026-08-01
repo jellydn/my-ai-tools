@@ -137,7 +137,7 @@ Inspired by [opencode-fusion](https://github.com/mihneaptu/opencode-fusion) and 
 | ------------ | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | **OpenCode** | Select the `fusion-lead` primary                                              | Lead has no edit or shell permission and delegates directly to `fusion-executor`                                  |
 | **Amp**      | Select the `fusion` agent mode                                                | Lead's tool surface omits mutation/shell and exposes `fusion_executor`                                            |
-| **Codex**    | Ask the root session to run `fusion_lead`, then its sibling `fusion_executor` | Lead uses a read-only sandbox; the writable root mediates sibling execution                                       |
+| **Codex**    | Ask the root session to run `fusion-lead`, then its sibling `fusion-executor` | Lead uses a read-only sandbox; the writable root mediates sibling execution                                       |
 | **Pi**       | Ask the root `Agent` tool for `fusion-lead`, then `fusion-executor`           | `pi-subagents` enforces role tool allowlists; the root mediates sibling execution and non-inspection verification |
 | **Others**   | Invoke the `orchestrating-fusion` skill                                       | Uses native delegation when available; otherwise the split is prompt-advisory                                     |
 
