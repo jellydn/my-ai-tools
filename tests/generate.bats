@@ -196,3 +196,26 @@ teardown() {
 
     export DRY_RUN=false
 }
+
+# ---------------------------------------------------------------------------
+# sanitize_absolute_paths – regression guard for the single→double quote fix
+# ---------------------------------------------------------------------------
+
+@test "sanitize_absolute_paths converts single-quoted \$HOME paths to double-quoted" {
+    # The regex must match plain '$HOME/...' (not '\$HOME'), so a single-quoted
+    # value becomes double-quoted after sanitization. The old '\\$' pattern
+    # matched a literal backslash before $ and silently no-op'd this case.
+    mkdir -p "$SCRIPT_DIR/configs"
+    local file="$SCRIPT_DIR/configs/test-sanitize.toml"
+    printf 'path = \x27$HOME/foo/bar\x27\n' > "$file"
+
+    run sanitize_absolute_paths
+    [ "$status" -eq 0 ]
+
+    # Positive: single quotes rewritten to double quotes around $HOME.
+    run grep -F 'path = "$HOME/foo/bar"' "$file"
+    [ "$status" -eq 0 ]
+    # Negative: the original single-quoted form must be gone.
+    run grep -F "'\$HOME/foo/bar'" "$file"
+    [ "$status" -ne 0 ]
+}
