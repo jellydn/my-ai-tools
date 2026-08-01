@@ -47,6 +47,8 @@ const EXECUTOR_TOOLS = [
 	"mcp__*",
 ] as const;
 
+const EXECUTOR_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutes
+
 type ExecutorLifecycle = "active" | "closed";
 
 function failedExecutorEnvelope(reason: string, verification = "none"): string {
@@ -63,12 +65,16 @@ function failedExecutorEnvelope(reason: string, verification = "none"): string {
 	].join("\n");
 }
 
-function isFusionLeadDefinition(definition: { kind: string; name?: string }): boolean {
-	return definition.kind === "agent-definition" && definition.name === "fusion-lead";
+function isFusionLeadDefinition(
+	definition: { kind: string; name?: string } | undefined | null,
+): boolean {
+	return definition?.kind === "agent-definition" && definition?.name === "fusion-lead";
 }
 
-function isFusionExecutorDefinition(definition: { kind: string; name?: string }): boolean {
-	return definition.kind === "agent-definition" && definition.name === "fusion-executor";
+function isFusionExecutorDefinition(
+	definition: { kind: string; name?: string } | undefined | null,
+): boolean {
+	return definition?.kind === "agent-definition" && definition?.name === "fusion-executor";
 }
 
 export default function fusionAgents(amp: PluginAPI) {
@@ -76,8 +82,46 @@ export default function fusionAgents(amp: PluginAPI) {
 	const leadThreadIDs = new Set<string>();
 	const executorLifecycle = new Map<string, ExecutorLifecycle>();
 
+	// Cache thread agent definitions to avoid redundant database lookups.
+	// @ampcode/plugin types are not bundled in this repo, so the cached value is
+	// the narrow shape we actually read (.definition) rather than the full agent.
+	type ThreadAgent = { definition?: { kind: string; name?: string } | null };
+	const threadAgentCache = new Map<string, ThreadAgent>();
+
+	// Bounded retention: once a collection exceeds MAX_COLLECTION_SIZE, drop the
+	// oldest entries and keep the RETAIN_COUNT most recent. Map/Set iterate in
+	// insertion order (oldest first), so evicting the leading indices preserves
+	// active entries — evicting the tail would discard in-flight executors.
+	const MAX_COLLECTION_SIZE = 1000;
+	const RETAIN_COUNT = 200;
+
+	const evictOldest = <K, V>(collection: Map<K, V> | Set<K>) => {
+		if (collection.size <= MAX_COLLECTION_SIZE) return;
+		const keys = Array.from(collection.keys());
+		for (let i = 0; i < keys.length - RETAIN_COUNT; i++) {
+			const key = keys[i];
+			if (key !== undefined) collection.delete(key);
+		}
+	};
+
+	// Keep all three collections bounded to prevent unbounded growth in long-lived sessions.
+	const limitCollections = () => {
+		evictOldest(leadThreadIDs);
+		evictOldest(executorLifecycle);
+		evictOldest(threadAgentCache);
+	};
+
+	const getThreadAgent = async (threadID: string): Promise<ThreadAgent> => {
+		let agent = threadAgentCache.get(threadID);
+		if (!agent) {
+			agent = await amp.threads.get(threadID).agent();
+			threadAgentCache.set(threadID, agent);
+			limitCollections();
+		}
+		return agent;
+	};
+
 	const isActiveExecutor = (threadID: string) => executorLifecycle.get(threadID) === "active";
-	const isKnownExecutor = (threadID: string) => executorLifecycle.has(threadID);
 	const isClosedExecutor = (threadID: string) => executorLifecycle.get(threadID) === "closed";
 
 	const closeExecutor = (threadID: string) => {
@@ -86,23 +130,32 @@ export default function fusionAgents(amp: PluginAPI) {
 	};
 
 	amp.on("tool.call", async (event) => {
-		// Track the interactive Fusion lead thread when it uses its own tool surface.
-		const maybeLead = await amp.threads.get(event.thread.id).agent();
-		if (isFusionLeadDefinition(maybeLead.definition)) {
-			leadThreadIDs.add(event.thread.id);
+		const threadID = event.thread.id;
+
+		// 1. Fast-path: Allow active executor tool calls immediately without lookups.
+		if (isActiveExecutor(threadID)) {
+			return { action: "allow" };
 		}
 
+		// 2. Fast-path: Reject closed/inactive executor tool calls immediately without lookups.
+		if (isClosedExecutor(threadID)) {
+			return {
+				action: "reject-and-continue",
+				message:
+					"Fusion executor task is no longer active. Stop tool use and wait for a new delegated task.",
+			};
+		}
+
+		// 3. Delegation checks for the fusion_executor tool.
 		if (event.tool === "fusion_executor") {
-			// Prefer exact plugin-owned lead thread IDs. Until a lead thread is observed,
-			// fall back to the complete expected definition (kind + name) and document
-			// that residual limitation in the portable Fusion skill.
-			if (leadThreadIDs.has(event.thread.id)) {
+			if (leadThreadIDs.has(threadID)) {
 				return { action: "allow" };
 			}
-			const caller = await amp.threads.get(event.thread.id).agent();
-			const definition = caller.definition;
+			const caller = await getThreadAgent(threadID);
+			const definition = caller?.definition;
 			if (isFusionLeadDefinition(definition)) {
-				leadThreadIDs.add(event.thread.id);
+				leadThreadIDs.add(threadID);
+				limitCollections();
 				return { action: "allow" };
 			}
 			return {
@@ -111,22 +164,11 @@ export default function fusionAgents(amp: PluginAPI) {
 			};
 		}
 
-		// Closed executor threads must not keep mutating after the delegated task ends.
-		if (
-			isClosedExecutor(event.thread.id) ||
-			(isKnownExecutor(event.thread.id) && !isActiveExecutor(event.thread.id))
-		) {
-			return {
-				action: "reject-and-continue",
-				message:
-					"Fusion executor task is no longer active. Stop tool use and wait for a new delegated task.",
-			};
-		}
-
-		// Also catch completed/orphaned executor threads identified only by agent definition.
-		if (!isActiveExecutor(event.thread.id)) {
-			const agent = await amp.threads.get(event.thread.id).agent();
-			if (isFusionExecutorDefinition(agent.definition)) {
+		// 4. Fallback for orphaned or completed executor threads not in our active lifecycle map.
+		if (!leadThreadIDs.has(threadID)) {
+			const agent = await getThreadAgent(threadID);
+			const definition = agent?.definition;
+			if (isFusionExecutorDefinition(definition)) {
 				return {
 					action: "reject-and-continue",
 					message:
@@ -158,23 +200,25 @@ export default function fusionAgents(amp: PluginAPI) {
 			required: ["task"],
 		},
 		async execute(input, ctx) {
-			const task = typeof input.task === "string" ? input.task.trim() : "";
+			const task = typeof input?.task === "string" ? input.task.trim() : "";
 			if (!task) return "Missing implementation specification.";
 			const caller = await ctx.thread.agent();
-			const definition = caller.definition;
+			const definition = caller?.definition;
 			if (!isFusionLeadDefinition(definition)) {
 				return "Only the Fusion lead can delegate to the Fusion executor.";
 			}
 			leadThreadIDs.add(ctx.thread.id);
+			limitCollections();
 
 			const thread = await executor.createThread({
 				parentThreadID: ctx.thread.id,
 				show: true,
 			});
 			executorLifecycle.set(thread.id, "active");
+			limitCollections();
 			try {
 				await thread.append([{ type: "user-message", content: task }]);
-				const response = await thread.waitForResponse({ timeoutMs: 20 * 60 * 1000 });
+				const response = await thread.waitForResponse({ timeoutMs: EXECUTOR_TIMEOUT_MS });
 				return response.content
 					.filter((block) => block.type === "text")
 					.map((block) => block.text)

@@ -229,13 +229,13 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'show: true' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'isActiveExecutor(event.thread.id)' "$plugin"
+	run grep -F 'isActiveExecutor(threadID)' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'executorLifecycle.set(thread.id, "active")' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'closeExecutor(thread.id)' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'isClosedExecutor(event.thread.id)' "$plugin"
+	run grep -F 'isClosedExecutor(threadID)' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'leadThreadIDs.add' "$plugin"
 	[ "$status" -eq 0 ]
@@ -243,6 +243,20 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'await thread.cancel()' "$plugin"
 	[ "$status" -eq 0 ]
+	# Bounded eviction (regression guard for the direction bug): the shared
+	# evictOldest helper must evict oldest entries, and the dead isKnownExecutor
+	# helper must stay removed so closed/active checks don't regress.
+	run grep -F 'evictOldest(leadThreadIDs)' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'evictOldest(executorLifecycle)' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'evictOldest(threadAgentCache)' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'MAX_COLLECTION_SIZE' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'RETAIN_COUNT' "$plugin"
+	[ "$status" -eq 0 ]
+	[ "$(grep -c 'isKnownExecutor' "$plugin")" -eq 0 ]
 	run sed -n '/const LEAD_TOOLS = \[/,/\] as const;/p' "$plugin"
 	[ "$status" -eq 0 ]
 	[[ "$output" != *"apply_patch"* ]]
