@@ -17,7 +17,7 @@
 		"explorer": {
 			"description": "Fast explorer subagent for codebase exploration",
 			"mode": "subagent",
-			"model": "cursor-acp/auto"
+			"model": "omnirouter/free"
 		}
 	},
 	"default_agent": "plan",
@@ -123,6 +123,108 @@
 				},
 				"cursor-grok-4.5-medium": {
 					"name": "Grok 4.5 Medium"
+				},
+				"default": {
+					"name": "Auto"
+				},
+				"grok-4.5": {
+					"name": "Cursor Grok 4.5"
+				},
+				"composer-2.5": {
+					"name": "Composer 2.5"
+				},
+				"claude-opus-5": {
+					"name": "Opus 5"
+				},
+				"claude-opus-4-8": {
+					"name": "Opus 4.8"
+				},
+				"gpt-5.6-sol": {
+					"name": "GPT-5.6 Sol"
+				},
+				"gpt-5.5": {
+					"name": "GPT-5.5"
+				},
+				"claude-fable-5": {
+					"name": "Fable 5"
+				},
+				"claude-sonnet-5": {
+					"name": "Sonnet 5"
+				},
+				"gpt-5.6-terra": {
+					"name": "GPT-5.6 Terra"
+				},
+				"claude-sonnet-4-6": {
+					"name": "Sonnet 4.6"
+				},
+				"composer-2": {
+					"name": "Composer 2"
+				},
+				"gpt-5.3-codex": {
+					"name": "Codex 5.3"
+				},
+				"claude-opus-4-7": {
+					"name": "Opus 4.7"
+				},
+				"gpt-5.4": {
+					"name": "GPT-5.4"
+				},
+				"claude-opus-4-6": {
+					"name": "Opus 4.6"
+				},
+				"claude-opus-4-5": {
+					"name": "Opus 4.5"
+				},
+				"gpt-5.2": {
+					"name": "GPT-5.2"
+				},
+				"gpt-5.6-luna": {
+					"name": "GPT-5.6 Luna"
+				},
+				"gemini-3.6-flash": {
+					"name": "Gemini 3.6 Flash"
+				},
+				"gemini-3.1-pro": {
+					"name": "Gemini 3.1 Pro"
+				},
+				"gpt-5.4-mini": {
+					"name": "GPT-5.4 Mini"
+				},
+				"gpt-5.4-nano": {
+					"name": "GPT-5.4 Nano"
+				},
+				"claude-haiku-4-5": {
+					"name": "Haiku 4.5"
+				},
+				"claude-sonnet-4-5": {
+					"name": "Sonnet 4.5"
+				},
+				"gpt-5.1": {
+					"name": "GPT-5.1"
+				},
+				"gemini-3-flash": {
+					"name": "Gemini 3 Flash"
+				},
+				"gemini-3.5-flash": {
+					"name": "Gemini 3.5 Flash"
+				},
+				"claude-sonnet-4": {
+					"name": "Sonnet 4"
+				},
+				"gpt-5-mini": {
+					"name": "GPT-5 Mini"
+				},
+				"gemini-2.5-flash": {
+					"name": "Gemini 2.5 Flash"
+				},
+				"kimi-k3": {
+					"name": "Kimi K3"
+				},
+				"kimi-k2.7-code": {
+					"name": "Kimi K2.7 Code"
+				},
+				"glm-5.2": {
+					"name": "GLM 5.2"
 				}
 			}
 		},
