@@ -922,7 +922,7 @@ sanitize_absolute_paths() {
 								modified = true;
 							}
 							if (content.includes("\x27$HOME")) {
-								content = content.replace(/\x27\\$HOME\/([^\x27]*)\x27/g, `\\"$HOME/$1\\"`);
+								content = content.replace(/\x27\$HOME\/([^\x27]*)\x27/g, `"$HOME/$1"`);
 								modified = true;
 							}
 							if (modified) {
@@ -952,7 +952,7 @@ sanitize_absolute_paths() {
 				}
 			}
 		}
-		walk(process.argv[2]);
+		walk(process.argv[process.argv.length - 1]);
 	' "$target_dir"
 }
 

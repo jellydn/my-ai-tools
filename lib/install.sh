@@ -288,6 +288,7 @@ install_opencode() {
 	run_installer "OpenCode" "_run_opencode_install" "command -v opencode" ""
 }
 
+# Usage: install_opencode_cursor
 # Cursor ACP bridge for OpenCode (https://github.com/Nomadcxx/opencode-cursor).
 # Config lives in configs/opencode/opencode.json — do not run `open-cursor install`
 # here; that CLI rewrites managed OpenCode config.

@@ -1375,6 +1375,7 @@ copy_kilo_configs() {
 	log_success "Kilo CLI configs copied"
 }
 
+# Usage: write_merged_pi_settings <source_settings> <destination_settings> <required_packages>
 # Normalize package entries so object-form packages (e.g. {"source":"npm:..."})
 # and bare strings both match on their source id.
 write_merged_pi_settings() {
@@ -1395,6 +1396,8 @@ write_merged_pi_settings() {
 	' "$source_settings" >"$destination_settings"
 }
 
+# Usage: pi_settings_has_required_packages <pi_settings> <required_packages>
+# Checks if the given settings file contains all the required packages.
 pi_settings_has_required_packages() {
 	local pi_settings="$1"
 	local required_packages="$2"
