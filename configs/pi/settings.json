@@ -36,7 +36,7 @@
 		"omniroute/premium"
 	],
 	"hideThinkingBlock": true,
-	"lastChangelogVersion": "0.82.1",
+	"lastChangelogVersion": "0.83.0",
 	"packages": [
 		{
 			"skills": [],
@@ -61,7 +61,8 @@
 		"npm:@yofriadi/pi-antigravity-oauth",
 		"npm:@juicesharp/rpiv-todo",
 		"npm:pi-qwencloud-provider",
-		"npm:pi-cursor-sdk"
+		"npm:pi-cursor-sdk",
+		"npm:pi-subagents"
 	],
 	"permissionLevel": "high",
 	"quietStartup": true,
