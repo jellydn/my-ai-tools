@@ -299,7 +299,7 @@ JSON
 	require_jq
 	run jq -e '
 		.model == "omniroute/free" and
-		.agent.explorer.model == "cursor-acp/auto" and
+		.agent.explorer.model == "omniroute/free" and
 		.provider["cursor-acp"].options.baseURL == "http://127.0.0.1:32124/v1" and
 		.provider["cursor-acp"].models.auto.name == "Auto" and
 		.provider["cursor-acp"].models["cursor-grok-4.5-medium"].name == "Grok 4.5 Medium"
