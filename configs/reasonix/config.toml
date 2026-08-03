@@ -1,0 +1,80 @@
+# Reasonix — user-global config (~/.reasonix/config.toml)
+# DeepSeek-native terminal coding agent. https://reasonix.io
+# Resolution: flags > ./reasonix.toml > this file > legacy config > defaults.
+
+default_model = "deepseek-flash"
+
+[ui]
+shortcut_layout = "desktop"
+
+[cli]
+update_channel = "stable"
+
+[agent]
+reasoning_language = "auto"
+# Optional read-only planner model (leave commented to use default_model).
+# planner_model = "deepseek-pro"
+
+[tools]
+enabled = [] # empty = all built-ins
+bash_timeout_seconds = 120
+mcp_call_timeout_seconds = 300
+
+[permissions]
+mode = "ask" # ask | allow | deny
+deny = ["Bash(rm -rf*)", "Bash(git push*)"]
+allow = ["Bash(npm test:*)", "Bash(bats:*)", "Bash(go test:*)"]
+
+[sandbox]
+workspace_root = "" # empty = current working directory
+allow_write = ["/tmp"]
+forbid_read = ["${HOME}/.ssh"]
+
+[serve]
+auth_mode = "none" # none | token | password
+behind_proxy = false
+
+# ─── MCP plugins ─────────────────────────────────────────────────────
+# Reasonix is an MCP client. stdio launches a local subprocess; http
+# connects to a Streamable HTTP server. Tools surface as mcp__<server>__<tool>.
+# Mirrors the shared MCP registry (configs/mcp-registry.json).
+
+[[plugins]]
+name = "context7"
+command = "npx -y @upstash/context7-mcp@latest"
+
+[[plugins]]
+name = "sequential-thinking"
+command = "npx -y @modelcontextprotocol/server-sequential-thinking"
+
+[[plugins]]
+name = "qmd"
+command = "qmd mcp"
+
+[[plugins]]
+name = "codebase-memory-mcp"
+command = "codebase-memory-mcp"
+
+[[plugins]]
+name = "fff"
+command = "fff-mcp"
+
+[[plugins]]
+name = "react-grab-mcp"
+command = "npx -y @react-grab/mcp --stdio"
+
+[[plugins]]
+name = "logpilot"
+command = "logpilot mcp-server"
+
+[[plugins]]
+name = "agentmemory"
+command = "npx -y @agentmemory/mcp"
+
+[[plugins]]
+name = "sem"
+command = "sem-mcp"
+
+[[plugins]]
+name = "ctx"
+command = "ctx mcp serve"

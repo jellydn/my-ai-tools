@@ -13,7 +13,7 @@ source "$SCRIPT_DIR/lib/install.sh"
 # Core tools installed/configured when -y (YES_TO_ALL) is active.
 # This is your personal active tool set. When YES_TO_ALL is false
 # (interactive mode), tool_allowed returns true for everything.
-TOOL_ALLOWLIST_YES=(amp codex ctx cursor kilo opencode open_code_review pi antigravity ai-switcher claude)
+TOOL_ALLOWLIST_YES=(amp codex ctx cursor kilo opencode open_code_review pi antigravity ai-switcher claude reasonix)
 
 tool_allowed() {
 	local name="$1"
@@ -43,6 +43,7 @@ INSTALL_SEQUENCE=(
 	"gemini:install_gemini"
 	"antigravity:install_antigravity"
 	"kilo:install_kilo"
+	"reasonix:install_reasonix"
 	"pi:install_pi"
 	"commandcode:install_commandcode"
 	"copilot:install_copilot"
@@ -326,6 +327,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.kimi-code" "$BACKUP_DIR" "kimi-code"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
 		copy_config_dir "$HOME/.config/kilo" "$BACKUP_DIR" "kilo"
+		copy_config_dir "$HOME/.reasonix" "$BACKUP_DIR" "reasonix"
 		copy_config_dir "$HOME/.pi" "$BACKUP_DIR" "pi"
 		copy_config_dir "$HOME/.cursor" "$BACKUP_DIR" "cursor"
 		copy_config_dir "$HOME/.conductor" "$BACKUP_DIR" "conductor"
@@ -522,6 +524,11 @@ copy_configurations() {
 	else
 		log_info "Skipping kilo config install (not in -y allowlist)"
 	fi
+	if tool_allowed "reasonix"; then
+		copy_reasonix_configs
+	else
+		log_info "Skipping reasonix config install (not in -y allowlist)"
+	fi
 	if tool_allowed "pi"; then
 		copy_pi_configs
 	else
@@ -616,6 +623,7 @@ _validate_config_tool_name() {
 		*gemini/settings.json*) echo "gemini" ;;
 		*antigravity-cli/settings.json*) echo "antigravity" ;;
 		*kilo/config.json*) echo "kilo" ;;
+		*reasonix/config.toml*) echo "reasonix" ;;
 		*kimi-code/mcp.json*) echo "kimi_code" ;;
 		*pi/settings.json*) echo "pi" ;;
 		*commandcode/*.json*) echo "commandcode" ;;
@@ -1373,6 +1381,23 @@ copy_kilo_configs() {
 	copy_config_file "$SCRIPT_DIR/configs/kilo/config.json" "$HOME/.config/kilo/" || true
 	copy_config_file "$SCRIPT_DIR/configs/kilo/AGENTS.md" "$HOME/.config/kilo/" || true
 	log_success "Kilo CLI configs copied"
+}
+
+copy_reasonix_configs() {
+	local reasonix_status
+	reasonix_status=$(detect_tool --detailed "reasonix" "$HOME/.reasonix") || reasonix_status="missing"
+	if [ "$reasonix_status" = "missing" ]; then
+		log_info "Reasonix not detected - skipping Reasonix config installation"
+		return 0
+	fi
+
+	log_info "Detected Reasonix (via $reasonix_status)"
+	# Reasonix home is ~/.reasonix on macOS/Linux (%APPDATA%\reasonix on Windows).
+	# config.toml is the user-global config; AGENTS.md seeds project memory.
+	execute_quoted mkdir -p "$HOME/.reasonix"
+	copy_config_file "$SCRIPT_DIR/configs/reasonix/config.toml" "$HOME/.reasonix/" || true
+	copy_config_file "$SCRIPT_DIR/configs/reasonix/AGENTS.md" "$HOME/.reasonix/" || true
+	log_success "Reasonix configs copied"
 }
 
 # Usage: write_merged_pi_settings <source_settings> <destination_settings> <required_packages>
@@ -2504,7 +2529,7 @@ main() {
 	echo "║  Antigravity • Pi • Kilo • Copilot • Cursor • Command Code           ║"
 	echo "║  Factory Droid • Cline • Grok • MiMo-Code • herdr                    ║"
 	echo "║  Qoder CLI • Kiro • Codiff • Devin                                   ║"
-	echo "║  ctx                                                                 ║"
+	echo "║  ctx • Reasonix                                                       ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 

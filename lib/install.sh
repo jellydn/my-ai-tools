@@ -448,6 +448,11 @@ install_kilo() {
 		"npm install -g @kilocode/cli"
 }
 
+install_reasonix() {
+	install_npm_tool "Reasonix" "reasonix" "reasonix" \
+		"npm install -g reasonix"
+}
+
 install_pi() {
 	install_npm_tool "Pi" "pi" "@mariozechner/pi-coding-agent" \
 		"npm install -g @mariozechner/pi-coding-agent"

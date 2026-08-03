@@ -385,6 +385,19 @@ generate_kilo_configs() {
 	fi
 }
 
+generate_reasonix_configs() {
+	log_info "Generating Reasonix configs..."
+
+	if [ -d "$HOME/.reasonix" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/reasonix"
+		copy_single "$HOME/.reasonix/config.toml" "$SCRIPT_DIR/configs/reasonix/config.toml"
+		copy_single "$HOME/.reasonix/AGENTS.md" "$SCRIPT_DIR/configs/reasonix/AGENTS.md"
+		log_success "Reasonix configs generated"
+	else
+		log_warning "Reasonix config directory not found: $HOME/.reasonix"
+	fi
+}
+
 generate_pi_configs() {
 	log_info "Generating Pi configs..."
 
@@ -993,6 +1006,9 @@ main() {
 	echo
 
 	generate_kilo_configs
+	echo
+
+	generate_reasonix_configs
 	echo
 
 	generate_pi_configs
