@@ -1,6 +1,12 @@
 // @amp-agent-mode {"key":"fusion","label":"Fusion"}
 
 import type { PluginAPI } from "@ampcode/plugin";
+import {
+	createActivityWatchdog,
+	EXECUTOR_MAX_TIMEOUT_MS,
+	ExecutorWaitError,
+	MAX_RECOMMENDED_TASK_CHARS,
+} from "./fusion-watchdog";
 
 const LEAD_INSTRUCTIONS = `
 You are the Fusion lead. Own interpretation, investigation, architecture, task decomposition, review, and final verification. You have no file mutation or shell tools. Delegate every implementation change through fusion_executor.
@@ -47,15 +53,6 @@ const EXECUTOR_TOOLS = [
 	"mcp__*",
 ] as const;
 
-// Activity-aware progressive waiting: instead of one hard wall-clock timeout
-// that kills executors still making progress, we poll in short intervals and
-// only declare a genuine timeout when the executor has had NO activity (tool
-// calls or results) for EXECUTOR_INACTIVITY_TIMEOUT_MS. An absolute cap still
-// prevents infinite waiting on a runaway thread.
-const EXECUTOR_POLL_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes per poll
-const EXECUTOR_INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000; // 10 min of no activity = stuck
-const EXECUTOR_MAX_TIMEOUT_MS = 60 * 60 * 1000; // 60 min absolute cap
-
 type ExecutorLifecycle = "active" | "closed";
 
 function failedExecutorEnvelope(reason: string, verification = "none"): string {
@@ -80,25 +77,18 @@ function isFusionExecutorDefinition(definition: { kind: string; name?: string } 
 	return definition?.kind === "agent-definition" && definition?.name === "fusion-executor";
 }
 
-class ExecutorWaitError extends Error {
-	constructor(
-		message: string,
-		public readonly kind: "inactivity" | "max-wait",
-	) {
-		super(message);
-		this.name = "ExecutorWaitError";
-	}
-}
-
 export default function fusionAgents(amp: PluginAPI) {
 	// Exact thread IDs owned by this plugin instance. Name checks alone are not a unique principal.
 	const leadThreadIDs = new Set<string>();
 	const executorLifecycle = new Map<string, ExecutorLifecycle>();
 	// Last activity timestamp (tool.call or tool.result) per executor thread.
-	// Used by the progressive wait loop to distinguish a busy executor from a stuck one.
+	// Used by the activity watchdog to distinguish a busy executor from a stuck one.
 	const executorLastActivity = new Map<string, number>();
-	// Count of currently executing tool calls per executor thread.
-	const executorInFlight = new Map<string, number>();
+	// Currently executing tool call IDs per executor thread, keyed by toolUseID.
+	// Using a Set instead of a numeric counter so duplicate or unmatched results
+	// are harmless — a missing result stays in-flight until the absolute cap,
+	// and an extra result simply removes a non-existent ID (no-op).
+	const executorInFlight = new Map<string, Set<string>>();
 
 	// Cache thread agent definitions to avoid redundant database lookups.
 	// @ampcode/plugin types are not bundled in this repo, so the cached value is
@@ -122,10 +112,26 @@ export default function fusionAgents(amp: PluginAPI) {
 		}
 	};
 
+	// Semantic eviction for lifecycle: never discard active executors.
+	// Closed entries are purged first; only if closed-only purge doesn't bring
+	// the collection under MAX_COLLECTION_SIZE do we evict oldest remaining entries.
+	const evictOldestLifecycle = () => {
+		if (executorLifecycle.size <= MAX_COLLECTION_SIZE) return;
+		for (const [key, status] of executorLifecycle) {
+			if (status === "closed") executorLifecycle.delete(key);
+		}
+		if (executorLifecycle.size <= MAX_COLLECTION_SIZE) return;
+		const keys = Array.from(executorLifecycle.keys());
+		for (let i = 0; i < keys.length - RETAIN_COUNT; i++) {
+			const key = keys[i];
+			if (key !== undefined) executorLifecycle.delete(key);
+		}
+	};
+
 	// Keep all collections bounded to prevent unbounded growth in long-lived sessions.
 	const limitCollections = () => {
 		evictOldest(leadThreadIDs);
-		evictOldest(executorLifecycle);
+		evictOldestLifecycle();
 		evictOldest(threadAgentCache);
 		evictOldest(executorLastActivity);
 		evictOldest(executorInFlight);
@@ -149,13 +155,28 @@ export default function fusionAgents(amp: PluginAPI) {
 		executorLastActivity.set(threadID, timestamp);
 	};
 
-	const setInFlight = (threadID: string, delta: number) => {
-		const count = (executorInFlight.get(threadID) ?? 0) + delta;
+	const addInFlight = (threadID: string, toolUseID: string) => {
+		let set = executorInFlight.get(threadID);
+		if (!set) {
+			set = new Set();
+			executorInFlight.set(threadID, set);
+		}
+		set.add(toolUseID);
+		// Refresh insertion order so evictOldest preserves recently-active executors.
 		executorInFlight.delete(threadID);
-		if (count > 0) {
-			executorInFlight.set(threadID, count);
+		executorInFlight.set(threadID, set);
+	};
+
+	const removeInFlight = (threadID: string, toolUseID: string) => {
+		const set = executorInFlight.get(threadID);
+		if (!set) return;
+		set.delete(toolUseID);
+		if (set.size === 0) {
+			executorInFlight.delete(threadID);
 		}
 	};
+
+	const hasInFlight = (threadID: string) => (executorInFlight.get(threadID)?.size ?? 0) > 0;
 
 	const setLifecycle = (threadID: string, status: ExecutorLifecycle) => {
 		executorLifecycle.delete(threadID);
@@ -172,10 +193,10 @@ export default function fusionAgents(amp: PluginAPI) {
 	amp.on("tool.call", async (event) => {
 		const threadID = event.thread.id;
 
-		// 1. Fast-path: Track activity/in-flight and allow active executor tool calls immediately without lookups.
+		// 1. Fast-path: Track activity/in-flight and allow active executor tool calls immediately.
 		if (isActiveExecutor(threadID)) {
 			setLastActivity(threadID, Date.now());
-			setInFlight(threadID, 1);
+			addInFlight(threadID, event.toolUseID);
 			return { action: "allow" };
 		}
 
@@ -222,12 +243,12 @@ export default function fusionAgents(amp: PluginAPI) {
 
 	// Track tool results for active executors as activity signals.
 	// This catches long-running tool calls (shell_command, apply_patch) that
-	// span multiple poll intervals — the result arrival proves the executor
+	// span multiple watchdog intervals — the result arrival proves the executor
 	// is still making progress, not stuck.
 	amp.on("tool.result", (event) => {
 		const threadID = event.thread.id;
 		if (isActiveExecutor(threadID)) {
-			setInFlight(threadID, -1);
+			removeInFlight(threadID, event.toolUseID);
 			setLastActivity(threadID, Date.now());
 		}
 	});
@@ -254,10 +275,9 @@ export default function fusionAgents(amp: PluginAPI) {
 		async execute(input, ctx) {
 			const task = typeof input?.task === "string" ? input.task.trim() : "";
 			if (!task) return "Missing implementation specification.";
-			const MAX_RECOMMENDED_TASK_CHARS = 12000;
 			if (task.length > MAX_RECOMMENDED_TASK_CHARS) {
 				console.warn(
-					`[fusion] Specification length (${task.length} chars) exceeds recommended maximum (${MAX_RECOMMENDED_TASK_CHARS} chars / ~3000 tokens). Consider decomposing into smaller tasks.`,
+					`[fusion] Specification length (${task.length} chars) exceeds recommended maximum (${MAX_RECOMMENDED_TASK_CHARS} chars / ~2000 tokens). Consider decomposing into smaller tasks.`,
 				);
 			}
 			const caller = await ctx.thread.agent();
@@ -278,66 +298,36 @@ export default function fusionAgents(amp: PluginAPI) {
 			try {
 				await thread.append([{ type: "user-message", content: task }]);
 
-				// Activity-aware progressive wait: poll in short intervals instead
-				// of one hard wall-clock timeout. After each poll, check whether the
-				// executor had any tool activity (tool.call/tool.result) since the
-				// last check or has tool calls in-flight. If yes, the executor is
-				// still making progress — extend the wait. Only declare a genuine
-				// timeout when there has been no activity for EXECUTOR_INACTIVITY_TIMEOUT_MS,
-				// or when the absolute cap EXECUTOR_MAX_TIMEOUT_MS is reached.
+				// Activity-aware wait: race a single long-lived waitForResponse
+				// against an independent activity watchdog. The watchdog checks
+				// inactivity and max-wait deadlines on an interval and rejects
+				// with a typed ExecutorWaitError. This avoids the two blockers
+				// of the old polling approach:
+				//  1. No regex matching of Amp's timeout error message — the
+				//     watchdog owns all timeout classification.
+				//  2. One continuous waitForResponse subscription — no missed
+				//     responses between poll cycles.
 				const startTime = Date.now();
-				let lastActivityCheck = Date.now();
 
-				while (true) {
-					const now = Date.now();
-					const elapsed = now - startTime;
-					if (elapsed >= EXECUTOR_MAX_TIMEOUT_MS) {
-						throw new ExecutorWaitError(
-							`Executor exceeded maximum wait of ${EXECUTOR_MAX_TIMEOUT_MS / 60000} minutes (total elapsed).`,
-							"max-wait",
-						);
-					}
+				const watchdog = createActivityWatchdog(
+					() => executorLastActivity.get(thread.id) ?? startTime,
+					() => hasInFlight(thread.id),
+					startTime,
+				);
 
-					const inFlight = executorInFlight.get(thread.id) ?? 0;
-					if (inFlight > 0) {
-						lastActivityCheck = now;
-					} else if (now - lastActivityCheck >= EXECUTOR_INACTIVITY_TIMEOUT_MS) {
-						throw new ExecutorWaitError(
-							`Executor timed out after ${EXECUTOR_INACTIVITY_TIMEOUT_MS / 60000} minutes of inactivity.`,
-							"inactivity",
-						);
-					}
-
-					const remainingMaximum = EXECUTOR_MAX_TIMEOUT_MS - elapsed;
-					const remainingInactivity = EXECUTOR_INACTIVITY_TIMEOUT_MS - (now - lastActivityCheck);
-					const pollTimeout = Math.min(
-						EXECUTOR_POLL_INTERVAL_MS,
-						Math.max(remainingInactivity, 1000),
-						Math.max(remainingMaximum, 1000),
-					);
-
-					try {
-						const response = await thread.waitForResponse({ timeoutMs: pollTimeout });
-						return response.content
-							.filter((block) => block.type === "text")
-							.map((block) => block.text)
-							.join("\n");
-					} catch (pollError) {
-						const pollReason =
-							pollError instanceof Error ? pollError.message : typeof pollError === "string" ? pollError : "";
-						// Non-timeout errors propagate to the outer catch as real failures.
-						if (!/timeout/i.test(pollReason)) throw pollError;
-
-						// Check if the executor had activity or in-flight calls since our last check.
-						const currentActivity = executorLastActivity.get(thread.id);
-						const currentInFlight = executorInFlight.get(thread.id) ?? 0;
-						if (currentInFlight > 0 || (currentActivity !== undefined && currentActivity > lastActivityCheck)) {
-							// Executor is still working — extend the wait.
-							lastActivityCheck = currentInFlight > 0 ? Date.now() : currentActivity!;
-						}
-
-						continue;
-					}
+				try {
+					// Give waitForResponse a small grace period beyond the watchdog's
+					// max-wait so the watchdog always fires first.
+					const response = await Promise.race([
+						thread.waitForResponse({ timeoutMs: EXECUTOR_MAX_TIMEOUT_MS + 5_000 }),
+						watchdog.promise,
+					]);
+					return response.content
+						.filter((block) => block.type === "text")
+						.map((block) => block.text)
+						.join("\n");
+				} finally {
+					watchdog.cleanup();
 				}
 			} catch (error) {
 				try {
@@ -354,13 +344,7 @@ export default function fusionAgents(amp: PluginAPI) {
 							? "max-wait timeout — executor was still active but exceeded the absolute time cap"
 							: "inactivity timeout — executor had no tool activity and was cancelled";
 				} else {
-					const isTimeout = /timeout/i.test(reason) || /maximum wait/i.test(reason);
-					const isMaxWait = /maximum wait/i.test(reason);
-					verification = isTimeout
-						? isMaxWait
-							? "max-wait timeout — executor was still active but exceeded the absolute time cap"
-							: "inactivity timeout — executor had no tool activity and was cancelled"
-						: "failed — unresolved verification commands were not completed";
+					verification = "failed — unresolved verification commands were not completed";
 				}
 				return failedExecutorEnvelope(reason, verification);
 			} finally {

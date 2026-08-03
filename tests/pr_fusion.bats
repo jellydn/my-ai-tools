@@ -207,6 +207,8 @@ JSON
 
 @test "Amp Fusion mode restricts lead tools and exposes executor delegation" {
 	local plugin="$REPO_ROOT/configs/amp/plugins/fusion-agents.ts"
+	local watchdog="$REPO_ROOT/configs/amp/plugins/fusion-watchdog.ts"
+	[ -f "$watchdog" ]
 	run grep -F 'name: "fusion_executor"' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'key: "fusion"' "$plugin"
@@ -240,7 +242,8 @@ JSON
 	# helper must stay removed so closed/active checks don't regress.
 	run grep -F 'evictOldest(leadThreadIDs)' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'evictOldest(executorLifecycle)' "$plugin"
+	# Lifecycle uses semantic eviction (never evict active) instead of generic evictOldest.
+	run grep -F 'evictOldestLifecycle()' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'evictOldest(threadAgentCache)' "$plugin"
 	[ "$status" -eq 0 ]
@@ -248,13 +251,27 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'executorInFlight.delete(threadID)' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'class ExecutorWaitError' "$plugin"
+	# ExecutorWaitError is defined in the extracted watchdog module.
+	run grep -F 'class ExecutorWaitError' "$watchdog"
+	[ "$status" -eq 0 ]
+	run grep -F 'ExecutorWaitError' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'error instanceof ExecutorWaitError' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'Math.max(remainingInactivity, 1000)' "$plugin"
+	# Watchdog architecture: single waitForResponse raced against an activity watchdog.
+	run grep -F 'createActivityWatchdog' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'remainingMaximum' "$plugin"
+	run grep -F 'Promise.race' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'watchdog.cleanup()' "$plugin"
+	[ "$status" -eq 0 ]
+	# Set-based in-flight tracking (not numeric counter).
+	run grep -F 'addInFlight(threadID, event.toolUseID)' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'removeInFlight(threadID, event.toolUseID)' "$plugin"
+	[ "$status" -eq 0 ]
+	# Semantic lifecycle eviction: never evict active executors.
+	run grep -F 'evictOldestLifecycle' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'setLastActivity' "$plugin"
 	[ "$status" -eq 0 ]
