@@ -1,4 +1,4 @@
-# Reasonix — user-global config (~/.reasonix/config.toml)
+# Reasonix — user-global config (<Reasonix home>/config.toml)
 # DeepSeek-native terminal coding agent. https://reasonix.io
 # Resolution: flags > ./reasonix.toml > this file > legacy config > defaults.
 
@@ -41,11 +41,11 @@ behind_proxy = false
 
 [[plugins]]
 name = "context7"
-command = "npx -y @upstash/context7-mcp@latest"
+command = "npx -y @upstash/context7-mcp@3.2.5"
 
 [[plugins]]
 name = "sequential-thinking"
-command = "npx -y @modelcontextprotocol/server-sequential-thinking"
+command = "npx -y @modelcontextprotocol/server-sequential-thinking@2026.7.4"
 
 [[plugins]]
 name = "qmd"
@@ -61,7 +61,7 @@ command = "fff-mcp"
 
 [[plugins]]
 name = "react-grab-mcp"
-command = "npx -y @react-grab/mcp --stdio"
+command = "npx -y @react-grab/mcp@0.1.37 --stdio"
 
 [[plugins]]
 name = "logpilot"
@@ -69,7 +69,7 @@ command = "logpilot mcp-server"
 
 [[plugins]]
 name = "agentmemory"
-command = "npx -y @agentmemory/mcp"
+command = "npx -y @agentmemory/mcp@0.9.28"
 
 [[plugins]]
 name = "sem"

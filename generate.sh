@@ -387,14 +387,16 @@ generate_kilo_configs() {
 
 generate_reasonix_configs() {
 	log_info "Generating Reasonix configs..."
+	local reasonix_dir
+	reasonix_dir=$(get_reasonix_dir)
 
-	if [ -d "$HOME/.reasonix" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/reasonix"
-		copy_single "$HOME/.reasonix/config.toml" "$SCRIPT_DIR/configs/reasonix/config.toml"
-		copy_single "$HOME/.reasonix/AGENTS.md" "$SCRIPT_DIR/configs/reasonix/AGENTS.md"
+	if [ -d "$reasonix_dir" ]; then
+		execute_quoted mkdir -p "$SCRIPT_DIR/configs/reasonix"
+		copy_single "$reasonix_dir/config.toml" "$SCRIPT_DIR/configs/reasonix/config.toml"
+		copy_single "$reasonix_dir/AGENTS.md" "$SCRIPT_DIR/configs/reasonix/AGENTS.md"
 		log_success "Reasonix configs generated"
 	else
-		log_warning "Reasonix config directory not found: $HOME/.reasonix"
+		log_warning "Reasonix config directory not found: $reasonix_dir"
 	fi
 }
 

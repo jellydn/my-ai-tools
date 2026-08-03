@@ -327,7 +327,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.kimi-code" "$BACKUP_DIR" "kimi-code"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
 		copy_config_dir "$HOME/.config/kilo" "$BACKUP_DIR" "kilo"
-		copy_config_dir "$HOME/.reasonix" "$BACKUP_DIR" "reasonix"
+		copy_config_dir "$(get_reasonix_dir)" "$BACKUP_DIR" "reasonix"
 		copy_config_dir "$HOME/.pi" "$BACKUP_DIR" "pi"
 		copy_config_dir "$HOME/.cursor" "$BACKUP_DIR" "cursor"
 		copy_config_dir "$HOME/.conductor" "$BACKUP_DIR" "conductor"
@@ -667,6 +667,7 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/gemini/settings.json" \
 		"$SCRIPT_DIR/configs/antigravity-cli/settings.json" \
 		"$SCRIPT_DIR/configs/kilo/config.json" \
+		"$SCRIPT_DIR/configs/reasonix/config.toml" \
 		"$SCRIPT_DIR/configs/kimi-code/mcp.json" \
 		"$SCRIPT_DIR/configs/pi/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/settings.json" \
@@ -1384,8 +1385,10 @@ copy_kilo_configs() {
 }
 
 copy_reasonix_configs() {
+	local reasonix_dir
+	reasonix_dir=$(get_reasonix_dir)
 	local reasonix_status
-	reasonix_status=$(detect_tool --detailed "reasonix" "$HOME/.reasonix") || reasonix_status="missing"
+	reasonix_status=$(detect_tool --detailed "reasonix" "$reasonix_dir") || reasonix_status="missing"
 	if [ "$reasonix_status" = "missing" ]; then
 		log_info "Reasonix not detected - skipping Reasonix config installation"
 		return 0
@@ -1394,9 +1397,9 @@ copy_reasonix_configs() {
 	log_info "Detected Reasonix (via $reasonix_status)"
 	# Reasonix home is ~/.reasonix on macOS/Linux (%APPDATA%\reasonix on Windows).
 	# config.toml is the user-global config; AGENTS.md seeds project memory.
-	execute_quoted mkdir -p "$HOME/.reasonix"
-	copy_config_file "$SCRIPT_DIR/configs/reasonix/config.toml" "$HOME/.reasonix/" || true
-	copy_config_file "$SCRIPT_DIR/configs/reasonix/AGENTS.md" "$HOME/.reasonix/" || true
+	execute_quoted mkdir -p "$reasonix_dir"
+	copy_config_file "$SCRIPT_DIR/configs/reasonix/config.toml" "$reasonix_dir/" || true
+	copy_config_file "$SCRIPT_DIR/configs/reasonix/AGENTS.md" "$reasonix_dir/" || true
 	log_success "Reasonix configs copied"
 }
 

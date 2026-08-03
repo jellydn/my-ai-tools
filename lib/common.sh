@@ -77,6 +77,16 @@ get_temp_dir() {
 	echo "$temp_dir"
 }
 
+# Get platform-specific Reasonix home directory
+# Usage: get_reasonix_dir
+get_reasonix_dir() {
+	if [ "$IS_WINDOWS" = true ] && [ -n "${APPDATA:-}" ]; then
+		normalize_path "$APPDATA/reasonix"
+	else
+		echo "$HOME/.reasonix"
+	fi
+}
+
 # Quote a path if it contains spaces or special characters
 # Usage: quote_path "path with spaces"
 quote_path() {
@@ -451,6 +461,51 @@ validate_yaml() {
 	return 0
 }
 
+# Validate TOML file syntax with detailed error reporting
+# Usage: validate_toml "filepath"
+# Returns: 0 if valid, 1 if invalid
+validate_toml() {
+	local filepath="$1"
+	local validator_found=false
+
+	if [ ! -f "$filepath" ]; then
+		log_error "File not found: $filepath"
+		return 1
+	fi
+
+	if command -v python3 &>/dev/null; then
+		if python3 -c 'import tomllib' >/dev/null 2>&1; then
+			validator_found=true
+			if FILEPATH="$filepath" python3 -c 'import os, tomllib; tomllib.loads(open(os.environ["FILEPATH"]).read())' 2>/dev/null; then
+				log_success "TOML validated: $filepath (Python/tomllib)"
+				return 0
+			fi
+		elif python3 -c 'import tomli' >/dev/null 2>&1; then
+			validator_found=true
+			if FILEPATH="$filepath" python3 -c 'import os, tomli; tomli.loads(open(os.environ["FILEPATH"]).read())' 2>/dev/null; then
+				log_success "TOML validated: $filepath (Python/tomli)"
+				return 0
+			fi
+		fi
+	fi
+
+	if command -v taplo &>/dev/null; then
+		validator_found=true
+		if taplo check "$filepath" 2>/dev/null; then
+			log_success "TOML validated: $filepath (taplo)"
+			return 0
+		fi
+	fi
+
+	if [ "$validator_found" = true ]; then
+		log_error "Invalid TOML in: $filepath"
+		return 1
+	fi
+
+	log_warning "No TOML validator available (python3 tomllib/tomli or taplo), skipping TOML validation for: $filepath"
+	return 0
+}
+
 # Validate config file based on extension
 # Usage: validate_config "filepath"
 # Returns: 0 if valid or validation skipped, 1 if invalid
@@ -465,6 +520,10 @@ validate_config() {
 		;;
 	yaml | yml)
 		validate_yaml "$filepath"
+		return $?
+		;;
+	toml)
+		validate_toml "$filepath"
 		return $?
 		;;
 	*)

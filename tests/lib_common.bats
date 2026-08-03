@@ -203,3 +203,19 @@ EOF
     [[ "$output" == *"one"* ]]
     [[ "$output" == *"two"* ]]
 }
+
+@test "get_reasonix_dir returns non-empty path" {
+    run get_reasonix_dir
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
+@test "validate_config validates TOML file" {
+    local toml_file="/tmp/my-ai-tools-valid-$$.toml"
+    printf 'key = "value"\n' > "$toml_file"
+
+    run validate_config "$toml_file"
+    [ "$status" -eq 0 ]
+
+    rm -f "$toml_file"
+}
