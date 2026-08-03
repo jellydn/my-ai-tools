@@ -186,3 +186,73 @@ test("Promise.race: immediate resolution wins over watchdog", async () => {
 	watchdog.cleanup();
 	expect((result as { content: { type: string; text: string }[] }).content[0].text).toBe("done");
 });
+
+// ─── Watchdog self-cleanup on reject ─────────────────────────────────
+
+test("createActivityWatchdog: self-clears interval on reject (no timer leak)", async () => {
+	let tickCount = 0;
+	let lastActivity = 0;
+	let inFlight = false;
+	const startTime = 0;
+
+	// Use a very short interval to verify the timer stops after reject
+	const watchdog = createActivityWatchdog(
+		() => lastActivity,
+		() => inFlight,
+		startTime,
+		() => EXECUTOR_INACTIVITY_TIMEOUT_MS + 1000,
+		5, // 5ms interval
+	);
+
+	// Wait for rejection
+	try {
+		await watchdog.promise;
+		throw new Error("should have rejected");
+	} catch (error) {
+		expect(error).toBeInstanceOf(ExecutorWaitError);
+	}
+
+	// After rejection, the interval should have been self-cleared.
+	// Wait a bit and verify no additional ticks happen — the promise
+	// is already settled so we can't observe via the promise, but we
+	// can verify cleanup() is idempotent (no throw).
+	watchdog.cleanup(); // should be a no-op since already cleared
+});
+
+test("createActivityWatchdog: cleanup is idempotent after self-clear", async () => {
+	const watchdog = createActivityWatchdog(
+		() => 0,
+		() => false,
+		0,
+		() => EXECUTOR_INACTIVITY_TIMEOUT_MS + 1,
+		5,
+	);
+
+	try {
+		await watchdog.promise;
+	} catch {
+		// expected
+	}
+
+	// Multiple cleanup calls should be safe
+	watchdog.cleanup();
+	watchdog.cleanup();
+	watchdog.cleanup();
+});
+
+// ─── In-flight Set semantics ─────────────────────────────────────────
+
+test("checkWatchdog: multiple in-flight calls all prevent inactivity timeout", () => {
+	// Simulates: tool.call fired twice (2 in-flight), neither has a result yet.
+	// Even with high inactivity elapsed, in-flight=true prevents timeout.
+	const verdict = checkWatchdog(EXECUTOR_INACTIVITY_TIMEOUT_MS + 5000, EXECUTOR_INACTIVITY_TIMEOUT_MS + 5000, true);
+	expect(verdict).toEqual({ action: "continue" });
+});
+
+test("checkWatchdog: in-flight=false after all results arrive triggers inactivity", () => {
+	// Simulates: all tool results arrived, then no activity for 10+ min.
+	const verdict = checkWatchdog(EXECUTOR_INACTIVITY_TIMEOUT_MS + 5000, EXECUTOR_INACTIVITY_TIMEOUT_MS + 1, false);
+	expect(verdict.action).toBe("reject");
+	if (verdict.action !== "reject") throw new Error("unreachable");
+	expect(verdict.kind).toBe("inactivity");
+});

@@ -273,6 +273,10 @@ JSON
 	# Semantic lifecycle eviction: never evict active executors.
 	run grep -F 'evictOldestLifecycle' "$plugin"
 	[ "$status" -eq 0 ]
+	# The eviction policy must NOT have a fallback that evicts active entries.
+	# Verify the comment that documents this invariant is present.
+	run grep -F 'Do NOT evict them' "$plugin"
+	[ "$status" -eq 0 ]
 	run grep -F 'setLastActivity' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'MAX_COLLECTION_SIZE' "$plugin"

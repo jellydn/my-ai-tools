@@ -113,18 +113,22 @@ export default function fusionAgents(amp: PluginAPI) {
 	};
 
 	// Semantic eviction for lifecycle: never discard active executors.
-	// Closed entries are purged first; only if closed-only purge doesn't bring
-	// the collection under MAX_COLLECTION_SIZE do we evict oldest remaining entries.
+	// Closed entries are purged first. If all remaining entries are active
+	// and the collection still exceeds MAX_COLLECTION_SIZE, we leave them —
+	// active executors will be purged naturally when they become closed via
+	// closeExecutor(). Evicting active entries would break in-flight work.
 	const evictOldestLifecycle = () => {
 		if (executorLifecycle.size <= MAX_COLLECTION_SIZE) return;
 		for (const [key, status] of executorLifecycle) {
 			if (status === "closed") executorLifecycle.delete(key);
 		}
-		if (executorLifecycle.size <= MAX_COLLECTION_SIZE) return;
-		const keys = Array.from(executorLifecycle.keys());
-		for (let i = 0; i < keys.length - RETAIN_COUNT; i++) {
-			const key = keys[i];
-			if (key !== undefined) executorLifecycle.delete(key);
+		// If still over the limit after purging closed entries, all remaining
+		// entries are active. Do NOT evict them — they will be cleaned up
+		// when they transition to closed via closeExecutor().
+		if (executorLifecycle.size > MAX_COLLECTION_SIZE) {
+			console.warn(
+				`[fusion] Lifecycle map has ${executorLifecycle.size} active entries (limit ${MAX_COLLECTION_SIZE}). All are active — deferring eviction until they close.`,
+			);
 		}
 	};
 

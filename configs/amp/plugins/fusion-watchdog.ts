@@ -94,6 +94,15 @@ export function createActivityWatchdog(
 ): WatchdogControls {
 	let timer: ReturnType<typeof setInterval> | null = null;
 
+	// Declared before the promise so the interval callback can self-clear
+	// on reject without waiting for an external caller to invoke cleanup.
+	const cleanup = () => {
+		if (timer !== null) {
+			clearInterval(timer);
+			timer = null;
+		}
+	};
+
 	const promise = new Promise<never>((_, reject) => {
 		timer = setInterval(() => {
 			const currentTime = now();
@@ -102,17 +111,14 @@ export function createActivityWatchdog(
 
 			const verdict = checkWatchdog(elapsed, lastActivityElapsed, hasInFlight());
 			if (verdict.action === "reject") {
+				// Self-clear the interval immediately so the timer stops firing
+				// after the promise has already rejected. This makes the module
+				// safe to reuse even if a caller forgets to call cleanup().
+				cleanup();
 				reject(new ExecutorWaitError(verdict.message, verdict.kind));
 			}
 		}, intervalMs);
 	});
-
-	const cleanup = () => {
-		if (timer !== null) {
-			clearInterval(timer);
-			timer = null;
-		}
-	};
 
 	return { promise, cleanup };
 }
