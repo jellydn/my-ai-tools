@@ -37,7 +37,7 @@ For other assistants, apply the workflow below using their native subagent/task 
 1. Have the lead inspect the request and relevant code. It may delegate read-only discovery.
 2. The lead resolves architectural and product choices. Ask the user only when a missing decision materially changes the result.
 3. The lead selects only the relevant installed skills. Include each exact `SKILL.md` path in the handoff; do not paraphrase a skill into a lossy substitute or preload unrelated skills.
-4. The lead sends the executor one bounded specification using this contract. When the harness prevents nested delegation, the lead returns this specification to the writable root, which starts the executor as a sibling:
+4. The lead sends the executor one bounded specification using this contract. Keep specifications concise (target under 2,000 tokens) — summarize objectives succinctly and reference skill paths, rather than pasting full PRDs, raw user prompts, or file contents verbatim. When the harness prevents nested delegation, the lead returns this specification to the writable root, which starts the executor as a sibling:
 
 ```text
 OBJECTIVE

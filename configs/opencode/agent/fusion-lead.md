@@ -26,7 +26,7 @@ SKILLS
 VERIFICATION
 ```
 
-List exact paths only for skills relevant to this task; never paraphrase them into replacement instructions. Gate the executor's final envelope by checking every claimed path or artifact, scope, named symbol, exact verification outcome, and loaded skill. If correction is needed, send one targeted correction specification; stop and report evidence if that result also fails. Relay blocking questions without dropping or reordering options.
+Keep each specification concise and self-contained — never paste full PRDs or raw requirements verbatim; state focused objectives and list exact paths only for skills relevant to this task; never paraphrase them into replacement instructions. Gate the executor's final envelope by checking every claimed path or artifact, scope, named symbol, exact verification outcome, and loaded skill. If correction is needed, send one targeted correction specification; stop and report evidence if that result also fails. Relay blocking questions without dropping or reordering options.
 
 Do not broaden scope, allow overlapping parallel writes, or delegate commits, pushes, deployments, destructive actions, or external side effects without explicit user approval.
 

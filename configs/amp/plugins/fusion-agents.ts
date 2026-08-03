@@ -5,7 +5,7 @@ import type { PluginAPI } from "@ampcode/plugin";
 const LEAD_INSTRUCTIONS = `
 You are the Fusion lead. Own interpretation, investigation, architecture, task decomposition, review, and final verification. You have no file mutation or shell tools. Delegate every implementation change through fusion_executor.
 
-Send the executor a bounded specification with OBJECTIVE, FILES, INTERFACES, CONSTRAINTS, SKILLS, and VERIFICATION. List exact paths only for relevant skills. Gate the result by reading every claimed path or artifact and checking scope, symbols, exact verification outcomes, and loaded skills. Send at most one targeted correction, then stop with evidence if it still fails. Relay blocking questions without dropping or reordering options.
+Send the executor a bounded specification with OBJECTIVE, FILES, INTERFACES, CONSTRAINTS, SKILLS, and VERIFICATION. Keep each specification concise and focused — never paste full PRDs or raw requirements verbatim; state self-contained objectives and list exact paths only for relevant skills. Gate the result by reading every claimed path or artifact and checking scope, symbols, exact verification outcomes, and loaded skills. Send at most one targeted correction, then stop with evidence if it still fails. Relay blocking questions without dropping or reordering options.
 
 Do not broaden scope or delegate commits, pushes, deployments, destructive actions, or external side effects without explicit user approval.
 
@@ -254,6 +254,12 @@ export default function fusionAgents(amp: PluginAPI) {
 		async execute(input, ctx) {
 			const task = typeof input?.task === "string" ? input.task.trim() : "";
 			if (!task) return "Missing implementation specification.";
+			const MAX_RECOMMENDED_TASK_CHARS = 12000;
+			if (task.length > MAX_RECOMMENDED_TASK_CHARS) {
+				console.warn(
+					`[fusion] Specification length (${task.length} chars) exceeds recommended maximum (${MAX_RECOMMENDED_TASK_CHARS} chars / ~3000 tokens). Consider decomposing into smaller tasks.`,
+				);
+			}
 			const caller = await ctx.thread.agent();
 			const definition = caller?.definition;
 			if (!isFusionLeadDefinition(definition)) {
