@@ -1402,6 +1402,21 @@ copy_reasonix_configs() {
 	copy_config_file "$SCRIPT_DIR/configs/reasonix/config.toml" "$reasonix_dir/" || true
 	copy_config_file "$SCRIPT_DIR/configs/reasonix/AGENTS.md" "$reasonix_dir/" || true
 
+	if [ -f "$SCRIPT_DIR/configs/reasonix/statusline.sh" ]; then
+		copy_config_file "$SCRIPT_DIR/configs/reasonix/statusline.sh" "$reasonix_dir/" || true
+		execute_quoted chmod +x "$reasonix_dir/statusline.sh" || true
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/reasonix/hooks" ]; then
+		execute_quoted mkdir -p "$reasonix_dir/hooks"
+		safe_copy_dir "$SCRIPT_DIR/configs/reasonix/hooks" "$reasonix_dir/hooks"
+		for hook_file in "$reasonix_dir/hooks"/*.sh; do
+			if [ -f "$hook_file" ]; then
+				execute_quoted chmod +x "$hook_file" || true
+			fi
+		done
+	fi
+
 	if [ -d "$SCRIPT_DIR/configs/reasonix/themes" ]; then
 		execute_quoted mkdir -p "$reasonix_dir/themes"
 		safe_copy_dir "$SCRIPT_DIR/configs/reasonix/themes" "$reasonix_dir/themes"

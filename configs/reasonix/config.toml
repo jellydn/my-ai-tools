@@ -155,7 +155,7 @@ network = true
 [statusline]
 # A custom status line: a command whose first stdout line replaces the built-in
 # data row. It receives {"model","contextUsed","contextWindow","cwd"} as JSON on stdin.
-# command = "my-statusline.sh"
+command = "bash ~/.reasonix/statusline.sh"
 
 # Bot gateway: multi-channel IM bot for QQ, Feishu/Lark, and WeChat.
 [bot]

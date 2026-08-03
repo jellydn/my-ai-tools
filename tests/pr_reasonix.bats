@@ -47,3 +47,29 @@ REASONIX_CONFIG_DIR="$REPO_ROOT/configs/reasonix"
 	run grep -F 'configs/reasonix/themes' "$REPO_ROOT/generate.sh"
 	[ "$status" -eq 0 ]
 }
+
+@test "configs/reasonix/statusline.sh exists and is executable" {
+	[ -f "$REASONIX_CONFIG_DIR/statusline.sh" ]
+	[ -x "$REASONIX_CONFIG_DIR/statusline.sh" ]
+}
+
+@test "configs/reasonix/hooks scripts exist and are executable" {
+	[ -f "$REASONIX_CONFIG_DIR/hooks/setup-hook.sh" ]
+	[ -x "$REASONIX_CONFIG_DIR/hooks/setup-hook.sh" ]
+	[ -f "$REASONIX_CONFIG_DIR/hooks/git-guard.sh" ]
+	[ -x "$REASONIX_CONFIG_DIR/hooks/git-guard.sh" ]
+}
+
+@test "cli.sh copies reasonix statusline.sh and hooks" {
+	run grep -F 'configs/reasonix/statusline.sh' "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+	run grep -F 'configs/reasonix/hooks' "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+}
+
+@test "generate.sh exports reasonix statusline.sh and hooks" {
+	run grep -F 'configs/reasonix/statusline.sh' "$REPO_ROOT/generate.sh"
+	[ "$status" -eq 0 ]
+	run grep -F 'configs/reasonix/hooks' "$REPO_ROOT/generate.sh"
+	[ "$status" -eq 0 ]
+}
