@@ -223,7 +223,7 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'isActiveExecutor(threadID)' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'executorLifecycle.set(thread.id, "active")' "$plugin"
+	run grep -F 'setLifecycle(thread.id, "active")' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'closeExecutor(thread.id)' "$plugin"
 	[ "$status" -eq 0 ]
@@ -253,6 +253,10 @@ JSON
 	run grep -F 'error instanceof ExecutorWaitError' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'Math.max(remainingInactivity, 1000)' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'remainingMaximum' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'setLastActivity' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'MAX_COLLECTION_SIZE' "$plugin"
 	[ "$status" -eq 0 ]

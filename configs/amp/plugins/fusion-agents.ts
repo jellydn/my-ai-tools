@@ -144,9 +144,27 @@ export default function fusionAgents(amp: PluginAPI) {
 	const isActiveExecutor = (threadID: string) => executorLifecycle.get(threadID) === "active";
 	const isClosedExecutor = (threadID: string) => executorLifecycle.get(threadID) === "closed";
 
+	const setLastActivity = (threadID: string, timestamp: number = Date.now()) => {
+		executorLastActivity.delete(threadID);
+		executorLastActivity.set(threadID, timestamp);
+	};
+
+	const setInFlight = (threadID: string, delta: number) => {
+		const count = (executorInFlight.get(threadID) ?? 0) + delta;
+		executorInFlight.delete(threadID);
+		if (count > 0) {
+			executorInFlight.set(threadID, count);
+		}
+	};
+
+	const setLifecycle = (threadID: string, status: ExecutorLifecycle) => {
+		executorLifecycle.delete(threadID);
+		executorLifecycle.set(threadID, status);
+	};
+
 	const closeExecutor = (threadID: string) => {
 		if (!executorLifecycle.has(threadID)) return;
-		executorLifecycle.set(threadID, "closed");
+		setLifecycle(threadID, "closed");
 		executorLastActivity.delete(threadID);
 		executorInFlight.delete(threadID);
 	};
@@ -156,8 +174,8 @@ export default function fusionAgents(amp: PluginAPI) {
 
 		// 1. Fast-path: Track activity/in-flight and allow active executor tool calls immediately without lookups.
 		if (isActiveExecutor(threadID)) {
-			executorLastActivity.set(threadID, Date.now());
-			executorInFlight.set(threadID, (executorInFlight.get(threadID) ?? 0) + 1);
+			setLastActivity(threadID, Date.now());
+			setInFlight(threadID, 1);
 			return { action: "allow" };
 		}
 
@@ -209,13 +227,8 @@ export default function fusionAgents(amp: PluginAPI) {
 	amp.on("tool.result", (event) => {
 		const threadID = event.thread.id;
 		if (isActiveExecutor(threadID)) {
-			const count = executorInFlight.get(threadID) ?? 0;
-			if (count <= 1) {
-				executorInFlight.delete(threadID);
-			} else {
-				executorInFlight.set(threadID, count - 1);
-			}
-			executorLastActivity.set(threadID, Date.now());
+			setInFlight(threadID, -1);
+			setLastActivity(threadID, Date.now());
 		}
 	});
 
@@ -253,8 +266,8 @@ export default function fusionAgents(amp: PluginAPI) {
 				parentThreadID: ctx.thread.id,
 				show: true,
 			});
-			executorLifecycle.set(thread.id, "active");
-			executorLastActivity.set(thread.id, Date.now());
+			setLifecycle(thread.id, "active");
+			setLastActivity(thread.id, Date.now());
 			limitCollections();
 			try {
 				await thread.append([{ type: "user-message", content: task }]);
@@ -271,7 +284,8 @@ export default function fusionAgents(amp: PluginAPI) {
 
 				while (true) {
 					const now = Date.now();
-					if (now - startTime >= EXECUTOR_MAX_TIMEOUT_MS) {
+					const elapsed = now - startTime;
+					if (elapsed >= EXECUTOR_MAX_TIMEOUT_MS) {
 						throw new ExecutorWaitError(
 							`Executor exceeded maximum wait of ${EXECUTOR_MAX_TIMEOUT_MS / 60000} minutes (total elapsed).`,
 							"max-wait",
@@ -288,8 +302,13 @@ export default function fusionAgents(amp: PluginAPI) {
 						);
 					}
 
+					const remainingMaximum = EXECUTOR_MAX_TIMEOUT_MS - elapsed;
 					const remainingInactivity = EXECUTOR_INACTIVITY_TIMEOUT_MS - (now - lastActivityCheck);
-					const pollTimeout = Math.min(EXECUTOR_POLL_INTERVAL_MS, Math.max(remainingInactivity, 1000));
+					const pollTimeout = Math.min(
+						EXECUTOR_POLL_INTERVAL_MS,
+						Math.max(remainingInactivity, 1000),
+						Math.max(remainingMaximum, 1000),
+					);
 
 					try {
 						const response = await thread.waitForResponse({ timeoutMs: pollTimeout });
