@@ -47,7 +47,14 @@ const EXECUTOR_TOOLS = [
 	"mcp__*",
 ] as const;
 
-const EXECUTOR_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutes
+// Activity-aware progressive waiting: instead of one hard wall-clock timeout
+// that kills executors still making progress, we poll in short intervals and
+// only declare a genuine timeout when the executor has had NO activity (tool
+// calls or results) for EXECUTOR_INACTIVITY_TIMEOUT_MS. An absolute cap still
+// prevents infinite waiting on a runaway thread.
+const EXECUTOR_POLL_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes per poll
+const EXECUTOR_INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000; // 10 min of no activity = stuck
+const EXECUTOR_MAX_TIMEOUT_MS = 60 * 60 * 1000; // 60 min absolute cap
 
 type ExecutorLifecycle = "active" | "closed";
 
@@ -65,15 +72,11 @@ function failedExecutorEnvelope(reason: string, verification = "none"): string {
 	].join("\n");
 }
 
-function isFusionLeadDefinition(
-	definition: { kind: string; name?: string } | undefined | null,
-): boolean {
+function isFusionLeadDefinition(definition: { kind: string; name?: string } | undefined | null): boolean {
 	return definition?.kind === "agent-definition" && definition?.name === "fusion-lead";
 }
 
-function isFusionExecutorDefinition(
-	definition: { kind: string; name?: string } | undefined | null,
-): boolean {
+function isFusionExecutorDefinition(definition: { kind: string; name?: string } | undefined | null): boolean {
 	return definition?.kind === "agent-definition" && definition?.name === "fusion-executor";
 }
 
@@ -81,6 +84,9 @@ export default function fusionAgents(amp: PluginAPI) {
 	// Exact thread IDs owned by this plugin instance. Name checks alone are not a unique principal.
 	const leadThreadIDs = new Set<string>();
 	const executorLifecycle = new Map<string, ExecutorLifecycle>();
+	// Last activity timestamp (tool.call or tool.result) per executor thread.
+	// Used by the progressive wait loop to distinguish a busy executor from a stuck one.
+	const executorLastActivity = new Map<string, number>();
 
 	// Cache thread agent definitions to avoid redundant database lookups.
 	// @ampcode/plugin types are not bundled in this repo, so the cached value is
@@ -109,6 +115,7 @@ export default function fusionAgents(amp: PluginAPI) {
 		evictOldest(leadThreadIDs);
 		evictOldest(executorLifecycle);
 		evictOldest(threadAgentCache);
+		evictOldest(executorLastActivity);
 	};
 
 	const getThreadAgent = async (threadID: string): Promise<ThreadAgent> => {
@@ -127,10 +134,17 @@ export default function fusionAgents(amp: PluginAPI) {
 	const closeExecutor = (threadID: string) => {
 		if (!executorLifecycle.has(threadID)) return;
 		executorLifecycle.set(threadID, "closed");
+		executorLastActivity.delete(threadID);
 	};
 
 	amp.on("tool.call", async (event) => {
 		const threadID = event.thread.id;
+
+		// Track activity for active executors so the progressive wait loop
+		// can distinguish a busy executor from a stuck one.
+		if (isActiveExecutor(threadID)) {
+			executorLastActivity.set(threadID, Date.now());
+		}
 
 		// 1. Fast-path: Allow active executor tool calls immediately without lookups.
 		if (isActiveExecutor(threadID)) {
@@ -141,8 +155,7 @@ export default function fusionAgents(amp: PluginAPI) {
 		if (isClosedExecutor(threadID)) {
 			return {
 				action: "reject-and-continue",
-				message:
-					"Fusion executor task is no longer active. Stop tool use and wait for a new delegated task.",
+				message: "Fusion executor task is no longer active. Stop tool use and wait for a new delegated task.",
 			};
 		}
 
@@ -171,13 +184,23 @@ export default function fusionAgents(amp: PluginAPI) {
 			if (isFusionExecutorDefinition(definition)) {
 				return {
 					action: "reject-and-continue",
-					message:
-						"Fusion executor task is no longer active. Stop tool use and wait for a new delegated task.",
+					message: "Fusion executor task is no longer active. Stop tool use and wait for a new delegated task.",
 				};
 			}
 		}
 
 		return { action: "allow" };
+	});
+
+	// Track tool results for active executors as activity signals.
+	// This catches long-running tool calls (shell_command, apply_patch) that
+	// span multiple poll intervals — the result arrival proves the executor
+	// is still making progress, not stuck.
+	amp.on("tool.result", (event) => {
+		const threadID = event.thread.id;
+		if (isActiveExecutor(threadID)) {
+			executorLastActivity.set(threadID, Date.now());
+		}
 	});
 
 	const executor = amp.createAgent({
@@ -215,14 +238,60 @@ export default function fusionAgents(amp: PluginAPI) {
 				show: true,
 			});
 			executorLifecycle.set(thread.id, "active");
+			executorLastActivity.set(thread.id, Date.now());
 			limitCollections();
 			try {
 				await thread.append([{ type: "user-message", content: task }]);
-				const response = await thread.waitForResponse({ timeoutMs: EXECUTOR_TIMEOUT_MS });
-				return response.content
-					.filter((block) => block.type === "text")
-					.map((block) => block.text)
-					.join("\n");
+
+				// Activity-aware progressive wait: poll in short intervals instead
+				// of one hard wall-clock timeout. After each poll, check whether the
+				// executor had any tool activity (tool.call/tool.result) since the
+				// last check. If yes, the executor is still making progress — extend
+				// the wait. Only declare a genuine timeout when there has been no
+				// activity for EXECUTOR_INACTIVITY_TIMEOUT_MS, or when the absolute
+				// cap EXECUTOR_MAX_TIMEOUT_MS is reached.
+				const startTime = Date.now();
+				let lastActivityCheck = Date.now();
+
+				while (true) {
+					const elapsed = Date.now() - startTime;
+					if (elapsed >= EXECUTOR_MAX_TIMEOUT_MS) {
+						throw new Error(`Executor exceeded maximum wait of ${EXECUTOR_MAX_TIMEOUT_MS / 60000} minutes (total elapsed).`);
+					}
+
+					const remainingInactivity = EXECUTOR_INACTIVITY_TIMEOUT_MS - (Date.now() - lastActivityCheck);
+					const pollTimeout = Math.min(EXECUTOR_POLL_INTERVAL_MS, Math.max(remainingInactivity, 0));
+
+					try {
+						const response = await thread.waitForResponse({ timeoutMs: pollTimeout });
+						return response.content
+							.filter((block) => block.type === "text")
+							.map((block) => block.text)
+							.join("\n");
+					} catch (pollError) {
+						const pollReason =
+							pollError instanceof Error ? pollError.message : typeof pollError === "string" ? pollError : "";
+						// Non-timeout errors propagate to the outer catch as real failures.
+						if (!/timeout/i.test(pollReason)) throw pollError;
+
+						// Check if the executor had activity since our last check.
+						const currentActivity = executorLastActivity.get(thread.id);
+						if (currentActivity !== undefined && currentActivity > lastActivityCheck) {
+							// Executor is still working — extend the wait.
+							lastActivityCheck = currentActivity;
+							continue;
+						}
+
+						// No activity since the last check. If the inactivity period
+						// has elapsed, this is a genuine timeout (executor is stuck).
+						if (Date.now() - lastActivityCheck >= EXECUTOR_INACTIVITY_TIMEOUT_MS) {
+							throw new Error(`Executor timed out after ${EXECUTOR_INACTIVITY_TIMEOUT_MS / 60000} minutes of inactivity.`);
+						}
+
+						// Otherwise, keep polling until the inactivity period elapses.
+						continue;
+					}
+				}
 			} catch (error) {
 				try {
 					await thread.cancel();
@@ -230,13 +299,13 @@ export default function fusionAgents(amp: PluginAPI) {
 					// Late calls still fail closed through the closed-executor lifecycle.
 				}
 				const reason =
-					error instanceof Error
-						? error.message
-						: typeof error === "string"
-							? error
-							: "Executor task failed or timed out.";
-				const verification = /timeout/i.test(reason)
-					? "timeout — unresolved verification commands were not completed"
+					error instanceof Error ? error.message : typeof error === "string" ? error : "Executor task failed or timed out.";
+				const isTimeout = /timeout/i.test(reason) || /maximum wait/i.test(reason);
+				const isMaxWait = /maximum wait/i.test(reason);
+				const verification = isTimeout
+					? isMaxWait
+						? "max-wait timeout — executor was still active but exceeded the absolute time cap"
+						: "inactivity timeout — executor had no tool activity and was cancelled"
 					: "failed — unresolved verification commands were not completed";
 				return failedExecutorEnvelope(reason, verification);
 			} finally {
