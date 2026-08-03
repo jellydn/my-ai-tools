@@ -244,6 +244,16 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'evictOldest(threadAgentCache)' "$plugin"
 	[ "$status" -eq 0 ]
+	run grep -F 'evictOldest(executorInFlight)' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'executorInFlight.delete(threadID)' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'class ExecutorWaitError' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'error instanceof ExecutorWaitError' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'Math.max(remainingInactivity, 1000)' "$plugin"
+	[ "$status" -eq 0 ]
 	run grep -F 'MAX_COLLECTION_SIZE' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'RETAIN_COUNT' "$plugin"
