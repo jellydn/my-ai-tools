@@ -1,0 +1,55 @@
+{
+	"schemaVersion": 2,
+	"id": "kanagawa",
+	"name": "Kanagawa",
+	"author": "rebelot (Kanagawa) / my-ai-tools",
+	"description": "Japanese-inspired palette from rebelot/kanagawa.nvim (Wave palette for dark, Lotus for light).",
+	"license": "MIT",
+	"baseStyle": "graphite",
+	"tokens": {
+		"light": {
+			"bg": "#F2ECBC",
+			"bgSoft": "#E6E0B2",
+			"bgElev": "#E4DEB2",
+			"panel": "#F2ECBC",
+			"sidebar": "#E6E0B2",
+			"chat": "#F2ECBC",
+			"workspace": "#F2ECBC",
+			"workspaceFiles": "#E6E0B2",
+			"border": "#D4CD9E",
+			"borderSoft": "#E4DEB2",
+			"fg": "#43432C",
+			"fgDim": "#6E6D5C",
+			"fgFaint": "#8A897C",
+			"accent": "#4C6A8D",
+			"accentFg": "#F2ECBC",
+			"ok": "#6E8B3D",
+			"warn": "#C3723D",
+			"err": "#C84E53"
+		},
+		"dark": {
+			"bg": "#1F1F28",
+			"bgSoft": "#2A2A37",
+			"bgElev": "#363646",
+			"panel": "#1F1F28",
+			"sidebar": "#16161D",
+			"chat": "#1F1F28",
+			"workspace": "#1F1F28",
+			"workspaceFiles": "#16161D",
+			"border": "#363646",
+			"borderSoft": "#2D2D3F",
+			"fg": "#DCD7BA",
+			"fgDim": "#727169",
+			"fgFaint": "#54546D",
+			"accent": "#7E9CD8",
+			"accentFg": "#1F1F28",
+			"ok": "#98BB6C",
+			"warn": "#FFA066",
+			"err": "#FF5D62"
+		}
+	},
+	"recipes": {
+		"density": "comfortable",
+		"corners": "round"
+	}
+}

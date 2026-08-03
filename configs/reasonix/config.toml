@@ -232,12 +232,12 @@ api_base = "https://ilinkai.weixin.qq.com"
 [[plugins]]
 name    = "context7"
 command = "npx"
-args    = ["-y", "@upstash/context7-mcp@latest"]
+args    = ["-y", "@upstash/context7-mcp@3.2.5"]
 
 [[plugins]]
 name    = "sequential-thinking"
 command = "npx"
-args    = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+args    = ["-y", "@modelcontextprotocol/server-sequential-thinking@2026.7.4"]
 
 [[plugins]]
 name    = "qmd"
@@ -255,7 +255,7 @@ command = "fff-mcp"
 [[plugins]]
 name    = "react-grab-mcp"
 command = "npx"
-args    = ["-y", "@react-grab/mcp", "--stdio"]
+args    = ["-y", "@react-grab/mcp@0.1.37", "--stdio"]
 
 [[plugins]]
 name    = "logpilot"
@@ -265,7 +265,7 @@ args    = ["mcp-server"]
 [[plugins]]
 name    = "agentmemory"
 command = "npx"
-args    = ["-y", "@agentmemory/mcp"]
+args    = ["-y", "@agentmemory/mcp@0.9.28"]
 
 [[plugins]]
 name    = "sem"
