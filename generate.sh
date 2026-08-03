@@ -262,6 +262,11 @@ generate_amp_configs() {
 		safe_copy_dir "$HOME/.config/amp/plugins" "$SCRIPT_DIR/configs/amp/plugins"
 	fi
 
+	# Copy shared library modules
+	if [ -d "$HOME/.config/amp/lib" ]; then
+		safe_copy_dir "$HOME/.config/amp/lib" "$SCRIPT_DIR/configs/amp/lib"
+	fi
+
 	log_success "Amp configs generated"
 }
 

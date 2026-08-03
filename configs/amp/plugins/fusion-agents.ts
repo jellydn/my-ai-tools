@@ -6,7 +6,7 @@ import {
 	EXECUTOR_MAX_TIMEOUT_MS,
 	ExecutorWaitError,
 	MAX_RECOMMENDED_TASK_CHARS,
-} from "./fusion-watchdog";
+} from "../lib/fusion-watchdog";
 
 const LEAD_INSTRUCTIONS = `
 You are the Fusion lead. Own interpretation, investigation, architecture, task decomposition, review, and final verification. You have no file mutation or shell tools. Delegate every implementation change through fusion_executor.

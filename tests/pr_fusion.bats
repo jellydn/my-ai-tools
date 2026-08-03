@@ -207,8 +207,12 @@ JSON
 
 @test "Amp Fusion mode restricts lead tools and exposes executor delegation" {
 	local plugin="$REPO_ROOT/configs/amp/plugins/fusion-agents.ts"
-	local watchdog="$REPO_ROOT/configs/amp/plugins/fusion-watchdog.ts"
+	local watchdog="$REPO_ROOT/configs/amp/lib/fusion-watchdog.ts"
 	[ -f "$watchdog" ]
+	# Watchdog helper must NOT live in the plugins directory — Amp scans every
+	# .ts file there as a standalone plugin, and the helper has no default
+	# export, causing "Plugin must export a default function" crashes.
+	[ ! -f "$REPO_ROOT/configs/amp/plugins/fusion-watchdog.ts" ]
 	run grep -F 'name: "fusion_executor"' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'key: "fusion"' "$plugin"
@@ -320,6 +324,9 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'copy_config_file "$plugin_dir" "$HOME/.config/amp/plugins"' "$REPO_ROOT/cli.sh"
 	[ "$status" -eq 0 ]
+	# Installer must copy shared library modules to a non-plugin directory.
+	run grep -F 'safe_copy_dir "$SCRIPT_DIR/configs/amp/lib" "$HOME/.config/amp/lib"' "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
 	run grep -F 'safe_copy_dir "$SCRIPT_DIR/configs/codex/agents"' "$REPO_ROOT/cli.sh"
 	[ "$status" -eq 0 ]
 	run grep -F 'safe_copy_dir "$SCRIPT_DIR/configs/pi/agents"' "$REPO_ROOT/cli.sh"
@@ -328,6 +335,18 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'def get_source: if type == "object" then .source else . end' "$REPO_ROOT/cli.sh"
 	[ "$status" -eq 0 ]
+}
+
+@test "every TypeScript file in amp plugins exports a default function" {
+	# Amp scans every .ts file in ~/.config/amp/plugins as a standalone plugin.
+	# A module without a default export crashes with "Plugin must export a
+	# default function". This regression guard ensures no helper modules are
+	# accidentally placed in the plugins directory.
+	for ts_file in "$REPO_ROOT"/configs/amp/plugins/*.ts; do
+		[ -f "$ts_file" ]
+		run grep -F 'export default function' "$ts_file"
+		[ "$status" -eq 0 ]
+	done
 }
 
 @test "OpenCode ships open-cursor with cursor-acp provider and omniroute/free default" {

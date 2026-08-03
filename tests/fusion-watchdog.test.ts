@@ -5,7 +5,7 @@ import {
 	EXECUTOR_INACTIVITY_TIMEOUT_MS,
 	EXECUTOR_MAX_TIMEOUT_MS,
 	ExecutorWaitError,
-} from "../configs/amp/plugins/fusion-watchdog";
+} from "../configs/amp/lib/fusion-watchdog";
 
 // ─── Pure function tests: checkWatchdog ──────────────────────────────
 

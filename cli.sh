@@ -1072,6 +1072,12 @@ copy_amp_configs() {
 		done
 	fi
 
+	# Copy shared library modules (not plugins — Amp does not scan lib/)
+	if [ -d "$SCRIPT_DIR/configs/amp/lib" ]; then
+		execute_quoted mkdir -p "$HOME/.config/amp/lib"
+		safe_copy_dir "$SCRIPT_DIR/configs/amp/lib" "$HOME/.config/amp/lib"
+	fi
+
 	log_success "Amp configs copied"
 }
 
