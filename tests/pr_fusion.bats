@@ -226,74 +226,66 @@ JSON
 	run grep -F 'event.tool === "fusion_executor"' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'show: true' "$plugin"
+	[ "$status" -ne 0 ]
+	# agent.run() pattern — no manual createThread/show.
+	run grep -F 'executor.run(' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'isActiveExecutor(threadID)' "$plugin"
-	[ "$status" -eq 0 ]
-	# Unified session: single map with one eviction policy (no split state).
-	run grep -F 'executors.set(thread.id, {' "$plugin"
-	[ "$status" -eq 0 ]
-	run grep -F 'closeExecutor(thread.id)' "$plugin"
-	[ "$status" -eq 0 ]
-	run grep -F 'isClosedExecutor(threadID)' "$plugin"
+	run grep -F 'parentThreadID: ctx.thread.id' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'leadThreadIDs.add' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'failedExecutorEnvelope' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'await thread.cancel()' "$plugin"
-	[ "$status" -eq 0 ]
-	# Bounded eviction (regression guard for the direction bug): the shared
-	# evictOldest helper must evict oldest entries, and the dead isKnownExecutor
-	# helper must stay removed so closed/active checks don't regress.
+	# Bounded eviction for lead thread IDs, active lead set, and agent cache.
 	run grep -F 'evictOldest(leadThreadIDs)' "$plugin"
 	[ "$status" -eq 0 ]
-	# Unified session eviction: never evict active executors.
-	run grep -F 'evictClosedSessions()' "$plugin"
+	run grep -F 'evictOldest(activeLeadThreadIDs)' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'evictOldest(threadAgentCache)' "$plugin"
 	[ "$status" -eq 0 ]
-	# ExecutorError is defined in the extracted watchdog module.
+	# Watchdog module is a standalone tested utility — ExecutorWaitError lives there.
 	run grep -F 'class ExecutorWaitError' "$watchdog"
 	[ "$status" -eq 0 ]
-	run grep -F 'ExecutorWaitError' "$plugin"
+	# Plugin imports the timeout constant from the watchdog module.
+	run grep -F 'EXECUTOR_MAX_TIMEOUT_MS' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'error instanceof ExecutorWaitError' "$plugin"
+	# No custom watchdog race — agent.run() timeoutMs handles the absolute cap.
+	# A Promise.race that can't cancel the losing promise leaves the executor
+	# running in the background, so it was removed for safety.
+	[ "$(grep -c 'createActivityWatchdog' "$plugin")" -eq 0 ]
+	[ "$(grep -c 'Promise.race' "$plugin")" -eq 0 ]
+	[ "$(grep -c 'watchdog.cleanup' "$plugin")" -eq 0 ]
+	# Active lead tracking uses a Set (concurrent-safe) not a single variable.
+	run grep -F 'activeLeadThreadIDs' "$plugin"
 	[ "$status" -eq 0 ]
-	# Watchdog architecture: single waitForResponse raced against an activity watchdog.
-	run grep -F 'createActivityWatchdog' "$plugin"
+	run grep -F 'activeLeadThreadIDs.add' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'Promise.race' "$plugin"
+	run grep -F 'activeLeadThreadIDs.delete' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'watchdog.cleanup()' "$plugin"
-	[ "$status" -eq 0 ]
-	# Set-based in-flight tracking within the unified session (not a separate map).
-	run grep -F 'addInFlight(threadID, event.toolUseID)' "$plugin"
-	[ "$status" -eq 0 ]
-	run grep -F 'removeInFlight(threadID, event.toolUseID)' "$plugin"
-	[ "$status" -eq 0 ]
-	# Semantic session eviction: never evict active executors.
-	run grep -F 'evictClosedSessions' "$plugin"
-	[ "$status" -eq 0 ]
-	# The eviction policy must NOT have a fallback that evicts active entries.
-	# Verify the comment that documents this invariant is present.
-	run grep -F 'Do NOT evict them' "$plugin"
-	[ "$status" -eq 0 ]
-	run grep -F 'setLastActivity' "$plugin"
-	[ "$status" -eq 0 ]
-	run grep -F 'MAX_COLLECTION_SIZE' "$plugin"
-	[ "$status" -eq 0 ]
-	run grep -F 'RETAIN_COUNT' "$plugin"
-	[ "$status" -eq 0 ]
-	[ "$(grep -c 'isKnownExecutor' "$plugin")" -eq 0 ]
-	# No split-state maps — all executor state is in the unified sessions map.
+	# No single-variable active-run state — concurrent leads must not overwrite.
+	[ "$(grep -c 'activeRunLastActivity' "$plugin")" -eq 0 ]
+	[ "$(grep -c 'activeRunInFlight' "$plugin")" -eq 0 ]
+	[ "$(grep -c 'activeRunLeadThreadID' "$plugin")" -eq 0 ]
+	# No split-state maps.
 	[ "$(grep -c 'executorLifecycle' "$plugin")" -eq 0 ]
 	[ "$(grep -c 'executorLastActivity' "$plugin")" -eq 0 ]
 	[ "$(grep -c 'executorInFlight' "$plugin")" -eq 0 ]
+	[ "$(grep -c 'ExecutorSession' "$plugin")" -eq 0 ]
+	[ "$(grep -c 'evictClosedSessions' "$plugin")" -eq 0 ]
+	# No manual lifecycle — use agent.run() instead.
+	[ "$(grep -c 'createThread' "$plugin")" -eq 0 ]
+	[ "$(grep -c 'thread.append' "$plugin")" -eq 0 ]
+	[ "$(grep -c 'waitForResponse' "$plugin")" -eq 0 ]
 	# MAX_RECOMMENDED_TASK_CHARS must be a plugin local, not in the watchdog module.
 	run grep -F 'MAX_RECOMMENDED_TASK_CHARS' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'MAX_RECOMMENDED_TASK_CHARS' "$watchdog"
 	[ "$status" -ne 0 ]
+	run grep -F 'MAX_COLLECTION_SIZE' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'RETAIN_COUNT' "$plugin"
+	[ "$status" -eq 0 ]
+	[ "$(grep -c 'isKnownExecutor' "$plugin")" -eq 0 ]
 	run sed -n '/const LEAD_TOOLS = \[/,/\] as const;/p' "$plugin"
 	[ "$status" -eq 0 ]
 	[[ "$output" != *"apply_patch"* ]]

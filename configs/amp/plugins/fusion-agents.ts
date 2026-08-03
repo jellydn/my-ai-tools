@@ -1,7 +1,7 @@
 // @amp-agent-mode {"key":"fusion","label":"Fusion"}
 
 import type { PluginAPI } from "@ampcode/plugin";
-import { createActivityWatchdog, EXECUTOR_MAX_TIMEOUT_MS, ExecutorWaitError } from "../lib/fusion-watchdog";
+import { EXECUTOR_MAX_TIMEOUT_MS } from "../lib/fusion-watchdog";
 
 /** Soft warning threshold for oversized task specifications (~2000 tokens). */
 const MAX_RECOMMENDED_TASK_CHARS = 8000;
@@ -73,23 +73,15 @@ function isFusionExecutorDefinition(definition: { kind: string; name?: string } 
 	return definition?.kind === "agent-definition" && definition?.name === "fusion-executor";
 }
 
-/**
- * One conceptual object — an executor session — stored as a single record.
- * This eliminates the split-state bug where activity/in-flight maps could be
- * LRU-evicted independently of the lifecycle map, causing the watchdog to
- * read stale data for a still-active executor.
- */
-interface ExecutorSession {
-	status: "active" | "closed";
-	lastActivity: number;
-	inFlight: Set<string>;
-}
-
 export default function fusionAgents(amp: PluginAPI) {
 	// Exact thread IDs owned by this plugin instance. Name checks alone are not a unique principal.
 	const leadThreadIDs = new Set<string>();
-	// Single map for all executor session state — one eviction policy, no desync.
-	const executors = new Map<string, ExecutorSession>();
+
+	// Lead threads that currently have an executor run in flight. Uses a Set
+	// (not a single variable) so concurrent Fusion leads don't overwrite each
+	// other's state. When this set is empty, orphaned executor threads are
+	// rejected to prevent background mutation after a run ends.
+	const activeLeadThreadIDs = new Set<string>();
 
 	// Cache thread agent definitions to avoid redundant database lookups.
 	// @ampcode/plugin types are not bundled in this repo, so the cached value is
@@ -113,30 +105,9 @@ export default function fusionAgents(amp: PluginAPI) {
 		}
 	};
 
-	// Semantic eviction for executor sessions: never discard active executors.
-	// Closed entries are purged first. If all remaining entries are active
-	// and the collection still exceeds MAX_COLLECTION_SIZE, we leave them —
-	// active executors will be purged naturally when they become closed via
-	// closeExecutor(). Evicting active entries would break in-flight work.
-	const evictClosedSessions = () => {
-		if (executors.size <= MAX_COLLECTION_SIZE) return;
-		for (const [key, session] of executors) {
-			if (session.status === "closed") executors.delete(key);
-		}
-		// If still over the limit after purging closed entries, all remaining
-		// entries are active. Do NOT evict them — they will be cleaned up
-		// when they transition to closed via closeExecutor().
-		if (executors.size > MAX_COLLECTION_SIZE) {
-			console.warn(
-				`[fusion] Executor map has ${executors.size} active entries (limit ${MAX_COLLECTION_SIZE}). All are active — deferring eviction until they close.`,
-			);
-		}
-	};
-
-	// Keep all collections bounded to prevent unbounded growth in long-lived sessions.
 	const limitCollections = () => {
 		evictOldest(leadThreadIDs);
-		evictClosedSessions();
+		evictOldest(activeLeadThreadIDs);
 		evictOldest(threadAgentCache);
 	};
 
@@ -150,82 +121,10 @@ export default function fusionAgents(amp: PluginAPI) {
 		return agent;
 	};
 
-	const getSession = (threadID: string): ExecutorSession | undefined => executors.get(threadID);
-	const isActiveExecutor = (threadID: string) => executors.get(threadID)?.status === "active";
-	const isClosedExecutor = (threadID: string) => executors.get(threadID)?.status === "closed";
-
-	// Refresh Map insertion order on touch so evictOldest preserves recently-active sessions.
-	const touchSession = (threadID: string) => {
-		const session = executors.get(threadID);
-		if (session) {
-			executors.delete(threadID);
-			executors.set(threadID, session);
-		}
-	};
-
-	const setLastActivity = (threadID: string, timestamp: number = Date.now()) => {
-		const session = executors.get(threadID);
-		if (session) {
-			session.lastActivity = timestamp;
-			touchSession(threadID);
-		}
-	};
-
-	const addInFlight = (threadID: string, toolUseID: string) => {
-		const session = executors.get(threadID);
-		if (session) {
-			session.inFlight.add(toolUseID);
-			touchSession(threadID);
-		}
-	};
-
-	const removeInFlight = (threadID: string, toolUseID: string) => {
-		const session = executors.get(threadID);
-		if (!session) return;
-		session.inFlight.delete(toolUseID);
-	};
-
-	const hasInFlight = (threadID: string): boolean => {
-		const session = executors.get(threadID);
-		return session ? session.inFlight.size > 0 : false;
-	};
-
-	const setLifecycle = (threadID: string, status: ExecutorSession["status"]) => {
-		const session = executors.get(threadID);
-		if (session) {
-			session.status = status;
-			touchSession(threadID);
-		}
-	};
-
-	const closeExecutor = (threadID: string) => {
-		const session = executors.get(threadID);
-		if (!session) return;
-		session.status = "closed";
-		session.inFlight.clear();
-		// Keep lastActivity for diagnostics until the session is evicted.
-		touchSession(threadID);
-	};
-
 	amp.on("tool.call", async (event) => {
 		const threadID = event.thread.id;
 
-		// 1. Fast-path: Track activity/in-flight and allow active executor tool calls immediately.
-		if (isActiveExecutor(threadID)) {
-			setLastActivity(threadID, Date.now());
-			addInFlight(threadID, event.toolUseID);
-			return { action: "allow" };
-		}
-
-		// 2. Fast-path: Reject closed/inactive executor tool calls immediately without lookups.
-		if (isClosedExecutor(threadID)) {
-			return {
-				action: "reject-and-continue",
-				message: "Fusion executor task is no longer active. Stop tool use and wait for a new delegated task.",
-			};
-		}
-
-		// 3. Delegation checks for the fusion_executor tool.
+		// Delegation check: only the Fusion lead can call fusion_executor.
 		if (event.tool === "fusion_executor") {
 			if (leadThreadIDs.has(threadID)) {
 				return { action: "allow" };
@@ -243,8 +142,10 @@ export default function fusionAgents(amp: PluginAPI) {
 			};
 		}
 
-		// 4. Fallback for orphaned or completed executor threads not in our active lifecycle map.
-		if (!leadThreadIDs.has(threadID)) {
+		// Reject orphaned fusion-executor threads when no run is active.
+		// This prevents stale executor threads from making tool calls after
+		// their run has ended or timed out.
+		if (!leadThreadIDs.has(threadID) && activeLeadThreadIDs.size === 0) {
 			const agent = await getThreadAgent(threadID);
 			const definition = agent?.definition;
 			if (isFusionExecutorDefinition(definition)) {
@@ -256,18 +157,6 @@ export default function fusionAgents(amp: PluginAPI) {
 		}
 
 		return { action: "allow" };
-	});
-
-	// Track tool results for active executors as activity signals.
-	// This catches long-running tool calls (shell_command, apply_patch) that
-	// span multiple watchdog intervals — the result arrival proves the executor
-	// is still making progress, not stuck.
-	amp.on("tool.result", (event) => {
-		const threadID = event.thread.id;
-		if (isActiveExecutor(threadID)) {
-			removeInFlight(threadID, event.toolUseID);
-			setLastActivity(threadID, Date.now());
-		}
 	});
 
 	const executor = amp.createAgent({
@@ -303,71 +192,29 @@ export default function fusionAgents(amp: PluginAPI) {
 				return "Only the Fusion lead can delegate to the Fusion executor.";
 			}
 			leadThreadIDs.add(ctx.thread.id);
+			activeLeadThreadIDs.add(ctx.thread.id);
 			limitCollections();
 
-			const thread = await executor.createThread({
-				parentThreadID: ctx.thread.id,
-				show: true,
-			});
-			const startTime = Date.now();
-			executors.set(thread.id, {
-				status: "active",
-				lastActivity: startTime,
-				inFlight: new Set(),
-			});
-			limitCollections();
+			// Use agent.run() — the documented custom-subagent pattern. This
+			// handles thread lifecycle internally and avoids the 30-second
+			// thread.messages RPC timeout that the manual approach hits.
+			// run()'s timeoutMs provides the 60-minute absolute cap.
 			try {
-				await thread.append([{ type: "user-message", content: task }]);
-
-				// Activity-aware wait: race a single long-lived waitForResponse
-				// against an independent activity watchdog. The watchdog checks
-				// inactivity and max-wait deadlines on an interval and rejects
-				// with a typed ExecutorWaitError. This avoids the two blockers
-				// of the old polling approach:
-				//  1. No regex matching of Amp's timeout error message — the
-				//     watchdog owns all timeout classification.
-				//  2. One continuous waitForResponse subscription — no missed
-				//     responses between poll cycles.
-				const watchdog = createActivityWatchdog(
-					() => getSession(thread.id)?.lastActivity ?? startTime,
-					() => hasInFlight(thread.id),
-					startTime,
-				);
-
-				try {
-					// Give waitForResponse a small grace period beyond the watchdog's
-					// max-wait so the watchdog always fires first.
-					const response = await Promise.race([
-						thread.waitForResponse({ timeoutMs: EXECUTOR_MAX_TIMEOUT_MS + 5_000 }),
-						watchdog.promise,
-					]);
-					return response.content
-						.filter((block) => block.type === "text")
-						.map((block) => block.text)
-						.join("\n");
-				} finally {
-					watchdog.cleanup();
-				}
+				const result = await executor.run(task, {
+					parentThreadID: ctx.thread.id,
+					timeoutMs: EXECUTOR_MAX_TIMEOUT_MS,
+				});
+				return result.text;
 			} catch (error) {
-				try {
-					await thread.cancel();
-				} catch {
-					// Late calls still fail closed through the closed-executor lifecycle.
-				}
 				const reason =
 					error instanceof Error ? error.message : typeof error === "string" ? error : "Executor task failed or timed out.";
-				let verification: string;
-				if (error instanceof ExecutorWaitError) {
-					verification =
-						error.kind === "max-wait"
-							? "max-wait timeout — executor was still active but exceeded the absolute time cap"
-							: "inactivity timeout — executor had no tool activity and was cancelled";
-				} else {
-					verification = "failed — unresolved verification commands were not completed";
-				}
+				const isTimeout = /timeout|timed out/i.test(reason);
+				const verification = isTimeout
+					? "timeout — executor exceeded the maximum wait"
+					: "failed — unresolved verification commands were not completed";
 				return failedExecutorEnvelope(reason, verification);
 			} finally {
-				closeExecutor(thread.id);
+				activeLeadThreadIDs.delete(ctx.thread.id);
 			}
 		},
 	});
