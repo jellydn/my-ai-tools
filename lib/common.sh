@@ -466,7 +466,6 @@ validate_yaml() {
 # Returns: 0 if valid, 1 if invalid
 validate_toml() {
 	local filepath="$1"
-	local validator_found=false
 
 	if [ ! -f "$filepath" ]; then
 		log_error "File not found: $filepath"
@@ -475,31 +474,32 @@ validate_toml() {
 
 	if command -v python3 &>/dev/null; then
 		if python3 -c 'import tomllib' >/dev/null 2>&1; then
-			validator_found=true
 			if FILEPATH="$filepath" python3 -c 'import os, tomllib; tomllib.loads(open(os.environ["FILEPATH"]).read())' 2>/dev/null; then
 				log_success "TOML validated: $filepath (Python/tomllib)"
 				return 0
+			else
+				log_error "Invalid TOML in: $filepath"
+				return 1
 			fi
 		elif python3 -c 'import tomli' >/dev/null 2>&1; then
-			validator_found=true
 			if FILEPATH="$filepath" python3 -c 'import os, tomli; tomli.loads(open(os.environ["FILEPATH"]).read())' 2>/dev/null; then
 				log_success "TOML validated: $filepath (Python/tomli)"
 				return 0
+			else
+				log_error "Invalid TOML in: $filepath"
+				return 1
 			fi
 		fi
 	fi
 
 	if command -v taplo &>/dev/null; then
-		validator_found=true
 		if taplo check "$filepath" 2>/dev/null; then
 			log_success "TOML validated: $filepath (taplo)"
 			return 0
+		else
+			log_error "Invalid TOML in: $filepath"
+			return 1
 		fi
-	fi
-
-	if [ "$validator_found" = true ]; then
-		log_error "Invalid TOML in: $filepath"
-		return 1
 	fi
 
 	log_warning "No TOML validator available (python3 tomllib/tomli or taplo), skipping TOML validation for: $filepath"
