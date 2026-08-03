@@ -191,14 +191,17 @@ test("Promise.race: immediate resolution wins over watchdog", async () => {
 
 test("createActivityWatchdog: self-clears interval on reject (no timer leak)", async () => {
 	let tickCount = 0;
-	let lastActivity = 0;
-	let inFlight = false;
 	const startTime = 0;
 
-	// Use a very short interval to verify the timer stops after reject
+	// Track ticks via the getLastActivity callback, which fires on every
+	// interval evaluation. After rejection, the interval should self-clear
+	// and tickCount must stop increasing.
 	const watchdog = createActivityWatchdog(
-		() => lastActivity,
-		() => inFlight,
+		() => {
+			tickCount++;
+			return 0;
+		},
+		() => false,
 		startTime,
 		() => EXECUTOR_INACTIVITY_TIMEOUT_MS + 1000,
 		5, // 5ms interval
@@ -212,11 +215,15 @@ test("createActivityWatchdog: self-clears interval on reject (no timer leak)", a
 		expect(error).toBeInstanceOf(ExecutorWaitError);
 	}
 
-	// After rejection, the interval should have been self-cleared.
-	// Wait a bit and verify no additional ticks happen — the promise
-	// is already settled so we can't observe via the promise, but we
-	// can verify cleanup() is idempotent (no throw).
-	watchdog.cleanup(); // should be a no-op since already cleared
+	// Record the tick count at rejection, then wait several interval
+	// periods. If the interval did not self-clear, tickCount would
+	// keep increasing.
+	const ticksAtRejection = tickCount;
+	await new Promise((r) => setTimeout(r, 30));
+	expect(tickCount).toBe(ticksAtRejection);
+
+	// cleanup() after self-clear should be a no-op (no throw).
+	watchdog.cleanup();
 });
 
 test("createActivityWatchdog: cleanup is idempotent after self-clear", async () => {
