@@ -4,16 +4,16 @@
 # Secrets are named via api_key_env and stored in Reasonix's global .env; never put keys here.
 
 config_version = 5   # schema marker for diagnostics; old versions may ignore it
-default_model = "deepseek-flash"
+default_model = "custom-openrouter-ai"
 language      = "en"   # ui/model language; empty = auto-detect from $LANG / $REASONIX_LANG
 credentials_store = "auto"   # legacy compatibility; provider keys are saved in Reasonix's global .env
 
 [ui]
 theme = "auto"   # auto|dark|light; CLI colors only; REASONIX_THEME can override per run
-# theme_style = "graphite"   # graphite|aurora|slate|carbon|nocturne|amber and legacy aliases
+theme_style = "kanagawa"   # graphite|aurora|slate|carbon|nocturne|amber and legacy aliases
 shortcut_layout = "desktop"   # classic|desktop; compatibility setting; Shift+Tab toggles Plan, Ctrl+Y toggles YOLO
 # cursor_shape = "bar"   # block|underline|bar; text input cursor shape
-# show_reasoning = true   # CLI: show thinking text by default; false = collapsed (toggle with Ctrl+O)
+show_reasoning = true   # CLI: show thinking text by default; false = collapsed (toggle with Ctrl+O)
 
 [desktop]
 # language = "zh"   # desktop UI language; empty/auto = browser/OS auto-detect
@@ -21,14 +21,15 @@ shortcut_layout = "desktop"   # classic|desktop; compatibility setting; Shift+Ta
 layout_style = "workbench"   # desktop layout: classic|workbench|creation
 theme = "auto"   # desktop only: auto|dark|light
 # theme_style = "graphite"   # graphite|aurora|slate|carbon|nocturne|amber and legacy aliases
-# external_opener = "vscode"   # desktop Open control: installed application id
+external_opener = "zed"   # desktop Open control: installed application id
 close_behavior = "background"   # desktop: quit|background when the window close button is clicked
 status_bar_style = "text"   # desktop: icon|text metric labels in the bottom status bar
 status_bar_items = ["model", "workspace", "git_branch", "cache", "cache_avg", "session_tokens", "turn_tokens", "turn_cost", "session_turns", "context", "compact", "cost", "balance"]   # desktop: ordered visible bottom status bar items
 default_tool_approval_mode = "auto"   # desktop: Ask/Auto/YOLO default for newly-created sessions
 check_updates = true   # desktop: check for new versions on startup
-telemetry = true   # desktop: anonymous launch ping + scrubbed next-launch native crash diagnostics; never content
+telemetry = false   # desktop: anonymous launch ping + scrubbed next-launch native crash diagnostics; never content
 metrics = true   # desktop: aggregate quality/lifecycle metrics (anonymous signal/bucket counts); never content
+provider_access = ["deepseek", "custom-openrouter-ai"]   # desktop settings: providers shown on Settings > Model > Access
 expand_thinking = false   # desktop: show reasoning text expanded by default; false = collapsed
 display_mode = "standard"   # desktop: standard|compact transcript display mode
 
@@ -80,7 +81,7 @@ cold_resume_prune   = true   # elide stale tool results when reopening a session
 # max_subagent_depth = 2   # nested subagent delegation depth; set 1 to disable nested delegation
 # max_subagent_concurrency = 6   # session-wide sub-agent concurrency (task/fleet/skills)
 # max_parallel_writers = 3   # concurrent writers with non-overlapping write_paths
-# output_style = "explanatory"   # explanatory | learning | concise | custom; empty = default
+output_style = "explanatory"   # persona/tone folded into the prompt
 
 [[providers]]
 name        = "deepseek-flash"
@@ -102,6 +103,27 @@ api_key_env = "DEEPSEEK_API_KEY"
 balance_url = "https://api.deepseek.com/user/balance"   # optional; wallet-balance endpoint shown in the status bar
 context_window = 1000000   # tokens; compaction triggers near this limit
 price       = { cache_hit = 0.003625, input = 0.435, output = 0.87, currency = "$" }   # provider-wide fallback, per 1M tokens
+
+[[providers]]
+name        = "custom-openrouter-ai"
+kind        = "openai"
+base_url    = "https://openrouter.ai/api/v1"
+models      = ["deepseek/deepseek-v4-pro", "~deepseek/deepseek-v4-flash-latest"]
+default     = "~deepseek/deepseek-v4-flash-latest"
+api_key_env = "OPENROUTER_AI_API_KEY"
+context_window = 128000   # tokens; compaction triggers near this limit
+
+[[providers]]
+name        = "deepseek"
+kind        = "openai"
+base_url    = "https://api.deepseek.com"
+models      = ["deepseek-v4-flash", "deepseek-v4-pro"]
+default     = "deepseek-v4-flash"
+api_key_env = "DEEPSEEK_API_KEY"
+balance_url = "https://api.deepseek.com/user/balance"   # optional; wallet-balance endpoint shown in the status bar
+context_window = 1000000   # tokens; compaction triggers near this limit
+price       = { cache_hit = 0.0028, input = 0.14, output = 0.28, currency = "$" }   # provider-wide fallback, per 1M tokens
+prices      = { "deepseek-v4-flash" = { cache_hit = 0.0028, input = 0.14, output = 0.28, currency = "$" }, "deepseek-v4-pro" = { cache_hit = 0.003625, input = 0.435, output = 0.87, currency = "$" } }   # per-model prices, per 1M tokens
 
 [tools]
 enabled = []   # empty = all built-in tools
@@ -155,7 +177,7 @@ network = true
 [statusline]
 # A custom status line: a command whose first stdout line replaces the built-in
 # data row. It receives {"model","contextUsed","contextWindow","cwd"} as JSON on stdin.
-command = "bash ~/.reasonix/statusline.sh"
+# command = "my-statusline.sh"
 
 # Bot gateway: multi-channel IM bot for QQ, Feishu/Lark, and WeChat.
 [bot]
@@ -232,12 +254,12 @@ api_base = "https://ilinkai.weixin.qq.com"
 [[plugins]]
 name    = "context7"
 command = "npx"
-args    = ["-y", "@upstash/context7-mcp@3.2.5"]
+args    = ["-y", "@upstash/context7-mcp@latest"]
 
 [[plugins]]
 name    = "sequential-thinking"
 command = "npx"
-args    = ["-y", "@modelcontextprotocol/server-sequential-thinking@2026.7.4"]
+args    = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 
 [[plugins]]
 name    = "qmd"
@@ -255,7 +277,7 @@ command = "fff-mcp"
 [[plugins]]
 name    = "react-grab-mcp"
 command = "npx"
-args    = ["-y", "@react-grab/mcp@0.1.37", "--stdio"]
+args    = ["-y", "@react-grab/mcp", "--stdio"]
 
 [[plugins]]
 name    = "logpilot"
@@ -265,7 +287,7 @@ args    = ["mcp-server"]
 [[plugins]]
 name    = "agentmemory"
 command = "npx"
-args    = ["-y", "@agentmemory/mcp@0.9.28"]
+args    = ["-y", "@agentmemory/mcp"]
 
 [[plugins]]
 name    = "sem"
