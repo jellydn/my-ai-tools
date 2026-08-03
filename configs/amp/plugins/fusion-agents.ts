@@ -1,12 +1,10 @@
 // @amp-agent-mode {"key":"fusion","label":"Fusion"}
 
 import type { PluginAPI } from "@ampcode/plugin";
-import {
-	createActivityWatchdog,
-	EXECUTOR_MAX_TIMEOUT_MS,
-	ExecutorWaitError,
-	MAX_RECOMMENDED_TASK_CHARS,
-} from "../lib/fusion-watchdog";
+import { createActivityWatchdog, EXECUTOR_MAX_TIMEOUT_MS, ExecutorWaitError } from "../lib/fusion-watchdog";
+
+/** Soft warning threshold for oversized task specifications (~2000 tokens). */
+const MAX_RECOMMENDED_TASK_CHARS = 8000;
 
 const LEAD_INSTRUCTIONS = `
 You are the Fusion lead. Own interpretation, investigation, architecture, task decomposition, review, and final verification. You have no file mutation or shell tools. Delegate every implementation change through fusion_executor.
@@ -53,8 +51,6 @@ const EXECUTOR_TOOLS = [
 	"mcp__*",
 ] as const;
 
-type ExecutorLifecycle = "active" | "closed";
-
 function failedExecutorEnvelope(reason: string, verification = "none"): string {
 	return [
 		"STATUS: failed",
@@ -77,18 +73,23 @@ function isFusionExecutorDefinition(definition: { kind: string; name?: string } 
 	return definition?.kind === "agent-definition" && definition?.name === "fusion-executor";
 }
 
+/**
+ * One conceptual object — an executor session — stored as a single record.
+ * This eliminates the split-state bug where activity/in-flight maps could be
+ * LRU-evicted independently of the lifecycle map, causing the watchdog to
+ * read stale data for a still-active executor.
+ */
+interface ExecutorSession {
+	status: "active" | "closed";
+	lastActivity: number;
+	inFlight: Set<string>;
+}
+
 export default function fusionAgents(amp: PluginAPI) {
 	// Exact thread IDs owned by this plugin instance. Name checks alone are not a unique principal.
 	const leadThreadIDs = new Set<string>();
-	const executorLifecycle = new Map<string, ExecutorLifecycle>();
-	// Last activity timestamp (tool.call or tool.result) per executor thread.
-	// Used by the activity watchdog to distinguish a busy executor from a stuck one.
-	const executorLastActivity = new Map<string, number>();
-	// Currently executing tool call IDs per executor thread, keyed by toolUseID.
-	// Using a Set instead of a numeric counter so duplicate or unmatched results
-	// are harmless — a missing result stays in-flight until the absolute cap,
-	// and an extra result simply removes a non-existent ID (no-op).
-	const executorInFlight = new Map<string, Set<string>>();
+	// Single map for all executor session state — one eviction policy, no desync.
+	const executors = new Map<string, ExecutorSession>();
 
 	// Cache thread agent definitions to avoid redundant database lookups.
 	// @ampcode/plugin types are not bundled in this repo, so the cached value is
@@ -112,22 +113,22 @@ export default function fusionAgents(amp: PluginAPI) {
 		}
 	};
 
-	// Semantic eviction for lifecycle: never discard active executors.
+	// Semantic eviction for executor sessions: never discard active executors.
 	// Closed entries are purged first. If all remaining entries are active
 	// and the collection still exceeds MAX_COLLECTION_SIZE, we leave them —
 	// active executors will be purged naturally when they become closed via
 	// closeExecutor(). Evicting active entries would break in-flight work.
-	const evictOldestLifecycle = () => {
-		if (executorLifecycle.size <= MAX_COLLECTION_SIZE) return;
-		for (const [key, status] of executorLifecycle) {
-			if (status === "closed") executorLifecycle.delete(key);
+	const evictClosedSessions = () => {
+		if (executors.size <= MAX_COLLECTION_SIZE) return;
+		for (const [key, session] of executors) {
+			if (session.status === "closed") executors.delete(key);
 		}
 		// If still over the limit after purging closed entries, all remaining
 		// entries are active. Do NOT evict them — they will be cleaned up
 		// when they transition to closed via closeExecutor().
-		if (executorLifecycle.size > MAX_COLLECTION_SIZE) {
+		if (executors.size > MAX_COLLECTION_SIZE) {
 			console.warn(
-				`[fusion] Lifecycle map has ${executorLifecycle.size} active entries (limit ${MAX_COLLECTION_SIZE}). All are active — deferring eviction until they close.`,
+				`[fusion] Executor map has ${executors.size} active entries (limit ${MAX_COLLECTION_SIZE}). All are active — deferring eviction until they close.`,
 			);
 		}
 	};
@@ -135,10 +136,8 @@ export default function fusionAgents(amp: PluginAPI) {
 	// Keep all collections bounded to prevent unbounded growth in long-lived sessions.
 	const limitCollections = () => {
 		evictOldest(leadThreadIDs);
-		evictOldestLifecycle();
+		evictClosedSessions();
 		evictOldest(threadAgentCache);
-		evictOldest(executorLastActivity);
-		evictOldest(executorInFlight);
 	};
 
 	const getThreadAgent = async (threadID: string): Promise<ThreadAgent> => {
@@ -151,47 +150,61 @@ export default function fusionAgents(amp: PluginAPI) {
 		return agent;
 	};
 
-	const isActiveExecutor = (threadID: string) => executorLifecycle.get(threadID) === "active";
-	const isClosedExecutor = (threadID: string) => executorLifecycle.get(threadID) === "closed";
+	const getSession = (threadID: string): ExecutorSession | undefined => executors.get(threadID);
+	const isActiveExecutor = (threadID: string) => executors.get(threadID)?.status === "active";
+	const isClosedExecutor = (threadID: string) => executors.get(threadID)?.status === "closed";
+
+	// Refresh Map insertion order on touch so evictOldest preserves recently-active sessions.
+	const touchSession = (threadID: string) => {
+		const session = executors.get(threadID);
+		if (session) {
+			executors.delete(threadID);
+			executors.set(threadID, session);
+		}
+	};
 
 	const setLastActivity = (threadID: string, timestamp: number = Date.now()) => {
-		executorLastActivity.delete(threadID);
-		executorLastActivity.set(threadID, timestamp);
+		const session = executors.get(threadID);
+		if (session) {
+			session.lastActivity = timestamp;
+			touchSession(threadID);
+		}
 	};
 
 	const addInFlight = (threadID: string, toolUseID: string) => {
-		let set = executorInFlight.get(threadID);
-		if (!set) {
-			set = new Set();
-			executorInFlight.set(threadID, set);
+		const session = executors.get(threadID);
+		if (session) {
+			session.inFlight.add(toolUseID);
+			touchSession(threadID);
 		}
-		set.add(toolUseID);
-		// Refresh insertion order so evictOldest preserves recently-active executors.
-		executorInFlight.delete(threadID);
-		executorInFlight.set(threadID, set);
 	};
 
 	const removeInFlight = (threadID: string, toolUseID: string) => {
-		const set = executorInFlight.get(threadID);
-		if (!set) return;
-		set.delete(toolUseID);
-		if (set.size === 0) {
-			executorInFlight.delete(threadID);
+		const session = executors.get(threadID);
+		if (!session) return;
+		session.inFlight.delete(toolUseID);
+	};
+
+	const hasInFlight = (threadID: string): boolean => {
+		const session = executors.get(threadID);
+		return session ? session.inFlight.size > 0 : false;
+	};
+
+	const setLifecycle = (threadID: string, status: ExecutorSession["status"]) => {
+		const session = executors.get(threadID);
+		if (session) {
+			session.status = status;
+			touchSession(threadID);
 		}
 	};
 
-	const hasInFlight = (threadID: string) => (executorInFlight.get(threadID)?.size ?? 0) > 0;
-
-	const setLifecycle = (threadID: string, status: ExecutorLifecycle) => {
-		executorLifecycle.delete(threadID);
-		executorLifecycle.set(threadID, status);
-	};
-
 	const closeExecutor = (threadID: string) => {
-		if (!executorLifecycle.has(threadID)) return;
-		setLifecycle(threadID, "closed");
-		executorLastActivity.delete(threadID);
-		executorInFlight.delete(threadID);
+		const session = executors.get(threadID);
+		if (!session) return;
+		session.status = "closed";
+		session.inFlight.clear();
+		// Keep lastActivity for diagnostics until the session is evicted.
+		touchSession(threadID);
 	};
 
 	amp.on("tool.call", async (event) => {
@@ -296,8 +309,12 @@ export default function fusionAgents(amp: PluginAPI) {
 				parentThreadID: ctx.thread.id,
 				show: true,
 			});
-			setLifecycle(thread.id, "active");
-			setLastActivity(thread.id, Date.now());
+			const startTime = Date.now();
+			executors.set(thread.id, {
+				status: "active",
+				lastActivity: startTime,
+				inFlight: new Set(),
+			});
 			limitCollections();
 			try {
 				await thread.append([{ type: "user-message", content: task }]);
@@ -311,10 +328,8 @@ export default function fusionAgents(amp: PluginAPI) {
 				//     watchdog owns all timeout classification.
 				//  2. One continuous waitForResponse subscription — no missed
 				//     responses between poll cycles.
-				const startTime = Date.now();
-
 				const watchdog = createActivityWatchdog(
-					() => executorLastActivity.get(thread.id) ?? startTime,
+					() => getSession(thread.id)?.lastActivity ?? startTime,
 					() => hasInFlight(thread.id),
 					startTime,
 				);

@@ -229,7 +229,8 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'isActiveExecutor(threadID)' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'setLifecycle(thread.id, "active")' "$plugin"
+	# Unified session: single map with one eviction policy (no split state).
+	run grep -F 'executors.set(thread.id, {' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'closeExecutor(thread.id)' "$plugin"
 	[ "$status" -eq 0 ]
@@ -246,16 +247,12 @@ JSON
 	# helper must stay removed so closed/active checks don't regress.
 	run grep -F 'evictOldest(leadThreadIDs)' "$plugin"
 	[ "$status" -eq 0 ]
-	# Lifecycle uses semantic eviction (never evict active) instead of generic evictOldest.
-	run grep -F 'evictOldestLifecycle()' "$plugin"
+	# Unified session eviction: never evict active executors.
+	run grep -F 'evictClosedSessions()' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'evictOldest(threadAgentCache)' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'evictOldest(executorInFlight)' "$plugin"
-	[ "$status" -eq 0 ]
-	run grep -F 'executorInFlight.delete(threadID)' "$plugin"
-	[ "$status" -eq 0 ]
-	# ExecutorWaitError is defined in the extracted watchdog module.
+	# ExecutorError is defined in the extracted watchdog module.
 	run grep -F 'class ExecutorWaitError' "$watchdog"
 	[ "$status" -eq 0 ]
 	run grep -F 'ExecutorWaitError' "$plugin"
@@ -269,13 +266,13 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'watchdog.cleanup()' "$plugin"
 	[ "$status" -eq 0 ]
-	# Set-based in-flight tracking (not numeric counter).
+	# Set-based in-flight tracking within the unified session (not a separate map).
 	run grep -F 'addInFlight(threadID, event.toolUseID)' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'removeInFlight(threadID, event.toolUseID)' "$plugin"
 	[ "$status" -eq 0 ]
-	# Semantic lifecycle eviction: never evict active executors.
-	run grep -F 'evictOldestLifecycle' "$plugin"
+	# Semantic session eviction: never evict active executors.
+	run grep -F 'evictClosedSessions' "$plugin"
 	[ "$status" -eq 0 ]
 	# The eviction policy must NOT have a fallback that evicts active entries.
 	# Verify the comment that documents this invariant is present.
@@ -288,6 +285,15 @@ JSON
 	run grep -F 'RETAIN_COUNT' "$plugin"
 	[ "$status" -eq 0 ]
 	[ "$(grep -c 'isKnownExecutor' "$plugin")" -eq 0 ]
+	# No split-state maps — all executor state is in the unified sessions map.
+	[ "$(grep -c 'executorLifecycle' "$plugin")" -eq 0 ]
+	[ "$(grep -c 'executorLastActivity' "$plugin")" -eq 0 ]
+	[ "$(grep -c 'executorInFlight' "$plugin")" -eq 0 ]
+	# MAX_RECOMMENDED_TASK_CHARS must be a plugin local, not in the watchdog module.
+	run grep -F 'MAX_RECOMMENDED_TASK_CHARS' "$plugin"
+	[ "$status" -eq 0 ]
+	run grep -F 'MAX_RECOMMENDED_TASK_CHARS' "$watchdog"
+	[ "$status" -ne 0 ]
 	run sed -n '/const LEAD_TOOLS = \[/,/\] as const;/p' "$plugin"
 	[ "$status" -eq 0 ]
 	[[ "$output" != *"apply_patch"* ]]

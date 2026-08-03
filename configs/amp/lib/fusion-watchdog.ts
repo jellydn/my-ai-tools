@@ -13,9 +13,6 @@ export const EXECUTOR_INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 /** Absolute cap: never wait longer than this, even if the executor is active. */
 export const EXECUTOR_MAX_TIMEOUT_MS = 60 * 60 * 1000; // 60 minutes
 
-/** Soft warning threshold for oversized task specifications (~2000 tokens). */
-export const MAX_RECOMMENDED_TASK_CHARS = 8000;
-
 export type WatchdogKind = "inactivity" | "max-wait";
 
 /** Typed error so the catch block can classify without string matching. */
