@@ -624,7 +624,7 @@ _validate_config_tool_name() {
 		*antigravity-cli/settings.json*) echo "antigravity" ;;
 		*kilo/config.json*) echo "kilo" ;;
 		*reasonix/config.toml*) echo "reasonix" ;;
-		*kimi-code/mcp.json*) echo "kimi_code" ;;
+		*kimi-code/*.json* | *kimi-code/*.toml*) echo "kimi_code" ;;
 		*pi/settings.json*) echo "pi" ;;
 		*commandcode/*.json*) echo "commandcode" ;;
 		*cline/*.json*) echo "cline" ;;
@@ -668,6 +668,7 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/antigravity-cli/settings.json" \
 		"$SCRIPT_DIR/configs/kilo/config.json" \
 		"$SCRIPT_DIR/configs/reasonix/config.toml" \
+		"$SCRIPT_DIR/configs/kimi-code/config.toml" \
 		"$SCRIPT_DIR/configs/kimi-code/mcp.json" \
 		"$SCRIPT_DIR/configs/pi/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/settings.json" \
@@ -1400,6 +1401,12 @@ copy_reasonix_configs() {
 	execute_quoted mkdir -p "$reasonix_dir"
 	copy_config_file "$SCRIPT_DIR/configs/reasonix/config.toml" "$reasonix_dir/" || true
 	copy_config_file "$SCRIPT_DIR/configs/reasonix/AGENTS.md" "$reasonix_dir/" || true
+
+	if [ -d "$SCRIPT_DIR/configs/reasonix/themes" ]; then
+		execute_quoted mkdir -p "$reasonix_dir/themes"
+		safe_copy_dir "$SCRIPT_DIR/configs/reasonix/themes" "$reasonix_dir/themes"
+	fi
+
 	log_success "Reasonix configs copied"
 }
 
