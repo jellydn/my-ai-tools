@@ -1078,6 +1078,17 @@ copy_amp_configs() {
 		safe_copy_dir "$SCRIPT_DIR/configs/amp/lib" "$HOME/.config/amp/lib"
 	fi
 
+	# Migration: remove stale helper modules previously installed as plugins.
+	# fusion-watchdog.ts was relocated from plugins/ to lib/ — a stale copy in
+	# the plugins directory causes "Plugin must export a default function" crashes.
+	local stale_plugin="$HOME/.config/amp/plugins/fusion-watchdog.ts"
+	if [ -f "$stale_plugin" ]; then
+		execute "rm -f \"$stale_plugin\""
+		if [ "$DRY_RUN" != true ]; then
+			log_info "Removed stale plugin: fusion-watchdog.ts (relocated to lib/)"
+		fi
+	fi
+
 	log_success "Amp configs copied"
 }
 

@@ -349,6 +349,16 @@ JSON
 	done
 }
 
+@test "Amp installer removes stale fusion-watchdog plugin during upgrades" {
+	# Regression: fusion-watchdog.ts was relocated from plugins/ to lib/.
+	# A stale copy in ~/.config/amp/plugins causes a plugin startup crash.
+	# The installer must remove it during upgrades.
+	run grep -F 'execute "rm -f' "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+	run grep -F 'stale_plugin' "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+}
+
 @test "OpenCode ships open-cursor with cursor-acp provider and omniroute/free default" {
 	require_jq
 	run jq -e '

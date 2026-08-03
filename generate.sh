@@ -262,6 +262,13 @@ generate_amp_configs() {
 		safe_copy_dir "$HOME/.config/amp/plugins" "$SCRIPT_DIR/configs/amp/plugins"
 	fi
 
+	# Migration: remove stale helper that was relocated from plugins/ to lib/.
+	# If a previous install left fusion-watchdog.ts in the user's plugins dir,
+	# safe_copy_dir would recreate it in the repo — remove it after copying.
+	if [ -f "$SCRIPT_DIR/configs/amp/plugins/fusion-watchdog.ts" ]; then
+		rm -f "$SCRIPT_DIR/configs/amp/plugins/fusion-watchdog.ts"
+	fi
+
 	# Copy shared library modules
 	if [ -d "$HOME/.config/amp/lib" ]; then
 		safe_copy_dir "$HOME/.config/amp/lib" "$SCRIPT_DIR/configs/amp/lib"
