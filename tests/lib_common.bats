@@ -211,6 +211,10 @@ EOF
 }
 
 @test "validate_config validates TOML file" {
+    if ! command -v python3 &>/dev/null && ! command -v taplo &>/dev/null; then
+        skip "no TOML validator available"
+    fi
+
     local toml_file="/tmp/my-ai-tools-valid-$$.toml"
     printf 'key = "value"\n' > "$toml_file"
 
@@ -218,4 +222,62 @@ EOF
     [ "$status" -eq 0 ]
 
     rm -f "$toml_file"
+}
+
+@test "validate_toml returns 0 for valid TOML" {
+    if ! command -v python3 &>/dev/null && ! command -v taplo &>/dev/null; then
+        skip "no TOML validator available"
+    fi
+
+    local toml_file="/tmp/my-ai-tools-valid-toml-$$.toml"
+    printf 'key = "value"\n[section]\nnum = 42\n' > "$toml_file"
+
+    run validate_toml "$toml_file"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"TOML validated"* ]]
+
+    rm -f "$toml_file"
+}
+
+@test "validate_toml returns 1 for invalid TOML" {
+    if ! command -v python3 &>/dev/null && ! command -v taplo &>/dev/null; then
+        skip "no TOML validator available"
+    fi
+
+    local toml_file="/tmp/my-ai-tools-invalid-toml-$$.toml"
+    printf 'key = = 1\n' > "$toml_file"
+
+    run validate_toml "$toml_file"
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"Invalid TOML"* ]]
+
+    rm -f "$toml_file"
+}
+
+@test "validate_toml returns 1 for missing file" {
+    run validate_toml "/tmp/my-ai-tools-missing-toml-$$.toml"
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"File not found"* ]]
+}
+
+@test "validate_toml skips when no TOML validator is available" {
+    local fake_bin_dir="/tmp/my-ai-tools-fake-bin-toml-$$"
+
+    mkdir -p "$fake_bin_dir"
+    cat > "$fake_bin_dir/python3" <<'EOF'
+#!/bin/sh
+exit 1
+EOF
+    chmod +x "$fake_bin_dir/python3"
+
+    local toml_file="/tmp/my-ai-tools-skip-toml-$$.toml"
+    printf 'key = "value"\n' > "$toml_file"
+
+    # Stubbed python3 (import fails) and no taplo on a restricted PATH -> should skip
+    run bash -c 'source "$0/../lib/common.sh"; PATH="$1"; validate_toml "$2"' "$BATS_TEST_DIRNAME" "$fake_bin_dir" "$toml_file"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"No TOML validator available"* ]]
+
+    rm -f "$fake_bin_dir/python3" "$toml_file"
+    rmdir "$fake_bin_dir"
 }
