@@ -4,13 +4,13 @@
 # Secrets are named via api_key_env and stored in Reasonix's global .env; never put keys here.
 
 config_version = 5   # schema marker for diagnostics; old versions may ignore it
-default_model = "custom-openrouter-ai"
+default_model = "deepseek/deepseek-v4-flash"
 language      = "en"   # ui/model language; empty = auto-detect from $LANG / $REASONIX_LANG
 credentials_store = "auto"   # legacy compatibility; provider keys are saved in Reasonix's global .env
 
 [ui]
 theme = "auto"   # auto|dark|light; CLI colors only; REASONIX_THEME can override per run
-theme_style = "kanagawa"   # graphite|aurora|slate|carbon|nocturne|amber and legacy aliases
+# theme_style = "graphite"   # graphite|aurora|slate|carbon|nocturne|amber and legacy aliases
 shortcut_layout = "desktop"   # classic|desktop; compatibility setting; Shift+Tab toggles Plan, Ctrl+Y toggles YOLO
 # cursor_shape = "bar"   # block|underline|bar; text input cursor shape
 show_reasoning = true   # CLI: show thinking text by default; false = collapsed (toggle with Ctrl+O)
