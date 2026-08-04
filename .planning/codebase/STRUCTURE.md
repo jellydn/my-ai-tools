@@ -1,193 +1,151 @@
-# Directory Structure
+# Codebase Structure
 
-**Analysis Date:** 2026-07-10
+**Analysis Date:** 2026-08-04
 
----
+## Directory Layout
 
-## Top-Level Layout
-
-```
-cli.sh                  # Install configs from repo → $HOME (2,574 lines)
-generate.sh             # Export configs from $HOME → repo (961 lines)
-install.sh              # Quick-start bootstrap installer
-install.ps1             # Windows PowerShell installer
-lib/                    # Shell script libraries
-configs/                # Per-tool configuration directories (20+ tools)
-skills/                 # Reusable skill plugins (30+ skills)
-tests/                  # BATS functional tests (23 test files)
-wiki/                   # LLM Wiki knowledge base
-docs/                   # User-facing documentation
-.planning/              # Codemap and planning artifacts
-.github/                # CI/CD workflows
-```
-
----
-
-## `lib/` — Core Libraries
-
-| File | Lines | Purpose |
-|------|-------|---------|
-| `require_bash.sh` | 32 | POSIX re-exec guard — sources first in every entry script |
-| `common.sh` | 866 | Shared utilities: logging, dry-run, paths, validation, retry |
-| `install.sh` | 1,102 | Tool detection and installation for 20+ CLIs |
-
----
-
-## `configs/` — Per-Tool Configurations
-
-Each subdirectory contains tool-native configuration files:
-
-```
-configs/
-├── ai-launcher/           # AI Launcher config.json
-├── amp/                   # Amp settings.json, AGENTS.md
-├── antigravity-cli/       # Antigravity CLI settings.json, statusline.sh
-├── ccs/                   # CCS config.yaml
-├── claude/                # Claude Code settings.json, CLAUDE.md, agents/, hooks/
-├── cline/                 # Cline skills/ (SKILL.md format)
-├── codex/                 # Codex CLI config.json, config.toml, AGENTS.md, agents/
-├── codiff/                # Codiff codiff.jsonc
-├── commandcode/           # CommandCode settings.json, AGENTS.md, mcp.json, agents/
-├── conductor/             # Conductor settings.toml, AGENTS.md
-├── copilot/               # Copilot AGENTS.md, mcp-config.json, agents/
-├── ctx/                   # ctx config.toml
-├── cursor/                # Cursor AGENTS.md, mcp.json, agents/
-├── factory/               # Factory settings.json, config.json, AGENTS.md, droids/
-├── grok/                  # Grok config.toml, AGENTS.md, hooks/
-├── herdr/                 # Herdr AGENTS.md
-├── kimi-code/             # Kimi Code skills/, AGENTS.md
-├── kiro/                  # Kiro settings.json, cli.json, AGENTS.md, mcp.json, agents/, shared/
-├── opencode/              # OpenCode agent/ (subagents), opencode.json
-├── pi/                    # Pi settings.json, AGENTS.md, mcp.json, agents/, models.json
-├── qodercli/              # Qoder CLI config
-├── agent-memory-guidelines.md   # Memory storage scoping (qmd, agentmemory, handoffs)
-├── best-practices.md             # Tidy First philosophy, testing strategy
-├── fable-guide.md                # Working with next-gen AI models
-├── git-guidelines.md             # Git safety rules
-├── mcp-registry.json             # Central MCP server install registry
-└── recommend-skills.json         # Community skill recommendations
+```text
+my-ai-tools/
+├── cli.sh, generate.sh, install.sh, install.ps1  # Config install/export entry points
+├── server.ts, index.html, public/                # Bun/Hono web application
+├── lib/                                          # Shared TypeScript retrieval and shell libraries
+├── scripts/                                      # Indexing and repository automation scripts
+├── src/github-bot/                               # GitHub coding bot service
+├── document_qa/                                  # Standalone Python document-QA app
+├── configs/                                      # Tool-specific configs, hooks, agents, plugins
+├── skills/                                       # Reusable agent skill definitions
+├── tests/                                        # BATS and TypeScript tests
+├── docs/, wiki/                                  # User/developer documentation and knowledge base
+├── .github/workflows/                            # Test, Pages, and Dokku workflows
+├── Dockerfile, .dockerignore                     # Container build/runtime
+├── package.json, bun.lock, package-lock.json     # JS/Bun dependency metadata
+└── .planning/codebase/                           # This generated codebase map
 ```
 
----
+## Directory Purposes
 
-## `skills/` — Skill Plugins
+**`lib/`:**
+- Purpose: Shared application and shell helpers.
+- Contains: `indexer.ts`, `retriever.ts`, `openai-client.ts`, `common.sh`, `install.sh`, `install-deps.sh`, and `require_bash.sh`.
+- Key files: `lib/indexer.ts`, `lib/retriever.ts`, `lib/common.sh`.
 
-30+ reusable skills, each in its own directory with a `SKILL.md`:
+**`src/github-bot/`:**
+- Purpose: GitHub App webhook, queue, agent, workspace, security, and publication logic.
+- Contains: `app.ts`, `worker.ts`, `agent.ts`, `github.ts`, `commands.ts`, `config.ts`, `security.ts`, `store.ts`, `workspace.ts`, `review.ts`, `types.ts`, and `github-bot.test.ts`.
 
-```
-skills/
-├── adr/                          # Architecture Decision Records
-├── blindspot-pass/               # Find unknown unknowns
-├── capability-experiments/       # Experiment with model capabilities
-├── code-review/                  # Two-axis code review (Conventions + Intent)
-├── codemap/                      # Map codebase structure
-├── commit-atomic/                # Group changes into atomic commits
-├── context-discovery/            # Discover context via MCP tools
-├── doc-search/                   # Search project documentation
-├── docs-update/                  # Sync docs with code changes
-├── draft-pull-request/           # Draft PRs with structured descriptions
-├── git-context/                  # Search git history for context
-├── handoffs/                     # Create handoff plans across sessions
-├── implementation-logger/        # Track implementation decisions
-├── llm-wiki/                     # Build compounding wiki from raw sources
-├── plannotator-setup-goal/       # Turn ideas into executable goal packages
-├── portless-local/               # Replace ports with .localhost URLs
-├── prd/                          # Generate Product Requirements Documents
-├── pr-review/                    # Fix PR review comments
-├── pickup/                       # Resume work from previous handoffs
-├── qmd-knowledge/                # Manage project knowledge with qmd
-├── quiz-me/                      # Verify understanding with quizzes
-├── ralph/                        # Convert PRDs to ralph format
-├── slop/                         # Remove AI-generated code slop
-├── spec-interview/               # Clarify requirements through questions
-├── tdd/                          # Red-Green-Refactor cycle
-├── thermo-nuclear-code-quality-review/  # Strict structural code quality review
-├── tmux/                         # Control tmux sessions remotely
-└── README-DISCOVERY.md           # Skill discovery guide
-```
+**`document_qa/`:**
+- Purpose: Separate local Python application for uploading documents and asking citation-aware questions.
+- Contains: FastAPI API, Streamlit UI, loaders/chunkers, embeddings, retrieval/vector store, requirements, README, and Python tests.
 
----
+**`configs/`:**
+- Purpose: Source-of-truth configurations for supported AI coding clients.
+- Contains: tool directories such as `claude/`, `codex/`, `pi/`, `amp/`, `kiro/`, `reasonix/`, `factory/`, and central registries/guidelines.
+- Key files: `configs/mcp-registry.json`, `configs/token-efficiency.md`, per-tool `AGENTS.md`/settings/agent/plugin files.
 
-## `tests/` — Test Suite
+**`skills/`:**
+- Purpose: Reusable agent instructions and automation packages.
+- Contains: one directory per skill with `SKILL.md` and optional templates/scripts.
+- Key files: `skills/codemap/SKILL.md`, `skills/docs-update/SKILL.md`, `skills/orchestrating-fusion/SKILL.md`.
 
-23 BATS test files organized by feature:
+**`tests/`:**
+- Purpose: Shell/config validation and integration-style checks.
+- Contains: `tests/pr_*.bats`, core BATS suites, fixtures/helpers, and `fusion-watchdog.test.ts`.
 
-```
-tests/
-├── cli.bats                      # Core CLI tests
-├── helpers.bash                  # Shared test helpers
-├── install.bats                  # Installation tests
-├── cursor_configs.bats           # Cursor config tests
-├── generate.bats                 # Generate script tests
-├── lib_common.bats               # lib/common.sh tests
-├── pr_ai_launcher.bats           # AI Launcher tests
-├── pr_antigravity.bats           # Antigravity CLI tests
-├── pr_claude.bats                # Claude Code tests
-├── pr_cline.bats                 # Cline tests
-├── pr_codebase_memory_mcp.bats   # Codebase memory MCP tests
-├── pr_codiff.bats                # Codiff tests
-├── pr_copilot.bats               # Copilot tests
-├── pr_ctx.bats                   # ctx tests
-├── pr_grok.bats                  # Grok tests
-├── pr_kimi_code.bats             # Kimi Code tests
-├── pr_kiro.bats                  # Kiro tests
-├── pr_pi_models.bats             # Pi models tests
-├── pr_pi_settings.bats           # Pi settings tests
-├── pr_pre_commit.bats            # Pre-commit hooks tests
-├── pr_qodercli.bats              # Qoder CLI tests
-├── pr_readme.bats                # README validation tests
-├── recommend_skills.bats         # Skill recommendation tests (47 tests — largest)
-└── sh_reexec.bats                # Shell re-exec guard tests
-```
+**`docs/` and `wiki/`:**
+- Purpose: Human-facing deployment/feature docs and generated/curated knowledge content.
+- Key files: `docs/dokku-deploy.md`, `docs/fusion-orchestration.md`, `docs/TESTING.md` references, and wiki source/entity material.
 
----
+**`.github/`:**
+- Purpose: CI/CD workflow definitions and GitHub bot example configuration.
+- Key files: `.github/workflows/test.yml`, `.github/workflows/dokku.yml`, `.github/workflows/deploy-pages.yml`, `.github/my-ai-bot.example.yml`.
 
-## `docs/` and `wiki/`
+## Key File Locations
 
-```
-docs/
-├── agent-teams-examples.md       # Multi-agent team examples
-├── claude-code-teams.md          # Claude Code team patterns
-├── fable-quick-start.md          # Fable Field Guide quick start
-├── learning-stories.md           # Learning stories from usage
-└── qmd-knowledge-management.md   # QMD knowledge management guide
+**Entry Points:**
+- `server.ts`: main Hono/Bun server.
+- `cli.sh`: install repository configurations into `$HOME`.
+- `generate.sh`: export user configurations into the repository.
+- `install.sh` / `install.ps1`: bootstrap installers.
+- `document_qa/api.py`: standalone FastAPI API.
 
-wiki/
-└── raw/                          # LLM Wiki raw source files
-```
+**Configuration:**
+- `package.json`, `bun.lock`, `package-lock.json`: JavaScript dependencies/scripts.
+- `.env.example`: runtime configuration contract.
+- `tsconfig.json`, `biome.json`: TypeScript and formatting configuration.
+- `Dockerfile`: production build/runtime contract.
+- `configs/mcp-registry.json`: shared MCP registry.
 
----
+**Core Logic:**
+- `lib/indexer.ts` and `lib/retriever.ts`: repository knowledge pipeline.
+- `src/github-bot/worker.ts`: bot workflow orchestration.
+- `src/github-bot/workspace.ts` and `security.ts`: execution/publication boundaries.
+- `lib/common.sh`: shared shell operations and safety wrappers.
+
+**Testing:**
+- `tests/*.bats`: shell/config behavior and structural tests.
+- `tests/fusion-watchdog.test.ts`: Bun watchdog tests.
+- `src/github-bot/github-bot.test.ts`: GitHub bot unit/integration tests.
+- `document_qa/tests/`: Python document-QA tests.
 
 ## Naming Conventions
 
-| Category | Convention | Examples |
-|----------|-----------|----------|
-| **Entry scripts** | Short lowercase | `cli.sh`, `generate.sh` |
-| **Libraries** | `kebab-case.sh` | `common.sh`, `require_bash.sh` |
-| **Config dirs** | Lowercase tool names | `claude/`, `codex/`, `factory/` |
-| **Agent files** | `kebab-case.md` | `code-reviewer.md`, `test-generator.md` |
-| **Skill files** | Always `SKILL.md` | `skills/code-review/SKILL.md` |
-| **Top-level docs** | `UPPERCASE.md` | `AGENTS.md`, `MEMORY.md`, `README.md` |
-| **Guide docs** | `kebab-case.md` | `best-practices.md`, `git-guidelines.md` |
-| **JSON configs** | `camelCase` keys | `mcpServers`, `defaultModel` |
-| **Test files** | `<feature>.bats` | `pr_claude.bats`, `cli.bats` |
+**Files:**
+- TypeScript modules use kebab-free descriptive names such as `openai-client.ts`, `fusion-watchdog.ts`, and `github-bot.test.ts`.
+- Shell entry points and helpers use lowercase names with `.sh`.
+- BATS files use `<area>.bats`; Python tests use `test_<area>.py`; skill docs use `SKILL.md`.
+- Tool configurations retain the native client’s expected names (`settings.json`, `config.toml`, `mcp.json`).
+
+**Directories:**
+- Domain/application modules use lowercase directories (`lib`, `src/github-bot`, `document_qa`, `scripts`).
+- Tool config directories use the tool/client name (`configs/<tool>`).
+- Skills are grouped under `skills/<skill-name>`.
+
+## Where to Add New Code
+
+**New feature in the Bun web app:**
+- Primary code: `server.ts` for route composition; a focused module under `lib/` or `src/` for logic.
+- Tests: co-located `*.test.ts` for TypeScript logic, plus a BATS test only if configuration/CLI behavior changes.
+
+**New GitHub bot capability:**
+- Implementation: `src/github-bot/worker.ts` and the nearest focused module (`commands.ts`, `github.ts`, `workspace.ts`, `review.ts`, or `config.ts`).
+- Tests: extend `src/github-bot/github-bot.test.ts` unless a new module warrants a focused test file.
+- Policy/config: update `.github/my-ai-bot.example.yml` and `docs/my-ai-bot.md` when user-facing.
+
+**New configuration/tool support:**
+- Config: `configs/<tool>/` using the target tool’s native format.
+- Installer/export integration: `cli.sh`, `generate.sh`, and `lib/install*.sh` according to `AGENTS.md`.
+- Tests: `tests/pr_<tool>.bats` or the nearest existing suite.
+
+**New document-QA capability:**
+- Implementation: focused module under `document_qa/`.
+- Tests: `document_qa/tests/test_<area>.py`.
+
+**Utilities:**
+- Shared TypeScript utility: `lib/` or the nearest domain module.
+- Shared shell helper: `lib/common.sh`, keeping modules below the repository’s size boundary.
+
+## Special Directories
+
+**`data/` and generated indexes:**
+- Purpose: runtime/generated retrieval artifacts.
+- Generated: Yes.
+- Committed: Usually no; inspect `.gitignore` before adding artifacts.
+
+**`.planning/codebase/`:**
+- Purpose: generated architectural map for onboarding/planning.
+- Generated: Yes, by `skills/codemap/SKILL.md`.
+- Committed: Yes in the current repository; refreshes should be reviewed as documentation changes.
+
+**`.freebuff/`:**
+- Purpose: local desktop/session state.
+- Generated: Yes.
+- Committed: No; preserve as local state and do not include in feature commits.
+
+**`configs/` and `skills/`:**
+- Purpose: managed source-of-truth content.
+- Generated: Some exports are generated from user-local tool state; verify the owning sync path before hand-editing.
+- Committed: Yes, except runtime artifacts excluded by repository rules.
 
 ---
 
-## Key Locations
-
-| What | Where |
-|------|-------|
-| Re-exec guard | `lib/require_bash.sh` |
-| Logging functions | `lib/common.sh` |
-| Dry-run wrappers | `lib/common.sh` (`execute()`, `execute_quoted()`) |
-| Tool detection | `lib/install.sh` (`detect_tool()`) |
-| Config install dispatch | `cli.sh` (`copy_configurations()`) |
-| Config export dispatch | `generate.sh` (`generate_configurations()`) |
-| MCP server registry | `configs/mcp-registry.json` |
-| Central skill index | `skills/README-DISCOVERY.md` |
-| Agent instructions | `AGENTS.md`, `GEMINI.md` |
-| Conventions docs | `.planning/codebase/CONVENTIONS.md` |
-| CI config | `.github/workflows/test.yml` |
-
-_Last updated: 2026-07-10_
+*Structure analysis: 2026-08-04*

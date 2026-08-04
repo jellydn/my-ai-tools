@@ -21,7 +21,6 @@ export function createOpenAIClient(): OpenAI {
 	if (!apiKey) {
 		throw new Error("OPENAI_API_KEY (or OPENROUTER_API_KEY) is not set");
 	}
-
 	// An OpenRouter key (sk-or-v1-...) is only accepted by OpenRouter's API,
 	// never api.openai.com. Default the base URL so a bare key works at build
 	// time and runtime without requiring OPENAI_BASE_URL to be configured.
