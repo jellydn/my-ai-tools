@@ -16,7 +16,7 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     run jq -r '[.tools[] | select(.name == "opencode")][0].promptCommand' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode2 run" ]]
+    [[ "$output" == "opencode run" ]]
 }
 
 @test "configs/ai-launcher/config.json opencode tool promptCommand no longer references big-pickle" {

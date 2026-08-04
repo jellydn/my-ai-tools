@@ -17,15 +17,15 @@
 		{
 			"name": "opencode",
 			"command": "opencode",
-			"description": "opencode2 AI assistant",
+			"description": "OpenCode AI assistant",
 			"aliases": ["o", "oc"],
-			"promptCommand": "opencode2 run",
+			"promptCommand": "opencode run",
 			"promptUseStdin": true
 		},
 		{
 			"name": "opencode2",
 			"command": "opencode2",
-			"description": "opencode2 2 beta AI assistant",
+			"description": "OpenCode 2 beta AI assistant",
 			"aliases": ["o2", "oc2"],
 			"promptCommand": "opencode2 run",
 			"promptUseStdin": true

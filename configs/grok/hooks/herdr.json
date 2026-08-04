@@ -1,15 +1,15 @@
 {
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "command": "sh "$HOME/.grok/hooks/herdr-agent-state.sh" session",
-            "timeout": 10,
-            "type": "command"
-          }
-        ]
-      }
-    ]
-  }
+	"hooks": {
+		"SessionStart": [
+			{
+				"hooks": [
+					{
+						"command": "bash \"$HOME/.grok/hooks/herdr-agent-state.sh\" session",
+						"timeout": 10,
+						"type": "command"
+					}
+				]
+			}
+		]
+	}
 }

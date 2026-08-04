@@ -290,17 +290,17 @@ install_opencode() {
 
 install_opencode2() {
 	_run_opencode2_install() {
-		if command -v opencode2 &>/dev/null; then
+		if command -v opencode2 >/dev/null 2>&1; then
 			log_warning "OpenCode 2 is already installed"
 		else
 			local package_manager
-			if command -v bun &>/dev/null; then
+			if command -v bun >/dev/null 2>&1; then
 				package_manager="bun"
-			elif command -v npm &>/dev/null; then
+			elif command -v npm >/dev/null 2>&1; then
 				package_manager="npm"
-			elif command -v pnpm &>/dev/null; then
+			elif command -v pnpm >/dev/null 2>&1; then
 				package_manager="pnpm"
-			elif command -v yarn &>/dev/null; then
+			elif command -v yarn >/dev/null 2>&1; then
 				package_manager="yarn"
 			else
 				log_error "No supported package manager found for OpenCode 2 (need Bun, npm, pnpm, or Yarn)"
@@ -335,7 +335,7 @@ install_opencode2() {
 
 			if [ "$DRY_RUN" = true ]; then
 				log_info "[DRY RUN] Would install OpenCode 2 as opencode2"
-			elif ! command -v opencode2 &>/dev/null; then
+			elif ! command -v opencode2 >/dev/null 2>&1; then
 				log_error "OpenCode 2 installation completed but opencode2 is not on PATH"
 				return 1
 			else
