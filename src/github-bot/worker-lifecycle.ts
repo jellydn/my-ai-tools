@@ -17,9 +17,9 @@ export class WorkerLifecycle {
 
 	start() {
 		if (this.timer || this.stopping) return;
-		this.timer = setInterval(() => void this.tick(), this.options.intervalMs ?? 500);
+		this.timer = setInterval(() => void this.tick().catch(() => undefined), this.options.intervalMs ?? 500);
 		this.timer.unref();
-		void this.tick();
+		void this.tick().catch(() => undefined);
 	}
 
 	async stop() {
@@ -29,8 +29,7 @@ export class WorkerLifecycle {
 			this.timer = undefined;
 		}
 		for (const id of this.controllers.keys()) this.cancel(id);
-		const deadline = Date.now() + 10_000;
-		while (this.controllers.size && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 20));
+		while (this.controllers.size) await new Promise((resolve) => setTimeout(resolve, 20));
 	}
 
 	cancel(id: string) {
