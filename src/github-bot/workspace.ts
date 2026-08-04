@@ -2,7 +2,8 @@ import { spawn } from "node:child_process";
 import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { RepoConfig } from "./config.ts";
-import { commandAllowed, scanSecrets } from "./security.ts";
+import { commandAllowed } from "./execution-policy.ts";
+import { scanSecrets } from "./security.ts";
 
 export interface RunOptions {
 	env?: NodeJS.ProcessEnv;
