@@ -14,8 +14,19 @@ export function parseCommand(body: string): ParsedCommand | undefined {
 }
 export type Access = "read" | "triage" | "write";
 export const commandAccess = (command: BotCommand): Access =>
-	(["help", "status"].includes(command) ? "read" : ["plan", "review"].includes(command) ? "triage" : "write") as Access;
-const ranks: Record<string, number> = { none: 0, read: 1, triage: 2, write: 3, maintain: 4, admin: 5 };
+	(["help", "status"].includes(command)
+		? "read"
+		: ["plan", "review"].includes(command)
+			? "triage"
+			: "write") as Access;
+const ranks: Record<string, number> = {
+	none: 0,
+	read: 1,
+	triage: 2,
+	write: 3,
+	maintain: 4,
+	admin: 5,
+};
 export function isAuthorized(
 	permission: string,
 	command: BotCommand = "implement",
@@ -24,8 +35,10 @@ export function isAuthorized(
 	configuredAccess?: Access,
 ): boolean {
 	const mandatory = commandAccess(command);
-	const required = configuredAccess && ranks[configuredAccess]! > ranks[mandatory]! ? configuredAccess : mandatory;
+	const required =
+		configuredAccess && ranks[configuredAccess]! > ranks[mandatory]! ? configuredAccess : mandatory;
 	return (
-		(ranks[permission] ?? 0) >= ranks[required]! && (!allowUsers.length || Boolean(actor && allowUsers.includes(actor)))
+		(ranks[permission] ?? 0) >= ranks[required]! &&
+		(!allowUsers.length || Boolean(actor && allowUsers.includes(actor)))
 	);
 }

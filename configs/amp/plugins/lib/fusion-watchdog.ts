@@ -30,7 +30,9 @@ export class ExecutorWaitError extends Error {
 }
 
 /** Verdict from a single watchdog tick. */
-export type WatchdogVerdict = { action: "continue" } | { action: "reject"; kind: WatchdogKind; message: string };
+export type WatchdogVerdict =
+	| { action: "continue" }
+	| { action: "reject"; kind: WatchdogKind; message: string };
 
 /**
  * Pure watchdog check — no timers, no side effects.
@@ -40,7 +42,11 @@ export type WatchdogVerdict = { action: "continue" } | { action: "reject"; kind:
  * @param hasInFlight      Whether any tool calls are currently executing.
  * @returns Whether to continue waiting or reject with a typed error.
  */
-export function checkWatchdog(elapsed: number, lastActivityElapsed: number, hasInFlight: boolean): WatchdogVerdict {
+export function checkWatchdog(
+	elapsed: number,
+	lastActivityElapsed: number,
+	hasInFlight: boolean,
+): WatchdogVerdict {
 	if (elapsed >= EXECUTOR_MAX_TIMEOUT_MS) {
 		return {
 			action: "reject",

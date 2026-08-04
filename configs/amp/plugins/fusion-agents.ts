@@ -65,11 +65,15 @@ function failedExecutorEnvelope(reason: string, verification = "none"): string {
 	].join("\n");
 }
 
-function isFusionLeadDefinition(definition: { kind: string; name?: string } | undefined | null): boolean {
+function isFusionLeadDefinition(
+	definition: { kind: string; name?: string } | undefined | null,
+): boolean {
 	return definition?.kind === "agent-definition" && definition?.name === "fusion-lead";
 }
 
-function isFusionExecutorDefinition(definition: { kind: string; name?: string } | undefined | null): boolean {
+function isFusionExecutorDefinition(
+	definition: { kind: string; name?: string } | undefined | null,
+): boolean {
 	return definition?.kind === "agent-definition" && definition?.name === "fusion-executor";
 }
 
@@ -151,7 +155,8 @@ export default function fusionAgents(amp: PluginAPI) {
 			if (isFusionExecutorDefinition(definition)) {
 				return {
 					action: "reject-and-continue",
-					message: "Fusion executor task is no longer active. Stop tool use and wait for a new delegated task.",
+					message:
+						"Fusion executor task is no longer active. Stop tool use and wait for a new delegated task.",
 				};
 			}
 		}
@@ -207,7 +212,11 @@ export default function fusionAgents(amp: PluginAPI) {
 				return result.text;
 			} catch (error) {
 				const reason =
-					error instanceof Error ? error.message : typeof error === "string" ? error : "Executor task failed or timed out.";
+					error instanceof Error
+						? error.message
+						: typeof error === "string"
+							? error
+							: "Executor task failed or timed out.";
 				const isTimeout = /timeout|timed out/i.test(reason);
 				const verification = isTimeout
 					? "timeout — executor exceeded the maximum wait"

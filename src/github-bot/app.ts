@@ -19,9 +19,15 @@ export function shouldIgnoreSender(
 	botLogin: string,
 	allowActionsBot: boolean,
 ) {
-	return login === botLogin || (type === "Bot" && !(allowActionsBot && login === "github-actions[bot]"));
+	return (
+		login === botLogin || (type === "Bot" && !(allowActionsBot && login === "github-actions[bot]"))
+	);
 }
-export async function installGitHubBot(app: Hono, config: BotConfig, fetcher: typeof fetch = fetch) {
+export async function installGitHubBot(
+	app: Hono,
+	config: BotConfig,
+	fetcher: typeof fetch = fetch,
+) {
 	const store = new JsonJobStore(config.dataDir);
 	await store.init();
 	const worker = new BotWorker(config, store, undefined, fetcher);
@@ -52,7 +58,14 @@ export async function installGitHubBot(app: Hono, config: BotConfig, fetcher: ty
 				!payload.comment
 			)
 				return c.json({ ignored: true }, 202);
-			if (shouldIgnoreSender(payload.sender.login, payload.sender.type, config.botLogin, config.allowActionsBot))
+			if (
+				shouldIgnoreSender(
+					payload.sender.login,
+					payload.sender.type,
+					config.botLogin,
+					config.allowActionsBot,
+				)
+			)
 				return c.json({ ignored: true }, 202);
 			const parsed = parseCommand(payload.comment.body);
 			if (!parsed) return c.json({ ignored: true }, 202);
@@ -62,7 +75,8 @@ export async function installGitHubBot(app: Hono, config: BotConfig, fetcher: ty
 			const snapshot = await client.repositorySnapshot(owner, repo);
 			const rawConfig = await client.contentAt(owner, repo, ".github/my-ai-bot.yml", snapshot.sha);
 			const repoConfig = rawConfig === undefined ? defaultRepoConfig : parseRepoConfig(rawConfig);
-			if (!repoConfig.enabled || !repoConfig.commands[parsed.command]) return c.json({ error: "COMMAND_DISABLED" }, 403);
+			if (!repoConfig.enabled || !repoConfig.commands[parsed.command])
+				return c.json({ error: "COMMAND_DISABLED" }, 403);
 			const permission = await client.permission(owner, repo, payload.sender.login);
 			const configuredAccess =
 				parsed.command === "help" || parsed.command === "status"
@@ -90,7 +104,10 @@ export async function installGitHubBot(app: Hono, config: BotConfig, fetcher: ty
 				return c.json({ jobId: target.id, state: store.get(target.id)?.state }, 202);
 			}
 			const baseRef = repoConfig.implementation.baseRef ?? snapshot.defaultBranch;
-			const baseSha = baseRef === snapshot.defaultBranch ? snapshot.sha : await client.refSha(owner, repo, baseRef);
+			const baseSha =
+				baseRef === snapshot.defaultBranch
+					? snapshot.sha
+					: await client.refSha(owner, repo, baseRef);
 			const result = await store.enqueue({
 				deliveryId,
 				owner,

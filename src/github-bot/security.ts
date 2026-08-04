@@ -7,7 +7,8 @@ export function commandAllowed(
 	config: RepoConfig,
 	branch?: string,
 ): { allowed: boolean; reason?: string } {
-	if (!argv.length || argv.some((arg) => arg.includes("\0"))) return { allowed: false, reason: "invalid argv" };
+	if (!argv.length || argv.some((arg) => arg.includes("\0")))
+		return { allowed: false, reason: "invalid argv" };
 	const joined = argv.join(" ").toLowerCase();
 	if (
 		/\b(sudo|env|printenv)\b/.test(joined) ||
@@ -27,13 +28,20 @@ export function commandAllowed(
 			return { allowed: false, reason: "rm outside workspace" };
 	}
 	if (argv[0] === "git") {
-		if (["reset", "clean", "rebase"].includes(argv[1] ?? "") || argv.includes("--force") || argv.includes("-f"))
+		if (
+			["reset", "clean", "rebase"].includes(argv[1] ?? "") ||
+			argv.includes("--force") ||
+			argv.includes("-f")
+		)
 			return { allowed: false, reason: "destructive git" };
 		if (["checkout", "restore"].includes(argv[1] ?? "") && argv.includes("."))
 			return { allowed: false, reason: "bulk discard" };
 		if (argv[1] === "config" && argv.some((x) => ["--global", "--system"].includes(x)))
 			return { allowed: false, reason: "global git config" };
-		if (argv[1] === "config" && !(argv.length === 4 && ["user.name", "user.email"].includes(argv[2] ?? "")))
+		if (
+			argv[1] === "config" &&
+			!(argv.length === 4 && ["user.name", "user.email"].includes(argv[2] ?? ""))
+		)
 			return { allowed: false, reason: "git config shape not allowed" };
 		if (argv[1] === "push" && (!branch || argv.at(-1) !== `HEAD:refs/heads/${branch}`))
 			return { allowed: false, reason: "unapproved push branch" };
@@ -79,7 +87,10 @@ export function redact(value: unknown): unknown {
 	if (Array.isArray(value)) return value.map(redact);
 	if (value && typeof value === "object")
 		return Object.fromEntries(
-			Object.entries(value).map(([k, v]) => [k, /token|secret|key/i.test(k) ? "[REDACTED]" : redact(v)]),
+			Object.entries(value).map(([k, v]) => [
+				k,
+				/token|secret|key/i.test(k) ? "[REDACTED]" : redact(v),
+			]),
 		);
 	return value;
 }

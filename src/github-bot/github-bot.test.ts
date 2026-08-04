@@ -49,8 +49,14 @@ describe("GitHub bot MVP", () => {
 		expect(verifyWebhook(raw, `${sig}0`, "s")).toBeFalse();
 	});
 	test("2 parses only anchored commands", () => {
-		expect(parseCommand(" /my-ai-bot implement carefully ")).toEqual({ command: "implement", args: "carefully" });
-		expect(parseCommand("@my-ai-bot review security")).toEqual({ command: "review", args: "security" });
+		expect(parseCommand(" /my-ai-bot implement carefully ")).toEqual({
+			command: "implement",
+			args: "carefully",
+		});
+		expect(parseCommand("@my-ai-bot review security")).toEqual({
+			command: "review",
+			args: "security",
+		});
 		expect(parseCommand("/my-ai-bot plan")).toEqual({ command: "plan", args: "" });
 		expect(parseCommand("text /my-ai-bot plan")).toBeUndefined();
 	});
@@ -66,7 +72,9 @@ describe("GitHub bot MVP", () => {
 	});
 	test("4 creates RS256 app JWT", () => {
 		const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
-		expect(createAppJwt("1", privateKey.export({ type: "pkcs8", format: "pem" }).toString()).split(".")).toHaveLength(3);
+		expect(
+			createAppJwt("1", privateKey.export({ type: "pkcs8", format: "pem" }).toString()).split("."),
+		).toHaveLength(3);
 	});
 	test("5 installation client sends bearer without leaking body", async () => {
 		let auth = "";
@@ -79,12 +87,17 @@ describe("GitHub bot MVP", () => {
 	});
 	test("6 defaults are secure and cannot weaken workflows", () => {
 		expect(defaultRepoConfig.review.autoApprove).toBeFalse();
-		expect(() => parseRepoConfig("version: 1\nimplementation:\n  protectWorkflows: false")).toThrow();
+		expect(() =>
+			parseRepoConfig("version: 1\nimplementation:\n  protectWorkflows: false"),
+		).toThrow();
 	});
 	test("7 supports escaped private key", () => {
 		expect(
-			botConfigFromEnv({ GITHUB_APP_ID: "1", GITHUB_APP_PRIVATE_KEY: "a\\nb", GITHUB_APP_WEBHOOK_SECRET: "s" })
-				?.privateKey,
+			botConfigFromEnv({
+				GITHUB_APP_ID: "1",
+				GITHUB_APP_PRIVATE_KEY: "a\\nb",
+				GITHUB_APP_WEBHOOK_SECRET: "s",
+			})?.privateKey,
 		).toBe("a\nb");
 	});
 	test("8 durably deduplicates deliveries", async () => {
@@ -152,10 +165,18 @@ describe("GitHub bot MVP", () => {
 		expect(prompt).toContain("cannot be overridden");
 	});
 	test("17 computes RIGHT-side commentable lines", () => {
-		expect([...commentableLines("@@ -1,2 +10,3 @@\n old\n-old\n+new\n context")]).toEqual([10, 11, 12]);
+		expect([...commentableLines("@@ -1,2 +10,3 @@\n old\n-old\n+new\n context")]).toEqual([
+			10, 11, 12,
+		]);
 	});
 	test("18 validates, dedupes, and falls back review findings", () => {
-		const finding = { path: "a.ts", line: 2, body: "bug", priority: "P1" as const, confidence: 0.9 };
+		const finding = {
+			path: "a.ts",
+			line: 2,
+			body: "bug",
+			priority: "P1" as const,
+			confidence: 0.9,
+		};
 		const result = validateFindings(
 			[finding, finding, { ...finding, line: 99 }],
 			[{ filename: "a.ts", patch: "@@ -1 +1,2 @@\n a\n+b" }],
@@ -176,7 +197,16 @@ describe("GitHub bot MVP", () => {
 		await Bun.write(join(workspace, "base.txt"), "base\n");
 		expect(await git(["add", "base.txt"])).toBe(0);
 		expect(
-			await git(["-c", "user.name=bot", "-c", "user.email=bot@example.invalid", "commit", "--quiet", "-m", "base"]),
+			await git([
+				"-c",
+				"user.name=bot",
+				"-c",
+				"user.email=bot@example.invalid",
+				"commit",
+				"--quiet",
+				"-m",
+				"base",
+			]),
 		).toBe(0);
 		await Bun.write(join(workspace, "a.txt"), "a\n");
 		await Bun.write(join(workspace, "b.txt"), "b\n");
@@ -195,7 +225,9 @@ describe("GitHub bot MVP", () => {
 			if (init?.signal?.aborted) throw new DOMException("Aborted", "AbortError");
 			return new Response("{}", { status: 200 });
 		}) as typeof fetch;
-		await expect(new GitHubClient("app", fetcher).installationToken(1, undefined, controller.signal)).rejects.toThrow();
+		await expect(
+			new GitHubClient("app", fetcher).installationToken(1, undefined, controller.signal),
+		).rejects.toThrow();
 	});
 	test("22 reconciles a prepared branch into one draft PR", async () => {
 		const { value } = await store();
@@ -223,7 +255,12 @@ describe("GitHub bot MVP", () => {
 			},
 		} as any;
 		const worker = new BotWorker({ workspaceRoot: tmpdir() } as any, value);
-		const result = await (worker as any).reconcilePrepared(prepared as Job, client, new AbortController().signal, true);
+		const result = await (worker as any).reconcilePrepared(
+			prepared as Job,
+			client,
+			new AbortController().signal,
+			true,
+		);
 		expect(requests.filter((x) => x.method === "POST")).toHaveLength(1);
 		expect(requests.find((x) => x.method === "POST")?.body.draft).toBeTrue();
 		expect(value.get(job.id)?.publication.pullRequestId).toBe(7);

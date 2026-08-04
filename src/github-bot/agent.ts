@@ -62,12 +62,14 @@ export class CodexAgent implements CodingAgent {
 		if (child) await terminate(child);
 	}
 	async run(input: AgentRunInput): Promise<AgentRunResult> {
-		if (input.signal?.aborted) throw Object.assign(new Error("Agent cancelled"), { code: "CANCELLED" });
+		if (input.signal?.aborted)
+			throw Object.assign(new Error("Agent cancelled"), { code: "CANCELLED" });
 		const home = await mkdtemp(join(tmpdir(), "my-ai-bot-agent-"));
 		const schema = join(home, "schema.json");
 		const output = join(home, "output.json");
 		await writeFile(schema, JSON.stringify(jsonSchema), { mode: 0o600 });
-		const sandbox = input.mode === "plan" || input.mode === "review" ? "read-only" : "workspace-write";
+		const sandbox =
+			input.mode === "plan" || input.mode === "review" ? "read-only" : "workspace-write";
 		const path = process.env.PATH ?? "/usr/bin:/bin";
 		const child = this.runner(
 			this.executable,
@@ -110,13 +112,18 @@ export class CodexAgent implements CodingAgent {
 				child.once("error", reject);
 				child.once("close", resolve);
 			});
-			if (input.signal?.aborted) throw Object.assign(new Error("Agent cancelled"), { code: "CANCELLED" });
+			if (input.signal?.aborted)
+				throw Object.assign(new Error("Agent cancelled"), { code: "CANCELLED" });
 			if (code !== 0)
-				throw Object.assign(new Error(`Agent failed (${code}): ${stderr.slice(0, 300)}`), { code: "AGENT_FAILED" });
+				throw Object.assign(new Error(`Agent failed (${code}): ${stderr.slice(0, 300)}`), {
+					code: "AGENT_FAILED",
+				});
 			return agentOutputSchema.parse(JSON.parse(await readFile(output, "utf8")));
 		} catch (cause) {
 			if ((cause as { code?: string }).code) throw cause;
-			throw Object.assign(new Error("Invalid agent output", { cause }), { code: "AGENT_OUTPUT_INVALID" });
+			throw Object.assign(new Error("Invalid agent output", { cause }), {
+				code: "AGENT_OUTPUT_INVALID",
+			});
 		} finally {
 			clearTimeout(timeout);
 			input.signal?.removeEventListener("abort", abort);

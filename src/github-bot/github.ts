@@ -8,7 +8,11 @@ export function createAppJwt(appId: string, privateKey: string, now = Date.now()
 	signer.update(payload);
 	return `${payload}.${signer.sign(privateKey, "base64url")}`;
 }
-export function verifyWebhook(raw: Uint8Array, signature: string | undefined, secret: string): boolean {
+export function verifyWebhook(
+	raw: Uint8Array,
+	signature: string | undefined,
+	secret: string,
+): boolean {
 	if (!signature || !/^sha256=[0-9a-f]{64}$/i.test(signature)) return false;
 	const expected = Buffer.from(createHmac("sha256", secret).update(raw).digest("hex"), "hex");
 	let supplied: Buffer;
@@ -48,7 +52,12 @@ export class GitHubClient {
 		const all: T[] = [];
 		for (let page = 1; ; page++) {
 			const separator = path.includes("?") ? "&" : "?";
-			const batch = await this.request<T[]>("GET", `${path}${separator}per_page=100&page=${page}`, undefined, signal);
+			const batch = await this.request<T[]>(
+				"GET",
+				`${path}${separator}per_page=100&page=${page}`,
+				undefined,
+				signal,
+			);
 			all.push(...batch);
 			if (batch.length < 100) return all;
 		}
@@ -99,7 +108,11 @@ export class GitHubClient {
 			throw error;
 		}
 	}
-	installationToken(id: number, permissions?: Record<string, "read" | "write">, signal?: AbortSignal) {
+	installationToken(
+		id: number,
+		permissions?: Record<string, "read" | "write">,
+		signal?: AbortSignal,
+	) {
 		return this.request<{ token: string; expires_at: string }>(
 			"POST",
 			`/app/installations/${id}/access_tokens`,
@@ -108,7 +121,10 @@ export class GitHubClient {
 		);
 	}
 	permission(owner: string, repo: string, actor: string) {
-		return this.request<{ permission: string }>("GET", `/repos/${owner}/${repo}/collaborators/${actor}/permission`);
+		return this.request<{ permission: string }>(
+			"GET",
+			`/repos/${owner}/${repo}/collaborators/${actor}/permission`,
+		);
 	}
 }
 export async function installationClient(

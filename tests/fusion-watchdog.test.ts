@@ -14,7 +14,9 @@ test("checkWatchdog: continues when within all deadlines", () => {
 });
 
 test("checkWatchdog: continues with in-flight tools even if inactivity is high", () => {
-	expect(checkWatchdog(60_000, EXECUTOR_INACTIVITY_TIMEOUT_MS + 1000, true)).toEqual({ action: "continue" });
+	expect(checkWatchdog(60_000, EXECUTOR_INACTIVITY_TIMEOUT_MS + 1000, true)).toEqual({
+		action: "continue",
+	});
 });
 
 test("checkWatchdog: rejects max-wait when elapsed exceeds absolute cap", () => {
@@ -34,14 +36,20 @@ test("checkWatchdog: rejects inactivity when no activity and no in-flight", () =
 });
 
 test("checkWatchdog: max-wait takes priority over inactivity", () => {
-	const verdict = checkWatchdog(EXECUTOR_MAX_TIMEOUT_MS + 1, EXECUTOR_INACTIVITY_TIMEOUT_MS + 1, false);
+	const verdict = checkWatchdog(
+		EXECUTOR_MAX_TIMEOUT_MS + 1,
+		EXECUTOR_INACTIVITY_TIMEOUT_MS + 1,
+		false,
+	);
 	expect(verdict.action).toBe("reject");
 	if (verdict.action !== "reject") throw new Error("unreachable");
 	expect(verdict.kind).toBe("max-wait");
 });
 
 test("checkWatchdog: inactivity not triggered when in-flight is true even if elapsed exceeds inactivity", () => {
-	expect(checkWatchdog(30_000, EXECUTOR_INACTIVITY_TIMEOUT_MS + 1, true)).toEqual({ action: "continue" });
+	expect(checkWatchdog(30_000, EXECUTOR_INACTIVITY_TIMEOUT_MS + 1, true)).toEqual({
+		action: "continue",
+	});
 });
 
 // ─── Integration tests: createActivityWatchdog ────────────────────────
@@ -252,13 +260,21 @@ test("createActivityWatchdog: cleanup is idempotent after self-clear", async () 
 test("checkWatchdog: multiple in-flight calls all prevent inactivity timeout", () => {
 	// Simulates: tool.call fired twice (2 in-flight), neither has a result yet.
 	// Even with high inactivity elapsed, in-flight=true prevents timeout.
-	const verdict = checkWatchdog(EXECUTOR_INACTIVITY_TIMEOUT_MS + 5000, EXECUTOR_INACTIVITY_TIMEOUT_MS + 5000, true);
+	const verdict = checkWatchdog(
+		EXECUTOR_INACTIVITY_TIMEOUT_MS + 5000,
+		EXECUTOR_INACTIVITY_TIMEOUT_MS + 5000,
+		true,
+	);
 	expect(verdict).toEqual({ action: "continue" });
 });
 
 test("checkWatchdog: in-flight=false after all results arrive triggers inactivity", () => {
 	// Simulates: all tool results arrived, then no activity for 10+ min.
-	const verdict = checkWatchdog(EXECUTOR_INACTIVITY_TIMEOUT_MS + 5000, EXECUTOR_INACTIVITY_TIMEOUT_MS + 1, false);
+	const verdict = checkWatchdog(
+		EXECUTOR_INACTIVITY_TIMEOUT_MS + 5000,
+		EXECUTOR_INACTIVITY_TIMEOUT_MS + 1,
+		false,
+	);
 	expect(verdict.action).toBe("reject");
 	if (verdict.action !== "reject") throw new Error("unreachable");
 	expect(verdict.kind).toBe("inactivity");

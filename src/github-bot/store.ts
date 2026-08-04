@@ -12,7 +12,13 @@ interface Snapshot {
 	deliveries: Record<string, Delivery | string>;
 }
 const terminal = new Set<JobState>(["completed", "failed", "cancelled"]);
-const active = new Set<JobState>(["preparing", "analyzing", "implementing", "validating", "publishing"]);
+const active = new Set<JobState>([
+	"preparing",
+	"analyzing",
+	"implementing",
+	"validating",
+	"publishing",
+]);
 const legal: Record<JobState, JobState[]> = {
 	queued: ["preparing", "cancelled", "failed"],
 	preparing: ["analyzing", "implementing", "completed", "failed", "cancelled"],
@@ -48,7 +54,9 @@ export class JsonJobStore {
 				job.history.push({
 					state: job.state,
 					at,
-					message: job.cancelRequested ? "Cancellation recovered after worker restart" : "Recovered after worker restart",
+					message: job.cancelRequested
+						? "Cancellation recovered after worker restart"
+						: "Recovered after worker restart",
 				});
 				changed = true;
 			}
@@ -83,7 +91,10 @@ export class JsonJobStore {
 			return true;
 		});
 	}
-	async finishDelivery(id: string, result: Omit<Delivery, "status"> & { status: Delivery["status"] }) {
+	async finishDelivery(
+		id: string,
+		result: Omit<Delivery, "status"> & { status: Delivery["status"] },
+	) {
 		return this.mutate(() => {
 			this.data.deliveries[id] = result;
 		});
@@ -91,11 +102,15 @@ export class JsonJobStore {
 	async releaseDelivery(id: string) {
 		return this.mutate(() => {
 			const delivery = this.data.deliveries[id];
-			if (typeof delivery !== "string" && delivery?.status === "reserved") delete this.data.deliveries[id];
+			if (typeof delivery !== "string" && delivery?.status === "reserved")
+				delete this.data.deliveries[id];
 		});
 	}
 	async enqueue(
-		input: Omit<Job, "id" | "createdAt" | "updatedAt" | "state" | "history" | "publication" | "retryCount">,
+		input: Omit<
+			Job,
+			"id" | "createdAt" | "updatedAt" | "state" | "history" | "publication" | "retryCount"
+		>,
 	): Promise<{ job: Job; duplicate: boolean }> {
 		return this.mutate(() => {
 			const old = this.data.deliveries[input.deliveryId];
@@ -138,13 +153,22 @@ export class JsonJobStore {
 			.filter((j) => j.owner === owner && j.repo === repo && j.issue === issue)
 			.sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
 	}
-	async transition(id: string, state: JobState, patch: Partial<Job> = {}, message?: string, expected?: JobState) {
+	async transition(
+		id: string,
+		state: JobState,
+		patch: Partial<Job> = {},
+		message?: string,
+		expected?: JobState,
+	) {
 		return this.mutate(() => {
 			const job = this.data.jobs[id];
 			if (!job) throw Object.assign(new Error("Job not found"), { code: "JOB_NOT_FOUND" });
-			if (expected && job.state !== expected) throw Object.assign(new Error("State conflict"), { code: "STATE_CONFLICT" });
+			if (expected && job.state !== expected)
+				throw Object.assign(new Error("State conflict"), { code: "STATE_CONFLICT" });
 			if (terminal.has(job.state) || !legal[job.state].includes(state))
-				throw Object.assign(new Error(`Illegal transition ${job.state} -> ${state}`), { code: "ILLEGAL_TRANSITION" });
+				throw Object.assign(new Error(`Illegal transition ${job.state} -> ${state}`), {
+					code: "ILLEGAL_TRANSITION",
+				});
 			const at = this.clock().toISOString();
 			Object.assign(job, patch, { state, updatedAt: at });
 			job.history.push({ state, at, message });
@@ -168,7 +192,10 @@ export class JsonJobStore {
 			if (running.length >= concurrency) return undefined;
 			const locks = new Set(running.map((j) => `${j.owner}/${j.repo}#${j.issue}`));
 			const job = this.list().find(
-				(j) => !j.cancelRequested && j.state === "queued" && !locks.has(`${j.owner}/${j.repo}#${j.issue}`),
+				(j) =>
+					!j.cancelRequested &&
+					j.state === "queued" &&
+					!locks.has(`${j.owner}/${j.repo}#${j.issue}`),
 			);
 			if (!job) return undefined;
 			const at = this.clock().toISOString();

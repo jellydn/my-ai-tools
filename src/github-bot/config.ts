@@ -2,10 +2,9 @@ import { parse } from "yaml";
 import { z } from "zod";
 import { COMMANDS } from "./types.ts";
 
-const commandFlags = Object.fromEntries(COMMANDS.map((x) => [x, z.boolean().default(true)])) as Record<
-	(typeof COMMANDS)[number],
-	z.ZodDefault<z.ZodBoolean>
->;
+const commandFlags = Object.fromEntries(
+	COMMANDS.map((x) => [x, z.boolean().default(true)]),
+) as Record<(typeof COMMANDS)[number], z.ZodDefault<z.ZodBoolean>>;
 const access = z.enum(["read", "triage", "write"]);
 const schema = z
 	.object({
@@ -14,7 +13,12 @@ const schema = z
 		commands: z
 			.object(commandFlags)
 			.strict()
-			.default(Object.fromEntries(COMMANDS.map((x) => [x, true])) as Record<(typeof COMMANDS)[number], boolean>),
+			.default(
+				Object.fromEntries(COMMANDS.map((x) => [x, true])) as Record<
+					(typeof COMMANDS)[number],
+					boolean
+				>,
+			),
 		authorization: z
 			.object({
 				plan: access.default("triage"),
@@ -101,7 +105,9 @@ export function parseValidationCommand(command: string): string[] {
 		["bash", "-n"],
 	];
 	if (!allowed.some((p) => p.every((v, i) => argv[i] === v)))
-		throw Object.assign(new Error("Validation command is not allowlisted"), { code: "INVALID_CONFIG" });
+		throw Object.assign(new Error("Validation command is not allowlisted"), {
+			code: "INVALID_CONFIG",
+		});
 	return argv;
 }
 export function parseRepoConfig(value: string): RepoConfig {
@@ -110,7 +116,9 @@ export function parseRepoConfig(value: string): RepoConfig {
 		result.validation.commands.forEach(parseValidationCommand);
 		return result;
 	} catch (cause) {
-		throw Object.assign(new Error("Malformed repository configuration", { cause }), { code: "INVALID_CONFIG" });
+		throw Object.assign(new Error("Malformed repository configuration", { cause }), {
+			code: "INVALID_CONFIG",
+		});
 	}
 }
 export interface BotConfig {
@@ -126,7 +134,8 @@ export interface BotConfig {
 	logLevel: string;
 }
 export function botConfigFromEnv(env: NodeJS.ProcessEnv): BotConfig | undefined {
-	if (!env.GITHUB_APP_ID || !env.GITHUB_APP_PRIVATE_KEY || !env.GITHUB_APP_WEBHOOK_SECRET) return undefined;
+	if (!env.GITHUB_APP_ID || !env.GITHUB_APP_PRIVATE_KEY || !env.GITHUB_APP_WEBHOOK_SECRET)
+		return undefined;
 	const concurrency = Number(env.BOT_WORKER_CONCURRENCY ?? env.BOT_REPO_CONCURRENCY ?? "2");
 	if (!Number.isFinite(concurrency) || concurrency <= 0 || !Number.isInteger(concurrency))
 		throw new Error("BOT_WORKER_CONCURRENCY must be a finite positive integer");
