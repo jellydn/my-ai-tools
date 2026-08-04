@@ -948,6 +948,8 @@ npm install -g @opencode-ai/cli@next
 bun install -g --trust @opencode-ai/cli@next
 # Or with pnpm (allow the native postinstall explicitly):
 pnpm add -g --allow-build=@opencode-ai/cli @opencode-ai/cli@next
+# Or with Yarn:
+yarn global add @opencode-ai/cli@next
 
 opencode2
 ```

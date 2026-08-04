@@ -1048,7 +1048,6 @@ copy_opencode_configs() {
 	execute_quoted mkdir -p "$HOME/.config/opencode"
 	execute_quoted cp "$SCRIPT_DIR/configs/opencode/opencode.json" "$HOME/.config/opencode/"
 	copy_config_file "$SCRIPT_DIR/configs/opencode/AGENTS.md" "$HOME/.config/opencode/" || true
-	copy_config_file "$SCRIPT_DIR/configs/opencode/cli.json" "$HOME/.config/opencode/" || true
 
 	execute_quoted rm -rf "$HOME/.config/opencode/agent"
 	safe_copy_dir "$SCRIPT_DIR/configs/opencode/agent" "$HOME/.config/opencode/agent"

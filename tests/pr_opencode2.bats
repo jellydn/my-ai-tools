@@ -25,6 +25,10 @@ LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
 	[ "$status" -eq 0 ]
 	run grep -F -- '--allow-build=@opencode-ai/cli @opencode-ai/cli@next' "$INSTALL_SH"
 	[ "$status" -eq 0 ]
+	run grep -F 'yarn global add @opencode-ai/cli@next' "$INSTALL_SH"
+	[ "$status" -eq 0 ]
+	run grep -F 'ensure_dir_on_path "$global_bin"' "$INSTALL_SH"
+	[ "$status" -eq 0 ]
 }
 
 @test "OpenCode config installation accepts either binary while sharing the v1 config path" {
@@ -34,6 +38,25 @@ LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
 	[ "$status" -eq 0 ]
 	run grep -F '$HOME/.config/opencode' "$CLI_SH"
 	[ "$status" -eq 0 ]
+	# cli.json is OpenCode 2-owned local state and is intentionally not managed by the repo.
+	run grep -F 'configs/opencode/cli.json' "$CLI_SH"
+	[ "$status" -eq 1 ]
+	run grep -F 'configs/opencode/cli.json' "$REPO_ROOT/generate.sh"
+	[ "$status" -eq 1 ]
+}
+
+@test "OpenCode 2 installer reports a failed package install" {
+	local fake_bin="$BATS_TEST_TMPDIR/opencode2-fail-bin"
+	mkdir -p "$fake_bin"
+	printf '#!/bin/sh\nexit 17\n' >"$fake_bin/npm"
+	chmod +x "$fake_bin/npm"
+
+	run env PATH="$fake_bin:/usr/bin:/bin" DRY_RUN=false YES_TO_ALL=true VERBOSE=false bash -c '
+		source "$1/cli.sh"
+		install_opencode2
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 1 ]
+	[[ "$output" == *"OpenCode 2 installation failed"* ]]
 }
 
 @test "OpenCode config copy detects opencode2 without requiring opencode1" {

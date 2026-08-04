@@ -300,8 +300,10 @@ install_opencode2() {
 				package_manager="npm"
 			elif command -v pnpm &>/dev/null; then
 				package_manager="pnpm"
+			elif command -v yarn &>/dev/null; then
+				package_manager="yarn"
 			else
-				log_error "No supported package manager found for OpenCode 2 (need Bun, npm, or pnpm)"
+				log_error "No supported package manager found for OpenCode 2 (need Bun, npm, pnpm, or Yarn)"
 				return 1
 			fi
 
@@ -309,12 +311,36 @@ install_opencode2() {
 				bun) execute "bun install -g --trust @opencode-ai/cli@next" ;;
 				npm) execute "npm install -g @opencode-ai/cli@next" ;;
 				pnpm) execute "pnpm add -g --allow-build=@opencode-ai/cli @opencode-ai/cli@next" ;;
+				yarn) execute "yarn global add @opencode-ai/cli@next" ;;
 				esac
 			then
 				log_error "OpenCode 2 installation failed"
 				return 1
 			fi
-			log_success "OpenCode 2 installed as opencode2"
+
+			if [ "$DRY_RUN" = false ]; then
+				local global_bin=""
+				case "$package_manager" in
+				bun)
+					global_bin="$(bun pm bin -g 2>/dev/null)"
+					[ -n "$global_bin" ] || global_bin="${BUN_INSTALL:-$HOME/.bun}/bin"
+					;;
+				npm) global_bin="$(npm prefix -g 2>/dev/null)/bin" ;;
+				pnpm) global_bin="$(pnpm bin -g 2>/dev/null)" ;;
+				yarn) global_bin="$(yarn global bin 2>/dev/null)" ;;
+				esac
+				ensure_dir_on_path "$global_bin"
+				hash -r 2>/dev/null || true
+			fi
+
+			if [ "$DRY_RUN" = true ]; then
+				log_info "[DRY RUN] Would install OpenCode 2 as opencode2"
+			elif ! command -v opencode2 &>/dev/null; then
+				log_error "OpenCode 2 installation completed but opencode2 is not on PATH"
+				return 1
+			else
+				log_success "OpenCode 2 installed as opencode2"
+			fi
 		fi
 	}
 	run_installer "OpenCode 2 (beta)" "_run_opencode2_install" "command -v opencode2" ""

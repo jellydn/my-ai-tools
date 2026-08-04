@@ -34,13 +34,9 @@ SYNC_SH="$REPO_ROOT/scripts/sync-token-efficiency.sh"
 	[ -f "$REPO_ROOT/configs/opencode/AGENTS.md" ]
 	run grep -F 'configs/opencode/AGENTS.md' "$CLI_SH"
 	[ "$status" -eq 0 ]
-	run grep -F 'configs/opencode/cli.json' "$CLI_SH"
-	[ "$status" -eq 0 ]
 	run grep -F '$HOME/.config/opencode/' "$CLI_SH"
 	[ "$status" -eq 0 ]
 	run grep -F 'configs/opencode/AGENTS.md' "$GENERATE_SH"
-	[ "$status" -eq 0 ]
-	run grep -F 'configs/opencode/cli.json' "$GENERATE_SH"
 	[ "$status" -eq 0 ]
 }
 
