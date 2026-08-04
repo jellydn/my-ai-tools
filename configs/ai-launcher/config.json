@@ -17,15 +17,15 @@
 		{
 			"name": "opencode",
 			"command": "opencode",
-			"description": "OpenCode AI assistant",
+			"description": "opencode2 AI assistant",
 			"aliases": ["o", "oc"],
-			"promptCommand": "opencode run",
+			"promptCommand": "opencode2 run",
 			"promptUseStdin": true
 		},
 		{
 			"name": "opencode2",
 			"command": "opencode2",
-			"description": "OpenCode 2 beta AI assistant",
+			"description": "opencode2 2 beta AI assistant",
 			"aliases": ["o2", "oc2"],
 			"promptCommand": "opencode2 run",
 			"promptUseStdin": true
@@ -50,37 +50,37 @@
 	"templates": [
 		{
 			"name": "review",
-			"command": "opencode run --agent plan 'Review the following changes and provide feedback: $@'",
+			"command": "opencode2 run --agent plan 'Review the following changes and provide feedback: $@'",
 			"description": "Code review with OpenCode",
 			"aliases": ["rev", "code-review"]
 		},
 		{
 			"name": "commit-zen",
-			"command": "opencode run --agent plan 'Review the following changes on git and generate a concise git commit message, group by logical changes with commitizen convention, do atomic commit message'",
+			"command": "opencode2 run --agent plan 'Review the following changes on git and generate a concise git commit message, group by logical changes with commitizen convention, do atomic commit message'",
 			"description": "Generate commit message with OpenCode",
 			"aliases": ["zen", "logical-commit"]
 		},
 		{
 			"name": "commit-staged",
-			"command": "opencode run --agent build 'Run git diff --staged then do atomic commit message for the change with commitizen convention. Write clear, informative commit messages that explain the what and why behind changes, not just the how.'",
+			"command": "opencode2 run --agent build 'Run git diff --staged then do atomic commit message for the change with commitizen convention. Write clear, informative commit messages that explain the what and why behind changes, not just the how.'",
 			"description": "Atomic commit message with staged changes",
 			"aliases": ["gd", "git-diff"]
 		},
 		{
 			"name": "commit-atomic",
-			"command": "opencode run --agent build 'Run git status and git diff to review all changes. Group changes into logical, independent units. Stage each group intentionally using git add with specific files or git add -p -- never use git add -A or git add --all. Commit each group with a commitizen conventional commits message (type(scope): subject) that explains the what and why. Verify staged changes with git diff --staged before each commit.'",
+			"command": "opencode2 run --agent build 'Run git status and git diff to review all changes. Group changes into logical, independent units. Stage each group intentionally using git add with specific files or git add -p -- never use git add -A or git add --all. Commit each group with a commitizen conventional commits message (type(scope): subject) that explains the what and why. Verify staged changes with git diff --staged before each commit.'",
 			"description": "Atomic commit messages with logical grouping and commitizen convention",
 			"aliases": ["ac", "auto-commit"]
 		},
 		{
 			"name": "architecture-explanation",
-			"command": "opencode run --agent plan 'Explain this codebase architecture'",
+			"command": "opencode2 run --agent plan 'Explain this codebase architecture'",
 			"description": "Explain architecture with OpenCode",
 			"aliases": ["arch", "arch-explanation"]
 		},
 		{
 			"name": "draft-pull-request",
-			"command": "opencode run --agent build 'Create a draft pull request using gh CLI. First review the git log and diff since the base branch. Then compose a structured PR description with three sections: What (what was changed), Why (the motivation and problem solved), How (the technical approach and key decisions). Run: gh pr create --draft --title \"[concise imperative title]\" --body \"[what/why/how description]\"'",
+			"command": "opencode2 run --agent build 'Create a draft pull request using gh CLI. First review the git log and diff since the base branch. Then compose a structured PR description with three sections: What (what was changed), Why (the motivation and problem solved), How (the technical approach and key decisions). Run: gh pr create --draft --title \"[concise imperative title]\" --body \"[what/why/how description]\"'",
 			"description": "Create draft pull request with what/why/how template via gh CLI",
 			"aliases": ["pr", "draft-pr"]
 		},
@@ -164,8 +164,8 @@
 		},
 		{
 			"name": "summary",
-			"command": "ai summary --provider opencode --mode tldr $@",
-			"description": "Summarize content with OpenCode (free model)",
+			"command": "ai summary --provider opencode2 --mode tldr $@",
+			"description": "Summarize content with opencode2 (free model)",
 			"aliases": ["sum", "summarize"]
 		}
 	]
