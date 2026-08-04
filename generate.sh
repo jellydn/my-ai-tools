@@ -20,9 +20,13 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 			DRY_RUN=true
 			shift
 			;;
+		-h | --help)
+			echo "Usage: $0 [--dry-run] [-h|--help]"
+			exit 0
+			;;
 		*)
 			echo "Unknown option: $arg"
-			echo "Usage: $0 [--dry-run]"
+			echo "Usage: $0 [--dry-run] [-h|--help]"
 			exit 1
 			;;
 		esac
@@ -452,6 +456,39 @@ generate_pi_configs() {
 		if [ -n "$(ls -A "$HOME/.pi/agent/agents" 2>/dev/null)" ]; then
 			if execute "cp -r '$HOME/.pi/agent/agents'/* '$SCRIPT_DIR/configs/pi/agents'/ 2>/dev/null"; then
 				log_success "Pi agents exported"
+			fi
+		fi
+	fi
+}
+generate_omp_configs() {
+	log_info "Generating Oh My Pi (omp) configs..."
+
+	if [ -f "$HOME/.omp/agent/settings.json" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/omp"
+		copy_single "$HOME/.omp/agent/settings.json" "$SCRIPT_DIR/configs/omp/settings.json"
+		log_success "Oh My Pi (omp) configs generated"
+	else
+		log_warning "Oh My Pi (omp) settings.json not found: $HOME/.omp/agent/settings.json"
+	fi
+
+	if [ -d "$HOME/.omp/agent/themes" ]; then
+		copy_directory "$HOME/.omp/agent/themes" "$SCRIPT_DIR/configs/omp/themes"
+		log_success "Oh My Pi (omp) themes generated"
+	else
+		log_warning "Oh My Pi (omp) themes directory not found: $HOME/.omp/agent/themes"
+	fi
+
+	if [ -f "$HOME/.omp/agent/mcp.json" ]; then
+		copy_single "$HOME/.omp/agent/mcp.json" "$SCRIPT_DIR/configs/omp/mcp.json"
+	else
+		log_warning "Oh My Pi (omp) MCP config not found: $HOME/.omp/agent/mcp.json"
+	fi
+
+	if [ -d "$HOME/.omp/agent/agents" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/omp/agents"
+		if [ -n "$(ls -A "$HOME/.omp/agent/agents" 2>/dev/null)" ]; then
+			if execute "cp -r '$HOME/.omp/agent/agents'/* '$SCRIPT_DIR/configs/omp/agents'/ 2>/dev/null"; then
+				log_success "Oh My Pi (omp) agents exported"
 			fi
 		fi
 	fi
@@ -1036,6 +1073,8 @@ main() {
 	echo
 
 	generate_pi_configs
+	echo
+	generate_omp_configs
 	echo
 
 	generate_commandcode_configs

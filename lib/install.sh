@@ -515,6 +515,11 @@ install_pi() {
 	install_npm_tool "Pi" "pi" "@mariozechner/pi-coding-agent" \
 		"npm install -g @mariozechner/pi-coding-agent"
 }
+install_omp() {
+	install_npm_tool "Oh My Pi" "omp" "@oh-my-pi/pi-coding-agent" \
+		"npm install -g @oh-my-pi/pi-coding-agent"
+}
+
 
 is_commandcode_installed() {
 	command -v cmd &>/dev/null

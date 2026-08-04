@@ -13,7 +13,7 @@ source "$SCRIPT_DIR/lib/install.sh"
 # Core tools installed/configured when -y (YES_TO_ALL) is active.
 # This is your personal active tool set. When YES_TO_ALL is false
 # (interactive mode), tool_allowed returns true for everything.
-TOOL_ALLOWLIST_YES=(amp codex ctx cursor kilo opencode open_code_review pi antigravity ai-switcher claude reasonix)
+TOOL_ALLOWLIST_YES=(amp codex ctx cursor kilo opencode open_code_review pi omp antigravity ai-switcher claude reasonix)
 
 tool_allowed() {
 	local name="$1"
@@ -46,6 +46,7 @@ INSTALL_SEQUENCE=(
 	"kilo:install_kilo"
 	"reasonix:install_reasonix"
 	"pi:install_pi"
+	"omp:install_omp"
 	"commandcode:install_commandcode"
 	"copilot:install_copilot"
 	"cursor:install_cursor"
@@ -124,9 +125,13 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 			rollback_transaction
 			exit $?
 			;;
+		-h | --help)
+			echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback] [-h|--help]"
+			exit 0
+			;;
 		*)
 			echo "Unknown option: $arg"
-			echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback]"
+			echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback] [-h|--help]"
 			exit 1
 			;;
 		esac
@@ -330,6 +335,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/kilo" "$BACKUP_DIR" "kilo"
 		copy_config_dir "$(get_reasonix_dir)" "$BACKUP_DIR" "reasonix"
 		copy_config_dir "$HOME/.pi" "$BACKUP_DIR" "pi"
+		copy_config_dir "$HOME/.omp" "$BACKUP_DIR" "omp"
 		copy_config_dir "$HOME/.cursor" "$BACKUP_DIR" "cursor"
 		copy_config_dir "$HOME/.conductor" "$BACKUP_DIR" "conductor"
 		copy_config_dir "$HOME/.factory" "$BACKUP_DIR" "factory"
@@ -535,6 +541,11 @@ copy_configurations() {
 	else
 		log_info "Skipping pi config install (not in -y allowlist)"
 	fi
+	if tool_allowed "omp"; then
+		copy_omp_configs
+	else
+		log_info "Skipping omp config install (not in -y allowlist)"
+	fi
 	if tool_allowed "commandcode"; then
 		copy_commandcode_configs
 	else
@@ -627,6 +638,7 @@ _validate_config_tool_name() {
 		*reasonix/config.toml*) echo "reasonix" ;;
 		*kimi-code/*.json* | *kimi-code/*.toml*) echo "kimi_code" ;;
 		*pi/settings.json*) echo "pi" ;;
+		*omp/settings.json*) echo "omp" ;;
 		*commandcode/*.json*) echo "commandcode" ;;
 		*cline/*.json*) echo "cline" ;;
 		*factory/settings.json*) echo "factory" ;;
@@ -672,6 +684,7 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/kimi-code/config.toml" \
 		"$SCRIPT_DIR/configs/kimi-code/mcp.json" \
 		"$SCRIPT_DIR/configs/pi/settings.json" \
+		"$SCRIPT_DIR/configs/omp/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/mcp.json" \
 		"$SCRIPT_DIR/configs/cline/mcp-settings.json" \
@@ -1552,6 +1565,35 @@ copy_pi_configs() {
 	fi
 
 	log_success "Pi configs copied"
+}
+copy_omp_configs() {
+	local omp_status
+	omp_status=$(detect_tool --detailed "omp" "$HOME/.omp") || omp_status="missing"
+	if [ "$omp_status" = "missing" ]; then
+		log_info "Oh My Pi (omp) not detected - skipping Oh My Pi config installation"
+		return 0
+	fi
+
+	log_info "Detected Oh My Pi (via $omp_status)"
+	execute_quoted mkdir -p "$HOME/.omp/agent"
+
+	if [ -d "$SCRIPT_DIR/configs/omp" ]; then
+		copy_config_file "$SCRIPT_DIR/configs/omp/settings.json" "$HOME/.omp/agent/" || true
+		if [ -d "$SCRIPT_DIR/configs/omp/themes" ]; then
+			execute_quoted mkdir -p "$HOME/.omp/agent/themes"
+			safe_copy_dir "$SCRIPT_DIR/configs/omp/themes" "$HOME/.omp/agent/themes"
+		fi
+		copy_config_file "$SCRIPT_DIR/configs/omp/AGENTS.md" "$HOME/.omp/agent/" || true
+		copy_config_file "$SCRIPT_DIR/configs/omp/mcp.json" "$HOME/.omp/agent/" || true
+		copy_config_file "$SCRIPT_DIR/configs/omp/models.json" "$HOME/.omp/agent/" || true
+		if [ -d "$SCRIPT_DIR/configs/omp/agents" ]; then
+			execute_quoted rm -rf "$HOME/.omp/agent/agents"
+			safe_copy_dir "$SCRIPT_DIR/configs/omp/agents" "$HOME/.omp/agent/agents"
+			log_success "Oh My Pi agents copied"
+		fi
+	fi
+
+	log_success "Oh My Pi configs copied"
 }
 
 copy_commandcode_configs() {
@@ -2474,6 +2516,7 @@ create_tool_skills_symlinks() {
 		"$HOME/.config/opencode/skills"
 		"$HOME/.gemini/skills"
 		"$HOME/.pi/skills"
+		"$HOME/.omp/skills"
 		"$HOME/.cursor/skills"
 		"$HOME/.config/amp/skills"
 		"$HOME/.codex/skills"

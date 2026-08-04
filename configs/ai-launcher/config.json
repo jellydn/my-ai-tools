@@ -45,6 +45,14 @@
 			"aliases": ["p"],
 			"promptCommand": "pi -p",
 			"promptUseStdin": true
+		},
+		{
+			"name": "omp",
+			"command": "omp",
+			"description": "Oh My Pi coding agent",
+			"aliases": ["om"],
+			"promptCommand": "omp -p",
+			"promptUseStdin": true
 		}
 	],
 	"templates": [

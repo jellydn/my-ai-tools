@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, CCS, and Reasonix with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, Oh My Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Codiff, ctx, Open Code Review, CCS, and Reasonix with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -260,7 +260,7 @@ cd my-ai-tools
 - `--dry-run` - Preview changes without making them
 - `--backup` - Backup existing configs before installing
 - `--no-backup` - Skip backup prompt
-- `-y` / `--yes` - Non-interactive mode; only installs/configures your active tool set (amp, codex, ctx, cursor, kilo, opencode, open_code_review, pi, antigravity, ai-switcher, claude, reasonix). Shared infra (plugins, skills, global tools) still installed. Auto-activated in CI/piped input.
+- `-y` / `--yes` - Non-interactive mode; only installs/configures your active tool set (amp, codex, ctx, cursor, kilo, opencode, open_code_review, pi, omp, antigravity, ai-switcher, claude, reasonix). Shared infra (plugins, skills, global tools) still installed. Auto-activated in CI/piped input.
 - `--migrate-gemini` - One-step Gemini→Antigravity CLI migration
 
 ## 🔄 Bidirectional Config Sync

@@ -36,6 +36,7 @@ Never run `./cli.sh` without `--dry-run` first. Config validation runs automatic
 - `--migrate-gemini` — one-step Gemini→Antigravity CLI migration
 - `--rollback` — restore from the most recent `$HOME/ai-tools-backup-{timestamp}`
 - `-v` / `--verbose` — verbose logging
+- `-h` / `--help` — print usage options and exit
 
 ## Testing
 
