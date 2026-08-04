@@ -1,11 +1,12 @@
 import { readFile } from "node:fs/promises";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import type { Context, Next } from "hono";
 import { Hono } from "hono";
 import { stream } from "hono/streaming";
 import { z } from "zod";
+import { buildSystemPrompt } from "./lib/chat-prompt.ts";
 import { createOpenAIClient } from "./lib/openai-client.ts";
+import { createRateLimiter } from "./lib/rate-limit.ts";
 import { type RetrievedChunk, retrieve } from "./lib/retriever.ts";
 import { installGitHubBot } from "./src/github-bot/app.ts";
 import { botConfigFromEnv } from "./src/github-bot/config.ts";
@@ -18,38 +19,8 @@ const [indexHtml, installSh, installPs1] = await Promise.all([
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX = 30;
-const requestTimestamps = new Map<string, number[]>();
-
-function rateLimitMiddleware(c: Context, next: Next) {
-	const forwarded = c.req.header("x-forwarded-for");
-	const clientIp = c.req.header("fly-client-ip") || (forwarded ? forwarded.split(",")[0]?.trim() : undefined);
-	const key = clientIp ?? "unknown";
-	const now = Date.now();
-	const timestamps = requestTimestamps.get(key) ?? [];
-	const recent = timestamps.filter((timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS);
-
-	if (recent.length >= RATE_LIMIT_MAX) {
-		return c.json({ error: "Rate limit exceeded. Try again later." }, 429);
-	}
-
-	recent.push(now);
-	requestTimestamps.set(key, recent);
-	return next();
-}
-
-function pruneRateLimitMap() {
-	const now = Date.now();
-	for (const [key, timestamps] of requestTimestamps.entries()) {
-		const recent = timestamps.filter((timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS);
-		if (recent.length === 0) {
-			requestTimestamps.delete(key);
-		} else {
-			requestTimestamps.set(key, recent);
-		}
-	}
-}
-
-const pruneTimer = setInterval(pruneRateLimitMap, 5 * 60 * 1000);
+const rateLimiter = createRateLimiter(RATE_LIMIT_WINDOW_MS, RATE_LIMIT_MAX);
+const pruneTimer = setInterval(() => rateLimiter.prune(), 5 * 60 * 1000);
 pruneTimer.unref();
 
 const app = new Hono();
@@ -70,24 +41,9 @@ const chatRequestSchema = z.object({
 	message: z.string().min(1).max(4000),
 });
 
-function buildSystemPrompt(chunks: { path: string; text: string }[]): string {
-	const context = chunks.map((chunk) => `--- ${chunk.path} ---\n${chunk.text}`).join("\n\n");
-
-	return `You are the my-ai-tools repository assistant.
-
-Answer only from the retrieved repository excerpts below.
-Do not invent commands, supported tools, or configuration.
-If the retrieved context is insufficient, say exactly: "This is not documented in the repository."
-Include the relevant source file paths in your answer.
-Keep answers concise and grounded.
-
-Retrieved repository excerpts:
-${context}`;
-}
-
 app.use("/data/*", async (c) => c.text("Forbidden", 403));
 
-app.post("/api/chat", rateLimitMiddleware, async (c) => {
+app.post("/api/chat", rateLimiter.middleware, async (c) => {
 	if (!openai) return c.json({ error: "Chat is not configured." }, 503);
 	let body: unknown;
 	try {
