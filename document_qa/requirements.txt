@@ -1,7 +1,7 @@
 faiss-cpu>=1.8.0,<2
 fastapi>=0.115.0,<1
 numpy>=1.26.0,<3
-openai>=1.52.0,<2
+openai>=2.53,<3
 pydantic>=2.9.0,<3
 pypdf>=5.0.0,<6
 python-multipart>=0.0.12,<1
