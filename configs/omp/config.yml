@@ -1,0 +1,7 @@
+modelRoles:
+  default: google-antigravity/gemini-3.6-flash:high
+symbolPreset: nerd
+theme:
+  dark: titanium
+  light: light
+setupVersion: 1
