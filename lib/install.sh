@@ -288,6 +288,38 @@ install_opencode() {
 	run_installer "OpenCode" "_run_opencode_install" "command -v opencode" ""
 }
 
+install_opencode2() {
+	_run_opencode2_install() {
+		if command -v opencode2 &>/dev/null; then
+			log_warning "OpenCode 2 is already installed"
+		else
+			local package_manager
+			if command -v bun &>/dev/null; then
+				package_manager="bun"
+			elif command -v npm &>/dev/null; then
+				package_manager="npm"
+			elif command -v pnpm &>/dev/null; then
+				package_manager="pnpm"
+			else
+				log_error "No supported package manager found for OpenCode 2 (need Bun, npm, or pnpm)"
+				return 1
+			fi
+
+			if ! case "$package_manager" in
+				bun) execute "bun install -g --trust @opencode-ai/cli@next" ;;
+				npm) execute "npm install -g @opencode-ai/cli@next" ;;
+				pnpm) execute "pnpm add -g --allow-build=@opencode-ai/cli @opencode-ai/cli@next" ;;
+				esac
+			then
+				log_error "OpenCode 2 installation failed"
+				return 1
+			fi
+			log_success "OpenCode 2 installed as opencode2"
+		fi
+	}
+	run_installer "OpenCode 2 (beta)" "_run_opencode2_install" "command -v opencode2" ""
+}
+
 # Usage: install_opencode_cursor
 # Cursor ACP bridge for OpenCode (https://github.com/Nomadcxx/opencode-cursor).
 # Config lives in configs/opencode/opencode.json — do not run `open-cursor install`

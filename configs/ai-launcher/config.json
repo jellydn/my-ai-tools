@@ -23,6 +23,14 @@
 			"promptUseStdin": true
 		},
 		{
+			"name": "opencode2",
+			"command": "opencode2",
+			"description": "OpenCode 2 beta AI assistant",
+			"aliases": ["o2", "oc2"],
+			"promptCommand": "opencode2 run",
+			"promptUseStdin": true
+		},
+		{
 			"name": "amp",
 			"command": "amp",
 			"description": "AI coding assistant by Modular",
