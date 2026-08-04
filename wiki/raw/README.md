@@ -919,29 +919,35 @@ Plugins are automatically installed on next OpenCode launch.
 Located in [`configs/opencode/agent/`](configs/opencode/agent/):
 
 - `ai-slop-remover` - Remove AI-generated boilerplate
-- `docs-update` - Automated documentation synchronization with code changes
 - `docs-writer` - Generate documentation
+- `fusion-executor` - Bounded implementation executor for the Fusion workflow
+- `fusion-lead` - Read-only planning lead for the Fusion workflow
 - `review` - Code review
 - `security-audit` - Security auditing
+- `test-generator` - Generate comprehensive tests for code changes
 
 ### Custom Providers
 
-OpenCode supports custom model providers via OpenAI-compatible endpoints:
+OpenCode supports custom model providers via OpenAI-compatible endpoints. They live under the singular `provider` key in `opencode.json` (V1-shaped, intentional), with custom model limits:
 
-| Provider  | Models                              | Endpoint                                        |
-| --------- | ----------------------------------- | ----------------------------------------------- |
-| cursorapi | `composer-2.5`, `composer-2.5-fast` | `http://127.0.0.1:8788/v1` (local Cursor proxy) |
-| llama.cpp | GLM-4.7-Flash (local inference)     | `http://192.168.1.11:8000/v1`                   |
-| ollama    | minimax-m2.5:cloud                  | `http://127.0.0.1:11434/v1`                     |
+| Provider    | Role / models                                                                                          | Endpoint                   |
+| ----------- | ------------------------------------------------------------------------------------------------------ | -------------------------- |
+| `cursor-acp` | Cursor ACP bridge; models include `auto`, `cursor-grok-4.5-medium`, `composer-2.5`, `claude-*`, `gpt-*`, `gemini-*`, etc. | `http://127.0.0.1:32124/v1` |
+| `omniroute`  | OmniRoute; `free` / `paid` / `premium` (plus named routes like `sf/step-3.7-flash`, `cu/grok-4.5-high`) | `http://localhost:20128/v1` |
 
-These are configured in `opencode.json` under the `provider` key with custom model limits.
+The top-level default model is `"model": "omnirouter/free"`.
 
 ### Custom Commands
 
 Located in [`configs/opencode/command/`](configs/opencode/command/):
 
-- `simplify` - Simplify over-engineered code for clarity and maintainability
 - `batch` - Run multiple tasks in parallel as worker tasks
+- `happyhorse` - Generate a video with QwenCloud HappyHorse (async, may take minutes)
+- `plannotator-annotate` - Annotate the current plan with @plannotator/opencode
+- `plannotator-last` - Show the last plannotator plan
+- `plannotator-review` - Review the current plan with @plannotator/opencode
+- `simplify` - Simplify over-engineered code for clarity and maintainability
+- `wan` - Generate an image with QwenCloud Wan (wan2.7)
 
 </details>
 
