@@ -18,7 +18,7 @@ The qmd-knowledge skill follows the Agent Skills specification:
 
 ```
 # The skill (one SKILL.md defines the capability)
-~/.config/opencode/skill/qmd-knowledge/
+~/.config/opencode/skills/qmd-knowledge/
 ├── SKILL.md              # Skill definition
 ├── scripts/              # Executable scripts
 │   └── record.sh         # Record learnings/issues/notes
@@ -92,7 +92,7 @@ The skill is installed when you run the setup script:
 ./cli.sh
 ```
 
-This copies the qmd-knowledge skill to `~/.config/opencode/skill/qmd-knowledge/`.
+`cli.sh` copies the skill to the universal skills directory at `~/.agents/skills/qmd-knowledge/`. Tool-specific paths such as `~/.config/opencode/skills/qmd-knowledge/` resolve to that directory via a symlink (`~/.config/opencode/skills` → `~/.agents/skills`), so the symlink path works at runtime.
 
 ### 4. Create a Knowledge Collection for Your Project
 
@@ -101,7 +101,7 @@ This copies the qmd-knowledge skill to `~/.config/opencode/skill/qmd-knowledge/`
 The `qmd-knowledge` skill now automatically sets up the knowledge base when you first use it. Simply run:
 
 ```bash
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "First learning"
+~/.config/opencode/skills/qmd-knowledge/scripts/record.sh learning "First learning"
 ```
 
 The script will:
@@ -144,7 +144,7 @@ qmd embed
 #### Record a Learning
 
 ```bash
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "qmd MCP integration"
+~/.config/opencode/skills/qmd-knowledge/scripts/record.sh learning "qmd MCP integration"
 ```
 
 This creates a timestamped file: `references/learnings/YYYY-MM-DD-qmd-mcp-integration.md`
@@ -152,7 +152,7 @@ This creates a timestamped file: `references/learnings/YYYY-MM-DD-qmd-mcp-integr
 #### Add Issue Note
 
 ```bash
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh issue 123 "Fixed by updating dependencies"
+~/.config/opencode/skills/qmd-knowledge/scripts/record.sh issue 123 "Fixed by updating dependencies"
 ```
 
 This appends to `references/issues/123.md` (creating it if it doesn't exist).
@@ -160,7 +160,7 @@ This appends to `references/issues/123.md` (creating it if it doesn't exist).
 #### Record General Note
 
 ```bash
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh note "Consider using agent skills for extensibility"
+~/.config/opencode/skills/qmd-knowledge/scripts/record.sh note "Consider using agent skills for extensibility"
 ```
 
 ### Querying Knowledge
@@ -212,7 +212,7 @@ qmd embed
 **Claude recognizes the skill and executes:**
 
 ```bash
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "qmd MCP autonomous tool use"
+~/.config/opencode/skills/qmd-knowledge/scripts/record.sh learning "qmd MCP autonomous tool use"
 ```
 
 ### 2. Query Knowledge Later
@@ -244,7 +244,7 @@ qmd search "MCP servers" -c my-ai-tools
 **Claude executes:**
 
 ```bash
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh issue 123 "Fixed by updating qmd dependency to latest version"
+~/.config/opencode/skills/qmd-knowledge/scripts/record.sh issue 123 "Fixed by updating qmd dependency to latest version"
 ```
 
 ## Multiple Projects
@@ -285,7 +285,7 @@ Set the `QMD_PROJECT` environment variable to override automatic detection:
 
 ```bash
 export QMD_PROJECT="another-project"
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "This goes to another-project"
+~/.config/opencode/skills/qmd-knowledge/scripts/record.sh learning "This goes to another-project"
 ```
 
 ### Handling Existing Collections
@@ -378,7 +378,7 @@ Contributions welcome! To add features:
 
 1. Fork the repository
 2. Create a feature branch
-3. Add your changes to `configs/opencode/skill/qmd-knowledge/`
+3. Add your changes to `skills/qmd-knowledge/`
 4. Submit a pull request
 
 ## License

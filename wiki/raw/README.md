@@ -849,7 +849,7 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
 					"qmd query": "allow",
 					"qmd get": "allow",
 					"qmd search": "allow",
-					"$HOME/.config/opencode/skill/qmd-knowledge/scripts/record.sh": "allow",
+					"$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh": "allow",
 					"$HOME/.claude/skills/qmd-knowledge/scripts/record.sh": "allow"
 				}
 			}
