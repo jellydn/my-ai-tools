@@ -17,7 +17,7 @@
 		"explorer": {
 			"description": "Fast explorer subagent for codebase exploration",
 			"mode": "subagent",
-			"model": "omniroute/free"
+			"model": "omnirouter/free"
 		}
 	},
 	"default_agent": "plan",
@@ -108,7 +108,7 @@
 			"command": ["codebase-memory-mcp"]
 		}
 	},
-	"model": "omniroute/free",
+	"model": "omnirouter/free",
 	"plugin": ["@plannotator/opencode@latest"],
 	"provider": {
 		"cursor-acp": {
