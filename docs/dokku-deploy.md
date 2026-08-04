@@ -60,7 +60,9 @@ Non-secret OpenAI-compatible settings live in Dokku config (same values as [`.en
 - `OPENAI_MODEL` = `openrouter/free`
 - `OPENAI_EMBEDDING_MODEL` = `nvidia/llama-nemotron-embed-vl-1b-v2:free`
 
-The Dockerfile indexes the repo at build time using a BuildKit secret `OPENAI_API_KEY`. Dokku passes that secret from app config via `docker-options` (`--secret id=OPENAI_API_KEY,env=OPENAI_API_KEY`). The deploy workflow syncs the GitHub OpenRouter secret into Dokku config before `git push`.
+The Dockerfile indexes the repo at build time using a BuildKit secret `OPENAI_API_KEY`. Dokku passes that secret from app config via `docker-options` (`--secret id=OPENAI_API_KEY,env=OPENAI_API_KEY`). The deploy workflow re-syncs the **full** config above (key, base URL, models) into Dokku before `git push`, so host-side drift cannot break the build — a bare `OPENAI_API_KEY` alone used to fail with `401 invalid_api_key` because the OpenAI SDK defaulted to `api.openai.com`, which rejects `sk-or-v1-...` keys.
+
+The code is defensive too: [`lib/openai-client.ts`](../lib/openai-client.ts) detects `sk-or-v1-...` keys and automatically targets `https://openrouter.ai/api/v1` when `OPENAI_BASE_URL` is unset, and the default embedding model is the free OpenRouter `nvidia/llama-nemotron-embed-vl-1b-v2:free` (indexed at build and queried at runtime with the same default).
 
 ## Local deploy (optional)
 

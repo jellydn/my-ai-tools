@@ -2,13 +2,13 @@ import { readFile, stat } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type OpenAI from "openai";
-import { createOpenAIClient } from "./openai-client.ts";
+import { createOpenAIClient, DEFAULT_EMBEDDING_MODEL } from "./openai-client.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const INDEX_PATH = resolve(__dirname, "..", "data", "index.json");
 
-const EMBEDDING_MODEL = process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small";
+const EMBEDDING_MODEL = process.env.OPENAI_EMBEDDING_MODEL ?? DEFAULT_EMBEDDING_MODEL;
 
 export type Chunk = {
 	path: string;

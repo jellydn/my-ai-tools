@@ -70,8 +70,15 @@ jobs:
 
           SSH=(ssh -i ~/.ssh/dokku_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes "dokku@$DOKKU_HOST")
 
-          # BuildKit secret + runtime both read OPENAI_API_KEY from app config.
-          "${SSH[@]}" config:set --no-restart "$DOKKU_APP" "OPENAI_API_KEY=${EFFECTIVE_OPENAI_API_KEY}"
+          # BuildKit secret + runtime both read app config. Re-set the full
+          # OpenAI-compatible config on every deploy so host-side drift (e.g. a
+          # missing OPENAI_BASE_URL sending the sk-or-v1- key to api.openai.com
+          # with a 401) can't break the image build.
+          "${SSH[@]}" config:set --no-restart "$DOKKU_APP" \
+            "OPENAI_API_KEY=${EFFECTIVE_OPENAI_API_KEY}" \
+            "OPENAI_BASE_URL=https://openrouter.ai/api/v1" \
+            "OPENAI_MODEL=openrouter/free" \
+            "OPENAI_EMBEDDING_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free"
 
       - name: Deploy to Dokku
         uses: dokku/github-action@master

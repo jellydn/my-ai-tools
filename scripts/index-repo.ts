@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { indexRepository } from "../lib/indexer.ts";
-import { createOpenAIClient } from "../lib/openai-client.ts";
+import { createOpenAIClient, DEFAULT_EMBEDDING_MODEL } from "../lib/openai-client.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,7 +11,7 @@ const DATA_DIR = resolve(REPO_ROOT, "data");
 const INDEX_PATH = resolve(DATA_DIR, "index.json");
 
 const EMBEDDING_BATCH_SIZE = 100;
-const EMBEDDING_MODEL = process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small";
+const EMBEDDING_MODEL = process.env.OPENAI_EMBEDDING_MODEL ?? DEFAULT_EMBEDDING_MODEL;
 
 async function createEmbeddings(chunks: string[]): Promise<number[][]> {
 	const openai = createOpenAIClient();
@@ -33,9 +33,11 @@ async function createEmbeddings(chunks: string[]): Promise<number[][]> {
 }
 
 async function main() {
-	const apiKey = process.env.OPENAI_API_KEY?.trim();
+	const apiKey = (process.env.OPENAI_API_KEY ?? process.env.OPENROUTER_API_KEY)?.trim();
 	if (!apiKey) {
-		console.error("OPENAI_API_KEY is not set. Copy .env.example to .env and add your key.");
+		console.error(
+			"OPENAI_API_KEY (or OPENROUTER_API_KEY) is not set. Copy .env.example to .env and add your key.",
+		);
 		process.exit(1);
 	}
 
