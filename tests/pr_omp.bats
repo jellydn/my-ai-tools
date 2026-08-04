@@ -56,6 +56,20 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     [ "$status" -eq 0 ]
     [ -n "$output" ]
 }
+@test "generate.sh generate_omp_configs() exports config.yml and config.yaml" {
+    run grep -F 'config.yml' "$GENERATE_SH"
+    [ "$status" -eq 0 ]
+    run grep -F 'config.yaml' "$GENERATE_SH"
+    [ "$status" -eq 0 ]
+}
+
+@test "cli.sh copy_omp_configs() handles config.yml and config.yaml" {
+    run grep -F 'configs/omp/config.yml' "$CLI_SH"
+    [ "$status" -eq 0 ]
+    run grep -F 'configs/omp/config.yaml' "$CLI_SH"
+    [ "$status" -eq 0 ]
+}
+
 
 @test "configs/ai-launcher/config.json has omp tool registered" {
     require_jq
