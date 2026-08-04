@@ -550,7 +550,7 @@ npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
 
-# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, tmux, blindspot-pass, implementation-logger, quiz-me, spec-interview, capability-experiments, code-review, context-discovery, doc-search, git-context, orchestrating-fusion
+# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, security-audit, tmux, blindspot-pass, implementation-logger, quiz-me, spec-interview, capability-experiments, code-review, context-discovery, doc-search, git-context, orchestrating-fusion
 # Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
@@ -803,6 +803,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `prd` - Generate Product Requirements Documents
 - `qmd-knowledge` - Project knowledge management
 - `ralph` - Convert PRDs to JSON for autonomous agent execution
+- `security-audit` - Structured security audit workflow using OWASP Top 10, ASVS, and DevSecOps controls
 - `slop` - AI slop detection and removal
 - `tdd` - Test-Driven Development workflows
 - `code-quality-review` - Extremely strict maintainability and structural code quality reviews

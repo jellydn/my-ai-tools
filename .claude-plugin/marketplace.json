@@ -165,6 +165,17 @@
 			"category": "productivity"
 		},
 		{
+			"name": "security-audit",
+			"description": "Perform structured security audits using OWASP Top 10, ASVS, cheat sheets, framework checks, and DevSecOps controls.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/security-audit",
+			"category": "code-quality"
+		},
+		{
 			"name": "slop",
 			"description": "Removes AI-generated code slop from git diffs to maintain code quality. Clean up extra comments, defensive checks, type casts, and inconsistent style.",
 			"version": "1.0.0",
