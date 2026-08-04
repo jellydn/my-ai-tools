@@ -4,7 +4,7 @@ DevSecOps shifts security left: automated scanning in the pipeline catches vulne
 
 ## The pipeline security flow
 
-```
+```text
 Code Push
   ├─ Secret scanning (pre-commit) ─┐
   ├─ SAST (source) ────────────────┤
@@ -115,29 +115,28 @@ jobs:
   secrets:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with: { fetch-depth: 0 }
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7
   sast:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: returntocorp/semgrep-action@v1
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: returntocorp/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d
   deps:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with: { node-version: "24" }
       - run: npm ci --ignore-scripts
       - run: npm audit --audit-level=high
   container:
     runs-on: ubuntu-latest
-    needs: build
     steps:
-      - uses: aquasecurity/trivy-action@master
+      - uses: aquasecurity/trivy-action@2736533278103862a861f4a35ebac3e97854d956
         with:
-          image-ref: ${{ needs.build.outputs.image }}
+          image-ref: node:24-alpine
           severity: HIGH,CRITICAL
           exit-code: "1"
 ```
