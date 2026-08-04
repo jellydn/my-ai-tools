@@ -1,7 +1,5 @@
 # OpenCode Global Guidelines
 
-OpenCode 2 beta runs as `opencode2` alongside OpenCode 1 and reads this same global configuration directory. Existing V1 configuration is intentionally kept here so both binaries can use it; V2 translates most V1 fields in memory. V1 plugins are not compatible with V2, so verify plugin-dependent workflows before switching.
-
 ## Token Efficiency
 
 - Keep responses concise and actionable; lead with conclusions, file paths, and verification.
