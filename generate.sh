@@ -987,7 +987,7 @@ sanitize_absolute_paths() {
 					walk(fullPath);
 				} else if (stat.isFile()) {
 					const ext = path.extname(file).toLowerCase();
-					if ([".json", ".toml", ".jsonc"].includes(ext)) {
+					if ([".json", ".toml", ".jsonc", ".yaml", ".yml"].includes(ext)) {
 						try {
 							let content = fs.readFileSync(fullPath, "utf8");
 							let modified = false;
