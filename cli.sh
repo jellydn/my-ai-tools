@@ -1557,6 +1557,9 @@ copy_pi_configs() {
 	copy_config_file "$SCRIPT_DIR/configs/pi/mcp.json" "$HOME/.pi/agent/" || true
 
 	copy_config_file "$SCRIPT_DIR/configs/pi/models.json" "$HOME/.pi/agent/" || true
+	copy_config_file "$SCRIPT_DIR/configs/pi/config.yml" "$HOME/.pi/agent/" || true
+	copy_config_file "$SCRIPT_DIR/configs/pi/config.yaml" "$HOME/.pi/agent/" || true
+	copy_config_file "$SCRIPT_DIR/configs/pi/config.json" "$HOME/.pi/agent/" || true
 
 	if [ -d "$SCRIPT_DIR/configs/pi/agents" ]; then
 		execute_quoted rm -rf "$HOME/.pi/agent/agents"
@@ -1586,6 +1589,9 @@ copy_omp_configs() {
 		copy_config_file "$SCRIPT_DIR/configs/omp/AGENTS.md" "$HOME/.omp/agent/" || true
 		copy_config_file "$SCRIPT_DIR/configs/omp/mcp.json" "$HOME/.omp/agent/" || true
 		copy_config_file "$SCRIPT_DIR/configs/omp/models.json" "$HOME/.omp/agent/" || true
+		copy_config_file "$SCRIPT_DIR/configs/omp/config.yml" "$HOME/.omp/agent/" || true
+		copy_config_file "$SCRIPT_DIR/configs/omp/config.yaml" "$HOME/.omp/agent/" || true
+		copy_config_file "$SCRIPT_DIR/configs/omp/config.json" "$HOME/.omp/agent/" || true
 		if [ -d "$SCRIPT_DIR/configs/omp/agents" ]; then
 			execute_quoted rm -rf "$HOME/.omp/agent/agents"
 			safe_copy_dir "$SCRIPT_DIR/configs/omp/agents" "$HOME/.omp/agent/agents"
