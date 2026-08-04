@@ -16,7 +16,7 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     run jq -r '[.tools[] | select(.name == "opencode")][0].promptCommand' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode run" ]]
+    [[ "$output" == "opencode2 run" ]]
 }
 
 @test "configs/ai-launcher/config.json opencode tool promptCommand no longer references big-pickle" {
@@ -76,7 +76,7 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode run --agent plan"* ]]
+    [[ "$output" == "opencode2 run --agent plan"* ]]
 }
 
 @test "configs/ai-launcher/config.json commit-zen template command no longer uses --model flag" {
@@ -85,7 +85,7 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode run --agent plan"* ]]
+    [[ "$output" == "opencode2 run --agent plan"* ]]
 }
 
 @test "configs/ai-launcher/config.json commit-staged template command no longer uses --model flag" {
@@ -94,7 +94,7 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode run --agent build"* ]]
+    [[ "$output" == "opencode2 run --agent build"* ]]
 }
 
 @test "configs/ai-launcher/config.json commit-atomic template command no longer uses --model flag" {
@@ -103,7 +103,7 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode run --agent build"* ]]
+    [[ "$output" == "opencode2 run --agent build"* ]]
 }
 
 @test "configs/ai-launcher/config.json architecture-explanation template command no longer uses --model flag" {
@@ -112,7 +112,7 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode run --agent plan"* ]]
+    [[ "$output" == "opencode2 run --agent plan"* ]]
 }
 
 @test "configs/ai-launcher/config.json draft-pull-request template command no longer uses --model flag" {
@@ -121,7 +121,7 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode run --agent build"* ]]
+    [[ "$output" == "opencode2 run --agent build"* ]]
 }
 
 @test "configs/ai-launcher/config.json no longer references deepseek-v4-flash-free" {
