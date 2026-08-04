@@ -20,7 +20,7 @@ The OWASP Top 10 is the standard awareness document for the most critical web ap
 ### Key 2021 → 2025 shifts
 - **A03** renamed from *Vulnerable and Outdated Components* to *Software Supply Chain Failures* — the supply chain is now treated as part of the application.
 - **A10** is brand new: *Mishandling of Exceptional Conditions* (24 CWEs covering fail-open, NULL deref, missing-param handling, sensitive info in errors).
-- *Server-Side Request Forgery* (A10:2021) is folded into broader categories.
+- *Server-Side Request Forgery* (A10:2021) is folded into broader categories in 2025, most commonly **A01:2025 Broken Access Control** when internal resources are reachable because authorization/trust boundaries fail.
 - Order shifted: Misconfiguration rose to #2, Injection dropped to #5.
 
 ## OWASP Top 10:2021 (still widely referenced)

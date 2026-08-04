@@ -10,7 +10,7 @@ The Cheat Sheet Series gives concise, actionable implementation guidance for spe
 - **Credential Stuffing Prevention Cheat Sheet** — rate limiting, MFA, breach-password checks, CAPTCHA considerations.
 
 ### Tokens & sessions
-- **JSON Web Token Cheat Sheet** — when to use JWT, signing algorithms (RS256/ES256 over HS256), `alg: none` rejection, short expiry + refresh, claims validation (`exp`, `iss`, `aud`), storage in HttpOnly cookies not localStorage, key rotation.
+- **JSON Web Token Cheat Sheet** — when to use JWT, enforce an explicit algorithm allow-list (reject `alg: none` and unexpected algorithms), prefer asymmetric signing (RS256/ES256) when tokens are verified by multiple services, use short expiry + refresh, validate claims (`exp`, `iss`, `aud`), store in HttpOnly cookies (not localStorage), and rotate keys.
 - **Session Management Cheat Sheet** — session ID generation, rotation on auth, idle/absolute timeout, invalidation, secure cookie flags.
 
 ### Injection prevention
@@ -60,7 +60,7 @@ The Cheat Sheet Series gives concise, actionable implementation guidance for spe
 
 1. When a finding maps to a topic, cite the specific cheat sheet in the recommendation, e.g. *"Fix: follow the OWASP File Upload Cheat Sheet — validate magic bytes and store outside web root."*
 2. The cheat sheets are **indexed by ASVS section** (https://cheatsheetseries.owasp.org/IndexASVS.html) — use this to go from an ASVS requirement ID to the matching implementation guidance.
-3. Prefer the cheat sheet's concrete pattern over a vague recommendation. A finding that says "fix your JWT handling" is weak; one that says "switch HS256 to RS256, set short expiries with refresh tokens, store in HttpOnly cookies per the JWT Cheat Sheet" is actionable.
+3. Prefer the cheat sheet's concrete pattern over a vague recommendation. A finding that says "fix your JWT handling" is weak; one that says "enforce an explicit JWT algorithm allow-list, use asymmetric signing when multi-service verification is required, set short expiries with refresh tokens, and store tokens in HttpOnly cookies per the JWT Cheat Sheet" is actionable.
 
 ## References
 - Cheat Sheet Series home — https://cheatsheetseries.owasp.org/

@@ -145,7 +145,7 @@ Audit checklist (Fastify):
 - **Scripts**: disable install scripts with `npm config set ignore-scripts true` / `--ignore-scripts` to block malicious postinstall.
 - **Lockfile poisoning**: verify lockfile integrity; don't accept unreviewed lockfile changes in PRs.
 - **Typosquatting**: verify package names exactly; prefer scoped packages; review new dependencies.
-- **EOL runtimes**: stay on an active LTS line. Node 20.x EOL Apr 2026; 24.x is current LTS. Running EOL means unpatched CVEs.
+- **EOL runtimes**: stay on an active LTS line and verify support status against the official Node.js release schedule: https://nodejs.org/en/about/previous-releases. Running EOL means unpatched CVEs.
 - **Reachability**: a CVE in a transitive dep is only critical if the vulnerable code path is reachable — use `npm audit` + Snyk/Socket reachability or `vet` to prioritize.
 - **Non-root container**: run the Node process as a non-root user; read-only FS where possible; drop Linux capabilities.
 - **Node.js permission model**: `--permission` flag restricts fs/net/child-process access — useful to contain compromised deps (still experimental; one layer among several).

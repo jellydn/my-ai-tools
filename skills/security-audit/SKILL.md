@@ -1,6 +1,6 @@
 ---
 name: security-audit
-description: "Audits code and architecture for security vulnerabilities using OWASP Top 10, ASVS, Cheat Sheet Series, Node.js best practices, and DevSecOps controls. Use when reviewing code for security issues, hardening an application, or planning security requirements."
+description: "Use when reviewing code for security vulnerabilities, hardening an application, or deriving security requirements from OWASP/ASVS guidance."
 license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when auditing code for security vulnerabilities or hardening an application
