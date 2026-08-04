@@ -74,11 +74,17 @@ jobs:
           # OpenAI-compatible config on every deploy so host-side drift (e.g. a
           # missing OPENAI_BASE_URL sending the sk-or-v1- key to api.openai.com
           # with a 401) can't break the image build.
-          "${SSH[@]}" config:set --no-restart "$DOKKU_APP" \
-            "OPENAI_API_KEY=${EFFECTIVE_OPENAI_API_KEY}" \
-            "OPENAI_BASE_URL=https://openrouter.ai/api/v1" \
-            "OPENAI_MODEL=openrouter/free" \
-            "OPENAI_EMBEDDING_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free"
+          # Dokku --encoded base64-decodes each value before storing, so the
+          # key never appears raw in SSH_ORIGINAL_COMMAND (not shell-escaped).
+          # GNU base64 -w 0 is available on ubuntu-latest.
+          encode() {
+            printf '%s' "$1" | base64 -w 0
+          }
+          "${SSH[@]}" config:set --encoded --no-restart "$DOKKU_APP" \
+            "OPENAI_API_KEY=$(encode "$EFFECTIVE_OPENAI_API_KEY")" \
+            "OPENAI_BASE_URL=$(encode "https://openrouter.ai/api/v1")" \
+            "OPENAI_MODEL=$(encode "openrouter/free")" \
+            "OPENAI_EMBEDDING_MODEL=$(encode "nvidia/llama-nemotron-embed-vl-1b-v2:free")"
 
       - name: Deploy to Dokku
         uses: dokku/github-action@master
