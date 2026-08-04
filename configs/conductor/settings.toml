@@ -10,8 +10,8 @@ delete_branch_on_archive = false
 [models]
 default = "auto"
 default_plan_mode = true
-review = "opencode:clinepass/cline-pass/glm-5.2"
-visible_provider_models = "{\"claude\":[],\"codex\":[],\"cursor\":[],\"opencode\":[\"opencode:openrouter/tencent/hy3:free\",\"opencode:opencode/deepseek-v4-flash-free\",\"opencode:opencode/hy3-free\",\"opencode:clinepass/cline-pass/deepseek-v4-flash\",\"opencode:clinepass/cline-pass/deepseek-v4-pro\",\"opencode:clinepass/cline-pass/glm-5.2\",\"opencode:alibaba-token-plan/qwen3.8-max-preview\"],\"pi\":[]}"
+review = "opencode:omniroute/paid"
+visible_provider_models = "{\"claude\":[],\"codex\":[],\"cursor\":[],\"opencode\":[\"opencode:alibaba-token-plan/glm-5.2\",\"opencode:alibaba-token-plan/qwen3.8-max-preview\",\"opencode:omniroute/free\",\"opencode:omniroute/kc/openrouter/free\",\"opencode:omniroute/oc/deepseek-v4-flash-free\",\"opencode:omniroute/cu/auto\",\"opencode:omniroute/paid\",\"opencode:omniroute/premium\",\"opencode:opencode/deepseek-v4-flash-free\",\"opencode:opencode/big-pickle\",\"opencode:openrouter/poolside/laguna-s-2.1:free\",\"opencode:openrouter/inclusionai/ling-3.0-flash:free\",\"opencode:omniroute/sf/step-3.7-flash\"],\"pi\":[]}"
 
 [models.codex]
 default_thinking_level = "high"
