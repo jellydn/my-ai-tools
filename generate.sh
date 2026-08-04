@@ -463,16 +463,58 @@ generate_pi_configs() {
 generate_omp_configs() {
 	log_info "Generating Oh My Pi (omp) configs..."
 
+	if [ ! -d "$HOME/.omp" ]; then
+		log_warning "Oh My Pi (omp) config directory not found: $HOME/.omp"
+		return 0
+	fi
+
+	execute "mkdir -p $SCRIPT_DIR/configs/omp"
+
 	if [ -f "$HOME/.omp/agent/settings.json" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/omp"
 		copy_single "$HOME/.omp/agent/settings.json" "$SCRIPT_DIR/configs/omp/settings.json"
+		log_success "Oh My Pi (omp) configs generated"
+	elif [ -f "$HOME/.omp/settings.json" ]; then
+		copy_single "$HOME/.omp/settings.json" "$SCRIPT_DIR/configs/omp/settings.json"
 		log_success "Oh My Pi (omp) configs generated"
 	else
 		log_warning "Oh My Pi (omp) settings.json not found: $HOME/.omp/agent/settings.json"
 	fi
 
+	if [ -f "$HOME/.omp/agent/config.yml" ]; then
+		copy_single "$HOME/.omp/agent/config.yml" "$SCRIPT_DIR/configs/omp/config.yml"
+	elif [ -f "$HOME/.omp/config.yml" ]; then
+		copy_single "$HOME/.omp/config.yml" "$SCRIPT_DIR/configs/omp/config.yml"
+	fi
+
+	if [ -f "$HOME/.omp/agent/config.yaml" ]; then
+		copy_single "$HOME/.omp/agent/config.yaml" "$SCRIPT_DIR/configs/omp/config.yaml"
+	elif [ -f "$HOME/.omp/config.yaml" ]; then
+		copy_single "$HOME/.omp/config.yaml" "$SCRIPT_DIR/configs/omp/config.yaml"
+	fi
+
+	if [ -f "$HOME/.omp/agent/config.json" ]; then
+		copy_single "$HOME/.omp/agent/config.json" "$SCRIPT_DIR/configs/omp/config.json"
+	elif [ -f "$HOME/.omp/config.json" ]; then
+		copy_single "$HOME/.omp/config.json" "$SCRIPT_DIR/configs/omp/config.json"
+	fi
+
+	if [ -f "$HOME/.omp/agent/AGENTS.md" ]; then
+		copy_single "$HOME/.omp/agent/AGENTS.md" "$SCRIPT_DIR/configs/omp/AGENTS.md"
+	elif [ -f "$HOME/.omp/AGENTS.md" ]; then
+		copy_single "$HOME/.omp/AGENTS.md" "$SCRIPT_DIR/configs/omp/AGENTS.md"
+	fi
+
+	if [ -f "$HOME/.omp/agent/models.json" ]; then
+		copy_single "$HOME/.omp/agent/models.json" "$SCRIPT_DIR/configs/omp/models.json"
+	elif [ -f "$HOME/.omp/models.json" ]; then
+		copy_single "$HOME/.omp/models.json" "$SCRIPT_DIR/configs/omp/models.json"
+	fi
+
 	if [ -d "$HOME/.omp/agent/themes" ]; then
 		copy_directory "$HOME/.omp/agent/themes" "$SCRIPT_DIR/configs/omp/themes"
+		log_success "Oh My Pi (omp) themes generated"
+	elif [ -d "$HOME/.omp/themes" ]; then
+		copy_directory "$HOME/.omp/themes" "$SCRIPT_DIR/configs/omp/themes"
 		log_success "Oh My Pi (omp) themes generated"
 	else
 		log_warning "Oh My Pi (omp) themes directory not found: $HOME/.omp/agent/themes"
@@ -480,18 +522,23 @@ generate_omp_configs() {
 
 	if [ -f "$HOME/.omp/agent/mcp.json" ]; then
 		copy_single "$HOME/.omp/agent/mcp.json" "$SCRIPT_DIR/configs/omp/mcp.json"
+	elif [ -f "$HOME/.omp/mcp.json" ]; then
+		copy_single "$HOME/.omp/mcp.json" "$SCRIPT_DIR/configs/omp/mcp.json"
 	else
 		log_warning "Oh My Pi (omp) MCP config not found: $HOME/.omp/agent/mcp.json"
 	fi
 
-	if [ -d "$HOME/.omp/agent/agents" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/omp/agents"
-		if [ -n "$(ls -A "$HOME/.omp/agent/agents" 2>/dev/null)" ]; then
-			if execute "cp -r '$HOME/.omp/agent/agents'/* '$SCRIPT_DIR/configs/omp/agents'/ 2>/dev/null"; then
-				log_success "Oh My Pi (omp) agents exported"
+	for src_dir in "$HOME/.omp/agent/agents" "$HOME/.omp/agents"; do
+		if [ -d "$src_dir" ]; then
+			execute "mkdir -p $SCRIPT_DIR/configs/omp/agents"
+			if [ -n "$(ls -A "$src_dir" 2>/dev/null)" ]; then
+				if execute "cp -r '$src_dir'/* '$SCRIPT_DIR/configs/omp/agents'/ 2>/dev/null"; then
+					log_success "Oh My Pi (omp) agents exported"
+				fi
 			fi
+			break
 		fi
-	fi
+	done
 }
 
 generate_commandcode_configs() {
