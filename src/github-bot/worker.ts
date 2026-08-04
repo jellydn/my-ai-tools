@@ -5,6 +5,7 @@ import { type GitHubClient, installationClient } from "./github.ts";
 import { type PullFile, validateFindings } from "./review.ts";
 import { jsonLogger } from "./security.ts";
 import { JsonJobStore } from "./store.ts";
+import { WorkerLifecycle } from "./worker-lifecycle.ts";
 import type { AgentRunResult, CodingAgent, Job } from "./types.ts";
 import {
 	cleanupWorkspace,
@@ -39,9 +40,7 @@ function boundedSignal(timeoutMs: number, parent?: AbortSignal) {
 	};
 }
 export class BotWorker {
-	private timer?: ReturnType<typeof setInterval>;
-	private stopping = false;
-	private controllers = new Map<string, AbortController>();
+	private lifecycle: WorkerLifecycle;
 	constructor(
 		private config: BotConfig,
 		private store: JsonJobStore,
@@ -77,21 +76,21 @@ export class BotWorker {
 							},
 				signal,
 			),
-	) {}
-	start() {
-		this.timer = setInterval(() => void this.tick(), 500);
-		this.timer.unref();
-		void this.tick();
+	) {
+		this.lifecycle = new WorkerLifecycle({
+			claim: () => this.store.claim(this.config.concurrency),
+			execute: (job, signal) => this.execute(job, signal),
+			cancelAgent: (id) => this.agent.cancel(id),
+		});
 	}
-	async stop() {
-		this.stopping = true;
-		if (this.timer) clearInterval(this.timer);
-		for (const id of this.controllers.keys()) this.cancel(id);
-		while (this.controllers.size) await new Promise((r) => setTimeout(r, 20));
+	start() {
+		this.lifecycle.start();
+	}
+	stop() {
+		return this.lifecycle.stop();
 	}
 	cancel(id: string) {
-		this.controllers.get(id)?.abort();
-		void this.agent.cancel(id);
+		this.lifecycle.cancel(id);
 	}
 	async reportStatus(job: Job, detail = "Current job status.") {
 		const bounded = boundedSignal(10_000);
@@ -146,12 +145,7 @@ export class BotWorker {
 		return this.comment(current, client, progress(current, detail), signal);
 	}
 	async tick() {
-		if (this.stopping) return;
-		const job = await this.store.claim(this.config.concurrency);
-		if (!job) return;
-		const controller = new AbortController();
-		this.controllers.set(job.id, controller);
-		void this.execute(job, controller.signal).finally(() => this.controllers.delete(job.id));
+		return this.lifecycle.tick();
 	}
 	private async agentRun(
 		job: Job,

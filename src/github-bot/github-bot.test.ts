@@ -13,6 +13,7 @@ import { commandAllowed, redact, scanSecrets } from "./security.ts";
 import { JsonJobStore } from "./store.ts";
 import type { Job } from "./types.ts";
 import { BotWorker } from "./worker.ts";
+import { WorkerLifecycle } from "./worker-lifecycle.ts";
 import { cleanupWorkspace, createWorkspace, inspectDiff } from "./workspace.ts";
 
 const dirs: string[] = [];
@@ -229,7 +230,40 @@ describe("GitHub bot MVP", () => {
 			new GitHubClient("app", fetcher).installationToken(1, undefined, controller.signal),
 		).rejects.toThrow();
 	});
-	test("22 reconciles a prepared branch into one draft PR", async () => {
+	test("22 isolates worker scheduling and cancellation lifecycle", async () => {
+		let claimed = 0;
+		let started = false;
+		let cancelled = "";
+		let resolveExecution!: () => void;
+		const execution = new Promise<void>((resolve) => {
+			resolveExecution = resolve;
+		});
+		const lifecycle = new WorkerLifecycle({
+			intervalMs: 60_000,
+			claim: async () => {
+				if (claimed++) return undefined;
+				return { id: "job-1" } as Job;
+			},
+			execute: async (_job, signal) => {
+				started = true;
+				await new Promise<void>((resolve) => {
+					if (signal.aborted) return resolve();
+					signal.addEventListener("abort", () => resolve(), { once: true });
+					execution.then(resolve);
+				});
+			},
+			cancelAgent: (id) => {
+				cancelled = id;
+			},
+		});
+		await lifecycle.tick();
+		expect(started).toBeTrue();
+		lifecycle.cancel("job-1");
+		expect(cancelled).toBe("job-1");
+		resolveExecution();
+		await lifecycle.stop();
+	});
+	test("23 reconciles a prepared branch into one draft PR", async () => {
 		const { value } = await store();
 		const { job } = await value.enqueue({
 			...input,
