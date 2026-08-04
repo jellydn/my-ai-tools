@@ -59,8 +59,11 @@ if (!process.env.OPENAI_API_KEY) {
 
 const openai = createOpenAIClient();
 
+const documentTypeSchema = z.enum(["documentation", "source", "issue", "pull_request", "cli_help", "example_config"]);
 const chatRequestSchema = z.object({
 	message: z.string().min(1).max(4000),
+	topK: z.union([z.literal(3), z.literal(5), z.literal(10), z.literal(20)]).default(5),
+	types: z.array(documentTypeSchema).max(6).optional(),
 });
 
 app.use("/data/*", async (c) => c.text("Forbidden", 403));
@@ -78,16 +81,20 @@ app.post("/api/chat", rateLimitMiddleware, async (c) => {
 		return c.json({ error: "Invalid request body" }, 400);
 	}
 
-	const { message } = parsed.data;
+	const { message, topK, types } = parsed.data;
 	let chunks: RetrievedChunk[];
+	const retrievalStartedAt = performance.now();
 	try {
-		chunks = await retrieve(message, 5);
+		chunks = await retrieve(message, { topK, types });
 	} catch (error) {
 		console.error(
 			JSON.stringify({
 				event: "rag_request",
-				question: message,
+				questionLength: message.length,
+				topK,
+				filters: { types: types ?? [] },
 				retrievedChunks: [],
+				retrievalLatencyMs: Math.round(performance.now() - retrievalStartedAt),
 				latencyMs: Math.round(performance.now() - startedAt),
 				error: "retrieval_failed",
 			}),
@@ -102,8 +109,11 @@ app.post("/api/chat", rateLimitMiddleware, async (c) => {
 		console.log(
 			JSON.stringify({
 				event: "rag_request",
-				question: message,
+				questionLength: message.length,
+				topK,
+				filters: { types: types ?? [] },
 				retrievedChunks: [],
+				retrievalLatencyMs: Math.round(performance.now() - retrievalStartedAt),
 				promptTokens: 0,
 				responseTokens: 0,
 				latencyMs: Math.round(performance.now() - startedAt),
@@ -133,12 +143,15 @@ app.post("/api/chat", rateLimitMiddleware, async (c) => {
 		console.error(
 			JSON.stringify({
 				event: "rag_request",
-				question: message,
+				questionLength: message.length,
+				topK,
+				filters: { types: types ?? [] },
 				retrievedChunks: chunks.map((chunk) => ({
 					path: chunk.path,
 					type: chunk.metadata.type,
 					score: Number(chunk.score.toFixed(4)),
 				})),
+				retrievalLatencyMs: Math.round(performance.now() - retrievalStartedAt),
 				latencyMs: Math.round(performance.now() - startedAt),
 				error: "generation_unavailable",
 			}),
@@ -176,13 +189,16 @@ app.post("/api/chat", rateLimitMiddleware, async (c) => {
 			console.log(
 				JSON.stringify({
 					event: "rag_request",
-					question: message,
+					questionLength: message.length,
+					topK,
+					filters: { types: types ?? [] },
 					retrievedChunks: chunks.map((chunk) => ({
 						path: chunk.path,
 						type: chunk.metadata.type,
 						author: chunk.metadata.author,
 						score: Number(chunk.score.toFixed(4)),
 					})),
+					retrievalLatencyMs: Math.round(performance.now() - retrievalStartedAt),
 					promptTokens,
 					responseTokens,
 					latencyMs: Math.round(performance.now() - startedAt),

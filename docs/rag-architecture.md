@@ -19,7 +19,7 @@ Repository + GitHub Issues/PRs
  In-image vector index (JSON)
             │
             ▼
- Cosine retriever (top 5)
+ Cosine retriever + metadata filter
             │
             ▼
  Grounding prompt policy
@@ -50,11 +50,11 @@ type ChunkMetadata = {
 };
 ```
 
-This supports future filters such as `type=issue`, `path=docs/`, or `author=jellydn` without changing the index schema.
+This supports pre-filtering by document type without changing the index schema. Path and author filters remain future extensions.
 
 ## Retrieval and grounding
 
-The server embeds the question with the same model used at index time, calculates cosine similarity against every chunk, and sends the five highest-scoring chunks to the answer model. The prompt treats excerpts as untrusted data, requires answers to use only those excerpts, cite relevant paths, and return `This is not documented in the repository.` when the evidence is insufficient. The UI appends deduplicated links for the retrieved sources, including direct links for Issues and Pull Requests. These links are a retrieval trace rather than a claim-level citation validator.
+The server embeds the question with the same model used at index time, optionally filters candidates by document type, calculates cosine similarity, and sends the requested top 3, 5, 10, or 20 chunks to the answer model. Top 5 remains the default. The prompt treats excerpts as untrusted data, requires answers to use only those excerpts, cite relevant paths, and return `This is not documented in the repository.` when the evidence is insufficient. The UI appends deduplicated links for the retrieved sources, including direct links for Issues and Pull Requests. Local-file links use `GITHUB_SOURCE_REF`; deployments should pass the indexed commit SHA as a Docker build argument so links do not silently drift with `main`. These links are a retrieval trace rather than a claim-level citation validator.
 
 The JSON vector index is an intentional first production step: the corpus fits in one Fly machine image, deployment is stateless, and there is no external database to operate. pgvector becomes appropriate when the corpus or update frequency makes rebuilding the image too slow, or when multiple application instances need incremental index updates.
 
@@ -65,8 +65,11 @@ Server mode emits one JSON log per accepted request:
 ```json
 {
   "event": "rag_request",
-  "question": "How do I add an MCP server?",
+  "questionLength": 27,
+  "topK": 5,
+  "filters": { "types": ["documentation", "example_config"] },
   "retrievedChunks": [{ "path": "README.md", "type": "documentation", "score": 0.8123 }],
+  "retrievalLatencyMs": 18,
   "promptTokens": 1420,
   "responseTokens": 186,
   "latencyMs": 934
@@ -75,11 +78,11 @@ Server mode emits one JSON log per accepted request:
 
 Failures include an `error` stage. Token counts are `null` if an OpenAI-compatible provider does not report streaming usage. Browser mode logs equivalent retrieval and timing details to the browser console.
 
-These logs make it possible to build an evaluation set, inspect poor retrieval, compare chunking strategies, and track latency/cost without logging embeddings or API credentials. Questions may contain sensitive text, so production log retention and access must be configured accordingly.
+These logs make it possible to inspect poor retrieval, compare settings, and track latency/cost without logging raw questions, prompt hashes, embeddings, or API credentials. Production log retention and access controls are still required.
 
 ## Production roadmap
 
-1. Add metadata filters to the API and chat UI.
+1. Add filter controls to the chat UI and extend filtering to path and author.
 2. Add BM25 retrieval, merge it with vector results, and retrieve an initial top 20.
 3. Rerank those 20 candidates down to the five chunks sent to the model.
 4. Move vectors to pgvector when incremental updates or horizontal scaling justify the operational cost.

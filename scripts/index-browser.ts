@@ -11,7 +11,7 @@ const PUBLIC_DIR = resolve(REPO_ROOT, "public");
 const INDEX_PATH = resolve(PUBLIC_DIR, "index-browser.json");
 
 const EMBEDDING_MODEL = "Xenova/all-MiniLM-L6-v2";
-const EMBEDDING_BATCH_SIZE = 32;
+const EMBEDDING_BATCH_SIZE = 4;
 
 async function createEmbeddings(texts: string[]): Promise<number[][]> {
 	const extractor = await pipeline("feature-extraction", EMBEDDING_MODEL);
@@ -65,6 +65,8 @@ async function main() {
 			schemaVersion: 2,
 			generatedAt: new Date().toISOString(),
 			model: EMBEDDING_MODEL,
+			repository: process.env.GITHUB_REPOSITORY ?? "jellydn/my-ai-tools",
+			sourceRef: process.env.GITHUB_SOURCE_REF?.trim() || "main",
 			dim,
 			chunks: chunks.map((chunk) => ({
 				path: chunk.path,

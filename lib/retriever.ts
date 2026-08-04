@@ -2,6 +2,7 @@ import { readFile, stat } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type OpenAI from "openai";
+import type { DocumentType } from "./indexer.ts";
 import { createOpenAIClient } from "./openai-client.ts";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,7 +15,7 @@ export type Chunk = {
 	path: string;
 	text: string;
 	metadata: {
-		type: string;
+		type: DocumentType;
 		author?: string;
 		url?: string;
 	};
@@ -26,6 +27,11 @@ export type RetrievedChunk = {
 	text: string;
 	metadata: Chunk["metadata"];
 	score: number;
+};
+
+export type RetrievalOptions = {
+	topK: 3 | 5 | 10 | 20;
+	types?: DocumentType[];
 };
 
 export type Index = {
@@ -97,7 +103,26 @@ function cosineSimilarity(a: number[], b: number[]): number {
 		aNorm += aValue * aValue;
 		bNorm += bValue * bValue;
 	}
-	return dot / (Math.sqrt(aNorm) * Math.sqrt(bNorm));
+	const denominator = Math.sqrt(aNorm) * Math.sqrt(bNorm);
+	return denominator === 0 ? 0 : dot / denominator;
+}
+
+export function rankChunks(
+	queryEmbedding: number[],
+	chunks: Chunk[],
+	{ topK, types }: RetrievalOptions,
+): RetrievedChunk[] {
+	const allowedTypes = types?.length ? new Set(types) : null;
+	const candidates = allowedTypes ? chunks.filter((chunk) => allowedTypes.has(chunk.metadata.type)) : chunks;
+	const scored = candidates.map((chunk) => ({
+		path: chunk.path,
+		text: chunk.text,
+		metadata: chunk.metadata,
+		score: cosineSimilarity(queryEmbedding, chunk.embedding),
+	}));
+
+	scored.sort((a, b) => b.score - a.score);
+	return scored.slice(0, topK);
 }
 
 export async function embed(text: string): Promise<number[]> {
@@ -113,9 +138,11 @@ export async function embed(text: string): Promise<number[]> {
 	return response.data[0].embedding;
 }
 
-export async function retrieve(query: string, topK: number): Promise<RetrievedChunk[]> {
+export async function retrieve(query: string, options: RetrievalOptions): Promise<RetrievedChunk[]> {
 	const index = await getIndex();
-	if (index.chunks.length === 0) {
+	const allowedTypes = options.types?.length ? new Set(options.types) : null;
+	const candidates = allowedTypes ? index.chunks.filter((chunk) => allowedTypes.has(chunk.metadata.type)) : index.chunks;
+	if (candidates.length === 0) {
 		return [];
 	}
 
@@ -123,13 +150,5 @@ export async function retrieve(query: string, topK: number): Promise<RetrievedCh
 	if (queryEmbedding.length !== index.chunks[0]?.embedding.length) {
 		throw new Error("Query embedding dimension does not match the repository index; rebuild the index");
 	}
-	const scored = index.chunks.map((chunk) => ({
-		path: chunk.path,
-		text: chunk.text,
-		metadata: chunk.metadata,
-		score: cosineSimilarity(queryEmbedding, chunk.embedding),
-	}));
-
-	scored.sort((a, b) => b.score - a.score);
-	return scored.slice(0, topK);
+	return rankChunks(queryEmbedding, candidates, { ...options, types: undefined });
 }
