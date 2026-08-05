@@ -2,7 +2,7 @@ modelRoles:
   default: google-antigravity/gemini-3.6-flash:high
   smol: deepseek/deepseek-v4-flash
   advisor: openai-codex/gpt-5.6-terra
-  plan: alibaba-token-plan/qwen3.8-max
+  plan: cursor/default
 symbolPreset: nerd
 theme:
   dark: dark-rose-pine
