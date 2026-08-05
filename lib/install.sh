@@ -520,7 +520,6 @@ install_omp() {
 		"npm install -g @oh-my-pi/pi-coding-agent"
 }
 
-
 is_commandcode_installed() {
 	command -v cmd &>/dev/null
 }
