@@ -10,4 +10,4 @@ streamlit>=1.39.0,<2
 uvicorn[standard]>=0.31.0,<1
 
 # Development
-pytest>=8.3.0,<9
+pytest>=9.1.1,<10
