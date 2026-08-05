@@ -1,0 +1,29 @@
+{
+  "skill": "docs-update",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "The code changed; update the user-facing docs to match.",
+      "should_trigger": true,
+      "expected_behavior": "Synchronizes documentation with the code change."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Review the latest commit and patch any docs that are now stale.",
+      "should_trigger": true,
+      "expected_behavior": "Finds documentation drift and updates the docs."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Write a new feature spec from scratch.",
+      "should_trigger": false,
+      "expected_behavior": "This is spec writing, not doc sync after code changes."
+    },
+    {
+      "id": "case-4",
+      "prompt": "The API response shape changed; update the examples and the README.",
+      "should_trigger": true,
+      "expected_behavior": "Covers docs that need to reflect changed behavior and examples."
+    }
+  ]
+}

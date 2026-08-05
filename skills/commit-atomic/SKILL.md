@@ -12,6 +12,18 @@ metadata:
 
 # Atomic Commit with Logical Grouping
 
+## What
+
+- Group staged changes into atomic commits with commitizen convention
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Create atomic commits by logically grouping changes following the commitizen/conventional commits convention. Each commit should represent one logical change with a clear, informative message explaining the **what** and **why**.
 
 ## Usage
