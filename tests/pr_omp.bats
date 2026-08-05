@@ -7,8 +7,17 @@ REPO_ROOT="$BATS_TEST_DIRNAME/.."
 LIB_INSTALL="$REPO_ROOT/lib/install.sh"
 CLI_SH="$REPO_ROOT/cli.sh"
 GENERATE_SH="$REPO_ROOT/generate.sh"
-README="$REPO_ROOT/README.md"
 AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
+
+setup() {
+    source "$REPO_ROOT/lib/common.sh"
+    source "$REPO_ROOT/lib/install.sh"
+    source "$REPO_ROOT/cli.sh"
+    export DRY_RUN=false
+    export SCRIPT_DIR="$REPO_ROOT"
+    export YES_TO_ALL=false
+    export VERBOSE=false
+}
 
 @test "configs/omp/settings.json exists and is valid JSON" {
     require_jq
@@ -56,18 +65,19 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     [ "$status" -eq 0 ]
     [ -n "$output" ]
 }
+
 @test "generate.sh generate_omp_configs() exports config.yml and config.yaml" {
-    run grep -F 'config.yml' "$GENERATE_SH"
+    run awk '/^generate_omp_configs\(\)/,/^}/' "$GENERATE_SH"
     [ "$status" -eq 0 ]
-    run grep -F 'config.yaml' "$GENERATE_SH"
-    [ "$status" -eq 0 ]
+    [[ "$output" == *"config.yml"* ]]
+    [[ "$output" == *"config.yaml"* ]]
 }
 
 @test "cli.sh copy_omp_configs() handles config.yml and config.yaml" {
-    run grep -F 'configs/omp/config.yml' "$CLI_SH"
+    run awk '/^copy_omp_configs\(\)/,/^}/' "$CLI_SH"
     [ "$status" -eq 0 ]
-    run grep -F 'configs/omp/config.yaml' "$CLI_SH"
-    [ "$status" -eq 0 ]
+    [[ "$output" == *"config.yml"* ]]
+    [[ "$output" == *"config.yaml"* ]]
 }
 
 
@@ -75,4 +85,17 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     require_jq
     run jq -e '.tools[] | select(.name == "omp")' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
+}
+
+@test "copy_omp_configs installs configs into a detected HOME" {
+    export DRY_RUN=false
+    FAKE_HOME=$(mktemp -d)
+    mkdir -p "$FAKE_HOME/.omp"
+
+    HOME="$FAKE_HOME" copy_omp_configs
+
+    [ -f "$FAKE_HOME/.omp/agent/settings.json" ]
+    [ -f "$FAKE_HOME/.omp/agent/AGENTS.md" ]
+    [ -f "$FAKE_HOME/.omp/agent/config.yml" ]
+    rm -rf "$FAKE_HOME"
 }
