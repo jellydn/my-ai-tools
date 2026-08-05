@@ -1,5 +1,9 @@
 # 🚀 herdr Agent Guidelines
 
+## Communication
+
+Always talk in ASD-STE100 Simplified Technical English. Always read CONTEXT.md files if present, and use their ubiquitous language.
+
 [**herdr**](https://herdr.dev/) ([GitHub](https://github.com/ogulcancelik/herdr)) is a terminal-native agent multiplexer — like `tmux` but agent-aware. It gives you workspaces, tabs, and panes, each running its own shell, agent, server, or log stream, and tracks agent status automatically.
 
 ## Key Concepts

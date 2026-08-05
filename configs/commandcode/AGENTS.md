@@ -1,5 +1,9 @@
 # 🤖 Command Code Agent Guidelines
 
+## Communication
+
+Always talk in ASD-STE100 Simplified Technical English. Always read CONTEXT.md files if present, and use their ubiquitous language.
+
 ## 🖥️ Session Management with tmux
 
 Run dev servers, tests, and interactive CLIs inside tmux with the **current directory name as the session name** for easy debugging:

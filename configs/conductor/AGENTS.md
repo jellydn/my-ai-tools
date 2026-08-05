@@ -1,5 +1,9 @@
 # 🤖 Conductor Agent Guidelines
 
+## Communication
+
+Always talk in ASD-STE100 Simplified Technical English. Always read CONTEXT.md files if present, and use their ubiquitous language.
+
 Conductor orchestrates parallel AI coding agents (Claude Code, Codex, Cursor, OpenCode) in isolated workspaces with automatic branch management, diff review, and merge workflows.
 
 ## Key Concepts

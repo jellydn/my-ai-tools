@@ -1,5 +1,9 @@
 # OpenCode Global Guidelines
 
+## Communication
+
+Always talk in ASD-STE100 Simplified Technical English. Always read CONTEXT.md files if present, and use their ubiquitous language.
+
 ## Token Efficiency
 
 - Keep responses concise and actionable; lead with conclusions, file paths, and verification.
