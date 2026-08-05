@@ -70,58 +70,73 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/ai-launcher/config.json review template command no longer uses --model flag" {
+@test "configs/ai-launcher/config.json review template command uses reasonix run with acceptEdits" {
     require_jq
     run jq -r '[.templates[] | select(.name == "review")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode2 run --agent plan"* ]]
+    [[ "$output" == "reasonix run --permission-mode acceptEdits"* ]]
 }
 
-@test "configs/ai-launcher/config.json commit-zen template command no longer uses --model flag" {
+@test "configs/ai-launcher/config.json commit-zen template command uses reasonix run with acceptEdits" {
     require_jq
     run jq -r '[.templates[] | select(.name == "commit-zen")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode2 run --agent plan"* ]]
+    [[ "$output" == "reasonix run --permission-mode acceptEdits"* ]]
 }
 
-@test "configs/ai-launcher/config.json commit-staged template command no longer uses --model flag" {
+@test "configs/ai-launcher/config.json commit-staged template command uses reasonix run with auto" {
     require_jq
     run jq -r '[.templates[] | select(.name == "commit-staged")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode2 run --agent build"* ]]
+    [[ "$output" == "reasonix run --permission-mode auto"* ]]
 }
 
-@test "configs/ai-launcher/config.json commit-atomic template command no longer uses --model flag" {
+@test "configs/ai-launcher/config.json commit-atomic template command uses reasonix run with auto" {
     require_jq
     run jq -r '[.templates[] | select(.name == "commit-atomic")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode2 run --agent build"* ]]
+    [[ "$output" == "reasonix run --permission-mode auto"* ]]
 }
 
-@test "configs/ai-launcher/config.json architecture-explanation template command no longer uses --model flag" {
+@test "configs/ai-launcher/config.json architecture-explanation template command uses reasonix run with acceptEdits" {
     require_jq
     run jq -r '[.templates[] | select(.name == "architecture-explanation")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode2 run --agent plan"* ]]
+    [[ "$output" == "reasonix run --permission-mode acceptEdits"* ]]
 }
 
-@test "configs/ai-launcher/config.json draft-pull-request template command no longer uses --model flag" {
+@test "configs/ai-launcher/config.json draft-pull-request template command uses reasonix run with auto" {
     require_jq
     run jq -r '[.templates[] | select(.name == "draft-pull-request")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode2 run --agent build"* ]]
+    [[ "$output" == "reasonix run --permission-mode auto"* ]]
+}
+
+@test "configs/ai-launcher/config.json additional review and explanation templates use acceptEdits" {
+    require_jq
+    for template in "explain" "review-security" "review-refactor" "review-performance"; do
+        run jq -r "[.templates[] | select(.name == \"$template\")][0].command" "$AI_LAUNCHER_CONFIG"
+        [ "$status" -eq 0 ]
+        [[ "$output" == "reasonix run --permission-mode acceptEdits"* ]]
+    done
+}
+
+@test "configs/ai-launcher/config.json no template uses non-interactive plan permission mode" {
+    require_jq
+    run jq -e '[.templates[].command | select(contains("--permission-mode plan"))] | length == 0' "$AI_LAUNCHER_CONFIG"
+    [ "$status" -eq 0 ]
 }
 
 @test "configs/ai-launcher/config.json no longer references deepseek-v4-flash-free" {

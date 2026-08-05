@@ -638,7 +638,7 @@ _validate_config_tool_name() {
 		*reasonix/config.toml*) echo "reasonix" ;;
 		*kimi-code/*.json* | *kimi-code/*.toml*) echo "kimi_code" ;;
 		*pi/settings.json*) echo "pi" ;;
-		*omp/settings.json*) echo "omp" ;;
+		*omp/*.yml* | *omp/*.yaml* | *omp/*.json*) echo "omp" ;;
 		*commandcode/*.json*) echo "commandcode" ;;
 		*cline/*.json*) echo "cline" ;;
 		*factory/settings.json*) echo "factory" ;;
@@ -684,7 +684,7 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/kimi-code/config.toml" \
 		"$SCRIPT_DIR/configs/kimi-code/mcp.json" \
 		"$SCRIPT_DIR/configs/pi/settings.json" \
-		"$SCRIPT_DIR/configs/omp/settings.json" \
+		"$SCRIPT_DIR/configs/omp/config.yml" \
 		"$SCRIPT_DIR/configs/commandcode/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/mcp.json" \
 		"$SCRIPT_DIR/configs/cline/mcp-settings.json" \
@@ -1581,7 +1581,7 @@ copy_omp_configs() {
 	execute_quoted mkdir -p "$HOME/.omp/agent"
 
 	if [ -d "$SCRIPT_DIR/configs/omp" ]; then
-		copy_config_file "$SCRIPT_DIR/configs/omp/settings.json" "$HOME/.omp/agent/" || true
+		copy_config_file "$SCRIPT_DIR/configs/omp/config.yml" "$HOME/.omp/agent/" || true
 		if [ -d "$SCRIPT_DIR/configs/omp/themes" ]; then
 			execute_quoted mkdir -p "$HOME/.omp/agent/themes"
 			safe_copy_dir "$SCRIPT_DIR/configs/omp/themes" "$HOME/.omp/agent/themes"

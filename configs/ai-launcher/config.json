@@ -58,13 +58,13 @@
 	"templates": [
 		{
 			"name": "review",
-			"command": "reasonix run --permission-mode plan 'Review the following changes and provide feedback: $@'",
+			"command": "reasonix run --permission-mode acceptEdits 'Review the following changes and provide feedback: $@'",
 			"description": "Code review with reasonix",
 			"aliases": ["rev", "code-review"]
 		},
 		{
 			"name": "commit-zen",
-			"command": "reasonix run --permission-mode plan 'Review the following changes on git and generate a concise git commit message, group by logical changes with commitizen convention, do atomic commit message'",
+			"command": "reasonix run --permission-mode acceptEdits 'Review git status and diff, then generate a concise git commit message with commitizen convention and logical grouping. Output the commit message text only - do not stage, commit, or push changes: $@'",
 			"description": "Generate commit message with reasonix",
 			"aliases": ["zen", "logical-commit"]
 		},
@@ -82,7 +82,7 @@
 		},
 		{
 			"name": "architecture-explanation",
-			"command": "reasonix run --permission-mode plan 'Explain this codebase architecture'",
+			"command": "reasonix run --permission-mode acceptEdits 'Explain this codebase architecture'",
 			"description": "Explain architecture with reasonix",
 			"aliases": ["arch", "arch-explanation"]
 		},
@@ -112,25 +112,25 @@
 		},
 		{
 			"name": "explain",
-			"command": "reasonix run --permission-mode plan 'Explain this code in detail: 1) What it does 2) How it works 3) Design decisions: $@'",
+			"command": "reasonix run --permission-mode acceptEdits 'Explain this code in detail: 1) What it does 2) How it works 3) Design decisions: $@'",
 			"description": "Code explanation",
 			"aliases": ["explain-code"]
 		},
 		{
 			"name": "review-security",
-			"command": "reasonix run --permission-mode plan 'Security review: Check for injection vulnerabilities, input validation, auth issues, and sensitive data handling in: $@'",
+			"command": "reasonix run --permission-mode acceptEdits 'Security review: Check for injection vulnerabilities, input validation, auth issues, and sensitive data handling in: $@'",
 			"description": "Security-focused review",
 			"aliases": ["sec", "security"]
 		},
 		{
 			"name": "review-refactor",
-			"command": "reasonix run --permission-mode plan 'Refactor suggestion: Improve readability, eliminate complexity, and apply clean code principles to: $@'",
+			"command": "reasonix run --permission-mode acceptEdits 'Refactor suggestion: Improve readability, eliminate complexity, and apply clean code principles to: $@'",
 			"description": "Refactoring recommendations",
 			"aliases": ["refactor"]
 		},
 		{
 			"name": "review-performance",
-			"command": "reasonix run --permission-mode plan 'Analyze performance: Identify bottlenecks, suggest optimizations with measurable impact for: $@'",
+			"command": "reasonix run --permission-mode acceptEdits 'Analyze performance: Identify bottlenecks, suggest optimizations with measurable impact for: $@'",
 			"description": "Performance review",
 			"aliases": ["perf", "optimize"]
 		},

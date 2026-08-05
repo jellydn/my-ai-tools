@@ -13,17 +13,15 @@ setup() {
     source "$REPO_ROOT/lib/common.sh"
     source "$REPO_ROOT/lib/install.sh"
     source "$REPO_ROOT/cli.sh"
+    source "$REPO_ROOT/generate.sh"
     export DRY_RUN=false
     export SCRIPT_DIR="$REPO_ROOT"
     export YES_TO_ALL=false
     export VERBOSE=false
 }
 
-@test "configs/omp/settings.json exists and is valid JSON" {
-    require_jq
-    [ -f "$REPO_ROOT/configs/omp/settings.json" ]
-    run jq empty "$REPO_ROOT/configs/omp/settings.json"
-    [ "$status" -eq 0 ]
+@test "configs/omp/config.yml exists" {
+    [ -f "$REPO_ROOT/configs/omp/config.yml" ]
 }
 
 @test "configs/omp/AGENTS.md exists" {
@@ -94,8 +92,24 @@ setup() {
 
     HOME="$FAKE_HOME" copy_omp_configs
 
-    [ -f "$FAKE_HOME/.omp/agent/settings.json" ]
-    [ -f "$FAKE_HOME/.omp/agent/AGENTS.md" ]
     [ -f "$FAKE_HOME/.omp/agent/config.yml" ]
+    [ -f "$FAKE_HOME/.omp/agent/AGENTS.md" ]
     rm -rf "$FAKE_HOME"
+}
+
+@test "generate_omp_configs exports config.yml from a detected HOME" {
+    export DRY_RUN=false
+    FAKE_HOME=$(mktemp -d)
+    FAKE_SCRIPT_DIR=$(mktemp -d)
+    mkdir -p "$FAKE_HOME/.omp/agent"
+    echo "setupVersion: 1" > "$FAKE_HOME/.omp/agent/config.yml"
+    echo '{"collapseChangelog": true}' > "$FAKE_HOME/.omp/agent/settings.json"
+
+    HOME="$FAKE_HOME" SCRIPT_DIR="$FAKE_SCRIPT_DIR" generate_omp_configs
+
+    [ -f "$FAKE_SCRIPT_DIR/configs/omp/config.yml" ]
+    [ ! -f "$FAKE_SCRIPT_DIR/configs/omp/settings.json" ]
+    run grep "setupVersion: 1" "$FAKE_SCRIPT_DIR/configs/omp/config.yml"
+    [ "$status" -eq 0 ]
+    rm -rf "$FAKE_HOME" "$FAKE_SCRIPT_DIR"
 }

@@ -1,9 +1,0 @@
-{
-	"collapseChangelog": true,
-	"defaultModel": "auto",
-	"defaultProvider": "cursor",
-	"defaultThinkingLevel": "high",
-	"editorPaddingX": 1,
-	"enabledModels": ["openai-codex/gpt-5.4-mini", "openai-codex/gpt-5.5", "cursor/auto", "cursor/grok-4.5"],
-	"hideThinkingBlock": true
-}
