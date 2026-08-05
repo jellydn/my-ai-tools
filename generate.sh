@@ -450,6 +450,18 @@ generate_pi_configs() {
 		log_warning "Pi MCP config not found: $HOME/.pi/agent/mcp.json"
 	fi
 
+	if [ -f "$HOME/.pi/agent/config.yml" ]; then
+		copy_single "$HOME/.pi/agent/config.yml" "$SCRIPT_DIR/configs/pi/config.yml"
+	fi
+
+	if [ -f "$HOME/.pi/agent/config.yaml" ]; then
+		copy_single "$HOME/.pi/agent/config.yaml" "$SCRIPT_DIR/configs/pi/config.yaml"
+	fi
+
+	if [ -f "$HOME/.pi/agent/config.json" ]; then
+		copy_single "$HOME/.pi/agent/config.json" "$SCRIPT_DIR/configs/pi/config.json"
+	fi
+
 	# Export agents
 	if [ -d "$HOME/.pi/agent/agents" ]; then
 		execute "mkdir -p $SCRIPT_DIR/configs/pi/agents"
