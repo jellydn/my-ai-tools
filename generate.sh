@@ -1052,7 +1052,7 @@ sanitize_absolute_paths() {
 								content = content.split(home).join("$HOME");
 								modified = true;
 							}
-							if (content.includes("\x27$HOME")) {
+							if ((ext === ".json" || ext === ".jsonc" || ext === ".toml") && content.includes("\x27$HOME")) {
 								content = content.replace(/\x27\$HOME\/([^\x27]*)\x27/g, `"$HOME/$1"`);
 								modified = true;
 							}
