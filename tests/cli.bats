@@ -167,19 +167,19 @@ setup() {
     done
 }
 @test "cli.sh and generate.sh handle --help and -h flags" {
-    run ./cli.sh --help
+    run "$BATS_TEST_DIRNAME/../cli.sh" --help
     [ "$status" -eq 0 ]
     [[ "$output" == *"Usage:"* ]]
 
-    run ./cli.sh -h
+    run "$BATS_TEST_DIRNAME/../cli.sh" -h
     [ "$status" -eq 0 ]
     [[ "$output" == *"Usage:"* ]]
 
-    run ./generate.sh --help
+    run "$BATS_TEST_DIRNAME/../generate.sh" --help
     [ "$status" -eq 0 ]
     [[ "$output" == *"Usage:"* ]]
 
-    run ./generate.sh -h
+    run "$BATS_TEST_DIRNAME/../generate.sh" -h
     [ "$status" -eq 0 ]
     [[ "$output" == *"Usage:"* ]]
 }
