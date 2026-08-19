@@ -241,6 +241,19 @@ generate_opencode_configs() {
 	log_success "OpenCode configs generated"
 }
 
+generate_fx_configs() {
+	log_info "Generating fx configs..."
+
+	if [ ! -d "$HOME/.fx" ]; then
+		log_warning "fx config directory not found: $HOME/.fx"
+		return 0
+	fi
+
+	execute_quoted mkdir -p "$SCRIPT_DIR/configs/fx"
+	copy_single "$HOME/.fx/AGENTS.md" "$SCRIPT_DIR/configs/fx/AGENTS.md"
+	log_success "fx configs generated"
+}
+
 generate_amp_configs() {
 	log_info "Generating Amp configs..."
 
@@ -1121,6 +1134,9 @@ main() {
 	echo
 
 	generate_opencode_configs
+	echo
+
+	generate_fx_configs
 	echo
 
 	generate_amp_configs

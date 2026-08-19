@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, Oh My Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Hunk, Codiff, ctx, Open Code Review, CCS, and Reasonix with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, fx, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, Oh My Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Hunk, Codiff, ctx, Open Code Review, CCS, and Reasonix with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Hunk, Codiff, ctx, Open Code Review, Reasonix, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, fx, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Hunk, Codiff, ctx, Open Code Review, Reasonix, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, codebase-memory-mcp, agentmemory, sem, ctx
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -261,7 +261,7 @@ cd my-ai-tools
 - `--dry-run` - Preview changes without making them
 - `--backup` - Backup existing configs before installing
 - `--no-backup` - Skip backup prompt
-- `-y` / `--yes` - Non-interactive mode; only installs/configures your active tool set (amp, codex, ctx, cursor, kilo, opencode, open_code_review, pi, omp, antigravity, ai-switcher, claude, reasonix). Shared infra (plugins, skills, global tools) still installed. Auto-activated in CI/piped input.
+- `-y` / `--yes` - Non-interactive mode; only installs/configures your active tool set (amp, codex, ctx, cursor, fx, kilo, opencode, open_code_review, pi, omp, antigravity, ai-switcher, claude, reasonix). Shared infra (plugins, skills, global tools) still installed. Auto-activated in CI/piped input.
 - `--migrate-gemini` - One-step Gemini→Antigravity CLI migration
 
 ## 🔄 Bidirectional Config Sync
@@ -283,6 +283,20 @@ Export your current configurations back to this repository for version control:
 ```
 
 > **Tip:** Use `generate.sh` after customizing your local setup to save changes back to this repo.
+
+## 𝒇x (Optional)
+
+[fx](https://fx.sh/) is a small native coding agent from Vercel Labs. The installer uses its official setup script on macOS and Linux, then installs this repository's global guidance to `~/.fx/AGENTS.md` when fx is detected.
+
+```bash
+# Install and configure fx interactively
+./cli.sh
+
+# Start fx in a project
+fx
+```
+
+fx discovers shared skills from `~/.agents/skills/`, so it uses this repository's universal skill installation automatically. Its MCP configuration at `~/.fx/mcp.json` and other runtime state remain private by design and are not managed by this repository.
 
 ## 🤖 Chat with the repo
 

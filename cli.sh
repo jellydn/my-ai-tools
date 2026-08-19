@@ -13,7 +13,7 @@ source "$SCRIPT_DIR/lib/install.sh"
 # Core tools installed/configured when -y (YES_TO_ALL) is active.
 # This is your personal active tool set. When YES_TO_ALL is false
 # (interactive mode), tool_allowed returns true for everything.
-TOOL_ALLOWLIST_YES=(amp codex ctx cursor kilo opencode open_code_review pi omp antigravity ai-switcher claude reasonix)
+TOOL_ALLOWLIST_YES=(amp codex ctx cursor fx kilo opencode open_code_review pi omp antigravity ai-switcher claude reasonix)
 
 tool_allowed() {
 	local name="$1"
@@ -35,6 +35,7 @@ INSTALL_SEQUENCE=(
 	"opencode:install_opencode"
 	"opencode:install_opencode2"
 	"opencode:install_open_cursor"
+	"fx:install_fx"
 	"amp:install_amp"
 	"always:install_global_tools"
 	"ccs:install_ccs"
@@ -330,6 +331,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.claude" "$BACKUP_DIR" "claude"
 		copy_config_dir "$HOME/.config/opencode" "$BACKUP_DIR" "opencode"
 		copy_config_dir "$HOME/.config/amp" "$BACKUP_DIR" "amp"
+		copy_config_file "$HOME/.fx/AGENTS.md" "$BACKUP_DIR/fx" || true
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
 		copy_config_dir "$HOME/.kimi-code" "$BACKUP_DIR" "kimi-code"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
@@ -497,6 +499,11 @@ copy_configurations() {
 		copy_opencode_configs
 	else
 		log_info "Skipping opencode config install (not in -y allowlist)"
+	fi
+	if tool_allowed "fx"; then
+		copy_fx_configs
+	else
+		log_info "Skipping fx config install (not in -y allowlist)"
 	fi
 	if tool_allowed "amp"; then
 		copy_amp_configs
@@ -1078,6 +1085,20 @@ copy_opencode_configs() {
 	copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/command"
 
 	log_success "OpenCode configs copied"
+}
+
+copy_fx_configs() {
+	local fx_status
+	fx_status=$(detect_tool --detailed "fx" "$HOME/.fx") || fx_status="missing"
+	if [ "$fx_status" = "missing" ]; then
+		log_info "fx not detected - skipping fx config installation"
+		return 0
+	fi
+
+	log_info "Detected fx (via $fx_status)"
+	execute_quoted mkdir -p "$HOME/.fx"
+	copy_config_file "$SCRIPT_DIR/configs/fx/AGENTS.md" "$HOME/.fx/" || true
+	log_success "fx configs copied"
 }
 
 copy_amp_configs() {
@@ -2654,7 +2675,7 @@ main() {
 
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
-	echo "║  Claude • OpenCode • Amp • CCS • Codex • Kimi Code • Gemini          ║"
+	echo "║  Claude • OpenCode • fx • Amp • CCS • Codex • Kimi Code • Gemini     ║"
 	echo "║  Antigravity • Pi • Kilo • Copilot • Cursor • Command Code           ║"
 	echo "║  Factory Droid • Cline • Grok • MiMo-Code • herdr                    ║"
 	echo "║  Qoder CLI • Kiro • Codiff • Devin • Hunk                            ║"

@@ -252,6 +252,31 @@ install_claude_code() {
 	fi
 }
 
+install_fx() {
+	_run_fx_install() {
+		if command -v fx &>/dev/null; then
+			log_warning "fx is already installed"
+			return 0
+		fi
+
+		if [ "$IS_WINDOWS" = true ]; then
+			log_warning "fx supports macOS and Linux only."
+			log_info "Install fx manually in a supported environment: https://fx.sh/docs/getting-started/installation"
+			return 1
+		fi
+
+		if execute_installer "https://fx.sh/setup.sh" "" "fx"; then
+			ensure_dir_on_path "$HOME/.local/bin"
+			log_success "fx installed"
+		else
+			log_error "Failed to install fx"
+			log_info "You can install manually: curl -fsSL https://fx.sh/setup.sh | bash"
+			return 1
+		fi
+	}
+	run_installer "fx" "_run_fx_install" "command -v fx" "fx --version"
+}
+
 install_rtk() {
 	if [ "${IS_WINDOWS:-false}" = true ]; then
 		log_warning "RTK automatic installation is unavailable on native Windows"
