@@ -262,7 +262,7 @@ install_fx() {
 		if [ "$IS_WINDOWS" = true ]; then
 			log_warning "fx supports macOS and Linux only."
 			log_info "Install fx manually in a supported environment: https://fx.sh/docs/getting-started/installation"
-			return 1
+			return 0
 		fi
 
 		if execute_installer "https://fx.sh/setup.sh" "" "fx"; then
