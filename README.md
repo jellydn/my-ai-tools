@@ -125,4 +125,29 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **adr**                           | Generate Architecture Decision Records from design discussions               | Before implementing significant technical changes — captures the why, alternatives considered, and consequences |
 | **codemap**                       | Parallel codebase analysis producing 7 structured documents                  | Onboarding to a new project, or before major refactoring — gives you the full picture fast                      |
 | **code-quality-review**           | Extremely strict maintainability and structural code quality review          | Before merging PRs — catches issues that regular linters miss                                                   |
-| **babysit-pr**                    | Continuously monitor open PRs, auto-fix CI failures, surface review feedback | After p
+| **babysit-pr**                    | Continuously monitor open PRs, auto-fix CI failures, surface review feedback | After pushing a PR — hands-off monitoring until it's ready to merge                                             |
+| **improve**                       | Frontier model plans, cheap model executes — audit and plan improvements     | When you need senior-level analysis with actionable plans for cheaper models to run (from shadcn)               |
+| **improve-codebase-architecture** | Codebase architecture deepening — find structural improvement opportunities  | When you want to improve modularity, patterns, and architecture of an existing codebase (from Matt Pocock)      |
+
+## 🧭 Fusion Orchestration
+
+Inspired by [opencode-fusion](https://github.com/mihneaptu/opencode-fusion) and complementary evidence-gating ideas from [Gentle AI](https://github.com/Gentleman-Programming/gentle-ai), the `orchestrating-fusion` skill separates senior planning and review from lower-cost mechanical implementation. The installer provides native `fusion-lead` and `fusion-executor` roles for active tools and shares the portable workflow with every assistant through `~/.agents/skills/`.
+
+| Tool         | Start Fusion                                                                  | Enforced boundary                                                                                                 |
+| ------------ | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **OpenCode** | Select the `fusion-lead` primary                                              | Lead has no edit or shell permission and delegates directly to `fusion-executor`                                  |
+| **Amp**      | Select the `fusion` agent mode                                                | Lead's tool surface omits mutation/shell and exposes `fusion_executor`                                            |
+| **Codex**    | Ask the root session to run `fusion-lead`, then its sibling `fusion-executor` | Lead uses a read-only sandbox; the writable root mediates sibling execution                                       |
+| **Pi**       | Ask the root `Agent` tool for `fusion-lead`, then `fusion-executor`           | `pi-subagents` enforces role tool allowlists; the root mediates sibling execution and non-inspection verification |
+| **Others**   | Invoke the `orchestrating-fusion` skill                                       | Uses native delegation when available; otherwise the split is prompt-advisory                                     |
+
+The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONSTRAINTS / VERIFICATION`. The executor returns an evidence envelope covering changes, verification, skills loaded, risks, questions, and key learnings. The lead reads artifacts back, permits one targeted correction, and stops rather than entering an unbounded fix loop. Durable PRDs or plans remain opt-in when they materially reduce ambiguity.
+
+## 🔌 MCP Servers & Plugins Overview
+
+| Tool            | MCP Servers                                                                                                                | Plugins/Extensions                                                                                                                                                                                                                             |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Claude Code** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                                                                                               |
+| **OpenCode**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | @plannotator/opencode                                                                                                                                                                                                                          |
+| **Codex**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl, ctx   | -                                                                                                                                                                                                                                              |
+| **Kimi Code**   | context7, sequential-thinki
