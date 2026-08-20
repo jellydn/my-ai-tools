@@ -293,6 +293,7 @@ generate_codex_configs() {
 	copy_single "$HOME/.codex/AGENTS.md" "$SCRIPT_DIR/configs/codex/AGENTS.md"
 	copy_single "$HOME/.codex/config.json" "$SCRIPT_DIR/configs/codex/config.json"
 	copy_single "$HOME/.codex/config.toml" "$SCRIPT_DIR/configs/codex/config.toml"
+	copy_single "$HOME/.codex/1m.config.toml" "$SCRIPT_DIR/configs/codex/1m.config.toml"
 
 	# Export agents
 	if [ -d "$HOME/.codex/agents" ]; then

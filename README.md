@@ -1381,33 +1381,40 @@ npm install -g @openai/codex
 Located in [`configs/codex/`](configs/codex/):
 
 - [`config.toml`](configs/codex/config.toml) - Main TOML configuration with MCP servers
+- [`1m.config.toml`](configs/codex/1m.config.toml) - Optional 1.05M context profile (`codex --profile 1m`)
 - [`AGENTS.md`](configs/codex/AGENTS.md) - Agent guidelines
 
-### 1M-token context window (GPT-5.6 Sol)
+### Optional 1.05M-token context profile (GPT-5.6 Sol)
 
-Codex defaults are tuned for performance and cost. If you want the full context budget for a model that supports it (for example `gpt-5.6-sol` with a documented ~1,050,000-token window), add or update these top-level keys in `~/.codex/config.toml` **before any `[section]` headers**:
+Codex defaults stay cost-tuned. This repo does **not** put a 1M+ window in [`configs/codex/config.toml`](configs/codex/config.toml). The optional profile [`configs/codex/1m.config.toml`](configs/codex/1m.config.toml) installs to `~/.codex/1m.config.toml`.
+
+GPT-5.6 Sol's documented limits are 1,050,000 total context, 922,000 max input, and 128,000 max output. The profile sets:
 
 ```toml
 model = "gpt-5.6-sol"
-model_context_window = 1000000
-model_auto_compact_token_limit = 900000
+model_context_window = 1050000
+model_auto_compact_token_limit = 794000
 ```
 
-- `model` selects the model.
-- `model_context_window` sets a one-million-token context budget.
-- `model_auto_compact_token_limit` starts automatic history compaction around 900,000 tokens, leaving headroom before the limit.
+Compaction starts at 794,000 tokens (922,000 − 128,000) so a full reply still fits under the input cap. Prompts over 272K input tokens are billed at 2× input and 1.5× output for the full request.
 
-Restart the Codex client and start a **new session** after saving.
+After `./cli.sh`, enable it for a session:
 
-To try the configuration for a single CLI session without changing defaults:
+```bash
+codex --profile 1m
+```
+
+Restart the Codex client and start a **new session** after installing.
+
+One-off CLI trial without a profile:
 
 ```bash
 codex -m gpt-5.6-sol \
-  -c model_context_window=1000000 \
-  -c model_auto_compact_token_limit=900000
+  -c model_context_window=1050000 \
+  -c model_auto_compact_token_limit=794000
 ```
 
-This repo's checked-in [`configs/codex/config.toml`](configs/codex/config.toml) already includes these values for `gpt-5.6-sol`.
+To merge these keys into `~/.codex/config.toml` instead, put them **before any `[section]` headers**.
 
 ### MCP Servers
 

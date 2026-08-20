@@ -1164,6 +1164,7 @@ copy_codex_configs() {
 	copy_config_file "$SCRIPT_DIR/configs/codex/config.json" "$HOME/.codex/" || true
 
 	copy_config_file "$SCRIPT_DIR/configs/codex/config.toml" "$HOME/.codex/" || true
+	copy_config_file "$SCRIPT_DIR/configs/codex/1m.config.toml" "$HOME/.codex/" || true
 
 	if [ -d "$SCRIPT_DIR/configs/codex/themes" ]; then
 		execute_quoted mkdir -p "$HOME/.codex/themes"
