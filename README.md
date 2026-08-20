@@ -125,4 +125,10 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **adr**                           | Generate Architecture Decision Records from design discussions               | Before implementing significant technical changes — captures the why, alternatives considered, and consequences |
 | **codemap**                       | Parallel codebase analysis producing 7 structured documents                  | Onboarding to a new project, or before major refactoring — gives you the full picture fast                      |
 | **code-quality-review**           | Extremely strict maintainability and structural code quality review          | Before merging PRs — catches issues that regular linters miss                                                   |
-| **babysit-pr**                    | Continuously monitor open PRs, auto-fix CI failures, surface review feedback | After p
+| **babysit-pr**                    | Continuously monitor open PRs, auto-fix CI failures, surface review feedback | After pushing a PR — hands-off monitoring until it's ready to merge                                             |
+| **improve**                       | Frontier model plans, cheap model executes — audit and plan improvements     | When you need senior-level analysis with actionable plans for cheaper models to run (from shadcn)               |
+| **improve-codebase-architecture** | Codebase architecture deepening — find structural improvement opportunities  | When you want to improve modularity, patterns, and architecture of an existing codebase (from Matt Pocock)      |
+
+## 🧭 Fusion Orchestration
+
+Inspired by [opencode-fusion](https://github.com/mihneaptu/opencode-fusion) and complementary evidence-gating ideas from [Gentle AI](https://github.com/Gentleman-Programming/gentle-ai), the `orchestrating-fusion` skill separates senior planning and review from lower-cost mechanical implementation. The installer provides native `fusion-lead` and `fusion-executor` roles for active tools and shares the 
