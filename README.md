@@ -1,1 +1,1 @@
-/workspace/my-ai-tools/README.md
+file:///workspace/my-ai-tools/README.md
