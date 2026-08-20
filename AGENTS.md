@@ -86,6 +86,7 @@ On the cloud VM `bats` is preinstalled — run `bats tests/` directly.
 - The `## Token Efficiency` section in `configs/**/AGENTS.md` and `configs/**/GEMINI.md` is generated from `configs/token-efficiency.md`. Edit the canonical file and run `./scripts/sync-token-efficiency.sh` — the profiles stay standalone on purpose, since eager `@file.md` imports cost tokens every session.
 - Backups go to `$HOME/ai-tools-backup-{timestamp}`; last 5 are kept.
 - Gemini CLI is deprecated for Google One/unpaid tiers (June 18, 2026 cutoff). Migrate to Antigravity CLI.
+- **Delta** (optional, docs-only): see `docs/delta-getting-started.md` and README `## 🧵 Delta (Optional)`. Not in `./cli.sh` — no stable install/config hook yet.
 
 ## Git Safety
 
