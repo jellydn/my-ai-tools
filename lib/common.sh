@@ -87,6 +87,21 @@ get_reasonix_dir() {
 	fi
 }
 
+# Get Delta's platform-specific settings directory. Personal rules and provider
+# credentials always live in ~/.config/delta, independently of this path.
+# Usage: get_delta_settings_dir
+get_delta_settings_dir() {
+	if [ -n "${DELTA_CONFIG_DIR:-}" ]; then
+		normalize_path "$DELTA_CONFIG_DIR"
+	elif [ "$IS_WINDOWS" = true ] && [ -n "${APPDATA:-}" ]; then
+		normalize_path "$APPDATA/delta"
+	elif [ "$(uname -s 2>/dev/null || echo "")" = "Darwin" ]; then
+		echo "$HOME/Library/Application Support/delta"
+	else
+		echo "${XDG_CONFIG_HOME:-$HOME/.config}/delta"
+	fi
+}
+
 # Quote a path if it contains spaces or special characters
 # Usage: quote_path "path with spaces"
 quote_path() {

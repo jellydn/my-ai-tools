@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, fx, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, Oh My Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Hunk, Codiff, ctx, Open Code Review, CCS, and Reasonix with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, fx, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, Oh My Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Delta, Hunk, Codiff, ctx, Open Code Review, CCS, and Reasonix with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, fx, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Hunk, Codiff, ctx, Open Code Review, Reasonix, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, fx, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Delta, Hunk, Codiff, ctx, Open Code Review, Reasonix, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, codebase-memory-mcp, agentmemory, sem, ctx
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -169,6 +169,7 @@ The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONS
 | **Qoder CLI**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                                                                              |
 | **Kiro CLI**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Steering files (AGENTS.md), slash commands, MCP servers, ACP                                                                                                                                                                                   |
 | **Reasonix**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | DeepSeek-native; prefix-cache loop; `[[plugins]]` MCP in config.toml; ACP (`reasonix acp`); `REASONIX.md`/`AGENTS.md` memory; Kanagawa theme staged                                                                                            |
+| **Delta**       | — (desktop app — model providers are configured in settings)                                                              | Personal rules (`~/.config/delta/AGENTS.md`), isolated checkouts, collaborative threads                                                                                                                                                        |
 | **Codiff**      | — (desktop app — uses configured agent backend via settings)                                                               | —                                                                                                                                                                                                                                              |
 
 ### 📋 MCP Server Details
@@ -3043,6 +3044,62 @@ hunk session list  # List live review sessions for agent interaction
 The recommended [Hunk Review skill](https://github.com/modem-dev/hunk/blob/main/skills/hunk-review/SKILL.md) teaches coding agents to inspect live sessions and add inline comments without launching the interactive TUI themselves.
 
 See the official [install guide](https://www.hunk.dev/docs/start/install/) and [config reference](https://www.hunk.dev/docs/reference/config) for all platforms and preferences.
+
+</details>
+
+---
+
+## 🔺 Delta (Optional)
+
+Collaborative agent workspace for running coding agents in isolated checkouts, reviewing their work, and syncing changes back to a repository. Delta is currently in beta and publishes nightly builds. [Homepage](https://delta.dev) | [Getting Started](https://delta.dev/docs/getting-started) | [Download](https://delta.dev/download)
+
+<details>
+<summary><strong>Installation &amp; Configuration</strong></summary>
+
+### Installation
+
+Download the build for your operating system and processor from Delta's official download page. Delta does not currently publish a stable package-manager or unattended installer URL, so this repository prints the official links instead of downloading a nightly build automatically.
+
+```bash
+# Linux: after extracting delta-linux-<architecture>.tar.gz
+./Delta/install.sh delta
+
+# macOS: after moving Delta.app into /Applications
+xattr -dr com.apple.quarantine /Applications/Delta.app
+```
+
+Run this repo's installer after Delta is present to deploy the managed configuration:
+
+```bash
+./cli.sh
+```
+
+### Configuration
+
+Delta configs are stored in [`configs/delta/`](configs/delta/):
+
+- [`settings.json`](configs/delta/settings.json) — Message, diff, notification, and review-link preferences
+- [`AGENTS.md`](configs/delta/AGENTS.md) — Personal rules loaded by Delta in every thread
+
+The installer and generator honor `DELTA_CONFIG_DIR`. Without that override, Delta uses these documented locations:
+
+| Config        | macOS                                                | Linux                                                   | Windows                               |
+| ------------- | ---------------------------------------------------- | ------------------------------------------------------- | ------------------------------------- |
+| Settings      | `~/Library/Application Support/delta/settings.json` | `$XDG_CONFIG_HOME/delta/settings.json` or `~/.config/delta/settings.json` | `%APPDATA%\delta\settings.json`      |
+| Personal rules | `~/.config/delta/AGENTS.md`                         | `~/.config/delta/AGENTS.md`                             | `%USERPROFILE%\.config\delta\AGENTS.md` |
+
+Delta checks `AGENT.md` before `AGENTS.md`; an existing non-empty `~/.config/delta/AGENT.md` therefore takes precedence over this managed profile.
+
+Provider credentials may be stored in `~/.config/delta/.env`, but this integration intentionally does not install, export, or commit that secret-bearing file. Sign in and connect a model provider through Delta's settings, or manage `.env` locally.
+
+### Usage
+
+```bash
+# Linux: launch Delta after running ./Delta/install.sh delta
+delta
+```
+
+See Delta's [getting-started guide](https://delta.dev/docs/getting-started) and [settings reference](https://delta.dev/docs/configuration/settings) for current details.
 
 </details>
 

@@ -1,0 +1,10 @@
+{
+	"cursor_after_send": "next_user_message",
+	"default_diff_base": "uncommitted",
+	"diff_color_scheme": "blue_orange",
+	"diff_signs": true,
+	"os_notifications": true,
+	"prevent_system_sleep": true,
+	"pull_request_thread_links": true,
+	"send_message_with_modifier": true
+}

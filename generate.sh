@@ -935,6 +935,23 @@ generate_kiro_configs() {
 	log_success "Kiro CLI configs generated"
 }
 
+generate_delta_configs() {
+	log_info "Generating Delta configs..."
+
+	local delta_settings_dir
+	delta_settings_dir=$(get_delta_settings_dir)
+	if [ ! -d "$delta_settings_dir" ] && [ ! -d "$HOME/.config/delta" ]; then
+		log_warning "Delta config directories not found"
+		return 0
+	fi
+
+	execute "mkdir -p \"$SCRIPT_DIR/configs/delta\""
+	copy_single "$delta_settings_dir/settings.json" "$SCRIPT_DIR/configs/delta/settings.json"
+	copy_single "$HOME/.config/delta/AGENTS.md" "$SCRIPT_DIR/configs/delta/AGENTS.md"
+
+	log_success "Delta configs generated"
+}
+
 generate_codiff_configs() {
 	log_info "Generating Codiff configs..."
 
@@ -1206,6 +1223,9 @@ main() {
 	echo
 
 	generate_kiro_configs
+	echo
+
+	generate_delta_configs
 	echo
 
 	generate_codiff_configs

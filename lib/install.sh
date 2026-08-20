@@ -848,6 +848,23 @@ install_kiro() {
 	run_installer "Kiro CLI" "_run_kiro_install" "command -v kiro-cli || command -v kiro" "kiro-cli --version 2>/dev/null || true"
 }
 
+# ─── delta installation ───────────────────────────────────────────
+
+install_delta() {
+	local delta_settings_dir
+	delta_settings_dir=$(get_delta_settings_dir)
+	if [ -d "$delta_settings_dir" ] || [ -d "/Applications/Delta.app" ] || [ -d "$HOME/.local/delta.app" ]; then
+		log_warning "Delta is already installed"
+		return 0
+	fi
+
+	# Delta is a beta with nightly, access-controlled builds. Its official docs
+	# do not expose a stable archive URL that is safe to automate here. Do not
+	# detect `command -v delta`: the unrelated git-delta pager uses that name too.
+	log_info "Delta installation is currently manual: https://delta.dev/download"
+	log_info "Follow the platform steps at https://delta.dev/docs/getting-started"
+}
+
 # ─── codiff installation ──────────────────────────────────────────
 
 install_codiff() {

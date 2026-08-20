@@ -57,6 +57,7 @@ INSTALL_SEQUENCE=(
 	"hunk:install_hunk"
 	"qodercli:install_qodercli"
 	"kiro:install_kiro"
+	"delta:install_delta"
 	"codiff:install_codiff"
 	"devin:install_devin"
 	"factory:install_factory"
@@ -349,6 +350,8 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/mimocode" "$BACKUP_DIR" "mimocode"
 		copy_config_dir "$HOME/.qoder" "$BACKUP_DIR" "qodercli"
 		copy_config_dir "$HOME/.kiro" "$BACKUP_DIR" "kiro"
+		copy_config_dir "$(get_delta_settings_dir)" "$BACKUP_DIR/delta" "settings"
+		copy_config_file "$HOME/.config/delta/AGENTS.md" "$BACKUP_DIR/delta" || true
 		copy_config_dir "$HOME/.codiff" "$BACKUP_DIR" "codiff"
 		copy_config_dir "$HOME/.config/devin" "$BACKUP_DIR" "devin"
 		copy_config_dir "$HOME/.ctx" "$BACKUP_DIR" "ctx"
@@ -600,6 +603,11 @@ copy_configurations() {
 	else
 		log_info "Skipping kiro config install (not in -y allowlist)"
 	fi
+	if tool_allowed "delta"; then
+		copy_delta_configs
+	else
+		log_info "Skipping delta config install (not in -y allowlist)"
+	fi
 	if tool_allowed "codiff"; then
 		copy_codiff_configs
 	else
@@ -651,6 +659,7 @@ _validate_config_tool_name() {
 		*kilo/config.json*) echo "kilo" ;;
 		*reasonix/config.toml*) echo "reasonix" ;;
 		*hunk/config.toml*) echo "hunk" ;;
+		*delta/settings.json*) echo "delta" ;;
 		*kimi-code/*.json* | *kimi-code/*.toml*) echo "kimi_code" ;;
 		*pi/settings.json*) echo "pi" ;;
 		*omp/*.yml* | *omp/*.yaml* | *omp/*.json*) echo "omp" ;;
@@ -697,6 +706,7 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/kilo/config.json" \
 		"$SCRIPT_DIR/configs/reasonix/config.toml" \
 		"$SCRIPT_DIR/configs/hunk/config.toml" \
+		"$SCRIPT_DIR/configs/delta/settings.json" \
 		"$SCRIPT_DIR/configs/kimi-code/config.toml" \
 		"$SCRIPT_DIR/configs/kimi-code/mcp.json" \
 		"$SCRIPT_DIR/configs/pi/settings.json" \
@@ -1911,6 +1921,27 @@ copy_kiro_configs() {
 	log_success "Kiro CLI configs copied"
 }
 
+copy_delta_configs() {
+	local delta_settings_dir
+	delta_settings_dir=$(get_delta_settings_dir)
+	local delta_status
+	delta_status="missing"
+	if [ -d "$delta_settings_dir" ]; then
+		delta_status="directory"
+	elif [ -d "$HOME/.local/delta.app" ] || [ -d "/Applications/Delta.app" ]; then
+		delta_status="application"
+	else
+		log_info "Delta not detected - skipping Delta config installation"
+		return 0
+	fi
+
+	log_info "Detected Delta (via $delta_status)"
+	copy_config_file "$SCRIPT_DIR/configs/delta/settings.json" "$delta_settings_dir/" || true
+	copy_config_file "$SCRIPT_DIR/configs/delta/AGENTS.md" "$HOME/.config/delta/" || true
+
+	log_success "Delta configs copied"
+}
+
 copy_codiff_configs() {
 	log_info "Copying Codiff configs..."
 	execute_quoted mkdir -p "$HOME/.codiff"
@@ -2678,7 +2709,7 @@ main() {
 	echo "║  Claude • OpenCode • fx • Amp • CCS • Codex • Kimi Code • Gemini     ║"
 	echo "║  Antigravity • Pi • Kilo • Copilot • Cursor • Command Code           ║"
 	echo "║  Factory Droid • Cline • Grok • MiMo-Code • herdr                    ║"
-	echo "║  Qoder CLI • Kiro • Codiff • Devin • Hunk                            ║"
+	echo "║  Qoder CLI • Kiro • Delta • Codiff • Devin • Hunk                    ║"
 	echo "║  ctx • Reasonix                                                       ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
