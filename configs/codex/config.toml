@@ -1,6 +1,10 @@
 model_personality = "pragmatic"
 model = "gpt-5.6-sol"
 model_reasoning_effort = "low"
+# GPT-5.6 Sol supports ~1,050,000 tokens. Defaults are tuned for cost/perf; raise the
+# budget here when you need more code, tool output, and history before compaction.
+model_context_window = 1000000
+model_auto_compact_token_limit = 900000
 approvals_reviewer = "guardian_subagent"
 personality = "pragmatic"
 

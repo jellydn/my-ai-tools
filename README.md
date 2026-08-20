@@ -1383,6 +1383,32 @@ Located in [`configs/codex/`](configs/codex/):
 - [`config.toml`](configs/codex/config.toml) - Main TOML configuration with MCP servers
 - [`AGENTS.md`](configs/codex/AGENTS.md) - Agent guidelines
 
+### 1M-token context window (GPT-5.6 Sol)
+
+Codex defaults are tuned for performance and cost. If you want the full context budget for a model that supports it (for example `gpt-5.6-sol` with a documented ~1,050,000-token window), add or update these top-level keys in `~/.codex/config.toml` **before any `[section]` headers**:
+
+```toml
+model = "gpt-5.6-sol"
+model_context_window = 1000000
+model_auto_compact_token_limit = 900000
+```
+
+- `model` selects the model.
+- `model_context_window` sets a one-million-token context budget.
+- `model_auto_compact_token_limit` starts automatic history compaction around 900,000 tokens, leaving headroom before the limit.
+
+Restart the Codex client and start a **new session** after saving.
+
+To try the configuration for a single CLI session without changing defaults:
+
+```bash
+codex -m gpt-5.6-sol \
+  -c model_context_window=1000000 \
+  -c model_auto_compact_token_limit=900000
+```
+
+This repo's checked-in [`configs/codex/config.toml`](configs/codex/config.toml) already includes these values for `gpt-5.6-sol`.
+
 ### MCP Servers
 
 ```toml
