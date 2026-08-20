@@ -188,4 +188,531 @@ The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONS
 
 ## 🎬 Demo
 
-[![IT Man Channel](https://img.sh
+[![IT Man Channel](https://img.shields.io/badge/YouTube-IT%20Man%20Channel-red?logo=youtube)](https://github.com/jellydn/itman-channel)
+
+[![IT Man - My AI Setup in 2026](https://i.ytimg.com/vi/ESudSFAyuuw/mqdefault.jpg)](https://www.youtube.com/watch?v=ESudSFAyuuw)
+
+## 📋 Prerequisites
+
+### All Platforms
+
+- **Bash 3.0+** - Shell interpreter for `cli.sh` and `generate.sh` (the scripts use bash-only syntax — process substitution, arrays, pattern-parameter expansion — that `sh`/`dash` cannot parse; the entry-point scripts `source` [`lib/require_bash.sh`](./lib/require_bash.sh) which auto-relaunches under bash if invoked via `sh`/`dash` — see [Shell Interpreter](#-shell-interpreter) below)
+- **Bun or Node.js LTS** - Runtime for tools and scripts
+- **Git** - Version control
+- **Claude Code subscription** or use [CCS](#-ccs---claude-code-switch-optional) with affordable providers (GLM, MiniMax)
+
+### Windows-Specific
+
+- **Git for Windows** - Required for Git Bash support
+  - Download: https://git-scm.com/download/win
+  - Make sure to select "Git from the command line and also from 3rd-party software" during installation
+- **PowerShell 5.1+** - For the PowerShell installer
+- **jq** - Will be auto-installed via winget if available, or download from [GitHub releases](https://github.com/jqlang/jq/releases)
+
+## 🚀 Quick Start
+
+### One-Line Installer (Recommended)
+
+Install directly without cloning the repository:
+
+```bash
+curl -fsSL https://ai-tools.itman.fyi/install.sh | bash
+```
+
+> **Security Note:** Review the script before running:
+>
+> ```bash
+> curl -fsSL https://ai-tools.itman.fyi/install.sh -o install.sh
+> cat install.sh  # Review the script
+> bash install.sh
+> ```
+
+**Options:**
+
+```bash
+# Preview changes without making them
+curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --dry-run
+
+# Backup existing configs before installing
+curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --backup
+
+# Skip backup prompt
+curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --no-backup
+
+# Non-interactive mode (auto-approve, only processes your active tools)
+curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --yes
+
+# One-step Gemini→Antigravity CLI migration
+curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --migrate-gemini
+```
+
+### Manual Installation
+
+Clone the repository and run the installer:
+
+```bash
+git clone https://github.com/jellydn/my-ai-tools.git
+cd my-ai-tools
+./cli.sh
+```
+
+**Options:**
+
+- `--dry-run` - Preview changes without making them
+- `--backup` - Backup existing configs before installing
+- `--no-backup` - Skip backup prompt
+- `-y` / `--yes` - Non-interactive mode; only installs/configures your active tool set (amp, codex, ctx, cursor, kilo, opencode, open_code_review, pi, omp, antigravity, ai-switcher, claude, reasonix). Shared infra (plugins, skills, global tools) still installed. Auto-activated in CI/piped input.
+- `--migrate-gemini` - One-step Gemini→Antigravity CLI migration
+
+## 🔄 Bidirectional Config Sync
+
+### Forward: Install to Home (`cli.sh`)
+
+Copy configurations from this repository to your home directory (`~/.claude/`, `~/.config/opencode/`, etc.):
+
+```bash
+./cli.sh [--dry-run] [--backup] [--no-backup] [-y|--yes] [--migrate-gemini]
+```
+
+### Reverse: Generate from Home (`generate.sh`)
+
+Export your current configurations back to this repository for version control:
+
+```bash
+./generate.sh [--dry-run]
+```
+
+> **Tip:** Use `generate.sh` after customizing your local setup to save changes back to this repo.
+
+## 🤖 Chat with the repo
+
+The landing page includes a repository assistant that answers questions from the indexed README, docs, configs, and scripts.
+
+To run it locally:
+
+```bash
+cp .env.example .env
+# Add OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_MODEL, and OPENAI_EMBEDDING_MODEL to .env
+npm install
+npm run index          # build data/index.json (server mode)
+npm run index:browser  # build public/index-browser.json (browser mode)
+source .env            # load OPENAI_BASE_URL for server mode
+npm run dev            # serve http://localhost:3000
+```
+
+The assistant only answers from the retrieved repository excerpts, cites the source file paths, and says "This is not documented in the repository." when the context is insufficient.
+
+The landing page also has a browser mode that runs the embedding and an instruction-tuned model (Qwen2.5-Coder-0.5B-Instruct) in the browser via WebGPU. Browser mode downloads the ~9 MB index and the ~300 MB model on the user's device.
+
+## 🐚 Shell Interpreter
+
+`cli.sh` and `generate.sh` use bash-only syntax (process substitution, arrays, pattern-parameter expansion) and **require bash**. Both scripts `source` [`lib/require_bash.sh`](./lib/require_bash.sh) as their first non-shebang line; that shim is intentionally POSIX-compatible so `sh`/`dash` can source it and transparently re-launch the script under `bash` before `lib/common.sh` is reached. Prefer one of these invocations for clarity:
+
+```bash
+./cli.sh                # Uses the #!/bin/bash shebang (recommended)
+bash cli.sh             # Explicit bash
+bash generate.sh        # Explicit bash for the reverse-sync script
+```
+
+> If `bash` is not on `PATH`, the guard falls back to a clear error: `Error: cli.sh requires bash, but bash was not found in PATH`. See `lib/require_bash.sh` for the canonical guard implementation.
+
+## 🪟 Windows Installation
+
+The installer supports Windows via PowerShell or Git Bash.
+
+### Prerequisites for Windows
+
+1. **Git for Windows** - Includes Git Bash (required for running shell scripts)
+   - Download from: https://git-scm.com/download/win
+   - During installation, choose "Use Git and optional Unix tools from the Command Prompt" to add Git Bash to PATH
+
+2. **jq** (JSON processor) - Auto-installed via winget if available
+   - Manual install: `winget install -e --id jqlang.jq`
+
+### Option 1: PowerShell (Recommended for Windows)
+
+```powershell
+# Run directly from the published URL
+irm https://ai-tools.itman.fyi/install.ps1 | iex
+
+# To pass options, download first, then run the local file:
+irm https://ai-tools.itman.fyi/install.ps1 -OutFile install.ps1
+.\install.ps1 -DryRun
+```
+
+**Local execution:**
+
+```powershell
+# Clone and run locally
+git clone https://github.com/jellydn/my-ai-tools.git
+cd my-ai-tools
+.\install.ps1
+```
+
+### Option 2: Git Bash
+
+```bash
+# Open Git Bash (from right-click menu or Start menu)
+git clone https://github.com/jellydn/my-ai-tools.git
+cd my-ai-tools
+bash ./cli.sh
+```
+
+> **Note:** If `bash` is not recognized in PowerShell, add Git to your PATH:
+>
+> ```powershell
+> [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\Git\bin", "User")
+> ```
+
+---
+
+Primary AI coding assistant with extensive customization.
+
+### Installation
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+### MCP Servers Setup
+
+#### Automatic Setup (Recommended)
+
+Run the setup script to configure MCP servers:
+
+```bash
+./cli.sh
+```
+
+The script will prompt you to install each MCP server:
+
+- [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
+- [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
+- [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
+- [`agentmemory`](https://github.com/rohitg00/agentmemory) - "Persistent memory" per the tool's branding; we use it session-only (qmd is the durable KB; see `~/.ai-tools/MEMORY.md`)
+- [`fff`](https://github.com/dmtrKovalenko/fff.nvim) - Fast file search with built-in memory for AI agents
+- [`react-grab-mcp`](https://github.com/nyan-left/react-grab-mcp) - React component extraction and analysis
+- [`logpilot`](https://github.com/jellydn/logpilot) - AI-powered log analysis and tmux session monitoring
+
+#### Manual Setup
+
+##### For Claude Code
+
+Configuration in [`~/.claude/mcp-servers.json`](configs/claude/mcp-servers.json):
+
+```json
+{
+	"mcpServers": {
+		"context7": {
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@latest"]
+		},
+		"sequential-thinking": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"]
+		},
+		"agentmemory": {
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"]
+		},
+		"fff": {
+			"type": "stdio",
+			"command": "fff-mcp",
+			"args": []
+		},
+		"react-grab-mcp": {
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"]
+		},
+		"logpilot": {
+			"command": "logpilot",
+			"args": ["mcp-server"]
+		}
+	}
+}
+```
+
+Or use the CLI (installed globally for all projects):
+
+```bash
+claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest
+claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
+claude mcp add --scope user --transport stdio qmd -- qmd mcp
+claude mcp add --scope user --transport stdio agentmemory -- npx -y @agentmemory/mcp
+claude mcp add --scope user --transport stdio fff -- fff-mcp  # Requires: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
+claude mcp add --scope user --transport stdio logpilot -- logpilot mcp-server  # Requires: cargo install logpilot
+claude mcp add --scope user --transport stdio sem -- sem-mcp  # Requires: cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp
+```
+
+> **Auto-Install:** `./cli.sh` automatically installs Rust via `rustup` when these cargo-dependent MCP servers are selected, so you don't need to install Rust manually beforehand (manual `claude mcp add` still requires a pre-installed Rust toolchain).
+
+> **MCP Scopes:**
+>
+> - `--scope user` (global): Available across all projects
+> - `--scope local` (default): Only in current project directory
+> - `--scope project`: Stored in `.mcp.json` for team sharing
+
+#### Managing MCP Servers
+
+```bash
+# List all configured servers
+claude mcp list
+
+# Remove an MCP server
+claude mcp remove context7
+
+# Get details for a specific server
+claude mcp get qmd
+```
+
+#### Knowledge Management
+
+Replace deprecated `claude-mem` with **qmd-based knowledge system**:
+
+- Project-specific knowledge bases in `~/.ai-knowledges/`
+- AI-powered search via qmd MCP server
+- No repository pollution
+- See [qmd Knowledge Management Guide](docs/qmd-knowledge-management.md)
+
+### Plugins
+
+#### Prerequisites
+
+Before installing plugins, ensure:
+
+1. **Claude Code subscription** - Active subscription with plugin support
+2. **Plugin marketplace access** - Verify marketplace is enabled for your repository
+3. **Network connectivity** - Required for downloading marketplace plugins
+
+To check marketplace availability:
+
+```bash
+# Verify Claude CLI supports plugins
+claude plugin list
+
+# If the above fails, check your Claude Code installation and subscription
+```
+
+#### Installation
+
+The setup script (`./cli.sh`) automatically checks marketplace availability before installing plugins. If marketplace is unavailable, it will offer to install local plugins only.
+
+**Automated installation (recommended):**
+
+```bash
+./cli.sh  # Includes marketplace check and fallback to local plugins
+```
+
+**Manual installation** (requires marketplace access):
+
+```bash
+# First, add the official marketplace
+claude plugin marketplace add anthropics/claude-plugins-official
+
+# Official plugins
+claude plugin install typescript-lsp@claude-plugins-official
+claude plugin install pyright-lsp@claude-plugins-official
+claude plugin install context7@claude-plugins-official
+claude plugin install frontend-design@claude-plugins-official
+claude plugin install learning-output-style@claude-plugins-official
+claude plugin install swift-lsp@claude-plugins-official
+claude plugin install lua-lsp@claude-plugins-official
+claude plugin install code-simplifier@claude-plugins-official
+claude plugin install rust-analyzer-lsp@claude-plugins-official
+claude plugin install claude-md-management@claude-plugins-official
+
+# Community plugins (add marketplace first)
+# Plugin installation format: plugin-name@marketplace-name
+# Example: The repository 'backnotprop/plannotator' registers as marketplace 'plannotator',
+#          then you install plugin 'plannotator' from that marketplace
+claude plugin marketplace add backnotprop/plannotator
+claude plugin install plannotator@plannotator
+
+claude plugin marketplace add jarrodwatts/claude-hud
+claude plugin install claude-hud@claude-hud
+
+claude plugin marketplace add max-sixty/worktrunk
+claude plugin install worktrunk@worktrunk
+
+claude plugin marketplace add openai/codex-plugin-cc
+claude plugin install codex@openai-codex
+
+claude plugin marketplace add JuliusBrussee/caveman
+claude plugin install caveman@caveman
+
+# Install skills from this repository (jellydn/my-ai-tools)
+# Recommended: Install all skills at once using npx skills add
+npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
+
+# Or install interactively (select which skills to install)
+npx skills add jellydn/my-ai-tools --global --agent claude-code
+
+# Available skills: accountable-engineering, prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, security-audit, tmux, blindspot-pass, implementation-logger, quiz-me, spec-interview, capability-experiments, code-review, context-discovery, doc-search, git-context, orchestrating-fusion
+# Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
+```
+
+#### Troubleshooting
+
+**Skills installation issues?**
+
+If you encounter issues:
+
+1. **Check npx availability**: Ensure Node.js and npx are installed (`npx --version`)
+2. **Use local skills**: The setup script automatically falls back to local skills from `skills/` folder
+3. **Manual installation**: Copy skill folders directly to `~/.claude/skills/`
+4. **Interactive mode**: Run without `--yes` flag to select specific skills
+
+**Common issues:**
+
+- "npx not found" → Install Node.js to use remote skill installation, or use local skills via `./cli.sh`
+- "Permission denied" → Try running without sudo, or use `--global` flag
+- "Skills already installed" → Remove existing skills first with `npx skills remove --global`
+
+#### Plugin List
+
+| Plugin                   | Description                             | Source            |
+| ------------------------ | --------------------------------------- | ----------------- |
+| `typescript-lsp`         | TypeScript language server              | Official          |
+| `pyright-lsp`            | Python language server                  | Official          |
+| `context7`               | Documentation lookup                    | Official          |
+| `frontend-design`        | UI/UX design assistance                 | Official          |
+| `learning-output-style`  | Interactive learning mode               | Official          |
+| `swift-lsp`              | Swift language support                  | Official          |
+| `lua-lsp`                | Lua language support                    | Official          |
+| `code-simplifier`        | Code simplification                     | Official          |
+| `rust-analyzer-lsp`      | Rust language support                   | Official          |
+| `claude-md-management`   | Markdown management                     | Official          |
+| `plannotator`            | Plan annotation tool                    | Community         |
+| `plannotator-setup-goal` | Turn ideas into goal packages           | Local Marketplace |
+| `prd`                    | Product Requirements Documents          | Local Marketplace |
+| `ralph`                  | PRD to JSON converter                   | Local Marketplace |
+| `qmd-knowledge`          | Project knowledge management            | Local Marketplace |
+| `codemap`                | Parallel codebase analysis              | Local Marketplace |
+| `code-quality-review`    | Extremely strict maintainability review | Local Marketplace |
+| `claude-hud`             | Status line with usage monitoring       | Community         |
+| `worktrunk`              | Work management                         | Community         |
+| `codex`                  | Codex code review & task delegation     | Community         |
+| `caveman`                | Concise, high-signal response mode      | Community         |
+
+#### Key Marketplace Plugins
+
+**`codemap`** - Orchestrates parallel codebase analysis producing 7 structured documents in `.planning/codebase/`:
+
+- `STACK.md` - Technologies, dependencies, configuration
+- `INTEGRATIONS.md` - 3rd party APIs, databases, auth
+- `ARCHITECTURE.md` - System patterns, layers, data flow
+- `STRUCTURE.md` - Directory layout, key locations
+- `CONVENTIONS.md` - Code style, patterns, error handling
+- `TESTING.md` - Framework, structure, mocking, coverage
+- `CONCERNS.md` - Tech debt, bugs, security issues
+
+**`prd`** - Generate Product Requirements Documents
+
+**`ralph`** - Convert PRDs to JSON for autonomous agent execution
+
+**`qmd-knowledge`** - Project-specific knowledge management ([guide](docs/qmd-knowledge-management.md))
+
+### Hooks & Status Line
+
+Configure in [`~/.claude/settings.json`](configs/claude/settings.json):
+
+#### PostToolUse Hooks
+
+Auto-format after file edits:
+
+```json
+{
+	"hooks": {
+		"PostToolUse": [
+			{
+				"matcher": "Write|Edit|MultiEdit",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(ts|tsx|js|jsx)$'; then biome check --write \"$file_path\"; fi; }"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.go$ ]]; then gofmt -w \"$( jq -r .tool_input.file_path )\"; fi"
+					},
+					{
+						"type": "command",
+						"command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(md|mdx)$'; then npx prettier --write \"$file_path\"; fi; }"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.py$ ]]; then ruff format \"$( jq -r .tool_input.file_path )\"; fi"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.rs$ ]]; then rustfmt \"$( jq -r .tool_input.file_path )\"; fi"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.sh$ ]]; then shfmt -w \"$( jq -r .tool_input.file_path )\"; fi"
+					},
+					{
+						"type": "command",
+						"command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.lua$ ]]; then stylua \"$( jq -r .tool_input.file_path )\"; fi"
+					}
+				]
+			}
+		]
+	}
+}
+```
+
+**Supported Formatters:**
+
+- **biome** - TypeScript/JavaScript files (`.ts`, `.tsx`, `.js`, `.jsx`) - includes linting
+- **gofmt** - Go files (`.go`)
+- **prettier** - Markdown files (`.md`, `.mdx`)
+- **ruff** - Python files (`.py`) - modern, fast formatter
+- **rustfmt** - Rust files (`.rs`)
+- **shfmt** - Shell scripts (`.sh`)
+- **stylua** - Lua files (`.lua`)
+
+**Installation:** The setup script (`./cli.sh`) automatically checks and installs these tools with mise priority:
+
+- `jq` - JSON parsing (required)
+- `biome` - JavaScript/TypeScript formatting
+- `gofmt` - Go formatting (requires Go installation)
+- `prettier` - Markdown formatting (used via `npx`)
+- `ruff` - Python formatting (installed via mise, pipx, or pip)
+- `rustfmt` - Rust formatting (installed via mise or rustup)
+- `shfmt` - Shell script formatting (installed via mise, brew, or go install)
+- `stylua` - Lua formatting (installed via mise, brew, or cargo)
+
+#### PreToolUse Hooks
+
+##### Git Guard Hook
+
+Prevents dangerous git commands from being executed:
+
+```json
+{
+	"hooks": {
+		"PreToolUse": [
+			{
+				"matcher": "Bash",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "bun ~/.claude/hooks/index.ts PreToolUse"
+					}
+				]
+			}
+		]
+	}
+}
+```
+
+**Blocked commands:**
+
+- `git push --force` / `-f` (without lease protection)
+- `git reset --hard` (destroys uncommitted changes)
+- `git clean -f
