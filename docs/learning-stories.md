@@ -242,6 +242,31 @@ A complete software development workflow for coding agents with composable "skil
 
 ---
 
+## Delta
+
+**Zed's collaborative agent workspace for coding with agents and reviewing what they build.**
+
+- **Homepage:** [delta.dev](https://delta.dev)
+- **Docs:** [Getting Started](https://delta.dev/docs/getting-started)
+- **Overview:** [Introducing Delta](https://zed.dev/blog/introducing-delta)
+- **Status:** Early development (private beta); sign in with a Zed account
+
+### Why it matters
+
+Delta keeps **conversation and code in one thread**. Agents work in an isolated checkout by default, so your working tree stays clean until you sync. Review happens in context — comments stay anchored as the worktree evolves. Teammates can open shared threads in the browser without installing Delta.
+
+### Pairing with my-ai-tools
+
+| Tool | Role |
+| ---- | ---- |
+| **Claude Code** | Terminal agent; syncs live into a Delta thread via ACP |
+| **Hunk** | Terminal diff review for local changes outside a Delta thread |
+| **This repo** | `docs/delta-getting-started.md` — install, models, first thread, troubleshooting |
+
+No `./cli.sh` integration yet — Delta has no stable shared config path to replicate from this repo.
+
+---
+
 ## My Philosophy: Keep It Simple
 
 > **"Add only if needed"**
