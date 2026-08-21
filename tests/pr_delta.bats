@@ -81,6 +81,30 @@ README="$REPO_ROOT/README.md"
 	[ "$status" -eq 0 ]
 }
 
+@test "-y allowlist runs the Delta install and config flow" {
+	run bash -c '
+		set -e
+		home=$(mktemp -d)
+		trap '\''rm -rf "$home"'\'' EXIT
+		export HOME="$home" DELTA_CONFIG_DIR="$home/custom delta"
+		export DRY_RUN=false YES_TO_ALL=true VERBOSE=false
+		unset XDG_CONFIG_HOME
+		source "$1"
+
+		tool_allowed delta
+		INSTALL_SEQUENCE=("delta:install_delta")
+		install_delta() { touch "$home/install-delta-called"; }
+		run_install_sequence >/dev/null
+
+		mkdir -p "$home/.local/delta.app"
+		copy_delta_configs >/dev/null
+		[ -f "$home/install-delta-called" ]
+		cmp "$2/configs/delta/settings.json" "$DELTA_CONFIG_DIR/settings.json"
+		cmp "$2/configs/delta/AGENTS.md" "$home/.config/delta/AGENTS.md"
+	' _ "$CLI_SH" "$REPO_ROOT"
+	[ "$status" -eq 0 ]
+}
+
 @test "copy_delta_configs installs settings and personal rules for detected Delta" {
 	run bash -c '
 		set -e
@@ -195,6 +219,10 @@ README="$REPO_ROOT/README.md"
 	[ "$status" -eq 0 ]
 	run grep -F 'Expand-Archive .\delta-windows-<architecture>.zip' "$README"
 	[ "$status" -eq 0 ]
+	run awk '/^## 🔺 Delta \(Optional\)/,/^## 🎨 Codiff \(Optional\)/' "$README"
+	[ "$status" -eq 0 ]
+	[[ "$output" == *"./cli.sh --dry-run"* ]]
+	[[ "$output" == *$'./cli.sh --dry-run\n./cli.sh'* ]]
 }
 
 @test "Delta support has a changeset" {

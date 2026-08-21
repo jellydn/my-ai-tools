@@ -3078,6 +3078,7 @@ Expand-Archive .\delta-windows-<architecture>.zip .\Delta
 Run this repo's installer after Delta is present to deploy the managed configuration:
 
 ```bash
+./cli.sh --dry-run
 ./cli.sh
 ```
 
