@@ -898,6 +898,24 @@ generate_qodercli_configs() {
 	log_success "Qoder CLI configs generated"
 }
 
+generate_deepseek_harness_configs() {
+	log_info "Generating DeepSeek Harness configs..."
+	local dsh_home="${DSH_HOME:-$HOME/.dsh}"
+
+	if [ ! -d "$dsh_home" ]; then
+		log_warning "DeepSeek Harness config directory not found: $dsh_home"
+		return 0
+	fi
+
+	execute "mkdir -p \"$SCRIPT_DIR/configs/deepseek-harness\""
+
+	copy_single "$dsh_home/AGENTS.md" "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
+	copy_single "$dsh_home/settings.yaml" "$SCRIPT_DIR/configs/deepseek-harness/settings.yaml"
+	copy_single "$dsh_home/cordis.patch.yml" "$SCRIPT_DIR/configs/deepseek-harness/cordis.patch.yml"
+
+	log_success "DeepSeek Harness configs generated"
+}
+
 generate_kiro_configs() {
 	log_info "Generating Kiro CLI configs..."
 
@@ -1225,6 +1243,9 @@ main() {
 	echo
 
 	generate_qodercli_configs
+	echo
+
+	generate_deepseek_harness_configs
 	echo
 
 	generate_kiro_configs

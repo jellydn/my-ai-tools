@@ -56,6 +56,7 @@ INSTALL_SEQUENCE=(
 	"ctx:install_ctx"
 	"hunk:install_hunk"
 	"qodercli:install_qodercli"
+	"deepseek_harness:install_deepseek_harness"
 	"kiro:install_kiro"
 	"delta:install_delta"
 	"codiff:install_codiff"
@@ -349,6 +350,10 @@ backup_configs() {
 		copy_config_dir "$HOME/.grok" "$BACKUP_DIR" "grok"
 		copy_config_dir "$HOME/.config/mimocode" "$BACKUP_DIR" "mimocode"
 		copy_config_dir "$HOME/.qoder" "$BACKUP_DIR" "qodercli"
+		local dsh_home="${DSH_HOME:-$HOME/.dsh}"
+		copy_config_file "$dsh_home/AGENTS.md" "$BACKUP_DIR/deepseek-harness" || true
+		copy_config_file "$dsh_home/settings.yaml" "$BACKUP_DIR/deepseek-harness" || true
+		copy_config_file "$dsh_home/cordis.patch.yml" "$BACKUP_DIR/deepseek-harness" || true
 		copy_config_dir "$HOME/.kiro" "$BACKUP_DIR" "kiro"
 		copy_config_file "$(get_delta_settings_dir)/settings.json" "$BACKUP_DIR/delta" || true
 		copy_config_file "$HOME/.config/delta/AGENTS.md" "$BACKUP_DIR/delta" || true
@@ -598,6 +603,11 @@ copy_configurations() {
 	else
 		log_info "Skipping qodercli config install (not in -y allowlist)"
 	fi
+	if tool_allowed "deepseek_harness"; then
+		copy_deepseek_harness_configs
+	else
+		log_info "Skipping deepseek_harness config install (not in -y allowlist)"
+	fi
 	if tool_allowed "kiro"; then
 		copy_kiro_configs
 	else
@@ -659,6 +669,7 @@ _validate_config_tool_name() {
 		*kilo/config.json*) echo "kilo" ;;
 		*reasonix/config.toml*) echo "reasonix" ;;
 		*hunk/config.toml*) echo "hunk" ;;
+		*deepseek-harness/*.yaml* | *deepseek-harness/*.yml*) echo "deepseek_harness" ;;
 		*delta/settings.json*) echo "delta" ;;
 		*kimi-code/*.json* | *kimi-code/*.toml*) echo "kimi_code" ;;
 		*pi/settings.json*) echo "pi" ;;
@@ -706,6 +717,8 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/kilo/config.json" \
 		"$SCRIPT_DIR/configs/reasonix/config.toml" \
 		"$SCRIPT_DIR/configs/hunk/config.toml" \
+		"$SCRIPT_DIR/configs/deepseek-harness/settings.yaml" \
+		"$SCRIPT_DIR/configs/deepseek-harness/cordis.patch.yml" \
 		"$SCRIPT_DIR/configs/delta/settings.json" \
 		"$SCRIPT_DIR/configs/kimi-code/config.toml" \
 		"$SCRIPT_DIR/configs/kimi-code/mcp.json" \
@@ -1846,6 +1859,29 @@ copy_qodercli_configs() {
 	log_success "Qoder CLI configs copied"
 }
 
+copy_deepseek_harness_configs() {
+	local dsh_home="${DSH_HOME:-$HOME/.dsh}"
+	local dsh_status
+	dsh_status=$(detect_tool --detailed "dsh" "$dsh_home") || dsh_status="missing"
+	if [ "$dsh_status" = "missing" ]; then
+		log_info "DeepSeek Harness not detected - skipping DeepSeek Harness config installation"
+		return 0
+	fi
+
+	log_info "Detected DeepSeek Harness (via $dsh_status)"
+	execute_quoted mkdir -p "$dsh_home" || return 1
+
+	local config_file
+	for config_file in AGENTS.md settings.yaml cordis.patch.yml; do
+		if ! copy_config_file "$SCRIPT_DIR/configs/deepseek-harness/$config_file" "$dsh_home/"; then
+			log_error "Failed to copy DeepSeek Harness config: $config_file"
+			return 1
+		fi
+	done
+
+	log_success "DeepSeek Harness configs copied"
+}
+
 copy_kiro_configs() {
 	local kiro_status
 	kiro_status=$(detect_tool --detailed "kiro" "$HOME/.kiro") || kiro_status="missing"
@@ -2716,8 +2752,8 @@ main() {
 	echo "║  Claude • OpenCode • fx • Amp • CCS • Codex • Kimi Code • Gemini     ║"
 	echo "║  Antigravity • Pi • Kilo • Copilot • Cursor • Command Code           ║"
 	echo "║  Factory Droid • Cline • Grok • MiMo-Code • herdr                    ║"
-	echo "║  Qoder CLI • Kiro • Delta • Codiff • Devin • Hunk                    ║"
-	echo "║  ctx • Reasonix                                                       ║"
+	echo "║  Qoder CLI • DeepSeek Harness • Kiro • Delta • Codiff • Hunk         ║"
+	echo "║  Devin • ctx • Reasonix                                               ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 

@@ -1,0 +1,4 @@
+llm-deepseek:
+  apiKeyEnv: DEEPSEEK_API_KEY
+  thinking: enabled
+  reasoningEffort: high

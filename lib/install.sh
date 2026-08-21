@@ -696,6 +696,12 @@ install_open_code_review() {
 		"npm install -g @alibaba-group/open-code-review"
 }
 
+install_deepseek_harness() {
+	install_npm_tool "DeepSeek Harness" "dsh" "@deepseek-ai/dsh" \
+		"npm install --global @deepseek-ai/dsh" \
+		"dsh --version"
+}
+
 install_hunk() {
 	_run_hunk_install() {
 		if ! command -v node &>/dev/null; then

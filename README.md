@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, fx, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, Oh My Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, Kiro CLI, Delta, Hunk, Codiff, ctx, Open Code Review, CCS, and Reasonix with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, fx, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, Oh My Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, DeepSeek Harness, Kiro CLI, Delta, Hunk, Codiff, ctx, Open Code Review, CCS, and Reasonix with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, fx, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, Kiro CLI, Delta, Hunk, Codiff, ctx, Open Code Review, Reasonix, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, fx, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, DeepSeek Harness, Kiro CLI, Delta, Hunk, Codiff, ctx, Open Code Review, Reasonix, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, codebase-memory-mcp, agentmemory, sem, ctx
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -167,6 +167,7 @@ The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONS
 | **Grok**        | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Default model `grok-4.5` (high reasoning); UI auto + `rosepine-moon`; Kanagawa theme staged                                                                                                                                                    |
 | **MiMo-Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                                                                              |
 | **Qoder CLI**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                                                                              |
+| **DeepSeek Harness** | context7, sequential-thinking, qmd, fff, sem, ctx                                                                     | Cordis plugin composition; global `AGENTS.md`; native DeepSeek model route                                                                                                                                                                      |
 | **Kiro CLI**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Steering files (AGENTS.md), slash commands, MCP servers, ACP                                                                                                                                                                                   |
 | **Reasonix**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | DeepSeek-native; prefix-cache loop; `[[plugins]]` MCP in config.toml; ACP (`reasonix acp`); `REASONIX.md`/`AGENTS.md` memory; Kanagawa theme staged                                                                                            |
 | **Delta**       | — (desktop app — model providers are configured in settings)                                                              | Personal rules (`~/.config/delta/AGENTS.md`), isolated checkouts, collaborative threads                                                                                                                                                        |
@@ -2971,6 +2972,60 @@ See the full [Qoder CLI docs](https://docs.qoder.com/en/cli/quick-start) for det
 
 ---
 
+## 🐋 DeepSeek Harness (Optional)
+
+DeepSeek's open-source, plugin-composable agent harness. It provides Web, headless, standard, code, minimal, and creator modes with append-only session tracing. DeepSeek Harness is currently a developer preview. [Homepage](https://deepseek.com/harness/en/) | [Docs](https://deepseek-harness.github.io/deepseek-harness/en/guide/quickstart) | [GitHub](https://github.com/deepseek-ai/deepseek-harness)
+
+<details>
+<summary><strong>Installation &amp; Configuration</strong></summary>
+
+### Installation
+
+```bash
+# Run without a global installation
+npx @deepseek-ai/dsh web
+
+# Or install the official CLI globally
+npm install --global @deepseek-ai/dsh
+```
+
+Or run this repo's installer:
+
+```bash
+./cli.sh
+```
+
+### Configuration
+
+DeepSeek Harness uses one user root at `${DSH_HOME:-~/.dsh}`. It does not use XDG config paths. This repository manages:
+
+- [`AGENTS.md`](configs/deepseek-harness/AGENTS.md) — user-global agent instructions
+- [`settings.yaml`](configs/deepseek-harness/settings.yaml) — native DeepSeek provider defaults using the `DEEPSEEK_API_KEY` environment variable
+- [`cordis.patch.yml`](configs/deepseek-harness/cordis.patch.yml) — Cordis plugin entries for context7, sequential-thinking, qmd, fff, sem, and ctx MCP tools
+
+`./generate.sh` exports only these managed files. It intentionally excludes `.credentials.yaml`, `.env`, `.anonymous-user-id`, sessions, storage, attachments, profile dependencies, and other runtime state. Never commit Harness credentials or session data.
+
+### Usage
+
+```bash
+# Start the Web UI (default: 127.0.0.1:3080)
+dsh web
+
+# Run a headless task
+dsh --profile headless "Summarize this repository"
+
+# Inspect the resolved Web profile
+dsh --profile web --dump-config
+```
+
+In the Web UI, open **Settings → Models** to store a DeepSeek API key, then choose a workspace before starting a session. The credential store remains outside the files managed by this repository.
+
+DeepSeek Harness also reads project `AGENTS.md`, `CLAUDE.md`, and same-directory `.local.md` overlays. It discovers project skills in `.dsh/skills/` or `.agents/skills/`, and user skills in `${DSH_HOME:-~/.dsh}/skills/` or `${DSH_AGENTS_HOME:-~/.agents}/skills/`.
+
+</details>
+
+---
+
 ## 🥷 Kiro CLI (Optional)
 
 Kiro Dev's AI coding assistant with native MCP support, steering files (AGENTS.md), and ACP (Agent Client Protocol) integration. Ships with `/model`, `/editor`, `/usage`, and custom agents. [Homepage](https://kiro.dev/) | [Docs](https://kiro.dev/docs/cli/installation/) | [GitHub](https://github.com/kirodotdev/Kiro)
@@ -3282,6 +3337,7 @@ ctx mcp serve
 The ctx MCP server is configured for all supported AI tools via this repo's config files and the central MCP registry (`configs/mcp-registry.json`):
 
 - **Claude Code**, **Cursor**, **Cline**, **Factory Droid**, **Kimi Code**, **CommandCode**, **Kiro**, **Copilot**, **Qoder CLI**, **Pi**, **Antigravity** — registered in tool-specific `mcpServers` JSON config
+- **DeepSeek Harness** — registered as `@deepseek-ai/dsh-mcp-client` entries in `cordis.patch.yml`
 - **OpenCode**, **Kilo** — registered in `mcp.ctx` (array-command format)
 - **Codex**, **Grok** — registered in TOML `[mcp_servers.ctx]` format
 - **Claude Code**, **OpenCode**, **Codex**, **Amp**, **Gemini**, **Antigravity**, **CommandCode**, **Copilot**, **Cursor**, **Factory**, **Cline**, **Grok**, **MiMo-Code**, **Qoder CLI**, **Kiro** — also covered by the central `mcp-registry.json` for automatic setup.
