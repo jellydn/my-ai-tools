@@ -248,6 +248,10 @@ generate_fx_configs() {
 		log_warning "fx config directory not found: $HOME/.fx"
 		return 0
 	fi
+	if [ ! -f "$HOME/.fx/AGENTS.md" ]; then
+		log_warning "fx config not found: $HOME/.fx/AGENTS.md"
+		return 0
+	fi
 
 	execute_quoted mkdir -p "$SCRIPT_DIR/configs/fx"
 	copy_single "$HOME/.fx/AGENTS.md" "$SCRIPT_DIR/configs/fx/AGENTS.md"

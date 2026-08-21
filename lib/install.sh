@@ -254,6 +254,10 @@ install_claude_code() {
 
 install_fx() {
 	_run_fx_install() {
+		local fx_install_dir="${FX_INSTALL_DIR:-$HOME/.local/bin}"
+		local fx_version="v0.0.4"
+		local fx_setup_sha256="254c2d4410678aa28acb17941f5447b34b312f829893d4261bb4d713508f924f"
+
 		if command -v fx &>/dev/null; then
 			log_warning "fx is already installed"
 			return 0
@@ -265,8 +269,8 @@ install_fx() {
 			return 0
 		fi
 
-		if execute_installer "https://fx.sh/setup.sh" "" "fx"; then
-			ensure_dir_on_path "$HOME/.local/bin"
+		if execute_installer "https://fx.sh/setup.sh" "$fx_setup_sha256" "fx $fx_version" "$fx_version"; then
+			ensure_dir_on_path "$fx_install_dir"
 			log_success "fx installed"
 		else
 			log_error "Failed to install fx"

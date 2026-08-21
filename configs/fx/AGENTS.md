@@ -24,8 +24,8 @@ tmux capture-pane -p -t "$SESSION" -S -20  # check output
 
 ## AI Tool Guidelines
 
-- Use the fff MCP tools for all file search operations instead of default tools.
-- Use the sem MCP tools for semantic version control and git operations.
+- Use the fff MCP tools for file search when they are configured. Otherwise, use `fd` or `rg`.
+- Use the sem MCP tools for semantic version control when they are configured. Otherwise, use Git.
 - When using bash commands for file/content search, prefer `fd` (fdfind) and `rg` (ripgrep) over standard `find` and `grep` for better performance and git-awareness.
 
 ## Token Efficiency

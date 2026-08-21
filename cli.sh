@@ -1097,7 +1097,7 @@ copy_fx_configs() {
 
 	log_info "Detected fx (via $fx_status)"
 	execute_quoted mkdir -p "$HOME/.fx"
-	copy_config_file "$SCRIPT_DIR/configs/fx/AGENTS.md" "$HOME/.fx/" || true
+	copy_config_file "$SCRIPT_DIR/configs/fx/AGENTS.md" "$HOME/.fx/" || return 1
 	log_success "fx configs copied"
 }
 
