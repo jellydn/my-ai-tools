@@ -350,7 +350,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/mimocode" "$BACKUP_DIR" "mimocode"
 		copy_config_dir "$HOME/.qoder" "$BACKUP_DIR" "qodercli"
 		copy_config_dir "$HOME/.kiro" "$BACKUP_DIR" "kiro"
-		copy_config_dir "$(get_delta_settings_dir)" "$BACKUP_DIR/delta" "settings"
+		copy_config_file "$(get_delta_settings_dir)/settings.json" "$BACKUP_DIR/delta" || true
 		copy_config_file "$HOME/.config/delta/AGENTS.md" "$BACKUP_DIR/delta" || true
 		copy_config_dir "$HOME/.codiff" "$BACKUP_DIR" "codiff"
 		copy_config_dir "$HOME/.config/devin" "$BACKUP_DIR" "devin"
@@ -1936,8 +1936,14 @@ copy_delta_configs() {
 	fi
 
 	log_info "Detected Delta (via $delta_status)"
-	copy_config_file "$SCRIPT_DIR/configs/delta/settings.json" "$delta_settings_dir/" || true
-	copy_config_file "$SCRIPT_DIR/configs/delta/AGENTS.md" "$HOME/.config/delta/" || true
+	if ! copy_config_file "$SCRIPT_DIR/configs/delta/settings.json" "$delta_settings_dir/"; then
+		log_error "Failed to copy Delta settings"
+		return 1
+	fi
+	if ! copy_config_file "$SCRIPT_DIR/configs/delta/AGENTS.md" "$HOME/.config/delta/"; then
+		log_error "Failed to copy Delta personal rules"
+		return 1
+	fi
 
 	log_success "Delta configs copied"
 }

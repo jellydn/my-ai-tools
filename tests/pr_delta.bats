@@ -83,27 +83,103 @@ README="$REPO_ROOT/README.md"
 
 @test "copy_delta_configs installs settings and personal rules for detected Delta" {
 	run bash -c '
+		set -e
 		home=$(mktemp -d)
 		trap '\''rm -rf "$home"'\'' EXIT
 		mkdir -p "$home/.local/delta.app"
-		export HOME="$home" DRY_RUN=false YES_TO_ALL=false
+		export HOME="$home" DELTA_CONFIG_DIR="$home/custom delta"
+		export DRY_RUN=false YES_TO_ALL=false VERBOSE=false
+		unset XDG_CONFIG_HOME
 		source "$1"
 		copy_delta_configs
-		cmp "$2/configs/delta/settings.json" "$home/.config/delta/settings.json"
+		cmp "$2/configs/delta/settings.json" "$DELTA_CONFIG_DIR/settings.json"
 		cmp "$2/configs/delta/AGENTS.md" "$home/.config/delta/AGENTS.md"
 	' _ "$CLI_SH" "$REPO_ROOT"
 	[ "$status" -eq 0 ]
 }
 
-@test "Delta configs participate in backup and reverse sync" {
-	run grep -F 'get_delta_settings_dir' "$CLI_SH"
+@test "copy_delta_configs reports managed file copy failures" {
+	run bash -c '
+		home=$(mktemp -d)
+		trap '\''rm -rf "$home"'\'' EXIT
+		mkdir -p "$home/.local/delta.app"
+		export HOME="$home" DRY_RUN=false YES_TO_ALL=false VERBOSE=false
+		unset DELTA_CONFIG_DIR XDG_CONFIG_HOME
+		source "$1"
+		copy_config_file() { return 1; }
+		copy_delta_configs
+	' _ "$CLI_SH"
+	[ "$status" -ne 0 ]
+	[[ "$output" == *"Failed to copy Delta settings"* ]]
+	[[ "$output" != *"Delta configs copied"* ]]
+
+	run bash -c '
+		home=$(mktemp -d)
+		trap '\''rm -rf "$home"'\'' EXIT
+		mkdir -p "$home/.local/delta.app"
+		export HOME="$home" DRY_RUN=false YES_TO_ALL=false VERBOSE=false
+		unset DELTA_CONFIG_DIR XDG_CONFIG_HOME
+		source "$1"
+		copy_config_file() { [ "${1##*/}" != "AGENTS.md" ]; }
+		copy_delta_configs
+	' _ "$CLI_SH"
+	[ "$status" -ne 0 ]
+	[[ "$output" == *"Failed to copy Delta personal rules"* ]]
+	[[ "$output" != *"Delta configs copied"* ]]
+}
+
+@test "Delta backup excludes credentials and reverse sync honors DELTA_CONFIG_DIR" {
+	run bash -c '
+		set -e
+		temp_home=$(mktemp -d)
+		temp_repo=$(mktemp -d)
+		trap '\''rm -rf "$temp_home" "$temp_repo"'\'' EXIT
+		export HOME="$temp_home" DELTA_CONFIG_DIR="$temp_home/custom delta"
+		export DRY_RUN=false YES_TO_ALL=false VERBOSE=false
+		unset XDG_CONFIG_HOME
+		mkdir -p "$DELTA_CONFIG_DIR" "$HOME/.config/delta"
+		cp "$1/configs/delta/settings.json" "$DELTA_CONFIG_DIR/settings.json"
+		cp "$1/configs/delta/AGENTS.md" "$HOME/.config/delta/AGENTS.md"
+		printf '\''DELTA_SECRET=do-not-copy\n'\'' >"$DELTA_CONFIG_DIR/.env"
+		printf '\''OTHER_SECRET=do-not-copy\n'\'' >"$HOME/.config/delta/.env"
+
+		source "$1/cli.sh"
+		BACKUP=true
+		PROMPT_BACKUP=false
+		BACKUP_DIR="$temp_home/backup"
+		backup_configs >/dev/null
+		cmp "$1/configs/delta/settings.json" "$BACKUP_DIR/delta/settings.json"
+		cmp "$1/configs/delta/AGENTS.md" "$BACKUP_DIR/delta/AGENTS.md"
+		[ ! -e "$BACKUP_DIR/delta/.env" ]
+		! grep -R -F '\''do-not-copy'\'' "$BACKUP_DIR"
+
+		source "$1/generate.sh"
+		SCRIPT_DIR="$temp_repo"
+		generate_delta_configs >/dev/null
+		cmp "$1/configs/delta/settings.json" "$temp_repo/configs/delta/settings.json"
+		cmp "$1/configs/delta/AGENTS.md" "$temp_repo/configs/delta/AGENTS.md"
+		[ ! -e "$temp_repo/configs/delta/.env" ]
+	' _ "$REPO_ROOT"
 	[ "$status" -eq 0 ]
-	run grep -E '^generate_delta_configs\(\)' "$GENERATE_SH"
+}
+
+@test "Delta reverse sync warns without claiming success when a managed file is missing" {
+	run bash -c '
+		temp_home=$(mktemp -d)
+		temp_repo=$(mktemp -d)
+		trap '\''rm -rf "$temp_home" "$temp_repo"'\'' EXIT
+		export HOME="$temp_home" DELTA_CONFIG_DIR="$temp_home/custom-delta"
+		export DRY_RUN=false VERBOSE=false
+		mkdir -p "$DELTA_CONFIG_DIR" "$HOME/.config/delta"
+		cp "$1/configs/delta/settings.json" "$DELTA_CONFIG_DIR/settings.json"
+		source "$1/generate.sh"
+		SCRIPT_DIR="$temp_repo"
+		generate_delta_configs
+	' _ "$REPO_ROOT"
 	[ "$status" -eq 0 ]
-	run grep -F 'configs/delta/settings.json' "$GENERATE_SH"
-	[ "$status" -eq 0 ]
-	run grep -E '^[[:space:]]*generate_delta_configs' "$GENERATE_SH"
-	[ "$status" -eq 0 ]
+	[[ "$output" == *"Delta managed config files not found"* ]]
+	[[ "$output" == *"AGENTS.md"* ]]
+	[[ "$output" != *"Delta configs generated"* ]]
 }
 
 @test "README documents Delta support, paths, and credential exclusion" {
@@ -114,6 +190,10 @@ README="$REPO_ROOT/README.md"
 	run grep -F 'DELTA_CONFIG_DIR' "$README"
 	[ "$status" -eq 0 ]
 	run grep -F 'does not install, export, or commit' "$README"
+	[ "$status" -eq 0 ]
+	run grep -F 'delta-windows-<architecture>-setup.exe' "$README"
+	[ "$status" -eq 0 ]
+	run grep -F 'Expand-Archive .\delta-windows-<architecture>.zip' "$README"
 	[ "$status" -eq 0 ]
 }
 

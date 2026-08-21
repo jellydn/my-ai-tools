@@ -3068,6 +3068,13 @@ Download the build for your operating system and processor from Delta's official
 xattr -dr com.apple.quarantine /Applications/Delta.app
 ```
 
+On Windows, run `delta-windows-<architecture>-setup.exe` for a per-user installation. If a setup executable is not available, extract and launch the portable build from PowerShell:
+
+```powershell
+Expand-Archive .\delta-windows-<architecture>.zip .\Delta
+.\Delta\delta.exe
+```
+
 Run this repo's installer after Delta is present to deploy the managed configuration:
 
 ```bash
@@ -3097,7 +3104,17 @@ Provider credentials may be stored in `~/.config/delta/.env`, but this integrati
 ```bash
 # Linux: launch Delta after running ./Delta/install.sh delta
 delta
+
+# macOS
+open /Applications/Delta.app
 ```
+
+```powershell
+# Windows portable installation
+.\Delta\delta.exe
+```
+
+For the Windows setup installation, launch Delta from the Start menu.
 
 See Delta's [getting-started guide](https://delta.dev/docs/getting-started) and [settings reference](https://delta.dev/docs/configuration/settings) for current details.
 
