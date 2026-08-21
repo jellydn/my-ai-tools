@@ -73,6 +73,8 @@ README="$REPO_ROOT/README.md"
 			node() {
 				[ "$1" = "-p" ] && echo "$TEST_NODE_VERSION" || echo "v${TEST_NODE_VERSION/ /.}"
 			}
+			npm() { :; }
+			npx() { :; }
 			install_npm_tool() { return 0; }
 			install_deepseek_harness
 		' _ "$REPO_ROOT" "$version"
@@ -87,6 +89,8 @@ README="$REPO_ROOT/README.md"
 			node() {
 				[ "$1" = "-p" ] && echo "$TEST_NODE_VERSION" || echo "v${TEST_NODE_VERSION/ /.}"
 			}
+			npm() { :; }
+			npx() { :; }
 			install_npm_tool() { return 0; }
 			install_deepseek_harness
 		' _ "$REPO_ROOT" "$version"
