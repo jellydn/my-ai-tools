@@ -703,6 +703,14 @@ install_deepseek_harness() {
 		return 1
 	fi
 
+	local node_major node_minor
+	read -r node_major node_minor <<<"$(node -p 'process.versions.node.split(".").slice(0, 2).join(" ")' 2>/dev/null)"
+	if ! [[ "$node_major" =~ ^[0-9]+$ && "$node_minor" =~ ^[0-9]+$ ]] || \
+		! { [ "$node_major" -eq 22 ] && [ "$node_minor" -ge 19 ] || [ "$node_major" -ge 24 ]; }; then
+		log_error "DeepSeek Harness requires Node.js 22.19+ or 24+ (found: $(node --version 2>/dev/null || echo unknown))."
+		return 1
+	fi
+
 	install_npm_tool "DeepSeek Harness" "dsh" "@deepseek-ai/dsh" \
 		"npm install --global @deepseek-ai/dsh" \
 		"dsh --version"

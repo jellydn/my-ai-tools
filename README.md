@@ -2981,6 +2981,8 @@ DeepSeek's open-source, plugin-composable agent harness. It provides Web, headle
 
 ### Installation
 
+DeepSeek Harness requires Node.js 22.19+ or 24+. Node.js 23 is not supported.
+
 ```bash
 # Run without a global installation
 npx @deepseek-ai/dsh web

@@ -64,6 +64,37 @@ README="$REPO_ROOT/README.md"
 	[[ "$output" == *"requires Node.js with npm and npx"* ]]
 }
 
+@test "DeepSeek Harness installer enforces its supported Node.js versions" {
+	for version in "22 19" "24 0"; do
+		run bash -c '
+			export DRY_RUN=false YES_TO_ALL=true IS_WINDOWS=false VERBOSE=false TEST_NODE_VERSION="$2"
+			source "$1/lib/common.sh"
+			source "$1/lib/install.sh"
+			node() {
+				[ "$1" = "-p" ] && echo "$TEST_NODE_VERSION" || echo "v${TEST_NODE_VERSION/ /.}"
+			}
+			install_npm_tool() { return 0; }
+			install_deepseek_harness
+		' _ "$REPO_ROOT" "$version"
+		[ "$status" -eq 0 ]
+	done
+
+	for version in "22 18" "23 9"; do
+		run bash -c '
+			export DRY_RUN=false YES_TO_ALL=true IS_WINDOWS=false VERBOSE=false TEST_NODE_VERSION="$2"
+			source "$1/lib/common.sh"
+			source "$1/lib/install.sh"
+			node() {
+				[ "$1" = "-p" ] && echo "$TEST_NODE_VERSION" || echo "v${TEST_NODE_VERSION/ /.}"
+			}
+			install_npm_tool() { return 0; }
+			install_deepseek_harness
+		' _ "$REPO_ROOT" "$version"
+		[ "$status" -ne 0 ]
+		[[ "$output" == *"requires Node.js 22.19+ or 24+"* ]]
+	done
+}
+
 @test "DeepSeek Harness install honors DSH_HOME" {
 	run bash -c '
 		set -e
