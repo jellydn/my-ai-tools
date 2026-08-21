@@ -38,6 +38,30 @@ README="$REPO_ROOT/README.md"
 	[ "$status" -eq 0 ]
 	run grep -F '"deepseek_harness:install_deepseek_harness"' "$CLI_SH"
 	[ "$status" -eq 0 ]
+	run bash -c '
+		export HOME="$(mktemp -d)" DRY_RUN=true YES_TO_ALL=true VERBOSE=false
+		trap '\''rm -rf "$HOME"'\'' EXIT
+		source "$1/cli.sh"
+		tool_allowed deepseek_harness
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 0 ]
+}
+
+@test "DeepSeek Harness installer requires the official Node.js toolchain" {
+	run bash -c '
+		export DRY_RUN=false YES_TO_ALL=true IS_WINDOWS=false VERBOSE=false
+		source "$1/lib/common.sh"
+		source "$1/lib/install.sh"
+		command() {
+			if [ "$1" = "-v" ] && [ "$2" = "npx" ]; then
+				return 1
+			fi
+			builtin command "$@"
+		}
+		install_deepseek_harness
+	' _ "$REPO_ROOT"
+	[ "$status" -ne 0 ]
+	[[ "$output" == *"requires Node.js with npm and npx"* ]]
 }
 
 @test "DeepSeek Harness install honors DSH_HOME" {
@@ -95,7 +119,9 @@ README="$REPO_ROOT/README.md"
 @test "README documents DeepSeek Harness setup and sensitive-file exclusions" {
 	run grep -F 'npm install --global @deepseek-ai/dsh' "$README"
 	[ "$status" -eq 0 ]
-	run grep -F '${DSH_HOME:-~/.dsh}' "$README"
+	run grep -F '${DSH_HOME:-$HOME/.dsh}' "$README"
+	[ "$status" -eq 0 ]
+	run grep -F './cli.sh --dry-run' "$README"
 	[ "$status" -eq 0 ]
 	run grep -F '.credentials.yaml' "$README"
 	[ "$status" -eq 0 ]

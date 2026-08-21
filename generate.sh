@@ -907,7 +907,7 @@ generate_deepseek_harness_configs() {
 		return 0
 	fi
 
-	execute "mkdir -p \"$SCRIPT_DIR/configs/deepseek-harness\""
+	execute_quoted mkdir -p "$SCRIPT_DIR/configs/deepseek-harness"
 
 	copy_single "$dsh_home/AGENTS.md" "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
 	copy_single "$dsh_home/settings.yaml" "$SCRIPT_DIR/configs/deepseek-harness/settings.yaml"

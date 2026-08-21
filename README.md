@@ -2989,7 +2989,13 @@ npx @deepseek-ai/dsh web
 npm install --global @deepseek-ai/dsh
 ```
 
-Or run this repo's installer:
+Preview this repo's installer first:
+
+```bash
+./cli.sh --dry-run
+```
+
+Review the dry-run output, then install the tool and configuration:
 
 ```bash
 ./cli.sh
@@ -2997,7 +3003,7 @@ Or run this repo's installer:
 
 ### Configuration
 
-DeepSeek Harness uses one user root at `${DSH_HOME:-~/.dsh}`. It does not use XDG config paths. This repository manages:
+DeepSeek Harness uses one user root at `${DSH_HOME:-$HOME/.dsh}`. It does not use XDG config paths. This repository manages:
 
 - [`AGENTS.md`](configs/deepseek-harness/AGENTS.md) — user-global agent instructions
 - [`settings.yaml`](configs/deepseek-harness/settings.yaml) — native DeepSeek provider defaults using the `DEEPSEEK_API_KEY` environment variable
@@ -3020,7 +3026,7 @@ dsh --profile web --dump-config
 
 In the Web UI, open **Settings → Models** to store a DeepSeek API key, then choose a workspace before starting a session. The credential store remains outside the files managed by this repository.
 
-DeepSeek Harness also reads project `AGENTS.md`, `CLAUDE.md`, and same-directory `.local.md` overlays. It discovers project skills in `.dsh/skills/` or `.agents/skills/`, and user skills in `${DSH_HOME:-~/.dsh}/skills/` or `${DSH_AGENTS_HOME:-~/.agents}/skills/`.
+DeepSeek Harness also reads project `AGENTS.md`, `CLAUDE.md`, and same-directory `.local.md` overlays. It discovers project skills in `.dsh/skills/` or `.agents/skills/`, and user skills in `${DSH_HOME:-$HOME/.dsh}/skills/` or `${DSH_AGENTS_HOME:-$HOME/.agents}/skills/`.
 
 </details>
 

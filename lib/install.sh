@@ -697,6 +697,12 @@ install_open_code_review() {
 }
 
 install_deepseek_harness() {
+	if ! command -v node &>/dev/null || ! command -v npm &>/dev/null || ! command -v npx &>/dev/null; then
+		log_error "DeepSeek Harness requires Node.js with npm and npx."
+		log_info "Install Node.js, then run this installer again."
+		return 1
+	fi
+
 	install_npm_tool "DeepSeek Harness" "dsh" "@deepseek-ai/dsh" \
 		"npm install --global @deepseek-ai/dsh" \
 		"dsh --version"
