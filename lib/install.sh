@@ -254,9 +254,10 @@ install_claude_code() {
 
 install_fx() {
 	_run_fx_install() {
+		local fx_platform
+		local fx_archive_sha256
 		local fx_install_dir="${FX_INSTALL_DIR:-$HOME/.local/bin}"
 		local fx_version="v0.0.4"
-		local fx_setup_sha256="254c2d4410678aa28acb17941f5447b34b312f829893d4261bb4d713508f924f"
 
 		if command -v fx &>/dev/null; then
 			log_warning "fx is already installed"
@@ -269,14 +270,53 @@ install_fx() {
 			return 0
 		fi
 
-		if execute_installer "https://fx.sh/setup.sh" "$fx_setup_sha256" "fx $fx_version" "$fx_version"; then
-			ensure_dir_on_path "$fx_install_dir"
-			log_success "fx installed"
-		else
+		case "$(uname -s):$(uname -m)" in
+		Linux:x86_64 | Linux:amd64)
+			fx_platform="linux-x86_64"
+			fx_archive_sha256="be9428636afb1196cb662b48ed57bbed3b95e7c37f2bc7849e02c0960fae1f01"
+			;;
+		Linux:arm64 | Linux:aarch64)
+			fx_platform="linux-aarch64"
+			fx_archive_sha256="9905a51c213d1b7fe3b5079f00fd3e61f2dba5bde707397991e9535c4a700caf"
+			;;
+		Darwin:x86_64 | Darwin:amd64)
+			fx_platform="macos-x86_64"
+			fx_archive_sha256="41d3c2cd78bdb53aa9df16fbd5ae9415c8a2e3e8851ebe6423db0cc32128bf7c"
+			;;
+		Darwin:arm64 | Darwin:aarch64)
+			fx_platform="macos-aarch64"
+			fx_archive_sha256="395ac3832f6f6c231f6ba7a46ba6ec70eefaddb68662e6fd6c4fb8e0d6d72f59"
+			;;
+		*)
+			log_error "Unsupported fx platform: $(uname -s) $(uname -m)"
+			return 1
+			;;
+		esac
+
+		if [ "$DRY_RUN" = true ]; then
+			log_info "[DRY RUN] Would install fx $fx_version for $fx_platform to $fx_install_dir"
+			return 0
+		fi
+
+		local fx_archive
+		local fx_extract_dir
+		fx_archive=$(download_and_verify_file "https://releases.fx.sh/$fx_version/fx-$fx_platform.tar.gz" "$fx_archive_sha256" "fx $fx_version ($fx_platform)") || return 1
+		fx_extract_dir="$(get_temp_dir)/fx-$fx_version-$$"
+
+		if ! execute_quoted mkdir -p "$fx_extract_dir" ||
+			! execute_quoted tar -xzf "$fx_archive" -C "$fx_extract_dir" ||
+			! execute_quoted mkdir -p "$fx_install_dir" ||
+			! execute_quoted cp "$fx_extract_dir/fx" "$fx_install_dir/fx" ||
+			! execute_quoted chmod +x "$fx_install_dir/fx"; then
+			execute_quoted rm -rf "$fx_extract_dir" "$fx_archive"
 			log_error "Failed to install fx"
 			log_info "You can install manually: curl -fsSL https://fx.sh/setup.sh | bash"
 			return 1
 		fi
+
+		execute_quoted rm -rf "$fx_extract_dir" "$fx_archive"
+		ensure_dir_on_path "$fx_install_dir"
+		log_success "fx installed"
 	}
 	run_installer "fx" "_run_fx_install" "command -v fx" "fx --version"
 }

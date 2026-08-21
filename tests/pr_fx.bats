@@ -14,24 +14,25 @@ FX_CONFIG_DIR="$REPO_ROOT/configs/fx"
 	[ "$status" -eq 0 ]
 }
 
-@test "install_fx verifies a pinned release and honors FX_INSTALL_DIR" {
+@test "install_fx verifies a pinned archive and honors FX_INSTALL_DIR" {
 	local test_home="$BATS_TEST_TMPDIR/fx-install-home"
 	local install_dir="$BATS_TEST_TMPDIR/fx-custom-bin"
-	local call_log="$BATS_TEST_TMPDIR/fx-installer-call"
+	local archive_log="$BATS_TEST_TMPDIR/fx-archive-call"
 	local path_log="$BATS_TEST_TMPDIR/fx-installer-path"
 	mkdir -p "$test_home"
 
-	run env HOME="$test_home" PATH="/usr/bin:/bin" FX_INSTALL_DIR="$install_dir" CALL_LOG="$call_log" PATH_LOG="$path_log" REPO_ROOT="$REPO_ROOT" bash -c '
+	run env HOME="$test_home" PATH="/usr/bin:/bin" FX_INSTALL_DIR="$install_dir" ARCHIVE_LOG="$archive_log" PATH_LOG="$path_log" REPO_ROOT="$REPO_ROOT" bash -c '
 		export DRY_RUN=false YES_TO_ALL=true VERBOSE=false IS_WINDOWS=false
 		source "$REPO_ROOT/cli.sh"
-		execute_installer() { printf "%s\n" "$@" >"$CALL_LOG"; }
+		download_and_verify_file() { printf "%s\n" "$@" >"$ARCHIVE_LOG"; printf "/tmp/fx-test-archive\n"; }
+		execute_quoted() { return 0; }
 		ensure_dir_on_path() { printf "%s\n" "$1" >"$PATH_LOG"; }
 		install_fx
 	'
 
 	[ "$status" -eq 0 ]
-	run cat "$call_log"
-	[ "$output" = $'https://fx.sh/setup.sh\n254c2d4410678aa28acb17941f5447b34b312f829893d4261bb4d713508f924f\nfx v0.0.4\nv0.0.4' ]
+	run cat "$archive_log"
+	[ "$output" = $'https://releases.fx.sh/v0.0.4/fx-linux-x86_64.tar.gz\nbe9428636afb1196cb662b48ed57bbed3b95e7c37f2bc7849e02c0960fae1f01\nfx v0.0.4 (linux-x86_64)' ]
 	run cat "$path_log"
 	[ "$output" = "$install_dir" ]
 }
