@@ -12,6 +12,18 @@ metadata:
 
 # Session Handoff Plan
 
+## What
+
+- Create handoff plans for continuing work across sessions
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Creates a detailed handoff plan of the conversation for continuing the work in a new session.
 
 The user specified purpose:

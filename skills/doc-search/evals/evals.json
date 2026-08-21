@@ -1,0 +1,29 @@
+{
+  "skill": "doc-search",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Search the docs for the repository convention on environment variables.",
+      "should_trigger": true,
+      "expected_behavior": "Finds relevant documentation passages and conventions."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Look through the project docs for guidance on deployment or handoff workflows.",
+      "should_trigger": true,
+      "expected_behavior": "Searches docs and surfaces the relevant references."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Change the docs so they mention deployment.",
+      "should_trigger": false,
+      "expected_behavior": "This is a docs-edit request, not search."
+    },
+    {
+      "id": "case-4",
+      "prompt": "I vaguely remember a rule about code review in the docs; find it.",
+      "should_trigger": true,
+      "expected_behavior": "Uses documentation search to recover a remembered rule."
+    }
+  ]
+}

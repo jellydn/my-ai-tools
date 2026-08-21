@@ -1,0 +1,29 @@
+{
+  "skill": "context-discovery",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Use the available MCP tools to discover the repo context before changing the feature.",
+      "should_trigger": true,
+      "expected_behavior": "Collects relevant repository and tool context using discovery tools."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Find the project conventions, nearby patterns, and any relevant docs.",
+      "should_trigger": true,
+      "expected_behavior": "Performs context discovery across code and documentation."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Write the feature implementation now.",
+      "should_trigger": false,
+      "expected_behavior": "This asks for implementation, not discovery."
+    },
+    {
+      "id": "case-4",
+      "prompt": "I only know the file path; discover the surrounding architecture and conventions first.",
+      "should_trigger": true,
+      "expected_behavior": "Starts from a narrow clue and expands to useful project context."
+    }
+  ]
+}

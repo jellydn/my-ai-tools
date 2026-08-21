@@ -10,6 +10,18 @@ metadata:
   workflow: code-quality
 ---
 
+## What
+
+- Review the diff between `HEAD` and a fixed point the user supplies along two axes: Conventions and Intent.
+
+## Why
+
+- This catches local code-quality issues and spec mismatches before they reach merge.
+
+## How
+
+- Pin the fixed point, gather repo standards and intent context, run both review axes in parallel, and aggregate the findings.
+
 Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
 
 - **Conventions** — does the code follow this repo's documented coding standards and Tidy First practices?

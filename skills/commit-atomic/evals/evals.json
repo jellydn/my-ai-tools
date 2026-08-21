@@ -1,0 +1,29 @@
+{
+  "skill": "commit-atomic",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Split the staged changes into atomic commits with clear commitizen-style messages.",
+      "should_trigger": true,
+      "expected_behavior": "Groups related changes into separate commits."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Create logical commits from my current staged diff and keep each commit focused.",
+      "should_trigger": true,
+      "expected_behavior": "Produces atomic commits aligned to change intent."
+    },
+    {
+      "id": "case-3",
+      "prompt": "What is the current git status?",
+      "should_trigger": false,
+      "expected_behavior": "This is just a status request, not a commit-splitting request."
+    },
+    {
+      "id": "case-4",
+      "prompt": "The diff mixes docs, tests, and code. Split it so each commit is independently reviewable.",
+      "should_trigger": true,
+      "expected_behavior": "Separates mixed concerns into coherent commits."
+    }
+  ]
+}
