@@ -3620,6 +3620,7 @@ Setup includes the following shared configuration files installed by `./cli.sh`:
 
 - Kent Beck's "Tidy First?" principles
 - Kent C. Dodds' programming wisdom
+- Focused changes, meaningful constants, stable boundaries, and regression-first bug fixes
 - Testing Trophy approach
 - Performance optimization patterns
 
@@ -3650,6 +3651,7 @@ Best practices and memory guidelines are automatically referenced by all 15+ AI 
 - [Claude Code Showcase](https://github.com/ChrisWiles/claude-code-showcase) - Community examples
 - [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) - Production configs
 - [Claude Code Best Practice](https://github.com/shanraisshan/claude-code-best-practice) - Best practices and tips for Claude Code
+- [My agent.md to improve LLM-assisted code quality](https://fabiensanglard.net/agent.md/index.html) - Practical prompts for focused, maintainable agent-generated code
 - [Why I switched to Claude Code 2.0](https://blog.silennai.com/claude-code)
 - [Llama.cpp Setup with Claude/Codex CLI](https://tammam.io/blog/llama-cpp-setup-with-claude-codex-cli/) - Local model setup guide
 - [Modern Web Guidance](https://developer.chrome.com/docs/modern-web-guidance) - Chrome's best practices for modern web development
