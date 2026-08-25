@@ -43,7 +43,8 @@ export class WorkerLifecycle {
 		if (!job) return;
 		const controller = new AbortController();
 		this.controllers.set(job.id, controller);
-		void this.options.execute(job, controller.signal)
+		void this.options
+			.execute(job, controller.signal)
 			.catch(() => undefined)
 			.finally(() => this.controllers.delete(job.id));
 	}

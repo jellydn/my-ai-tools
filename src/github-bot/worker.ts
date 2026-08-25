@@ -5,8 +5,8 @@ import { type GitHubClient, installationClient } from "./github.ts";
 import { type PullFile, validateFindings } from "./review.ts";
 import { jsonLogger } from "./security.ts";
 import { JsonJobStore } from "./store.ts";
-import { WorkerLifecycle } from "./worker-lifecycle.ts";
 import type { AgentRunResult, CodingAgent, Job } from "./types.ts";
+import { WorkerLifecycle } from "./worker-lifecycle.ts";
 import {
 	cleanupWorkspace,
 	cloneExact,
