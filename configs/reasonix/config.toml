@@ -3,7 +3,7 @@
 # Fields marked user/global only are not overridden by ./reasonix.toml.
 # Secrets are named via api_key_env and stored in Reasonix's global .env; never put keys here.
 
-config_version = 5   # schema marker for diagnostics; old versions may ignore it
+config_version = 7   # schema marker for diagnostics; old versions may ignore it
 default_model = "deepseek/deepseek-v4-flash"
 language      = "en"   # ui/model language; empty = auto-detect from $LANG / $REASONIX_LANG
 credentials_store = "auto"   # legacy compatibility; provider keys are saved in Reasonix's global .env
@@ -14,12 +14,13 @@ theme = "auto"   # auto|dark|light; CLI colors only; REASONIX_THEME can override
 shortcut_layout = "desktop"   # classic|desktop; compatibility setting; Shift+Tab toggles Plan, Ctrl+Y toggles YOLO
 # cursor_shape = "bar"   # block|underline|bar; text input cursor shape
 show_reasoning = true   # CLI: show thinking text by default; false = collapsed (toggle with Ctrl+O)
+show_turn_usage = true   # CLI/TUI: show per-request token and cost receipts in the transcript
 
 [desktop]
 # language = "zh"   # desktop UI language; empty/auto = browser/OS auto-detect
-# currency = "USD"   # official pricing currency: CNY|USD; empty/auto follows language
 layout_style = "workbench"   # desktop layout: classic|workbench|creation
 theme = "auto"   # desktop only: auto|dark|light
+terminal_theme = "auto"   # integrated terminal: auto|dark|light; auto follows the desktop app
 # theme_style = "graphite"   # graphite|aurora|slate|carbon|nocturne|amber and legacy aliases
 external_opener = "zed"   # desktop Open control: installed application id
 close_behavior = "background"   # desktop: quit|background when the window close button is clicked
@@ -30,8 +31,11 @@ check_updates = true   # desktop: check for new versions on startup
 telemetry = false   # desktop: anonymous launch ping + scrubbed next-launch native crash diagnostics; never content
 metrics = true   # desktop: aggregate quality/lifecycle metrics (anonymous signal/bucket counts); never content
 provider_access = ["deepseek", "custom-openrouter-ai"]   # desktop settings: providers shown on Settings > Model > Access
-expand_thinking = false   # desktop: show reasoning text expanded by default; false = collapsed
+expand_thinking = false   # desktop: legacy reasoning display alias; use reasoning_display_mode
 display_mode = "standard"   # desktop: standard|compact transcript display mode
+
+[billing]
+# display_currency = "auto"   # auto|CNY|USD; display only — does not rewrite provider list prices
 
 [telemetry]
 cli_metrics = "off"   # CLI content-free usage metrics: auto|on|off; auto requires a local interactive terminal
@@ -56,23 +60,21 @@ type = "socks5"   # http|https|socks5|socks5h
 
 [environment]
 enabled = true   # inject a stable startup environment summary into the model prompt
+offline = false   # declare that outbound network access is unavailable; prevents futile retries
 # [environment.tools]
 # go = "/opt/homebrew/bin/go"   # trusted executable path; workspace-local paths are not auto-executed
 
 [agent]
 # system_prompt = """..."""   # omit to use the built-in prompt for this version
-# system_prompt_file = "prompts/system.md"   # overrides system_prompt when set
+# system_prompt_file = "prompts/system.md"   # project paths stay in <workspace>; user paths may fall back to <reasonix home>
 temperature       = 0.0
 # recovery_model = "deepseek-pro"   # optional; falls back to guardian then main model
 # reasoning_language = "zh"   # visible reasoning language: auto|zh|en
-soft_compact_ratio  = 0.5   # notice only; keeps cache-first prefix intact
-tool_result_snip_ratio = 0.6   # snip stale tool results at this fraction before summary compaction
-compact_ratio       = 0.8   # try compacting when prompt reaches this fraction
-compact_force_ratio = 0.9   # force compacting at this high-water mark
-# keep                = ["errors"]   # compaction keep policy: errors, user_marked
-# recent_keep         = 2   # minimum recent messages kept verbatim
-cold_resume_prune   = true   # elide stale tool results when reopening a session past the provider cache window
+compact_ratio       = 0.8   # sole auto trigger; presets 0.70/0.80/0.85 (default 0.80)
+# keep                = ["errors"]   # deprecated compatibility field; ignored at runtime
+# recent_keep         = 2   # deprecated compatibility field; ignored at runtime
 # plan_mode_read_only_commands = ["gh issue view"]   # legacy compatibility only; Plan bash uses Permissions
+# legacy_anchor_safety_gate = true   # rollback delete_range to the full-file fresh-read guard
 # planner_model = "deepseek-pro"   # optional: enable two-model collaboration
 # subagent_model = "deepseek-pro"   # optional default for runAs=subagent skills
 # subagent_models = { review = "deepseek-pro", security_review = "deepseek-pro" }   # per-skill overrides
@@ -92,7 +94,12 @@ default     = "deepseek-v4-flash"
 api_key_env = "DEEPSEEK_API_KEY"
 balance_url = "https://api.deepseek.com/user/balance"   # optional; wallet-balance endpoint shown in the status bar
 context_window = 1000000   # tokens; compaction triggers near this limit
+# max_output_tokens = 0       # recommended: official DeepSeek omits the field (server 384K ceiling)
+# max_output_tokens = 32768   # optional cost cap
+# max_output_tokens = 65536   # optional cost cap
+# max_output_tokens = 131072  # optional cost cap
 price       = { cache_hit = 0.0028, input = 0.14, output = 0.28, currency = "$" }   # provider-wide fallback, per 1M tokens
+billing_currency = "USD"   # frozen list-price currency; independent of display_currency
 
 [[providers]]
 name        = "deepseek-pro"
@@ -102,7 +109,12 @@ model       = "deepseek-v4-pro"
 api_key_env = "DEEPSEEK_API_KEY"
 balance_url = "https://api.deepseek.com/user/balance"   # optional; wallet-balance endpoint shown in the status bar
 context_window = 1000000   # tokens; compaction triggers near this limit
-price       = { cache_hit = 0.003625, input = 0.435, output = 0.87, currency = "$" }   # provider-wide fallback, per 1M tokens
+# max_output_tokens = 0       # recommended: official DeepSeek omits the field (server 384K ceiling)
+# max_output_tokens = 32768   # optional cost cap
+# max_output_tokens = 65536   # optional cost cap
+# max_output_tokens = 131072  # optional cost cap
+price       = { cache_hit = 0.044, input = 1.32, output = 3.96, currency = "$" }   # provider-wide fallback, per 1M tokens
+billing_currency = "USD"   # frozen list-price currency; independent of display_currency
 
 [[providers]]
 name        = "custom-openrouter-ai"
@@ -112,6 +124,10 @@ models      = ["deepseek/deepseek-v4-pro", "~deepseek/deepseek-v4-flash-latest"]
 default     = "~deepseek/deepseek-v4-flash-latest"
 api_key_env = "OPENROUTER_AI_API_KEY"
 context_window = 128000   # tokens; compaction triggers near this limit
+# max_output_tokens = 0       # recommended: official DeepSeek omits the field (server 384K ceiling)
+# max_output_tokens = 32768   # optional cost cap
+# max_output_tokens = 65536   # optional cost cap
+# max_output_tokens = 131072  # optional cost cap
 
 [[providers]]
 name        = "deepseek"
@@ -122,8 +138,13 @@ default     = "deepseek-v4-flash"
 api_key_env = "DEEPSEEK_API_KEY"
 balance_url = "https://api.deepseek.com/user/balance"   # optional; wallet-balance endpoint shown in the status bar
 context_window = 1000000   # tokens; compaction triggers near this limit
+# max_output_tokens = 0       # recommended: official DeepSeek omits the field (server 384K ceiling)
+# max_output_tokens = 32768   # optional cost cap
+# max_output_tokens = 65536   # optional cost cap
+# max_output_tokens = 131072  # optional cost cap
 price       = { cache_hit = 0.0028, input = 0.14, output = 0.28, currency = "$" }   # provider-wide fallback, per 1M tokens
-prices      = { "deepseek-v4-flash" = { cache_hit = 0.0028, input = 0.14, output = 0.28, currency = "$" }, "deepseek-v4-pro" = { cache_hit = 0.003625, input = 0.435, output = 0.87, currency = "$" } }   # per-model prices, per 1M tokens
+prices      = { "deepseek-v4-flash" = { cache_hit = 0.014, input = 0.44, output = 1.32, currency = "$" }, "deepseek-v4-pro" = { cache_hit = 0.044, input = 1.32, output = 3.96, currency = "$" } }   # per-model prices, per 1M tokens
+billing_currency = "USD"   # frozen list-price currency; independent of display_currency
 
 [tools]
 enabled = []   # empty = all built-in tools
@@ -148,6 +169,7 @@ enabled = true   # language server tools; servers launch lazily when used
 [skills]
 # paths = ["~/my-skills", "../shared/skills"]   # extra custom skill roots
 # excluded_paths = ["~/.agents/skills"]   # hide convention roots without deleting folders
+# disable_implicit_invocation = false   # keep skills available for automatic model invocation
 # max_depth = 3   # nested scan depth; set 1 for legacy root-only discovery
 # disabled_skills = ["review"]   # hide noisy or unwanted skills
 
@@ -297,3 +319,8 @@ command = "sem-mcp"
 name    = "ctx"
 command = "ctx"
 args    = ["mcp", "serve"]
+
+[[plugins]]
+name    = "playwright"
+command = "npx"
+args    = ["-y", "@playwright/mcp@latest"]
