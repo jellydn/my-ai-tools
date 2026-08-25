@@ -78,6 +78,14 @@ Make big changes through small, safe steps. Code is communication between humans
 
 **Self-documenting**: Meaningful names and clear structure beat comments. Comments explain why, not what.
 
+**Keep changes focused**: Change only what the task requires. Do not reformat, rename, or annotate unrelated code.
+
+**Name meaningful values**: Extract recurring values and values defined by protocols or business rules into descriptive
+constants or enums. Keep obvious one-off values inline when a name would add noise.
+
+**Protect boundaries**: Follow the repository's existing architecture and keep low-level mechanics behind the module that
+owns them. Treat public API and visibility changes as design decisions; make them only when the task requires them.
+
 **Test for confidence**: Write tests that enable change, not tests that constrain it.
 
 ## 📦 Dependencies
@@ -187,6 +195,7 @@ Based on Kent C. Dodds' testing philosophy:
 - Test behavior, not implementation details
 - Focus on user-facing functionality
 - Prefer integration tests over isolated unit tests
+- For a reproducible bug, add a regression test and observe it fail before the fix when practical
 
 #### 🏗️ Test Structure
 
