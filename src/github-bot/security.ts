@@ -1,4 +1,5 @@
 import { relative, resolve } from "node:path";
+import type { RepoConfig } from "./config.ts";
 
 export function commandAllowed(
 	argv: string[],
