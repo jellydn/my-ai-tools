@@ -78,7 +78,15 @@ Make big changes through small, safe steps. Code is communication between humans
 
 **Self-documenting**: Meaningful names and clear structure beat comments. Comments explain why, not what.
 
-**Keep changes focused**: Change only what the task requires. Do not reformat, rename, or annotate unrelated code.
+**Resolve material ambiguity**: Inspect repository evidence first. Ask only when different interpretations would change
+behavior, scope, interfaces, security, or other important outcomes.
+
+**Keep changes focused**: Change only what the task requires. Before completion, inspect the diff and account for every
+hunk as either required work or cleanup made necessary by that work. Remove unrelated formatting, renaming, refactoring,
+and commentary changes.
+
+**Make progress checkable**: For each significant plan step, name the test, command, observable behavior, or diff property
+that proves it is complete. Scale the evidence to the risk; not every change needs a new test.
 
 **Name meaningful values**: Extract recurring values and values defined by protocols or business rules into descriptive
 constants or enums. Keep obvious one-off values inline when a name would add noise.
