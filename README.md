@@ -3514,6 +3514,10 @@ See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for det
 /claude-hud:setup
 ```
 
+### Ponytail
+
+[**Ponytail**](https://ponytail.dev/) - Cross-agent ruleset that steers AI coding agents toward the least code that works. ([GitHub](https://github.com/DietrichGebert/ponytail))
+
 ### Token-Efficient AI Assistants
 
 The setup applies the approach from [How I Stopped Running out of Tokens](https://danielabaron.me/blog/how-i-stopped-running-out-of-tokens/) across the managed AI assistants without assuming that every tool supports Claude-specific hooks or commands:
