@@ -19,14 +19,16 @@ accepting generated decisions that nobody can independently explain.
 ### 1. Define behavior and constraints
 
 Write the expected behavior, non-goals, security boundaries, performance expectations, and verification criteria before
-editing code.
+editing code. Inspect repository evidence before asking questions. Ask only when different interpretations would change
+behavior, scope, interfaces, security, or another material outcome.
 
 **Complete when**: Each requested behavior has a checkable outcome, and every known constraint or non-goal is explicit.
 
 ### 2. Propose approach before implementation
 
 Inspect the relevant code and propose the smallest approach that fits its existing boundaries. Include data flow,
-integration points, failure handling, meaningful alternatives, and unanswered questions.
+integration points, failure handling, meaningful alternatives, and unanswered questions. For each significant step, name
+the test, command, observable behavior, or diff property that will prove it is complete.
 
 Load `blindspot-pass` for hidden gotchas, `spec-interview` when requirements can change the design, or
 `context-discovery` when the behavior spans multiple modules or tools.
@@ -45,7 +47,8 @@ explained without relying on generated code.
 ### 4. Implement in small steps
 
 Implement the smallest independently verifiable increment, then inspect its diff and run its targeted check before
-continuing.
+continuing. Account for every changed hunk as either required work or cleanup made necessary by that work. Remove
+unrelated formatting, renaming, refactoring, and commentary changes.
 
 Load `tdd` when behavior can be expressed as a failing test. Load `implementation-logger` when repository reality
 forces a material deviation from the approved approach.

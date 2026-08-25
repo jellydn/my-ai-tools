@@ -15,6 +15,15 @@ setup() {
 	[ "$output" -eq 8 ]
 }
 
+@test "accountable workflow requires material questions and checkable focused changes" {
+	run grep -F 'Ask only when different interpretations would change' "$SKILL"
+	[ "$status" -eq 0 ]
+	run grep -F 'For each significant step, name' "$SKILL"
+	[ "$status" -eq 0 ]
+	run grep -F 'Account for every changed hunk as either required work or cleanup made necessary by that work.' "$SKILL"
+	[ "$status" -eq 0 ]
+}
+
 @test "accountable engineering references installed paths" {
 	run grep -F '@~/.agents/skills/accountable-engineering/SKILL.md' "$REPO_ROOT/configs/best-practices.md"
 	[ "$status" -eq 0 ]
