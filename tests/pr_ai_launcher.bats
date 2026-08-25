@@ -70,66 +70,66 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/ai-launcher/config.json review template command uses reasonix run with acceptEdits" {
+@test "configs/ai-launcher/config.json review template command uses opencode2 with the free model" {
     require_jq
     run jq -r '[.templates[] | select(.name == "review")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "reasonix run --permission-mode acceptEdits"* ]]
+    [[ "$output" == "opencode2 run --standalone -m opencode/hy3-free --auto"* ]]
 }
 
-@test "configs/ai-launcher/config.json commit-zen template command uses reasonix run with acceptEdits" {
+@test "configs/ai-launcher/config.json commit-zen template command uses opencode2 with the free model" {
     require_jq
     run jq -r '[.templates[] | select(.name == "commit-zen")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "reasonix run --permission-mode acceptEdits"* ]]
+    [[ "$output" == "opencode2 run --standalone -m opencode/hy3-free --auto"* ]]
 }
 
-@test "configs/ai-launcher/config.json commit-staged template command uses reasonix run with auto" {
+@test "configs/ai-launcher/config.json commit-staged template command uses opencode2 with the free model" {
     require_jq
     run jq -r '[.templates[] | select(.name == "commit-staged")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "reasonix run --permission-mode auto"* ]]
+    [[ "$output" == "opencode2 run --standalone -m opencode/hy3-free --auto"* ]]
 }
 
-@test "configs/ai-launcher/config.json commit-atomic template command uses reasonix run with auto" {
+@test "configs/ai-launcher/config.json commit-atomic template command uses opencode2 with the free model" {
     require_jq
     run jq -r '[.templates[] | select(.name == "commit-atomic")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "reasonix run --permission-mode auto"* ]]
+    [[ "$output" == "opencode2 run --standalone -m opencode/hy3-free --auto"* ]]
 }
 
-@test "configs/ai-launcher/config.json architecture-explanation template command uses reasonix run with acceptEdits" {
+@test "configs/ai-launcher/config.json architecture-explanation template command uses opencode2 with the free model" {
     require_jq
     run jq -r '[.templates[] | select(.name == "architecture-explanation")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "reasonix run --permission-mode acceptEdits"* ]]
+    [[ "$output" == "opencode2 run --standalone -m opencode/hy3-free --auto"* ]]
 }
 
-@test "configs/ai-launcher/config.json draft-pull-request template command uses reasonix run with auto" {
+@test "configs/ai-launcher/config.json draft-pull-request template command uses opencode2 with the free model" {
     require_jq
     run jq -r '[.templates[] | select(.name == "draft-pull-request")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "reasonix run --permission-mode auto"* ]]
+    [[ "$output" == "opencode2 run --standalone -m opencode/hy3-free --auto"* ]]
 }
 
-@test "configs/ai-launcher/config.json additional review and explanation templates use acceptEdits" {
+@test "configs/ai-launcher/config.json additional review and explanation templates use opencode2 with the free model" {
     require_jq
     for template in "explain" "review-security" "review-refactor" "review-performance"; do
         run jq -r "[.templates[] | select(.name == \"$template\")][0].command" "$AI_LAUNCHER_CONFIG"
         [ "$status" -eq 0 ]
-        [[ "$output" == "reasonix run --permission-mode acceptEdits"* ]]
+        [[ "$output" == "opencode2 run --standalone -m opencode/hy3-free --auto"* ]]
     done
 }
 
