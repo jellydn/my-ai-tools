@@ -6,7 +6,11 @@ import { createIndexLoader } from "./index-loader.ts";
 import type { Index } from "./retriever.ts";
 
 const dirs: string[] = [];
-const sample = (text: string): Index => ({ generatedAt: "2026-01-01T00:00:00Z", model: "test", chunks: [{ path: "a.md", text, embedding: [1] }] });
+const sample = (text: string): Index => ({
+	generatedAt: "2026-01-01T00:00:00Z",
+	model: "test",
+	chunks: [{ path: "a.md", text, embedding: [1] }],
+});
 
 afterEach(async () => {
 	await Promise.all(dirs.splice(0).map((path) => rm(path, { recursive: true, force: true })));
