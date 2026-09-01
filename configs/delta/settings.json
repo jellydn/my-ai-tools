@@ -1,10 +1,41 @@
 {
-	"cursor_after_send": "next_user_message",
-	"default_diff_base": "uncommitted",
-	"diff_color_scheme": "blue_orange",
-	"diff_signs": true,
-	"os_notifications": true,
-	"prevent_system_sleep": true,
-	"pull_request_thread_links": true,
-	"send_message_with_modifier": true
+  "version": 1,
+  "portable": {
+    "appearance": "system",
+    "light_theme": "Delta One Light",
+    "dark_theme": "Delta One Dark",
+    "font_size": "default",
+    "code_font_size": "default",
+    "font_family": "Maple Mono NF",
+    "ui_font_family": "Maple UI",
+    "buffer_font_family": "Maple Mono NF",
+    "ligatures": true,
+    "send_message_with_modifier": true,
+    "send_message_with_modifier_was_enabled": true,
+    "cursor_after_send": "agent_response",
+    "model_picker": {
+      "favorites": [],
+      "hidden_models": []
+    },
+    "model_preferences": {},
+    "file_pane": {
+      "line_numbers": true,
+      "soft_wrap": false
+    },
+    "default_diff_base": "branch",
+    "subagent_concurrency": {
+      "maximum_per_parent": 4,
+      "maximum_total": 8
+    },
+    "subagent_defaults": {
+      "allow_parent_model_override": true
+    },
+    "diff_color_scheme": "green_red",
+    "diff_signs": false,
+    "pull_request_thread_links": true
+  },
+  "native": {
+    "os_notifications": true,
+    "prevent_system_sleep": true
+  }
 }
