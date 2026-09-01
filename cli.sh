@@ -13,7 +13,7 @@ source "$SCRIPT_DIR/lib/install.sh"
 # Core tools installed/configured when -y (YES_TO_ALL) is active.
 # This is your personal active tool set. When YES_TO_ALL is false
 # (interactive mode), tool_allowed returns true for everything.
-TOOL_ALLOWLIST_YES=(amp codex ctx cursor deepseek_harness delta fx kilo opencode open_code_review pi omp antigravity ai-switcher claude reasonix)
+TOOL_ALLOWLIST_YES=(amp codex ctx cursor deepseek_harness delta fx kilo muse opencode open_code_review pi omp antigravity ai-switcher claude reasonix)
 
 tool_allowed() {
 	local name="$1"
@@ -36,6 +36,7 @@ INSTALL_SEQUENCE=(
 	"opencode:install_opencode2"
 	"opencode:install_open_cursor"
 	"fx:install_fx"
+	"muse:install_muse"
 	"amp:install_amp"
 	"always:install_global_tools"
 	"ccs:install_ccs"
@@ -334,6 +335,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.config/opencode" "$BACKUP_DIR" "opencode"
 		copy_config_dir "$HOME/.config/amp" "$BACKUP_DIR" "amp"
 		copy_config_file "$HOME/.fx/AGENTS.md" "$BACKUP_DIR/fx" || true
+		copy_config_file "$HOME/.config/muse/settings.json" "$BACKUP_DIR/muse" || true
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
 		copy_config_dir "$HOME/.kimi-code" "$BACKUP_DIR" "kimi-code"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
@@ -513,6 +515,11 @@ copy_configurations() {
 	else
 		log_info "Skipping fx config install (not in -y allowlist)"
 	fi
+	if tool_allowed "muse"; then
+		copy_muse_configs
+	else
+		log_info "Skipping muse config install (not in -y allowlist)"
+	fi
 	if tool_allowed "amp"; then
 		copy_amp_configs
 	else
@@ -669,6 +676,7 @@ _validate_config_tool_name() {
 		*kilo/config.json*) echo "kilo" ;;
 		*reasonix/config.toml*) echo "reasonix" ;;
 		*hunk/config.toml*) echo "hunk" ;;
+		*muse/settings.json*) echo "muse" ;;
 		*deepseek-harness/*.yaml* | *deepseek-harness/*.yml*) echo "deepseek_harness" ;;
 		*delta/settings.json*) echo "delta" ;;
 		*kimi-code/*.json* | *kimi-code/*.toml*) echo "kimi_code" ;;
@@ -717,6 +725,7 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/kilo/config.json" \
 		"$SCRIPT_DIR/configs/reasonix/config.toml" \
 		"$SCRIPT_DIR/configs/hunk/config.toml" \
+		"$SCRIPT_DIR/configs/muse/settings.json" \
 		"$SCRIPT_DIR/configs/deepseek-harness/settings.yaml" \
 		"$SCRIPT_DIR/configs/deepseek-harness/cordis.patch.yml" \
 		"$SCRIPT_DIR/configs/delta/settings.json" \
@@ -1122,6 +1131,20 @@ copy_fx_configs() {
 	execute_quoted mkdir -p "$HOME/.fx"
 	copy_config_file "$SCRIPT_DIR/configs/fx/AGENTS.md" "$HOME/.fx/" || return 1
 	log_success "fx configs copied"
+}
+
+copy_muse_configs() {
+	local muse_status
+	muse_status=$(detect_tool --detailed "muse" "$HOME/.config/muse") || muse_status="missing"
+	if [ "$muse_status" = "missing" ]; then
+		log_info "Muse Code not detected - skipping Muse Code config installation"
+		return 0
+	fi
+
+	log_info "Detected Muse Code (via $muse_status)"
+	execute_quoted mkdir -p "$HOME/.config/muse"
+	copy_config_file "$SCRIPT_DIR/configs/muse/settings.json" "$HOME/.config/muse/" || return 1
+	log_success "Muse Code configs copied"
 }
 
 copy_amp_configs() {
@@ -2750,7 +2773,7 @@ main() {
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
 	echo "║  Claude • OpenCode • fx • Amp • CCS • Codex • Kimi Code • Gemini     ║"
-	echo "║  Antigravity • Pi • Kilo • Copilot • Cursor • Command Code           ║"
+	echo "║  Muse • Antigravity • Pi • Kilo • Copilot • Cursor • Command Code    ║"
 	echo "║  Factory Droid • Cline • Grok • MiMo-Code • herdr                    ║"
 	echo "║  Qoder CLI • DeepSeek Harness • Kiro • Delta • Codiff • Hunk         ║"
 	echo "║  Devin • ctx • Reasonix                                               ║"

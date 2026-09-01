@@ -321,6 +321,19 @@ install_fx() {
 	run_installer "fx" "_run_fx_install" "command -v fx" "fx --version"
 }
 
+install_muse() {
+	if [ "$IS_WINDOWS" = true ]; then
+		log_warning "Muse Code supports macOS and Linux only."
+		log_info "Install Muse Code in a supported environment: https://dev.meta.ai/docs/muse-code"
+		return 0
+	fi
+
+	_run_muse_install() {
+		execute_installer "https://dev.meta.ai/install.sh" "" "Muse Code"
+	}
+	run_installer "Muse Code" "_run_muse_install" "command -v muse" "muse --version"
+}
+
 install_rtk() {
 	if [ "${IS_WINDOWS:-false}" = true ]; then
 		log_warning "RTK automatic installation is unavailable on native Windows"

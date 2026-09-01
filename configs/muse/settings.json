@@ -1,0 +1,75 @@
+{
+	"schema_version": 1,
+	"mcp_servers": {
+		"context7": {
+			"transport": "stdio",
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@3.2.5"],
+			"enabled": true,
+			"mode": "optional"
+		},
+		"sequential-thinking": {
+			"transport": "stdio",
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking@2026.7.4"],
+			"enabled": true,
+			"mode": "optional"
+		},
+		"qmd": {
+			"transport": "stdio",
+			"command": "qmd",
+			"args": ["mcp"],
+			"enabled": true,
+			"mode": "optional"
+		},
+		"codebase-memory-mcp": {
+			"transport": "stdio",
+			"command": "codebase-memory-mcp",
+			"args": [],
+			"enabled": true,
+			"mode": "optional"
+		},
+		"fff": {
+			"transport": "stdio",
+			"command": "fff-mcp",
+			"args": [],
+			"enabled": true,
+			"mode": "optional"
+		},
+		"react-grab-mcp": {
+			"transport": "stdio",
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp@0.1.37", "--stdio"],
+			"enabled": true,
+			"mode": "optional"
+		},
+		"logpilot": {
+			"transport": "stdio",
+			"command": "logpilot",
+			"args": ["mcp-server"],
+			"enabled": true,
+			"mode": "optional"
+		},
+		"agentmemory": {
+			"transport": "stdio",
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp@0.9.28"],
+			"enabled": true,
+			"mode": "optional"
+		},
+		"sem": {
+			"transport": "stdio",
+			"command": "sem-mcp",
+			"args": [],
+			"enabled": true,
+			"mode": "optional"
+		},
+		"ctx": {
+			"transport": "stdio",
+			"command": "ctx",
+			"args": ["mcp", "serve"],
+			"enabled": true,
+			"mode": "optional"
+		}
+	}
+}

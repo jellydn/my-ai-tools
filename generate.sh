@@ -258,6 +258,19 @@ generate_fx_configs() {
 	log_success "fx configs generated"
 }
 
+generate_muse_configs() {
+	log_info "Generating Muse Code configs..."
+
+	if [ ! -f "$HOME/.config/muse/settings.json" ]; then
+		log_warning "Muse Code config not found: $HOME/.config/muse/settings.json"
+		return 0
+	fi
+
+	execute_quoted mkdir -p "$SCRIPT_DIR/configs/muse"
+	copy_single "$HOME/.config/muse/settings.json" "$SCRIPT_DIR/configs/muse/settings.json"
+	log_success "Muse Code configs generated"
+}
+
 generate_amp_configs() {
 	log_info "Generating Amp configs..."
 
@@ -1181,6 +1194,9 @@ main() {
 	echo
 
 	generate_fx_configs
+	echo
+
+	generate_muse_configs
 	echo
 
 	generate_amp_configs
