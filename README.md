@@ -3610,6 +3610,10 @@ RTK is installed automatically on macOS, Linux, and WSL. Native Windows users sh
 
 [**Try**](https://github.com/tobi/try) - Fresh directories for every vibe. ([Interactive Demo](https://asciinema.org/a/ve8AXBaPhkKz40YbqPTlVjqgs))
 
+### Lane
+
+[**Lane**](https://github.com/lukeed/lane) - Rust CLI for copy-on-write Git worktrees with warm ignored caches and code-anchored context that persists across branches and coding-agent sessions.
+
 ### Claude Squad
 
 [**Claude Squad**](https://github.com/smtg-ai/claude-squad) - Manage multiple AI agents in separate workspaces with isolated git worktrees.
