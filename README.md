@@ -879,6 +879,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Improve Code Architect** | [shadcn/improve](https://github.com/shadcn/improve)                                                           | Frontier model plans, cheap model executes — audit any codebase and produce implementation plans for cheaper models to run.                                                                                                    |
 | **Engram**                 | [Gentleman-Programming/engram](https://github.com/Gentleman-Programming/engram)                               | Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, and git-based cross-machine sync.                                                                                          |
 | **mac-OCR**                | [privatenumber/mac-ocr](https://github.com/privatenumber/mac-ocr)                                             | macOS CLI for OCR and searchable PDFs using Apple's Vision framework                                                                                                                                                           |
+| **Archify**                | [tt-a1i/archify](https://github.com/tt-a1i/archify)                                                           | Turn a codebase or system description into a polished, interactive system map directly in chat. Supports architecture, workflow, sequence, data-flow, and lifecycle diagrams.                                                  |
 
 **Installation:**
 
@@ -903,6 +904,7 @@ npx skills add mvanhorn/last30days-skill --global --agent claude-code
 npx skills add shadcn/improve --global --agent claude-code
 npx skills add Gentleman-Programming/engram --skill engram-memory --global --agent claude-code
 npx skills add ctxrs/ctx --global --agent claude-code
+npx skills add tt-a1i/archify --skill archify --global --agent claude-code
 ```
 
 ### Configuration Files
