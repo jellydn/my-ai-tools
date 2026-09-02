@@ -80,6 +80,11 @@
 		{
 			"repo": "ctxrs/ctx",
 			"description": "Install the ctx agent-history search skill — gives agents the ability to search past coding sessions before editing"
+		},
+		{
+			"repo": "tt-a1i/archify",
+			"skill": "archify",
+			"description": "Turn a codebase or system description into a polished, interactive system map directly in chat"
 		}
 	]
 }

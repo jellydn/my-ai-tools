@@ -441,3 +441,29 @@ README_FILE="$REPO_ROOT/README.md"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
+
+@test "recommend-skills.json contains tt-a1i/archify skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "tt-a1i/archify" and .skill == "archify")] | length == 1' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "archify entry describes interactive system maps" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.skill == "archify")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"interactive system map"* ]]
+}
+
+@test "README.md documents Archify and its install command" {
+    run grep -F 'https://github.com/tt-a1i/archify' "$README_FILE"
+    [ "$status" -eq 0 ]
+
+    run grep -F 'npx skills add tt-a1i/archify --skill archify --global --agent claude-code' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
