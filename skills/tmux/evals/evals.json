@@ -1,0 +1,29 @@
+{
+  "skill": "tmux",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Control this tmux session remotely and capture the pane output after running the command.",
+      "should_trigger": true,
+      "expected_behavior": "Uses tmux to manage an interactive session and read its output."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Set up a clean tmux socket, send commands to the session, and then collect the pane contents.",
+      "should_trigger": true,
+      "expected_behavior": "Handles session control and output capture programmatically."
+    },
+    {
+      "id": "case-3",
+      "prompt": "List my files.",
+      "should_trigger": false,
+      "expected_behavior": "This is unrelated to tmux control."
+    },
+    {
+      "id": "case-4",
+      "prompt": "I need to drive a REPL and keep it isolated from my personal tmux sessions.",
+      "should_trigger": true,
+      "expected_behavior": "Uses an isolated tmux socket for interactive terminal automation."
+    }
+  ]
+}

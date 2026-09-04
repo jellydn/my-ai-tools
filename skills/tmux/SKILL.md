@@ -12,6 +12,18 @@ metadata:
 
 # 🚀 tmux Skill
 
+## What
+
+- Control tmux sessions remotely — send commands, capture output, manage panes
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Control tmux sessions programmatically to run interactive terminal applications (REPLs, debuggers, databases) without blocking.
 
 ---

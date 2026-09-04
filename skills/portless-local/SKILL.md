@@ -13,6 +13,18 @@ metadata:
 
 # Portless - Named .localhost URLs
 
+## What
+
+- Replace port numbers with stable named .localhost URLs for local development
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Replace port numbers with stable, named `.localhost` URLs for local development. For humans and agents.
 
 > **Note:** By default, use HTTP (`http://myapp.localhost`). Only enable HTTPS (`--https` or `PORTLESS_HTTPS=1`) if the user specifically requests it (e.g., for OAuth, secure cookies, or HTTPS-only features).

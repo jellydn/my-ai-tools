@@ -1,0 +1,29 @@
+{
+  "skill": "plannotator-setup-goal",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Turn this feature idea into an executable goal package with clear tasks and context.",
+      "should_trigger": true,
+      "expected_behavior": "Produces a structured setup goal package."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Interview me about the idea and then organize the implementation steps.",
+      "should_trigger": true,
+      "expected_behavior": "Uses guided clarification to produce a usable plan package."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Just build the feature directly.",
+      "should_trigger": false,
+      "expected_behavior": "This is implementation, not setup or planning."
+    },
+    {
+      "id": "case-4",
+      "prompt": "I have a rough idea and a messy repo; help me turn it into a concrete goal with steps.",
+      "should_trigger": true,
+      "expected_behavior": "Brings structure to an under-defined idea and repo context."
+    }
+  ]
+}

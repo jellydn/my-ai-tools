@@ -1,0 +1,29 @@
+{
+  "skill": "portless-local",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Replace the port numbers in my local dev setup with stable named .localhost URLs.",
+      "should_trigger": true,
+      "expected_behavior": "Maps ports to stable local hostnames and updates the configuration."
+    },
+    {
+      "id": "case-2",
+      "prompt": "I want local services accessible through friendly hostnames instead of raw ports.",
+      "should_trigger": true,
+      "expected_behavior": "Sets up portless local access using named URLs."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Deploy the app to the internet.",
+      "should_trigger": false,
+      "expected_behavior": "This is deployment, not local port mapping."
+    },
+    {
+      "id": "case-4",
+      "prompt": "I have several local services on random ports and keep forgetting them; give them stable names.",
+      "should_trigger": true,
+      "expected_behavior": "Creates a predictable local naming scheme for ports."
+    }
+  ]
+}
