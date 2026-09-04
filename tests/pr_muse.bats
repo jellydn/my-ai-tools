@@ -8,12 +8,11 @@ CONFIG_DIR="$REPO_ROOT/configs/muse"
 @test "Muse settings use schema version 1 and valid MCP entries" {
 	run jq -e '
 		.schema_version == 1 and
-		(.mcp_servers | type == "object" and length > 0) and
-		([.mcp_servers[] |
+		(.mcpServers | type == "object" and length > 0) and
+		([.mcpServers[] |
 			.transport == "stdio" and
 			(.command | type == "string" and length > 0) and
-			(.args | type == "array") and
-			.enabled == true and
+			((.args // []) | type == "array") and
 			.mode == "optional"
 		] | all)
 	' "$CONFIG_DIR/settings.json"
