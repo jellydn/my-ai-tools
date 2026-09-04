@@ -14,11 +14,14 @@ README="$REPO_ROOT/README.md"
 	[ -f "$REPO_ROOT/configs/delta/settings.json" ]
 	require_jq
 	run jq -e '
-		.send_message_with_modifier == true and
-		.cursor_after_send == "next_user_message" and
-		.default_diff_base == "uncommitted" and
-		.diff_color_scheme == "blue_orange" and
-		.diff_signs == true
+		.version == 1 and
+		.portable.send_message_with_modifier == true and
+		.portable.cursor_after_send == "agent_response" and
+		.portable.default_diff_base == "branch" and
+		.portable.diff_color_scheme == "green_red" and
+		.portable.diff_signs == false and
+		.native.os_notifications == true and
+		.native.prevent_system_sleep == true
 	' "$REPO_ROOT/configs/delta/settings.json"
 	[ "$status" -eq 0 ]
 }
