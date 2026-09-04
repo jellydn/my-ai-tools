@@ -16,7 +16,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/install-deps.sh"
 ensure_dir_on_path() {
 	local dir="${1:-}"
 	[ -n "$dir" ] || return 0
-	if case ":$PATH:" in *":$dir:"*) false ;; *) true ;; esac; then
+	if case ":$PATH:" in *":$dir:"*) false ;; *) true ;; esac then
 		export PATH="$dir:$PATH"
 	fi
 }
@@ -96,6 +96,9 @@ resolve_installer_checksum() {
 		;;
 	rtk)
 		checksum_url="${RTK_INSTALL_SHA256_URL:-}"
+		;;
+	muse)
+		checksum_url="${MUSE_INSTALL_SHA256_URL:-}"
 		;;
 	esac
 
@@ -321,6 +324,25 @@ install_fx() {
 	run_installer "fx" "_run_fx_install" "command -v fx" "fx --version"
 }
 
+install_muse() {
+	if [ "$IS_WINDOWS" = true ]; then
+		log_warning "Muse Code supports macOS and Linux only."
+		log_info "Install Muse Code in a supported environment: https://dev.meta.ai/docs/muse-code"
+		return 0
+	fi
+
+	ensure_dir_on_path "$HOME/.local/bin"
+
+	_run_muse_install() {
+		ensure_dir_on_path "$HOME/.local/bin"
+		local muse_checksum
+		muse_checksum=$(resolve_installer_checksum "muse")
+		execute_installer "https://dev.meta.ai/install.sh" "$muse_checksum" "Muse Code"
+		ensure_dir_on_path "$HOME/.local/bin"
+	}
+	run_installer "Muse Code" "_run_muse_install" "command -v muse || test -x \"\$HOME/.local/bin/muse\"" "if [ -x \"\$HOME/.local/bin/muse\" ]; then \"\$HOME/.local/bin/muse\" --version; else muse --version; fi"
+}
+
 install_rtk() {
 	if [ "${IS_WINDOWS:-false}" = true ]; then
 		log_warning "RTK automatic installation is unavailable on native Windows"
@@ -381,8 +403,7 @@ install_opencode2() {
 				npm) execute "npm install -g @opencode-ai/cli@next" ;;
 				pnpm) execute "pnpm add -g --allow-build=@opencode-ai/cli @opencode-ai/cli@next" ;;
 				yarn) execute "yarn global add @opencode-ai/cli@next" ;;
-				esac
-			then
+				esac then
 				log_error "OpenCode 2 installation failed"
 				return 1
 			fi
@@ -705,7 +726,7 @@ install_deepseek_harness() {
 
 	local node_major node_minor
 	read -r node_major node_minor <<<"$(node -p 'process.versions.node.split(".").slice(0, 2).join(" ")' 2>/dev/null)"
-	if ! [[ "$node_major" =~ ^[0-9]+$ && "$node_minor" =~ ^[0-9]+$ ]] || \
+	if ! [[ "$node_major" =~ ^[0-9]+$ && "$node_minor" =~ ^[0-9]+$ ]] ||
 		! { [ "$node_major" -eq 22 ] && [ "$node_minor" -ge 19 ] || [ "$node_major" -ge 24 ]; }; then
 		log_error "DeepSeek Harness requires Node.js 22.19+ or 24+ (found: $(node --version 2>/dev/null || echo unknown))."
 		return 1

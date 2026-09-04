@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, fx, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, Oh My Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, DeepSeek Harness, Kiro CLI, Delta, Hunk, Codiff, ctx, Open Code Review, CCS, and Reasonix with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, fx, Muse Code, Amp, Kilo CLI, Codex, Devin CLI, Kimi Code, Gemini CLI, Antigravity CLI, Pi, Oh My Pi, GitHub Copilot CLI, Cursor Agent CLI, Factory Droid, Cline, Grok CLI, MiMo-Code, Qoder CLI, DeepSeek Harness, Kiro CLI, Delta, Hunk, Codiff, ctx, Open Code Review, CCS, and Reasonix with custom configurations, MCP servers, skills, plugins, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +12,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, fx, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, DeepSeek Harness, Kiro CLI, Delta, Hunk, Codiff, ctx, Open Code Review, Reasonix, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, fx, Muse Code, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, DeepSeek Harness, Kiro CLI, Delta, Hunk, Codiff, ctx, Open Code Review, Reasonix, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, codebase-memory-mcp, agentmemory, sem, ctx
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -153,6 +153,7 @@ The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONS
 | **Kimi Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, logpilot, sem, ctx                              | Skills, MCP servers, and hooks via `~/.kimi-code/`                                                                                                                                                                                             |
 | **Pi**          | context7, sequential-thinking, qmd, codebase-memory-mcp, fff, react-grab-mcp, agentmemory, sem, ctx                        | Packages (pi-extension, pi-subagents, autoresearch, fff, mcp-adapter, simplify, rpiv-todo, btw, code-previews, codex-goal, commandcode-provider, pi-web-access, footer, tps-meter, pi-qwencloud-provider, pi-cursor-sdk) |
 | **Oh My Pi**  | Pi-compatible layout; MCP servers via `~/.omp/agent/mcp.json` when present                                                  | Pi fork (`@oh-my-pi/pi-coding-agent`); configs managed under `configs/omp/`                                                                                                                                          |
+| **Muse Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Workflows, session messaging, rewind, shared `~/.agents/skills`, developer-preview SDK                                                                                                                                                         |
 | **Amp**         | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Agent modes: fusion, glm-5.2, grok45, inkling, cursor-composer-2.5; plannotator; orca-agent-status                                                                                                                                             |
 | **Gemini**      | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                                                                                 |
 | **Antigravity** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx (via plugin) | my-ai-tools-gemini-migration                                                                                                                                                                                                                   |
@@ -263,7 +264,7 @@ cd my-ai-tools
 - `--dry-run` - Preview changes without making them
 - `--backup` - Backup existing configs before installing
 - `--no-backup` - Skip backup prompt
-- `-y` / `--yes` - Non-interactive mode; only installs/configures your active tool set (amp, codex, ctx, cursor, fx, kilo, opencode, open_code_review, pi, omp, antigravity, ai-switcher, claude, reasonix). Shared infra (plugins, skills, global tools) still installed. Auto-activated in CI/piped input.
+- `-y` / `--yes` - Non-interactive mode; only installs/configures your active tool set (amp, codex, ctx, cursor, fx, kilo, muse, opencode, open_code_review, pi, omp, antigravity, ai-switcher, claude, reasonix). Shared infra (plugins, skills, global tools) still installed. Auto-activated in CI/piped input.
 - `--migrate-gemini` - One-step Gemini→Antigravity CLI migration
 
 ## 🔄 Bidirectional Config Sync
@@ -299,6 +300,37 @@ fx
 ```
 
 fx discovers shared skills from `~/.agents/skills/`, so it uses this repository's universal skill installation automatically. Its MCP configuration at `~/.fx/mcp.json` and other runtime state remain private by design and are not managed by this repository.
+
+## 🎼 Muse Code (Optional)
+
+[Muse Code](https://dev.meta.ai/docs/muse-code) is Meta's coding agent for terminal and CI workflows, powered by Muse Spark 1.2. Meta brought it out of beta on August 31, 2026 with inter-session messaging, multi-agent workflows, safe conversation rewind, and a developer-preview SDK. [Announcement](https://developer.meta.com/ai/resources/blog/muse-code-new-plans-and-features/) | [Docs](https://dev.meta.ai/docs/muse-code) | [SDK](https://github.com/meta-models/muse-code-sdk)
+
+```bash
+# Official macOS/Linux installer
+curl -fsSL https://dev.meta.ai/install.sh | sh
+
+# Start an interactive session, or run one headless task
+muse
+muse exec "Review this repository and run its tests."
+```
+
+This repository installs [`configs/muse/settings.json`](configs/muse/settings.json) to `~/.config/muse/settings.json`. The file uses Muse's required `schema_version: 1` and configures the standard MCP tool set as optional servers, so an unavailable local tool does not abort Muse. `./generate.sh` exports only this managed settings file; credentials, sessions, event logs, and other local runtime state stay outside the repository.
+
+Muse reads project instructions from `AGENTS.md` and discovers this repository's universal skills directly from `~/.agents/skills`. The announced CLI features include:
+
+- **Session messaging** between local Muse processes over a Unix socket
+- **Workflows** for parallel or staged agent teams, monitored with `/workflows`
+- **Rewind** to a safe earlier conversation point by pressing `Esc` twice
+
+### Muse Code SDK (Developer Preview)
+
+The SDK is a per-project TypeScript dependency, not another global CLI. It requires Node.js 20+ and a separately installed `muse` binary, which it launches as a local `muse serve` host over the Muse Session Protocol:
+
+```bash
+npm install @muse-code/sdk
+```
+
+The pre-1.0 SDK supports starting and resuming sessions, streaming responses, handling permission requests, and controlling the local Muse host. Minor releases can contain breaking changes during the developer preview.
 
 ## 🤖 Chat with the repo
 
@@ -3347,6 +3379,7 @@ ctx mcp serve
 The ctx MCP server is configured for all supported AI tools via this repo's config files and the central MCP registry (`configs/mcp-registry.json`):
 
 - **Claude Code**, **Cursor**, **Cline**, **Factory Droid**, **Kimi Code**, **CommandCode**, **Kiro**, **Copilot**, **Qoder CLI**, **Pi**, **Antigravity** — registered in tool-specific `mcpServers` JSON config
+- **Muse Code** — registered in the native `mcp_servers` settings block with optional stdio transports
 - **DeepSeek Harness** — registered as `@deepseek-ai/dsh-mcp-client` entries in `cordis.patch.yml`
 - **OpenCode**, **Kilo** — registered in `mcp.ctx` (array-command format)
 - **Codex**, **Grok** — registered in TOML `[mcp_servers.ctx]` format
