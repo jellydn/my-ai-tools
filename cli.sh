@@ -668,24 +668,24 @@ copy_configurations() {
 # Used by validate_all_configs to skip non-allowlisted tool configs.
 _validate_config_tool_name() {
 	case "$1" in
-		*amp/settings.json*) echo "amp" ;;
-		*ai-launcher/config.json*) echo "ai-switcher" ;;
-		*codex/config.json*) echo "codex" ;;
-		*gemini/settings.json*) echo "gemini" ;;
-		*antigravity-cli/settings.json*) echo "antigravity" ;;
-		*kilo/config.json*) echo "kilo" ;;
-		*reasonix/config.toml*) echo "reasonix" ;;
-		*hunk/config.toml*) echo "hunk" ;;
-		*muse/settings.json*) echo "muse" ;;
-		*deepseek-harness/*.yaml* | *deepseek-harness/*.yml*) echo "deepseek_harness" ;;
-		*delta/settings.json*) echo "delta" ;;
-		*kimi-code/*.json* | *kimi-code/*.toml*) echo "kimi_code" ;;
-		*pi/settings.json*) echo "pi" ;;
-		*omp/*.yml* | *omp/*.yaml* | *omp/*.json*) echo "omp" ;;
-		*commandcode/*.json*) echo "commandcode" ;;
-		*cline/*.json*) echo "cline" ;;
-		*factory/settings.json*) echo "factory" ;;
-		*) echo "unknown" ;;
+	*amp/settings.json*) echo "amp" ;;
+	*ai-launcher/config.json*) echo "ai-switcher" ;;
+	*codex/config.json*) echo "codex" ;;
+	*gemini/settings.json*) echo "gemini" ;;
+	*antigravity-cli/settings.json*) echo "antigravity" ;;
+	*kilo/config.json*) echo "kilo" ;;
+	*reasonix/config.toml*) echo "reasonix" ;;
+	*hunk/config.toml*) echo "hunk" ;;
+	*muse/settings.json*) echo "muse" ;;
+	*deepseek-harness/*.yaml* | *deepseek-harness/*.yml*) echo "deepseek_harness" ;;
+	*delta/settings.json*) echo "delta" ;;
+	*kimi-code/*.json* | *kimi-code/*.toml*) echo "kimi_code" ;;
+	*pi/settings.json*) echo "pi" ;;
+	*omp/*.yml* | *omp/*.yaml* | *omp/*.json*) echo "omp" ;;
+	*commandcode/*.json*) echo "commandcode" ;;
+	*cline/*.json*) echo "cline" ;;
+	*factory/settings.json*) echo "factory" ;;
+	*) echo "unknown" ;;
 	esac
 }
 
@@ -1143,7 +1143,35 @@ copy_muse_configs() {
 
 	log_info "Detected Muse Code (via $muse_status)"
 	execute_quoted mkdir -p "$HOME/.config/muse"
-	copy_config_file "$SCRIPT_DIR/configs/muse/settings.json" "$HOME/.config/muse/" || return 1
+	local muse_src="$SCRIPT_DIR/configs/muse/settings.json"
+	local muse_dest="$HOME/.config/muse/settings.json"
+	if [ -f "$muse_dest" ]; then
+		if ! command -v jq &>/dev/null; then
+			log_warning "Existing Muse settings found but jq is not installed. Install jq to merge configs, or manually update $muse_dest"
+			return 1
+		fi
+		local muse_merged
+		muse_merged=$(make_temp_file "muse-settings" "json")
+		if jq -s '
+			.[0] as $existing |
+			.[1] as $src |
+			$existing + ($src | with_entries(select(.key == "schema_version" or .key == "mcpServers" or .key == "mcp_servers")))
+			| with_entries(select(.value != null))
+		' "$muse_dest" "$muse_src" >"$muse_merged"; then
+			execute_quoted cp -p "$muse_merged" "$muse_dest" || {
+				rm -f "$muse_merged"
+				return 1
+			}
+			rm -f "$muse_merged"
+			log_success "Muse Code configs merged"
+			return 0
+		else
+			rm -f "$muse_merged"
+			log_error "Failed to merge Muse Code settings"
+			return 1
+		fi
+	fi
+	copy_config_file "$muse_src" "$HOME/.config/muse/" || return 1
 	log_success "Muse Code configs copied"
 }
 
