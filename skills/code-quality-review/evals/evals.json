@@ -1,0 +1,29 @@
+{
+  "skill": "code-quality-review",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Review this refactor for structural issues, abstraction leaks, and overly complex boundaries.",
+      "should_trigger": true,
+      "expected_behavior": "Performs a strict architecture and maintainability review."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Audit the implementation for code judo opportunities and delete unnecessary layers.",
+      "should_trigger": true,
+      "expected_behavior": "Identifies simplification opportunities and structural smell."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Check if the code has syntax errors.",
+      "should_trigger": false,
+      "expected_behavior": "This is a linting/basic validation request, not a structural review."
+    },
+    {
+      "id": "case-4",
+      "prompt": "The feature works, but the file is growing fast. Review whether the design is becoming spaghetti.",
+      "should_trigger": true,
+      "expected_behavior": "Flags design drift, file growth, and abstraction issues."
+    }
+  ]
+}

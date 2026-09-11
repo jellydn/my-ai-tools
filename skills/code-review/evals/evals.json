@@ -1,0 +1,29 @@
+{
+  "skill": "code-review",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Review the diff since main and check both conventions and intent.",
+      "should_trigger": true,
+      "expected_behavior": "Separately evaluates repo conventions and whether the change matches its stated purpose."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Review this PR against HEAD~3 and call out any coding-standard or behavior mismatches.",
+      "should_trigger": true,
+      "expected_behavior": "Runs a two-axis review against a fixed point."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Can you summarize the latest branch for me?",
+      "should_trigger": false,
+      "expected_behavior": "This is a summary request, not a code review."
+    },
+    {
+      "id": "case-4",
+      "prompt": "Review the diff since commit abc123, but ignore a documented implementation-log deviation.",
+      "should_trigger": true,
+      "expected_behavior": "Respects documented deviations while reviewing conventions and intent."
+    }
+  ]
+}

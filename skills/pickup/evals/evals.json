@@ -1,0 +1,29 @@
+{
+  "skill": "pickup",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Resume work from the latest handoff file in .planning/handoffs/.",
+      "should_trigger": true,
+      "expected_behavior": "Finds the handoff, summarizes it, and continues from there."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Pick up the previous session and continue from the documented next step.",
+      "should_trigger": true,
+      "expected_behavior": "Restores prior context and proceeds with the handoff flow."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Start a brand new feature with no previous context.",
+      "should_trigger": false,
+      "expected_behavior": "This is a fresh start, not a pickup flow."
+    },
+    {
+      "id": "case-4",
+      "prompt": "I only know there is a handoff file somewhere; find it and continue the work.",
+      "should_trigger": true,
+      "expected_behavior": "Discovers available handoffs and resumes from the selected one."
+    }
+  ]
+}

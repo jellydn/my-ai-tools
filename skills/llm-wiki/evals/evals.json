@@ -1,0 +1,29 @@
+{
+  "skill": "llm-wiki",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Turn these raw notes into a persistent LLM wiki entry with useful links and structure.",
+      "should_trigger": true,
+      "expected_behavior": "Creates a reusable wiki-style knowledge artifact."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Build a compounding wiki page from the source material and keep it organized for future reuse.",
+      "should_trigger": true,
+      "expected_behavior": "Synthesizes a durable knowledge base entry."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Summarize this one-off article for me.",
+      "should_trigger": false,
+      "expected_behavior": "This is a summary request, not a persistent wiki build."
+    },
+    {
+      "id": "case-4",
+      "prompt": "I have multiple raw sources about the same topic; merge them into one wiki page without losing key references.",
+      "should_trigger": true,
+      "expected_behavior": "Integrates multiple sources into a structured wiki entry."
+    }
+  ]
+}

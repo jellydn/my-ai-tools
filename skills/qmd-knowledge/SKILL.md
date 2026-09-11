@@ -12,6 +12,18 @@ metadata:
 
 # QMD Knowledge
 
+## What
+
+- Manage project knowledge with qmd — captures learnings, decisions, and conventions
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 ## What I do
 
 - Record and retrieve project learnings and insights

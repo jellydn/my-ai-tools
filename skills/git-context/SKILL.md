@@ -9,6 +9,18 @@ user-invocable: true
 
 # Git Context
 
+## What
+
+- Search git history for context — commit messages, blame, related changes, impact analysis
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 ## When to Use
 
 Use this skill when:

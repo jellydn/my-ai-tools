@@ -13,6 +13,18 @@ metadata:
 
 # Ralph PRD Converter
 
+## What
+
+- Convert PRDs to prd.json format for the Ralph autonomous agent system
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Converts existing PRDs to the prd.json format that Ralph uses for autonomous execution.
 
 ---

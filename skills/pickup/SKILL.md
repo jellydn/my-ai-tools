@@ -13,6 +13,18 @@ metadata:
 
 # Pickup Handoff
 
+## What
+
+- Resume work from previous handoff sessions stored in .planning/handoffs/
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Resumes work from previous handoff sessions which are stored in `.planning/handoffs/`.
 
 ## Usage

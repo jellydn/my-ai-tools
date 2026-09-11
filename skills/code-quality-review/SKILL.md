@@ -11,6 +11,18 @@ metadata:
 
 # Code Quality Review
 
+## What
+
+- Run an extremely strict maintainability and structural code quality review — flags abstraction issues, spaghetti growth, and boundary leaks
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Use this skill for an unusually strict review focused on implementation quality, maintainability, abstraction quality, and codebase health.
 
 Above all, this skill should push the reviewer to be **ambitious** about code structure. Actively search for "code judo" moves: restructurings that preserve behavior while making the implementation dramatically simpler, smaller, more direct, and more elegant. Surface-level cleanup notes are useful but secondary — the real goal is structural simplification.

@@ -1,0 +1,29 @@
+{
+  "skill": "blindspot-pass",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Before refactoring the auth flow, find hidden risks and unknown unknowns.",
+      "should_trigger": true,
+      "expected_behavior": "Surfaces likely blind spots, edge cases, and architecture gotchas before implementation."
+    },
+    {
+      "id": "case-2",
+      "prompt": "What should I check before shipping this feature so I do not miss anything obvious?",
+      "should_trigger": true,
+      "expected_behavior": "Produces a risk-oriented blindspot pass focused on unknown unknowns and hidden assumptions."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Give me a high-level project status update.",
+      "should_trigger": false,
+      "expected_behavior": "This is not a blindspot discovery request."
+    },
+    {
+      "id": "case-4",
+      "prompt": "Review this tiny change where the obvious risk is already known; still look for less obvious gotchas.",
+      "should_trigger": true,
+      "expected_behavior": "Looks beyond the obvious issue and searches for secondary risks and missing context."
+    }
+  ]
+}

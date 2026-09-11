@@ -1,0 +1,29 @@
+{
+  "skill": "implementation-logger",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Log the decisions we made while implementing the feature and note any deviations from the plan.",
+      "should_trigger": true,
+      "expected_behavior": "Tracks implementation rationale and changes in direction."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Capture the reasons we skipped a planned step during the refactor.",
+      "should_trigger": true,
+      "expected_behavior": "Records intentional deviations and why they happened."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Plan the whole project from scratch.",
+      "should_trigger": false,
+      "expected_behavior": "This is planning, not logging implementation decisions."
+    },
+    {
+      "id": "case-4",
+      "prompt": "We changed the approach halfway through; log the before/after and the reason.",
+      "should_trigger": true,
+      "expected_behavior": "Records the pivot clearly for later review."
+    }
+  ]
+}
