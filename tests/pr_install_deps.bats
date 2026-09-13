@@ -79,3 +79,24 @@ load helpers
 	[ "$status" -eq 0 ]
 	[ "$output" = "/opt/demo/bin:/usr/bin:/bin" ]
 }
+
+@test "local binary links create their directory, refresh symlinks, and preserve regular files" {
+	run bash -c '
+		export HOME="$(mktemp -d)" DRY_RUN=false
+		source "$1/lib/common.sh"
+		source "$1/lib/install.sh"
+		mkdir -p "$HOME/sources"
+		touch "$HOME/sources/first" "$HOME/sources/second"
+
+		_link_binary_on_local_bin "$HOME/sources/first" "tool"
+		[ "$(readlink "$HOME/.local/bin/tool")" = "$HOME/sources/first" ] || exit 1
+		_link_binary_on_local_bin "$HOME/sources/second" "tool"
+		[ "$(readlink "$HOME/.local/bin/tool")" = "$HOME/sources/second" ] || exit 1
+
+		rm "$HOME/.local/bin/tool"
+		printf "keep" >"$HOME/.local/bin/tool"
+		_link_binary_on_local_bin "$HOME/sources/first" "tool"
+		[ "$(cat "$HOME/.local/bin/tool")" = "keep" ]
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 0 ]
+}

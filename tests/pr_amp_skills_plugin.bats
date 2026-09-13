@@ -50,6 +50,9 @@ setup() {
 		[ -n "$description" ]
 		[[ "$description" != "|"* ]]
 		[[ "$description" != ">"* ]]
+		if [[ "$description" == \"*\" ]] || [[ "$description" == \'*\' ]]; then
+			description="${description:1:${#description}-2}"
+		fi
 		[ "${#description}" -le 160 ]
 	done
 }

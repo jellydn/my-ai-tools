@@ -31,6 +31,13 @@ README="$REPO_ROOT/README.md"
     [ "$output" = "true" ]
 }
 
+@test "configs/qodercli/settings.json guards the optional session hook" {
+    require_jq
+    run jq -e '.hooks.SessionStart[0].hooks[0].command | startswith("if [ -f ")' "$REPO_ROOT/configs/qodercli/settings.json"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
 @test "lib/install.sh defines install_qodercli()" {
     run grep -E '^install_qodercli\(\)' "$LIB_INSTALL"
     [ "$status" -eq 0 ]

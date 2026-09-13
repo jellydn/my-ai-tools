@@ -77,6 +77,3 @@ description = "Routed via OmniRoute gateway"
 api_backend = "chat_completions"
 api_key = "sk_omniroute"
 context_window = 200_000
-
-[privacy]
-privacy_banner_acked = "2026-08-17T08:51:39Z"

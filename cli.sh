@@ -435,6 +435,11 @@ copy_grok_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/grok/config.toml" "$HOME/.grok/" || true
 
+	if [ -d "$SCRIPT_DIR/configs/grok/hooks" ]; then
+		execute_quoted mkdir -p "$HOME/.grok/hooks"
+		safe_copy_dir "$SCRIPT_DIR/configs/grok/hooks" "$HOME/.grok/hooks"
+	fi
+
 	if [ -d "$SCRIPT_DIR/configs/grok/themes" ]; then
 		execute_quoted mkdir -p "$HOME/.grok/themes"
 		safe_copy_dir "$SCRIPT_DIR/configs/grok/themes" "$HOME/.grok/themes"

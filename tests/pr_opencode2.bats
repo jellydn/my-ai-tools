@@ -82,4 +82,9 @@ LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
 	run jq -r '[.tools[] | select(.name == "opencode")][0].promptCommand' "$LAUNCHER_CONFIG"
 	[ "$status" -eq 0 ]
 	[[ "$output" == "opencode run" ]]
+	run jq -e '.tools[] | select((.aliases // []) | index("o2")) | .command == "opencode"' "$LAUNCHER_CONFIG"
+	[ "$status" -eq 0 ]
+	run jq -r '.tools[] | select((.aliases // []) | index("o2")) | .promptCommand' "$LAUNCHER_CONFIG"
+	[ "$status" -eq 0 ]
+	[[ "$output" == "opencode run" ]]
 }

@@ -11,7 +11,7 @@
       {
         "hooks": [
           {
-            "command": "bash \"$HOME/.qoder/hooks/herdr-agent-state.sh\" session",
+            "command": "if [ -f \"$HOME/.qoder/hooks/herdr-agent-state.sh\" ]; then bash \"$HOME/.qoder/hooks/herdr-agent-state.sh\" session; fi",
             "timeout": 10,
             "type": "command"
           }

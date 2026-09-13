@@ -85,7 +85,9 @@ _link_binary_on_local_bin() {
 		return 0
 	fi
 	ensure_dir_on_path "$HOME/.local/bin"
-	if [ "$src_bin" != "$HOME/.local/bin/$link_name" ] && [ ! -e "$HOME/.local/bin/$link_name" ]; then
+	execute_quoted mkdir -p "$HOME/.local/bin"
+	local dest_bin="$HOME/.local/bin/$link_name"
+	if [ "$src_bin" != "$dest_bin" ] && { [ ! -e "$dest_bin" ] || [ -L "$dest_bin" ]; }; then
 		execute_quoted ln -sf "$src_bin" "$HOME/.local/bin/$link_name"
 	fi
 }

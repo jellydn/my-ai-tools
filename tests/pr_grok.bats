@@ -135,6 +135,20 @@ GROK_CONFIG_DIR="$REPO_ROOT/configs/grok"
 	[ "$status" -eq 0 ]
 }
 
+@test "grok state hooks are present and installed" {
+	[ -f "$GROK_CONFIG_DIR/hooks/herdr.json" ]
+	[ -x "$GROK_CONFIG_DIR/hooks/herdr-agent-state.sh" ]
+	run bash -c '
+		export HOME="$(mktemp -d)" DRY_RUN=false YES_TO_ALL=false VERBOSE=false
+		mkdir -p "$HOME/.grok"
+		source "$1/cli.sh"
+		copy_grok_configs
+		[ -f "$HOME/.grok/hooks/herdr.json" ]
+		[ -x "$HOME/.grok/hooks/herdr-agent-state.sh" ]
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 0 ]
+}
+
 @test "generate.sh exports grok themes" {
 	run grep -F '$HOME/.grok/themes' "$REPO_ROOT/generate.sh"
 	[ "$status" -eq 0 ]

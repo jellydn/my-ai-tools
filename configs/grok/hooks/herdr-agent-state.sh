@@ -8,7 +8,7 @@
 set -eu
 
 action="${1:-}"
-hook_input_file="$(mktemp "${TMPDIR:-/tmp}/herdr-grok-hook.XXXXXX")" || exit 0
+hook_input_file="$(mktemp "${TMPDIR:-"$HOME"}/herdr-grok-hook.XXXXXX")" || exit 0
 trap 'rm -f "$hook_input_file"' EXIT HUP INT TERM
 cat >"$hook_input_file" 2>/dev/null || true
 
