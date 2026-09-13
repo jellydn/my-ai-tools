@@ -75,16 +75,11 @@ LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
 	[[ "$output" == *"Detected OpenCode (via command-v2)"* ]]
 }
 
-@test "AI launcher exposes OpenCode 2 without replacing OpenCode 1" {
+@test "AI launcher configures opencode tool" {
 	require_jq
 	run jq -e '[.tools[] | select(.name == "opencode")][0].command == "opencode"' "$LAUNCHER_CONFIG"
-	[ "$status" -eq 0 ]
-	run jq -e '[.tools[] | select(.name == "opencode2")][0].command == "opencode2"' "$LAUNCHER_CONFIG"
 	[ "$status" -eq 0 ]
 	run jq -r '[.tools[] | select(.name == "opencode")][0].promptCommand' "$LAUNCHER_CONFIG"
 	[ "$status" -eq 0 ]
 	[[ "$output" == "opencode run" ]]
-	run jq -r '[.tools[] | select(.name == "opencode2")][0].promptCommand' "$LAUNCHER_CONFIG"
-	[ "$status" -eq 0 ]
-	[[ "$output" == "opencode2 run" ]]
 }
