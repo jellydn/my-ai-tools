@@ -15,10 +15,10 @@ README="$REPO_ROOT/README.md"
 	[ "$status" -eq 0 ]
 }
 
-@test "Hunk config enables the built-in Kanagawa theme and agent notes" {
+@test "Hunk config enables the built-in Kanagawa theme and disables agent notes" {
 	run grep -F 'theme = "kanagawa-wave"' "$CONFIG"
 	[ "$status" -eq 0 ]
-	run grep -F 'agent_notes = true' "$CONFIG"
+	run grep -F 'agent_notes = false' "$CONFIG"
 	[ "$status" -eq 0 ]
 }
 
