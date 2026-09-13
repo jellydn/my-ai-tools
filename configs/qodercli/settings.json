@@ -1,66 +1,100 @@
 {
-	"permissions": {
-		"additionalDirectories": [],
-		"trustDirectories": []
-	},
-	"security": {
-		"auth": {
-			"selectedType": "qoder-browser"
-		}
-	},
-	"general": {
-		"vimMode": true,
-		"defaultPermissionMode": "plan"
-	},
-	"ui": {
-		"inlineThinkingMode": "full",
-		"escapePastedAtSymbols": true,
-		"theme": "GitHub"
-	},
-	"mcpServers": {
-		"context7": {
-			"command": "npx",
-			"args": ["-y", "@upstash/context7-mcp@latest"]
-		},
-		"sequential-thinking": {
-			"command": "npx",
-			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-		},
-		"qmd": {
-			"command": "qmd",
-			"args": ["mcp"]
-		},
-		"fff": {
-			"type": "stdio",
-			"command": "fff-mcp",
-			"args": []
-		},
-		"react-grab-mcp": {
-			"command": "npx",
-			"args": ["-y", "@react-grab/mcp", "--stdio"]
-		},
-		"logpilot": {
-			"command": "logpilot",
-			"args": ["mcp-server"]
-		},
-		"agentmemory": {
-			"command": "npx",
-			"args": ["-y", "@agentmemory/mcp"]
-		},
-		"sem": {
-			"command": "sem-mcp",
-			"args": []
-		},
-		"ctx": {
-			"command": "ctx",
-			"args": ["mcp", "serve"]
-		},
-		"codebase-memory-mcp": {
-			"command": "codebase-memory-mcp",
-			"args": []
-		}
-	},
-	"experimental": {
-		"taskTracker": true
-	}
+  "experimental": {
+    "taskTracker": true
+  },
+  "general": {
+    "defaultPermissionMode": "plan",
+    "vimMode": true
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"$HOME/.qoder/hooks/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ],
+        "matcher": "*"
+      }
+    ]
+  },
+  "mcpServers": {
+    "agentmemory": {
+      "args": [
+        "-y",
+        "@agentmemory/mcp"
+      ],
+      "command": "npx"
+    },
+    "codebase-memory-mcp": {
+      "args": [],
+      "command": "codebase-memory-mcp"
+    },
+    "context7": {
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ],
+      "command": "npx"
+    },
+    "ctx": {
+      "args": [
+        "mcp",
+        "serve"
+      ],
+      "command": "ctx"
+    },
+    "fff": {
+      "args": [],
+      "command": "fff-mcp",
+      "type": "stdio"
+    },
+    "logpilot": {
+      "args": [
+        "mcp-server"
+      ],
+      "command": "logpilot"
+    },
+    "qmd": {
+      "args": [
+        "mcp"
+      ],
+      "command": "qmd"
+    },
+    "react-grab-mcp": {
+      "args": [
+        "-y",
+        "@react-grab/mcp",
+        "--stdio"
+      ],
+      "command": "npx"
+    },
+    "sem": {
+      "args": [],
+      "command": "sem-mcp"
+    },
+    "sequential-thinking": {
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "command": "npx"
+    }
+  },
+  "permissions": {
+    "additionalDirectories": [],
+    "trustDirectories": []
+  },
+  "security": {
+    "auth": {
+      "selectedType": "qoder-browser"
+    }
+  },
+  "ui": {
+    "escapePastedAtSymbols": true,
+    "inlineThinkingMode": "full",
+    "theme": "GitHub"
+  }
 }
