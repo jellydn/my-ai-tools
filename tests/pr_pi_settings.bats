@@ -11,18 +11,18 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/pi/settings.json defaultModel is auto" {
+@test "configs/pi/settings.json defaultModel is deepseek/deepseek-v4-pro" {
     require_jq
     run jq -r '.defaultModel' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "auto" ]
+    [ "$output" = "deepseek/deepseek-v4-pro" ]
 }
 
-@test "configs/pi/settings.json defaultProvider is cursor" {
+@test "configs/pi/settings.json defaultProvider is commandcode" {
     require_jq
     run jq -r '.defaultProvider' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "cursor" ]
+    [ "$output" = "commandcode" ]
 }
 
 @test "configs/pi/settings.json enables OmniRoute paid/free/premium models" {
@@ -51,16 +51,19 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains clinepass/cline-pass/deepseek-v4-pro" {
+@test "configs/pi/settings.json enabledModels contains commandcode/deepseek/deepseek-v4-pro" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "clinepass/cline-pass/deepseek-v4-pro")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "commandcode/deepseek/deepseek-v4-pro")] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains qw/deepseek-v4-pro" {
+@test "configs/pi/settings.json enabledModels no longer contains clinepass or qw models" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "qw/deepseek-v4-pro")] | length > 0' "$PI_SETTINGS"
+    run jq -e '
+        ([.enabledModels[] | select(startswith("clinepass/"))] | length == 0) and
+        ([.enabledModels[] | select(startswith("qw/"))] | length == 0)
+    ' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }

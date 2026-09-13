@@ -1866,12 +1866,12 @@ Located in [`configs/pi/`](configs/pi/):
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 - [`models.json`](configs/pi/models.json) - Provider and model definitions (google-antigravity, ollama)
 
-The installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `cursor` as the default provider with `auto` as the default model (OmniRoute `paid`/`free`/`premium` remain available in `enabledModels`). You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+The installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `commandcode` as the default provider with `deepseek/deepseek-v4-pro` as the default model (OmniRoute `paid`/`free`/`premium` remain available in `enabledModels`). You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `auto`
-- **Default Provider**: `cursor`
+- **Default Model**: `deepseek/deepseek-v4-pro`
+- **Default Provider**: `commandcode`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`
@@ -1962,9 +1962,9 @@ Pi is configured with multi-provider model access (`settings.json` `enabledModel
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | cursor             | `auto`, `composer-2-5`, `grok-4.5`                                                                                                                 |
 | openai-codex       | `gpt-5.4-mini`, `gpt-5.5`, `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra`                                                                          |
-| clinepass          | `deepseek-v4-pro` (default), `deepseek-v4-flash`, `kimi-k2.7-code`, `glm-5.2`, `kimi-k2.6`, `kimi-k3`, `minimax-m3`, `qwen3.7-max`, `qwen3.7-plus` |
+| clinepass          | `deepseek-v4-pro`, `deepseek-v4-flash`, `kimi-k2.7-code`, `glm-5.2`, `kimi-k2.6`, `kimi-k3`, `minimax-m3`, `qwen3.7-max`, `qwen3.7-plus` |
 | google-antigravity | `gemini-3.5-flash`, `gemini-3-pro`, `claude-opus-4-6`                                                                                              |
-| commandcode        | `deepseek/deepseek-v4-pro`, `MiniMaxAI/MiniMax-M3`, `poolside/laguna-s-2.1-free`                                                                   |
+| commandcode        | `deepseek/deepseek-v4-pro` (default), `MiniMaxAI/MiniMax-M3`, `poolside/laguna-s-2.1-free`                                                                   |
 | qw                 | `deepseek-v4-pro`, `glm-5.2`, `qwen3.8-max-preview`                                                                                                |
 
 ### Pi Antigravity Rotator
