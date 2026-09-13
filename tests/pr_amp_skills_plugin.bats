@@ -40,3 +40,14 @@ setup() {
 		[ "$status" -eq 0 ]
 	done
 }
+
+@test "canonical skill descriptions stay concise" {
+	local description
+	local skill_file
+
+	for skill_file in "$REPO_ROOT"/skills/*/SKILL.md; do
+		description="$(sed -n 's/^description:[[:space:]]*//p' "$skill_file" | head -n 1)"
+		[ -n "$description" ]
+		[ "${#description}" -le 160 ]
+	done
+}

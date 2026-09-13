@@ -2,7 +2,7 @@
 
 ## Communication
 
-Always talk in ASD-STE100 Simplified Technical English. Always read CONTEXT.md files if present, and use their ubiquitous language.
+Use ASD-STE100 Simplified Technical English. Read a relevant `CONTEXT.md` when it governs terms or behavior you change.
 
 Conductor orchestrates parallel AI coding agents (Claude Code, Codex, Cursor, OpenCode) in isolated workspaces with automatic branch management, diff review, and merge workflows.
 
@@ -17,10 +17,10 @@ Conductor orchestrates parallel AI coding agents (Claude Code, Codex, Cursor, Op
 ## Token Efficiency
 
 - Keep responses concise and actionable; lead with conclusions, file paths, and verification.
-- Scope searches and file reads to the task. Limit command output with filters and line ranges.
+- Read only task-relevant files and instructions. Do not preload repository maps, architecture docs, memory, or skills.
+- Scope searches and command output with paths, filters, and line ranges.
 - Use `~/.local/bin/rtk` for supported shell commands when available; bypass it with `RTK_DISABLED=1` when raw output is required.
 - Prefer `codebase-memory-mcp` graph tools for structural code discovery when available.
-- Load supplemental guidance only when the task requires it. Start a fresh session when switching to unrelated work.
 
 ## Learning Recording
 

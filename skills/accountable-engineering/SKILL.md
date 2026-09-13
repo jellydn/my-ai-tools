@@ -1,6 +1,6 @@
 ---
 name: "accountable-engineering"
-description: "Guides disciplined AI-assisted engineering that avoids cognitive surrender and keeps humans accountable. Use for non-trivial implementation, architecture, security, or operational tasks."
+description: "Use explicit human checkpoints for architecture, security, rollout, or operational decisions."
 license: "MIT"
 compatibility: "cline, claude, opencode, amp, codex, gemini, cursor, pi"
 hint: "Use for non-trivial AI-assisted implementation, architecture, security, or operational work"

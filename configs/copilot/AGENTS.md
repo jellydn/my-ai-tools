@@ -2,7 +2,7 @@
 
 ## Communication
 
-Always talk in ASD-STE100 Simplified Technical English. Always read CONTEXT.md files if present, and use their ubiquitous language.
+Use ASD-STE100 Simplified Technical English. Read a relevant `CONTEXT.md` when it governs terms or behavior you change.
 
 ## Session Management with tmux
 
@@ -33,17 +33,17 @@ tmux capture-pane -p -t "$SESSION" -S -20  # check output
 ## Token Efficiency
 
 - Keep responses concise and actionable; lead with conclusions, file paths, and verification.
-- Scope searches and file reads to the task. Limit command output with filters and line ranges.
+- Read only task-relevant files and instructions. Do not preload repository maps, architecture docs, memory, or skills.
+- Scope searches and command output with paths, filters, and line ranges.
 - Use `~/.local/bin/rtk` for supported shell commands when available; bypass it with `RTK_DISABLED=1` when raw output is required.
 - Prefer `codebase-memory-mcp` graph tools for structural code discovery when available.
-- Load supplemental guidance only when the task requires it. Start a fresh session when switching to unrelated work.
 
 ## General Practices
 
 - Read `~/.ai-tools/best-practices.md` only when the repository lacks equivalent guidance or the task needs its detailed workflow.
 - Read `~/.ai-tools/MEMORY.md` and `~/.ai-tools/agent-memory.md` only when deciding whether or where to persist a learning.
 - Read `~/.ai-tools/git-guidelines.md` before destructive or history-changing git operations.
-- Always propose a plan before edits. Use phases to break down tasks into manageable steps.
+- Propose a phased plan before large or risky edits; make focused routine edits directly.
 - Ask before destructive operations — don't guess safety
 - Code is communication — prefer clarity and simplicity
 - Self-documenting code through meaningful names and structure

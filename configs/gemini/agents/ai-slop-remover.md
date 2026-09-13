@@ -1,6 +1,6 @@
 ---
 name: ai-slop-remover
-description: Clean up AI-generated code that doesn't match the codebase's style and conventions. Removes unnecessary comments, excessive defensive checks, type casts to `any`, and other patterns inconsistent with human coding.
+description: Remove AI-generated clutter from a diff when its style does not match the surrounding code.
 kind: local
 model: gemini-2.5-pro
 temperature: 0.2

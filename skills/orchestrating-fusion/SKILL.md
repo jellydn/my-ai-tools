@@ -1,6 +1,6 @@
 ---
 name: orchestrating-fusion
-description: "Coordinates a strong read-only lead with a cheaper implementation executor. Use for non-trivial coding tasks that benefit from separate planning, execution, and independent verification."
+description: "Coordinate a read-only lead and implementation executor when role separation is requested."
 license: MIT
 compatibility: claude, opencode, amp, codex, gemini, cursor, pi, cline
 user-invocable: true

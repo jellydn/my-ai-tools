@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: "Review the diff since a fixed point along two axes — Conventions (does the code follow this repo's coding standards and Tidy First practices?) and Intent (does the change do what it claims to do?). Runs both reviews in parallel sub-agents and reports them side by side. Use when you want to review a branch, a PR, work-in-progress changes, or ask to \"review since X\"."
+description: "Review a branch, PR, or worktree diff for repository conventions and stated intent."
 license: MIT
 compatibility: cline, claude, opencode, amp, codex, gemini, cursor, pi
 hint: Use when reviewing a branch, PR, or work-in-progress changes against a fixed point — runs parallel Conventions (coding standards + clean code smells) and Intent sub-agents

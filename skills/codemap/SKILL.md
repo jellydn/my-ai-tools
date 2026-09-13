@@ -1,6 +1,6 @@
 ---
 name: codemap
-description: "Map codebase structure with parallel analysis — produces 7 documents about architecture, concerns, and conventions"
+description: "Create a seven-document architecture map when the user asks to map a codebase."
 license: MIT
 compatibility: cline, opencode, claude, amp, codex, gemini, cursor, pi
 hint: Use when mapping codebase structure, documenting architecture, or onboarding to a project

@@ -1,6 +1,6 @@
 ---
 name: "blindspot-pass"
-description: "Find unknown unknowns before starting implementation — searches git history, patterns, and architecture for hidden gotchas"
+description: "Inspect history and architecture for hidden constraints before risky cross-cutting changes."
 license: "MIT"
 compatibility: "cline, claude, opencode, amp, codex, gemini, cursor, pi"
 hint: "Use before starting complex or unfamiliar work to identify hidden issues"
