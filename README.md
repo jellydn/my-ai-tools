@@ -1962,7 +1962,8 @@ Pi is configured with multi-provider model access (`settings.json` `enabledModel
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | commandcode        | `deepseek/deepseek-v4-pro` (default)                                                                                                              |
 | cursor             | `auto`, `composer-2-5`, `grok-4.5`                                                                                                                 |
-| openai-codex       | `gpt-5.6-terra`, `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-6-astra`                                                                                     |
+| openai-codex       | `gpt-5.4-mini`, `gpt-5.5`, `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra`                                                                          |
+| google-antigravity | `gemini-3.5-flash`, `gemini-3-pro`, `claude-opus-4-6`                                                                                              |
 | omniroute          | `paid`, `free`, `premium`                                                                                                                         |
 | openrouter         | `openrouter/free`, `deepseek/deepseek-v4-flash-0731`, `~deepseek/deepseek-v4-flash-latest`                                                      |
 | xai                | `grok-4.6`, `grok-4.5`                                                                                                                             |
