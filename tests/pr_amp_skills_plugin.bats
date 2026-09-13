@@ -48,6 +48,8 @@ setup() {
 	for skill_file in "$REPO_ROOT"/skills/*/SKILL.md; do
 		description="$(sed -n 's/^description:[[:space:]]*//p' "$skill_file" | head -n 1)"
 		[ -n "$description" ]
+		[[ "$description" != "|"* ]]
+		[[ "$description" != ">"* ]]
 		[ "${#description}" -le 160 ]
 	done
 }
