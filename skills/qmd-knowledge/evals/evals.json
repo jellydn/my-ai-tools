@@ -1,0 +1,29 @@
+{
+  "skill": "qmd-knowledge",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Capture this learning in qmd so the project knowledge stays reusable.",
+      "should_trigger": true,
+      "expected_behavior": "Writes durable project knowledge in qmd form."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Add the decision and convention to the knowledge base with the right qmd structure.",
+      "should_trigger": true,
+      "expected_behavior": "Stores a reusable knowledge artifact with context."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Search the docs for the answer.",
+      "should_trigger": false,
+      "expected_behavior": "This is search, not knowledge capture."
+    },
+    {
+      "id": "case-4",
+      "prompt": "We learned a new constraint during debugging; record it in qmd with links to the related files.",
+      "should_trigger": true,
+      "expected_behavior": "Captures a stable lesson and its context."
+    }
+  ]
+}

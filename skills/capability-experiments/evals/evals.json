@@ -1,0 +1,29 @@
+{
+  "skill": "capability-experiments",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Design an experiment to test whether the model can follow multi-step reasoning instructions and summarize the result in an HTML report.",
+      "should_trigger": true,
+      "expected_behavior": "Produces an experiment plan and report structure for measuring capability."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Run a small questionnaire to compare two prompt styles for robustness.",
+      "should_trigger": true,
+      "expected_behavior": "Creates a structured capability experiment with measurable prompts and comparison points."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Explain how LLMs work at a high level.",
+      "should_trigger": false,
+      "expected_behavior": "This is an explanation request, not a capability experiment."
+    },
+    {
+      "id": "case-4",
+      "prompt": "Create a multi-step experiment that asks the model to search first, then reason, then report failures.",
+      "should_trigger": true,
+      "expected_behavior": "Exercises staged evaluation and records where the model succeeds or fails."
+    }
+  ]
+}

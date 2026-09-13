@@ -12,6 +12,18 @@ metadata:
 
 # PRD Generator
 
+## What
+
+- Generate Product Requirements Documents from feature ideas — plans specs and requirements
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Create detailed Product Requirements Documents that are clear, actionable, and suitable for implementation.
 
 ---

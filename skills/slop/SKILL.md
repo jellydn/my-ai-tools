@@ -12,6 +12,18 @@ metadata:
 
 # Remove AI Code Slop
 
+## What
+
+- Remove AI-generated code slop from git diffs to maintain code quality
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Check the diff against a branch and remove all AI-generated slop introduced in this branch. Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality.
 
 ## Usage
