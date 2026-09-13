@@ -1960,12 +1960,12 @@ Pi is configured with multi-provider model access (`settings.json` `enabledModel
 
 | Provider           | Models                                                                                                                                             |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| commandcode        | `deepseek/deepseek-v4-pro` (default)                                                                                                              |
 | cursor             | `auto`, `composer-2-5`, `grok-4.5`                                                                                                                 |
-| openai-codex       | `gpt-5.4-mini`, `gpt-5.5`, `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra`                                                                          |
-| clinepass          | `deepseek-v4-pro`, `deepseek-v4-flash`, `kimi-k2.7-code`, `glm-5.2`, `kimi-k2.6`, `kimi-k3`, `minimax-m3`, `qwen3.7-max`, `qwen3.7-plus` |
-| google-antigravity | `gemini-3.5-flash`, `gemini-3-pro`, `claude-opus-4-6`                                                                                              |
-| commandcode        | `deepseek/deepseek-v4-pro` (default), `MiniMaxAI/MiniMax-M3`, `poolside/laguna-s-2.1-free`                                                                   |
-| qw                 | `deepseek-v4-pro`, `glm-5.2`, `qwen3.8-max-preview`                                                                                                |
+| openai-codex       | `gpt-5.6-terra`, `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-6-astra`                                                                                     |
+| omniroute          | `paid`, `free`, `premium`                                                                                                                         |
+| openrouter         | `openrouter/free`, `deepseek/deepseek-v4-flash-0731`, `~deepseek/deepseek-v4-flash-latest`                                                      |
+| xai                | `grok-4.6`, `grok-4.5`                                                                                                                             |
 
 ### Pi Antigravity Rotator
 
