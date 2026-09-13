@@ -3042,7 +3042,7 @@ Review the dry-run output, then install the tool and configuration:
 DeepSeek Harness uses one user root at `${DSH_HOME:-$HOME/.dsh}`. It does not use XDG config paths. This repository manages:
 
 - [`AGENTS.md`](configs/deepseek-harness/AGENTS.md) — user-global agent instructions
-- [`settings.yaml`](configs/deepseek-harness/settings.yaml) — native DeepSeek provider defaults using the `DEEPSEEK_API_KEY` environment variable
+- [`settings.yaml`](configs/deepseek-harness/settings.yaml) — native DeepSeek provider defaults using the `DEEPSEEK_API_KEY` environment variable with thinking mode and high reasoning effort enabled
 - [`cordis.patch.yml`](configs/deepseek-harness/cordis.patch.yml) — Cordis plugin entries for context7, sequential-thinking, qmd, fff, sem, and ctx MCP tools
 
 `./generate.sh` exports only these managed files. It intentionally excludes `.credentials.yaml`, `.env`, `.anonymous-user-id`, sessions, storage, attachments, profile dependencies, and other runtime state. Never commit Harness credentials or session data.
