@@ -3,4 +3,7 @@ ui-onboarding:
 agent-default-model:
   provider: deepseek-official
   model: deepseek-v4-flash
+llm-deepseek:
+  apiKeyEnv: DEEPSEEK_API_KEY
+  thinking: enabled
   reasoningEffort: high

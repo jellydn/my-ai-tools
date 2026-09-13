@@ -20,7 +20,9 @@ README="$REPO_ROOT/README.md"
 @test "DeepSeek Harness settings reference environment credentials" {
 	run grep -F 'apiKeyEnv: DEEPSEEK_API_KEY' "$CONFIG_DIR/settings.yaml"
 	[ "$status" -eq 0 ]
-	run grep -R -E 'sk-[A-Za-z0-9]' "$CONFIG_DIR"
+	# Require a non-letter before sk- so English compounds like
+	# "task-relevant" do not look like leaked API keys.
+	run grep -R -E '(^|[^A-Za-z])sk-[A-Za-z0-9]{8,}' "$CONFIG_DIR"
 	[ "$status" -ne 0 ]
 }
 
