@@ -219,9 +219,9 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F '"fusion_executor",' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'model: "amp/glm-5.2"' "$plugin"
+	run grep -F 'model: "zhipuai/glm-5.3-flash"' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'model: "xai/grok-4.5"' "$plugin"
+	run grep -F 'model: "xai/grok-4.6"' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'event.tool === "fusion_executor"' "$plugin"
 	[ "$status" -eq 0 ]
@@ -332,6 +332,21 @@ JSON
 	run grep -F 'pi_settings_has_required_packages' "$REPO_ROOT/cli.sh"
 	[ "$status" -eq 0 ]
 	run grep -F 'def get_source: if type == "object" then .source else . end' "$REPO_ROOT/cli.sh"
+	[ "$status" -eq 0 ]
+}
+
+@test "Grok 4.6 exposes current thread coordination tools" {
+	local plugin="$REPO_ROOT/configs/amp/plugins/grok-46-mode.ts"
+	local tools tool
+	# Limit assertions to the explicit list, not names mentioned in the prompt.
+	tools=$(sed -n '/^const ULTRA_TOOL_NAMES = \[/,/^\] as const/p' "$plugin" | tr "'" '"')
+	for tool in create_thread list_agent_modes find_thread read_thread \
+		send_thread_message get_thread_status wait_for_threads \
+		download_thread_file upload_thread_file; do
+		[[ "$tools" == *"\"$tool\""* ]]
+	done
+	[[ "$tools" != *'"thread_interact"'* ]]
+	run grep -F 'tools: ULTRA_TOOL_NAMES' "$plugin"
 	[ "$status" -eq 0 ]
 }
 

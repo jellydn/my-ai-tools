@@ -24,8 +24,8 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "README.md still mentions deepseek/deepseek-v4-pro among Pi models" {
-    run grep -F "deepseek/deepseek-v4-pro" "$README_FILE"
+@test "README.md still mentions meta/muse-spark-1.3-contributor among Pi models" {
+    run grep -F "meta/muse-spark-1.3-contributor" "$README_FILE"
     [ "$status" -eq 0 ]
 }
 

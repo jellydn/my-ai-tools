@@ -11,11 +11,11 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/pi/settings.json defaultModel is deepseek/deepseek-v4-pro" {
+@test "configs/pi/settings.json defaultModel is meta/muse-spark-1.3-contributor" {
     require_jq
     run jq -r '.defaultModel' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "deepseek/deepseek-v4-pro" ]
+    [ "$output" = "meta/muse-spark-1.3-contributor" ]
 }
 
 @test "configs/pi/settings.json defaultProvider is commandcode" {
@@ -51,9 +51,9 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains commandcode/deepseek/deepseek-v4-pro" {
+@test "configs/pi/settings.json enabledModels contains commandcode/meta/muse-spark-1.3-contributor" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "commandcode/deepseek/deepseek-v4-pro")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "commandcode/meta/muse-spark-1.3-contributor")] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
