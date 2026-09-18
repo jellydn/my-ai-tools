@@ -1869,11 +1869,11 @@ Located in [`configs/pi/`](configs/pi/):
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 - [`models.json`](configs/pi/models.json) - Provider and model definitions (google-antigravity, ollama)
 
-The installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `commandcode` as the default provider with `deepseek/deepseek-v4-pro` as the default model (OmniRoute `paid`/`free`/`premium` remain available in `enabledModels`). You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+The installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `commandcode` as the default provider with `meta/muse-spark-1.3-contributor` as the default model (OmniRoute `paid`/`free`/`premium` remain available in `enabledModels`). You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `deepseek/deepseek-v4-pro`
+- **Default Model**: `meta/muse-spark-1.3-contributor`
 - **Default Provider**: `commandcode`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
@@ -1963,7 +1963,7 @@ Pi is configured with multi-provider model access (`settings.json` `enabledModel
 
 | Provider           | Models                                                                                                                                             |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| commandcode        | `deepseek/deepseek-v4-pro` (default)                                                                                                              |
+| commandcode        | `meta/muse-spark-1.3-contributor` (default)                                                                                                       |
 | cursor             | `auto`, `composer-2-5`, `grok-4.5`                                                                                                                 |
 | openai-codex       | `gpt-5.4-mini`, `gpt-5.5`, `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra`                                                                          |
 | google-antigravity | `gemini-3.5-flash`, `gemini-3-pro`, `claude-opus-4-6`                                                                                              |
