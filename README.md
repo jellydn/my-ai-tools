@@ -1320,8 +1320,11 @@ Custom Amp agent modes live in [`configs/amp/plugins/`](configs/amp/plugins/) an
 
 | Plugin                   | Mode key          | Model                              | Notes                                |
 | ------------------------ | ----------------- | ---------------------------------- | ------------------------------------ |
-| `glm-52-mode.ts`         | `glm-5.2`         | `amp/glm-5.2`                      | Experimental GLM 5.2 agent mode      |
+| `glm-52-mode.ts`         | `glm-5.2`         | `zhipuai/glm-5.2`                  | Experimental GLM 5.2 agent mode      |
+| `glm-53-mode.ts`         | `glm-5.3`         | `zhipuai/glm-5.3` (exp. assumed)   | Experimental GLM 5.3 agent mode      |
+| `glm-53-mode.ts`         | `glm-5.3-flash`   | `zhipuai/glm-5.3-flash` (exp.)     | Experimental fast GLM 5.3 Flash mode |
 | `grok-45-mode.ts`        | `grok45`          | `xai/grok-4.5`                     | Grok 4.5 with deep-mode tools        |
+| `grok-46-mode.ts`        | `grok46`          | `xai/grok-4.6`                     | Grok 4.6 with ultra prompt and tools |
 | `inkling-mode.ts`        | `inkling`         | `baseten/thinkingmachines/inkling` | Thinking Machines Inkling agent mode |
 | `kimi-k3-mode.ts`        | `kimi-k3`         | —                                  | Senior engineering judgment mode     |
 | `cursor-composer-2.5.ts` | `cursor-comp-2.5` | `openai/gpt-5.2-codex`             | Cursor Composer-style editing mode   |
