@@ -1,7 +1,7 @@
 // @amp-plugin updated automatically from https://ampcode.com/@amp/plugins/grok-46-mode.ts
 // @amp-agent-mode {"key":"grok46","label":"Grok 4.6"}
 
-import type { PluginAPI } from '@ampcode/plugin'
+import type { PluginAPI } from "@ampcode/plugin";
 
 /** Static portion of thread-actors/src/inference/system-prompts/ultra.md.njk. */
 const GROK_46_PROMPT = `You are pair programming with a user to solve their coding task. Your main goal is to follow the user's instructions and verify that the result works.
@@ -145,78 +145,79 @@ Files named AGENTS.md pass along human guidance to you: coding standards, projec
 Each AGENTS.md governs the directory that contains it and every child directory beneath it. When you change a file, comply with every AGENTS.md whose scope covers that file. Apply only the parts relevant to the current files and task; they define constraints, not extra work to perform by default.
 
 These guidance files are delivered dynamically in the conversation context after file operations (Read, create_file) and user file mentions, so you don't have to search for them. They appear with a header like "Contents of [path] ([scope]):" followed by <instructions> tags. The files at the repository root and the directories up to the working directory are included automatically; when working in subdirectories, watch for any additional AGENTS.md files that apply.
-`
+`;
 
 /** Ultra's tool list (UNIFIED_SMART_INCLUDE_TOOLS in core/src/inference/agent-modes.ts). */
 const ULTRA_TOOL_NAMES = [
-	'finder',
-	'shell_command',
-	'shell_command_status',
-	'create_file',
-	'edit_file',
-	'web_search',
-	'read_web_page',
-	'portal_observe',
-	'portal_control',
-	'read_thread',
-	'find_thread',
-	'list_agent_modes',
-	'list_runners',
-	'create_thread',
-	'thread_interact',
-	'wait_for_threads',
-	'download_thread_file',
-	'upload_thread_file',
-	'notepad',
-	'skill',
-	'load_plugin',
-	'reload_plugins',
-	'reload_skills',
-	'oracle',
-	'librarian',
-	'Task',
-	'view_media',
-	'painter',
-	'public_artifact_url',
-	'thread_file_url',
-	'read_mcp_resource',
-	'get_current_user_identity',
-	'list_workspace_members',
-	'find_shared_plugins_and_skills',
-	'send_email',
-	'slack_write',
-	'slack_read',
-	'get_schedule',
-	'set_schedule',
-	'update_schedule',
-	'clear_schedule',
-	'create_slack_trigger',
-	'x_read',
-	'x_reply',
-	'mcp__*',
-] as const
+	"finder",
+	"shell_command",
+	"shell_command_status",
+	"create_file",
+	"edit_file",
+	"web_search",
+	"read_web_page",
+	"portal_observe",
+	"portal_control",
+	"read_thread",
+	"find_thread",
+	"list_agent_modes",
+	"list_runners",
+	"create_thread",
+	"send_thread_message",
+	"get_thread_status",
+	"wait_for_threads",
+	"download_thread_file",
+	"upload_thread_file",
+	"notepad",
+	"skill",
+	"load_plugin",
+	"reload_plugins",
+	"reload_skills",
+	"oracle",
+	"librarian",
+	"Task",
+	"view_media",
+	"painter",
+	"public_artifact_url",
+	"thread_file_url",
+	"read_mcp_resource",
+	"get_current_user_identity",
+	"list_workspace_members",
+	"find_shared_plugins_and_skills",
+	"send_email",
+	"slack_write",
+	"slack_read",
+	"get_schedule",
+	"set_schedule",
+	"update_schedule",
+	"clear_schedule",
+	"create_slack_trigger",
+	"x_read",
+	"x_reply",
+	"mcp__*",
+] as const;
 
 export default function (amp: PluginAPI) {
 	if (!amp.experimental) {
-		amp.logger.log('Experimental plugin API is not available.')
-		return
+		amp.logger.log("Experimental plugin API is not available.");
+		return;
 	}
 
 	const agent = amp.experimental.createAgent({
-		name: 'grok-4-6',
-		model: 'xai/grok-4.6',
+		name: "grok-4-6",
+		model: "xai/grok-4.6",
 		instructions: GROK_46_PROMPT,
 		tools: ULTRA_TOOL_NAMES,
-		reasoningEffort: 'high',
+		reasoningEffort: "high",
 		compactionThresholdTokens: 300_000,
-		display: { label: 'Grok 4.6', color: '#0ea5e9' },
-	})
+		display: { label: "Grok 4.6", color: "#0ea5e9" },
+	});
 
 	amp.experimental.registerAgentMode({
-		key: 'grok46',
-		label: 'Grok 4.6',
-		description: 'Grok 4.6 with the ultra system prompt and ultra tool set',
-		color: '#0ea5e9',
+		key: "grok46",
+		label: "Grok 4.6",
+		description: "Grok 4.6 with the ultra system prompt and ultra tool set",
+		color: "#0ea5e9",
 		agent: agent.definition,
-	})
+	});
 }

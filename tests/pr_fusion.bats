@@ -335,6 +335,21 @@ JSON
 	[ "$status" -eq 0 ]
 }
 
+@test "Grok 4.6 exposes current thread coordination tools" {
+	local plugin="$REPO_ROOT/configs/amp/plugins/grok-46-mode.ts"
+	local tools tool
+	# Limit assertions to the explicit list, not names mentioned in the prompt.
+	tools=$(sed -n '/^const ULTRA_TOOL_NAMES = \[/,/^\] as const/p' "$plugin" | tr "'" '"')
+	for tool in create_thread list_agent_modes find_thread read_thread \
+		send_thread_message get_thread_status wait_for_threads \
+		download_thread_file upload_thread_file; do
+		[[ "$tools" == *"\"$tool\""* ]]
+	done
+	[[ "$tools" != *'"thread_interact"'* ]]
+	run grep -F 'tools: ULTRA_TOOL_NAMES' "$plugin"
+	[ "$status" -eq 0 ]
+}
+
 @test "every TypeScript file in amp plugins exports a default function" {
 	# Amp scans every .ts file in ~/.config/amp/plugins as a standalone plugin.
 	# A module without a default export crashes with "Plugin must export a
