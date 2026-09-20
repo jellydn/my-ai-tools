@@ -4,7 +4,7 @@
 // @amp-agent-mode {"key":"glm-5.3","label":"GLM 5.3 (exp)"}
 // @amp-agent-mode {"key":"glm-5.3-flash","label":"GLM 5.3 Flash (exp)"}
 
-import type { PluginAPI } from '@ampcode/plugin'
+import type { PluginAPI } from "@ampcode/plugin";
 
 const GLM_53_AGENT_PROMPT = `
 You are a senior software engineer working directly in the user's codebase. You read code, plan, implement, and verify changes to satisfy the latest request, then report what changed and how you confirmed it.
@@ -122,66 +122,65 @@ Self-check before you call UI done — the AI-slop test: if someone could glance
 - Final replies start with the outcome, then mention changed behavior and verification.
 - Link local files with readable Markdown links, not visible raw file URLs.
 </communication>
-`
-
+`;
 
 const SMART_TOOL_NAMES = [
-	'Read',
-	'finder',
-	'shell_command',
-	'shell_command_status',
-	'create_file',
-	'edit_file',
-	'web_search',
-	'read_web_page',
-	'read_thread',
-	'find_thread',
-	'skill',
-	'oracle',
-	'librarian',
-	'view_media',
-	'painter',
-	'read_mcp_resource',
-	'mcp__*',
-] as const
+	"Read",
+	"finder",
+	"shell_command",
+	"shell_command_status",
+	"create_file",
+	"edit_file",
+	"web_search",
+	"read_web_page",
+	"read_thread",
+	"find_thread",
+	"skill",
+	"oracle",
+	"librarian",
+	"view_media",
+	"painter",
+	"read_mcp_resource",
+	"mcp__*",
+] as const;
 
 export default function (amp: PluginAPI) {
 	if (!amp.experimental) {
-		amp.logger.log('Experimental plugin API is not available.')
-		return
+		amp.logger.log("Experimental plugin API is not available.");
+		return;
 	}
 
 	const glm53 = amp.experimental.createAgent({
-		name: 'glm-5.3',
-		model: 'zhipuai/glm-5.3',
+		name: "glm-5.3",
+		model: "zhipuai/glm-5.3",
 		instructions: GLM_53_AGENT_PROMPT,
 		tools: SMART_TOOL_NAMES,
-		reasoningEffort: 'max',
-		display: { label: 'GLM 5.3 (exp)', color: '#10a37f' },
-	})
+		reasoningEffort: "max",
+		display: { label: "GLM 5.3 (exp)", color: "#10a37f" },
+	});
 
 	amp.experimental.registerAgentMode({
-		key: 'glm-5.3',
-		label: 'GLM 5.3 (exp)',
-		description: 'Experimental GLM 5.3-driven agent mode.',
-		color: '#10a37f',
+		key: "glm-5.3",
+		label: "GLM 5.3 (exp)",
+		description: "Experimental GLM 5.3-driven agent mode.",
+		color: "#10a37f",
 		agent: glm53.definition,
-	})
+	});
 
 	const glm53Flash = amp.experimental.createAgent({
-		name: 'glm-5.3-flash',
-		model: 'zhipuai/glm-5.3-flash',
+		name: "glm-5.3-flash",
+		model: "zhipuai/glm-5.3-flash",
 		instructions: GLM_53_AGENT_PROMPT,
 		tools: SMART_TOOL_NAMES,
-		reasoningEffort: 'high',
-		display: { label: 'GLM 5.3 Flash (exp)', color: '#34d399' },
-	})
+		reasoningEffort: "high",
+		display: { label: "GLM 5.3 Flash (exp)", color: "#34d399" },
+	});
 
 	amp.experimental.registerAgentMode({
-		key: 'glm-5.3-flash',
-		label: 'GLM 5.3 Flash (exp)',
-		description: 'Experimental fast GLM 5.3 Flash agent mode.',
-		color: '#34d399',
+		key: "glm-5.3-flash",
+		label: "GLM 5.3 Flash (exp)",
+		description: "Experimental fast GLM 5.3 Flash agent mode.",
+		color: "#34d399",
 		agent: glm53Flash.definition,
-	})
+	});
 }
