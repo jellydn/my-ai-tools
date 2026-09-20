@@ -1,202 +1,159 @@
 {
-	"devin": {},
-	"mcpServers": {
-		"context7": {
-			"command": "npx",
-			"args": ["-y", "@upstash/context7-mcp@latest"]
-		},
-		"sequential-thinking": {
-			"command": "npx",
-			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-		},
-		"qmd": {
-			"command": "qmd",
-			"args": ["mcp"]
-		},
-		"fff": {
-			"type": "stdio",
-			"command": "fff-mcp",
-			"args": []
-		},
-		"react-grab-mcp": {
-			"command": "npx",
-			"args": ["-y", "@react-grab/mcp", "--stdio"]
-		},
-		"logpilot": {
-			"command": "logpilot",
-			"args": ["mcp-server"]
-		},
-		"agentmemory": {
-			"command": "npx",
-			"args": ["-y", "@agentmemory/mcp"]
-		},
-		"sem": {
-			"command": "sem-mcp",
-			"args": []
-		},
-		"ctx": {
-			"command": "ctx",
-			"args": ["mcp", "serve"]
-		},
-		"codebase-memory-mcp": {
-			"command": "codebase-memory-mcp",
-			"args": []
-		}
-	},
-	"hooks": {
-		"PermissionRequest": [
-			{
-				"hooks": [
-					{
-						"command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
-						"timeout": 10,
-						"type": "command"
-					}
-				]
-			},
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
-						"timeout": 10
-					}
-				]
-			}
-		],
-		"PostToolUse": [
-			{
-				"hooks": [
-					{
-						"command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
-						"timeout": 10,
-						"type": "command"
-					}
-				]
-			},
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
-						"timeout": 10
-					}
-				]
-			}
-		],
-		"PreToolUse": [
-			{
-				"hooks": [
-					{
-						"command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
-						"timeout": 10,
-						"type": "command"
-					}
-				]
-			},
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
-						"timeout": 10
-					}
-				]
-			}
-		],
-		"SessionStart": [
-			{
-				"hooks": [
-					{
-						"command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
-						"timeout": 10,
-						"type": "command"
-					}
-				]
-			},
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
-						"timeout": 10
-					}
-				]
-			}
-		],
-		"Stop": [
-			{
-				"hooks": [
-					{
-						"command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
-						"timeout": 10,
-						"type": "command"
-					}
-				]
-			},
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
-						"timeout": 10
-					}
-				]
-			}
-		],
-		"UserPromptSubmit": [
-			{
-				"hooks": [
-					{
-						"command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
-						"timeout": 10,
-						"type": "command"
-					}
-				]
-			},
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
-						"timeout": 10
-					}
-				]
-			}
-		],
-		"PostCompaction": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
-						"timeout": 10
-					}
-				]
-			}
-		],
-		"SessionEnd": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
-						"timeout": 10
-					}
-				]
-			}
-		]
-	},
-	"notify": "smart",
-	"respect_gitignore": true,
-	"shell": {
-		"setup_complete": true
-	},
-	"show_path": true,
-	"skip_home_directory_warning": true,
-	"skip_workspace_trust": false,
-	"theme_auto_detect": "always",
-	"theme_mode": "dark",
-	"unicode_mode": "auto",
-	"version": 1
+  "devin": {},
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostCompaction": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x \"$HOME/.orca/agent-hooks/devin-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/devin-hook.sh\"; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "notify": "smart",
+  "respect_gitignore": true,
+  "shell": {
+    "setup_complete": true
+  },
+  "show_path": true,
+  "skip_home_directory_warning": true,
+  "skip_workspace_trust": true,
+  "theme_auto_detect": "always",
+  "theme_mode": "dark",
+  "unicode_mode": "auto",
+  "version": 1
 }
