@@ -35,8 +35,8 @@ toml_keys_before_tables() {
 	[ "$status" -eq 0 ]
 }
 
-@test "configs/codex/config.toml selects gpt-5.6-sol" {
-	run grep -E '^model[[:space:]]*=[[:space:]]*"gpt-5.6-sol"' "$CODEX_CONFIG"
+@test "configs/codex/config.toml selects gpt-6-astra" {
+	run grep -E '^model[[:space:]]*=[[:space:]]*"gpt-6-astra"' "$CODEX_CONFIG"
 	[ "$status" -eq 0 ]
 }
 

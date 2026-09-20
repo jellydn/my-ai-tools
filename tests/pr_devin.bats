@@ -36,8 +36,13 @@ CONFIG_DIR="$REPO_ROOT/configs/devin"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/devin/config.json has mcpServers" {
+@test "configs/devin/config.json ships without legacy mcpServers" {
     run jq -e '.mcpServers' "$CONFIG_DIR/config.json"
+    [ "$status" -ne 0 ]
+}
+
+@test "configs/devin/config.json has hooks" {
+    run jq -e '.hooks' "$CONFIG_DIR/config.json"
     [ "$status" -eq 0 ]
 }
 
