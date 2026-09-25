@@ -499,3 +499,35 @@ README_FILE="$REPO_ROOT/README.md"
     run grep -F 'https://github.com/humanlayer/skills' "$README_FILE"
     [ "$status" -eq 0 ]
 }
+
+# ---------------------------------------------------------------------------
+# BuilderIO/skills visual-recap entry (newly added)
+# ---------------------------------------------------------------------------
+
+@test "recommend-skills.json contains BuilderIO visual-recap skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "BuilderIO/skills" and .skill == "visual-recap")] | length == 1' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "BuilderIO visual-recap entry has non-empty description" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "BuilderIO/skills" and .skill == "visual-recap")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
+@test "README.md documents BuilderIO visual-recap install command" {
+    run grep -F 'npx skills add BuilderIO/skills --skill visual-recap --global --agent claude-code' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md visual-recap table row references BuilderIO skills" {
+    run grep -F 'https://github.com/BuilderIO/skills' "$README_FILE"
+    [ "$status" -eq 0 ]
+}

@@ -6,6 +6,11 @@
 			"description": "Create or update pull requests with concise visual outlines that help reviewers understand the change"
 		},
 		{
+			"repo": "BuilderIO/skills",
+			"skill": "visual-recap",
+			"description": "Turn a PR, branch, commit, or git diff into an interactive visual recap with diagrams, file maps, API/schema summaries, and focused review notes"
+		},
+		{
 			"repo": "shadcn/improve",
 			"description": "Audit any codebase and write implementation plans for cheaper models to execute. Uses expensive model for planning, cheap model for execution."
 		},
