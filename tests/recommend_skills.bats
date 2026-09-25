@@ -467,3 +467,35 @@ README_FILE="$REPO_ROOT/README.md"
     run grep -F 'npx skills add tt-a1i/archify --skill archify --global --agent claude-code' "$README_FILE"
     [ "$status" -eq 0 ]
 }
+
+# ---------------------------------------------------------------------------
+# humanlayer/skills visual-pr entry (newly added)
+# ---------------------------------------------------------------------------
+
+@test "recommend-skills.json contains humanlayer visual-pr skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "humanlayer/skills" and .skill == "visual-pr")] | length == 1' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "humanlayer visual-pr entry has non-empty description" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "humanlayer/skills" and .skill == "visual-pr")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
+@test "README.md documents humanlayer visual-pr install command" {
+    run grep -F 'npx skills add humanlayer/skills --skill visual-pr --global --agent claude-code' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md visual-pr table row references humanlayer skills" {
+    run grep -F 'https://github.com/humanlayer/skills' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
