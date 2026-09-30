@@ -96,7 +96,7 @@ load helpers
 
 @test "Bun and Rust installers still require installed binaries in real mode" {
 	run bash -c '
-		export HOME="$(mktemp -d)" DRY_RUN=false BUN_INSTALL=""
+		export HOME="$(mktemp -d)" DRY_RUN=false BUN_INSTALL="" CARGO_HOME=""
 		source "$1/lib/common.sh"
 		source "$1/lib/install.sh"
 		resolve_installer_checksum() { printf "\n"; }
