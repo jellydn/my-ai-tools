@@ -531,3 +531,33 @@ README_FILE="$REPO_ROOT/TOOL_REFERENCE.md"
     run grep -F 'https://github.com/BuilderIO/skills' "$README_FILE"
     [ "$status" -eq 0 ]
 }
+
+# ---------------------------------------------------------------------------
+# dzhng/jevgrep entry
+# ---------------------------------------------------------------------------
+
+@test "recommend-skills.json contains dzhng/jevgrep skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "dzhng/jevgrep" and .skill == "jevgrep")] | length == 1' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "jevgrep entry describes behavior-based code discovery" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "dzhng/jevgrep" and .skill == "jevgrep")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"asking what code does"* ]]
+}
+
+@test "README.md documents jevgrep and its install command" {
+    run grep -F 'https://github.com/dzhng/jevgrep' "$README_FILE"
+    [ "$status" -eq 0 ]
+
+    run grep -F 'npx skills add dzhng/jevgrep --skill jevgrep --global --agent claude-code' "$README_FILE"
+    [ "$status" -eq 0 ]
+}

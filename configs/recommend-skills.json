@@ -78,6 +78,11 @@
 			"description": "Search tool for modern web development best practices"
 		},
 		{
+			"repo": "dzhng/jevgrep",
+			"skill": "jevgrep",
+			"description": "Find relevant files and source context by asking what code does"
+		},
+		{
 			"repo": "openai/codex",
 			"skill": "babysit-pr",
 			"description": "Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required"
