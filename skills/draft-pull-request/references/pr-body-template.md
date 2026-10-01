@@ -35,7 +35,10 @@ already make the shape clear.}
 ## Rules
 
 - **What** and **Why** are required and stay short. Put detail in **How**, not in **Why**.
+- **What** names the surface area: components, commands, APIs, or configs that changed.
+- **Why** states the concrete problem. Avoid vague phrases like "to improve things".
 - **How** is about decisions and structure. Do not write a file-by-file changelog; the diff already shows that.
 - **Reviewer notes** is for things a reviewer could miss or must act on. Do not repeat **How**.
 - **Validation** lists only checks that you ran, with their result. If you ran none, write `- Not run.` and say why.
+  Do not tick checklist items (yours or the repository's) for work you did not do.
 - Keep the body short enough to read in about one minute. Link to plans or ADRs instead of copying them.

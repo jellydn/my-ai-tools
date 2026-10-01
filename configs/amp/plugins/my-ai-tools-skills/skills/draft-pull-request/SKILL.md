@@ -83,7 +83,7 @@ BODY_FILE=$(mktemp "${TMPDIR:-/tmp}/pr-body.XXXXXX")
 ### 4. Publish
 
 ```bash
-# Push only when the branch has no upstream or is ahead of it. Never force-push.
+# Never force-push.
 git push -u origin HEAD
 
 # New PR
@@ -114,10 +114,7 @@ Reply with:
 ## Guidelines
 
 - **Title**: Short, imperative, max 72 characters (e.g., `feat(auth): add JWT refresh token support`).
-- **What**: Name the surface area — components, commands, APIs, or configs that changed.
-- **Why**: State the concrete problem or need. Avoid vague phrases like "to improve things".
-- **How**: Explain the approach and non-obvious decisions, not every line changed.
-- **Honesty**: List only validation you ran. Do not tick checklist items you did not do.
+- **Body**: Section rules live in `references/pr-body-template.md`; do not restate them here.
 - **Language**: Write as one person to another — plain, concise, no jargon or filler.
 
 ## Example
