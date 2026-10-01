@@ -63,6 +63,8 @@ git diff "origin/$BASE_BRANCH"...HEAD --stat
 git diff "origin/$BASE_BRANCH"...HEAD
 ```
 
+- For an existing PR, prefer GitHub's view: `gh pr diff <number>` and `gh pr view <number> --json commits,files`.
+  This stays correct when the branch lives in a fork and `origin` is not the base repository.
 - Read the complete diff and enough surrounding code to understand behavior and ownership.
 - Read the linked issue, plan, ADR, or handoff when one exists. Collect their links for the body.
 - Note the validation you actually ran (tests, lint, typecheck, manual checks) and the results.
@@ -109,7 +111,7 @@ rm -f "$BODY_FILE"
 Reply with:
 
 ```markdown
-- PR: [#<number> <title>](<url>) (draft)
+- PR: [#<number> <title>](<url>) (<draft or ready for review, from isDraft>)
 - Summary: <2-3 sentences: what the PR does and the key decision>
 - Validation: <commands run and their results, or "not run">
 - Left out: <uncommitted or unrelated changes, or "none">
