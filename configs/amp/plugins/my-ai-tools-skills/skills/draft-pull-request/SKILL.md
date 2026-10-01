@@ -43,10 +43,11 @@ git branch --show-current
 git status --short --branch
 
 # Reuse an existing PR for this branch instead of opening a duplicate
-gh pr view --json number,url,title,state,isDraft,baseRefName 2>/dev/null
+gh pr view --json number,url,title,state,isDraft,baseRefName,body 2>/dev/null
 ```
 
-- **Open PR exists** — update its body in step 4. Do not create a second PR or change its draft state.
+- **Open PR exists** — set `BASE_BRANCH` to its `baseRefName`, which may differ from the default branch, and update
+  its body in step 4. Do not create a second PR or change its draft state.
 - **On the default branch** — create a feature branch named after the change before you continue. Never open a PR
   from the default branch.
 - **Uncommitted task changes** — commit them first (use `commit-atomic` when it is available). Leave unrelated or
@@ -94,6 +95,9 @@ gh pr edit <number> --body-file "$BODY_FILE"
 ```
 
 Use `--body-file` instead of `--body` so that Markdown, backticks, and code fences survive shell quoting.
+
+`gh pr edit --body-file` replaces the whole body. Before you edit an existing PR, carry over from its current `body`
+anything the diff cannot tell you: links, reviewer notes, and checklist items that someone ticked and that still apply.
 
 ### 5. Confirm and report
 
