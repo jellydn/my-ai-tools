@@ -747,7 +747,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `code-review` - Two-axis diff review (Conventions + Intent) with parallel sub-agents — checks bash idioms, Tidy First practices, and whether the change does what it claims
 - `codemap` - Parallel codebase analysis producing structured documentation
 - `commit-atomic` - Atomic commits by logically grouping changes with commitizen convention (no `git add -A`)
-- `draft-pull-request` - Create draft pull requests using gh CLI with what/why/how template
+- `draft-pull-request` - Create or update draft pull requests via gh CLI with a what/why/how body, optional change-outline views, and honest validation notes
 - `handoffs` - Create handoff plans for continuing work (provides `/handoffs` command)
 - `llm-wiki` - Build and maintain a persistent, compounding knowledge wiki from raw sources (Karpathy's LLM Wiki pattern)
 - `pickup` - Resume work from previous handoff sessions (provides `/pickup` command)

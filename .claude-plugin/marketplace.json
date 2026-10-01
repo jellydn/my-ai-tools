@@ -65,7 +65,7 @@
 		},
 		{
 			"name": "draft-pull-request",
-			"description": "Creates a draft pull request using gh CLI with a structured what/why/how description",
+			"description": "Creates or updates a draft pull request using gh CLI with a what/why/how description and optional change-outline views",
 			"version": "1.0.0",
 			"author": {
 				"name": "Dung Huynh Duc",
