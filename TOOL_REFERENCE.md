@@ -8,7 +8,7 @@ workflow.
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, fx, Muse Code, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, DeepSeek Harness, Kiro CLI, Delta, Hunk, Codiff, ctx, Open Code Review, Reasonix, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, fx, Muse Code, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, DeepSeek Harness, Kiro CLI, Delta, Hunk, Codiff, Whiteboard, ctx, Open Code Review, Reasonix, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, codebase-memory-mcp, agentmemory, sem, ctx
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -72,6 +72,7 @@ The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONS
 | **Reasonix**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | DeepSeek-native; prefix-cache loop; `[[plugins]]` MCP in config.toml; ACP (`reasonix acp`); `REASONIX.md`/`AGENTS.md` memory; Kanagawa theme staged                                                                                            |
 | **Delta**       | — (desktop app — model providers are configured in settings)                                                              | Personal rules (`~/.config/delta/AGENTS.md`), isolated checkouts, collaborative threads                                                                                                                                                        |
 | **Codiff**      | — (desktop app — uses configured agent backend via settings)                                                               | —                                                                                                                                                                                                                                              |
+| **Whiteboard**  | — (desktop app — model providers are configured in settings)                                                               | Architecture-level visual diff reviews, semantic diffs, and agent trajectory audits                                                                                                                                                            |
 
 ### 📋 MCP Server Details
 
@@ -3220,6 +3221,38 @@ codiff pr 75
 ```
 
 See the full [Codiff docs](https://github.com/nkzw-tech/codiff#readme) for details.
+
+</details>
+
+---
+
+## 🧭 Whiteboard (Optional)
+
+[/dev/fast/ Whiteboard](https://dev.fast/) is an open-source canvas for thoughtful software design. It turns code
+changes into architecture-level visual reviews, semantic diffs, and agent-trajectory audits, including sequence and
+database diagrams. [GitHub](https://github.com/devdotfast/whiteboard)
+
+<details>
+<summary><strong>Installation &amp; Configuration</strong></summary>
+
+### Installation
+
+Whiteboard is a standalone desktop application. Download the installer for your platform from the official install
+page:
+
+- [macOS Apple Silicon (.dmg)](https://install.dev.fast/releases/latest/darwin-arm64/Whiteboard.dmg)
+- [macOS Intel (.dmg)](https://install.dev.fast/releases/latest/darwin-x64/Whiteboard.dmg)
+- [Windows x64 (.exe)](https://install.dev.fast/releases/latest/win32-x64/Whiteboard-Setup.exe)
+- [Linux installation instructions](https://dev.fast/install#linux)
+
+The repository installer does not download or configure Whiteboard because the project publishes its own signed
+platform installers and package repositories. This entry documents the tool alongside the other optional desktop
+review tools without managing machine-specific app state.
+
+### Usage
+
+Open Whiteboard, then use its review canvas to explore a diff at the architecture level. The official site also
+provides a [preview build](https://dev.fast/install/preview) and the [source repository](https://github.com/devdotfast/whiteboard).
 
 </details>
 
