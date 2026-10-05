@@ -18,15 +18,7 @@
 			"name": "opencode",
 			"command": "opencode",
 			"description": "OpenCode AI assistant",
-			"aliases": ["o", "oc"],
-			"promptCommand": "opencode run",
-			"promptUseStdin": true
-		},
-		{
-			"name": "opencode",
-			"command": "opencode",
-			"description": "OpenCode 2 beta AI assistant",
-			"aliases": ["o2", "oc2"],
+			"aliases": ["o", "oc", "o2", "oc2"],
 			"promptCommand": "opencode run",
 			"promptUseStdin": true
 		},
