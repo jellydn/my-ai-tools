@@ -820,6 +820,7 @@ Official and community-maintained skill collections for specific frameworks:
 | **Engram**                 | [Gentleman-Programming/engram](https://github.com/Gentleman-Programming/engram)                               | Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, and git-based cross-machine sync.                                                                                          |
 | **mac-OCR**                | [privatenumber/mac-ocr](https://github.com/privatenumber/mac-ocr)                                             | macOS CLI for OCR and searchable PDFs using Apple's Vision framework                                                                                                                                                           |
 | **Archify**                | [tt-a1i/archify](https://github.com/tt-a1i/archify)                                                           | Turn a codebase or system description into a polished, interactive system map directly in chat. Supports architecture, workflow, sequence, data-flow, and lifecycle diagrams.                                                  |
+| **pstack**                 | [michael-denyer/pstack-claude](https://github.com/michael-denyer/pstack-claude)                               | Rigorous agent workflows for planning, implementation, review, and verification. The `poteto-mode` skill routes goals to the appropriate playbook across multiple agent harnesses.                                                     |
 
 **Installation:**
 
@@ -848,6 +849,7 @@ npx skills add shadcn/improve --global --agent claude-code
 npx skills add Gentleman-Programming/engram --skill engram-memory --global --agent claude-code
 npx skills add ctxrs/ctx --global --agent claude-code
 npx skills add tt-a1i/archify --skill archify --global --agent claude-code
+npx skills add michael-denyer/pstack-claude --skill poteto-mode --global --agent claude-code
 ```
 
 ### Configuration Files

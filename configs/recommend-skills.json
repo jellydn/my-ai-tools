@@ -1,6 +1,11 @@
 {
 	"recommended_skills": [
 		{
+			"repo": "michael-denyer/pstack-claude",
+			"skill": "poteto-mode",
+			"description": "Route coding tasks through rigorous planning, delegation, review, and verification workflows across Claude Code, Codex, Pi, OpenCode, and other agent harnesses"
+		},
+		{
 			"repo": "humanlayer/skills",
 			"skill": "visual-pr",
 			"description": "Create or update pull requests with concise visual outlines that help reviewers understand the change"
