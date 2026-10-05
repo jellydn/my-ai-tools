@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -r \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -x \"$HOME/.orca/agent-hooks/grok-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/grok-hook.sh\"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -r "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -x "$HOME/.orca/agent-hooks/grok-hook.sh" ]; then /bin/sh "$HOME/.orca/agent-hooks/grok-hook.sh"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
             "timeout": 10
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -r \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -x \"$HOME/.orca/agent-hooks/grok-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/grok-hook.sh\"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -r "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -x "$HOME/.orca/agent-hooks/grok-hook.sh" ]; then /bin/sh "$HOME/.orca/agent-hooks/grok-hook.sh"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
             "timeout": 10
           }
         ]
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -r \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -x \"$HOME/.orca/agent-hooks/grok-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/grok-hook.sh\"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -r "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -x "$HOME/.orca/agent-hooks/grok-hook.sh" ]; then /bin/sh "$HOME/.orca/agent-hooks/grok-hook.sh"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
             "timeout": 10
           }
         ]
@@ -38,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -r \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -x \"$HOME/.orca/agent-hooks/grok-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/grok-hook.sh\"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -r "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -x "$HOME/.orca/agent-hooks/grok-hook.sh" ]; then /bin/sh "$HOME/.orca/agent-hooks/grok-hook.sh"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
             "timeout": 10
           }
         ]
@@ -50,7 +50,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -r \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -x \"$HOME/.orca/agent-hooks/grok-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/grok-hook.sh\"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -r "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -x "$HOME/.orca/agent-hooks/grok-hook.sh" ]; then /bin/sh "$HOME/.orca/agent-hooks/grok-hook.sh"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
             "timeout": 10
           }
         ]
@@ -62,7 +62,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -r \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -x \"$HOME/.orca/agent-hooks/grok-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/grok-hook.sh\"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -r "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -x "$HOME/.orca/agent-hooks/grok-hook.sh" ]; then /bin/sh "$HOME/.orca/agent-hooks/grok-hook.sh"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
             "timeout": 10
           }
         ]
@@ -74,7 +74,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -r \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -x \"$HOME/.orca/agent-hooks/grok-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/grok-hook.sh\"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -r "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -x "$HOME/.orca/agent-hooks/grok-hook.sh" ]; then /bin/sh "$HOME/.orca/agent-hooks/grok-hook.sh"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
             "timeout": 10
           }
         ]
@@ -85,7 +85,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -r \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -x \"$HOME/.orca/agent-hooks/grok-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/grok-hook.sh\"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -r "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -x "$HOME/.orca/agent-hooks/grok-hook.sh" ]; then /bin/sh "$HOME/.orca/agent-hooks/grok-hook.sh"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
             "timeout": 10
           }
         ]
@@ -96,7 +96,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -r \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -x \"$HOME/.orca/agent-hooks/grok-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/grok-hook.sh\"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -r "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -x "$HOME/.orca/agent-hooks/grok-hook.sh" ]; then /bin/sh "$HOME/.orca/agent-hooks/grok-hook.sh"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
             "timeout": 10
           }
         ]
@@ -107,7 +107,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -r \"$HOME/.orca/agent-hooks/grok-hook.sh\" ] && [ -x \"$HOME/.orca/agent-hooks/grok-hook.sh\" ]; then /bin/sh \"$HOME/.orca/agent-hooks/grok-hook.sh\"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "command": "if [ -n \"${ORCA_PANE_KEY-}\" ] && [ -f "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -r "$HOME/.orca/agent-hooks/grok-hook.sh" ] && [ -x "$HOME/.orca/agent-hooks/grok-hook.sh" ]; then /bin/sh "$HOME/.orca/agent-hooks/grok-hook.sh"; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
             "timeout": 10
           }
         ]
