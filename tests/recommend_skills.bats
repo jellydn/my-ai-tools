@@ -561,3 +561,35 @@ README_FILE="$REPO_ROOT/TOOL_REFERENCE.md"
     run grep -F 'npx skills add dzhng/jevgrep --skill jevgrep --global --agent claude-code' "$README_FILE"
     [ "$status" -eq 0 ]
 }
+
+# ---------------------------------------------------------------------------
+# michael-denyer/pstack-claude entry
+# ---------------------------------------------------------------------------
+
+@test "recommend-skills.json contains pstack poteto-mode skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "michael-denyer/pstack-claude" and .skill == "poteto-mode")] | length == 1' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "pstack poteto-mode entry has non-empty description" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "michael-denyer/pstack-claude" and .skill == "poteto-mode")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
+@test "README.md documents pstack poteto-mode install command" {
+    run grep -F 'npx skills add michael-denyer/pstack-claude --skill poteto-mode --global --agent claude-code' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md pstack table row references michael-denyer/pstack-claude" {
+    run grep -F 'https://github.com/michael-denyer/pstack-claude' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
