@@ -503,7 +503,7 @@ npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
 
-# Available skills: accountable-engineering, prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, security-audit, tmux, blindspot-pass, implementation-logger, quiz-me, spec-interview, capability-experiments, code-review, context-discovery, doc-search, git-context, orchestrating-fusion
+# Available skills: accountable-engineering, prd, ralph, qmd-knowledge, codemap, adr, babysit-pr, handoffs, pickup, pr-review, slop, tdd, code-quality-review, commit-atomic, draft-pull-request, diagnosing-bugs, docs-update, llm-wiki, plannotator-setup-goal, portless-local, security-audit, tmux, visual-pr, blindspot-pass, implementation-logger, quiz-me, spec-interview, capability-experiments, code-review, context-discovery, doc-search, git-context, orchestrating-fusion
 # Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
@@ -743,10 +743,12 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 
 - `accountable-engineering` - Checkpoint-driven workflow for accountable AI-assisted implementation, architecture, security, and operational work
 - `adr` - Architecture Decision Records
-- `code-review` - Two-axis diff review (Conventions + Intent) with parallel sub-agents — checks bash idioms, Tidy First practices, and whether the change does what it claims
+- `babysit-pr` - Monitor an open GitHub pull request for CI failures, review feedback, mergeability, and safe retries or fixes
+- `code-review` - Two-axis diff review (Conventions + Intent) with parallel sub-agents — checks bash idioms, Tidy First practices, and whether the change does what it claims. Intent comes from the linked issue, spec, or pull request description, and falls back to commit messages
 - `codemap` - Parallel codebase analysis producing structured documentation
 - `commit-atomic` - Atomic commits by logically grouping changes with commitizen convention (no `git add -A`)
-- `draft-pull-request` - Create or update draft pull requests via gh CLI with a what/why/how body, optional change-outline views, and honest validation notes
+- `draft-pull-request` - Create or update draft pull requests via gh CLI with a what/why/how body, optional change-outline views, optional Evidence and Merge Danger sections, and honest validation notes
+- `diagnosing-bugs` - Reproduce the failure with a red-capable loop before diagnosing it, then lock the fix with a regression test
 - `handoffs` - Create handoff plans for continuing work (provides `/handoffs` command)
 - `llm-wiki` - Build and maintain a persistent, compounding knowledge wiki from raw sources (Karpathy's LLM Wiki pattern)
 - `pickup` - Resume work from previous handoff sessions (provides `/pickup` command)
@@ -762,6 +764,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `tdd` - Test-Driven Development workflows
 - `code-quality-review` - Extremely strict maintainability and structural code quality reviews
 - `tmux` - Remote control tmux sessions for interactive CLIs (python, node, gdb, etc.)
+- `visual-pr` - Post a concise visual outline as a GitHub pull request comment without replacing the pull request description
 
 #### Projects Built with AI
 
@@ -895,13 +898,9 @@ OpenCode 2 is stable. It uses the `opencode` command and reads the same global c
 
 ### Installation
 
-OpenCode 1:
+`./cli.sh` installs OpenCode 2 as the `opencode` command. Do not install OpenCode 1 first. The V2 installer replaces the V1 binary. A leftover beta `opencode2` binary still works.
 
-```bash
-curl -fsSL https://opencode.ai/install | bash
-```
-
-OpenCode 2 (replaces the V1 `opencode` binary):
+OpenCode 2:
 
 ```bash
 curl -fsSL https://opencode.ai/v2/install | bash
@@ -915,6 +914,12 @@ pnpm add -g --allow-build=@opencode/cli @opencode/cli
 yarn global add @opencode/cli
 
 opencode
+```
+
+OpenCode 1 (legacy; `cli.sh` does not install this):
+
+```bash
+curl -fsSL https://opencode.ai/install | bash
 ```
 
 ### Configuration

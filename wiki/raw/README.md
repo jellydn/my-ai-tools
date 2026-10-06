@@ -28,6 +28,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **adr**                                | Generate Architecture Decision Records from design discussions                  | Before implementing significant technical changes — captures the why, alternatives considered, and consequences |
 | **codemap**                            | Parallel codebase analysis producing 7 structured documents                     | Onboarding to a new project, or before major refactoring — gives you the full picture fast                      |
 | **code-quality-review** | Extremely strict maintainability and structural code quality review             | Before merging PRs — catches issues that regular linters miss                                                   |
+| **babysit-pr**                         | Monitor an open pull request, fix branch-related CI failures, and surface review feedback | After pushing a pull request — keep watching until it is merged, closed, or needs a person                       |
 | **improve**                            | Audit any codebase and write implementation plans for cheaper models to execute | When you want a senior-level code review with actionable, self-contained plans                                  |
 
 ## 🔌 MCP Servers & Plugins Overview
@@ -36,7 +37,7 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | --------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Claude Code** | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                                          |
 | **OpenCode**    | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                         |
-| **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl, ctx   | -                                                                                                                                                                                         |
+| **Codex**       | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                         |
 | **Kimi Code**   | context7, sequential-thinking, qmd, agentmemory, fff, logpilot, sem, ctx                              | Skills, MCP servers, and hooks via `~/.kimi-code/`                                                                                                                                        |
 | **Pi**          | context7, sequential-thinking, qmd, fff, react-grab-mcp, agentmemory, sem, ctx                        | Packages (pi-extension, autoresearch, hooks, fff, mcp-adapter, simplify, todo, btw, code-previews, codex-goal, dynamic-workflows, commandcode-provider, pi-web-access, footer, tps-meter) |
 | **Amp**         | context7, sequential-thinking, qmd, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                         |
@@ -410,7 +411,7 @@ npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
 
-# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd, code-quality-review, commit-atomic, draft-pull-request, docs-update, llm-wiki, plannotator-setup-goal, portless-local, tmux
+# Available skills: prd, ralph, qmd-knowledge, codemap, adr, babysit-pr, handoffs, pickup, pr-review, slop, tdd, code-quality-review, commit-atomic, draft-pull-request, diagnosing-bugs, docs-update, llm-wiki, plannotator-setup-goal, portless-local, tmux, visual-pr
 # Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
@@ -648,9 +649,11 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 **Local Marketplace Plugins** - Installed by `cli.sh` from [`skills/`](skills/):
 
 - `adr` - Architecture Decision Records
+- `babysit-pr` - Monitor an open GitHub pull request for CI failures, review feedback, mergeability, and safe retries or fixes
 - `codemap` - Parallel codebase analysis producing structured documentation
 - `commit-atomic` - Atomic commits by logically grouping changes with commitizen convention (no `git add -A`)
-- `draft-pull-request` - Create draft pull requests using gh CLI with what/why/how template
+- `draft-pull-request` - Create draft pull requests using gh CLI with a what/why/how body, plus optional Evidence and Merge Danger sections
+- `diagnosing-bugs` - Reproduce the failure with a red-capable loop before diagnosing it, then lock the fix with a regression test
 - `handoffs` - Create handoff plans for continuing work (provides `/handoffs` command)
 - `llm-wiki` - Build and maintain a persistent, compounding knowledge wiki from raw sources (Karpathy's LLM Wiki pattern)
 - `pickup` - Resume work from previous handoff sessions (provides `/pickup` command)
@@ -665,6 +668,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 - `tdd` - Test-Driven Development workflows
 - `code-quality-review` - Extremely strict maintainability and structural code quality reviews
 - `tmux` - Remote control tmux sessions for interactive CLIs (python, node, gdb, etc.)
+- `visual-pr` - Post a concise visual outline as a GitHub pull request comment without replacing the pull request description
 
 #### Projects Built with AI
 
@@ -782,6 +786,16 @@ OpenAI-powered AI coding assistant. [Homepage](https://opencode.ai)
 
 ### Installation
 
+`./cli.sh` installs OpenCode 2 as the `opencode` command. Do not install OpenCode 1 first. The V2 installer replaces the V1 binary. A leftover beta `opencode2` binary still works.
+
+OpenCode 2:
+
+```bash
+curl -fsSL https://opencode.ai/v2/install | bash
+```
+
+OpenCode 1 (legacy; `cli.sh` does not install this):
+
 ```bash
 curl -fsSL https://opencode.ai/install | bash
 ```
@@ -853,7 +867,13 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
 		}
 	},
 	"plugin": [
-		"@plannotator/opencode@latest",
+		[
+			"@plannotator/opencode@latest",
+			{
+				"workflow": "plan-agent",
+				"planningAgents": ["plan"]
+			}
+		],
 		"opencode-chrome-annotation@latest"
 	],
 	"formatter": {
@@ -906,10 +926,9 @@ Similar to Claude Code's PostToolUse hooks, formatters run automatically after w
 OpenCode supports community plugins that enhance functionality:
 
 - **[@plannotator/opencode](https://github.com/backnotprop/plannotator)** - Interactive code planning and annotation
-
 - **[opencode-chrome-annotation](https://www.npmjs.com/package/opencode-chrome-annotation)** - Chrome-based annotation for plan reviews
 
-Plugins are automatically installed on next OpenCode launch.
+Plugins are installed on the next OpenCode launch. OpenCode 2 loads `@plannotator/opencode` through its package `exports` entry and converts a `plugin` tuple into `{ package, options }` in memory. The published schema (`https://opencode.ai/config.json`) still only allows `plugin`, so the repo keeps that tuple. A bare package string omits the workflow options. Markdown stubs for `/plannotator-review`, `/plannotator-annotate`, and `/plannotator-last` must run the `plannotator` CLI: their descriptions do not match the plugin's native commands, so the stubs replace those commands.
 
 ### Custom Agents
 
@@ -939,6 +958,9 @@ Located in [`configs/opencode/command/`](configs/opencode/command/):
 
 - `simplify` - Simplify over-engineered code for clarity and maintainability
 - `batch` - Run multiple tasks in parallel as worker tasks
+- `plannotator-annotate` - Annotate the current plan with @plannotator/opencode
+- `plannotator-last` - Show the last plannotator plan
+- `plannotator-review` - Review the current plan with @plannotator/opencode
 
 </details>
 

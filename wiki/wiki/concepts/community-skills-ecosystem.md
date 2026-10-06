@@ -38,6 +38,8 @@ npx skills add <owner/repo> --skill <name> --yes  # Install a skill
 | `Gentleman-Programming/engram` | `engram-memory` | Persistent agent memory |
 | `privatenumber/mac-ocr` | `mac-ocr` | macOS OCR via Vision framework |
 
+`babysit-pr` is not installed from `openai/codex`. It is a first-party skill in this repository, together with `diagnosing-bugs` and `visual-pr`.
+
 ## Related Pages
 
 - [[sources/readme]] — Primary documentation source
