@@ -30,7 +30,6 @@ npx skills add <owner/repo> --skill <name> --yes  # Install a skill
 | `blader/humanizer` | `humanizer` | Remove AI-generated writing style |
 | `openclaw/agent-skills` | `autoreview` | Automated PR review |
 | `GoogleChrome/modern-web-guidance` | `modern-web-guidance` | Web dev best practices |
-| `openai/codex` | `babysit-pr` | Automated PR monitoring |
 | `mvanhorn/last30days-skill` | `last30days` | Recent topic research |
 | `av/facts` | `facts` suite | Track project specs with lifecycle |
 | `github/gh-stack` | `gh-stack` | Stacked branches and PRs |
