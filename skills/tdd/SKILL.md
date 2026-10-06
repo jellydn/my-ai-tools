@@ -44,7 +44,17 @@ Guides you through the complete TDD workflow with Red-Green-Refactor cycle.
 - Clean code - Refactor regularly to maintain quality
 - One concept per test - Keep tests focused and atomic
 - AAA Pattern - Structure tests as Arrange, Act, Assert
-- Black-box testing - Test only public methods and behavior, not implementation details
+- **Black-box testing** - Test only public methods and behavior, not implementation details
+- **Test at an agreed seam** - Before writing a test, identify the public interface that exposes the behavior and prefer the highest existing seam
+- **Independent expectations** - Expected values come from a literal, worked example, or spec; do not recompute them with the same algorithm as the implementation
+- **Vertical slices** - Write one meaningful test, implement the minimum, then repeat; avoid writing an entire imagined test suite before learning from the first cycle
+
+### Anti-Patterns
+
+- **Implementation-coupled tests** mock private collaborators or inspect internal state. They fail during harmless refactors and provide weak behavioral confidence.
+- **Tautological tests** derive the expected value with the same logic as the code under test, so both can be wrong together.
+- **Horizontal slicing** writes all tests first and all implementation later. Prefer tracer-bullet slices that exercise one user-visible behavior at a time.
+- **Unconfirmed seams** test a low-level helper only because it is easy to reach. If the behavior matters at a higher interface, test there instead or document why the lower seam is the correct one.
 
 ## Process
 

@@ -47,7 +47,7 @@ The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONS
 | --------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Claude Code** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                                                                                               |
 | **OpenCode**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | @plannotator/opencode                                                                                                                                                                                                                          |
-| **Codex**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, node_repl, ctx   | -                                                                                                                                                                                                                                              |
+| **Codex**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                                                                              |
 | **Kimi Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, logpilot, sem, ctx                              | Skills, MCP servers, and hooks via `~/.kimi-code/`                                                                                                                                                                                             |
 | **Pi**          | context7, sequential-thinking, qmd, codebase-memory-mcp, fff, react-grab-mcp, agentmemory, sem, ctx                        | Packages (pi-extension, pi-subagents, autoresearch, fff, mcp-adapter, simplify, rpiv-todo, btw, code-previews, codex-goal, commandcode-provider, pi-web-access, footer, tps-meter, pi-qwencloud-provider, pi-cursor-sdk) |
 | **Oh My Pi**  | Pi-compatible layout; MCP servers via `~/.omp/agent/mcp.json` when present                                                  | Pi fork (`@oh-my-pi/pi-coding-agent`); configs managed under `configs/omp/`                                                                                                                                          |
@@ -983,7 +983,15 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
 			}
 		}
 	},
-	"plugin": ["@plannotator/opencode@latest"],
+	"plugin": [
+		[
+			"@plannotator/opencode@latest",
+			{
+				"workflow": "plan-agent",
+				"planningAgents": ["plan"]
+			}
+		]
+	],
 	"formatter": {
 		"biome": {
 			"command": ["biome", "check", "--write", "$FILE"],
@@ -1035,7 +1043,7 @@ OpenCode supports community plugins that enhance functionality:
 
 - **[@plannotator/opencode](https://github.com/backnotprop/plannotator)** - Interactive code planning and annotation
 
-Plugins are automatically installed on next OpenCode launch. Note: `@plannotator/opencode` is a V1 plugin and does not work in OpenCode 2 until ported (see the migration note above).
+Plugins are installed on the next OpenCode launch. OpenCode 2 loads `@plannotator/opencode` through its package `exports` entry and converts a `plugin` tuple into `{ package, options }` in memory. The published schema (`https://opencode.ai/config.json`) still only allows `plugin`, so the repo keeps that tuple. A bare package string omits the workflow options. Markdown stubs for `/plannotator-review`, `/plannotator-annotate`, and `/plannotator-last` must run the `plannotator` CLI: their descriptions do not match the plugin's native commands, so the stubs replace those commands.
 
 ### Custom Agents
 
@@ -1406,14 +1414,10 @@ args = [ "-y", "@react-grab/mcp", "--stdio" ]
 command = "logpilot"
 args = ["mcp-server"]
 
+# node_repl ships inside ChatGPT.app. Leave it disabled when that binary is absent.
 [mcp_servers.node_repl]
-args = []
-command = "/Applications/Codex.app/Contents/Resources/node_repl"
-startup_timeout_sec = 120
-
-[mcp_servers.node_repl.env]
-CODEX_HOME = "$HOME/.codex"
-NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/node"
+command = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
+enabled = false
 ```
 
 ### Custom Agents

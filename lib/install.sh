@@ -367,6 +367,7 @@ install_rtk() {
 	run_installer "RTK command-output compressor" "_run_rtk_install" "$check_cmd" "$version_cmd"
 }
 
+# Legacy OpenCode 1 installer. cli.sh does not call this; OpenCode 2 is the default.
 install_opencode() {
 	_run_opencode_install() {
 		if command -v opencode &>/dev/null; then

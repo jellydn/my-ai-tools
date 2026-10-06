@@ -21,6 +21,22 @@ beyond this template unless the repository's own PR template requires them.
 {Optional change outline: 1-3 small views from change-outline.md, each after one short sentence. Omit when the bullets
 already make the shape clear.}
 
+{Optional **Evidence** section. Delete the heading and bullets when you have no before/after observation.}
+
+## Evidence
+
+- **Before:** {failing test, old output, screenshot, or observed behavior}
+- **After:** {passing test, new output, screenshot, or verified behavior}
+
+{Optional **Merge Danger** section. Delete the heading and bullets when the change is an ordinary reversible edit and
+**How** already makes the blast radius clear.}
+
+## Merge Danger
+
+- **Door:** {one-way or two-way}
+- **Blast radius:** {one-word scope, such as local, API, data, or global}
+- {Optional: rollback, migration, compatibility, or deployment risk.}
+
 ## Reviewer notes
 
 - {Optional, 1-3 bullets: risks, migrations, breaking changes, deliberate omissions, or surprising decisions. Delete
@@ -38,6 +54,9 @@ already make the shape clear.}
 - **What** names the surface area: components, commands, APIs, or configs that changed.
 - **Why** states the concrete problem. Avoid vague phrases like "to improve things".
 - **How** is about decisions and structure. Do not write a file-by-file changelog; the diff already shows that.
+- **Evidence** is optional. Keep the section only when a before/after observation helps a reviewer see the change.
+- **Merge Danger** is optional. Keep the section only when reversal is hard or the blast radius is not already clear
+  from **How**.
 - **Reviewer notes** is for things a reviewer could miss or must act on. Do not repeat **How**.
 - **Validation** lists only checks that you ran, with their result. If you ran none, write `- Not run.` and say why.
   Do not tick checklist items (yours or the repository's) for work you did not do.

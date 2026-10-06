@@ -109,7 +109,15 @@
 		}
 	},
 	"model": "omnirouter/free",
-	"plugin": ["@plannotator/opencode@latest"],
+	"plugin": [
+		[
+			"@plannotator/opencode@latest",
+			{
+				"workflow": "plan-agent",
+				"planningAgents": ["plan"]
+			}
+		]
+	],
 	"provider": {
 		"cursor-acp": {
 			"name": "Cursor ACP",

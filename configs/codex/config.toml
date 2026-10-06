@@ -1,4 +1,3 @@
-model_personality = "pragmatic"
 model = "gpt-6-astra"
 model_reasoning_effort = "medium"
 approvals_reviewer = "guardian_subagent"
@@ -72,6 +71,8 @@ command = "codebase-memory-mcp"
 [mcp_servers.node_repl]
 args = []
 command = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
+# ChatGPT.app is not installed, so this helper is missing and Codex fails MCP startup.
+enabled = false
 startup_timeout_sec = 120
 
 [mcp_servers.node_repl.env]
