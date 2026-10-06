@@ -16,7 +16,10 @@ printf '%s\n' "$*" >>"$GH_CALLS"
 case "$*" in
 	"repo view --json nameWithOwner --jq .nameWithOwner") echo "jellydn/my-ai-tools" ;;
 	"api user --jq .login") echo "jellydn" ;;
-	"api --paginate repos/jellydn/my-ai-tools/issues/42/comments") echo "$GH_COMMENTS" ;;
+	"api --paginate repos/jellydn/my-ai-tools/issues/42/comments")
+		[ "${GH_LOOKUP_FAIL:-}" != "1" ] || exit 1
+		echo "$GH_COMMENTS"
+		;;
 	"api --method PATCH repos/jellydn/my-ai-tools/issues/comments/9 --input - --jq .html_url")
 		cat >"$GH_PAYLOAD"
 		echo "https://github.com/jellydn/my-ai-tools/pull/42#issuecomment-9"
@@ -33,8 +36,9 @@ EOF
 
 run_visual_pr_publish() {
 	local comments="$1"
+	local lookup_fail="${2:-}"
 	run env PATH="$VISUAL_PR_BIN_DIR:$PATH" GH_CALLS="$BATS_TEST_TMPDIR/calls" \
-		GH_PAYLOAD="$BATS_TEST_TMPDIR/payload" GH_COMMENTS="$comments" \
+		GH_PAYLOAD="$BATS_TEST_TMPDIR/payload" GH_COMMENTS="$comments" GH_LOOKUP_FAIL="$lookup_fail" \
 		"$REPO_ROOT/skills/visual-pr/scripts/publish-comment.sh" 42 "$VISUAL_PR_COMMENT_FILE"
 }
 
@@ -127,6 +131,15 @@ run_visual_pr_publish() {
 	[ "$status" -eq 0 ]
 	run grep -F '<!-- visual-pr -->' "$BATS_TEST_TMPDIR/payload"
 	[ "$status" -eq 0 ]
+}
+
+@test "visual-pr stops without publishing when comment lookup fails" {
+	setup_visual_pr_fixture
+	run_visual_pr_publish '[]' 1
+
+	[ "$status" -ne 0 ]
+	run grep -E 'pr comment|api --method PATCH' "$BATS_TEST_TMPDIR/calls"
+	[ "$status" -ne 0 ]
 }
 
 @test "Claude marketplace exposes the first-party visual-pr skill" {

@@ -17,14 +17,17 @@ if [ ! -f "$comment_file" ]; then
 	exit 2
 fi
 
-readonly repository="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
-readonly viewer="$(gh api user --jq .login)"
-readonly comment_id="$(
+repository="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+readonly repository
+viewer="$(gh api user --jq .login)"
+readonly viewer
+comment_id="$(
 	gh api --paginate "repos/$repository/issues/$pr_number/comments" |
 		jq -r --arg viewer "$viewer" --arg marker "$MARKER" \
 			'.[] | select(.user.login == $viewer and (.body | startswith($marker))) | .id' |
 		tail -n 1
 )"
+readonly comment_id
 
 marked_comment="$(mktemp "${TMPDIR:-/tmp}/visual-pr-comment.XXXXXX")"
 trap 'rm -f "$marked_comment"' EXIT
