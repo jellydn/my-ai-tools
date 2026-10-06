@@ -35,6 +35,24 @@ README_FILE="$REPO_ROOT/TOOL_REFERENCE.md"
     [ "$output" -ge 10 ]
 }
 
+@test "recommend-skills.json contains Orca orchestration skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "stablyai/orca" and .skill == "orchestration")] | length == 1' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "Orca orchestration description states the runtime requirement" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "stablyai/orca" and .skill == "orchestration")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"requires the Orca runtime"* ]]
+}
+
 @test "every entry in recommended-skills.json has a non-empty repo field" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
@@ -547,6 +565,21 @@ README_FILE="$REPO_ROOT/TOOL_REFERENCE.md"
 @test "README.md documents pstack poteto-mode install command" {
     run grep -F 'npx skills add michael-denyer/pstack-claude --skill poteto-mode --global --agent claude-code' "$README_FILE"
     [ "$status" -eq 0 ]
+}
+
+# ---------------------------------------------------------------------------
+# stablyai/orca orchestration entry
+# ---------------------------------------------------------------------------
+
+@test "README.md documents Orca orchestration install command" {
+    run grep -F 'npx skills add stablyai/orca --skill orchestration --global --agent claude-code' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md Orca row states the runtime requirement" {
+    run grep -F 'Orca-specific orchestration' "$README_FILE"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Requires the Orca runtime"* ]]
 }
 
 @test "README.md pstack table row references michael-denyer/pstack-claude" {

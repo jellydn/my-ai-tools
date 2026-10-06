@@ -6,6 +6,11 @@
 			"description": "Route coding tasks through rigorous planning, delegation, review, and verification workflows across Claude Code, Codex, Pi, OpenCode, and other agent harnesses"
 		},
 		{
+			"repo": "stablyai/orca",
+			"skill": "orchestration",
+			"description": "Coordinate supervised Orca workers through messages, task DAGs, decision gates, and completion or escalation flows; requires the Orca runtime"
+		},
+		{
 			"repo": "humanlayer/skills",
 			"skill": "visual-pr",
 			"description": "Create or update pull requests with concise visual outlines that help reviewers understand the change"
