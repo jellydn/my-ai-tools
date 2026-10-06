@@ -5,6 +5,39 @@ setup() {
 	PLUGIN_ROOT="$REPO_ROOT/configs/amp/plugins/my-ai-tools-skills"
 }
 
+setup_visual_pr_fixture() {
+	VISUAL_PR_BIN_DIR="$BATS_TEST_TMPDIR/bin"
+	VISUAL_PR_COMMENT_FILE="$BATS_TEST_TMPDIR/comment.md"
+	mkdir -p "$VISUAL_PR_BIN_DIR"
+	printf '%s\n' 'visual outline' >"$VISUAL_PR_COMMENT_FILE"
+	cat >"$VISUAL_PR_BIN_DIR/gh" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"$GH_CALLS"
+case "$*" in
+	"repo view --json nameWithOwner --jq .nameWithOwner") echo "jellydn/my-ai-tools" ;;
+	"api user --jq .login") echo "jellydn" ;;
+	"api --paginate repos/jellydn/my-ai-tools/issues/42/comments") echo "$GH_COMMENTS" ;;
+	"api --method PATCH repos/jellydn/my-ai-tools/issues/comments/9 --input - --jq .html_url")
+		cat >"$GH_PAYLOAD"
+		echo "https://github.com/jellydn/my-ai-tools/pull/42#issuecomment-9"
+		;;
+	"pr comment 42 --body-file "*)
+		cp "${*: -1}" "$GH_PAYLOAD"
+		echo "https://github.com/jellydn/my-ai-tools/pull/42#issuecomment-10"
+		;;
+	*) exit 1 ;;
+esac
+EOF
+	chmod +x "$VISUAL_PR_BIN_DIR/gh"
+}
+
+run_visual_pr_publish() {
+	local comments="$1"
+	run env PATH="$VISUAL_PR_BIN_DIR:$PATH" GH_CALLS="$BATS_TEST_TMPDIR/calls" \
+		GH_PAYLOAD="$BATS_TEST_TMPDIR/payload" GH_COMMENTS="$comments" \
+		"$REPO_ROOT/skills/visual-pr/scripts/publish-comment.sh" 42 "$VISUAL_PR_COMMENT_FILE"
+}
+
 @test "Amp skills plugin bundles every canonical skill without drift" {
 	run diff -qr -x README-DISCOVERY.md "$REPO_ROOT/skills" "$PLUGIN_ROOT/skills"
 	[ "$status" -eq 0 ]
@@ -55,4 +88,57 @@ setup() {
 		fi
 		[ "${#description}" -le 160 ]
 	done
+}
+
+@test "visual-pr publishes a comment without replacing the PR description" {
+	local skill_file="$REPO_ROOT/skills/visual-pr/SKILL.md"
+	local publish_script="$REPO_ROOT/skills/visual-pr/scripts/publish-comment.sh"
+
+	run grep -F 'scripts/publish-comment.sh' "$skill_file"
+	[ "$status" -eq 0 ]
+
+	run grep -F 'gh pr comment "$pr_number" --body-file "$marked_comment"' "$publish_script"
+	[ "$status" -eq 0 ]
+
+	run grep -E 'gh pr edit .*--body-file' "$skill_file" "$publish_script"
+	[ "$status" -ne 0 ]
+}
+
+@test "visual-pr updates the current user's existing marked comment" {
+	setup_visual_pr_fixture
+	run_visual_pr_publish \
+		'[{"id":7,"body":"<!-- visual-pr --> old","user":{"login":"other"}},{"id":9,"body":"<!-- visual-pr --> old","user":{"login":"jellydn"}}]'
+
+	[ "$status" -eq 0 ]
+	[ "$output" = "https://github.com/jellydn/my-ai-tools/pull/42#issuecomment-9" ]
+	run grep -F 'api --method PATCH repos/jellydn/my-ai-tools/issues/comments/9' "$BATS_TEST_TMPDIR/calls"
+	[ "$status" -eq 0 ]
+	run jq -e '.body | startswith("<!-- visual-pr -->\n\nvisual outline")' "$BATS_TEST_TMPDIR/payload"
+	[ "$status" -eq 0 ]
+}
+
+@test "visual-pr posts a new marked comment when none exists" {
+	setup_visual_pr_fixture
+	run_visual_pr_publish '[]'
+
+	[ "$status" -eq 0 ]
+	[ "$output" = "https://github.com/jellydn/my-ai-tools/pull/42#issuecomment-10" ]
+	run grep -F 'pr comment 42 --body-file' "$BATS_TEST_TMPDIR/calls"
+	[ "$status" -eq 0 ]
+	run grep -F '<!-- visual-pr -->' "$BATS_TEST_TMPDIR/payload"
+	[ "$status" -eq 0 ]
+}
+
+@test "Claude marketplace exposes the first-party visual-pr skill" {
+	local marketplace="$REPO_ROOT/.claude-plugin/marketplace.json"
+	local recommendations="$REPO_ROOT/configs/recommend-skills.json"
+
+	run jq -e '[.plugins[] | select(.name == "visual-pr" and .source == "./skills/visual-pr")] | length == 1' "$marketplace"
+	[ "$status" -eq 0 ]
+	[ "$output" = "true" ]
+
+	run jq -e '[.recommended_skills[] | select(.repo == "humanlayer/skills" and .skill == "visual-pr")] | length == 0' \
+		"$recommendations"
+	[ "$status" -eq 0 ]
+	[ "$output" = "true" ]
 }

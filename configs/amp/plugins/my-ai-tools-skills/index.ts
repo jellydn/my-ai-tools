@@ -35,6 +35,7 @@ const SKILLS = [
 	"spec-interview",
 	"tdd",
 	"tmux",
+	"visual-pr",
 ] as const;
 
 export default async function myAiToolsSkills(amp: PluginAPI) {
