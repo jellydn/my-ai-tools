@@ -68,11 +68,11 @@ Before going further, confirm the fixed point resolves (`git rev-parse <fixed-po
 - If the repo documents nothing, the clean code smell baseline below still applies
 
 **Intent sources** — understand what the change claims to do:
-- Find issue references in commit messages (`#123`, `Closes #45`, etc.) and fetch the linked issue when possible
+- Find issue references in commit messages and the PR description (`#123`, `Closes #45`, etc.) and fetch the linked issue when possible
 - Read the PR description if one exists (from `gh pr view` or branch context)
 - Look for a spec or plan under `docs/`, `specs/`, `.scratch/`, or a path supplied by the user
 - Check for an `.implementation-log.md` file that records conscious deviations from the plan — the review should **not** penalize a valid pivot
-- If no issue, spec, or plan exists, say so explicitly and use commit messages as the fallback source of intent
+- If no issue, spec, plan, or PR description exists, say so explicitly and use commit messages as the fallback source of intent
 
 A commit message is evidence of intent, not a substitute for the originating spec. Separate missing requirements from unrequested scope.
 
