@@ -88,11 +88,6 @@
 			"description": "Find relevant files and source context by asking what code does"
 		},
 		{
-			"repo": "openai/codex",
-			"skill": "babysit-pr",
-			"description": "Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required"
-		},
-		{
 			"repo": "Gentleman-Programming/engram",
 			"skill": "engram-memory",
 			"description": "Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, git-based sync"

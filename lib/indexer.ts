@@ -65,7 +65,6 @@ export const EXCLUDED_FILE_PATTERNS = [
 	/accounts\.json$/,
 	/sessions\.json$/,
 	/delegation-.*\.json$/,
-	/\.codex\/skills\/babysit-pr$/,
 ];
 
 export type Chunk = {
