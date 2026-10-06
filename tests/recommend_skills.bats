@@ -517,6 +517,39 @@ README_FILE="$REPO_ROOT/TOOL_REFERENCE.md"
     [ "$status" -eq 0 ]
 }
 
+# ---------------------------------------------------------------------------
+# jellydn/flowly analyzing-repositories entry
+# ---------------------------------------------------------------------------
+
+@test "recommend-skills.json contains Flowly analyzing-repositories entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "jellydn/flowly" and .skill == "analyzing-repositories")] | length == 1' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "Flowly analyzing-repositories entry has non-empty description" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "jellydn/flowly" and .skill == "analyzing-repositories")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"read-only"* ]]
+    [[ "$output" == *"citations"* ]]
+}
+
+@test "README.md documents Flowly analyzing-repositories install command" {
+    run grep -F 'npx skills add jellydn/flowly --skill analyzing-repositories --global --agent claude-code' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md Flowly table row references jellydn/flowly" {
+    run grep -F 'https://github.com/jellydn/flowly' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
 @test "README.md pstack table row references michael-denyer/pstack-claude" {
     run grep -F 'https://github.com/michael-denyer/pstack-claude' "$README_FILE"
     [ "$status" -eq 0 ]
