@@ -52,6 +52,20 @@ toml_keys_before_tables() {
 	[ "$status" -eq 0 ]
 }
 
+@test "configs/codex/config.toml uses personality and does not start a missing node_repl" {
+	run grep -E '^model_personality[[:space:]]*=' "$CODEX_CONFIG"
+	[ "$status" -ne 0 ]
+	run grep -E '^personality[[:space:]]*=[[:space:]]*"pragmatic"' "$CODEX_CONFIG"
+	[ "$status" -eq 0 ]
+	run awk '
+		$0 == "[mcp_servers.node_repl]" { in_block = 1; next }
+		in_block && $0 ~ /^\[/ { exit }
+		in_block && $0 ~ /^enabled[[:space:]]*=[[:space:]]*false$/ { found = 1 }
+		END { exit found ? 0 : 1 }
+	' "$CODEX_CONFIG"
+	[ "$status" -eq 0 ]
+}
+
 @test "configs/codex/config.toml references context7 MCP server" {
 	run grep -F "context7" "$CODEX_CONFIG"
 	[ "$status" -eq 0 ]
