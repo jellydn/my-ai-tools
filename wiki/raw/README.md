@@ -28,7 +28,6 @@ The most-used skills across Claude Code, OpenCode, and other AI tools:
 | **adr**                                | Generate Architecture Decision Records from design discussions                  | Before implementing significant technical changes — captures the why, alternatives considered, and consequences |
 | **codemap**                            | Parallel codebase analysis producing 7 structured documents                     | Onboarding to a new project, or before major refactoring — gives you the full picture fast                      |
 | **code-quality-review** | Extremely strict maintainability and structural code quality review             | Before merging PRs — catches issues that regular linters miss                                                   |
-| **babysit-pr**                         | Continuously monitor open PRs, auto-fix CI failures, surface review feedback    | After pushing a PR — hands-off monitoring until it's ready to merge                                             |
 | **improve**                            | Audit any codebase and write implementation plans for cheaper models to execute | When you want a senior-level code review with actionable, self-contained plans                                  |
 
 ## 🔌 MCP Servers & Plugins Overview
@@ -713,7 +712,6 @@ Official and community-maintained skill collections for specific frameworks:
 | **Facts**                  | [av/facts](https://github.com/av/facts)                                                                       | Track project specs and facts in a `.facts` file. Lifecycle stages (`@draft` → `@spec` → `@implemented`) with shell-command verification. Ships four skills: `facts`, `facts-discover`, `facts-refine`, and `facts-implement`. |
 | **Modern Web Guidance**    | [GoogleChrome/modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance)                       | Search tool for modern web development best practices (HTML, CSS, accessibility, and client-side JS APIs).                                                                                                                     |
 | **Plannotator Setup Goal** | [backnotprop/plannotator](https://github.com/backnotprop/plannotator)                                         | Turn ideas into structured goal packages with fact sheets and execution plans, gated by Plannotator annotation                                                                                                                 |
-| **Codex PR Babysitter**    | [openai/codex](https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md)                   | Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required                                 |
 | **Last 30 Days**           | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill)                                     | Research what people actually say about any topic in the last 30 days. Pulls from Reddit, X, YouTube, TikTok, HN, Polymarket, GitHub, and the web.                                                                             |
 | **Improve**                | [shadcn/improve](https://github.com/shadcn/improve)                                                           | Audit any codebase and write implementation plans for cheaper models to execute. Uses expensive model for planning, cheap model for execution.                                                                                 |
 | **Engram**                 | [Gentleman-Programming/engram](https://github.com/Gentleman-Programming/engram)                               | Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, and git-based cross-machine sync.                                                                                          |
@@ -736,7 +734,6 @@ npx skills add github/gh-stack --global --agent claude-code
 npx skills add openclaw/agent-skills --skill autoreview --global --agent claude-code
 npx skills add av/facts --global --agent claude-code
 npx skills add GoogleChrome/modern-web-guidance --skill modern-web-guidance --global --agent claude-code
-npx skills add openai/codex --skill babysit-pr --global --agent claude-code
 npx skills add mvanhorn/last30days-skill --global --agent claude-code
 npx skills add shadcn/improve --global --agent claude-code
 npx skills add Gentleman-Programming/engram --skill engram-memory --global --agent claude-code
