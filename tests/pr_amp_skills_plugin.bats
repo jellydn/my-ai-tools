@@ -142,3 +142,12 @@ run_visual_pr_publish() {
 	[ "$status" -eq 0 ]
 	[ "$output" = "true" ]
 }
+
+@test "Claude marketplace exposes the first-party babysit-pr skill" {
+	local marketplace="$REPO_ROOT/.claude-plugin/marketplace.json"
+
+	run jq -e '[.plugins[] | select(.name == "babysit-pr" and .source == "./skills/babysit-pr")] | length == 1' \
+		"$marketplace"
+	[ "$status" -eq 0 ]
+	[ "$output" = "true" ]
+}

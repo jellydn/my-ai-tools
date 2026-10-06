@@ -19,6 +19,16 @@
 			"category": "productivity"
 		},
 		{
+			"name": "babysit-pr",
+			"description": "Monitors an open GitHub PR for CI failures, review feedback, mergeability, and safe retries or fixes.",
+			"version": "1.0.0",
+			"author": {
+				"name": "my-ai-tools contributors"
+			},
+			"source": "./skills/babysit-pr",
+			"category": "productivity"
+		},
+		{
 			"name": "adr",
 			"description": "Manages Architecture Decision Records (ADR) for tracking important architectural decisions. Initialize, create, list, search, and view ADRs.",
 			"version": "1.0.0",
