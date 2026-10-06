@@ -29,7 +29,7 @@
     "commandcode/deepseek/deepseek-v4.1-flash"
   ],
   "hideThinkingBlock": true,
-  "lastChangelogVersion": "0.99.1",
+  "lastChangelogVersion": "1.0.3",
   "packages": [
     {
       "skills": [],
