@@ -109,6 +109,31 @@ LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
 	[[ "$output" == *"Detected OpenCode (via command-v2)"* ]]
 }
 
+@test "OpenCode config passes Plannotator workflow options and command stubs run the CLI" {
+	require_jq
+	local config="$REPO_ROOT/configs/opencode/opencode.json"
+	run jq -e '
+		.plugin == [[
+			"@plannotator/opencode@latest",
+			{ "workflow": "plan-agent", "planningAgents": ["plan"] }
+		]]
+		and (.plugins | not)
+	' "$config"
+	[ "$status" -eq 0 ]
+	run grep -F 'plannotator review $ARGUMENTS' "$REPO_ROOT/configs/opencode/command/plannotator-review.md"
+	[ "$status" -eq 0 ]
+	run grep -F 'plannotator annotate $ARGUMENTS' "$REPO_ROOT/configs/opencode/command/plannotator-annotate.md"
+	[ "$status" -eq 0 ]
+	run grep -F 'plannotator last $ARGUMENTS' "$REPO_ROOT/configs/opencode/command/plannotator-last.md"
+	[ "$status" -eq 0 ]
+	if grep -F 'Acknowledge "Opening code review..."' "$REPO_ROOT/configs/opencode/command/plannotator-review.md"; then
+		echo "FAIL: plannotator-review still tells the model to wait instead of running plannotator" >&2
+		return 1
+	fi
+	run grep -F 'copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/commands"' "$CLI_SH"
+	[ "$status" -eq 0 ]
+}
+
 @test "AI launcher configures opencode tool" {
 	require_jq
 	run jq -e '[.tools[] | select(.name == "opencode")] | length == 1' "$LAUNCHER_CONFIG"

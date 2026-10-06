@@ -1121,6 +1121,8 @@ copy_opencode_configs() {
 
 	execute_quoted rm -rf "$HOME/.config/opencode/command"
 	copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/command"
+	# OpenCode 2 also reads commands/. Older Plannotator stubs there shadow the plugin.
+	copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/commands"
 
 	log_success "OpenCode configs copied"
 }
