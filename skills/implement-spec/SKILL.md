@@ -100,6 +100,14 @@ Do not merge two workers that modify the same contract without reviewing their c
 
 When every ticket is complete, load `code-review` and review the full integration branch against the original spec, not only the individual ticket descriptions. Fix findings in a focused worker, rerun the affected checks, and repeat the review until there are no unresolved critical or important findings.
 
+For changes to agent skills or workflow instructions, include a learning check before declaring the ticket complete:
+
+1. Preserve a representative input and the old output.
+2. Record any human correction and the decision behind it.
+3. Update the skill with a bounded decision rule rather than a slogan.
+4. Rerun the same input and compare the new output with the correction.
+5. Add a deterministic check when the lesson is mechanical.
+
 ### 7. Finish cleanly
 
 Run the repository's complete validation suite. Confirm:
@@ -132,5 +140,7 @@ Keep worker prompts sparse. Prefer pointers to the spec, ticket, notes, and prev
 - [ ] Each completed ticket has a verified commit SHA.
 - [ ] Merges were checked as an integrated change.
 - [ ] `code-review` passed on the complete branch.
+- [ ] Skill/workflow changes were rerun against a stable input, when applicable.
+- [ ] Mechanical lessons became deterministic checks where practical.
 - [ ] Full repository validation passed, or blockers are reported exactly.
 - [ ] Worker worktrees and temporary artifacts were cleaned up.

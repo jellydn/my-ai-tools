@@ -34,6 +34,7 @@ Before writing, gather:
 - The complete diff against the PR base.
 - The actual commands run and their output.
 - Any screenshots, logs, or before/after behavior available.
+- If a skill or workflow changed, the original input plus the pre-edit and post-edit outputs.
 - The current PR template and existing reviewer notes.
 
 Never claim a test, screenshot, or manual check that was not actually run.
@@ -97,6 +98,18 @@ Evidence should be execution-based whenever possible:
 
 For visual work, prefer screenshots. For bug fixes, show the original reproduction and the regression check. If there is no meaningful before state, say so and provide the strongest available verification instead of manufacturing one.
 
+For skill changes, show the learning loop rather than only the edited Markdown:
+
+```markdown
+- **Input:** <stable task or fixture>
+- **Before:** <output from the previous skill>
+- **Human edit:** <decision the user made and why>
+- **After:** <output after updating the skill>
+- **Rerun:** <same input compared against the intended result>
+```
+
+Prefer a decision rule with boundaries over a literal preference. If the lesson can be checked mechanically, include the lint/test/hook that now enforces it.
+
 ### Merge Danger: risk, not drama
 
 Classify the door:
@@ -130,6 +143,7 @@ After writing and checking the body:
 - [ ] Diff was reviewed against the correct base.
 - [ ] Summary contains one useful visual or diff sketch.
 - [ ] Evidence includes real before/after results, or the limitation is explicit.
+- [ ] Skill changes include a same-input learning-loop result, when applicable.
 - [ ] Door type and blast radius are named.
 - [ ] Rollback and compatibility concerns are documented.
 - [ ] Repository PR template and existing reviewer notes were preserved.

@@ -56,6 +56,18 @@ Cost: maintenance and false-positive risk
 
 Inspect these categories:
 
+### Skill learning loop
+
+Treat a human correction as training data for the workflow, not as a one-off preference:
+
+1. Save the agent's output before editing it.
+2. Make and save the human-edited version against the same input.
+3. State what decision the edit reflects that the skill did not encode.
+4. Rewrite the rule as a decision procedure, including when it does **not** apply.
+5. Rerun the original input and compare the result with the edited version.
+
+Do not add vague rules such as “make it better” or blindly encode every edit as a universal instruction. Keep only lessons that held up on real work. If a lesson is mechanical and stable, prefer a linter, test, hook, or CI check over more prose. Keep shared rules in the main skill and context-specific rules in a linked reference or style file so the skill does not grow indiscriminately.
+
 ### Navigation
 
 Could the agent have found the right file, command, dependency, or domain term sooner? Prefer a short navigation pointer or a `GLOSSARY.md` entry over a large instruction block.
@@ -81,6 +93,10 @@ Look for repeated broad searches, redundant reads, missing filters, or expensive
 ### Information access
 
 Identify information the agent needed but could not access: logs, service status, readonly API data, fixtures, schemas, or architecture notes. Prefer safe readonly access and concise pointers.
+
+### Skill drift
+
+When an installed or existing skill repeatedly needs correction, compare the same input across the old and revised versions. Treat the difference as evidence of skill drift: the user's standard moved, the skill was underspecified, or the rule was too literal. Record the smallest durable change and its verification result.
 
 ## Output
 
@@ -111,4 +127,7 @@ For each candidate, include the exact target path and a proposed patch shape. Do
 - [ ] Mechanical violations are assigned to deterministic automation.
 - [ ] Judgement calls are assigned to review standards.
 - [ ] Findings are ranked by severity and leverage.
+- [ ] Human edits were captured as before/after evidence where a skill change is proposed.
+- [ ] Proposed rules describe decisions and boundaries, not only desired outputs.
+- [ ] The original input was rerun to verify that the skill actually learned the change.
 - [ ] No environment change was applied without user approval.
