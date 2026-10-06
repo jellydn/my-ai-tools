@@ -56,6 +56,8 @@ Guides you through the complete TDD workflow with Red-Green-Refactor cycle.
 - **Horizontal slicing** writes all tests first and all implementation later. Prefer tracer-bullet slices that exercise one user-visible behavior at a time.
 - **Unconfirmed seams** test a low-level helper only because it is easy to reach. If the behavior matters at a higher interface, test there instead or document why the lower seam is the correct one.
 
+Before the first Red phase, discover the repository's test runner and command from its manifest, task runner, docs, or CI. Do not assume TypeScript, Vitest, npm, or pnpm. Record the exact command used for the red failure and why it failed; a syntax/import error is not a valid Red state.
+
 ## Process
 
 ### For "start <FEATURE>":
