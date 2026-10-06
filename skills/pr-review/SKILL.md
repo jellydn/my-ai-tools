@@ -54,11 +54,13 @@ Or create a PR first:
 ## Process
 
 1. Parse `$ARGUMENTS` to determine PR identifier (URL, number, or auto-detect)
-2. Fetch PR details and review comments using `gh` CLI
-3. Parse review comments to understand what needs to be changed
-4. For each comment, implement the fix
-5. Run tests to ensure nothing breaks
-6. Commit the changes
+2. Fetch PR details, review threads, issue comments, and authoritative thread-resolution state using `gh`
+3. Classify each comment as actionable, informational, disputed/ambiguous, or resolved; ask before changing disputed or ambiguous requests
+4. For each actionable comment, record the comment ID, planned change, and verification command
+5. Implement the approved fixes
+6. Run focused tests, then the relevant broader checks
+7. Recheck the comment-to-change list and confirm every actionable thread is resolved or explicitly deferred
+8. Commit the changes
 
 ## Available Scripts
 
@@ -79,7 +81,7 @@ node $SKILL_PATH/scripts/extract-pr-comments.js \
 
 **What it does:**
 
-- Filters out comments with replies (likely resolved)
+- Does not infer resolution from the presence or absence of replies; use GitHub's authoritative thread-resolution state
 - Classifies comments by severity (critical, high, medium, low)
 - Categorizes comments (security, performance, maintainability, etc.)
 - Creates 3 output files:

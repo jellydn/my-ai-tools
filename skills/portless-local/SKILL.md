@@ -134,11 +134,9 @@ If you skipped the trust prompt on first run, run `portless trust` to add the CA
 
 ### HTTPS & HTTP/2
 
-HTTP/2 + TLS is enabled by default for faster dev server page loads.
+HTTP is the documented default for this skill. Use `--https` or `PORTLESS_HTTPS=1` only when the app needs OAuth callbacks, secure cookies, HTTPS-only features, or HTTP/2 testing.
 
-**Why HTTP/2 matters:** Browsers limit HTTP/1.1 to 6 connections per host, which bottlenecks dev servers serving many unbundled files. HTTP/2 multiplexes all requests over a single connection.
-
-**First run:** Generates a local CA and server certs, then adds the CA to your system trust store. After that, no prompts, no browser warnings.
+When HTTPS is enabled, the first run may generate a local CA and server certificates. Run `portless trust` only if the local certificate must be trusted by the host or browser.
 
 **Custom certificates:** Use your own certs (e.g., from mkcert):
 
@@ -171,9 +169,9 @@ portless proxy start
 
 | Flag                  | Description                                                                |
 | --------------------- | -------------------------------------------------------------------------- |
-| `-p, --port <number>` | Proxy port (default: 443, or 80 with `--no-tls`). Auto-elevates with sudo. |
-| `--no-tls`            | Disable HTTPS (use plain HTTP on port 80)                                  |
-| `--https`             | Enable HTTPS (default, accepted for compatibility)                         |
+| `-p, --port <number>` | Proxy port (default: 80, or 443 with `--https`). |
+| `--no-tls`            | Disable HTTPS (use plain HTTP).                     |
+| `--https`             | Enable HTTPS and TLS.                               |
 | `--lan`               | Enable LAN mode (mDNS `.local` domains for real device testing)            |
 | `--ip <address>`      | Override auto-detected LAN IP (use with `--lan`)                           |
 | `--tld <tld>`         | Use a custom TLD instead of `.localhost` (e.g. `.test`)                    |
