@@ -67,7 +67,7 @@ load helpers
 	[ "$status" -eq 0 ]
 	run grep -F "    external_directory: deny" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
 	[ "$status" -eq 0 ]
-	run grep -F "model: cursor/grok-4.5" "$REPO_ROOT/configs/pi/agents/fusion-lead.md"
+	run grep -F "model: xai/grok-4.6" "$REPO_ROOT/configs/pi/agents/fusion-lead.md"
 	[ "$status" -eq 0 ]
 	run grep -F "model: cursor/auto" "$REPO_ROOT/configs/pi/agents/fusion-executor.md"
 	[ "$status" -eq 0 ]
@@ -76,7 +76,7 @@ load helpers
 	run grep -F "omniroute/cu/auto" "$REPO_ROOT/configs/pi/settings.json"
 	[ "$status" -ne 0 ]
 	run jq -e '
-		(.enabledModels | index("cursor/grok-4.5") != null) and
+		(.enabledModels | index("xai/grok-4.6") != null) and
 		(.enabledModels | index("cursor/auto") != null) and
 		(.enabledModels | index("openai-codex/gpt-5.6-tera") == null) and
 		(.enabledModels | index("omniroute/cu/auto") == null)
@@ -340,12 +340,11 @@ JSON
 	local tools tool
 	# Limit assertions to the explicit list, not names mentioned in the prompt.
 	tools=$(sed -n '/^const ULTRA_TOOL_NAMES = \[/,/^\] as const/p' "$plugin" | tr "'" '"')
-	for tool in create_thread list_agent_modes find_thread read_thread \
-		send_thread_message get_thread_status wait_for_threads \
+	for tool in read_thread find_thread list_agent_modes list_runners \
+		create_thread thread_interact wait_for_threads \
 		download_thread_file upload_thread_file; do
 		[[ "$tools" == *"\"$tool\""* ]]
 	done
-	[[ "$tools" != *'"thread_interact"'* ]]
 	run grep -F 'tools: ULTRA_TOOL_NAMES' "$plugin"
 	[ "$status" -eq 0 ]
 }
