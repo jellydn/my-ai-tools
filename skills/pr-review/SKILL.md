@@ -70,18 +70,25 @@ The `extract-pr-comments.js` script processes GitHub PR review comments and issu
 
 ```bash
 # Usage
-node $SKILL_PATH/scripts/extract-pr-comments.js <review-comments-file> <issue-comments-file> [output-file]
+node $SKILL_PATH/scripts/extract-pr-comments.js <review-comments-file> <issue-comments-file> <threads-file> [output-file]
 
 # Example
+gh api graphql \
+  -f owner=OWNER -f name=REPO -F number=4972 \
+  -f query='query($owner:String!, $name:String!, $number:Int!) { repository(owner:$owner, name:$name) { pullRequest(number:$number) { reviewThreads(first:100) { nodes { isResolved comments(first:100) { nodes { databaseId } } } } } } }' \
+  > pr-4972-threads.json
+
 node $SKILL_PATH/scripts/extract-pr-comments.js \
   pr-4972-review-comments-raw.json \
   pr-4972-issue-comments-raw.json \
+  pr-4972-threads.json \
   pr-4972-comments.ndjson
 ```
 
 **What it does:**
 
-- Does not infer resolution from the presence or absence of replies; use GitHub's authoritative thread-resolution state
+- Requires a threads file of GitHub review threads and skips a review comment only when its thread has `isResolved: true`
+- Does not treat a reply as resolution; an unanswered thread stays actionable
 - Classifies comments by severity (critical, high, medium, low)
 - Categorizes comments (security, performance, maintainability, etc.)
 - Creates 3 output files:
