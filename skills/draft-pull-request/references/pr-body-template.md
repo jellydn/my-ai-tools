@@ -21,6 +21,17 @@ beyond this template unless the repository's own PR template requires them.
 {Optional change outline: 1-3 small views from change-outline.md, each after one short sentence. Omit when the bullets
 already make the shape clear.}
 
+## Evidence
+
+- **Before:** {failing test, old output, screenshot, or observed behavior}
+- **After:** {passing test, new output, screenshot, or verified behavior}
+
+## Merge Danger
+
+- **Door:** {one-way or two-way}
+- **Blast radius:** {one-word scope, such as local, API, data, or global}
+- {Optional: rollback, migration, compatibility, or deployment risk.}
+
 ## Reviewer notes
 
 - {Optional, 1-3 bullets: risks, migrations, breaking changes, deliberate omissions, or surprising decisions. Delete
