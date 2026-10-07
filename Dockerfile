@@ -5,6 +5,15 @@ RUN bun install --frozen-lockfile
 COPY . .
 RUN --mount=type=secret,id=OPENAI_API_KEY,env=OPENAI_API_KEY \
     if [ -n "$OPENAI_API_KEY" ]; then bun scripts/index-repo.ts && bun scripts/index-browser.ts; fi
+# index-browser.ts is the only consumer. The running bot embeds through the API.
+# A frozen install still unpacks every ONNX and sharp platform binary, and that
+# extract filled the Dokku disk.
+RUN rm -rf \
+    node_modules/@huggingface \
+    node_modules/onnxruntime-node \
+    node_modules/onnxruntime-web \
+    node_modules/sharp \
+    node_modules/@img
 
 FROM oven/bun:1-slim
 RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates && rm -rf /var/lib/apt/lists/*
