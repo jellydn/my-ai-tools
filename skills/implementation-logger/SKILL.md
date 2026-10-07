@@ -87,10 +87,12 @@ Track different types of deviations:
 ### Step 4: Review & Extract
 
 After implementation:
-1. Review log for patterns
-2. Extract key learnings for documentation
-3. Identify knowledge to preserve
-4. Update relevant docs/ADRs
+1. Review the log for patterns
+2. For each material deviation, compare `expected -> observed -> decision -> verified result`
+3. Extract only durable learnings for documentation or skills
+4. Identify knowledge to preserve
+5. Record "No material deviations" when the plan held; do not invent entries
+6. Update relevant docs/ADRs
 
 ## Log Template
 

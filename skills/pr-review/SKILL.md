@@ -54,11 +54,13 @@ Or create a PR first:
 ## Process
 
 1. Parse `$ARGUMENTS` to determine PR identifier (URL, number, or auto-detect)
-2. Fetch PR details and review comments using `gh` CLI
-3. Parse review comments to understand what needs to be changed
-4. For each comment, implement the fix
-5. Run tests to ensure nothing breaks
-6. Commit the changes
+2. Fetch PR details, review threads, issue comments, and authoritative thread-resolution state using `gh`
+3. Classify each comment as actionable, informational, disputed/ambiguous, or resolved; ask before changing disputed or ambiguous requests
+4. For each actionable comment, record the comment ID, planned change, and verification command
+5. Implement the approved fixes
+6. Run focused tests, then the relevant broader checks
+7. Recheck the comment-to-change list and confirm every actionable thread is resolved or explicitly deferred
+8. Commit the changes
 
 ## Available Scripts
 
@@ -68,18 +70,25 @@ The `extract-pr-comments.js` script processes GitHub PR review comments and issu
 
 ```bash
 # Usage
-node $SKILL_PATH/scripts/extract-pr-comments.js <review-comments-file> <issue-comments-file> [output-file]
+node $SKILL_PATH/scripts/extract-pr-comments.js <review-comments-file> <issue-comments-file> <threads-file> [output-file]
 
 # Example
+gh api graphql \
+  -f owner=OWNER -f name=REPO -F number=4972 \
+  -f query='query($owner:String!, $name:String!, $number:Int!) { repository(owner:$owner, name:$name) { pullRequest(number:$number) { reviewThreads(first:100) { nodes { isResolved comments(first:100) { nodes { databaseId } } } } } } }' \
+  > pr-4972-threads.json
+
 node $SKILL_PATH/scripts/extract-pr-comments.js \
   pr-4972-review-comments-raw.json \
   pr-4972-issue-comments-raw.json \
+  pr-4972-threads.json \
   pr-4972-comments.ndjson
 ```
 
 **What it does:**
 
-- Filters out comments with replies (likely resolved)
+- Requires a threads file of GitHub review threads and skips a review comment only when its thread has `isResolved: true`
+- Does not treat a reply as resolution; an unanswered thread stays actionable
 - Classifies comments by severity (critical, high, medium, low)
 - Categorizes comments (security, performance, maintainability, etc.)
 - Creates 3 output files:
