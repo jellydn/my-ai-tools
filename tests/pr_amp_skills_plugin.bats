@@ -203,6 +203,10 @@ PY
 	[ "$status" -eq 0 ]
 	run grep -F '/tmp/portless' "$skill_file"
 	[ "$status" -ne 0 ]
+	run grep -F 'portless myapp next dev --no-tls' "$skill_file"
+	[ "$status" -ne 0 ]
+	run grep -F 'PORTLESS_HTTPS=0 PORTLESS_PORT=8080 portless myapp next dev' "$skill_file"
+	[ "$status" -eq 0 ]
 }
 
 @test "Codemap rejects scope expansion and scans filenames without exposing secrets" {
@@ -210,6 +214,10 @@ PY
 	run grep -F 'do not silently expand to the whole repository' "$skill_file"
 	[ "$status" -eq 0 ]
 	run grep -F 'perform the four focus passes sequentially' "$skill_file"
+	[ "$status" -eq 0 ]
+	run grep -F 'run_in_background=true' "$skill_file"
+	[ "$status" -ne 0 ]
+	run grep -F 'Run the Four Focus Passes' "$skill_file"
 	[ "$status" -eq 0 ]
 	run grep -F 'rg -l ' "$skill_file"
 	[ "$status" -eq 0 ]

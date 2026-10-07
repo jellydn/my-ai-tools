@@ -17,7 +17,7 @@ metadata:
 
 Replace port numbers with stable, named `.localhost` URLs for local development. For humans and agents.
 
-> **Note:** The portless CLI enables HTTPS on port 443 by default (`https://myapp.localhost`). Pass `--no-tls` or set `PORTLESS_HTTPS=0` for plain HTTP. Keep HTTPS when the app needs OAuth, secure cookies, or HTTP/2.
+> **Note:** The portless CLI enables HTTPS on port 443 by default (`https://myapp.localhost`). Pass `--no-tls` to `portless proxy start`, or set `PORTLESS_HTTPS=0`, for plain HTTP. Keep HTTPS when the app needs OAuth, secure cookies, or HTTP/2.
 
 ## Safety and Approval
 
@@ -156,11 +156,11 @@ When HTTPS stays on, the first run may generate a local CA and server certificat
 portless proxy start --cert ./cert.pem --key ./key.pem
 ```
 
-**Disable HTTPS:** HTTPS on port 443 is the CLI default. Pass `--no-tls` or `PORTLESS_HTTPS=0` for plain HTTP on port 80:
+**Disable HTTPS:** HTTPS on port 443 is the CLI default. `portless proxy start --no-tls` or `PORTLESS_HTTPS=0` selects plain HTTP on port 80. Do not put `--no-tls` after the app command; portless forwards those arguments to the child process.
 
 ```bash
 portless proxy start --no-tls
-portless myapp next dev --no-tls
+PORTLESS_HTTPS=0 portless myapp next dev
 ```
 
 ### Clean Up
@@ -295,7 +295,7 @@ portless admin.myapp npm run dev
 {
 	"scripts": {
 		"dev": "portless myapp next dev",
-		"dev:http": "portless myapp next dev --no-tls"
+		"dev:http": "PORTLESS_HTTPS=0 portless myapp next dev"
 	}
 }
 ```
@@ -452,8 +452,9 @@ Portless sets `NODE_EXTRA_CA_CERTS` for child Node.js processes. For a separate 
 # Only after explicit approval for elevation:
 sudo portless proxy start
 
-# Or use an approved proxy on an unprivileged port
-portless myapp next dev --no-tls -p 8080
+# Or configure an approved unprivileged proxy before the app starts.
+# Flags after the child command are forwarded to Next.js, which rejects --no-tls.
+PORTLESS_HTTPS=0 PORTLESS_PORT=8080 portless myapp next dev
 ```
 
 When sudo is unavailable, portless falls back to port 1355. Check the actual URL rather than assuming 443. Use `portless doctor` first for routing, DNS, or trust failures. For cross-app proxy loops, set `changeOrigin: true` in the forwarding proxy so the Host header matches the target route.

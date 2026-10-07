@@ -38,16 +38,16 @@ Use this skill when you need to:
 
 ## How it works
 
-This skill orchestrates 4 parallel agents, each exploring a specific focus area:
+This skill runs four focus passes. Use parallel file-reading and file-writing workers when the runtime provides them. If suitable workers are unavailable, perform the same passes sequentially in the current context:
 
-1. **Tech Agent** → Analyzes stack and integrations → STACK.md, INTEGRATIONS.md
-2. **Architecture Agent** → Analyzes patterns and structure → ARCHITECTURE.md, STRUCTURE.md
-3. **Quality Agent** → Analyzes conventions and testing → CONVENTIONS.md, TESTING.md
-4. **Concerns Agent** → Identifies tech debt and issues → CONCERNS.md
+1. **Tech** → Analyzes stack and integrations → STACK.md, INTEGRATIONS.md
+2. **Architecture** → Analyzes patterns and structure → ARCHITECTURE.md, STRUCTURE.md
+3. **Quality** → Analyzes conventions and testing → CONVENTIONS.md, TESTING.md
+4. **Concerns** → Identifies tech debt and issues → CONCERNS.md
 
-Each agent:
+Each pass:
 
-- Explores the codebase in a fresh context
+- Explores the codebase for its focus
 - Uses templates from `$SKILL_PATH/templates/`
 - Writes documents directly to `.planning/codebase/`
 - Returns only confirmation (not document contents)
@@ -55,7 +55,8 @@ Each agent:
 The orchestrator:
 
 - Creates `.planning/codebase/` directory
-- Spawns 4 parallel agents with `run_in_background=true`
+- Runs the four passes in parallel only when suitable workers are available
+- Otherwise runs those passes sequentially in the current context
 - Collects confirmations
 - Verifies all documents created
 - Commits the codebase map (if configured)
@@ -89,9 +90,9 @@ Create the output directory:
 mkdir -p .planning/codebase
 ```
 
-### Step 3: Spawn Parallel Agents
+### Step 3: Run the Four Focus Passes
 
-Use the runtime's supported worker API for parallel execution. Each worker must receive the validated scope, current date, and the appropriate template paths from `$SKILL_PATH/templates/`. The examples below describe worker assignments, not mandatory API parameter names. While workers are active, do not duplicate their exploration or write their documents.
+Run the passes in parallel only when the runtime supports file-reading and file-writing workers. Otherwise perform them sequentially in the current context. Parallel workers are optional, not required. Each pass must receive the validated scope, current date, and the appropriate template paths from `$SKILL_PATH/templates/`. The examples below describe assignments, not mandatory API parameter names. While a parallel worker is active, do not duplicate its exploration or write its documents.
 
 **Tech Agent:**
 
