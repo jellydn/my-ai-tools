@@ -164,3 +164,63 @@ run_visual_pr_publish() {
 	[ "$status" -eq 0 ]
 	[ "$output" = "true" ]
 }
+
+@test "Plannotator bundles parseable interview and fact-review examples" {
+	run python3 - "$REPO_ROOT/skills/plannotator-setup-goal/SKILL.md" <<'PY'
+import json
+import pathlib
+import re
+import sys
+
+skill = pathlib.Path(sys.argv[1]).read_text()
+examples = [json.loads(block) for block in re.findall(r"```json\n(.*?)\n```", skill, re.S)]
+assert len(examples) == 2
+interview, facts = examples
+assert interview["stage"] == "interview"
+question = interview["questions"][0]
+assert question["answerMode"] == "multi-custom"
+assert set(question["recommendedOptionIds"]) <= {option["id"] for option in question["options"]}
+assert facts["stage"] == "facts"
+fact = facts["facts"][0]
+assert fact["accepted"] is False and fact["removed"] is False
+assert fact["recommendedAutomatedVerification"] is True and fact["automatedVerification"] is True
+assert "interview-result.json" in skill and "facts-result.json" in skill and "facts.meta.json" in skill
+assert "plannotator annotate goals/<slug>/facts.md --gate" not in skill
+PY
+	[ "$status" -eq 0 ]
+}
+
+@test "Portless guidance gates system changes and retains current runtime defaults" {
+	local skill_file="$REPO_ROOT/skills/portless-local/SKILL.md"
+	run grep -F 'Ask for explicit approval before' "$skill_file"
+	[ "$status" -eq 0 ]
+	[[ "$output" == *"CA trust-store"* && "$output" == *"LAN exposure"* && "$output" == *"public Funnel/ngrok"* ]]
+	run grep -F 'PORTLESS_SYNC_HOSTS=0' "$skill_file"
+	[ "$status" -eq 0 ]
+	run grep -F 'Requires Node.js 24+' "$skill_file"
+	[ "$status" -eq 0 ]
+	run grep -F 'invoking user' "$skill_file"
+	[ "$status" -eq 0 ]
+	run grep -F '/tmp/portless' "$skill_file"
+	[ "$status" -ne 0 ]
+	run grep -F 'portless myapp next dev --no-tls' "$skill_file"
+	[ "$status" -ne 0 ]
+	run grep -F 'PORTLESS_HTTPS=0 PORTLESS_PORT=8080 portless myapp next dev' "$skill_file"
+	[ "$status" -eq 0 ]
+}
+
+@test "Codemap rejects scope expansion and scans filenames without exposing secrets" {
+	local skill_file="$REPO_ROOT/skills/codemap/SKILL.md"
+	run grep -F 'do not silently expand to the whole repository' "$skill_file"
+	[ "$status" -eq 0 ]
+	run grep -F 'perform the four focus passes sequentially' "$skill_file"
+	[ "$status" -eq 0 ]
+	run grep -F 'run_in_background=true' "$skill_file"
+	[ "$status" -ne 0 ]
+	run grep -F 'Run the Four Focus Passes' "$skill_file"
+	[ "$status" -eq 0 ]
+	run grep -F 'rg -l ' "$skill_file"
+	[ "$status" -eq 0 ]
+	run grep -F 'more than 20 lines' "$skill_file"
+	[ "$status" -eq 0 ]
+}

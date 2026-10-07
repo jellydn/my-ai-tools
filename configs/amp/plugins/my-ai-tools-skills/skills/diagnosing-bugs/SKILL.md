@@ -8,6 +8,8 @@ user-invocable: true
 metadata:
   audience: all
   workflow: debugging
+  source: mattpocock/skills@6fd947921b935b7e1e69293a200400f0fdd5c15f
+  source_path: skills/engineering/diagnosing-bugs/SKILL.md
 ---
 
 # Diagnosing Bugs
@@ -59,6 +61,8 @@ Completion condition: removing any remaining element makes the loop pass.
 Write 3–5 ranked hypotheses. Each must predict an observable result:
 
 > If `<cause>` is responsible, changing `<variable>` should make the symptom disappear or become worse.
+
+Show the ranked list to the user before testing so they can supply domain evidence or identify hypotheses already ruled out. This is not an approval gate: proceed with the ranking while the user is unavailable.
 
 Probe one prediction at a time. Prefer a debugger or REPL, then targeted logs at boundaries that distinguish hypotheses. Tag temporary logs with a unique prefix such as `[DEBUG-1234]` so cleanup is mechanical. For performance issues, measure a baseline and use a profiler or timing harness instead of logging everything.
 

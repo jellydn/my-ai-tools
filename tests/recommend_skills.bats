@@ -294,7 +294,7 @@ README_FILE="$REPO_ROOT/TOOL_REFERENCE.md"
 }
 
 @test "README.md table row references modem-dev/hunk hunk-review SKILL.md URL" {
-    run grep -F 'https://github.com/modem-dev/hunk/blob/main/skills/hunk-review/SKILL.md' "$README_FILE"
+    run grep -F 'https://github.com/modem-dev/hunk/blob/main/packages/hunk/skills/hunk-review/SKILL.md' "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
@@ -331,13 +331,13 @@ README_FILE="$REPO_ROOT/TOOL_REFERENCE.md"
     [ "$status" -eq 0 ]
 }
 
-@test "shadcn/improve is the first entry in recommended_skills" {
+@test "pstack remains the first recommendation after upstream refresh" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
     fi
     run jq -r '.recommended_skills[0].repo' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
-    [ "$output" = "shadcn/improve" ]
+    [ "$output" = "michael-denyer/pstack-claude" ]
 }
 
 @test "shadcn/improve entry has no skill subfield" {
@@ -391,6 +391,16 @@ README_FILE="$REPO_ROOT/TOOL_REFERENCE.md"
     run jq -r '[.recommended_skills[] | select(.repo == "Gentleman-Programming/engram")] | length' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
     [ "$output" -ge 1 ]
+}
+
+@test "Engram documentation describes hooks and optional network sync" {
+    run jq -r '.recommended_skills[] | select(.repo == "Gentleman-Programming/engram") | .description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"lifecycle hooks"* ]]
+    [[ "$output" == *"22 MCP tools at the checked revision"* ]]
+    [[ "$output" == *"optional Git/cloud sync"* ]]
+    run grep -F '22 MCP tools at the checked revision' "$README_FILE"
+    [ "$status" -eq 0 ]
 }
 
 @test "recommend-skills.json contains privatenumber/mac-ocr skill entry" {
