@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="qmd Knowledge Management System — my-ai-tools documentation"><title>qmd Knowledge Management System · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
 <body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
-<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2><a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
 <a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
 <a href="claude-code-teams.html">🤝 Claude Code Teams</a>
 <a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
@@ -10,7 +11,9 @@
 <a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
 <a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
 <a href="my-ai-bot.html">my-ai-bot</a>
-<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a></nav><main><article><h1>qmd Knowledge Management System</h1>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+</nav><main><article>
+<h1>qmd Knowledge Management System</h1>
 <blockquote>
 <p><strong>Alternative to claude-mem</strong>: Project-specific knowledge capture using qmd MCP server and Agent Skills</p>
 </blockquote>
@@ -39,15 +42,17 @@ $HOME/.config/opencode/skills/qmd-knowledge/
 # Knowledge storage (qmd collections per project)
 ~/.ai-knowledges/
 ├── my-ai-tools/          # Collection for my-ai-tools project
-│   ├── learnings/
-│   │   ├── 2024-01-26-qmd-integration.md
-│   │   └── 2024-01-27-mcp-servers.md
-│   └── issues/
-│       ├── 123.md
-│       └── 456.md
+│   └── references/
+│       ├── learnings/
+│       │   ├── 2024-01-26-qmd-integration.md
+│       │   └── 2024-01-27-mcp-servers.md
+│       └── issues/
+│           ├── 123.md
+│           └── 456.md
 └── another-project/      # Collection for another-project
-    ├── learnings/
-    └── issues/
+    └── references/
+        ├── learnings/
+        └── issues/
 </code></pre>
 <p><strong>Key concept</strong>: One skill (<code>qmd-knowledge</code>) manages knowledge for multiple projects. Each project is a qmd collection, not a separate skill.</p>
 <h2>Installation</h2>
@@ -98,8 +103,8 @@ $HOME/.config/opencode/skills/qmd-knowledge/
 <p><strong>Option 2: Manual Setup</strong></p>
 <p>If you prefer manual setup or need to create collections for multiple projects:</p>
 <pre><code class="language-bash"># Create storage directory for your project
-mkdir -p ~/.ai-knowledges/my-ai-tools/learnings
-mkdir -p ~/.ai-knowledges/my-ai-tools/issues
+mkdir -p ~/.ai-knowledges/my-ai-tools/references/learnings
+mkdir -p ~/.ai-knowledges/my-ai-tools/references/issues
 
 # Add qmd collection for this project
 qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
@@ -125,7 +130,7 @@ qmd embed
 <h4>Add Issue Note</h4>
 <pre><code class="language-bash">$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh issue 123 &quot;Fixed by updating dependencies&quot;
 </code></pre>
-<p>This appends to <code>references/issues/123.md</code> (creating it if it doesn't exist).</p>
+<p>This appends to <code>references/issues/123.md</code> (creating it if it doesn&#39;t exist).</p>
 <h4>Record General Note</h4>
 <pre><code class="language-bash">$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh note &quot;Consider using agent skills for extensibility&quot;
 </code></pre>
@@ -193,8 +198,8 @@ qmd embed
 <h2>Multiple Projects</h2>
 <p>The qmd-knowledge skill manages knowledge for multiple projects. Each project gets its own qmd collection:</p>
 <pre><code class="language-bash"># Create storage for a different project
-mkdir -p ~/.ai-knowledges/another-project/learnings
-mkdir -p ~/.ai-knowledges/another-project/issues
+mkdir -p ~/.ai-knowledges/another-project/references/learnings
+mkdir -p ~/.ai-knowledges/another-project/references/issues
 
 # Add collection and context
 qmd collection add ~/.ai-knowledges/another-project --name another-project
@@ -244,6 +249,7 @@ git push
 # On machine 2
 cd ~/.ai-knowledges
 git clone &lt;your-backup-repo&gt; my-ai-tools
+# Entries are stored in references/learnings and references/issues.
 
 # Add collection and generate embeddings
 qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
@@ -257,8 +263,8 @@ qmd embed
 </code></pre>
 <h3>Knowledge collection not found</h3>
 <p>Create the collection for your project:</p>
-<pre><code class="language-bash">mkdir -p ~/.ai-knowledges/my-ai-tools/learnings
-mkdir -p ~/.ai-knowledges/my-ai-tools/issues
+<pre><code class="language-bash">mkdir -p ~/.ai-knowledges/my-ai-tools/references/learnings
+mkdir -p ~/.ai-knowledges/my-ai-tools/references/issues
 qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
 qmd context add qmd://my-ai-tools &quot;Knowledge base for my-ai-tools project&quot;
 qmd embed

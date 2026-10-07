@@ -207,6 +207,8 @@ conventions.
 
 ## 📚 Documentation
 
+HTML pages in [`docs/`](docs/index.html) are generated from the Markdown sources. Regenerate them with `bun scripts/render-docs.ts`.
+
 - [Documentation website](https://ai-tools.itman.fyi)
 - [Detailed tool and skill reference](TOOL_REFERENCE.md)
 - [Fusion orchestration](docs/fusion-orchestration.md)

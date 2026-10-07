@@ -337,5 +337,5 @@ Update docs for the new webhook system:
 ## Resources
 
 - [Agent Teams Documentation](claude-code-teams.md)
-- [Agent Definitions](../configs/claude/agents/)
+- [Agent Definitions](https://github.com/jellydn/my-ai-tools/tree/main/configs/claude/agents)
 - [Settings Configuration](../configs/claude/settings.json)

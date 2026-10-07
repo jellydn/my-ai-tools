@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="🤝 Claude Code Teams — my-ai-tools documentation"><title>🤝 Claude Code Teams · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
 <body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
-<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2><a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
 <a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
 <a href="claude-code-teams.html">🤝 Claude Code Teams</a>
 <a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
@@ -10,7 +11,9 @@
 <a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
 <a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
 <a href="my-ai-bot.html">my-ai-bot</a>
-<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a></nav><main><article><h1>🤝 Claude Code Teams</h1>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+</nav><main><article>
+<h1>🤝 Claude Code Teams</h1>
 <blockquote>
 <p><strong>Agent Teams</strong> is an experimental feature in Claude Code that enables sophisticated multi-agent workflows through subagent orchestration.</p>
 </blockquote>
@@ -47,12 +50,40 @@ temperature: 0.1
 Your detailed instructions and guidelines here...
 </code></pre>
 <h3>Agent Properties</h3>
-<p>| Property      | Required | Description                     | Values                    |<br />
-| ------------- | -------- | ------------------------------- | ------------------------- |<br />
-| <code>name</code>        | Yes      | Unique identifier for the agent | kebab-case string         |<br />
-| <code>description</code> | Yes      | Brief purpose statement         | Plain text                |<br />
-| <code>mode</code>        | Yes      | Agent execution mode            | <code>subagent</code>, <code>coordinator</code> |<br />
-| <code>temperature</code> | No       | Creativity level (0-1)          | Default: 0.7              |</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Required</th>
+<th>Description</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>Yes</td>
+<td>Unique identifier for the agent</td>
+<td>kebab-case string</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>Yes</td>
+<td>Brief purpose statement</td>
+<td>Plain text</td>
+</tr>
+<tr>
+<td><code>mode</code></td>
+<td>Yes</td>
+<td>Agent execution mode</td>
+<td><code>subagent</code>, <code>coordinator</code></td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
+<td>No</td>
+<td>Creativity level (0-1)</td>
+<td>Default: 0.7</td>
+</tr>
+</tbody></table>
 <h3>Directory Structure</h3>
 <pre><code>configs/claude/
 ├── agents/                    # Agent definitions
@@ -266,16 +297,11 @@ Report findings as:
 }
 ```
 </code></pre>
-<pre><code>
-## 🎓 Best Practices
-
-### 1. Single Responsibility
-
-Each agent should have a clear, focused purpose:
-
-✅ **Good:**
-```yaml
-name: typescript-type-checker
+<h2>🎓 Best Practices</h2>
+<h3>1. Single Responsibility</h3>
+<p>Each agent should have a clear, focused purpose:</p>
+<p>✅ <strong>Good:</strong></p>
+<pre><code class="language-yaml">name: typescript-type-checker
 description: Validates TypeScript type safety
 </code></pre>
 <p>❌ <strong>Bad:</strong></p>
@@ -325,7 +351,7 @@ When delegating to this agent:
 </code></pre>
 <h2>🔍 Troubleshooting</h2>
 <h3>Agent Not Found</h3>
-<p><strong>Symptom:</strong> Error: &quot;Agent 'agent-name' not found&quot;</p>
+<p><strong>Symptom:</strong> Error: &quot;Agent &#39;agent-name&#39; not found&quot;</p>
 <p><strong>Solution:</strong></p>
 <ol>
 <li>Verify file exists in <code>configs/claude/agents/</code></li>
@@ -333,7 +359,7 @@ When delegating to this agent:
 <li>Ensure YAML frontmatter is valid</li>
 </ol>
 <h3>Subagent Not Triggering</h3>
-<p><strong>Symptom:</strong> Subagent doesn't spawn</p>
+<p><strong>Symptom:</strong> Subagent doesn&#39;t spawn</p>
 <p><strong>Solution:</strong></p>
 <ol>
 <li>Verify <code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: &quot;1&quot;</code> in settings.json</li>
@@ -341,7 +367,7 @@ When delegating to this agent:
 <li>Review hook configuration</li>
 </ol>
 <h3>Hook Not Executing</h3>
-<p><strong>Symptom:</strong> SubagentStop hook doesn't run</p>
+<p><strong>Symptom:</strong> SubagentStop hook doesn&#39;t run</p>
 <p><strong>Solution:</strong></p>
 <ol>
 <li>Verify hooks directory structure</li>
@@ -351,7 +377,7 @@ When delegating to this agent:
 <h2>📚 Additional Resources</h2>
 <ul>
 <li><a href="../configs/claude/agents/ai-slop-remover.md">Agent Definition Example</a></li>
-<li><a href="./agent-teams-examples.md">Agent Teams Usage Examples</a> - Practical examples and workflows</li>
+<li><a href="agent-teams-examples.html">Agent Teams Usage Examples</a> - Practical examples and workflows</li>
 <li><a href="../configs/claude/hooks/lib.ts">Hook Implementation</a></li>
 <li><a href="../configs/claude/hooks/session.ts">Session Management</a></li>
 <li><a href="../configs/claude/settings.json">Claude Code Settings</a></li>
@@ -359,11 +385,11 @@ When delegating to this agent:
 <h2>🔄 Next Steps</h2>
 <ol>
 <li><strong>Review existing agent</strong> - Study <code>ai-slop-remover.md</code> for reference</li>
-<li><strong>Try the examples</strong> - See <a href="./agent-teams-examples.md">agent-teams-examples.md</a> for practical workflows</li>
+<li><strong>Try the examples</strong> - See <a href="agent-teams-examples.html">agent-teams-examples.md</a> for practical workflows</li>
 <li><strong>Create your first agent</strong> - Start with a simple subagent</li>
 <li><strong>Test coordination</strong> - Use SubagentStop hook for data sharing</li>
 <li><strong>Build a team</strong> - Create complementary agents that work together</li>
 </ol>
-<hr />
-<p><strong>Questions?</strong> Check <a href="./learning-stories.md">Learning Stories</a> for real-world examples of subagent workflows.</p>
+<hr>
+<p><strong>Questions?</strong> Check <a href="learning-stories.html">Learning Stories</a> for real-world examples of subagent workflows.</p>
 </article></main></div></body></html>

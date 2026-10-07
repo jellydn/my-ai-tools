@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="my-ai-bot — my-ai-tools documentation"><title>my-ai-bot · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
 <body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
-<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2><a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
 <a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
 <a href="claude-code-teams.html">🤝 Claude Code Teams</a>
 <a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
@@ -10,9 +11,11 @@
 <a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
 <a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
 <a href="my-ai-bot.html">my-ai-bot</a>
-<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a></nav><main><article><h1>my-ai-bot</h1>
-<p><code>my-ai-bot</code> is a self-hosted GitHub App that turns authorized issue and pull-request comments into durable, isolated<br />
-jobs. The design baseline and trust boundaries are in <a href="my-ai-bot-architecture.md">my-ai-bot-architecture.md</a>.</p>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+</nav><main><article>
+<h1>my-ai-bot</h1>
+<p><code>my-ai-bot</code> is a self-hosted GitHub App that turns authorized issue and pull-request comments into durable, isolated
+jobs. The design baseline and trust boundaries are in <a href="my-ai-bot-architecture.html">my-ai-bot-architecture.md</a>.</p>
 <h2>Register and install the App</h2>
 <p>Create a GitHub App with a webhook URL ending in <code>/api/github/webhooks</code> and an independently generated webhook secret.</p>
 <p>Grant only these repository permissions:</p>
@@ -25,18 +28,18 @@ jobs. The design baseline and trust boundaries are in <a href="my-ai-bot-archite
 <li>Actions: read</li>
 <li>Commit statuses: read</li>
 </ul>
-<p>Do not grant Workflows permission unless a future platform release explicitly supports workflow changes; the current<br />
-mandatory policy rejects them. Subscribe to <strong>Issue comment</strong>, <strong>Issues</strong>, <strong>Pull request</strong>, <strong>Pull request review</strong>,<br />
-<strong>Pull request review comment</strong>, <strong>Installation</strong>, and <strong>Installation repositories</strong>. The current command ingress uses<br />
-Issue comment; the other events allow lifecycle-aware follow-up without broad subscriptions. Do not grant<br />
-Administration or expose a Docker socket. Install the App on selected repositories rather than all repositories unless<br />
+<p>Do not grant Workflows permission unless a future platform release explicitly supports workflow changes; the current
+mandatory policy rejects them. Subscribe to <strong>Issue comment</strong>, <strong>Issues</strong>, <strong>Pull request</strong>, <strong>Pull request review</strong>,
+<strong>Pull request review comment</strong>, <strong>Installation</strong>, and <strong>Installation repositories</strong>. The current command ingress uses
+Issue comment; the other events allow lifecycle-aware follow-up without broad subscriptions. Do not grant
+Administration or expose a Docker socket. Install the App on selected repositories rather than all repositories unless
 every repository is trusted.</p>
-<p>Copy <code>.env.example</code>; set <code>GITHUB_APP_ID</code>, the PEM <code>GITHUB_APP_PRIVATE_KEY</code> (literal newlines or escaped <code>\n</code>), and<br />
-<code>GITHUB_APP_WEBHOOK_SECRET</code>. All three are required to enable bot mode. Chat remains optional. Copy<br />
-<code>.github/my-ai-bot.example.yml</code> to <code>.github/my-ai-bot.yml</code> in a target repository and narrow commands and validation.<br />
+<p>Copy <code>.env.example</code>; set <code>GITHUB_APP_ID</code>, the PEM <code>GITHUB_APP_PRIVATE_KEY</code> (literal newlines or escaped <code>\n</code>), and
+<code>GITHUB_APP_WEBHOOK_SECRET</code>. All three are required to enable bot mode. Chat remains optional. Copy
+<code>.github/my-ai-bot.example.yml</code> to <code>.github/my-ai-bot.yml</code> in a target repository and narrow commands and validation.
 Repository configuration cannot turn off mandatory controls.</p>
-<p>Rotate a private key by adding a second GitHub App key, deploying it, testing readiness, then deleting the old key.<br />
-Rotate a webhook secret by coordinating the GitHub setting and deployment during a maintenance window; GitHub does<br />
+<p>Rotate a private key by adding a second GitHub App key, deploying it, testing readiness, then deleting the old key.
+Rotate a webhook secret by coordinating the GitHub setting and deployment during a maintenance window; GitHub does
 not support two webhook secrets simultaneously. Never log either value.</p>
 <p>Local setup from a clean checkout:</p>
 <pre><code class="language-bash">bun install --frozen-lockfile
@@ -45,15 +48,17 @@ cp .env.example .env
 mkdir -p .data/my-ai-bot .work/my-ai-bot
 BOT_DATA_DIR=&quot;$PWD/.data/my-ai-bot&quot; BOT_WORKSPACE_ROOT=&quot;$PWD/.work/my-ai-bot&quot; bun run bot:dev
 </code></pre>
-<p>Expose port 3000 through a trusted HTTPS tunnel (for example <code>cloudflared tunnel --url http://localhost:3000</code>) and<br />
+<p>Expose port 3000 through a trusted HTTPS tunnel (for example <code>cloudflared tunnel --url http://localhost:3000</code>) and
 place its HTTPS URL in the App settings. A signed fixture can be sent with:</p>
-<pre><code class="language-bash">body='{&quot;action&quot;:&quot;created&quot;,&quot;installation&quot;:{&quot;id&quot;:1},&quot;sender&quot;:{&quot;login&quot;:&quot;alice&quot;},&quot;comment&quot;:{&quot;body&quot;:&quot;/my-ai-bot help&quot;},&quot;issue&quot;:{&quot;number&quot;:1},&quot;repository&quot;:{&quot;name&quot;:&quot;demo&quot;,&quot;owner&quot;:{&quot;login&quot;:&quot;acme&quot;}}}'
-sig=&quot;sha256=$(printf %s &quot;$body&quot; | openssl dgst -sha256 -hmac &quot;$GITHUB_APP_WEBHOOK_SECRET&quot; -hex | awk '{print $2}')&quot;
+<pre><code class="language-bash">body=&#39;{&quot;action&quot;:&quot;created&quot;,&quot;installation&quot;:{&quot;id&quot;:1},&quot;sender&quot;:{&quot;login&quot;:&quot;alice&quot;},&quot;comment&quot;:{&quot;body&quot;:&quot;/my-ai-bot help&quot;},&quot;issue&quot;:{&quot;number&quot;:1},&quot;repository&quot;:{&quot;name&quot;:&quot;demo&quot;,&quot;owner&quot;:{&quot;login&quot;:&quot;acme&quot;}}}&#39;
+GITHUB_APP_WEBHOOK_SECRET=$(sed -n &#39;s/^GITHUB_APP_WEBHOOK_SECRET=//p&#39; .env | head -n 1 | sed -e &#39;s/^&quot;//&#39; -e &#39;s/&quot;$//&#39;)
+export GITHUB_APP_WEBHOOK_SECRET
+sig=&quot;sha256=$(printf %s &quot;$body&quot; | openssl dgst -sha256 -hmac &quot;$GITHUB_APP_WEBHOOK_SECRET&quot; -hex | awk &#39;{print $2}&#39;)&quot;
 curl -i -X POST http://localhost:3000/api/github/webhooks -H &quot;X-GitHub-Event: issue_comment&quot; \
-  -H &quot;X-GitHub-Delivery: local-1&quot; -H &quot;X-Hub-Signature-256: $sig&quot; -H 'Content-Type: application/json' -d &quot;$body&quot;
+  -H &quot;X-GitHub-Delivery: local-1&quot; -H &quot;X-Hub-Signature-256: $sig&quot; -H &#39;Content-Type: application/json&#39; -d &quot;$body&quot;
 </code></pre>
 <h2>Commands</h2>
-<p>Comments may use <code>@my-ai-bot &lt;command&gt;</code>; <code>plan</code>, <code>implement</code>, and <code>review</code> also accept <code>/my-ai-bot</code> aliases. Commands<br />
+<p>Comments may use <code>@my-ai-bot &lt;command&gt;</code>; <code>plan</code>, <code>implement</code>, and <code>review</code> also accept <code>/my-ai-bot</code> aliases. Commands
 are <code>help</code>, <code>status</code>, <code>plan</code>, <code>implement</code>, <code>review</code>, <code>review security</code>, <code>fix-ci</code>, <code>address-review</code>, and <code>cancel</code>.</p>
 <ul>
 <li><code>help</code> and <code>status</code> require read permission.</li>
@@ -61,19 +66,19 @@ are <code>help</code>, <code>status</code>, <code>plan</code>, <code>implement</
 <li><code>implement</code>, <code>fix-ci</code>, <code>address-review</code>, and <code>cancel</code> require write permission.</li>
 <li><code>authorization.allowUsers</code> can narrow access. Repository settings cannot lower these mandatory minimums.</li>
 </ul>
-<p>Reviews use the immutable API diff and never execute PR code. Implementations start from the trusted base SHA, use a<br />
-unique <code>my-ai-bot/issue-N-*</code> branch, pass configured validation plus secret/diff/workflow policy, and open a draft PR.<br />
-Address/fix commands accept only a recorded bot-created PR branch; ambiguous or human-decision feedback is reported<br />
+<p>Reviews use the immutable API diff and never execute PR code. Implementations start from the trusted base SHA, use a
+unique <code>my-ai-bot/issue-N-*</code> branch, pass configured validation plus secret/diff/workflow policy, and open a draft PR.
+Address/fix commands accept only a recorded bot-created PR branch; ambiguous or human-decision feedback is reported
 rather than edited.</p>
 <p>Example sequence:</p>
 <ol>
 <li>On issue #42, comment <code>@my-ai-bot plan</code> and inspect the seven-section grounded plan.</li>
 <li>After approval, comment <code>@my-ai-bot implement</code>; follow the durable progress comment to the generated draft PR.</li>
 <li>On that PR, comment <code>@my-ai-bot review</code> or <code>@my-ai-bot review security</code>.</li>
-<li>After reviewers leave actionable inline feedback, comment <code>@my-ai-bot address-review</code>; the bot validates and pushes<br />
+<li>After reviewers leave actionable inline feedback, comment <code>@my-ai-bot address-review</code>; the bot validates and pushes
 only the recorded bot branch, then replies only to comments it actually addressed.</li>
 </ol>
-<p>Use <code>@my-ai-bot status</code> at any point or <code>@my-ai-bot cancel</code> to signal an active worker. One marker-bearing progress<br />
+<p>Use <code>@my-ai-bot status</code> at any point or <code>@my-ai-bot cancel</code> to signal an active worker. One marker-bearing progress
 comment is updated rather than posting progress spam.</p>
 <h2>Production deployment</h2>
 <p>Build and run on a VPS with:</p>
@@ -87,14 +92,14 @@ docker run -d --name my-ai-bot --restart unless-stopped \
 curl --fail https://bot.example.com/healthz
 curl --fail https://bot.example.com/readyz
 </code></pre>
-<p>The image runs as a non-root user. Keep only <code>/var/lib/my-ai-bot</code> persistent; <code>/tmp/my-ai-bot</code> is ephemeral. Inject<br />
-App secrets through the VPS secret manager, publish the service only behind TLS, back up the data volume, and restart<br />
-one instance at a time. Active jobs recover to queued. <code>/healthz</code> is liveness and <code>/readyz</code> is readiness. Build a<br />
+<p>The image runs as a non-root user. Keep only <code>/var/lib/my-ai-bot</code> persistent; <code>/tmp/my-ai-bot</code> is ephemeral. Inject
+App secrets through the VPS secret manager, publish the service only behind TLS, back up the data volume, and restart
+one instance at a time. Active jobs recover to queued. <code>/healthz</code> is liveness and <code>/readyz</code> is readiness. Build a
 derived worker image containing Codex and validation binaries required by configured repositories.</p>
-<p>OS/network resource isolation remains a deployment responsibility. The JSON store is suitable for one process only;<br />
-use a transactional backend before horizontal scaling. The MVP does not merge, auto-approve by default, resolve<br />
-ambiguous review requests, or guarantee arbitrary repository validation dependencies are available. The regex secret<br />
-scan is a blocking safeguard, not a proof that every possible secret format has been detected. GitHub interactions in<br />
-the automated suite are mocked; validate registration and installation-token permissions in a staging repository<br />
+<p>OS/network resource isolation remains a deployment responsibility. The JSON store is suitable for one process only;
+use a transactional backend before horizontal scaling. The MVP does not merge, auto-approve by default, resolve
+ambiguous review requests, or guarantee arbitrary repository validation dependencies are available. The regex secret
+scan is a blocking safeguard, not a proof that every possible secret format has been detected. GitHub interactions in
+the automated suite are mocked; validate registration and installation-token permissions in a staging repository
 before production rollout.</p>
 </article></main></div></body></html>

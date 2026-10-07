@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Agent Teams Usage Examples — my-ai-tools documentation"><title>Agent Teams Usage Examples · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
 <body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
-<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2><a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
 <a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
 <a href="claude-code-teams.html">🤝 Claude Code Teams</a>
 <a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
@@ -10,7 +11,9 @@
 <a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
 <a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
 <a href="my-ai-bot.html">my-ai-bot</a>
-<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a></nav><main><article><h1>Agent Teams Usage Examples</h1>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+</nav><main><article>
+<h1>Agent Teams Usage Examples</h1>
 <p>This guide provides practical examples of using Claude Code Agent Teams for common development workflows.</p>
 <h2>Example 1: Feature Development with Team Coordination</h2>
 <p>When building a new feature, use the <code>feature-team-coordinator</code> to orchestrate the entire workflow:</p>
@@ -121,7 +124,7 @@ Document the export feature API
 </code></pre>
 <h2>Example 7: Parallel Review</h2>
 <p>Get multiple perspectives simultaneously:</p>
-<pre><code class="language-markdown">I've implemented a new caching layer. I need parallel reviews:
+<pre><code class="language-markdown">I&#39;ve implemented a new caching layer. I need parallel reviews:
 
 @code-reviewer
 Review src/cache/RedisCache.ts for:
@@ -142,7 +145,7 @@ Document the caching API in docs/caching.md
 </code></pre>
 <h2>Tips for Effective Team Usage</h2>
 <h3>Be Specific</h3>
-<p>❌ &quot;Review this code&quot;<br />
+<p>❌ &quot;Review this code&quot;
 ✅ &quot;Review auth.ts focusing on security vulnerabilities and session management&quot;</p>
 <h3>Provide Context</h3>
 <p>Include:</p>
@@ -161,7 +164,7 @@ Document the caching API in docs/caching.md
 <li>Full feature → <code>feature-team-coordinator</code></li>
 </ul>
 <h3>Iterate When Needed</h3>
-<p>If results aren't satisfactory:</p>
+<p>If results aren&#39;t satisfactory:</p>
 <ol>
 <li>Provide more specific feedback</li>
 <li>Reference existing examples</li>
@@ -223,7 +226,7 @@ Skip style and minor issues - focus on critical security only.
    - Security review
 </code></pre>
 <h3>Fusion Lead &amp; Executor Orchestration</h3>
-<p>In Amp, OpenCode, Pi, and Codex, use the <code>orchestrating-fusion</code> skill pattern to pair a strong read-only Lead agent (planning, verification) with a faster implementation Executor agent (code edits, unit tests). See <a href="./fusion-orchestration.md">Fusion Orchestration Guide</a> for full details.</p>
+<p>In Amp, OpenCode, Pi, and Codex, use the <code>orchestrating-fusion</code> skill pattern to pair a strong read-only Lead agent (planning, verification) with a faster implementation Executor agent (code edits, unit tests). See <a href="fusion-orchestration.html">Fusion Orchestration Guide</a> for full details.</p>
 <pre><code class="language-markdown">1. Lead Agent: Analyzes codebase, generates phase plan and boundaries
 2. Executor Agent: Implements code changes for Phase 1 and runs verification tests
 3. Lead Agent: Reviews diff and test output independently
@@ -282,8 +285,8 @@ Update docs for the new webhook system:
 </ul>
 <h2>Resources</h2>
 <ul>
-<li><a href="claude-code-teams.md">Agent Teams Documentation</a></li>
-<li><a href="../configs/claude/agents/">Agent Definitions</a></li>
+<li><a href="claude-code-teams.html">Agent Teams Documentation</a></li>
+<li><a href="https://github.com/jellydn/my-ai-tools/tree/main/configs/claude/agents">Agent Definitions</a></li>
 <li><a href="../configs/claude/settings.json">Settings Configuration</a></li>
 </ul>
 </article></main></div></body></html>

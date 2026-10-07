@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="My AI Coding Tools Learning Notes — my-ai-tools documentation"><title>My AI Coding Tools Learning Notes · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
 <body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
-<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2><a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
 <a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
 <a href="claude-code-teams.html">🤝 Claude Code Teams</a>
 <a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
@@ -10,9 +11,11 @@
 <a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
 <a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
 <a href="my-ai-bot.html">my-ai-bot</a>
-<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a></nav><main><article><h1>My AI Coding Tools Learning Notes</h1>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+</nav><main><article>
+<h1>My AI Coding Tools Learning Notes</h1>
 <p>Personal notes from experimenting with AI coding tools, workflows, and frameworks.</p>
-<hr />
+<hr>
 <h2>Keybinder</h2>
 <p><strong>A modern, intuitive macOS app for managing skhd keyboard shortcuts.</strong></p>
 <ul>
@@ -35,7 +38,7 @@
 <li>Implementation tasks generated from specifications</li>
 <li>Pragmatic deviation during actual development (specs as reference, not strict rules)</li>
 </ol>
-<hr />
+<hr>
 <h2>SealCode (VS Code Extension)</h2>
 <p><strong>Smart Code Review with AI-Powered Insights</strong></p>
 <ul>
@@ -59,7 +62,7 @@
 <li>Autonomous implementation of extension features</li>
 <li>Integrated testing and quality validation</li>
 </ul>
-<hr />
+<hr>
 <h2>Ralph</h2>
 <p><strong>Autonomous AI agent loop for PRD-driven development.</strong></p>
 <ul>
@@ -69,21 +72,21 @@
 <li><strong>Tech Stack:</strong> TypeScript, Shell, JavaScript</li>
 </ul>
 <p>Minimal Ralph implementation: PRD → task decomposition → autonomous execution → loop until complete. Used in SealCode development. Will deprecate once upstream PRs land.</p>
-<hr />
+<hr>
 <h2>AI Launcher</h2>
 <p><strong>Fast launcher for switching between AI coding assistants.</strong></p>
 <ul>
 <li><strong>Repository:</strong> <a href="https://github.com/jellydn/ai-launcher">jellydn/ai-launcher</a></li>
 </ul>
 <p>Fuzzy search interface for Claude Code, OpenCode, Amp, etc. Quick switching without managing multiple terminals.</p>
-<hr />
+<hr>
 <h2>Tiny Coding Agent</h2>
 <p><strong>Minimal coding agent focused on simplicity.</strong></p>
 <ul>
 <li><strong>Repository:</strong> <a href="https://github.com/jellydn/tiny-coding-agent">jellydn/tiny-coding-agent</a></li>
 </ul>
 <p>Lightweight agent with minimal dependencies. Response to heavy frameworks that waste tokens on orchestration overhead.</p>
-<hr />
+<hr>
 <h2>HermesHub</h2>
 <p><strong>Web app for deploying and managing a self-hosted Hermes AI Agent on any VPS — no terminal required.</strong></p>
 <ul>
@@ -109,50 +112,71 @@
 <li><strong>Grok CLI Composer 2.5 for implementation</strong> — Fast iteration on TanStack Start routes, Hono API handlers, SSH deploy pipelines, and Vitest coverage</li>
 </ol>
 <p>The planner produced bite-sized tasks with file paths and verification steps; Composer 2.5 executed them in focused sessions. Review and docs passes stayed in the same Grok CLI workflow.</p>
-<hr />
+<hr>
 <h2>Key Takeaways</h2>
-<p>| Tool Combination                    | Best For                                                    |<br />
-| ----------------------------------- | ----------------------------------------------------------- |<br />
-| <strong>Claude + spec-kit</strong>               | Greenfield projects requiring structured planning           |<br />
-| <strong>GPT-5.5 + Grok CLI Composer 2.5</strong> | Plan-heavy web apps with fast, tool-aware implementation    |<br />
-| <strong>Amp + Ralph</strong>                     | Autonomous development with PRD-to-implementation pipelines |<br />
-| <strong>AI CLI Switcher</strong>                 | Developers working with multiple AI tools                   |<br />
-| <strong>Tiny Agent</strong>                      | Cost-conscious development with minimal overhead            |</p>
+<table>
+<thead>
+<tr>
+<th>Tool Combination</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Claude + spec-kit</strong></td>
+<td>Greenfield projects requiring structured planning</td>
+</tr>
+<tr>
+<td><strong>GPT-5.5 + Grok CLI Composer 2.5</strong></td>
+<td>Plan-heavy web apps with fast, tool-aware implementation</td>
+</tr>
+<tr>
+<td><strong>Amp + Ralph</strong></td>
+<td>Autonomous development with PRD-to-implementation pipelines</td>
+</tr>
+<tr>
+<td><strong>AI CLI Switcher</strong></td>
+<td>Developers working with multiple AI tools</td>
+</tr>
+<tr>
+<td><strong>Tiny Agent</strong></td>
+<td>Cost-conscious development with minimal overhead</td>
+</tr>
+</tbody></table>
 <p>Focused, single-purpose solutions &gt; heavy, all-in-one frameworks.</p>
-<hr />
-<h2>Tools I Tried But Didn't Keep</h2>
+<hr>
+<h2>Tools I Tried But Didn&#39;t Keep</h2>
 <p>Not every tool fits every workflow. Here are tools I evaluated but chose not to adopt:</p>
 <h3>Task Master (claude-task-master)</h3>
 <p><strong>Repository:</strong> <a href="https://github.com/eyaltoledano/claude-task-master">eyaltoledano/claude-task-master</a></p>
 <p>An AI-powered task management system designed for Cursor, Windsurf, and other editors.</p>
-<p><strong>Why I didn't keep it:</strong></p>
+<p><strong>Why I didn&#39;t keep it:</strong></p>
 <ul>
 <li><strong>Complexity</strong> - Requires multiple API keys (Anthropic, OpenAI, Perplexity, etc.)</li>
 <li><strong>Heavy setup</strong> - MCP configuration, environment variables, PRD structure</li>
 <li><strong>Overkill</strong> - 36 tools available, ~21,000 tokens context usage in full mode</li>
-<li><strong>Too structured</strong> - Strict PRD-to-task workflow doesn't fit iterative development</li>
+<li><strong>Too structured</strong> - Strict PRD-to-task workflow doesn&#39;t fit iterative development</li>
 </ul>
 <h3>SuperClaude</h3>
 <p><strong>Website:</strong> <a href="https://superclaude.netlify.app/">superclaude.netlify.app</a></p>
 <p>A meta-programming configuration framework for Claude Code.</p>
-<p><strong>Why I didn't keep it:</strong></p>
+<p><strong>Why I didn&#39;t keep it:</strong></p>
 <ul>
 <li><strong>Context hungry</strong> - Uses too much context for the framework overhead</li>
-<li><strong>Mental overhead</strong> - Learning the framework's abstractions vs just coding</li>
+<li><strong>Mental overhead</strong> - Learning the framework&#39;s abstractions vs just coding</li>
 <li><strong>Over-engineered</strong> - Adds complexity without proportional benefit</li>
 </ul>
 <h3>Oh My OpenCode</h3>
 <p><strong>Repository:</strong> <a href="https://github.com/code-yeongyu/oh-my-opencode">code-yeongyu/oh-my-opencode</a></p>
 <p>A feature-rich plugin for OpenCode with multi-model orchestration, background agents, and &quot;Sisyphus&quot; workflow.</p>
-<p><strong>Why I didn't keep it:</strong></p>
+<p><strong>Why I didn&#39;t keep it:</strong></p>
 <ul>
 <li><strong>Too opinionated</strong> - Enforces specific workflows (ultrawork, ralph-loop, Sisyphus mode)</li>
 <li><strong>Multi-model complexity</strong> - Requires multiple API keys (Claude, GPT, Gemini, Grok)</li>
 <li><strong>Magic keywords</strong> - <code>ultrawork</code>, <code>ulw</code>, <code>ultrathink</code> - adds cognitive overhead</li>
 <li><strong>Feature bloat</strong> - LSP tools, AST-grep, background agents, keyword detectors</li>
-<li><strong>Not my style</strong> - Aggressive automation doesn't fit my iterative workflow</li>
+<li><strong>Not my style</strong> - Aggressive automation doesn&#39;t fit my iterative workflow</li>
 </ul>
-<hr />
+<hr>
 <h2>Addy Osmani — Accountable Engineering with AI</h2>
 <p><strong>Video:</strong> <a href="https://www.youtube.com/watch?v=2fyPnxKu8ZM">The Future of Software Engineering with AI</a></p>
 <p>Addy Osmani (Chrome, DevTools, Core Web Vitals, AI developer experience) argues AI will not eliminate software engineering — it changes what valuable engineering looks like.</p>
@@ -167,21 +191,42 @@
 <li><strong>Broaden beyond coding</strong> — product thinking, UX, evangelism, go-to-market, and customer understanding increasingly matter.</li>
 </ul>
 <h3>Practical Workflow (Captured as a Skill)</h3>
-<p>The <a href="../skills/accountable-engineering/SKILL.md"><code>accountable-engineering</code> skill</a> turns these lessons into one<br />
+<p>The <a href="../skills/accountable-engineering/SKILL.md"><code>accountable-engineering</code> skill</a> turns these lessons into one
 authoritative eight-step workflow with explicit completion criteria from definition through operational ownership.</p>
 <h3>Senior AI Engineer Profile</h3>
 <p>Own complete outcomes, not just AI features:</p>
-<p>| Dimension | What it means |<br />
-| --------- | ------------- |<br />
-| Technical depth | RAG, agents, evaluation, deployment, observability |<br />
-| AI leverage | Use coding agents; verify their work |<br />
-| Product sense | Know who benefits and what success means |<br />
-| Operational ownership | Reliability, cost, security, monitoring |<br />
-| Communication | Explain trade-offs to any audience |</p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Technical depth</td>
+<td>RAG, agents, evaluation, deployment, observability</td>
+</tr>
+<tr>
+<td>AI leverage</td>
+<td>Use coding agents; verify their work</td>
+</tr>
+<tr>
+<td>Product sense</td>
+<td>Know who benefits and what success means</td>
+</tr>
+<tr>
+<td>Operational ownership</td>
+<td>Reliability, cost, security, monitoring</td>
+</tr>
+<tr>
+<td>Communication</td>
+<td>Explain trade-offs to any audience</td>
+</tr>
+</tbody></table>
 <p>The valuable engineer is an <strong>accountable system builder</strong>, not merely a fast coder.</p>
-<hr />
+<hr>
 <h2>Worth Learning From</h2>
-<p>These tools aren't for me daily, but are valuable references for understanding AI-assisted workflows:</p>
+<p>These tools aren&#39;t for me daily, but are valuable references for understanding AI-assisted workflows:</p>
 <h3>Superpowers</h3>
 <p><strong>Repository:</strong> <a href="https://github.com/obra/superpowers">obra/superpowers</a></p>
 <p>A complete software development workflow for coding agents with composable &quot;skills&quot;.</p>
@@ -193,23 +238,41 @@ authoritative eight-step workflow with explicit completion criteria from definit
 <li><strong>TDD enforcement</strong> - RED-GREEN-REFACTOR cycle, deletes code written before tests</li>
 <li><strong>Git worktrees</strong> - Isolated workspaces on new branches</li>
 </ul>
-<p><strong>Why it's a good reference:</strong></p>
+<p><strong>Why it&#39;s a good reference:</strong></p>
 <ul>
 <li>Well-structured skill composition patterns</li>
 <li>Philosophy: systematic over ad-hoc, evidence over claims</li>
 <li>Shows how to build layered agent workflows</li>
 </ul>
-<hr />
+<hr>
 <h2>My Philosophy: Keep It Simple</h2>
 <blockquote>
 <p><strong>&quot;Add only if needed&quot;</strong></p>
 </blockquote>
 <p>Instead of adopting heavy frameworks, I prefer:</p>
-<p>| Approach               | Why                                             |<br />
-| ---------------------- | ----------------------------------------------- |<br />
-| <strong>Minimal tooling</strong>    | Less context usage, more tokens for actual work |<br />
-| <strong>AGENTS.md</strong>          | Simple, portable project guidance               |<br />
-| <strong>Native AI features</strong> | Use built-in Claude/Amp capabilities first      |<br />
-| <strong>Add incrementally</strong>  | Only add tools when there's clear friction      |</p>
-<p>The best tool is the one you don't have to think about.</p>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Minimal tooling</strong></td>
+<td>Less context usage, more tokens for actual work</td>
+</tr>
+<tr>
+<td><strong>AGENTS.md</strong></td>
+<td>Simple, portable project guidance</td>
+</tr>
+<tr>
+<td><strong>Native AI features</strong></td>
+<td>Use built-in Claude/Amp capabilities first</td>
+</tr>
+<tr>
+<td><strong>Add incrementally</strong></td>
+<td>Only add tools when there&#39;s clear friction</td>
+</tr>
+</tbody></table>
+<p>The best tool is the one you don&#39;t have to think about.</p>
 </article></main></div></body></html>
