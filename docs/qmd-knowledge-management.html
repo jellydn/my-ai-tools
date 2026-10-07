@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="qmd Knowledge Management System — my-ai-tools documentation"><title>qmd Knowledge Management System · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+</nav><main><article>
+<h1>qmd Knowledge Management System</h1>
+<blockquote>
+<p><strong>Alternative to claude-mem</strong>: Project-specific knowledge capture using qmd MCP server and Agent Skills</p>
+</blockquote>
+<h2>Overview</h2>
+<p>This system provides a lightweight, project-specific knowledge management solution that captures learnings, issue notes, and project conventions in a searchable knowledge base. Unlike <code>claude-mem</code>, it:</p>
+<ul>
+<li>✅ Keeps knowledge <strong>outside project directories</strong> (no repository pollution)</li>
+<li>✅ Uses <strong>standard markdown files</strong> (portable and version-controllable)</li>
+<li>✅ Provides <strong>AI-powered search</strong> via qmd MCP server</li>
+<li>✅ Follows <strong>skills.md specification</strong> (self-documenting)</li>
+<li>✅ Supports <strong>multiple projects</strong> with isolated knowledge bases</li>
+</ul>
+<h2>Architecture</h2>
+<p>The qmd-knowledge skill follows the Agent Skills specification:</p>
+<pre><code># The skill (one SKILL.md defines the capability)
+$HOME/.config/opencode/skills/qmd-knowledge/
+├── SKILL.md              # Skill definition
+├── scripts/              # Executable scripts
+│   └── record.sh         # Record learnings/issues/notes
+└── references/           # Documentation and examples
+    ├── learnings/
+    │   └── README.md
+    └── issues/
+        └── README.md
+
+# Knowledge storage (qmd collections per project)
+~/.ai-knowledges/
+├── my-ai-tools/          # Collection for my-ai-tools project
+│   └── references/
+│       ├── learnings/
+│       │   ├── 2024-01-26-qmd-integration.md
+│       │   └── 2024-01-27-mcp-servers.md
+│       └── issues/
+│           ├── 123.md
+│           └── 456.md
+└── another-project/      # Collection for another-project
+    └── references/
+        ├── learnings/
+        └── issues/
+</code></pre>
+<p><strong>Key concept</strong>: One skill (<code>qmd-knowledge</code>) manages knowledge for multiple projects. Each project is a qmd collection, not a separate skill.</p>
+<h2>Installation</h2>
+<h3>1. Install qmd</h3>
+<p>Install qmd globally via bun:</p>
+<pre><code class="language-bash">bun install -g @tobilu/qmd
+</code></pre>
+<h3>2. Configure MCP Server</h3>
+<p>The MCP server configuration is already included in this repository.</p>
+<p><strong>For Claude Code</strong> (<code>~/.claude/mcp-servers.json</code>):</p>
+<pre><code class="language-json">{
+	&quot;mcpServers&quot;: {
+		&quot;qmd&quot;: {
+			&quot;command&quot;: &quot;qmd&quot;,
+			&quot;args&quot;: [&quot;mcp&quot;]
+		}
+	}
+}
+</code></pre>
+<p><strong>For Amp</strong> (<code>~/.config/amp/settings.json</code>):</p>
+<pre><code class="language-json">{
+	&quot;amp.mcpServers&quot;: {
+		&quot;qmd&quot;: {
+			&quot;command&quot;: &quot;qmd&quot;,
+			&quot;args&quot;: [&quot;mcp&quot;]
+		}
+	}
+}
+</code></pre>
+<h3>3. Install the Skill</h3>
+<p>The skill is installed when you run the setup script:</p>
+<pre><code class="language-bash">./cli.sh
+</code></pre>
+<p><code>cli.sh</code> copies the skill to the universal skills directory at <code>$HOME/.agents/skills/qmd-knowledge/</code>. Tool-specific paths such as <code>$HOME/.config/opencode/skills/qmd-knowledge/</code> resolve to that directory via a symlink (<code>$HOME/.config/opencode/skills</code> → <code>$HOME/.agents/skills</code>), so the symlink path works at runtime.</p>
+<h3>4. Create a Knowledge Collection for Your Project</h3>
+<p><strong>Option 1: Automatic Setup (Recommended)</strong></p>
+<p>The <code>qmd-knowledge</code> skill now automatically sets up the knowledge base when you first use it. Simply run:</p>
+<pre><code class="language-bash">$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh learning &quot;First learning&quot;
+</code></pre>
+<p>The script will:</p>
+<ul>
+<li>Auto-detect your project name from git remote URL (most reliable)</li>
+<li>Create necessary directories</li>
+<li>Add qmd collection (or verify if already exists - no errors!)</li>
+<li>Add context for better search</li>
+<li>Generate embeddings</li>
+</ul>
+<p><strong>Option 2: Manual Setup</strong></p>
+<p>If you prefer manual setup or need to create collections for multiple projects:</p>
+<pre><code class="language-bash"># Create storage directory for your project
+mkdir -p ~/.ai-knowledges/my-ai-tools/references/learnings
+mkdir -p ~/.ai-knowledges/my-ai-tools/references/issues
+
+# Add qmd collection for this project
+qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
+
+# Add context to improve search results
+qmd context add qmd://my-ai-tools &quot;Knowledge base for my-ai-tools project: learnings, issue notes, and conventions&quot;
+
+# Generate embeddings for semantic search
+qmd embed
+</code></pre>
+<p><strong>Note</strong>:</p>
+<ul>
+<li>The skill is installed once and manages knowledge for all your projects</li>
+<li>Each project gets its own qmd collection for storing knowledge</li>
+<li>The script handles existing collections gracefully (no errors if collection already exists)</li>
+</ul>
+<h2>Usage</h2>
+<h3>Recording Knowledge</h3>
+<h4>Record a Learning</h4>
+<pre><code class="language-bash">$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh learning &quot;qmd MCP integration&quot;
+</code></pre>
+<p>This creates a timestamped file: <code>references/learnings/YYYY-MM-DD-qmd-mcp-integration.md</code></p>
+<h4>Add Issue Note</h4>
+<pre><code class="language-bash">$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh issue 123 &quot;Fixed by updating dependencies&quot;
+</code></pre>
+<p>This appends to <code>references/issues/123.md</code> (creating it if it doesn&#39;t exist).</p>
+<h4>Record General Note</h4>
+<pre><code class="language-bash">$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh note &quot;Consider using agent skills for extensibility&quot;
+</code></pre>
+<h3>Querying Knowledge</h3>
+<h4>From Claude or OpenCode</h4>
+<p>When qmd MCP server is configured, Claude can autonomously search the knowledge base:</p>
+<blockquote>
+<p>&quot;What did I learn about MCP servers?&quot;</p>
+</blockquote>
+<p>Claude will use the qmd MCP server tools to query the knowledge base.</p>
+<h4>Manual Queries</h4>
+<pre><code class="language-bash"># Fast keyword search within a collection
+qmd search &quot;MCP servers&quot; -c my-ai-tools
+
+# Semantic search using AI embeddings
+qmd vsearch &quot;how to configure MCP&quot;
+
+# Hybrid search with reranking (best quality)
+qmd query &quot;quarterly planning process&quot;
+
+# Get a specific document
+qmd get &quot;references/learnings/2024-01-26-qmd-integration.md&quot;
+
+# Get document by docid (shown in search results)
+qmd get &quot;#abc123&quot;
+
+# Get multiple documents by glob pattern
+qmd multi-get &quot;references/learnings/2025-05*.md&quot;
+
+# Search with minimum score filter
+qmd search &quot;API&quot; --all --files --min-score 0.3 -c my-ai-tools
+
+# Update embeddings after manual edits
+qmd embed
+</code></pre>
+<h2>Example Workflow</h2>
+<h3>1. Capture Learning During Development</h3>
+<p><strong>You (in Claude):</strong></p>
+<blockquote>
+<p>&quot;I just learned that qmd MCP server allows Claude to use tools autonomously for knowledge management.&quot;</p>
+</blockquote>
+<p><strong>Claude recognizes the skill and executes:</strong></p>
+<pre><code class="language-bash">$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh learning &quot;qmd MCP autonomous tool use&quot;
+</code></pre>
+<h3>2. Query Knowledge Later</h3>
+<p><strong>You (in Claude):</strong></p>
+<blockquote>
+<p>&quot;What have I learned about MCP servers in this project?&quot;</p>
+</blockquote>
+<p><strong>Claude uses qmd MCP server:</strong></p>
+<pre><code class="language-bash">qmd query &quot;MCP servers&quot;
+</code></pre>
+<p>Or with collection filter:</p>
+<pre><code class="language-bash">qmd search &quot;MCP servers&quot; -c my-ai-tools
+</code></pre>
+<p><strong>Claude responds with relevant learnings from the knowledge base.</strong></p>
+<h3>3. Track Issue Resolution</h3>
+<p><strong>You (in Claude):</strong></p>
+<blockquote>
+<p>&quot;Add a note to issue #123 that it was fixed by updating the qmd dependency.&quot;</p>
+</blockquote>
+<p><strong>Claude executes:</strong></p>
+<pre><code class="language-bash">$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh issue 123 &quot;Fixed by updating qmd dependency to latest version&quot;
+</code></pre>
+<h2>Multiple Projects</h2>
+<p>The qmd-knowledge skill manages knowledge for multiple projects. Each project gets its own qmd collection:</p>
+<pre><code class="language-bash"># Create storage for a different project
+mkdir -p ~/.ai-knowledges/another-project/references/learnings
+mkdir -p ~/.ai-knowledges/another-project/references/issues
+
+# Add collection and context
+qmd collection add ~/.ai-knowledges/another-project --name another-project
+qmd context add qmd://another-project &quot;Knowledge base for another-project&quot;
+
+# Generate embeddings
+qmd embed
+</code></pre>
+<p>Use the same skill script for all projects - it will use the <code>QMD_PROJECT</code> environment variable or detect the project automatically.</p>
+<h2>Advanced Usage</h2>
+<h3>Project Name Detection</h3>
+<p>The skill automatically detects your project name using the following priority:</p>
+<ol>
+<li><strong>QMD_PROJECT environment variable</strong> (highest priority)</li>
+<li><strong>Git remote URL</strong> (most reliable - extracts repo name from origin)</li>
+<li><strong>Git repository folder name</strong> (fallback if remote URL unavailable)</li>
+<li><strong>Current directory name</strong> (last resort)</li>
+</ol>
+<p>This ensures consistent project naming even if your local folder has a non-standard name (e.g., <code>2026-01-08-my-ai-tools.qmd-skill</code> will still be detected as <code>my-ai-tools</code>).</p>
+<h3>Custom Project Detection</h3>
+<p>Set the <code>QMD_PROJECT</code> environment variable to override automatic detection:</p>
+<pre><code class="language-bash">export QMD_PROJECT=&quot;another-project&quot;
+$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh learning &quot;This goes to another-project&quot;
+</code></pre>
+<h3>Handling Existing Collections</h3>
+<p>The skill now automatically handles existing collections gracefully. If a collection already exists:</p>
+<ul>
+<li>The script will verify its presence and continue without error</li>
+<li>No manual intervention is needed</li>
+<li>The knowledge base will be ready to use immediately</li>
+</ul>
+<p>This prevents the &quot;Collection already exists&quot; error that previously occurred.</p>
+<h3>Backup Knowledge Base</h3>
+<pre><code class="language-bash"># Backup to git
+cd ~/.ai-knowledges/my-ai-tools
+git init
+git add .
+git commit -m &quot;Backup knowledge base&quot;
+git remote add origin &lt;your-backup-repo&gt;
+git push -u origin main
+</code></pre>
+<h3>Sync Across Machines</h3>
+<pre><code class="language-bash"># On machine 1
+cd ~/.ai-knowledges/my-ai-tools
+git push
+
+# On machine 2
+cd ~/.ai-knowledges
+git clone &lt;your-backup-repo&gt; my-ai-tools
+# Entries are stored in references/learnings and references/issues.
+
+# Add collection and generate embeddings
+qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
+qmd context add qmd://my-ai-tools &quot;Knowledge base for my-ai-tools project&quot;
+qmd embed
+</code></pre>
+<h2>Troubleshooting</h2>
+<h3>qmd not found</h3>
+<p>Install qmd:</p>
+<pre><code class="language-bash">bun install -g @tobilu/qmd
+</code></pre>
+<h3>Knowledge collection not found</h3>
+<p>Create the collection for your project:</p>
+<pre><code class="language-bash">mkdir -p ~/.ai-knowledges/my-ai-tools/references/learnings
+mkdir -p ~/.ai-knowledges/my-ai-tools/references/issues
+qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
+qmd context add qmd://my-ai-tools &quot;Knowledge base for my-ai-tools project&quot;
+qmd embed
+</code></pre>
+<h3>MCP server not working</h3>
+<ol>
+<li>Check that qmd is in your PATH: <code>which qmd</code></li>
+<li>Verify MCP server config in <code>~/.claude/mcp-servers.json</code> or <code>~/.config/amp/settings.json</code></li>
+<li>Restart Claude Code or Amp</li>
+</ol>
+<h3>Embeddings not updating</h3>
+<p>Manually regenerate embeddings:</p>
+<pre><code class="language-bash">qmd embed
+</code></pre>
+<p>This will update the semantic search index for all collections.</p>
+<h2>Resources</h2>
+<ul>
+<li><strong><a href="https://github.com/tobi/qmd">qmd GitHub</a></strong> - Quick Markdown Search</li>
+<li><strong><a href="https://support.claude.com/en/articles/12512198-how-to-create-custom-skills">How to create custom Skills</a></strong> - Official documentation</li>
+<li><strong><a href="https://agentskills.io/what-are-skills">Skills Specification</a></strong> - Technical details</li>
+<li><strong><a href="https://mcp.so">MCP Documentation</a></strong> - Model Context Protocol</li>
+</ul>
+<h2>Contributing</h2>
+<p>Contributions welcome! To add features:</p>
+<ol>
+<li>Fork the repository</li>
+<li>Create a feature branch</li>
+<li>Add your changes to <code>skills/qmd-knowledge/</code></li>
+<li>Submit a pull request</li>
+</ol>
+<h2>License</h2>
+<p>MIT - Same as the parent repository</p>
+</article></main></div></body></html>

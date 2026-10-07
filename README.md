@@ -207,12 +207,15 @@ conventions.
 
 ## 📚 Documentation
 
+HTML pages in [`docs/`](docs/index.html) are generated from the Markdown sources. Regenerate them with `bun scripts/render-docs.ts`.
+
 - [Documentation website](https://ai-tools.itman.fyi)
 - [Detailed tool and skill reference](TOOL_REFERENCE.md)
 - [Fusion orchestration](docs/fusion-orchestration.md)
 - [Claude Code agent teams](docs/claude-code-teams.md)
 - [qmd knowledge management](docs/qmd-knowledge-management.md)
 - [My AI Bot](docs/my-ai-bot.md)
+- [Applied AI and GenAI cheat sheet](docs/ai-applied-genai-cheat-sheet.md)
 - [Testing guide](TESTING.md)
 
 ## 🤝 Contributing

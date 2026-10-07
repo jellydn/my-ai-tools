@@ -70,7 +70,9 @@ With SSH access as `dokku@docklight.itman.fyi`:
 
 ```bash
 export OPENAI_API_KEY="sk-or-v1-..."
-ssh dokku@docklight.itman.fyi config:set --no-restart ai-tools "OPENAI_API_KEY=$OPENAI_API_KEY"
+# --encoded stores a base64 value so the raw key is not in the SSH command.
+encoded=$(printf '%s' "$OPENAI_API_KEY" | base64 | tr -d '\n')
+ssh dokku@docklight.itman.fyi config:set --encoded --no-restart ai-tools "OPENAI_API_KEY=$encoded"
 git remote add dokku dokku@docklight.itman.fyi:ai-tools 2>/dev/null || true
 git push dokku main:main
 ```

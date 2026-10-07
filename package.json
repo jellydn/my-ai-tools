@@ -28,6 +28,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.3",
 		"bun-types": "^1.1.29",
+		"marked": "^18.1.0",
 		"typescript": "^7.0.0"
 	}
 }

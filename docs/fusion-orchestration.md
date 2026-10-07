@@ -153,4 +153,4 @@ KEY LEARNINGS: <Domain insights discovered during implementation>
 
 - [Agent Teams Usage Examples](./agent-teams-examples.md)
 - [Subagent Infrastructure](../wiki/wiki/entities/subagent-infrastructure.md)
-- [Orchestrating Fusion Skill](../../skills/orchestrating-fusion/SKILL.md)
+- [Orchestrating Fusion Skill](../skills/orchestrating-fusion/SKILL.md)

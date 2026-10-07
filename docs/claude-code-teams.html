@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="🤝 Claude Code Teams — my-ai-tools documentation"><title>🤝 Claude Code Teams · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+</nav><main><article>
+<h1>🤝 Claude Code Teams</h1>
+<blockquote>
+<p><strong>Agent Teams</strong> is an experimental feature in Claude Code that enables sophisticated multi-agent workflows through subagent orchestration.</p>
+</blockquote>
+<h2>📋 Overview</h2>
+<p>Claude Code Teams allows you to:</p>
+<ul>
+<li><strong>Spawn specialized subagents</strong> for specific tasks</li>
+<li><strong>Coordinate multiple agents</strong> through hooks and session data</li>
+<li><strong>Build composable workflows</strong> with isolated, focused agents</li>
+<li><strong>Maintain context</strong> across agent interactions</li>
+</ul>
+<h2>🚀 Getting Started</h2>
+<h3>Enable Agent Teams</h3>
+<p>The feature is controlled by an environment variable in <code>configs/claude/settings.json</code>:</p>
+<pre><code class="language-json">{
+	&quot;env&quot;: {
+		&quot;CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS&quot;: &quot;1&quot;
+	}
+}
+</code></pre>
+<p>This is <strong>already enabled</strong> in this repository.</p>
+<h2>🎯 Agent Configuration</h2>
+<h3>Agent Definition Format</h3>
+<p>Agents are defined in markdown files with YAML frontmatter:</p>
+<pre><code class="language-markdown">---
+name: agent-name
+description: Brief description of what this agent does
+mode: subagent
+temperature: 0.1
+---
+
+# Agent Instructions
+
+Your detailed instructions and guidelines here...
+</code></pre>
+<h3>Agent Properties</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Required</th>
+<th>Description</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>Yes</td>
+<td>Unique identifier for the agent</td>
+<td>kebab-case string</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>Yes</td>
+<td>Brief purpose statement</td>
+<td>Plain text</td>
+</tr>
+<tr>
+<td><code>mode</code></td>
+<td>Yes</td>
+<td>Agent execution mode</td>
+<td><code>subagent</code>, <code>coordinator</code></td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
+<td>No</td>
+<td>Creativity level (0-1)</td>
+<td>Default: 0.7</td>
+</tr>
+</tbody></table>
+<h3>Directory Structure</h3>
+<pre><code>configs/claude/
+├── agents/                    # Agent definitions
+│   ├── ai-slop-remover.md    # Existing example
+│   ├── code-reviewer.md      # Example worker agent
+│   └── team-coordinator.md   # Example coordinator
+├── hooks/                     # Agent coordination hooks
+│   ├── index.ts              # Hook implementations
+│   ├── lib.ts                # Hook utilities
+│   └── session.ts            # Session data management
+└── settings.json             # Global configuration
+</code></pre>
+<h2>🔧 Agent Types</h2>
+<h3>1. Subagent (Worker)</h3>
+<p>Specialized agents that handle specific tasks:</p>
+<pre><code class="language-markdown">---
+name: code-reviewer
+description: Reviews code for quality, style, and potential issues
+mode: subagent
+temperature: 0.2
+---
+
+You are an expert code reviewer...
+</code></pre>
+<p><strong>Use Cases:</strong></p>
+<ul>
+<li>Code quality analysis</li>
+<li>Security scanning</li>
+<li>Test generation</li>
+<li>Documentation writing</li>
+<li>Refactoring tasks</li>
+</ul>
+<h3>2. Coordinator</h3>
+<p>Orchestrates multiple subagents:</p>
+<pre><code class="language-markdown">---
+name: team-coordinator
+description: Coordinates multiple specialized agents for complex tasks
+mode: coordinator
+temperature: 0.5
+---
+
+You coordinate specialized agents to solve complex problems...
+</code></pre>
+<p><strong>Use Cases:</strong></p>
+<ul>
+<li>Multi-stage workflows</li>
+<li>Parallel task execution</li>
+<li>Result aggregation</li>
+<li>Task delegation</li>
+</ul>
+<h2>🎨 Team Patterns</h2>
+<h3>Pattern 1: Sequential Specialist Chain</h3>
+<p>Agents process work in sequence, each adding value:</p>
+<pre><code>Coordinator → Implementer → Reviewer → Documenter
+</code></pre>
+<p><strong>Example Workflow:</strong></p>
+<ol>
+<li><strong>Coordinator</strong> analyzes requirements and creates plan</li>
+<li><strong>Implementer</strong> writes code following the plan</li>
+<li><strong>Reviewer</strong> checks code quality and suggests improvements</li>
+<li><strong>Documenter</strong> adds comprehensive documentation</li>
+</ol>
+<h3>Pattern 2: Parallel Workers</h3>
+<p>Multiple agents work simultaneously on independent tasks:</p>
+<pre><code>                 ┌─ Frontend Agent
+Coordinator ─────┼─ Backend Agent
+                 └─ Database Agent
+</code></pre>
+<p><strong>Example Workflow:</strong></p>
+<ol>
+<li><strong>Coordinator</strong> breaks feature into frontend/backend/database</li>
+<li>Agents work in parallel on their components</li>
+<li><strong>Coordinator</strong> integrates results</li>
+</ol>
+<h3>Pattern 3: Iterative Refinement</h3>
+<p>Agent refines work through multiple passes:</p>
+<pre><code>Draft Agent → Review Agent → Polish Agent → Review Agent → Final Agent
+</code></pre>
+<p><strong>Example Workflow:</strong></p>
+<ol>
+<li><strong>Draft Agent</strong> creates initial implementation</li>
+<li><strong>Review Agent</strong> identifies issues</li>
+<li><strong>Polish Agent</strong> addresses feedback</li>
+<li>Repeat until quality threshold met</li>
+</ol>
+<h2>🪝 Hook Integration</h2>
+<h3>SubagentStop Hook</h3>
+<p>Triggered when a subagent completes:</p>
+<pre><code class="language-typescript">// configs/claude/hooks/index.ts
+import { SubagentStop } from &quot;./lib&quot;;
+
+export const hooks = {
+	SubagentStop: SubagentStop,
+};
+</code></pre>
+<p><strong>Hook Implementation:</strong></p>
+<pre><code class="language-typescript">// configs/claude/hooks/lib.ts
+export function SubagentStop(event: SubagentEvent) {
+	// Access subagent results
+	const result = event.result;
+
+	// Save data for coordination
+	saveSessionData({
+		agentName: event.agentName,
+		output: result,
+		timestamp: new Date().toISOString(),
+	});
+
+	// Return modified result if needed
+	return result;
+}
+</code></pre>
+<h3>Session Data Management</h3>
+<p>Share data between agents:</p>
+<pre><code class="language-typescript">// configs/claude/hooks/session.ts
+interface SessionData {
+	[key: string]: any;
+}
+
+export function saveSessionData(data: SessionData): void {
+	// Save to persistent storage
+}
+
+export function getSessionData(key: string): any {
+	// Retrieve from storage
+}
+</code></pre>
+<h2>📝 Example: Code Quality Team</h2>
+<h3>Team Structure</h3>
+<pre><code>configs/claude/agents/
+├── code-quality-coordinator.md   # Orchestrates quality checks
+├── style-checker.md              # Checks code style
+├── security-scanner.md           # Scans for vulnerabilities
+└── performance-analyzer.md       # Analyzes performance
+</code></pre>
+<h3>Coordinator Definition</h3>
+<pre><code class="language-markdown">---
+name: code-quality-coordinator
+description: Orchestrates comprehensive code quality checks
+mode: coordinator
+temperature: 0.3
+---
+
+# Code Quality Coordinator
+
+You coordinate specialized agents to ensure code quality:
+
+1. **Style Checker** - Verifies code adheres to style guidelines
+2. **Security Scanner** - Identifies potential security issues
+3. **Performance Analyzer** - Detects performance bottlenecks
+
+## Process
+
+1. Analyze the code changes
+2. Delegate to appropriate specialists
+3. Aggregate findings
+4. Prioritize issues by severity
+5. Generate comprehensive report
+
+## Output Format
+
+Provide a structured report with:
+
+- Summary of all issues found
+- Severity classification (critical/high/medium/low)
+- Actionable recommendations
+- Priority order for fixes
+</code></pre>
+<h3>Worker Agent Example</h3>
+<pre><code class="language-markdown">---
+name: security-scanner
+description: Scans code for security vulnerabilities and best practices
+mode: subagent
+temperature: 0.1
+---
+
+# Security Scanner
+
+You are an expert security analyst specializing in code security.
+
+## Your Mission
+
+Scan code for:
+
+- SQL injection vulnerabilities
+- XSS attack vectors
+- Authentication/authorization issues
+- Sensitive data exposure
+- Insecure dependencies
+- Cryptographic weaknesses
+
+## Analysis Process
+
+1. Review all code changes
+2. Identify security-relevant code paths
+3. Check against OWASP Top 10
+4. Validate input sanitization
+5. Verify output encoding
+
+## Output Format
+
+Report findings as:
+
+```json
+{
+	&quot;severity&quot;: &quot;critical|high|medium|low&quot;,
+	&quot;type&quot;: &quot;vulnerability-type&quot;,
+	&quot;location&quot;: &quot;file:line&quot;,
+	&quot;description&quot;: &quot;Clear explanation&quot;,
+	&quot;recommendation&quot;: &quot;Specific fix&quot;
+}
+```
+</code></pre>
+<h2>🎓 Best Practices</h2>
+<h3>1. Single Responsibility</h3>
+<p>Each agent should have a clear, focused purpose:</p>
+<p>✅ <strong>Good:</strong></p>
+<pre><code class="language-yaml">name: typescript-type-checker
+description: Validates TypeScript type safety
+</code></pre>
+<p>❌ <strong>Bad:</strong></p>
+<pre><code class="language-yaml">name: code-improver
+description: Fixes all code issues
+</code></pre>
+<h3>2. Clear Interfaces</h3>
+<p>Define expected inputs and outputs:</p>
+<pre><code class="language-markdown">## Inputs
+
+- File path(s) to analyze
+- Analysis scope (full/changes only)
+
+## Outputs
+
+- List of issues found
+- Confidence score (0-100)
+- Suggested fixes
+</code></pre>
+<h3>3. Temperature Tuning</h3>
+<ul>
+<li><strong>0.0-0.3</strong>: Deterministic tasks (linting, security scanning)</li>
+<li><strong>0.3-0.5</strong>: Balanced tasks (code review, refactoring)</li>
+<li><strong>0.5-0.7</strong>: Creative tasks (architecture, design)</li>
+<li><strong>0.7-1.0</strong>: Exploratory tasks (brainstorming, alternatives)</li>
+</ul>
+<h3>4. Error Handling</h3>
+<p>Agents should gracefully handle failures:</p>
+<pre><code class="language-markdown">## Error Handling
+
+If unable to complete analysis:
+
+1. Report specific error encountered
+2. Suggest alternative approaches
+3. Indicate which parts succeeded
+4. Provide partial results if possible
+</code></pre>
+<h3>5. Coordination Protocol</h3>
+<p>Establish communication patterns:</p>
+<pre><code class="language-markdown">## Coordination
+
+When delegating to this agent:
+
+- Provide: file paths, context, specific concerns
+- Expect: JSON report within 2 minutes
+- Handle: timeout with partial results
+</code></pre>
+<h2>🔍 Troubleshooting</h2>
+<h3>Agent Not Found</h3>
+<p><strong>Symptom:</strong> Error: &quot;Agent &#39;agent-name&#39; not found&quot;</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Verify file exists in <code>configs/claude/agents/</code></li>
+<li>Check filename matches agent <code>name</code> property</li>
+<li>Ensure YAML frontmatter is valid</li>
+</ol>
+<h3>Subagent Not Triggering</h3>
+<p><strong>Symptom:</strong> Subagent doesn&#39;t spawn</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Verify <code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: &quot;1&quot;</code> in settings.json</li>
+<li>Check agent <code>mode: subagent</code> is set</li>
+<li>Review hook configuration</li>
+</ol>
+<h3>Hook Not Executing</h3>
+<p><strong>Symptom:</strong> SubagentStop hook doesn&#39;t run</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Verify hooks directory structure</li>
+<li>Check TypeScript compilation</li>
+<li>Review hook registration in <code>hooks/index.ts</code></li>
+</ol>
+<h2>📚 Additional Resources</h2>
+<ul>
+<li><a href="../configs/claude/agents/ai-slop-remover.md">Agent Definition Example</a></li>
+<li><a href="agent-teams-examples.html">Agent Teams Usage Examples</a> - Practical examples and workflows</li>
+<li><a href="../configs/claude/hooks/lib.ts">Hook Implementation</a></li>
+<li><a href="../configs/claude/hooks/session.ts">Session Management</a></li>
+<li><a href="../configs/claude/settings.json">Claude Code Settings</a></li>
+</ul>
+<h2>🔄 Next Steps</h2>
+<ol>
+<li><strong>Review existing agent</strong> - Study <code>ai-slop-remover.md</code> for reference</li>
+<li><strong>Try the examples</strong> - See <a href="agent-teams-examples.html">agent-teams-examples.md</a> for practical workflows</li>
+<li><strong>Create your first agent</strong> - Start with a simple subagent</li>
+<li><strong>Test coordination</strong> - Use SubagentStop hook for data sharing</li>
+<li><strong>Build a team</strong> - Create complementary agents that work together</li>
+</ol>
+<hr>
+<p><strong>Questions?</strong> Check <a href="learning-stories.html">Learning Stories</a> for real-world examples of subagent workflows.</p>
+</article></main></div></body></html>

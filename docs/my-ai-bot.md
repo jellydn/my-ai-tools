@@ -48,6 +48,8 @@ place its HTTPS URL in the App settings. A signed fixture can be sent with:
 
 ```bash
 body='{"action":"created","installation":{"id":1},"sender":{"login":"alice"},"comment":{"body":"/my-ai-bot help"},"issue":{"number":1},"repository":{"name":"demo","owner":{"login":"acme"}}}'
+GITHUB_APP_WEBHOOK_SECRET=$(sed -n 's/^GITHUB_APP_WEBHOOK_SECRET=//p' .env | head -n 1 | sed -e 's/^"//' -e 's/"$//')
+export GITHUB_APP_WEBHOOK_SECRET
 sig="sha256=$(printf %s "$body" | openssl dgst -sha256 -hmac "$GITHUB_APP_WEBHOOK_SECRET" -hex | awk '{print $2}')"
 curl -i -X POST http://localhost:3000/api/github/webhooks -H "X-GitHub-Event: issue_comment" \
   -H "X-GitHub-Delivery: local-1" -H "X-Hub-Signature-256: $sig" -H 'Content-Type: application/json' -d "$body"
