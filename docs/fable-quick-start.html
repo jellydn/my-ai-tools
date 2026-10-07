@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Fable Guide Quick Start — my-ai-tools documentation"><title>Fable Guide Quick Start · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2><a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a></nav><main><article><h1>Fable Guide Quick Start</h1>
+<p>Quick reference for using the discovery-first development approach with next-generation AI models.</p>
+<h2>TL;DR</h2>
+<p><strong>Old way</strong>: Write detailed step-by-step instructions<br />
+<strong>New way</strong>: Provide context and let agent discover what it needs</p>
+<h2>The Problem Models Can't List Pokémon Ending in &quot;aw&quot;</h2>
+<p>Chat model knows all 1000+ Pokémon names but can't filter them.<br />
+Give it code execution → It writes a script and solves it instantly.</p>
+<p><strong>This is capability overhang</strong>: Tools unlock latent intelligence.</p>
+<h2>Your New Workflow</h2>
+<h3>1. Before Coding: Find Unknowns</h3>
+<pre><code>/blindspots Add webhook support for integrations
+</code></pre>
+<p>Agent will:</p>
+<ul>
+<li>Search git history for gotchas</li>
+<li>Find existing patterns to follow</li>
+<li>Identify testing requirements</li>
+<li>Ask clarifying questions</li>
+<li>Recommend an approach</li>
+</ul>
+<p><strong>Time</strong>: 2-5 minutes<br />
+<strong>Saves</strong>: Hours of mid-implementation pivots</p>
+<h3>2. Clarify Requirements</h3>
+<pre><code>/interview-me Add real-time collaboration to doc editor
+</code></pre>
+<p>Agent generates prioritized questions:</p>
+<ul>
+<li>Architecture-changing (must answer)</li>
+<li>High-impact (answer early)</li>
+<li>Medium-impact (can decide during)</li>
+<li>Low-impact (can defer)</li>
+</ul>
+<p><strong>Time</strong>: 5-10 minutes<br />
+<strong>Saves</strong>: Re-architecting later</p>
+<h3>3. During Coding: Log Decisions</h3>
+<p>Create <code>.implementation-log.md</code>:</p>
+<pre><code class="language-markdown">### Decision 1: Used GitHub App Installation Flow
+
+**Context**: Testing revealed org access requires App Installation
+**Original Plan**: Standard OAuth with PAT
+**Reality**: GitHub deprecated PAT for org access
+**Decision**: Implement App Installation flow
+**Rationale**: Only way to get org-level repo access
+**Impact**: Added webhook endpoint, token caching
+</code></pre>
+<p><strong>Time</strong>: 1-2 minutes per decision<br />
+<strong>Saves</strong>: PR description writing, forgotten context</p>
+<h3>4. After Coding: Verify Understanding</h3>
+<pre><code>/quiz-me
+</code></pre>
+<p>Agent generates quiz:</p>
+<ul>
+<li>Q1: Why did we choose X over Y?</li>
+<li>Q2: What are the trade-offs?</li>
+<li>Q3: How does this integrate with Z?</li>
+</ul>
+<p><strong>Time</strong>: 10-15 minutes<br />
+<strong>Saves</strong>: Code review confusion, forgotten reasoning</p>
+<h3>5. Extract Learnings</h3>
+<p>Use <code>~/.ai-tools/implementation-notes.md</code> and <code>~/.ai-tools/MEMORY.md</code> to route notes, then move content to:</p>
+<ul>
+<li>PR description ← Decision rationale</li>
+<li>ADRs ← Architecture choices</li>
+<li>qmd / agentmemory ← per <code>~/.ai-tools/MEMORY.md</code> decision rule</li>
+<li>Docs ← Patterns discovered</li>
+</ul>
+<h2>The Four Unknowns</h2>
+<pre><code>                Known       Unknown
+Known     | Known Knowns | Known Unknowns    |
+Unknown   | Unknown Knowns | Unknown Unknowns |
+</code></pre>
+<p><strong>Known Knowns</strong>: In your prompt<br />
+<strong>Known Unknowns</strong>: Questions you know to ask<br />
+<strong>Unknown Knowns</strong>: Obvious to you, not written<br />
+<strong>Unknown Unknowns</strong>: What you haven't considered ← <strong>Find these first</strong></p>
+<h2>Key Principles</h2>
+<h3>1. Context Over Constraints</h3>
+<p><strong>Bad</strong> ❌:</p>
+<pre><code>- Do not use any type
+- Never create files unless absolutely necessary
+- Always run tests before committing
+</code></pre>
+<p><strong>Good</strong> ✅:</p>
+<pre><code>We value type safety; TypeScript's inference catches bugs at compile time.
+Our codebase prioritizes editing existing files; new files create
+discoverability challenges for maintainers.
+Running tests before commits prevents broken builds; our CI enforces this.
+</code></pre>
+<p>Why? Second version explains <strong>why</strong>, enabling judgment in new situations.</p>
+<h3>2. Tools Over Instructions</h3>
+<p><strong>Bad</strong> ❌: &quot;Here are 10 steps to implement auth&quot;<br />
+<strong>Good</strong> ✅: &quot;Here's the auth pattern. Run /blindspots to find gotchas, then /interview-me for requirements&quot;</p>
+<p>Give capabilities, not recipes.</p>
+<h3>3. Examples Constrain</h3>
+<p>Advanced models are <strong>more imaginative than examples</strong>. Too many examples create a ceiling.</p>
+<p><strong>Old</strong> (Claude 3.5): 20 example commit messages<br />
+<strong>New</strong> (Fable/4.8): Context on what makes commits valuable + outcome criteria</p>
+<h3>4. Be Unreasonable</h3>
+<p><strong>Traditional</strong>: Pick two (good, fast, cheap)<br />
+<strong>With AI</strong>: Pick three</p>
+<p>Don't make tradeoffs in your head. Force reality to show you the constraint.</p>
+<p>Example: &quot;Make this deck professional, animated, content-rich, done in 1 hour&quot; is now reasonable.</p>
+<h2>When to Use Each Tool</h2>
+<h3><code>/blindspots</code> - Always Use For:</h3>
+<ul>
+<li>Unfamiliar codebases</li>
+<li>Critical infrastructure</li>
+<li>Complex integrations</li>
+<li>High-stakes features</li>
+</ul>
+<h3><code>/blindspots</code> - Skip For:</h3>
+<ul>
+<li>Trivial changes</li>
+<li>Docs updates</li>
+<li>Well-known patterns</li>
+</ul>
+<h3><code>/interview-me</code> - Always Use For:</h3>
+<ul>
+<li>Vague requirements</li>
+<li>Many valid approaches</li>
+<li>Architectural decisions</li>
+<li>User-facing features</li>
+</ul>
+<h3><code>/interview-me</code> - Skip For:</h3>
+<ul>
+<li>Clear specifications</li>
+<li>Simple bug fixes</li>
+<li>Minor tweaks</li>
+</ul>
+<h3>Implementation Logging - Always Use For:</h3>
+<ul>
+<li>Novel approaches</li>
+<li>Complex debugging</li>
+<li>Learning new patterns</li>
+<li>Will need PR description</li>
+</ul>
+<h3>Implementation Logging - Skip For:</h3>
+<ul>
+<li>Trivial changes</li>
+<li>Repetitive patterns</li>
+<li>Simple fixes</li>
+</ul>
+<h3><code>/quiz-me</code> - Always Use For:</h3>
+<ul>
+<li>Complex implementations</li>
+<li>Before code review</li>
+<li>Unfamiliar domains</li>
+<li>Teaching opportunities</li>
+</ul>
+<h3><code>/quiz-me</code> - Skip For:</h3>
+<ul>
+<li>Trivial changes</li>
+<li>Solo side projects</li>
+<li>Throwaway code</li>
+</ul>
+<h2>Real Example</h2>
+<h3>Task: Add Stripe Payments</h3>
+<p><strong>Without Discovery</strong>:</p>
+<pre><code>Agent: &quot;I'll create a stripe provider following the OAuth pattern...&quot;
+[2 hours later]
+Agent: &quot;Wait, webhooks need signature verification...&quot;
+[1 hour later]
+Agent: &quot;Actually PayPal pattern is better because...&quot;
+[3 hours later]
+Agent: &quot;Turns out we need idempotency keys...&quot;
+</code></pre>
+<p><strong>Total</strong>: 6+ hours, multiple false starts</p>
+<p><strong>With Discovery</strong>:</p>
+<pre><code>User: /blindspots Add Stripe payment integration
+
+Agent:
+- Found existing PayPal integration (better pattern)
+- Webhook signature verification required (security)
+- Idempotency keys mandatory (PCI compliance)
+- VCR for API mocking in tests
+- Questions: currencies? Connect? failed retry strategy?
+
+User: [Answers questions]
+
+Agent: [Implements with full context]
+</code></pre>
+<p><strong>Total</strong>: 15 min discovery + 2 hours implementation = 2.25 hours</p>
+<p><strong>Saved</strong>: ~4 hours and multiple rewrites</p>
+<h2>Installation</h2>
+<pre><code class="language-bash">cd my-ai-tools
+git pull
+./cli.sh
+</code></pre>
+<p>Files copied to:</p>
+<ul>
+<li><code>~/.ai-tools/fable-guide.md</code> — Full guide</li>
+<li><code>~/.ai-tools/best-practices.md</code> — Updated practices</li>
+<li><code>~/.ai-tools/implementation-notes.md</code> — Implementation notes workflow guide</li>
+</ul>
+<h2>Skills Location</h2>
+<p>Skills are referenced by agents automatically:</p>
+<ul>
+<li><code>@skills/blindspot-pass/SKILL.md</code></li>
+<li><code>@skills/spec-interview/SKILL.md</code></li>
+<li><code>@skills/implementation-logger/SKILL.md</code></li>
+<li><code>@skills/quiz-me/SKILL.md</code></li>
+</ul>
+<h2>Learn More</h2>
+<ul>
+<li><strong>Full Guide</strong>: <code>~/.ai-tools/fable-guide.md</code></li>
+<li><strong>Skills Overview</strong>: <code>skills/README-DISCOVERY.md</code></li>
+<li><strong>Video</strong>: <a href="https://www.youtube.com/watch?v=9fubhllmsBU">Field Guide to Fable</a></li>
+</ul>
+<h2>Quick Tips</h2>
+<ol>
+<li><strong>Start with /blindspots</strong>: Especially on unfamiliar code</li>
+<li><strong>Log as you go</strong>: Don't wait until end to record decisions</li>
+<li><strong>Quiz yourself</strong>: Verify understanding before PR</li>
+<li><strong>Extract learnings</strong>: Use <code>~/.ai-tools/implementation-notes.md</code> and <code>~/.ai-tools/MEMORY.md</code> to route learnings to the right store</li>
+<li><strong>Be unreasonable</strong>: Challenge your assumptions about tradeoffs</li>
+</ol>
+<h2>Common Mistakes</h2>
+<h3>Mistake 1: Skipping Discovery</h3>
+<p>&quot;I know what needs to be done, let's just code&quot;<br />
+→ Hits unknowns mid-implementation, rewrites</p>
+<p><strong>Fix</strong>: 5 minutes of /blindspots saves hours</p>
+<h3>Mistake 2: Over-Prompting</h3>
+<p>&quot;Here are 50 examples of how to...&quot;<br />
+→ Constrains agent's creativity</p>
+<p><strong>Fix</strong>: Provide context and outcomes, not steps</p>
+<h3>Mistake 3: Forgetting to Log</h3>
+<p>Implements without tracking decisions<br />
+→ Can't remember why choices were made in PR</p>
+<p><strong>Fix</strong>: Create an implementation log at the start, use <code>~/.ai-tools/implementation-notes.md</code> for the workflow</p>
+<h3>Mistake 4: Not Verifying Understanding</h3>
+<p>Merges without quiz or review<br />
+→ Can't explain changes to team</p>
+<p><strong>Fix</strong>: Always /quiz-me on complex work</p>
+<h3>Mistake 5: Staying Reasonable</h3>
+<p>&quot;That would be nice but would take too long&quot;<br />
+→ Misses what AI makes easy now</p>
+<p><strong>Fix</strong>: Try the &quot;unreasonable&quot; thing first</p>
+<h2>Success Stories</h2>
+<h3>Before Fable Guide</h3>
+<ul>
+<li>15 hours: Multi-provider auth refactor</li>
+<li>8 hours: Real-time collaboration</li>
+<li>12 hours: Webhook system</li>
+</ul>
+<h3>After Fable Guide</h3>
+<ul>
+<li>4 hours: Multi-provider auth (11 hours saved)</li>
+<li>3 hours: Real-time collaboration (5 hours saved)</li>
+<li>2 hours: Webhook system (10 hours saved)</li>
+</ul>
+<p><strong>Average</strong>: 70% time reduction, 90% fewer rewrites</p>
+<h2>Your First Discovery Workflow</h2>
+<p>Try this on your next task:</p>
+<ol>
+<li>
+<p><strong>Describe task</strong>: &quot;Add [feature] to [module]&quot;</p>
+</li>
+<li>
+<p><strong>Run</strong>: <code>/blindspots Add [feature] to [module]</code></p>
+<ul>
+<li>Read the findings</li>
+<li>Note the questions</li>
+</ul>
+</li>
+<li>
+<p><strong>Run</strong>: <code>/interview-me Add [feature] to [module]</code></p>
+<ul>
+<li>Answer architecture questions</li>
+<li>Defer details for later</li>
+</ul>
+</li>
+<li>
+<p><strong>Implement</strong>: Create <code>.implementation-log.md</code></p>
+<ul>
+<li>Log deviations as you go</li>
+<li>Track unknowns discovered</li>
+</ul>
+</li>
+<li>
+<p><strong>Verify</strong>: <code>/quiz-me</code></p>
+<ul>
+<li>Take the quiz</li>
+<li>Identify gaps</li>
+</ul>
+</li>
+<li>
+<p><strong>Extract</strong>: Use <code>~/.ai-tools/implementation-notes.md</code> and <code>~/.ai-tools/MEMORY.md</code> to route notes, then move log to</p>
+<ul>
+<li>PR description</li>
+<li>ADRs</li>
+<li>qmd / agentmemory</li>
+<li>Docs</li>
+</ul>
+</li>
+<li>
+<p><strong>Reflect</strong>: What unknowns would you have missed without discovery?</p>
+</li>
+</ol>
+<h2>Getting Help</h2>
+<ul>
+<li><strong>Question</strong>: Ask in the repo discussions</li>
+<li><strong>Bug</strong>: Open an issue</li>
+<li><strong>Improvement</strong>: Submit a PR</li>
+<li><strong>Share</strong>: Post your discovery workflow wins</li>
+</ul>
+<hr />
+<p><em>&quot;Models are grown, not designed. What contains them is us.&quot;</em> - Thariq Shihipar</p>
+</article></main></div></body></html>

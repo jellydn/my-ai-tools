@@ -287,11 +287,11 @@ Benchmark candidate models on the same representative dataset.
 
 ---
 
-## 11. Omio-Style Travel Assistant Architecture
+## 11. Tool-Grounded Travel Assistant Architecture
 
 ### User request
 
-> “Find me the cheapest way from Singapore to Tokyo next weekend.”
+> “Find me the cheapest way from one city to another next weekend.”
 
 ### Strong architecture
 

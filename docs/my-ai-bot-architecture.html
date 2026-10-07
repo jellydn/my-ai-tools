@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="my-ai-bot architecture — my-ai-tools documentation"><title>my-ai-bot architecture · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2><a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a></nav><main><article><h1>my-ai-bot architecture</h1>
+<h2>Current reusable components</h2>
+<ul>
+<li><code>server.ts</code> is the existing Hono/Node HTTP entry point and remains the process owner.</li>
+<li>Zod is already used for request validation and will validate repository configuration and agent output.</li>
+<li><code>configs/ai-launcher/config.json</code> establishes <code>codex exec</code> as a supported non-interactive coding-agent command.</li>
+<li>Root and nested <code>AGENTS.md</code> files, <code>configs/cline/AGENTS.md</code>, and repository <code>skills/*/SKILL.md</code> files are the<br />
+existing instruction sources. The bot reads them from the trusted base checkout rather than copying their content.</li>
+<li><code>configs/claude/hooks/git-guard.ts</code> and <code>configs/git-guidelines.md</code> define the dangerous Git operations that the bot's<br />
+stricter command policy must block.</li>
+<li>The <code>code-review</code>, <code>pr-review</code>, <code>draft-pull-request</code>, and planning skills provide review and publication conventions.</li>
+</ul>
+<p>The implementation now includes GitHub App authentication, API publication, a durable queue, isolated workspace runner,<br />
+and structured agent output. The remaining boundaries are deployment-level rather than missing core flows.</p>
+<h2>Proposed modules</h2>
+<p><code>src/github-bot/</code> owns the GitHub App. Modules are grouped by responsibility rather than mirroring every GitHub API<br />
+resource:</p>
+<ul>
+<li>app/config/types: composition, secure configuration defaults, and shared schemas.</li>
+<li>github: App JWT and installation-token authentication, a small injected API client, webhook verification, comments,<br />
+reviews, and pull-request publication.</li>
+<li>commands: parsing, authorization, and command dispatch.</li>
+<li>jobs: persistent idempotent records, state transitions, per-issue locking, queueing, cancellation, and recovery.</li>
+<li>agent: provider-neutral contract, structured instruction bundles/output, an argv-based process runner, and one Codex<br />
+adapter based on the repository's AI Launcher configuration.</li>
+<li>workspace/security: ephemeral clones, validation, diff limits, command policy, redaction, and secret scanning.</li>
+<li>observability: structured redacted logs and replaceable counters/timers.</li>
+</ul>
+<p>The initial persistent backend is a locked JSON snapshot written atomically to <code>BOT_DATA_DIR</code>. Its interface is kept<br />
+independent of the storage format so a transactional SQLite/Postgres implementation can replace it without changing<br />
+command handlers. This avoids adding a native database dependency to the existing Node/Bun deployment.</p>
+<h2>Data flow</h2>
+<ol>
+<li>Hono receives the raw webhook body and verifies <code>X-Hub-Signature-256</code> before JSON parsing.</li>
+<li><code>X-GitHub-Delivery</code> is reserved atomically. Unsupported events and messages without a command return immediately.</li>
+<li>The installation-scoped GitHub client checks the actor's collaborator permission before a job is enqueued.</li>
+<li>The HTTP request returns <code>202</code>; an in-process worker claims durable queued jobs up to configured concurrency.</li>
+<li>Read-only jobs retrieve issue/PR data through GitHub APIs and send structured untrusted data to the agent.</li>
+<li>Write jobs clone the trusted base branch into a unique workspace, run the agent and configured validation under<br />
+policy, scan and bound the diff, then push only the approved bot branch and create a draft PR.</li>
+<li>One marked progress comment is updated through each state transition. Logs and comments expose summaries, never<br />
+raw prompts, agent logs, tokens, or environment values.</li>
+<li>Shutdown stops intake, cancels active children, persists state, and cleans job workspaces.</li>
+</ol>
+<h2>Security boundaries</h2>
+<ul>
+<li>GitHub-controlled text and repository files are untrusted data and cannot override platform policy.</li>
+<li>App private keys mint short-lived installation tokens; tokens are scoped to a job, redacted, removed from remotes,<br />
+and deleted from the child environment after publication.</li>
+<li>Authorization comes only from GitHub collaborator permission APIs plus an optional platform allowlist.</li>
+<li>PR review uses API-provided diffs and never executes fork code. Implementation starts from the trusted base branch.</li>
+<li>The process runner accepts argv, not a shell string. A mandatory command policy blocks destructive Git, credential<br />
+access, environment dumping, privilege escalation, pipe-to-shell, and writes outside the workspace.</li>
+<li>Repository configuration can narrow behavior but cannot disable signature checks, authorization, token redaction,<br />
+workspace isolation, force-push protection, workflow-file protection, or publication limits.</li>
+<li>Workspaces are unique and ephemeral. Network isolation and OS resource controls are deployment responsibilities and<br />
+are documented explicitly; the application still limits environment, timeout, turns, files, and diff size.</li>
+</ul>
+<h2>Assumptions</h2>
+<ul>
+<li>The self-hosted worker has Git, the selected agent CLI, and repository validation tools installed.</li>
+<li>The App is installed on repositories it operates on and receives only the documented webhook events.</li>
+<li>The deployment gives <code>BOT_DATA_DIR</code> a persistent volume and <code>BOT_WORKSPACE_ROOT</code> ephemeral storage.</li>
+<li>Codex is the first supported provider. Other configured CLIs can be added behind the same adapter contract.</li>
+<li><code>address-review</code> and <code>fix-ci</code> are conservative MVP flows: they act only on bot branches and decline ambiguous fixes.</li>
+</ul>
+</article></main></div></body></html>

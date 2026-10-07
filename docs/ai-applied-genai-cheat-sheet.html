@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Applied AI &amp; GenAI Cheat Sheet — my-ai-tools documentation"><title>Applied AI &amp; GenAI Cheat Sheet · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2><a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a></nav><main><article><h1>Applied AI &amp; GenAI Cheat Sheet</h1>
+<p><em>A production-oriented reference for learning, interviews, and system design.</em></p>
+<h2>1. The Core Mental Model</h2>
+<blockquote>
+<p>AI systems are software systems with probabilistic components.</p>
+</blockquote>
+<p>When designing one, answer:</p>
+<ol>
+<li>What does the user want?</li>
+<li>What data or tools are authoritative?</li>
+<li>Where can the model make a mistake?</li>
+<li>How do we detect and recover from mistakes?</li>
+<li>How do we measure quality, latency, security, and cost?</li>
+</ol>
+<p>Prefer deterministic software where possible. Use an LLM where language understanding, generation, classification, or dynamic decision-making creates real value.</p>
+<hr />
+<h2>2. LLM Fundamentals</h2>
+<p>| Concept | Practical meaning |<br />
+|---|---|<br />
+| Token | A piece of text processed by the model. Tokens affect context limits and cost. |<br />
+| Context window | The maximum input/output context the model can consider in one request. |<br />
+| Temperature | Controls randomness. Lower values are better for predictable structured tasks; higher values can help creative generation. |<br />
+| System prompt | High-level behavior, constraints, and role instructions. |<br />
+| User prompt | The task or request from the user/application. |<br />
+| Structured output | Model output constrained to a schema such as JSON. Still validate it. |<br />
+| Hallucination | An answer that sounds plausible but is unsupported or false. |<br />
+| Reasoning model | A model optimized for deliberate multi-step problem solving, usually with higher latency/cost. |<br />
+| Non-reasoning model | Faster and cheaper for straightforward extraction, classification, transformation, or generation. |</p>
+<h3>Transformer explanation</h3>
+<p>A transformer uses self-attention to model relationships between tokens. Text is tokenized, tokens are represented numerically, and the model predicts the next token autoregressively. For most applied-AI interviews, this conceptual explanation is enough.</p>
+<hr />
+<h2>3. RAG: Retrieval-Augmented Generation</h2>
+<h3>Standard pipeline</h3>
+<pre><code class="language-text">Documents
+  -&gt; parse and clean
+  -&gt; chunk
+  -&gt; embed
+  -&gt; store in vector database
+
+User question
+  -&gt; query embedding
+  -&gt; retrieve candidates
+  -&gt; optional reranking
+  -&gt; build context
+  -&gt; generate answer
+  -&gt; return citations/sources
+</code></pre>
+<h3>Why RAG instead of putting everything in the prompt?</h3>
+<ul>
+<li>Context windows are limited and expensive.</li>
+<li>Retrieval focuses the model on relevant information.</li>
+<li>Documents can be updated without retraining the model.</li>
+<li>Access control can be applied during retrieval.</li>
+<li>Sources can be shown to users.</li>
+</ul>
+<h3>Production RAG checklist</h3>
+<ul>
+<li>Parse PDFs, HTML, Markdown, tables, and scanned documents correctly.</li>
+<li>Preserve metadata: title, source, owner, permissions, version, timestamp.</li>
+<li>Chunk by meaning and document structure, not only fixed character count.</li>
+<li>Use overlap carefully; too much overlap increases cost and duplication.</li>
+<li>Filter by user permissions before or during retrieval.</li>
+<li>Combine semantic search with keyword/BM25 search when useful.</li>
+<li>Rerank candidates when initial retrieval returns noisy results.</li>
+<li>Require citations or source references for factual answers.</li>
+<li>Say “I don’t know” when evidence is insufficient.</li>
+<li>Re-index changed documents and remove stale versions.</li>
+<li>Evaluate retrieval separately from answer generation.</li>
+</ul>
+<h3>RAG vs fine-tuning</h3>
+<p>| Use RAG when | Use fine-tuning when |<br />
+|---|---|<br />
+| Knowledge changes frequently | Behavior/style needs to be learned repeatedly |<br />
+| Answers require private or current documents | You need consistent formatting or task behavior |<br />
+| Citations and traceability matter | You have high-quality representative training data |<br />
+| You need permission-aware retrieval | Prompting and RAG are not sufficient |</p>
+<p>They can be combined: RAG supplies current knowledge; fine-tuning shapes behavior.</p>
+<hr />
+<h2>4. Embeddings and Vector Search</h2>
+<h3>What is an embedding?</h3>
+<p>An embedding is a numerical vector representing the meaning or features of text, images, code, or other data. Similar items should be close together in vector space.</p>
+<h3>Semantic search flow</h3>
+<pre><code class="language-text">text -&gt; embedding model -&gt; vector -&gt; nearest-neighbor search -&gt; similar content
+</code></pre>
+<h3>Similarity</h3>
+<p>Cosine similarity compares the angle between vectors. Higher similarity generally means more semantic relatedness, but the threshold must be calibrated on real examples.</p>
+<h3>Choosing an embedding model</h3>
+<p>Consider:</p>
+<ul>
+<li>Language coverage</li>
+<li>Domain vocabulary</li>
+<li>Search quality on representative queries</li>
+<li>Vector dimensions and storage cost</li>
+<li>Latency and throughput</li>
+<li>Hosted vs local deployment</li>
+<li>Privacy and data residency</li>
+<li>Version stability and migration cost</li>
+</ul>
+<p>Do not choose based only on benchmark scores. Test it on your own golden dataset.</p>
+<hr />
+<h2>5. Agents vs Workflows</h2>
+<h3>Deterministic workflow</h3>
+<p>Use when the sequence is known and transitions are predictable:</p>
+<pre><code class="language-text">retrieve -&gt; validate -&gt; process -&gt; save
+</code></pre>
+<h3>Agent</h3>
+<p>Use when the system must dynamically decide what to do next:</p>
+<pre><code class="language-text">goal -&gt; choose tool -&gt; observe result -&gt; decide next action -&gt; repeat -&gt; finish
+</code></pre>
+<h3>Engineering rule</h3>
+<blockquote>
+<p>Prefer a deterministic workflow. Add agentic behavior only when dynamic decision-making creates enough value to justify the additional risk, cost, latency, and testing difficulty.</p>
+</blockquote>
+<h3>Agent design checklist</h3>
+<ul>
+<li>Define the goal and termination condition.</li>
+<li>Limit available tools.</li>
+<li>Limit steps, time, and budget.</li>
+<li>Persist state intentionally; do not assume memory is free.</li>
+<li>Validate every tool call and result.</li>
+<li>Log decisions and tool interactions.</li>
+<li>Handle loops, retries, partial failure, and cancellation.</li>
+<li>Keep humans in the loop for high-impact actions.</li>
+</ul>
+<hr />
+<h2>6. Tool and Function Calling</h2>
+<p>A reliable tool call needs:</p>
+<ol>
+<li>A precise schema.</li>
+<li>Input validation.</li>
+<li>Authentication and authorization.</li>
+<li>Permission checks for the current user.</li>
+<li>Timeouts.</li>
+<li>Bounded retries with backoff.</li>
+<li>Idempotency for retried write operations.</li>
+<li>Validation of the tool result.</li>
+<li>Safe handling of malformed or adversarial output.</li>
+<li>Clear error messages the model can act on.</li>
+</ol>
+<p>Never let the model invent a successful result. The application should return the real tool result or an explicit failure.</p>
+<hr />
+<h2>7. Evaluation</h2>
+<h3>Offline evaluation</h3>
+<p>Create a golden dataset containing representative requests, expected outcomes, relevant documents, and known edge cases.</p>
+<p>Measure:</p>
+<ul>
+<li>Retrieval recall and precision</li>
+<li>Reranker quality</li>
+<li>Answer correctness</li>
+<li>Groundedness/faithfulness</li>
+<li>Citation accuracy</li>
+<li>Hallucination rate</li>
+<li>Tool-call accuracy</li>
+<li>Structured-output validity</li>
+<li>Task completion rate</li>
+<li>Safety/policy compliance</li>
+</ul>
+<h3>Online evaluation</h3>
+<p>Monitor:</p>
+<ul>
+<li>User feedback</li>
+<li>Task success</li>
+<li>Escalation/fallback rate</li>
+<li>Latency percentiles</li>
+<li>Token usage</li>
+<li>Cost per request</li>
+<li>Error and timeout rate</li>
+<li>Model/version changes</li>
+<li>Drift in query and document distribution</li>
+</ul>
+<p>Use A/B tests or controlled rollouts for meaningful changes. Manual testing is useful for discovery, but it is not an evaluation strategy by itself.</p>
+<hr />
+<h2>8. Production Reliability</h2>
+<p>Plan for failure:</p>
+<ul>
+<li>Timeouts for every external call</li>
+<li>Exponential backoff with bounded retries</li>
+<li>Fallback models or deterministic paths</li>
+<li>Rate-limit handling and request queues</li>
+<li>Caching for repeated, safe requests</li>
+<li>Streaming for long responses</li>
+<li>Circuit breakers for failing dependencies</li>
+<li>Idempotency for writes</li>
+<li>Graceful degradation</li>
+<li>Correlation IDs and traceability</li>
+<li>Prompt, model, tool, and configuration version tracking</li>
+<li>Cost and token budgets</li>
+</ul>
+<p>A useful answer structure:</p>
+<blockquote>
+<p>“I would start with the simplest reliable path, define failure boundaries, add observability, and then optimize latency and cost based on measurements.”</p>
+</blockquote>
+<hr />
+<h2>9. Security</h2>
+<p>Key threats:</p>
+<ul>
+<li>Prompt injection from users or retrieved documents</li>
+<li>Sensitive-data leakage</li>
+<li>PII exposure in prompts, logs, or traces</li>
+<li>Excessive tool permissions</li>
+<li>Data poisoning</li>
+<li>Insecure generated code or queries</li>
+<li>Cross-tenant retrieval</li>
+<li>Model output used without validation</li>
+</ul>
+<p>Defenses:</p>
+<ul>
+<li>Treat user input and retrieved content as untrusted data.</li>
+<li>Separate instructions from data.</li>
+<li>Apply authorization before retrieval and tool execution.</li>
+<li>Use least-privilege tools and scoped credentials.</li>
+<li>Validate generated SQL, code, JSON, and API parameters.</li>
+<li>Redact sensitive values from logs.</li>
+<li>Test adversarial prompts and malicious documents.</li>
+<li>Require confirmation for irreversible or high-impact actions.</li>
+</ul>
+<hr />
+<h2>10. Model Selection</h2>
+<p>Choose based on the task, not brand preference:</p>
+<pre><code class="language-text">quality needs
++ latency budget
++ cost budget
++ privacy/deployment constraints
++ tool/structured-output support
++ reliability and availability
+</code></pre>
+<p>Use a large model when the task is complex or ambiguity is costly. Use a smaller model when the task is repetitive, well-defined, high-volume, or latency-sensitive.</p>
+<p>Hosted models usually provide easier operations and stronger capabilities. Local/open models may improve privacy, cost control, and deployment flexibility, but add infrastructure and quality trade-offs.</p>
+<p>Benchmark candidate models on the same representative dataset.</p>
+<hr />
+<h2>11. Tool-Grounded Travel Assistant Architecture</h2>
+<h3>User request</h3>
+<blockquote>
+<p>“Find me the cheapest way from one city to another next weekend.”</p>
+</blockquote>
+<h3>Strong architecture</h3>
+<pre><code class="language-text">User
+  -&gt; LLM extracts intent and structured parameters
+  -&gt; validate dates, locations, passengers, constraints
+  -&gt; call authoritative travel/search APIs
+  -&gt; receive real inventory, routes, availability, and prices
+  -&gt; apply deterministic filters/ranking
+  -&gt; LLM explains and formats the verified options
+  -&gt; user receives bookable results and sources
+</code></pre>
+<p>The LLM handles natural language and orchestration. The travel APIs remain the source of truth for prices, availability, and routes.</p>
+<h3>Safeguards</h3>
+<ul>
+<li>Structured tool calls</li>
+<li>Schema and business-rule validation</li>
+<li>No invented routes or prices</li>
+<li>API timeouts and retries</li>
+<li>Latency budgets</li>
+<li>Caching where freshness allows</li>
+<li>Clear handling of unavailable or stale results</li>
+<li>Evaluation against real travel queries</li>
+<li>Confirmation before booking or other irreversible actions</li>
+</ul>
+<hr />
+<h2>12. Internal Policy Assistant Architecture</h2>
+<p>For thousands of company policy documents:</p>
+<pre><code class="language-text">ingest -&gt; parse -&gt; chunk -&gt; metadata + permissions -&gt; embed -&gt; index
+question -&gt; authorize -&gt; retrieve -&gt; rerank -&gt; answer with citations
+</code></pre>
+<p>Discuss:</p>
+<ul>
+<li>Document ownership and update propagation</li>
+<li>Access control and tenant isolation</li>
+<li>Versioning and stale content</li>
+<li>Retrieval quality and evaluation datasets</li>
+<li>Citation and groundedness requirements</li>
+<li>“No answer found” behavior</li>
+<li>Monitoring, caching, latency, and cost</li>
+<li>PII and prompt-injection defenses</li>
+</ul>
+<hr />
+<h2>13. Project Story Template</h2>
+<p>Prepare 2–3 real projects using:</p>
+<pre><code class="language-text">Problem
+-&gt; Why AI was appropriate
+-&gt; Architecture
+-&gt; Model and data/tools
+-&gt; Implementation
+-&gt; Evaluation
+-&gt; Hardest challenge
+-&gt; Result
+-&gt; What I would change today
+</code></pre>
+<p>Keep claims precise. A defensible positioning statement:</p>
+<blockquote>
+<p>“My production engineering background comes from building and scaling full-stack systems, cloud infrastructure, and reliable services. My applied-AI experience has grown through recent projects using LLMs, RAG, agents, and AI-assisted development. I approach AI as a production system that needs measurable quality, reliability, security, and cost control.”</p>
+</blockquote>
+<hr />
+<h2>14. Rapid Interview Answers</h2>
+<h3>How do you reduce hallucinations?</h3>
+<p>Use authoritative retrieval, clear instructions, structured outputs, citations, confidence/abstention behavior, tool grounding, validation, and evaluation against a golden dataset. Monitor production feedback and investigate failures.</p>
+<h3>What is tool calling?</h3>
+<p>The model selects a declared function and produces structured arguments. The application validates permissions and inputs, executes the function, validates the result, and returns the real output to the model.</p>
+<h3>What makes an agent different from a chatbot?</h3>
+<p>A chatbot mainly generates responses. An agent can choose tools, take actions, observe results, maintain state, and continue until a goal or stopping condition is reached.</p>
+<h3>Why not use agents everywhere?</h3>
+<p>Agents add nondeterminism, latency, cost, security risk, and testing complexity. A deterministic workflow is easier to reason about and operate when the process is known.</p>
+<h3>How do you evaluate an LLM application?</h3>
+<p>Use a representative golden dataset for offline metrics such as retrieval quality, correctness, groundedness, tool accuracy, and task completion. Add online monitoring for feedback, latency, cost, failures, and drift.</p>
+<h3>How do you handle prompt injection?</h3>
+<p>Treat all external content as untrusted, separate instructions from data, restrict tools and permissions, validate outputs, avoid exposing secrets, and test malicious user and retrieved-document inputs.</p>
+<h3>How do you manage latency and cost?</h3>
+<p>Use smaller models for simple tasks, limit context, retrieve only relevant data, cache safe repeated work, stream responses, parallelize independent calls, set budgets/timeouts, and measure before optimizing.</p>
+<hr />
+<h2>15. High-Value Questions to Practice</h2>
+<ol>
+<li>Explain RAG. Why not put everything in the context window?</li>
+<li>RAG vs fine-tuning: when would you use each?</li>
+<li>What are embeddings and vector databases?</li>
+<li>How would you reduce hallucinations?</li>
+<li>How do you evaluate an LLM application?</li>
+<li>What is tool/function calling?</li>
+<li>What makes an agent different from a chatbot?</li>
+<li>Agent vs deterministic workflow?</li>
+<li>How do you handle prompt injection?</li>
+<li>How do you manage LLM latency and cost?</li>
+<li>How do you choose between hosted and open-source models?</li>
+<li>How do you implement retries and fallbacks?</li>
+<li>How do you make structured output reliable?</li>
+<li>How would you build a production RAG application?</li>
+<li>Tell me about an AI system you built.</li>
+<li>What was the hardest problem?</li>
+<li>How did you evaluate it?</li>
+<li>What would you change if you rebuilt it today?</li>
+</ol>
+<hr />
+<h2>16. One-Night Preparation Plan</h2>
+<h3>Hour 1: RAG fundamentals</h3>
+<ul>
+<li>RAG pipeline</li>
+<li>Chunking and metadata</li>
+<li>Embeddings and vector search</li>
+<li>Reranking</li>
+<li>Hallucination reduction</li>
+<li>Policy-assistant architecture</li>
+</ul>
+<h3>Hour 2: Production AI</h3>
+<ul>
+<li>Agents vs workflows</li>
+<li>Tool calling and structured output</li>
+<li>Evaluation</li>
+<li>Security and prompt injection</li>
+<li>Reliability, latency, and cost</li>
+</ul>
+<h3>Hour 3: Rehearsal</h3>
+<ul>
+<li>Prepare 2–3 project stories</li>
+<li>Rehearse the travel-assistant architecture</li>
+<li>Answer the 18 questions aloud</li>
+<li>Spend the final 20–30 minutes speaking, not reading</li>
+</ul>
+<hr />
+<h2>Final Positioning</h2>
+<p>Do not present yourself as an ML researcher if that is not your background.</p>
+<p>Your differentiator is:</p>
+<blockquote>
+<p>Production software engineering + system design + cloud/infrastructure + practical applied AI.</p>
+</blockquote>
+<p>Frame AI problems as systems that must work reliably in production. That means authoritative data, bounded model behavior, measurable quality, security, observability, and sensible cost.</p>
+</article></main></div></body></html>

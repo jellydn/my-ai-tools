@@ -213,6 +213,7 @@ conventions.
 - [Claude Code agent teams](docs/claude-code-teams.md)
 - [qmd knowledge management](docs/qmd-knowledge-management.md)
 - [My AI Bot](docs/my-ai-bot.md)
+- [Applied AI and GenAI cheat sheet](docs/ai-applied-genai-cheat-sheet.md)
 - [Testing guide](TESTING.md)
 
 ## 🤝 Contributing

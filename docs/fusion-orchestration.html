@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="⚡ Fusion Orchestration Guide — my-ai-tools documentation"><title>⚡ Fusion Orchestration Guide · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2><a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a></nav><main><article><h1>⚡ Fusion Orchestration Guide</h1>
+<blockquote>
+<p><strong>Fusion Mode</strong> is a multi-agent orchestration architecture that separates <strong>judgment and architecture</strong> (Lead) from <strong>mechanical implementation</strong> (Executor) across OpenCode, Amp, Pi, and Codex.</p>
+</blockquote>
+<hr />
+<h2>💡 What is Fusion Orchestration?</h2>
+<p>When single AI agents work on complex tasks, they frequently mix planning, code editing, and self-verification. This often leads to context rot, premature edits, scope creep, and self-congratulatory claims of success without empirical verification.</p>
+<p><strong>Fusion Mode</strong> solves this by establishing a strict separation of concerns:</p>
+<ul>
+<li><strong>Fusion Lead (Architect/Planner/Verifier)</strong>: A high-reasoning, read-only agent. It inspects the codebase, resolves architecture choices, defines bounded contracts, delegates tasks, and independently verifies the output.</li>
+<li><strong>Fusion Executor (Implementation Worker)</strong>: A fast, targeted execution agent. It receives a bounded specification, loads required skills, edits only the specified files, runs unit tests/build checks, and reports results via a structured envelope.</li>
+</ul>
+<pre><code>                    ┌─────────────────────────┐
+                    │       Fusion Lead       │
+                    │   (Read-Only Planner)   │
+                    └────────────┬────────────┘
+                                 │
+                   1. Bounded Specification
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │     Fusion Executor     │
+                    │ (Implementation Worker) │
+                    └────────────┬────────────┘
+                                 │
+                     2. Structured Envelope
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │       Fusion Lead       │
+                    │  (Independent Gatekeeper)│
+                    └─────────────────────────┘
+</code></pre>
+<hr />
+<h2>🎯 When to Use vs. When NOT to Use</h2>
+<p>| Scenario | Use Fusion Mode? | Rationale |<br />
+|----------|-----------------|-----------|<br />
+| <strong>Multi-file feature implementation</strong> | ✅ <strong>Yes</strong> | Benefit from separate planning, bounded file edits, and independent verification. |<br />
+| <strong>Complex architectural refactoring</strong> | ✅ <strong>Yes</strong> | Prevents broken contracts and broad unguided code mutations. |<br />
+| <strong>Tasks needing strict verification</strong> | ✅ <strong>Yes</strong> | Lead independently verifies diffs and test results before acceptance. |<br />
+| <strong>Trivial 1-line typo / import fix</strong> | ❌ <strong>No</strong> | Too much overhead. Keep in standard writable session. |<br />
+| <strong>Single-file mechanical update</strong> | ❌ <strong>No</strong> | Single agent is faster and more direct. |<br />
+| <strong>Exploratory Q&amp;A / Code discovery</strong> | ❌ <strong>No</strong> | Standard read-only session is sufficient. |</p>
+<hr />
+<h2>🛠️ Tool-by-Tool Implementations</h2>
+<p>Native Fusion integration is available across multiple AI coding tools in this repository:</p>
+<h3>1. OpenCode</h3>
+<ul>
+<li><strong>Primary Agent</strong>: <code>fusion-lead</code></li>
+<li><strong>Behavior</strong>: Read-only primary session (<code>permission</code> blocks restrict file writes and shell execution). Delegates implementation to <code>fusion-executor</code> via subagents.</li>
+</ul>
+<h3>2. Amp</h3>
+<ul>
+<li><strong>Agent Mode</strong>: <code>fusion</code></li>
+<li><strong>Behavior</strong>: Exposes <code>fusion_executor</code> tool to plugin-authorized lead threads.</li>
+</ul>
+<h3>3. Pi Agent</h3>
+<ul>
+<li><strong>Execution Pattern</strong>: Sibling delegation from the root session.</li>
+<li><strong>Behavior</strong>: Root session calls <code>fusion-lead</code> for specification, then passes the specification to sibling <code>fusion-executor</code>. (<code>pi-subagents</code> enforces tool allowlists and isolates child sessions).</li>
+<li><em>Note:</em> Pi executor requires skills under project-local directories (e.g. <code>.agents/skills/...</code>).</li>
+</ul>
+<h3>4. Codex</h3>
+<ul>
+<li><strong>Execution Pattern</strong>: Sibling delegation.</li>
+<li><strong>Behavior</strong>: Root session invokes <code>fusion-lead</code> for plan and specification, then executes sibling <code>fusion-executor</code> with bounded file permissions.</li>
+</ul>
+<hr />
+<h2>📋 The Handoff Contract &amp; Envelope Protocol</h2>
+<p>Communication between Lead and Executor is governed by strict, structured contracts:</p>
+<h3>1. Lead-to-Executor Specification Contract</h3>
+<p>The Lead produces a spec with exact boundaries:</p>
+<pre><code class="language-text">OBJECTIVE: &lt;Clear goal statement&gt;
+FILES: &lt;Exact list of target file paths to create/modify&gt;
+INTERFACES: &lt;Public signatures, types, or API contracts to satisfy&gt;
+CONSTRAINTS: &lt;Style rules, forbidden modifications, backward-compatibility requirements&gt;
+SKILLS: &lt;Exact filesystem paths to relevant SKILL.md files to load&gt;
+VERIFICATION: &lt;Specific test suite or build commands to execute&gt;
+</code></pre>
+<h3>2. Executor-to-Lead Return Envelope Contract</h3>
+<p>Upon completing implementation, the Executor returns a structured summary:</p>
+<pre><code class="language-text">STATUS: SUCCESS | VERIFICATION_FAILED | BLOCKED
+EXECUTIVE SUMMARY: &lt;High-level narrative of what was done&gt;
+CHANGES: &lt;Summary of modified files and functions&gt;
+VERIFIED: &lt;Passed check commands and output summary&gt;
+SKILLS LOADED: &lt;List of SKILL.md paths actually read&gt;
+RISKS: &lt;Potential edge cases or follow-up items&gt;
+QUESTIONS: &lt;Blockers requiring user input&gt;
+NEXT RECOMMENDED: &lt;Suggested next steps&gt;
+KEY LEARNINGS: &lt;Domain insights discovered during implementation&gt;
+</code></pre>
+<h3>3. Verification &amp; Approval Rules</h3>
+<ul>
+<li><strong>Direct Checks</strong>: Read-only checks and standard unit tests run directly inside the executor when permitted by sandbox policy.</li>
+<li><strong>Verification Required</strong>: If a check cannot run inside the executor due to permission or lifecycle limits, the executor marks it as <code>VERIFICATION REQUIRED</code> with the exact command string.</li>
+<li><strong>No Self-Proclamation</strong>: Neither Lead nor Executor may mark a task as &quot;Passed&quot; without empirical command output.</li>
+</ul>
+<hr />
+<h2>📖 Step-by-Step Walkthrough Example</h2>
+<h3>Example Workflow: Adding a New Plugin Endpoint</h3>
+<ol>
+<li>
+<p><strong>Step 1: Lead Investigation</strong><br />
+User asks to add a new authentication endpoint. <code>fusion-lead</code> inspects <code>configs/</code> and existing route definitions.</p>
+</li>
+<li>
+<p><strong>Step 2: Specification Hand-off</strong><br />
+<code>fusion-lead</code> issues a bounded specification:</p>
+<pre><code class="language-text">OBJECTIVE: Add JWT validation helper in lib/auth.ts
+FILES: lib/auth.ts, tests/auth.test.ts
+INTERFACES: export function validateJwt(token: string): AuthPayload
+CONSTRAINTS: Must use existing jwt-verify library, no extra external deps
+SKILLS: skills/tdd/SKILL.md
+VERIFICATION: bun test tests/auth.test.ts
+</code></pre>
+</li>
+<li>
+<p><strong>Step 3: Executor Implementation</strong><br />
+<code>fusion-executor</code> loads <code>skills/tdd/SKILL.md</code>, implements <code>lib/auth.ts</code>, writes unit tests in <code>tests/auth.test.ts</code>, and runs <code>bun test tests/auth.test.ts</code>.</p>
+</li>
+<li>
+<p><strong>Step 4: Envelope Return &amp; Independent Lead Verification</strong><br />
+<code>fusion-executor</code> returns the <code>STATUS: SUCCESS</code> envelope. <code>fusion-lead</code> reviews the git diff and test output. If clean, <code>fusion-lead</code> accepts the result and presents it to the user.</p>
+</li>
+</ol>
+<hr />
+<h2>🔍 Troubleshooting &amp; Gotchas</h2>
+<ul>
+<li><strong>Max 2 Correction Attempts</strong>: If <code>fusion-executor</code> fails verification, <code>fusion-lead</code> sends 1 targeted correction specification. If it fails a second time, execution halts to present evidence to the user rather than entering an infinite loop.</li>
+<li><strong>No Unsafe Fallbacks</strong>: If <code>fusion-executor</code> is unavailable or fails to spawn, <code>fusion-lead</code> must <strong>not</strong> silently make file edits itself. It will inform the user and request switching to standard mode.</li>
+<li><strong>Pi Skill Paths</strong>: On Pi, child subagents cannot read outside the project workspace. Place required custom skills in <code>.agents/skills/</code> within the repository.</li>
+</ul>
+<hr />
+<h2>🔗 Related Resources</h2>
+<ul>
+<li><a href="./agent-teams-examples.md">Agent Teams Usage Examples</a></li>
+<li><a href="../wiki/wiki/entities/subagent-infrastructure.md">Subagent Infrastructure</a></li>
+<li><a href="../../skills/orchestrating-fusion/SKILL.md">Orchestrating Fusion Skill</a></li>
+</ul>
+</article></main></div></body></html>
