@@ -8,6 +8,8 @@ user-invocable: true
 metadata:
   audience: all
   workflow: codebase-mapping
+  source: glittercowboy/get-shit-done@bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815
+  source_path: get-shit-done/workflows/map-codebase.md
 ---
 
 # Codemap
@@ -60,6 +62,14 @@ The orchestrator:
 
 ## Process
 
+### Scope and Runtime
+
+Accept an optional `--paths <p1,p2,...>` for an incremental map. Validate repository-relative prefixes before use: reject absolute paths, `..` components, and shell metacharacters (`;`, backticks, `$`, `&`, `|`, `<`, `>`). If no supplied path is valid, stop and ask for a corrected scope; do not silently expand to the whole repository. Pass the same normalized scope to every mapper and every sequential pass. Do not interpolate unchecked input into shell commands.
+
+Use the actual current date for all analysis-date placeholders. For scoped refreshes, retain documented information outside the scope and state which prefixes were rechecked.
+
+Use parallel agents only when the runtime supports file-reading and file-writing workers. Do not assume an `explore` agent can write files or use a browser agent as a code mapper. If suitable workers are unavailable, perform the four focus passes sequentially in the current context, using the same scope and templates. Do not require GSD-specific SDK commands or agent types.
+
 ### Step 1: Check Existing Map
 
 If `.planning/codebase/` already exists, prompt:
@@ -81,7 +91,7 @@ mkdir -p .planning/codebase
 
 ### Step 3: Spawn Parallel Agents
 
-Use the `Task` tool with `agent_type="explore"` and `run_in_background=true` for parallel execution.
+Use the runtime's supported worker API for parallel execution. Each worker must receive the validated scope, current date, and the appropriate template paths from `$SKILL_PATH/templates/`. The examples below describe worker assignments, not mandatory API parameter names. While workers are active, do not duplicate their exploration or write their documents.
 
 **Tech Agent:**
 
@@ -156,16 +166,24 @@ prompt: |
 
 ### Step 4: Verify Output
 
-Check that all documents were created:
+Wait for every mapper to finish. Check that all seven expected documents exist and each has more than 20 lines; a filename alone is not success. Report missing, short, or failed outputs and repair them before declaring completion. Check that dates are current and scoped output retains unaffected information.
 
 ```bash
 ls -la .planning/codebase/
 wc -l .planning/codebase/*.md
 ```
 
-### Step 5: Commit (Optional)
+### Step 5: Secret Check and Optional Commit
 
-If `.planning/` is not gitignored and the user wants to commit:
+Before showing or committing documents, scan for accidentally copied credentials. List configuration paths and environment-variable names, not secret values. Do not read `.env` contents or credential files for the map. Use the repository's secret scanner when available. A minimal supplementary check is:
+
+```bash
+rg -l '(sk-[A-Za-z0-9]{20,}|gh[pousr]_[A-Za-z0-9]{36,}|AKIA[A-Z0-9]{16}|xox[baprs]-[A-Za-z0-9-]+|-----BEGIN.*PRIVATE KEY)' .planning/codebase/*.md
+```
+
+This prints filenames only, not matching secret values. A no-match exit status is normal; a scanner error is not a clean scan. If a match is found, stop, redact the content, and recheck before proceeding. Pattern matching is not proof that all secrets are absent; also review excerpts copied from logs and configuration.
+
+If the checks pass, `.planning/` is not gitignored, and the user wants to commit:
 
 ```bash
 git add .planning/codebase/*.md
@@ -237,7 +255,7 @@ _rg() { command -v rg >/dev/null 2>&1 && rg "$@" || grep -r "$@"; }
 cat package.json pyproject.toml Cargo.toml go.mod 2>/dev/null
 
 # Config files
-ls -la *.config.* .env* tsconfig.json 2>/dev/null
+ls -la *.config.* tsconfig.json 2>/dev/null
 
 # Find SDK/API imports
 _rg "import.*stripe|import.*supabase|import.*aws" src/ 2>/dev/null | head -50

@@ -9,6 +9,8 @@ disable-model-invocation: true
 metadata:
   audience: all
   workflow: development
+  source: vercel-labs/portless@7abf4df5d939fe3b527a120e20bc270c681c3536
+  source_path: skills/portless/SKILL.md
 ---
 
 # Portless - Named .localhost URLs
@@ -16,6 +18,16 @@ metadata:
 Replace port numbers with stable, named `.localhost` URLs for local development. For humans and agents.
 
 > **Note:** The portless CLI enables HTTPS on port 443 by default (`https://myapp.localhost`). Pass `--no-tls` or set `PORTLESS_HTTPS=0` for plain HTTP. Keep HTTPS when the app needs OAuth, secure cookies, or HTTP/2.
+
+## Safety and Approval
+
+Read existing proxy configuration before starting an app: auto-start reuses saved settings, including LAN mode. Outside LAN mode the proxy binds only to IPv4/IPv6 loopback; LAN mode binds all interfaces.
+
+Ask for explicit approval before first-run sudo/elevation, CA trust-store changes, `/etc/hosts` writes, LAN exposure, Tailscale sharing, public Funnel/ngrok tunnels, startup-service installation/removal, or destructive cleanup. A request for local development does not authorize these actions. Use `PORTLESS_SYNC_HOSTS=0` when hosts writes are not approved. In non-interactive environments, first-run prompts fail rather than granting permission; pre-start only an approved proxy configuration.
+
+`--force` kills the existing process and takes over its route. `prune` terminates orphaned process groups, and `prune --force` uses SIGKILL. Do not use them without checking ownership and approval. `clean` also removes startup services and trust entries; it is not routine project cleanup.
+
+Never print or commit TLS private keys or ngrok tokens. Let the user configure authentication through the provider's private credential workflow. Do not disable TLS verification to resolve proxy errors.
 
 ## Why Portless?
 
@@ -43,7 +55,7 @@ npm install -g portless
 npm install -D portless
 ```
 
-> **Note:** portless is pre-1.0. When installed per-project, different contributors may run different versions.
+Requires Node.js 24+ and OpenSSL for certificate generation. Install globally or as a project dependency; do not use a one-off `npx`/`pnpm dlx` download. A local package may be invoked through package scripts or `npx portless` without downloading it.
 
 ## Usage
 
@@ -72,7 +84,7 @@ portless <name> <cmd> [args...]                # Explicit name, no inference
 | --------------------- | --------------------------------------------------------------------------------------------------- |
 | `--name <name>`       | Override the inferred base name (worktree prefix still applies). Only for `portless run`.           |
 | `--app-port <number>` | Use a fixed port for the app instead of auto-assignment. Also configurable via `PORTLESS_APP_PORT`. |
-| `--force`             | Override an existing route registered by another process                                            |
+| `--force`             | Kill the existing process and take over its route; requires ownership checks and approval           |
 
 **Examples:**
 
@@ -225,7 +237,23 @@ Runs the command directly without the proxy.
 ```bash
 portless --help
 portless --version
+portless doctor    # Read-only diagnostics for proxy, DNS, trust, routes, and LAN prerequisites
 ```
+
+### Sharing and Startup Services
+
+Only run these after approval for the stated exposure or persistent system change:
+
+```bash
+portless myapp --tailscale next dev   # Tailnet; requires connected Tailscale CLI and HTTPS certificates
+portless myapp --funnel next dev      # Public internet; requires Funnel enabled for tailnet and node
+portless myapp --ngrok next dev       # Public internet; requires authenticated ngrok CLI
+portless service status              # Inspect installed service configuration
+portless service install             # Persist proxy at OS startup; may require administrator privileges
+portless service uninstall           # Remove startup service
+```
+
+Tailscale and ngrok registrations are removed when the app exits. `PORTLESS_TAILSCALE`, `PORTLESS_FUNNEL`, and `PORTLESS_NGROK` can enable sharing by default; inspect them before starting an app. Startup services save their options in launchd, systemd, or Task Scheduler, and may run as root or SYSTEM.
 
 ## Common Use Cases
 
@@ -354,7 +382,24 @@ Portless auto-detects and configures:
 
 ## Configuration
 
-Portless is configured through environment variables. No config files needed.
+### Zero-config and Workspaces
+
+Bare `portless` runs the package's `dev` script with an inferred name. An optional `portless.json` or package.json `portless` key can set `name`, `script`, `appPort`, and `proxy` (`false` for non-proxied tasks).
+
+```json
+{
+  "apps": {
+    "apps/web": { "name": "myapp" },
+    "apps/api": { "name": "api.myapp" }
+  }
+}
+```
+
+From a workspace root, `portless` discovers packages in `pnpm-workspace.yaml` or package.json `workspaces` and starts their dev scripts. Unlisted packages use inferred names. Use `--script start` for a different script. Readable `turbo.json` or `turbo.jsonc` preserves Turbo task ordering; root `"turbo": false` selects direct spawning.
+
+Precedence: CLI flags > package.json `portless` key > portless.json app entry > defaults. To avoid recursion when `dev` runs portless, put the real command in `dev:app` and configure `"portless": { "script": "dev:app" }`.
+
+Strict routing is the default. `proxy start --wildcard` allows unregistered child subdomains to fall back to the most specific registered parent. Multiple `--tld` flags (or comma-separated `PORTLESS_TLD`) support single- and multi-segment domains. Review these routing changes before use.
 
 ### Environment Variables
 
@@ -363,7 +408,12 @@ Portless is configured through environment variables. No config files needed.
 | `PORTLESS_PORT`       | Proxy port                                                      | 443; 80 with `--no-tls` |
 | `PORTLESS_HTTPS`      | Set to `0` to disable HTTPS (same as `--no-tls`)                | on                      |
 | `PORTLESS_LAN`        | Set to `1` to always enable LAN mode (mDNS `.local` domains)    | off                     |
-| `PORTLESS_TLD`        | Use a custom TLD instead of `.localhost` (e.g. `test`)          | localhost               |
+| `PORTLESS_TLD`        | One or more comma-separated TLDs (e.g. `localhost,dev.example.com`) | localhost            |
+| `PORTLESS_WILDCARD`   | Set to `1` for parent-route fallback                          | off                     |
+| `PORTLESS_LAN_IP`     | Pin a LAN IP instead of auto-detection                        | auto-detected           |
+| `PORTLESS_TAILSCALE`  | Share apps on the tailnet; requires approval                  | off                     |
+| `PORTLESS_FUNNEL`     | Share apps publicly; requires approval                       | off                     |
+| `PORTLESS_NGROK`      | Share apps publicly through ngrok; requires approval         | off                     |
 | `PORTLESS_APP_PORT`   | Use a fixed port for the app (skip auto-assignment)             | random 4000-4999        |
 | `PORTLESS_SYNC_HOSTS` | Set to `0` to disable auto-sync of `/etc/hosts`                 | on                      |
 | `PORTLESS_STATE_DIR`  | Override the state directory                                    | see below               |
@@ -371,13 +421,7 @@ Portless is configured through environment variables. No config files needed.
 
 ### State Directory
 
-Portless stores state (routes, PID file, port file, TLS marker) in a directory that depends on the proxy port:
-
-| Condition                           | Path            |
-| ----------------------------------- | --------------- |
-| Port below 1024 (sudo, macOS/Linux) | `/tmp/portless` |
-| Port 1024+ (no sudo)                | `~/.portless`   |
-| Windows (any port)                  | `~/.portless`   |
+Portless stores state (routes, PID file, port file, TLS marker) in `~/.portless`. Under sudo, this remains the invoking user's home so apps and the proxy share registrations.
 
 Override with `PORTLESS_STATE_DIR`.
 
@@ -396,17 +440,23 @@ Override with `PORTLESS_STATE_DIR`.
 
 Apps get a random port in the 4000-4999 range. Portless sets `PORT` and usually `HOST` before running your command. Most frameworks respect `PORT` automatically. For frameworks that ignore it (Vite, Astro, React Router, Angular, Expo, React Native), portless auto-injects the right `--port` flag and, when needed, a matching `--host` flag.
 
+Injection applies to recognized server commands, including VitePlus, and can reach through simple package scripts. It skips build/test/check commands, compound shell commands, env prefixes, script delegation, option terminators, comments, and ambiguous runner flags. Those scripts must set their own port. Expo's `--localhost`, `--lan`, and `--tunnel` modes are preserved.
+
+Portless sets `NODE_EXTRA_CA_CERTS` for child Node.js processes. For a separate process that must trust the local CA, use `NODE_EXTRA_CA_CERTS=~/.portless/ca.pem` rather than disabling certificate verification.
+
 ## Troubleshooting
 
 ### Port 443 permission denied
 
 ```bash
-# Portless auto-elevates with sudo, but if it fails:
+# Only after explicit approval for elevation:
 sudo portless proxy start
 
-# Or use HTTP mode on a different port
+# Or use an approved proxy on an unprivileged port
 portless myapp next dev --no-tls -p 8080
 ```
+
+When sudo is unavailable, portless falls back to port 1355. Check the actual URL rather than assuming 443. Use `portless doctor` first for routing, DNS, or trust failures. For cross-app proxy loops, set `changeOrigin: true` in the forwarding proxy so the Host header matches the target route.
 
 ### Certificate warning
 

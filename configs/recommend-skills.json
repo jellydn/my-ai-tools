@@ -51,7 +51,7 @@
 		},
 		{
 			"repo": "jezweb/claude-skills",
-			"description": "97 production-ready skills for Claude Code"
+			"description": "Production-ready skills for Claude Code"
 		},
 		{
 			"repo": "openclaw/agent-skills",
@@ -85,7 +85,7 @@
 		{
 			"repo": "Gentleman-Programming/engram",
 			"skill": "engram-memory",
-			"description": "Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, git-based sync"
+			"description": "Persistent agent memory via a Go binary — SQLite + FTS5, lifecycle hooks, 22 MCP tools at the checked revision, optional Git/cloud sync"
 		},
 		{
 			"repo": "ctxrs/ctx",
