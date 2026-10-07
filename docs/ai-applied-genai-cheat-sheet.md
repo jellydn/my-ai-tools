@@ -38,7 +38,33 @@ A transformer uses self-attention to model relationships between tokens. Text is
 
 ---
 
-## 3. RAG: Retrieval-Augmented Generation
+## 3. Choose the Simplest Technique
+
+Move to a more complex technique only when evaluation shows the simpler one is not enough. These sources do not share a numeric cutoff for accuracy, example count, context size, or cost. Measure that on your own dataset.
+
+| Level | Use it when | Stop here when |
+|---|---|---|
+| Prompting | The task fits in one call with a system prompt and a few examples. | That call meets the eval bar. |
+| Long context or cache | The needed context is known ahead of time and fits the window. | Putting that context in the prompt, or caching it, meets the eval bar. |
+| RAG | The context is private, current, or unknown until the query. | Retrieval plus a prompt meets the eval bar. |
+| Deterministic workflow | The sequence of steps is fixed. | The coded path meets the eval bar. |
+| Agent | The system must act, or the next step depends on intermediate results and cannot be hardcoded. | One agent meets the eval bar. |
+| Multi-agent | One agent cannot cover the roles, and evaluation shows the split is worth the extra failure modes. | — |
+
+Fine-tuning is not the next step after RAG. Use it for stable behavior such as style, tone, or strict format, and only after a strong prompt still fails and you have enough labeled examples. Do not fine-tune to inject knowledge.
+
+A practical way to pick among four methods is the gap you need to close:
+
+- Task guidance: prompting.
+- Missing private or current information: RAG.
+- Inconsistent behavior or format after strong prompts: fine-tuning.
+- Unpredictable multi-step action: an agent. Use a workflow when the path is known.
+
+Many applications need only one model call with retrieval and in-context examples.
+
+---
+
+## 4. RAG: Retrieval-Augmented Generation
 
 ### Standard pipeline
 
@@ -72,7 +98,7 @@ User question
 - Preserve metadata: title, source, owner, permissions, version, timestamp.
 - Chunk by meaning and document structure, not only fixed character count.
 - Use overlap carefully; too much overlap increases cost and duplication.
-- Filter by user permissions before or during retrieval.
+- Store the source document's access control on every chunk. Enforce it again at retrieval, not only at ingestion.
 - Combine semantic search with keyword/BM25 search when useful.
 - Rerank candidates when initial retrieval returns noisy results.
 - Require citations or source references for factual answers.
@@ -84,16 +110,16 @@ User question
 
 | Use RAG when | Use fine-tuning when |
 |---|---|
-| Knowledge changes frequently | Behavior/style needs to be learned repeatedly |
-| Answers require private or current documents | You need consistent formatting or task behavior |
-| Citations and traceability matter | You have high-quality representative training data |
-| You need permission-aware retrieval | Prompting and RAG are not sufficient |
+| Knowledge changes, or is private or unknown until query time | You need stable style, tone, or strict format |
+| Answers require citations | A strong prompt and examples still fail |
+| You need permission-aware retrieval | You have enough labeled examples of that behavior |
+| You need to add or update knowledge | Not for injecting knowledge |
 
-They can be combined: RAG supplies current knowledge; fine-tuning shapes behavior.
+They can be combined: RAG supplies current knowledge; fine-tuning shapes behavior. Prefer RAG over fine-tuning when the gap is knowledge.
 
 ---
 
-## 4. Embeddings and Vector Search
+## 5. Embeddings and Vector Search
 
 ### What is an embedding?
 
@@ -126,7 +152,7 @@ Do not choose based only on benchmark scores. Test it on your own golden dataset
 
 ---
 
-## 5. Agents vs Workflows
+## 6. Agents vs Workflows
 
 ### Deterministic workflow
 
@@ -155,20 +181,22 @@ goal -> choose tool -> observe result -> decide next action -> repeat -> finish
 - Limit steps, time, and budget.
 - Persist state intentionally; do not assume memory is free.
 - Validate every tool call and result.
+- Check tool authorization in application code outside the model. Unknown tools and missing approvals fail closed.
+- Require human approval for high-impact or irreversible actions. Review medium, high, critical, and unmapped tools. If that approval cannot be validated, fail closed.
 - Log decisions and tool interactions.
 - Handle loops, retries, partial failure, and cancellation.
-- Keep humans in the loop for high-impact actions.
+- Run structured adversarial tests before production and after material changes. Block a release when a high-risk tool, approval, or credential change has no updated tests.
 
 ---
 
-## 6. Tool and Function Calling
+## 7. Tool and Function Calling
 
 A reliable tool call needs:
 
 1. A precise schema.
 2. Input validation.
-3. Authentication and authorization.
-4. Permission checks for the current user.
+3. Authorization checked outside the model, in the code that executes the tool.
+4. Permission checks for the current user. Unknown tools and missing approvals fail closed.
 5. Timeouts.
 6. Bounded retries with backoff.
 7. Idempotency for retried write operations.
@@ -180,7 +208,7 @@ Never let the model invent a successful result. The application should return th
 
 ---
 
-## 7. Evaluation
+## 8. Evaluation
 
 ### Offline evaluation
 
@@ -217,7 +245,7 @@ Use A/B tests or controlled rollouts for meaningful changes. Manual testing is u
 
 ---
 
-## 8. Production Reliability
+## 9. Production Reliability
 
 Plan for failure:
 
@@ -232,7 +260,10 @@ Plan for failure:
 - Graceful degradation
 - Correlation IDs and traceability
 - Prompt, model, tool, and configuration version tracking
-- Cost and token budgets
+- Per-tenant limits on tokens, requests, concurrency, and spend
+- Limits on recursion, retries, and chain depth
+- A kill switch for cost or tool calls
+- Near-real-time alerts on token use and spend
 
 A useful answer structure:
 
@@ -240,7 +271,7 @@ A useful answer structure:
 
 ---
 
-## 9. Security
+## 10. Security
 
 Key threats:
 
@@ -261,12 +292,13 @@ Defenses:
 - Use least-privilege tools and scoped credentials.
 - Validate generated SQL, code, JSON, and API parameters.
 - Redact sensitive values from logs.
-- Test adversarial prompts and malicious documents.
-- Require confirmation for irreversible or high-impact actions.
+- Test adversarial prompts and malicious documents before production and after material changes. Run those tests in CI.
+- Require confirmation for irreversible or high-impact actions. If the approval cannot be validated, fail closed.
+- Treat a guardrail model as an extra layer only. It does not replace input validation, structured prompts, least-privilege tools, or human approval for destructive actions.
 
 ---
 
-## 10. Model Selection
+## 11. Model Selection
 
 Choose based on the task, not brand preference:
 
@@ -287,7 +319,7 @@ Benchmark candidate models on the same representative dataset.
 
 ---
 
-## 11. Tool-Grounded Travel Assistant Architecture
+## 12. Tool-Grounded Travel Assistant Architecture
 
 ### User request
 
@@ -322,7 +354,7 @@ The LLM handles natural language and orchestration. The travel APIs remain the s
 
 ---
 
-## 12. Internal Policy Assistant Architecture
+## 13. Internal Policy Assistant Architecture
 
 For thousands of company policy documents:
 
@@ -334,7 +366,8 @@ question -> authorize -> retrieve -> rerank -> answer with citations
 Discuss:
 
 - Document ownership and update propagation
-- Access control and tenant isolation
+- Access control stored on every chunk and enforced again at retrieval
+- Tenant isolation
 - Versioning and stale content
 - Retrieval quality and evaluation datasets
 - Citation and groundedness requirements
@@ -344,7 +377,7 @@ Discuss:
 
 ---
 
-## 13. Project Story Template
+## 14. Project Story Template
 
 Prepare 2–3 real projects using:
 
@@ -366,7 +399,7 @@ Keep claims precise. A defensible positioning statement:
 
 ---
 
-## 14. Rapid Interview Answers
+## 15. Rapid Interview Answers
 
 ### How do you reduce hallucinations?
 
@@ -382,15 +415,15 @@ A chatbot mainly generates responses. An agent can choose tools, take actions, o
 
 ### Why not use agents everywhere?
 
-Agents add nondeterminism, latency, cost, security risk, and testing complexity. A deterministic workflow is easier to reason about and operate when the process is known.
-
-### How do you evaluate an LLM application?
-
-Use a representative golden dataset for offline metrics such as retrieval quality, correctness, groundedness, tool accuracy, and task completion. Add online monitoring for feedback, latency, cost, failures, and drift.
+Agents add nondeterminism, latency, cost, security risk, and testing complexity. Start with prompting. Use long context when the context is known and fits. Use RAG when the context is private, current, or unknown until query time. Use a workflow when the path is fixed. Use an agent only when the next step cannot be hardcoded. Use fine-tuning for style or format, not to add knowledge.
 
 ### How do you handle prompt injection?
 
-Treat all external content as untrusted, separate instructions from data, restrict tools and permissions, validate outputs, avoid exposing secrets, and test malicious user and retrieved-document inputs.
+Treat all external content as untrusted, separate instructions from data, restrict tools and permissions, validate outputs, avoid exposing secrets, and test malicious user and retrieved-document inputs. A guardrail model is only an extra check.
+
+### How do you evaluate an LLM application?
+
+Use a representative golden dataset for offline metrics such as retrieval quality, correctness, groundedness, tool accuracy, and task completion. Add online monitoring for feedback, latency, cost, failures, and drift. Block a release when a high-risk tool, approval, or credential change has no updated adversarial tests.
 
 ### How do you manage latency and cost?
 
@@ -398,7 +431,7 @@ Use smaller models for simple tasks, limit context, retrieve only relevant data,
 
 ---
 
-## 15. High-Value Questions to Practice
+## 16. High-Value Questions to Practice
 
 1. Explain RAG. Why not put everything in the context window?
 2. RAG vs fine-tuning: when would you use each?
@@ -421,12 +454,12 @@ Use smaller models for simple tasks, limit context, retrieve only relevant data,
 
 ---
 
-## 16. One-Night Preparation Plan
+## 17. One-Night Preparation Plan
 
 ### Hour 1: RAG fundamentals
 
 - RAG pipeline
-- Chunking and metadata
+- Chunking, metadata, and chunk-level access control
 - Embeddings and vector search
 - Reranking
 - Hallucination reduction
@@ -434,11 +467,12 @@ Use smaller models for simple tasks, limit context, retrieve only relevant data,
 
 ### Hour 2: Production AI
 
+- Simplest-technique ladder: prompt, long context, RAG, workflow, agent
 - Agents vs workflows
 - Tool calling and structured output
 - Evaluation
 - Security and prompt injection
-- Reliability, latency, and cost
+- Reliability, spend limits, latency, and cost
 
 ### Hour 3: Rehearsal
 
@@ -458,3 +492,18 @@ Your differentiator is:
 > Production software engineering + system design + cloud/infrastructure + practical applied AI.
 
 Frame AI problems as systems that must work reliably in production. That means authoritative data, bounded model behavior, measurable quality, security, observability, and sensible cost.
+
+---
+
+## Sources
+
+Checked 2026-10-07. These pages informed the technique ladder and the production controls above. They do not share one numeric threshold for switching methods, and no single page states one combined mandatory set.
+
+- [Towards AI engineering playbook](https://github.com/louisfb01/ai-engineering-cheatsheets/blob/main/AI_Engineering_Playbook.md) — simpler-first order. Its context-size and tool-count cutoffs are not repeated by the other pages here, so this sheet does not use them.
+- [What We've Learned From A Year of Building with LLMs](https://applied-llms.org/) — prototype with prompting; prefer RAG for new knowledge.
+- [Building effective agents](https://www.anthropic.com/engineering/building-effective-agents) — one call when it is enough; a workflow when the path is known; an agent when the step count cannot be hardcoded.
+- [From Prompt to Production](https://builder.aws.com/content/3JJrLZnjtr2acv0fIZxNC2hjsmJ/from-prompt-to-production-choosing-prompt-engineering-rag-fine-tuning-and-agents) — one author’s gap test. It is not an AWS standard.
+- [OWASP AI Agent Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html) — authorization outside the agent, fail closed, human approval, adversarial tests.
+- [OWASP Secure AI Model Ops Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secure_AI_Model_Ops_Cheat_Sheet.html) — per-tenant limits, kill switch, spend alerts.
+- [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html) — a guardrail model is only an extra layer.
+- [OWASP RAG Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/RAG_Security_Cheat_Sheet.html) — access control on every chunk, enforced again at retrieval.
