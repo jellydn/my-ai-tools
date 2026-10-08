@@ -138,6 +138,17 @@ app.use(
 
 app.get("/", (c) => c.html(indexHtml));
 app.get("/index.html", (c) => c.redirect("/"));
+app.get("/docs", (c) => c.redirect("/docs/"));
+app.use(
+	"/docs/*",
+	serveStatic({
+		root: "./docs",
+		rewriteRequestPath: (requestPath) => {
+			const relativePath = requestPath.replace(/^\/docs\/?/, "");
+			return relativePath === "" ? "index.html" : relativePath;
+		},
+	}),
+);
 app.get("/install.sh", (c) => c.text(installSh));
 app.get("/install.ps1", (c) => c.text(installPs1));
 
