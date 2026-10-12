@@ -898,6 +898,14 @@ OpenAI-powered AI coding assistant. [Homepage](https://opencode.ai)
 
 OpenCode 2 is stable. It uses the `opencode` command and reads the same global configuration directory, `~/.config/opencode/`. OpenCode 1 and 2 are no longer installed side by side by default; the V2 installer replaces the V1 binary. A leftover beta `opencode2` binary still works. Existing V1 configuration is translated in memory, but V1 plugins do not run in V2. See the [OpenCode 2 migration guide](https://opencode.ai/v2/docs/migrate-v1).
 
+### OpenCode 2 compatibility
+
+- Keep the supported V1 JSON shape and separate agent/command Markdown files. Native V2 conversion is optional; a bulk rewrite would also affect OpenCode-based tools that share this configuration.
+- V2 uses one background service for its clients. Local MCP processes inherit that service's environment. Set `AGENTMEMORY_SECRET`, `AGENTMEMORY_URL`, and any other overrides before starting it; run `opencode service restart` after changing them. AgentMemory supplies its own defaults when values are absent. Shell expressions such as `${VAR:-default}` are not expanded in OpenCode JSON.
+- MCP servers use Code Mode by default; no extra switch is needed. This repo has no OpenCode server API or SDK integration to port.
+- `generate.sh` reads both `agent/` and `agents/`, and both `command/` and `commands/`. It exports to the repo's existing singular directories, with plural definitions taking precedence for matching names. Generated `ai/` commands stay excluded.
+- V2 migrates global `tui.json` settings to machine-local `cli.json`. Neither client-state file is managed here. V2 does not run LSP servers; use project lint, typecheck, and compiler commands.
+
 <details>
 <summary><strong>Installation & Configuration</strong></summary>
 
@@ -1053,7 +1061,7 @@ OpenCode supports community plugins that enhance functionality:
 
 - **[@plannotator/opencode](https://github.com/backnotprop/plannotator)** - Interactive code planning and annotation
 
-Plugins are installed on the next OpenCode launch. OpenCode 2 loads `@plannotator/opencode` through its package `exports` entry and converts a `plugin` tuple into `{ package, options }` in memory. The published schema (`https://opencode.ai/config.json`) still only allows `plugin`, so the repo keeps that tuple. A bare package string omits the workflow options. Markdown stubs for `/plannotator-review`, `/plannotator-annotate`, and `/plannotator-last` must run the `plannotator` CLI: their descriptions do not match the plugin's native commands, so the stubs replace those commands.
+Plugins are installed on the next OpenCode launch. `@plannotator/opencode` 0.28.17 publishes a V2 definition with `id: "plannotator"` and `setup(ctx)`; older V1-only implementations cannot run in V2. OpenCode 2 loads the package's `exports` entry and converts the supported `plugin` tuple into `{ package, options }` in memory. Keep the tuple to preserve `workflow: "plan-agent"` and `planningAgents: ["plan"]`; a bare package string omits these options. Markdown stubs for `/plannotator-review`, `/plannotator-annotate`, and `/plannotator-last` must run the `plannotator` CLI: their descriptions do not match the plugin's native commands, so the stubs replace those commands.
 
 ### Custom Agents
 
@@ -1076,7 +1084,7 @@ OpenCode supports custom model providers via OpenAI-compatible endpoints. They l
 | `cursor-acp` | Cursor ACP bridge; models include `auto`, `cursor-grok-4.5-medium`, `composer-2.5`, `claude-*`, `gpt-*`, `gemini-*`, etc. | `http://127.0.0.1:32124/v1` |
 | `omniroute`  | OmniRoute; `free` / `paid` / `premium` (plus named routes like `sf/step-3.7-flash`, `cu/grok-4.5-high`) | `http://localhost:20128/v1` |
 
-The top-level default model is `"model": "omnirouter/free"`.
+The top-level default model and explorer model are `omniroute/free`, matching the configured `omniroute` provider.
 
 ### Custom Commands
 

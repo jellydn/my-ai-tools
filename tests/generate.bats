@@ -198,6 +198,33 @@ teardown() {
 }
 
 # ---------------------------------------------------------------------------
+# OpenCode export – V1 and V2 directory compatibility
+# ---------------------------------------------------------------------------
+
+@test "OpenCode exports both directory layouts with plural definitions taking precedence" {
+    local config_dir="$HOME/.config/opencode"
+    mkdir -p "$config_dir"/{agent,agents,command,commands/ai}
+    printf 'legacy agent\n' > "$config_dir/agent/reviewer.md"
+    printf 'v2 agent\n' > "$config_dir/agents/reviewer.md"
+    printf 'legacy only\n' > "$config_dir/agent/legacy.md"
+    printf 'legacy command\n' > "$config_dir/command/review.md"
+    printf 'v2 command\n' > "$config_dir/commands/review.md"
+    printf 'v2 only\n' > "$config_dir/commands/custom.md"
+    printf 'generated\n' > "$config_dir/commands/ai/generated.md"
+    printf 'machine-local\n' > "$config_dir/cli.json"
+
+    run generate_opencode_configs
+
+    [ "$status" -eq 0 ]
+    [ "$(cat "$SCRIPT_DIR/configs/opencode/agent/reviewer.md")" = "v2 agent" ]
+    [ "$(cat "$SCRIPT_DIR/configs/opencode/agent/legacy.md")" = "legacy only" ]
+    [ "$(cat "$SCRIPT_DIR/configs/opencode/command/review.md")" = "v2 command" ]
+    [ "$(cat "$SCRIPT_DIR/configs/opencode/command/custom.md")" = "v2 only" ]
+    [ ! -e "$SCRIPT_DIR/configs/opencode/command/ai" ]
+    [ ! -e "$SCRIPT_DIR/configs/opencode/cli.json" ]
+}
+
+# ---------------------------------------------------------------------------
 # sanitize_absolute_paths – regression guard for the single→double quote fix
 # ---------------------------------------------------------------------------
 
