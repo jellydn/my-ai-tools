@@ -1,6 +1,11 @@
 {
 	"recommended_skills": [
 		{
+			"repo": "jellydn/flowly",
+			"skill": "analyzing-repositories",
+			"description": "Analyze repository architecture and trace features across files with bounded, read-only inspection and file citations"
+		},
+		{
 			"repo": "michael-denyer/pstack-claude",
 			"skill": "poteto-mode",
 			"description": "Route coding tasks through rigorous planning, delegation, review, and verification workflows across Claude Code, Codex, Pi, OpenCode, and other agent harnesses"
