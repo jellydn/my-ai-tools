@@ -213,6 +213,7 @@ HTML pages in [`docs/`](docs/index.html) are generated from the Markdown sources
 - [Detailed tool and skill reference](TOOL_REFERENCE.md)
 - [Fusion orchestration](docs/fusion-orchestration.md)
 - [Claude Code agent teams](docs/claude-code-teams.md)
+- [30-day applied AI learning sprint](docs/30-day-applied-ai-learnings.md)
 - [qmd knowledge management](docs/qmd-knowledge-management.md)
 - [My AI Bot](docs/my-ai-bot.md)
 - [Applied AI and GenAI cheat sheet](docs/ai-applied-genai-cheat-sheet.md)

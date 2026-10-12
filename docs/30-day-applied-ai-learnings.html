@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="30-Day Applied AI Learning Sprint — my-ai-tools documentation"><title>30-Day Applied AI Learning Sprint · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="30-day-applied-ai-learnings.html">30-Day Applied AI Learning Sprint</a>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+</nav><main><article>
+<h1>30-Day Applied AI Learning Sprint</h1>
+<p><em>A practical month of building, measuring, and explaining AI systems.</em></p>
+<p>This is a build-first learning path for software engineers. Every day produces a small artifact that can be tested, reviewed, or reused. The goal is not to memorize model trivia. The goal is to learn where probabilistic software helps, where deterministic code is better, and how to operate the boundary safely.</p>
+<h2>How to use this guide</h2>
+<ul>
+<li>Spend 30–60 minutes on the daily exercise.</li>
+<li>Keep one small repository with the prompts, data, evaluations, and notes.</li>
+<li>Record the model, prompt version, latency, token usage, cost, and failures.</li>
+<li>Prefer a deterministic baseline before adding RAG, agents, or fine-tuning.</li>
+<li>Do not use production secrets or private customer data in experiments.</li>
+<li>At the end of each week, write what failed and what you would remove.</li>
+</ul>
+<h2>The 30 days</h2>
+<h3>Week 1 — Model the problem before the model</h3>
+<h4>Day 1 — Pick a real task</h4>
+<p>Choose one narrow task with a clear user and outcome: classify support requests, extract fields from invoices, answer questions over internal docs, or draft a code-review summary.</p>
+<p><strong>Deliverable:</strong> a one-paragraph problem statement with inputs, outputs, users, risks, and a measurable success criterion.</p>
+<h4>Day 2 — Build a deterministic baseline</h4>
+<p>Write the simplest non-LLM implementation you can. Rules, regular expressions, SQL, and ordinary application code are useful baselines, not failures.</p>
+<p><strong>Deliverable:</strong> baseline code plus three examples where it succeeds and three where it fails.</p>
+<h4>Day 3 — Make the first model call</h4>
+<p>Use a small, fast model for extraction, classification, or transformation. Keep the prompt short and ask for structured output.</p>
+<p><strong>Deliverable:</strong> a repeatable script with the prompt and model settings stored in version control.</p>
+<h4>Day 4 — Validate the output</h4>
+<p>Treat model output as untrusted input. Parse it against a schema, handle missing fields, and reject malformed responses.</p>
+<p><strong>Deliverable:</strong> schema validation tests for valid, incomplete, malformed, and adversarial outputs.</p>
+<h4>Day 5 — Create a small golden dataset</h4>
+<p>Collect representative examples, edge cases, and known failures. Include the expected outcome or an explicit acceptable range.</p>
+<p><strong>Deliverable:</strong> at least 20 labelled cases in a machine-readable format.</p>
+<h4>Day 6 — Measure quality, latency, and cost</h4>
+<p>Run the same dataset through the baseline and model solution. Track quality separately from latency and cost; a single score hides trade-offs.</p>
+<p><strong>Deliverable:</strong> a small evaluation report with the dataset version, model, metrics, and failure examples.</p>
+<h4>Day 7 — Write the first decision record</h4>
+<p>Decide whether the model is justified. If it is not clearly better than the baseline, simplify. If it is, document the value and the remaining risks.</p>
+<p><strong>Deliverable:</strong> a short ADR stating what you will build and what you deliberately will not build.</p>
+<h3>Week 2 — Ground answers in evidence</h3>
+<h4>Day 8 — Prepare the source data</h4>
+<p>Parse the documents your task actually needs. Preserve title, source, owner, permissions, version, and update time as metadata.</p>
+<p><strong>Deliverable:</strong> a cleaned sample corpus and an ingestion note describing unsupported formats.</p>
+<h4>Day 9 — Chunk by meaning</h4>
+<p>Compare structure-aware chunks with fixed-size chunks. Keep headings and useful context; avoid splitting tables or procedures in the middle.</p>
+<p><strong>Deliverable:</strong> a chunk preview showing source metadata and at least five difficult documents.</p>
+<h4>Day 10 — Implement retrieval</h4>
+<p>Start with keyword search or a simple vector index. Do not introduce a framework until you understand the retrieval inputs and outputs.</p>
+<p><strong>Deliverable:</strong> a retrieval function returning ranked chunks, scores, and source paths.</p>
+<h4>Day 11 — Add hybrid search or reranking</h4>
+<p>Use lexical search for exact names and identifiers, semantic search for meaning, and reranking only when evaluation shows it improves results.</p>
+<p><strong>Deliverable:</strong> a comparison of baseline retrieval and the improved method on the golden questions.</p>
+<h4>Day 12 — Generate cited answers</h4>
+<p>Require the answer to cite the retrieved sources. If evidence is missing or contradictory, return uncertainty instead of inventing an answer.</p>
+<p><strong>Deliverable:</strong> five answers with citations and three intentional “insufficient evidence” cases.</p>
+<h4>Day 13 — Test permissions and freshness</h4>
+<p>Apply access control during retrieval, not just during ingestion. Re-index changed documents and remove stale versions.</p>
+<p><strong>Deliverable:</strong> tests proving an unauthorized document cannot influence an answer and an old version is not returned.</p>
+<h4>Day 14 — Evaluate retrieval separately</h4>
+<p>Measure retrieval recall and answer quality as separate concerns. A fluent answer can still be based on the wrong document.</p>
+<p><strong>Deliverable:</strong> a weekly report containing retrieval failures, answer failures, and the next experiment.</p>
+<h3>Week 3 — Add actions carefully</h3>
+<h4>Day 15 — Map the workflow</h4>
+<p>Draw the task as a deterministic sequence. Mark the points where the next step is genuinely unknown and where a normal function is enough.</p>
+<p><strong>Deliverable:</strong> a workflow diagram and a list of candidate tools.</p>
+<h4>Day 16 — Define narrow tools</h4>
+<p>Give each tool one job, a precise schema, bounded inputs, and a clear result. Keep read tools separate from write tools.</p>
+<p><strong>Deliverable:</strong> tool definitions with examples, validation rules, and error responses.</p>
+<h4>Day 17 — Enforce authorization outside the model</h4>
+<p>The model may request an action, but application code decides whether it is allowed. Unknown tools, missing approvals, and invalid arguments must fail closed.</p>
+<p><strong>Deliverable:</strong> an authorization test matrix for anonymous, normal, privileged, and revoked users.</p>
+<h4>Day 18 — Add timeouts, retries, and idempotency</h4>
+<p>Assume network calls fail and models repeat themselves. Bound retries, use backoff, and make write operations safe to retry.</p>
+<p><strong>Deliverable:</strong> failure-injection tests for timeout, duplicate request, malformed result, and partial completion.</p>
+<h4>Day 19 — Define termination and budgets</h4>
+<p>Set maximum steps, wall-clock time, token budget, and tool-call budget. A system without a stopping rule is an incident waiting to happen.</p>
+<p><strong>Deliverable:</strong> a run policy that explains when the system stops, asks for approval, or escalates.</p>
+<h4>Day 20 — Add human approval</h4>
+<p>Require confirmation for irreversible, high-impact, or externally visible actions. Show the proposed action and the evidence behind it.</p>
+<p><strong>Deliverable:</strong> an approval screen or CLI prompt plus tests that prove approval cannot be bypassed.</p>
+<h4>Day 21 — Compare workflow and agent</h4>
+<p>Implement the same task as a fixed workflow and as a bounded agent. Compare quality, latency, cost, and failure recovery.</p>
+<p><strong>Deliverable:</strong> a decision explaining whether dynamic planning is worth its additional complexity.</p>
+<h3>Week 4 — Operate and teach the system</h3>
+<h4>Day 22 — Add observability</h4>
+<p>Log request ID, model, prompt version, retrieval sources, tool calls, latency, token usage, outcome, and error class. Redact secrets and sensitive content.</p>
+<p><strong>Deliverable:</strong> a trace that explains one successful run and one failed run without reading raw private data.</p>
+<h4>Day 23 — Test adversarial inputs</h4>
+<p>Try prompt injection, poisoned documents, malicious tool arguments, oversized inputs, data exfiltration requests, and misleading retrieved content.</p>
+<p><strong>Deliverable:</strong> an adversarial test set with severity, expected behavior, and release-blocking failures.</p>
+<h4>Day 24 — Improve cost and latency</h4>
+<p>Use the smallest model that meets the evaluation bar. Cache stable context, parallelize independent reads, trim irrelevant context, and stream only where it helps users.</p>
+<p><strong>Deliverable:</strong> before-and-after measurements with quality held constant.</p>
+<h4>Day 25 — Test model changes</h4>
+<p>Treat model, prompt, embedding model, chunker, and reranker changes as versioned releases. Re-run the golden dataset before switching defaults.</p>
+<p><strong>Deliverable:</strong> a regression report showing improvements, regressions, and unresolved cases.</p>
+<h4>Day 26 — Add a fallback path</h4>
+<p>Define what happens when the provider is unavailable, the answer is uncertain, retrieval is empty, or a tool fails halfway through.</p>
+<p><strong>Deliverable:</strong> a fallback matrix and an end-to-end test for each important failure mode.</p>
+<h4>Day 27 — Package the workflow</h4>
+<p>Write the setup instructions, environment variables, dry-run command, test command, and rollback procedure. A useful experiment should be reproducible by someone else.</p>
+<p><strong>Deliverable:</strong> a README section that takes a new developer from clone to first verified run.</p>
+<h4>Day 28 — Explain the trade-offs</h4>
+<p>Write a one-page system design covering the baseline, data flow, trust boundaries, evaluation, operations, and known limitations.</p>
+<p><strong>Deliverable:</strong> a design note that a reviewer can challenge without opening the implementation.</p>
+<h4>Day 29 — Teach it without hiding uncertainty</h4>
+<p>Explain the system to another engineer. Ask them to predict where it fails and to find one unsupported claim in its output.</p>
+<p><strong>Deliverable:</strong> review notes and at least one change made from the feedback.</p>
+<h4>Day 30 — Ship the smallest useful version</h4>
+<p>Remove experiments that did not improve the measured outcome. Keep the smallest reliable path, its tests, its evaluation dataset, and its operational limits.</p>
+<p><strong>Deliverable:</strong> a tagged release or pull request with a changelog, evaluation summary, known limitations, and next experiment.</p>
+<h2>What this month should teach</h2>
+<ol>
+<li><strong>AI is a software component, not the architecture.</strong> Use deterministic code wherever it is sufficient.</li>
+<li><strong>Evaluation comes before optimization.</strong> Without a representative dataset, model and retrieval changes are guesses.</li>
+<li><strong>Knowledge and behavior are different problems.</strong> Use retrieval for current or private knowledge; consider fine-tuning only for stable behavior after prompting and examples fail.</li>
+<li><strong>Agents need boundaries.</strong> Tools, permissions, budgets, termination conditions, and approvals belong in application code.</li>
+<li><strong>Fluency is not correctness.</strong> Require evidence, citations, validation, and explicit uncertainty.</li>
+<li><strong>Operational details are part of quality.</strong> Latency, cost, privacy, observability, fallback behavior, and rollback determine whether a demo can become a product.</li>
+<li><strong>The durable skill is judgment.</strong> Learn to choose the least complex system that meets the measured need, then verify it continuously.</li>
+</ol>
+<h2>Suggested project layout</h2>
+<pre><code class="language-text">ai-learning-lab/
+├── README.md
+├── data/
+│   ├── golden.jsonl
+│   └── adversarial.jsonl
+├── src/
+├── evals/
+│   ├── run.py
+│   └── reports/
+├── prompts/
+├── traces/
+└── decisions/
+</code></pre>
+<p>Keep prompts, evaluation data, and decisions versioned with the code. That history is more useful than a screenshot of a successful demo.</p>
+<h2>References</h2>
+<ul>
+<li><a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a> — concepts and production checklists.</li>
+<li><a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/">OWASP Top 10 for LLM Applications</a> — security risks to include in adversarial tests.</li>
+<li><a href="https://www.nist.gov/itl/ai-risk-management-framework">NIST AI Risk Management Framework</a> — risk-management vocabulary and lifecycle guidance.</li>
+</ul>
+</article></main></div></body></html>
