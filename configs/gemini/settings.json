@@ -73,6 +73,13 @@
       "command": "codebase-memory-mcp",
       "args": [],
       "timeout": 60000
+    },
+    "plannotator-inbox": {
+      "command": "plannotator",
+      "args": [
+        "inbox",
+        "mcp"
+      ]
     }
   },
   "security": {
