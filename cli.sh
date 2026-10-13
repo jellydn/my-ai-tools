@@ -2385,7 +2385,7 @@ install_cli_dependency() {
 	local name="$1"
 
 	case "$name" in
-	plannotator | plannotator-copilot)
+	plannotator | plannotator-copilot | plannotator-droid)
 		if command -v plannotator &>/dev/null; then
 			return 0
 		fi
@@ -2444,6 +2444,7 @@ enable_plugins() {
 		"caveman|caveman@caveman|JuliusBrussee/caveman|claude"
 		"plannotator|plannotator@plannotator|backnotprop/plannotator|claude"
 		"plannotator-copilot|plannotator-copilot@plannotator|backnotprop/plannotator|copilot"
+		"plannotator-droid|plannotator@plannotator|https://github.com/backnotprop/plannotator|droid"
 		"plannotator-setup-goal|plannotator-setup-goal@my-ai-tools|$SCRIPT_DIR|claude"
 		"prd|prd@my-ai-tools|$SCRIPT_DIR|claude"
 		"ralph|ralph@my-ai-tools|$SCRIPT_DIR|claude"
@@ -2459,6 +2460,7 @@ enable_plugins() {
 
 	if ! command -v claude &>/dev/null; then
 		handle_no_claude_cli
+		install_local_community_plugins
 		return 0
 	fi
 
@@ -2593,11 +2595,6 @@ install_community_skills() {
 }
 
 install_local_community_plugins() {
-	# Only install CLI-based plugins (non-remote skills) if Claude CLI is available
-	if ! command -v claude &>/dev/null; then
-		return 0
-	fi
-
 	for plugin_entry in "${community_plugins[@]}"; do
 		local name plugin_spec marketplace_repo cli_tool
 		name="${plugin_entry%%|*}"
@@ -2610,6 +2607,11 @@ install_local_community_plugins() {
 		local rest2="${rest#*|}"
 		marketplace_repo="${rest2%%|*}"
 		cli_tool="${rest2##*|}"
+
+		if ! command -v "$cli_tool" &>/dev/null; then
+			log_info "Skipping $name ($cli_tool CLI not found)"
+			continue
+		fi
 
 		install_community_plugin "$name" "$plugin_spec" "$marketplace_repo" "$cli_tool"
 	done
