@@ -481,6 +481,8 @@ copy_mimo_configs() {
 	if [ -d "$SCRIPT_DIR/configs/mimo/command" ]; then
 		execute_quoted rm -rf "$HOME/.config/mimocode/command"
 		safe_copy_dir "$SCRIPT_DIR/configs/mimo/command" "$HOME/.config/mimocode/command"
+		# MiMo also reads commands/. Copy onto it without deleting other files.
+		copy_opencode_commands "$SCRIPT_DIR/configs/mimo/command" "$HOME/.config/mimocode/commands"
 	fi
 
 	# Theme and plugin directories use additive copy (mkdir -p + safe_copy_dir)
@@ -1533,6 +1535,9 @@ copy_kilo_configs() {
 	execute_quoted mkdir -p "$HOME/.config/kilo"
 	copy_config_file "$SCRIPT_DIR/configs/kilo/config.json" "$HOME/.config/kilo/" || true
 	copy_config_file "$SCRIPT_DIR/configs/kilo/AGENTS.md" "$HOME/.config/kilo/" || true
+	# Kilo reads the OpenCode command dirs. Copy onto commands/ without deleting other files.
+	copy_opencode_commands "$SCRIPT_DIR/configs/kilo/command" "$HOME/.config/kilo/command"
+	copy_opencode_commands "$SCRIPT_DIR/configs/kilo/command" "$HOME/.config/kilo/commands"
 	log_success "Kilo CLI configs copied"
 }
 
