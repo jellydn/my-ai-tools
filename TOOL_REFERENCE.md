@@ -47,27 +47,27 @@ The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONS
 | --------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Claude Code** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Official + Community (plannotator, claude-hud, worktrunk, codex)                                                                                                                                                                               |
 | **OpenCode**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | @plannotator/opencode                                                                                                                                                                                                                          |
-| **Codex**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                                                                              |
+| **Codex**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Plannotator `Stop` hook (`hooks.json`); `[features] hooks = true`                                                                                                                                                                              |
 | **Kimi Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, logpilot, sem, ctx                              | Skills, MCP servers, and hooks via `~/.kimi-code/`                                                                                                                                                                                             |
 | **Pi**          | context7, sequential-thinking, qmd, codebase-memory-mcp, fff, react-grab-mcp, agentmemory, sem, ctx                        | Packages (pi-extension, pi-subagents, autoresearch, fff, mcp-adapter, simplify, rpiv-todo, btw, code-previews, codex-goal, commandcode-provider, pi-web-access, footer, tps-meter, pi-qwencloud-provider, pi-cursor-sdk) |
 | **Oh My Pi**  | Pi-compatible layout; MCP servers via `~/.omp/agent/mcp.json` when present                                                  | Pi fork (`@oh-my-pi/pi-coding-agent`); configs managed under `configs/omp/`                                                                                                                                          |
 | **Muse Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Workflows, session messaging, rewind, shared `~/.agents/skills`, developer-preview SDK                                                                                                                                                         |
 | **Amp**         | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Agent modes: fusion, glm-5.2, grok45, inkling, cursor-composer-2.5; plannotator; orca-agent-status                                                                                                                                             |
-| **Gemini**      | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                                                                                 |
+| **Gemini**      | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Plannotator `BeforeTool` hook for `exit_plan_mode`. Deprecated for Google One/unpaid tiers; migrate to Antigravity                                                                                                                             |
 | **Antigravity** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx (via plugin) | my-ai-tools-gemini-migration                                                                                                                                                                                                                   |
-| **Kilo**        | (uses OpenCode config)                                                                                                     | (uses OpenCode plugins)                                                                                                                                                                                                                        |
+| **Kilo**        | context7, qmd, fff, sequential-thinking, react-grab-mcp, logpilot, agentmemory, sem, ctx (own `~/.config/kilo/config.json`) | `@plannotator/opencode` `plan-agent` tuple, plus `@mohak34/opencode-notifier`                                                                                                                                                                  |
 | **CommandCode** | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                                                                              |
-| **Copilot**     | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                                                                              |
+| **Copilot**     | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | `plannotator-copilot@plannotator` (plan review on `exit_plan_mode`)                                                                                                                                                                            |
 | **Cursor**      | context7 (via bunx), sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx   | -                                                                                                                                                                                                                                              |
 | **Conductor**   | Per-harness (Claude Code, Codex, Cursor MCP configs)                                                                       | Orchestrates parallel agents in isolated workspaces                                                                                                                                                                                            |
-| **Factory**     | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | core, security-engineer, droid-evolved, autoresearch                                                                                                                                                                                           |
+| **Factory**     | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | core, security-engineer, droid-evolved, autoresearch, plannotator (manual commands only)                                                                                                                                                       |
 | **Orca**        | -                                                                                                                          | Agent hooks (claude, gemini, codex, cursor, droid)                                                                                                                                                                                             |
 | **Cline**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Global rules (AGENTS.md → ~/.cline/rules/, ~~/.agents/AGENTS.md), universal skills (~~/.agents/skills)                                                                                                                                         |
 | **Grok**        | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Default model `grok-4.5` (high reasoning); UI auto + `rosepine-moon`; Kanagawa theme staged                                                                                                                                                    |
-| **MiMo-Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | @plannotator/opencode, opencode-chrome-annotation                                                                                                                                                                                              |
+| **MiMo-Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | `@plannotator/opencode` `plan-agent` tuple, opencode-chrome-annotation                                                                                                                                                                         |
 | **Qoder CLI**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                                                                              |
 | **DeepSeek Harness** | context7, sequential-thinking, qmd, fff, sem, ctx                                                                     | Cordis plugin composition; global `AGENTS.md`; native DeepSeek model route                                                                                                                                                                      |
-| **Kiro CLI**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Steering files (AGENTS.md), slash commands, MCP servers, ACP                                                                                                                                                                                   |
+| **Kiro CLI**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Steering files (AGENTS.md), slash commands, MCP servers, ACP. Plannotator agent is manual (`plannotator-review`, `plannotator-annotate`)                                                                                                       |
 | **Reasonix**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | DeepSeek-native; prefix-cache loop; `[[plugins]]` MCP in config.toml; ACP (`reasonix acp`); `REASONIX.md`/`AGENTS.md` memory; Kanagawa theme staged                                                                                            |
 | **Delta**       | — (desktop app — model providers are configured in settings)                                                              | Personal rules (`~/.config/delta/AGENTS.md`), isolated checkouts, collaborative threads                                                                                                                                                        |
 | **Codiff**      | — (desktop app — uses configured agent backend via settings)                                                               | —                                                                                                                                                                                                                                              |
@@ -538,7 +538,7 @@ If you encounter issues:
 | `code-simplifier`        | Code simplification                     | Official          |
 | `rust-analyzer-lsp`      | Rust language support                   | Official          |
 | `claude-md-management`   | Markdown management                     | Official          |
-| `plannotator`            | Plan annotation tool                    | Community         |
+| `plannotator`            | Plan review at `ExitPlanMode`; manual code review | Community         |
 | `plannotator-setup-goal` | Turn ideas into goal packages           | Local Marketplace |
 | `prd`                    | Product Requirements Documents          | Local Marketplace |
 | `ralph`                  | PRD to JSON converter                   | Local Marketplace |
@@ -724,6 +724,11 @@ Located in [`configs/claude/commands/`](configs/claude/commands/):
 
 - `/ccs` - CCS delegation and profile management
 - `/ultrathink` - Deep thinking mode
+- `/plannotator-review` - Code review for current changes or a PR URL (`plannotator review`)
+- `/plannotator-annotate` - Annotate a file, folder, or URL (`plannotator annotate`)
+- `/plannotator-last` - Annotate the last assistant message (`plannotator annotate-last`)
+
+The marketplace plugin intercepts `ExitPlanMode` and opens plan review. It does not include the `plannotator` binary. These command files are the manual path and run that binary. The Plannotator installer also writes skills with the same names under `~/.claude/skills`. Keep the binary current by rerunning `curl -fsSL https://plannotator.ai/install.sh | bash`. `./cli.sh` installs that binary only when `plannotator` is missing.
 
 #### Custom Agents
 
@@ -1061,7 +1066,7 @@ OpenCode supports community plugins that enhance functionality:
 
 - **[@plannotator/opencode](https://github.com/backnotprop/plannotator)** - Interactive code planning and annotation
 
-Plugins are installed on the next OpenCode launch. `@plannotator/opencode` 0.28.17 publishes a V2 definition with `id: "plannotator"` and `setup(ctx)`; older V1-only implementations cannot run in V2. OpenCode 2 loads the package's `exports` entry and converts the supported `plugin` tuple into `{ package, options }` in memory. Keep the tuple to preserve `workflow: "plan-agent"` and `planningAgents: ["plan"]`; a bare package string omits these options. Markdown stubs for `/plannotator-review`, `/plannotator-annotate`, and `/plannotator-last` must run the `plannotator` CLI: their descriptions do not match the plugin's native commands, so the stubs replace those commands.
+Plugins are installed on the next OpenCode launch. `@plannotator/opencode` 0.28.17 or later publishes a V2 definition with `id: "plannotator"` and `setup(ctx)`. Older V1-only plugins cannot run in V2. OpenCode 2 loads the package `exports` entry and converts the `plugin` tuple into `{ package, options }` in memory. Keep the tuple. It sets `workflow: "plan-agent"` and `planningAgents: ["plan"]`. A bare package string omits those options. Plan review opens when the `plan` agent calls `submit_plan`. There is no OpenCode hook that opens a code review. The Markdown commands `/plannotator-review`, `/plannotator-annotate`, and `/plannotator-last` must run `plannotator review`, `plannotator annotate`, and `plannotator last`. Their descriptions do not match the plugin's native commands, so the stubs replace those commands. `./cli.sh` installs the `plannotator` binary only when the command is missing. Rerun `curl -fsSL https://plannotator.ai/install.sh | bash`, then restart OpenCode, to update an old binary.
 
 ### Custom Agents
 
@@ -1092,9 +1097,9 @@ Located in [`configs/opencode/command/`](configs/opencode/command/):
 
 - `batch` - Run multiple tasks in parallel as worker tasks
 - `happyhorse` - Generate a video with QwenCloud HappyHorse (async, may take minutes)
-- `plannotator-annotate` - Annotate the current plan with @plannotator/opencode
-- `plannotator-last` - Show the last plannotator plan
-- `plannotator-review` - Review the current plan with @plannotator/opencode
+- `plannotator-annotate` - Annotate a file, folder, or URL
+- `plannotator-last` - Annotate the last assistant message
+- `plannotator-review` - Code review for local changes, a directory, or a PR URL
 - `simplify` - Simplify over-engineered code for clarity and maintainability
 - `wan` - Generate an image with QwenCloud Wan (wan2.7)
 
@@ -1265,7 +1270,7 @@ Custom Amp agent modes live in [`configs/amp/plugins/`](configs/amp/plugins/) an
 | `kimi-k3-mode.ts`        | `kimi-k3`         | —                                  | Senior engineering judgment mode     |
 | `cursor-composer-2.5.ts` | `cursor-comp-2.5` | `openai/gpt-5.2-codex`             | Cursor Composer-style editing mode   |
 | `opus-5-mode.ts`         | `opus-5`          | `anthropic/claude-opus-5`          | Opus 5 with configurable reasoning   |
-| `plannotator.ts`         | —                 | —                                  | Interactive plan annotation          |
+| `plannotator.ts`         | —                 | —                                  | Manual code review, file annotation, and last-answer annotation. Amp has no plan hook. |
 | `orca-agent-status.ts`   | —                 | —                                  | Orca agent status integration        |
 
 The [`my-ai-tools-skills`](configs/amp/plugins/my-ai-tools-skills/) directory plugin also bundles every repository
@@ -1369,9 +1374,12 @@ npm install -g @openai/codex
 
 Located in [`configs/codex/`](configs/codex/):
 
-- [`config.toml`](configs/codex/config.toml) - Main TOML configuration with MCP servers
+- [`config.toml`](configs/codex/config.toml) - Main TOML configuration with MCP servers. `[features] hooks = true` is required for plan review.
+- [`hooks.json`](configs/codex/hooks.json) - `Stop` hook that runs `plannotator` after a turn renders. This is plan review, not code review. Codex Desktop may not inherit `PATH`; set `command` to the absolute `plannotator` path if the hook does not run.
 - [`1m.config.toml`](configs/codex/1m.config.toml) - Optional 1.05M context profile (`codex --profile 1m`)
 - [`AGENTS.md`](configs/codex/AGENTS.md) - Agent guidelines
+
+Manual code review, file annotation, and last-message annotation are shell commands, not hooks: `!plannotator review`, `!plannotator annotate path/to/spec.md`, and `!plannotator last`. Restart Codex Desktop after a hook change. Hooks are experimental and are not enabled by the Windows installer.
 
 ### Optional 1.05M-token context profile (GPT-5.6 Sol)
 
@@ -1527,6 +1535,11 @@ Located in [`configs/gemini/`](configs/gemini/):
   - `security-audit.md` - Security vulnerability assessment
 - [`commands/`](configs/gemini/commands/) - Custom slash commands (`.toml` format)
   - `ultrathink.toml` - Deep thinking mode
+  - `plannotator-review.toml` - Code review for current changes or a PR URL
+  - `plannotator-annotate.toml` - Annotate a markdown file or folder
+- [`policies/plannotator.toml`](configs/gemini/policies/plannotator.toml) - Allows `exit_plan_mode` so the browser UI is the only gate
+
+Plan review is the `BeforeTool` hook on `exit_plan_mode` in `settings.json`. It runs `plannotator` when the agent calls that tool. Gemini has no `/plannotator-last` command. The official Gemini guide does not define one.
 
 ### Key Features
 
@@ -1706,7 +1719,10 @@ Kilo provides both `kilo` and `kilocode` commands.
 
 Kilo CLI uses its own configuration directory at `~/.config/kilo/`:
 
-- [`config.json`](configs/kilo/config.json) - Main configuration with permissions and settings
+- [`config.json`](configs/kilo/config.json) - Main configuration with permissions and settings. The Plannotator plugin entry is the OpenCode tuple `workflow: "plan-agent"`, `planningAgents: ["plan"]`. A bare package string omits those options.
+- [`command/`](configs/kilo/command/) - `/plannotator-review`, `/plannotator-annotate`, and `/plannotator-last`. The installer copies them to both `~/.config/kilo/command` and `~/.config/kilo/commands`.
+
+Plan review opens when the `plan` agent calls `submit_plan`. The slash commands run the `plannotator` CLI. Kilo does not share OpenCode's plugin config.
 
 Configuration is managed through:
 
@@ -1716,14 +1732,14 @@ Configuration is managed through:
 
 ### MCP Servers
 
-Kilo delegates to OpenCode's MCP configuration. See [OpenCode MCP Servers](#mcp-servers-1) for the full list.
+Kilo keeps its own MCP servers in [`configs/kilo/config.json`](configs/kilo/config.json). It does not read `~/.config/opencode/`.
 
 ### Key Features
 
-- 🚀 **Built on OpenCode**: Full compatibility with OpenCode configuration and plugins
+- 🚀 **Built on OpenCode**: Same config schema, with its own `~/.config/kilo/` directory
 - 🤖 **300+ AI Models**: Access to Claude, GPT, Gemini, DeepSeek, Llama, and more
 - 🥔 **Giga Potato Model**: Free stealth model optimized for agentic programming with vision support
-- 🔌 **Plugin ecosystem**: Compatible with OpenCode plugins
+- 🔌 **Plugin ecosystem**: OpenCode-compatible plugins, configured in Kilo's own `plugin` array
 - 📝 **Custom agents**: Same agent system as OpenCode
 - 🎨 **Terminal UI**: Enhanced terminal interface for productivity
 
@@ -1867,7 +1883,7 @@ Then register them in `~/.pi/agent/settings.json`:
 
 | Package                              | Description                                                        |
 | ------------------------------------ | ------------------------------------------------------------------ |
-| `@plannotator/pi-extension`          | Interactive plan review with visual annotation                     |
+| `@plannotator/pi-extension`          | Plan mode via `plannotator_submit_plan`, plus `/plannotator-review`, `/plannotator-annotate`, and `/plannotator-last`. Since Plannotator 0.28.0 the agent does not wait while you review. Pi does not need the standard installer for this extension. |
 | `pi-autoresearch`                    | Autonomous experiment loop for optimization targets                |
 | `@ff-labs/pi-fff`                    | FFF-powered fuzzy file and content search                          |
 | `pi-simplify`                        | Reviews changed code for clarity, consistency, and maintainability |
@@ -1953,6 +1969,8 @@ Copilot CLI configs are stored in [`configs/copilot/`](configs/copilot/) and ins
 
 - [`AGENTS.md`](configs/copilot/AGENTS.md) - Agent guidelines and best practices, installed to `~/.copilot/copilot-instructions.md`
 - [`mcp-config.json`](configs/copilot/mcp-config.json) - MCP server configuration, installed to `~/.copilot/mcp-config.json`
+
+Plan review is the marketplace plugin `plannotator-copilot@plannotator`. It intercepts `exit_plan_mode`. `./cli.sh` installs it when the `copilot` command exists, including when Claude Code is not installed. Manual commands are `/plannotator-review`, `/plannotator-annotate`, and `/plannotator-last`. Install the `plannotator` binary first. `./cli.sh` does that only when the command is missing.
 
 ### MCP Servers
 
@@ -2274,6 +2292,7 @@ Factory Droid includes plugins that enhance functionality:
 | `security-engineer@factory-plugins` | Security-focused code review engine                |
 | `droid-evolved@factory-plugins`     | Advanced droid capabilities with improved autonomy |
 | `autoresearch@factory-plugins`      | Autonomous research and experiment loop            |
+| `plannotator@plannotator`           | Manual `/plannotator-review`, `/plannotator-annotate`, and `/plannotator-last`. Droid has no plan hook. `./cli.sh` adds the marketplace when `droid` is installed. |
 
 ### Custom Models
 
@@ -2651,7 +2670,7 @@ The setup script automatically deploys config files, commands, and agent guideli
 - **Goal Tracking** — `/goal` command with independent judge model to verify completion
 - **Self-Improvement** — `/dream` extracts knowledge from session traces; `/distill` packages workflows into reusable skills
 - **Voice Input** — Real-time voice commands via TenVAD and MiMo ASR
-- **OpenCode Compatible** — Inherits OpenCode's architecture; uses the same config schema, MCP servers, formatters, and plugin system
+- **OpenCode Compatible** — Inherits OpenCode's architecture; uses the same config schema, MCP servers, formatters, and plugin system. Plannotator uses the `plan-agent` tuple (`planningAgents: ["plan"]`). Plan review is `submit_plan` on the `plan` agent. `/plannotator-review`, `/plannotator-annotate`, and `/plannotator-last` in [`configs/mimo/command/`](configs/mimo/command/) run the `plannotator` CLI. The installer copies them to both `command/` and `commands/`.
 
 ### 🔌 MCP Servers
 
@@ -3031,6 +3050,7 @@ Or run this repo's installer:
 Kiro CLI configs are stored in [`configs/kiro/`](configs/kiro/) and installed to `~/.kiro/`:
 
 - [`AGENTS.md`](configs/kiro/AGENTS.md) — Agent guidelines (Kiro uses steering files to guide agent behavior)
+- [`agents/plannotator.json`](configs/kiro/agents/plannotator.json) — Example agent for manual review. `plannotator-review` is code review. `plannotator-annotate` is a file, folder, or URL. Kiro has no plan hook. Start it with `kiro-cli chat --agent plannotator`. The review and annotate skill files are not in this repo. The standard Plannotator installer writes them under `~/.kiro/skills` when it detects Kiro.
 - MCP servers are configured via `kiro mcp add <name> -- <command>` or hand-edited in `~/.kiro/settings.json`
 
 **Config Locations:**
@@ -3535,7 +3555,7 @@ Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/
 
 ### Plannotator
 
-[**Plannotator**](https://plannotator.ai/) - Annotate plans outside the terminal for better collaboration. ([GitHub](https://github.com/backnotprop/plannotator))
+[**Plannotator**](https://plannotator.ai/) - Review a plan or a code diff outside the terminal. Plan review is automatic only where the agent has a hook or a `submit_plan` tool. Code review is a manual command (`/plannotator-review`, `!plannotator review`, or the Amp command palette). ([GitHub](https://github.com/backnotprop/plannotator))
 
 ### Waku
 
