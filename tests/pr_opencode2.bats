@@ -149,3 +149,24 @@ LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
 	[ "$status" -eq 0 ]
 	[[ "$output" != *"beta"* ]]
 }
+
+@test "OpenCode default models resolve to configured providers and models" {
+	require_jq
+	run jq -e '
+		. as $config |
+		[.model, .agent.explorer.model] | all(.[];
+			split("/") as $ref |
+			$config.provider[$ref[0]].models[$ref[1:] | join("/")] != null
+		)
+	' "$REPO_ROOT/configs/opencode/opencode.json"
+	[ "$status" -eq 0 ]
+}
+
+@test "OpenCode AgentMemory inherits environment rather than overriding it with shell placeholders" {
+	require_jq
+	run jq -e '
+		.mcp.agentmemory.command == ["npx", "-y", "@agentmemory/mcp"] and
+		(.mcp.agentmemory.environment // {} | length == 0)
+	' "$REPO_ROOT/configs/opencode/opencode.json"
+	[ "$status" -eq 0 ]
+}

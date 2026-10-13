@@ -481,6 +481,8 @@ copy_mimo_configs() {
 	if [ -d "$SCRIPT_DIR/configs/mimo/command" ]; then
 		execute_quoted rm -rf "$HOME/.config/mimocode/command"
 		safe_copy_dir "$SCRIPT_DIR/configs/mimo/command" "$HOME/.config/mimocode/command"
+		# MiMo also reads commands/. Copy onto it without deleting other files.
+		copy_opencode_commands "$SCRIPT_DIR/configs/mimo/command" "$HOME/.config/mimocode/commands"
 	fi
 
 	# Theme and plugin directories use additive copy (mkdir -p + safe_copy_dir)
@@ -1268,6 +1270,7 @@ copy_codex_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/codex/config.toml" "$HOME/.codex/" || true
 	copy_config_file "$SCRIPT_DIR/configs/codex/1m.config.toml" "$HOME/.codex/" || true
+	copy_config_file "$SCRIPT_DIR/configs/codex/hooks.json" "$HOME/.codex/" || true
 
 	if [ -d "$SCRIPT_DIR/configs/codex/themes" ]; then
 		execute_quoted mkdir -p "$HOME/.codex/themes"
@@ -1533,6 +1536,9 @@ copy_kilo_configs() {
 	execute_quoted mkdir -p "$HOME/.config/kilo"
 	copy_config_file "$SCRIPT_DIR/configs/kilo/config.json" "$HOME/.config/kilo/" || true
 	copy_config_file "$SCRIPT_DIR/configs/kilo/AGENTS.md" "$HOME/.config/kilo/" || true
+	# Kilo reads the OpenCode command dirs. Copy onto commands/ without deleting other files.
+	copy_opencode_commands "$SCRIPT_DIR/configs/kilo/command" "$HOME/.config/kilo/command"
+	copy_opencode_commands "$SCRIPT_DIR/configs/kilo/command" "$HOME/.config/kilo/commands"
 	log_success "Kilo CLI configs copied"
 }
 
@@ -2379,7 +2385,7 @@ install_cli_dependency() {
 	local name="$1"
 
 	case "$name" in
-	plannotator | plannotator-copilot)
+	plannotator | plannotator-copilot | plannotator-droid)
 		if command -v plannotator &>/dev/null; then
 			return 0
 		fi
@@ -2438,6 +2444,7 @@ enable_plugins() {
 		"caveman|caveman@caveman|JuliusBrussee/caveman|claude"
 		"plannotator|plannotator@plannotator|backnotprop/plannotator|claude"
 		"plannotator-copilot|plannotator-copilot@plannotator|backnotprop/plannotator|copilot"
+		"plannotator-droid|plannotator@plannotator|https://github.com/backnotprop/plannotator|droid"
 		"plannotator-setup-goal|plannotator-setup-goal@my-ai-tools|$SCRIPT_DIR|claude"
 		"prd|prd@my-ai-tools|$SCRIPT_DIR|claude"
 		"ralph|ralph@my-ai-tools|$SCRIPT_DIR|claude"
@@ -2453,6 +2460,7 @@ enable_plugins() {
 
 	if ! command -v claude &>/dev/null; then
 		handle_no_claude_cli
+		install_local_community_plugins
 		return 0
 	fi
 
@@ -2587,11 +2595,6 @@ install_community_skills() {
 }
 
 install_local_community_plugins() {
-	# Only install CLI-based plugins (non-remote skills) if Claude CLI is available
-	if ! command -v claude &>/dev/null; then
-		return 0
-	fi
-
 	for plugin_entry in "${community_plugins[@]}"; do
 		local name plugin_spec marketplace_repo cli_tool
 		name="${plugin_entry%%|*}"
@@ -2604,6 +2607,11 @@ install_local_community_plugins() {
 		local rest2="${rest#*|}"
 		marketplace_repo="${rest2%%|*}"
 		cli_tool="${rest2##*|}"
+
+		if ! command -v "$cli_tool" &>/dev/null; then
+			log_info "Skipping $name ($cli_tool CLI not found)"
+			continue
+		fi
 
 		install_community_plugin "$name" "$plugin_spec" "$marketplace_repo" "$cli_tool"
 	done
