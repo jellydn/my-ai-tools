@@ -232,7 +232,9 @@ generate_opencode_configs() {
 			continue
 		fi
 		execute_quoted mkdir -p "$SCRIPT_DIR/configs/opencode/command"
-		for item in "$HOME/.config/opencode/$subdir"/*; do
+		# Include hidden definitions, but never "." or ".."; an unmatched glob
+		# stays literal and is skipped by the -e guard below.
+		for item in "$HOME/.config/opencode/$subdir"/* "$HOME/.config/opencode/$subdir"/.[!.]* "$HOME/.config/opencode/$subdir"/..?*; do
 			[ -e "$item" ] || continue
 			item_name=$(basename "$item")
 			if [ "$item_name" = "ai" ]; then

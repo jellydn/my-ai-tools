@@ -210,6 +210,8 @@ teardown() {
     printf 'legacy command\n' > "$config_dir/command/review.md"
     printf 'v2 command\n' > "$config_dir/commands/review.md"
     printf 'v2 only\n' > "$config_dir/commands/custom.md"
+    printf 'hidden v1\n' > "$config_dir/command/.legacy-hidden.md"
+    printf 'hidden v2\n' > "$config_dir/commands/.hidden.md"
     printf 'generated\n' > "$config_dir/commands/ai/generated.md"
     printf 'machine-local\n' > "$config_dir/cli.json"
 
@@ -220,6 +222,8 @@ teardown() {
     [ "$(cat "$SCRIPT_DIR/configs/opencode/agent/legacy.md")" = "legacy only" ]
     [ "$(cat "$SCRIPT_DIR/configs/opencode/command/review.md")" = "v2 command" ]
     [ "$(cat "$SCRIPT_DIR/configs/opencode/command/custom.md")" = "v2 only" ]
+    [ "$(cat "$SCRIPT_DIR/configs/opencode/command/.legacy-hidden.md")" = "hidden v1" ]
+    [ "$(cat "$SCRIPT_DIR/configs/opencode/command/.hidden.md")" = "hidden v2" ]
     [ ! -e "$SCRIPT_DIR/configs/opencode/command/ai" ]
     [ ! -e "$SCRIPT_DIR/configs/opencode/cli.json" ]
 }
