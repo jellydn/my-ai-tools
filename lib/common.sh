@@ -610,8 +610,10 @@ run_installer() {
 	_install() {
 		log_info "Installing $tool_name..."
 		if eval "$check_cmd" &>/dev/null; then
-			if [ -n "$version_cmd" ]; then
-				log_warning "$tool_name is already installed ($($version_cmd 2>/dev/null))"
+			local installed_version=""
+			[ -n "$version_cmd" ] && installed_version=$($version_cmd 2>/dev/null)
+			if [ -n "$installed_version" ]; then
+				log_warning "$tool_name is already installed ($installed_version)"
 			else
 				log_warning "$tool_name is already installed"
 			fi

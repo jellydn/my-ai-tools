@@ -306,3 +306,26 @@ EOF
     rm -f "$fake_bin_dir/python3" "$toml_file"
     rmdir "$fake_bin_dir"
 }
+
+@test "run_installer omits an empty version in the already-installed message" {
+    run bash -c '
+        source "$1/lib/common.sh"
+        YES_TO_ALL=true
+        DRY_RUN=false
+        run_installer "Demo Tool" "true" "true" "false"
+    ' _ "$BATS_TEST_DIRNAME/.."
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Demo Tool is already installed"* ]]
+    [[ "$output" != *"already installed ()"* ]]
+}
+
+@test "run_installer includes the version when it is available" {
+    run bash -c '
+        source "$1/lib/common.sh"
+        YES_TO_ALL=true
+        DRY_RUN=false
+        run_installer "Demo Tool" "true" "true" "echo 1.2.3"
+    ' _ "$BATS_TEST_DIRNAME/.."
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Demo Tool is already installed (1.2.3)"* ]]
+}

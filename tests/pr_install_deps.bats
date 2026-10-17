@@ -141,3 +141,40 @@ load helpers
 	' _ "$REPO_ROOT"
 	[ "$status" -eq 0 ]
 }
+
+@test "check_gofmt installs Go via mise when gofmt is missing" {
+	run bash -c '
+		export DRY_RUN=false IS_WINDOWS=false
+		source "$1/lib/common.sh"
+		source "$1/lib/install.sh"
+		mise() { echo "MISE $*"; }
+		command() {
+			if [ "$1" = "-v" ] && [ "$2" = "gofmt" ]; then
+				return 1
+			fi
+			builtin command "$@"
+		}
+		check_gofmt
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 0 ]
+	[[ "$output" == *"MISE use -g go@latest"* ]]
+	[[ "$output" == *"Go installed"* ]]
+}
+
+@test "check_gofmt falls back to manual guidance when mise fails" {
+	run bash -c '
+		export DRY_RUN=false IS_WINDOWS=false
+		source "$1/lib/common.sh"
+		source "$1/lib/install.sh"
+		mise() { return 1; }
+		command() {
+			if [ "$1" = "-v" ] && [ "$2" = "gofmt" ]; then
+				return 1
+			fi
+			builtin command "$@"
+		}
+		check_gofmt
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 0 ]
+	[[ "$output" == *"golang.org/dl"* ]]
+}
