@@ -147,10 +147,11 @@ load helpers
 		export DRY_RUN=false IS_WINDOWS=false
 		source "$1/lib/common.sh"
 		source "$1/lib/install.sh"
-		mise() { echo "MISE $*"; }
+		mise() { echo "MISE $*"; gofmt_ready=true; }
 		command() {
 			if [ "$1" = "-v" ] && [ "$2" = "gofmt" ]; then
-				return 1
+				[ "$gofmt_ready" = true ]
+				return
 			fi
 			builtin command "$@"
 		}
@@ -168,7 +169,7 @@ load helpers
 		source "$1/lib/install.sh"
 		mise() { return 1; }
 		command() {
-			if [ "$1" = "-v" ] && [ "$2" = "gofmt" ]; then
+			if [ "$1" = "-v" ] && [[ "$2" = gofmt || "$2" = brew || "$2" = apt-get ]]; then
 				return 1
 			fi
 			builtin command "$@"
@@ -177,4 +178,43 @@ load helpers
 	' _ "$REPO_ROOT"
 	[ "$status" -eq 0 ]
 	[[ "$output" == *"golang.org/dl"* ]]
+}
+
+@test "check_gofmt gives manual guidance when mise succeeds but gofmt stays unavailable" {
+	run bash -c '
+		export DRY_RUN=false IS_WINDOWS=false
+		source "$1/lib/common.sh"
+		source "$1/lib/install.sh"
+		mise() { return 0; }
+		command() {
+			if [ "$1" = "-v" ] && [[ "$2" = gofmt || "$2" = brew || "$2" = apt-get ]]; then
+				return 1
+			fi
+			builtin command "$@"
+		}
+		check_gofmt
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 0 ]
+	[[ "$output" == *"golang.org/dl"* ]]
+	[[ "$output" != *"Go installed"* ]]
+}
+
+@test "check_gofmt dry-run does not install Go or claim success" {
+	run bash -c '
+		export DRY_RUN=true IS_WINDOWS=false
+		source "$1/lib/common.sh"
+		source "$1/lib/install.sh"
+		mise() { echo "UNEXPECTED INSTALL"; }
+		command() {
+			if [ "$1" = "-v" ] && [ "$2" = "gofmt" ]; then
+				return 1
+			fi
+			builtin command "$@"
+		}
+		check_gofmt
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 0 ]
+	[[ "$output" == *"[DRY RUN]"*"mise use -g go@latest"* ]]
+	[[ "$output" != *"UNEXPECTED INSTALL"* ]]
+	[[ "$output" != *"Go installed"* ]]
 }

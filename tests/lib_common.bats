@@ -308,7 +308,7 @@ EOF
 }
 
 @test "run_installer omits an empty version in the already-installed message" {
-    run bash -c '
+    run bash -ec '
         source "$1/lib/common.sh"
         YES_TO_ALL=true
         DRY_RUN=false
