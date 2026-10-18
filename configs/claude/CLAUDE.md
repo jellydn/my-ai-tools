@@ -2,6 +2,15 @@
 
 Use judgment. These instructions define outcomes, not a mandatory workflow.
 
+## Task Completion
+
+- Define observable done conditions from the request, including the checks needed to confirm them.
+- Continue through implementation and verification when the next step needs no user decision. Give status updates without stopping to offer to continue.
+- Ask when blocked by a material decision, or before destructive actions or changes to shared or external state unless the user has authorized that action. Keep permission checks enabled.
+- Treat mid-run follow-ups as updates to the active task. Preserve unfinished work unless the user changes or cancels it.
+- For long, multi-step work, keep progress and remaining checks in the existing plan or handoff file. Do not create a second checklist when one already exists.
+- End with any user action needed, the outcome, verification results, and limits. For research, mark what you could not confirm and where you looked.
+
 ## Token-Efficient Sessions
 
 - Keep responses concise and actionable. Lead with conclusions, file paths, and verification results.

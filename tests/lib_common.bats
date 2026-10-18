@@ -30,6 +30,31 @@ setup() {
     [[ "$output" == *"[DRY RUN]"* ]]
 }
 
+@test "safe_copy_dir skips an unreadable file with errexit enabled" {
+    local source_dir="$BATS_TEST_TMPDIR/source"
+    local dest_dir="$BATS_TEST_TMPDIR/dest"
+    mkdir -p "$source_dir"
+    printf 'blocked\n' > "$source_dir/a-blocked.txt"
+    printf 'copied\n' > "$source_dir/z-copied.txt"
+
+    run bash -c '
+        set -e
+        source "$1"
+        DRY_RUN=false
+        rsync() { return 1; }
+        cp() {
+            case "$1" in
+                *a-blocked.txt) return 1 ;;
+            esac
+            command cp "$@"
+        }
+        safe_copy_dir "$2" "$3"
+        test -f "$3/z-copied.txt"
+    ' _ "$BATS_TEST_DIRNAME/../lib/common.sh" "$source_dir" "$dest_dir"
+
+    [ "$status" -eq 0 ]
+}
+
 @test "validate_json returns 0 for valid JSON" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
@@ -280,4 +305,27 @@ EOF
 
     rm -f "$fake_bin_dir/python3" "$toml_file"
     rmdir "$fake_bin_dir"
+}
+
+@test "run_installer omits an empty version in the already-installed message" {
+    run bash -ec '
+        source "$1/lib/common.sh"
+        YES_TO_ALL=true
+        DRY_RUN=false
+        run_installer "Demo Tool" "true" "true" "false"
+    ' _ "$BATS_TEST_DIRNAME/.."
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Demo Tool is already installed"* ]]
+    [[ "$output" != *"already installed ()"* ]]
+}
+
+@test "run_installer includes the version when it is available" {
+    run bash -c '
+        source "$1/lib/common.sh"
+        YES_TO_ALL=true
+        DRY_RUN=false
+        run_installer "Demo Tool" "true" "true" "echo 1.2.3"
+    ' _ "$BATS_TEST_DIRNAME/.."
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Demo Tool is already installed (1.2.3)"* ]]
 }

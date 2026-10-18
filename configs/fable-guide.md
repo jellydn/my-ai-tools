@@ -209,7 +209,7 @@ As agents become more capable, **your role shifts**:
 - To: Identifying unknowns and providing context
 
 **Key practices**:
-- Ask agents to explain their reasoning
+- Ask for a short decision summary with assumptions, evidence, and trade-offs, not an internal reasoning transcript
 - Request implementation notes
 - Review deviations from plan
 - Verify your understanding with quizzes

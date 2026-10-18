@@ -64,7 +64,7 @@ const TOOL_NAMES = [
 export default function (amp: PluginAPI) {
 	const agent = amp.createAgent({
 		name: "kimi-k3",
-		model: "fireworks/accounts/fireworks/models/kimi-k3",
+		model: "fireworks-ai/accounts/fireworks/models/kimi-k3",
 		instructions: KIMI_K3_AGENT_PROMPT,
 		tools: TOOL_NAMES,
 		reasoningEffort: "max",

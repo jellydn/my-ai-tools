@@ -22,3 +22,44 @@ jobs:
 
       - name: Run config validation tests
         run: bats tests/pr_*.bats tests/generate.bats tests/sh_reexec.bats
+
+  windows-installer:
+    name: Windows PowerShell Installer
+    runs-on: windows-2025
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Parse installer
+        shell: powershell
+        run: |
+          $tokens = $null
+          $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path .\install.ps1),
+            [ref]$tokens,
+            [ref]$errors
+          )
+          if ($errors.Count -gt 0) {
+            $errors | Format-List
+            exit 1
+          }
+
+      - name: Test Windows prerequisite recovery
+        shell: powershell
+        run: .\tests\windows_installer.ps1
+
+      - name: Run native Windows dry-run
+        shell: powershell
+        run: .\install.ps1 -DryRun -Yes
+
+      - name: Install StyLua without compiling Rust
+        shell: bash
+        run: |
+          source lib/common.sh
+          source lib/install.sh
+          install_stylua_if_needed
+          stylua --version

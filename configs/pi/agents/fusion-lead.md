@@ -1,6 +1,6 @@
 ---
 description: Read-only lead that plans, delegates implementation, reviews, and verifies
-model: cursor/grok-4.5
+model: xai/grok-4.6
 thinking: high
 tools: "read, grep, find"
 extensions: false

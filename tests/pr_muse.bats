@@ -69,11 +69,11 @@ CONFIG_DIR="$REPO_ROOT/configs/muse"
 }
 
 @test "README documents Muse Code and the SDK as separate installs" {
-	run grep -F 'curl -fsSL https://dev.meta.ai/install.sh | sh' "$REPO_ROOT/README.md"
+	run grep -F 'curl -fsSL https://dev.meta.ai/install.sh | sh' "$REPO_ROOT/TOOL_REFERENCE.md"
 	[ "$status" -eq 0 ]
-	run grep -F 'npm install @muse-code/sdk' "$REPO_ROOT/README.md"
+	run grep -F 'npm install @muse-code/sdk' "$REPO_ROOT/TOOL_REFERENCE.md"
 	[ "$status" -eq 0 ]
-	run grep -F 'Node.js 20+' "$REPO_ROOT/README.md"
+	run grep -F 'Node.js 20+' "$REPO_ROOT/TOOL_REFERENCE.md"
 	[ "$status" -eq 0 ]
 }
 

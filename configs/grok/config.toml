@@ -1,38 +1,54 @@
 [mcp_servers.context7]
 command = "npx"
-args = [ "-y", "@upstash/context7-mcp" ]
+args = [
+    "-y",
+    "@upstash/context7-mcp",
+]
 
 [mcp_servers.sequential-thinking]
 command = "npx"
-args = [ "-y", "@modelcontextprotocol/server-sequential-thinking" ]
+args = [
+    "-y",
+    "@modelcontextprotocol/server-sequential-thinking",
+]
 
 [mcp_servers.qmd]
 command = "qmd"
-args = [ "mcp" ]
+args = ["mcp"]
 
 [mcp_servers.fff]
 command = "fff-mcp"
-args = [ ]
+args = []
 
 [mcp_servers.react-grab-mcp]
 command = "npx"
-args = [ "-y", "@react-grab/mcp", "--stdio" ]
+args = [
+    "-y",
+    "@react-grab/mcp",
+    "--stdio",
+]
 
 [mcp_servers.logpilot]
 command = "logpilot"
-args = [ "mcp-server" ]
+args = ["mcp-server"]
 
 [mcp_servers.agentmemory]
 command = "npx"
-args = [ "-y", "@agentmemory/mcp" ]
+args = [
+    "-y",
+    "@agentmemory/mcp",
+]
 
 [mcp_servers.sem]
 command = "sem-mcp"
-args = [ ]
+args = []
 
 [mcp_servers.ctx]
 command = "ctx"
-args = [ "mcp", "serve" ]
+args = [
+    "mcp",
+    "serve",
+]
 
 [mcp_servers.codebase-memory-mcp]
 type = "stdio"
@@ -49,13 +65,14 @@ auto_light_theme = "grokday"
 max_thoughts_width = 120
 fork_secondary_model = "grok-build"
 yolo = false
-compact_mode = false
+compact_mode = true
 permission_mode = "always-approve"
 simple_mode = true
 vim_mode = true
 show_timestamps = true
 show_timeline = true
 hunk_tracker_mode = "agent_only"
+screen_mode = "fullscreen"
 
 [cli]
 installer = "npm"
@@ -65,9 +82,9 @@ auto_update = true
 official_marketplace_auto_installed = true
 default_skills_installs_purged = true
 
-  [[marketplace.sources]]
-  name = "xAI Official"
-  git = "https://github.com/xai-org/plugin-marketplace.git"
+[[marketplace.sources]]
+name = "xAI Official"
+git = "https://github.com/xai-org/plugin-marketplace.git"
 
 [model.omniroute]
 model = "paid"
@@ -76,4 +93,7 @@ name = "OmniRoute"
 description = "Routed via OmniRoute gateway"
 api_backend = "chat_completions"
 api_key = "sk_omniroute"
-context_window = 200_000
+context_window = 200000
+
+[privacy]
+privacy_banner_acked = "2026-08-17T08:51:39Z"

@@ -14,14 +14,24 @@ const REPO_ROOT = resolve(__dirname, "..");
 const DATA_DIR = resolve(REPO_ROOT, "data");
 const INDEX_PATH = resolve(DATA_DIR, "index.json");
 
-const EMBEDDING_BATCH_SIZE = 100;
+const EMBEDDING_BATCH_SIZE = 128;
+const FREE_MODEL_REQUEST_INTERVAL_MS = 3100;
 const EMBEDDING_MODEL = process.env.OPENAI_EMBEDDING_MODEL ?? getDefaultEmbeddingModel();
+
+function wait(milliseconds: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
 
 async function createEmbeddings(chunks: string[]): Promise<number[][]> {
 	const openai = createOpenAIClient();
 	const embeddings: number[][] = [];
 
 	for (let i = 0; i < chunks.length; i += EMBEDDING_BATCH_SIZE) {
+		// OpenRouter free models allow 20 requests per minute. Keep builds below
+		// that limit while leaving paid OpenAI-compatible providers unthrottled.
+		if (i > 0 && EMBEDDING_MODEL.endsWith(":free")) {
+			await wait(FREE_MODEL_REQUEST_INTERVAL_MS);
+		}
 		const batch = chunks.slice(i, i + EMBEDDING_BATCH_SIZE);
 		const response = await openai.embeddings.create({
 			model: EMBEDDING_MODEL,

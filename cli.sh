@@ -32,7 +32,7 @@ INSTALL_SEQUENCE=(
 	"claude:install_claude_code"
 	# RTK reduces shell-output context for every managed coding assistant.
 	"always:install_rtk"
-	"opencode:install_opencode"
+	# OpenCode 2 is the default `opencode` binary. Do not install OpenCode 1 first.
 	"opencode:install_opencode2"
 	"opencode:install_open_cursor"
 	"fx:install_fx"
@@ -1097,7 +1097,8 @@ setup_commandcode_mcp_servers() {
 
 copy_opencode_configs() {
 	local opencode_status="missing"
-	if command -v opencode2 &>/dev/null; then
+	# `opencode` is OpenCode 2. `opencode2` is only a leftover beta binary.
+	if _opencode_v2_installed; then
 		opencode_status="command-v2"
 	elif command -v opencode &>/dev/null; then
 		opencode_status="command-v1"
@@ -1120,6 +1121,8 @@ copy_opencode_configs() {
 
 	execute_quoted rm -rf "$HOME/.config/opencode/command"
 	copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/command"
+	# OpenCode 2 also reads commands/. Older Plannotator stubs there shadow the plugin.
+	copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/commands"
 
 	log_success "OpenCode configs copied"
 }
@@ -2625,6 +2628,11 @@ install_community_plugin_non_interactive() {
 	local marketplace_repo="$3"
 	local cli_tool="$4"
 
+	if ! command -v "$cli_tool" &>/dev/null; then
+		log_info "Skipping $name plugin ($cli_tool CLI not installed)"
+		return 0
+	fi
+
 	install_cli_dependency "$name"
 
 	setup_tmpdir
@@ -2640,6 +2648,11 @@ install_community_plugin_interactive() {
 	local plugin_spec="$2"
 	local marketplace_repo="$3"
 	local cli_tool="$4"
+
+	if ! command -v "$cli_tool" &>/dev/null; then
+		log_info "Skipping $name plugin ($cli_tool CLI not installed)"
+		return 0
+	fi
 
 	if ! prompt_yn "Install $name"; then
 		return 0

@@ -1,5 +1,5 @@
-import type { PluginAPI } from "@ampcode/plugin";
 import { readFileSync, statSync } from "fs";
+import type { PluginAPI } from "@ampcode/plugin";
 
 // Managed by Orca. Do not edit; changes may be overwritten.
 type HookCoords = { port?: string; token?: string; env?: string; version?: string };
@@ -100,6 +100,7 @@ async function post(hookEventName: string, payload: Record<string, unknown>): Pr
 			},
 			body: JSON.stringify({
 				paneKey,
+				launchToken: process.env.ORCA_AGENT_LAUNCH_TOKEN || "",
 				tabId: process.env.ORCA_TAB_ID || "",
 				worktreeId: process.env.ORCA_WORKTREE_ID || "",
 				env: coords.env,

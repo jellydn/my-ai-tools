@@ -192,8 +192,9 @@ Follow idempotency pattern from Braintree integration.
 ## Success Criteria
 
 A good blind spot pass:
-- Identifies at least 2-3 gotchas you didn't know about
-- Generates questions that would change your approach
+- Reports only evidence-backed gotchas; zero gotchas is valid when inspection finds none
+- Generates questions only when their answers could change the approach
+- Records each finding's outcome: `changed approach`, `resolved`, or `not reproduced`
 - References concrete evidence (commits, code, comments)
-- Provides clear recommendation for how to proceed
-- Takes 5-15 minutes (not hours)
+- Provides a clear recommendation for how to proceed
+- Stops when the relevant boundaries and implementation-changing unknowns are covered, rather than optimizing for a fixed time or finding count

@@ -17,6 +17,10 @@ install_bun_now() {
 	local bun_checksum
 	bun_checksum=$(resolve_installer_checksum "bun")
 	if execute_installer "https://bun.sh/install" "$bun_checksum" "Bun"; then
+		if [ "$DRY_RUN" = true ]; then
+			return 0
+		fi
+
 		# Source shell profiles to get Bun environment
 		[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc" 2>/dev/null || true
 		[ -f "$HOME/.zshrc" ] && source "$HOME/.zshrc" 2>/dev/null || true
@@ -351,7 +355,21 @@ check_gofmt() {
 		return 0
 	fi
 
-	log_warning "gofmt not found. Go is not installed."
+	log_warning "gofmt not found. Installing Go..."
+	if command -v mise &>/dev/null; then
+		if execute "mise use -g go@latest"; then
+			if [ "$DRY_RUN" = true ]; then
+				return 0
+			elif command -v gofmt &>/dev/null; then
+				log_success "Go installed"
+				return 0
+			fi
+			log_warning "gofmt is not available in PATH after mise installation; falling back to manual install"
+		else
+			log_warning "mise could not install Go; falling back to manual install"
+		fi
+	fi
+
 	if [ "$IS_WINDOWS" = true ]; then
 		if command -v choco &>/dev/null; then
 			log_info "Install Go with: choco install golang -y"
@@ -422,6 +440,10 @@ install_rust_if_needed() {
 		execute_installer "https://sh.rustup.rs" "$rust_checksum" "Rust" "-y"
 	fi
 
+	if [ "$DRY_RUN" = true ]; then
+		return 0
+	fi
+
 	if [ -x "$cargo_bin/cargo" ]; then
 		ensure_dir_on_path "$cargo_bin"
 	fi
@@ -476,7 +498,15 @@ install_stylua_if_needed() {
 	fi
 
 	log_warning "stylua not found. Installing stylua..."
-	if command -v mise &>/dev/null; then
+	if [ "$IS_WINDOWS" = true ]; then
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "stylua")
+		if [ -n "$pkg_manager" ]; then
+			execute "$pkg_manager install -g @johnnymorganz/stylua-bin"
+		else
+			log_warning "Bun or npm is required to install stylua on Windows."
+		fi
+	elif command -v mise &>/dev/null; then
 		execute "mise use -g stylua@latest"
 	elif command -v brew &>/dev/null; then
 		execute "brew install stylua"

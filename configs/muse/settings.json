@@ -82,5 +82,18 @@
         "@modelcontextprotocol/server-sequential-thinking@2026.7.4"
       ]
     }
-  }
+  },
+  "managed_hooks_env_vars": [
+    "ORCA_AGENT_HOOK_PORT",
+    "ORCA_AGENT_HOOK_TOKEN",
+    "ORCA_AGENT_HOOK_ENV",
+    "ORCA_AGENT_HOOK_VERSION",
+    "ORCA_AGENT_HOOK_TRANSPORT",
+    "ORCA_AGENT_HOOK_ENDPOINT",
+    "ORCA_PANE_KEY",
+    "ORCA_TAB_ID",
+    "ORCA_WORKTREE_ID",
+    "ORCA_AGENT_LAUNCH_TOKEN",
+    "USERPROFILE"
+  ]
 }

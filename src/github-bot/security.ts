@@ -15,7 +15,10 @@ export function redact(value: unknown): unknown {
 	if (Array.isArray(value)) return value.map(redact);
 	if (value && typeof value === "object")
 		return Object.fromEntries(
-			Object.entries(value).map(([k, v]) => [k, /token|secret|key/i.test(k) ? "[REDACTED]" : redact(v)]),
+			Object.entries(value).map(([k, v]) => [
+				k,
+				/token|secret|key/i.test(k) ? "[REDACTED]" : redact(v),
+			]),
 		);
 	return value;
 }

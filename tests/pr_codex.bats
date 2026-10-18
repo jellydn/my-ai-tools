@@ -6,7 +6,7 @@ load helpers
 CODEX_CONFIG_DIR="$REPO_ROOT/configs/codex"
 CODEX_CONFIG="$CODEX_CONFIG_DIR/config.toml"
 CODEX_1M_PROFILE="$CODEX_CONFIG_DIR/1m.config.toml"
-README_FILE="$REPO_ROOT/README.md"
+README_FILE="$REPO_ROOT/TOOL_REFERENCE.md"
 CLI_SH="$REPO_ROOT/cli.sh"
 GENERATE_SH="$REPO_ROOT/generate.sh"
 
@@ -35,8 +35,8 @@ toml_keys_before_tables() {
 	[ "$status" -eq 0 ]
 }
 
-@test "configs/codex/config.toml selects gpt-5.6-sol" {
-	run grep -E '^model[[:space:]]*=[[:space:]]*"gpt-5.6-sol"' "$CODEX_CONFIG"
+@test "configs/codex/config.toml selects gpt-6-astra" {
+	run grep -E '^model[[:space:]]*=[[:space:]]*"gpt-6-astra"' "$CODEX_CONFIG"
 	[ "$status" -eq 0 ]
 }
 
@@ -49,6 +49,20 @@ toml_keys_before_tables() {
 
 @test "configs/codex/config.toml has mcp_servers section" {
 	run grep -F "[mcp_servers." "$CODEX_CONFIG"
+	[ "$status" -eq 0 ]
+}
+
+@test "configs/codex/config.toml uses personality and does not start a missing node_repl" {
+	run grep -E '^model_personality[[:space:]]*=' "$CODEX_CONFIG"
+	[ "$status" -ne 0 ]
+	run grep -E '^personality[[:space:]]*=[[:space:]]*"pragmatic"' "$CODEX_CONFIG"
+	[ "$status" -eq 0 ]
+	run awk '
+		$0 == "[mcp_servers.node_repl]" { in_block = 1; next }
+		in_block && $0 ~ /^\[/ { exit }
+		in_block && $0 ~ /^enabled[[:space:]]*=[[:space:]]*false$/ { found = 1 }
+		END { exit found ? 0 : 1 }
+	' "$CODEX_CONFIG"
 	[ "$status" -eq 0 ]
 }
 

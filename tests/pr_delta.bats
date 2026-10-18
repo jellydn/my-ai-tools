@@ -7,7 +7,7 @@ LIB_COMMON="$REPO_ROOT/lib/common.sh"
 LIB_INSTALL="$REPO_ROOT/lib/install.sh"
 CLI_SH="$REPO_ROOT/cli.sh"
 GENERATE_SH="$REPO_ROOT/generate.sh"
-README="$REPO_ROOT/README.md"
+README="$REPO_ROOT/TOOL_REFERENCE.md"
 
 @test "Delta managed configs exist and settings are valid JSON" {
 	[ -f "$REPO_ROOT/configs/delta/AGENTS.md" ]

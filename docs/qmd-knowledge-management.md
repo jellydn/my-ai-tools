@@ -31,15 +31,17 @@ $HOME/.config/opencode/skills/qmd-knowledge/
 # Knowledge storage (qmd collections per project)
 ~/.ai-knowledges/
 ├── my-ai-tools/          # Collection for my-ai-tools project
-│   ├── learnings/
-│   │   ├── 2024-01-26-qmd-integration.md
-│   │   └── 2024-01-27-mcp-servers.md
-│   └── issues/
-│       ├── 123.md
-│       └── 456.md
+│   └── references/
+│       ├── learnings/
+│       │   ├── 2024-01-26-qmd-integration.md
+│       │   └── 2024-01-27-mcp-servers.md
+│       └── issues/
+│           ├── 123.md
+│           └── 456.md
 └── another-project/      # Collection for another-project
-    ├── learnings/
-    └── issues/
+    └── references/
+        ├── learnings/
+        └── issues/
 ```
 
 **Key concept**: One skill (`qmd-knowledge`) manages knowledge for multiple projects. Each project is a qmd collection, not a separate skill.
@@ -118,8 +120,8 @@ If you prefer manual setup or need to create collections for multiple projects:
 
 ```bash
 # Create storage directory for your project
-mkdir -p ~/.ai-knowledges/my-ai-tools/learnings
-mkdir -p ~/.ai-knowledges/my-ai-tools/issues
+mkdir -p ~/.ai-knowledges/my-ai-tools/references/learnings
+mkdir -p ~/.ai-knowledges/my-ai-tools/references/issues
 
 # Add qmd collection for this project
 qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
@@ -253,8 +255,8 @@ The qmd-knowledge skill manages knowledge for multiple projects. Each project ge
 
 ```bash
 # Create storage for a different project
-mkdir -p ~/.ai-knowledges/another-project/learnings
-mkdir -p ~/.ai-knowledges/another-project/issues
+mkdir -p ~/.ai-knowledges/another-project/references/learnings
+mkdir -p ~/.ai-knowledges/another-project/references/issues
 
 # Add collection and context
 qmd collection add ~/.ai-knowledges/another-project --name another-project
@@ -320,6 +322,7 @@ git push
 # On machine 2
 cd ~/.ai-knowledges
 git clone <your-backup-repo> my-ai-tools
+# Entries are stored in references/learnings and references/issues.
 
 # Add collection and generate embeddings
 qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
@@ -342,8 +345,8 @@ bun install -g @tobilu/qmd
 Create the collection for your project:
 
 ```bash
-mkdir -p ~/.ai-knowledges/my-ai-tools/learnings
-mkdir -p ~/.ai-knowledges/my-ai-tools/issues
+mkdir -p ~/.ai-knowledges/my-ai-tools/references/learnings
+mkdir -p ~/.ai-knowledges/my-ai-tools/references/issues
 qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
 qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project"
 qmd embed

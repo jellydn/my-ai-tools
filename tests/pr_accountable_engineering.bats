@@ -45,10 +45,10 @@ setup() {
 }
 
 @test "README documents accountable engineering installation and usage" {
-	run grep -F 'Available skills: accountable-engineering,' "$REPO_ROOT/README.md"
+	run grep -F 'Available skills: accountable-engineering,' "$REPO_ROOT/TOOL_REFERENCE.md"
 	[ "$status" -eq 0 ]
-	run grep -F -- '- `accountable-engineering` - Checkpoint-driven workflow' "$REPO_ROOT/README.md"
+	run grep -F -- '- `accountable-engineering` - Checkpoint-driven workflow' "$REPO_ROOT/TOOL_REFERENCE.md"
 	[ "$status" -eq 0 ]
-	run grep -F '`my-ai-tools-skills:accountable-engineering`' "$REPO_ROOT/README.md"
+	run grep -F '`my-ai-tools-skills:accountable-engineering`' "$REPO_ROOT/TOOL_REFERENCE.md"
 	[ "$status" -eq 0 ]
 }

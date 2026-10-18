@@ -7,7 +7,7 @@ LIB_INSTALL="$REPO_ROOT/lib/install.sh"
 CLI_SH="$REPO_ROOT/cli.sh"
 GENERATE_SH="$REPO_ROOT/generate.sh"
 CONFIG_DIR="$REPO_ROOT/configs/deepseek-harness"
-README="$REPO_ROOT/README.md"
+README="$REPO_ROOT/TOOL_REFERENCE.md"
 
 @test "DeepSeek Harness managed configs exist and are valid YAML" {
 	[ -f "$CONFIG_DIR/AGENTS.md" ]
@@ -36,7 +36,7 @@ README="$REPO_ROOT/README.md"
 }
 
 @test "DeepSeek Harness uses the official npm package and dsh binary" {
-	run grep -F 'install_npm_tool "DeepSeek Harness" "dsh" "@deepseek-ai/dsh"' "$LIB_INSTALL"
+	run grep -F 'execute "npm install --global @deepseek-ai/dsh"' "$LIB_INSTALL"
 	[ "$status" -eq 0 ]
 	run grep -F '"deepseek_harness:install_deepseek_harness"' "$CLI_SH"
 	[ "$status" -eq 0 ]
@@ -62,8 +62,9 @@ README="$REPO_ROOT/README.md"
 		}
 		install_deepseek_harness
 	' _ "$REPO_ROOT"
-	[ "$status" -ne 0 ]
+	[ "$status" -eq 0 ]
 	[[ "$output" == *"requires Node.js with npm and npx"* ]]
+	[[ "$output" == *"Continuing without DeepSeek Harness"* ]]
 }
 
 @test "DeepSeek Harness installer enforces its supported Node.js versions" {
@@ -77,7 +78,7 @@ README="$REPO_ROOT/README.md"
 			}
 			npm() { :; }
 			npx() { :; }
-			install_npm_tool() { return 0; }
+			execute() { return 0; }
 			install_deepseek_harness
 		' _ "$REPO_ROOT" "$version"
 		[ "$status" -eq 0 ]
@@ -93,11 +94,12 @@ README="$REPO_ROOT/README.md"
 			}
 			npm() { :; }
 			npx() { :; }
-			install_npm_tool() { return 0; }
+			execute() { return 0; }
 			install_deepseek_harness
 		' _ "$REPO_ROOT" "$version"
-		[ "$status" -ne 0 ]
+		[ "$status" -eq 0 ]
 		[[ "$output" == *"requires Node.js 22.19+ or 24+"* ]]
+		[[ "$output" == *"Continuing without DeepSeek Harness"* ]]
 	done
 }
 

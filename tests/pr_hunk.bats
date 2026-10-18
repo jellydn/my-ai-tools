@@ -7,7 +7,7 @@ LIB_INSTALL="$REPO_ROOT/lib/install.sh"
 CLI_SH="$REPO_ROOT/cli.sh"
 GENERATE_SH="$REPO_ROOT/generate.sh"
 CONFIG="$REPO_ROOT/configs/hunk/config.toml"
-README="$REPO_ROOT/README.md"
+README="$REPO_ROOT/TOOL_REFERENCE.md"
 
 @test "Hunk config exists and is valid TOML" {
 	[ -f "$CONFIG" ]

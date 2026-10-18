@@ -166,10 +166,10 @@ export default function fusionAgents(amp: PluginAPI) {
 
 	const executor = amp.createAgent({
 		name: "fusion-executor",
-		model: "amp/glm-5.2",
+		model: "zhipuai/glm-5.3-flash",
 		instructions: EXECUTOR_INSTRUCTIONS,
 		tools: EXECUTOR_TOOLS,
-		reasoningEffort: "medium",
+		reasoningEffort: "high",
 		display: { label: "Fusion Executor", color: "#76946a" },
 	});
 
@@ -230,7 +230,7 @@ export default function fusionAgents(amp: PluginAPI) {
 
 	const lead = amp.createAgent({
 		name: "fusion-lead",
-		model: "xai/grok-4.5",
+		model: "xai/grok-4.6",
 		instructions: LEAD_INSTRUCTIONS,
 		tools: LEAD_TOOLS,
 		reasoningEffort: "high",

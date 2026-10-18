@@ -610,8 +610,10 @@ run_installer() {
 	_install() {
 		log_info "Installing $tool_name..."
 		if eval "$check_cmd" &>/dev/null; then
-			if [ -n "$version_cmd" ]; then
-				log_warning "$tool_name is already installed ($($version_cmd 2>/dev/null))"
+			local installed_version=""
+			[ -n "$version_cmd" ] && installed_version=$($version_cmd 2>/dev/null) || installed_version=""
+			if [ -n "$installed_version" ]; then
+				log_warning "$tool_name is already installed ($installed_version)"
 			else
 				log_warning "$tool_name is already installed"
 			fi
@@ -651,15 +653,14 @@ prompt_yn() {
 		return 1
 	fi
 
-	# POSIX: no -n or -p on read. Print prompt separately, then read one byte
-	# from the terminal (dd is the portable way to read exactly one char).
+	# Read a full line. A one-byte read (dd/read -n 1) leaves the Enter key
+	# in stdin, so the next prompt_yn sees a blank answer and skips.
 	printf '%s (y/n) ' "$prompt" >&2
-	response=$(dd bs=1 count=1 2>/dev/null)
-	printf '\n' >&2
+	IFS= read -r response || return 1
+	response=$(printf '%s' "$response" | tr -d '\r')
 
-	# Return 0 only if response is y or Y
 	case "$response" in
-		[Yy]) return 0 ;;
+		[Yy] | [Yy][Ee][Ss]) return 0 ;;
 		*) return 1 ;;
 	esac
 }
@@ -782,8 +783,8 @@ safe_copy_dir() {
 		local dest_file="$dest_dir/$rel_path"
 		mkdir -p "$(dirname "$dest_file")"
 		if ! cp "$file" "$dest_file" 2>/dev/null; then
-			((errors++))
-			((skipped++))
+			errors=$((errors + 1))
+			skipped=$((skipped + 1))
 			[ "${VERBOSE:-false}" = true ] && log_warning "Skipped busy file: $rel_path"
 		fi
 	done < "$_find_list"

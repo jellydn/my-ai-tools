@@ -202,7 +202,7 @@ ask_user_question(questions: [{
 3. **Show trade-offs**: Each option's description should explain the trade-off, not just restate the label.
 4. **Lead with impact**: Architecture-changing questions first, then high-impact, then medium-impact.
 5. **Allow deferral**: The "Chat about this" option and custom answer ("Type something") let users skip or elaborate. Honour "skip" gracefully.
-6. **Limit to 4-7 questions**: Too many overwhelms. You can always follow up if needed. With one-at-a-time asking, the user stays engaged.
+6. **Limit questions by impact, not quota**: Stop when all unresolved questions are either architecture-changing, acceptance-test-changing, security/data-risk-changing, or explicitly deferred. A complete spec may need zero follow-up questions.
 7. **Acknowledge each answer**: Before asking the next question, briefly restate what was decided and its implications.
 
 ## Answer Processing

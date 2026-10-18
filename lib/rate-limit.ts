@@ -11,13 +11,15 @@ export function createRateLimiter(windowMs: number, maxRequests: number): RateLi
 	return {
 		middleware: async (c, next) => {
 			const forwarded = c.req.header("x-forwarded-for");
-			const clientIp = c.req.header("fly-client-ip") || (forwarded ? forwarded.split(",")[0]?.trim() : undefined);
+			const clientIp =
+				c.req.header("fly-client-ip") || (forwarded ? forwarded.split(",")[0]?.trim() : undefined);
 			const key = clientIp ?? "unknown";
 			const now = Date.now();
 			const timestamps = requestTimestamps.get(key) ?? [];
 			const recent = timestamps.filter((timestamp) => now - timestamp < windowMs);
 
-			if (recent.length >= maxRequests) return c.json({ error: "Rate limit exceeded. Try again later." }, 429);
+			if (recent.length >= maxRequests)
+				return c.json({ error: "Rate limit exceeded. Try again later." }, 429);
 			recent.push(now);
 			requestTimestamps.set(key, recent);
 			return next();

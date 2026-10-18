@@ -4,8 +4,9 @@
     "appearance": "system",
     "light_theme": "Delta One Light",
     "dark_theme": "Delta One Dark",
-    "font_size": "default",
-    "code_font_size": "default",
+    "ui_font_size": 16,
+    "prose_font_size": 15,
+    "code_font_size_px": 15,
     "font_family": "Maple Mono NF",
     "ui_font_family": "Maple UI",
     "buffer_font_family": "Maple Mono NF",
@@ -20,6 +21,7 @@
     "model_preferences": {},
     "thread_layout": {
       "centered": false,
+      "constrain_wide_content": false,
       "width": "default",
       "custom_width_hundredths": null
     },
@@ -28,7 +30,7 @@
       "soft_wrap": false
     },
     "default_diff_base": "branch",
-    "subagents_enabled": true,
+    "subagent_delegation": "automatic",
     "subagent_concurrency": {
       "maximum_per_parent": 4,
       "maximum_total": 8
@@ -44,6 +46,7 @@
   "native": {
     "os_notifications": true,
     "prevent_system_sleep": true,
-    "automatic_update_restart": true
+    "automatic_update_restart": true,
+    "sync_threads_across_devices": false
   }
 }

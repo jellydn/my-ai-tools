@@ -17,7 +17,10 @@ export class WorkerLifecycle {
 
 	start() {
 		if (this.timer || this.stopping) return;
-		this.timer = setInterval(() => void this.tick().catch(() => undefined), this.options.intervalMs ?? 500);
+		this.timer = setInterval(
+			() => void this.tick().catch(() => undefined),
+			this.options.intervalMs ?? 500,
+		);
 		this.timer.unref();
 		void this.tick().catch(() => undefined);
 	}

@@ -29,14 +29,13 @@ This handoff plan should be thorough in capturing technical details, code patter
 
 ## Process
 
-Before providing your final plan, wrap your analysis in <analysis> tags to organize your thoughts and ensure you've covered all necessary points:
+Before providing the final handoff, produce a concise evidence-based summary for the user. Do not expose private chain-of-thought or `<analysis>` tags. Include decisions, current state, blockers, and the exact next action instead of a chronological transcript or full code dumps.
 
-1. Chronologically analyze each message and section of the conversation. For each section thoroughly identify:
-   - The user's explicit requests and intents
-   - Your approach to addressing the user's requests
-   - Key decisions, technical concepts and code patterns
-   - Specific details like file names, full code snippets, function signatures, file edits, etc
-2. Double-check for technical accuracy and completeness, addressing each required element thoroughly.
+1. Identify the user's explicit purpose and the current work state.
+2. Verify important paths, branch/status, recent command results, and unresolved blockers.
+3. Capture only decision-relevant file names, symbols, short snippets, and links.
+4. Mark uncertain or stale information explicitly.
+
 
 Your plan should include the following sections:
 
@@ -62,9 +61,7 @@ Together with the slug create a "Readable Summary". Examples:
 
 ## Output Structure
 
-First, show your analysis to the user in `<analysis>` tags as part of your response.
-
-Then write the handoff file with this structure:
+The handoff file should contain the structured summary below. Do not include private chain-of-thought or a chronological transcript.
 
 ```markdown
 # Session Handoff Plan
@@ -126,4 +123,5 @@ After providing your analysis and summary:
 
 1. Ensure the `.planning/handoffs/` directory exists (create it if needed)
 2. Write the handoff summary to a markdown file at `.planning/handoffs/[timestamp]-[slug].md` where [timestamp] is the current date in format YYYY-MM-DD and the slug is what we defined before
-3. Tell the user about this file and that they can use `/pickup $1` to continue where $1 is the filename
+3. Read the handoff file back and verify it contains the purpose, current state, verification, blockers, and next action.
+4. Tell the user about this file and that they can use `/pickup $1` to continue where $1 is the filename

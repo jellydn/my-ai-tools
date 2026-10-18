@@ -68,10 +68,13 @@ Before going further, confirm the fixed point resolves (`git rev-parse <fixed-po
 - If the repo documents nothing, the clean code smell baseline below still applies
 
 **Intent sources** — understand what the change claims to do:
-- Read the commit messages from `git log <fixed-point>..HEAD --oneline`
+- Find issue references in commit messages and the PR description (`#123`, `Closes #45`, etc.) and fetch the linked issue when possible
 - Read the PR description if one exists (from `gh pr view` or branch context)
+- Look for a spec or plan under `docs/`, `specs/`, `.scratch/`, or a path supplied by the user
 - Check for an `.implementation-log.md` file that records conscious deviations from the plan — the review should **not** penalize a valid pivot
-- If nothing is found, the Intent axis works from the commit messages alone
+- If no issue, spec, plan, or PR description exists, say so explicitly and use commit messages as the fallback source of intent
+
+A commit message is evidence of intent, not a substitute for the originating spec. Separate missing requirements from unrequested scope.
 
 ### 3. Spawn both sub-agents in parallel
 
@@ -83,9 +86,10 @@ Send a single message with two `Agent` tool calls. Use the `general-purpose` sub
 - The brief: "Report — per file/hunk where relevant — (a) every place the diff violates a documented convention: cite the convention (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls — documented-convention breaches can be hard, but baseline smells are always judgement calls. A documented repo convention overrides the baseline. Skip anything tooling (linters, formatters, pre-commit hooks) already enforces. Under 400 words."
 
 **Intent sub-agent prompt** — include:
-- The diff command and commit list.
-- The commit messages and any PR description or implementation log found.
-- The brief: "Report: (a) claims in the commits/PR that are missing or partial in the diff; (b) behaviour in the diff that wasn't claimed (scope creep); (c) claimed behaviour that looks incorrectly implemented. Quote the commit message or PR line for each finding. If an `.implementation-log.md` records a conscious deviation, note it but don't flag it as a problem. Under 400 words."
+- The diff and commit list.
+- The issue, spec, plan, or PR description found in step 2, and identify which source is authoritative.
+- The commit messages and any implementation log.
+- The brief: "Report: (a) requirements from the authoritative issue/spec that are missing or partial; (b) behavior in the diff that was not requested (scope creep); (c) claimed behavior that looks incorrectly implemented. Quote the source line for each finding. If only commit messages exist, say that confidence is lower. If an implementation log records a conscious deviation, note it but don't flag it as a problem. Under 400 words."
 
 ### 4. Aggregate
 
