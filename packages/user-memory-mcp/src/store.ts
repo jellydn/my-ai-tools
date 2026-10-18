@@ -87,7 +87,7 @@ export class PreferenceStore {
 
 	async get(key: string): Promise<UserPreference | undefined> {
 		const memory = await this.readMemory();
-		const preference = memory.preferences[key];
+		const preference = Object.hasOwn(memory.preferences, key) ? memory.preferences[key] : undefined;
 		return preference ? { key, ...preference } : undefined;
 	}
 

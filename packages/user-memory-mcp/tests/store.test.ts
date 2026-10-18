@@ -48,6 +48,8 @@ test("stores and updates constructor as an own preference across store instances
 
 test("deletes only persisted own preferences, not inherited or nonexistent keys", async () => {
 	const { directory, store } = await makeStore();
+	assert.equal(await store.get("constructor"), undefined);
+	assert.equal(await store.get("nonexistent"), undefined);
 	assert.equal(await store.delete("constructor"), false);
 	assert.equal(await store.delete("nonexistent"), false);
 	await assert.rejects(readFile(store.auditPath, "utf8"), { code: "ENOENT" });
