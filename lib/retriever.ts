@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import type OpenAI from "openai";
 import { createIndexLoader } from "./index-loader.ts";
 import { createOpenAIClient, getDefaultEmbeddingModel } from "./openai-client.ts";
+import { cosineSimilarity } from "./vector-similarity.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -44,20 +45,6 @@ async function getIndex(): Promise<Index> {
 	return indexLoader.load();
 }
 
-function cosineSimilarity(a: number[], b: number[]): number {
-	let dot = 0;
-	let aNorm = 0;
-	let bNorm = 0;
-	for (let index = 0; index < a.length; index++) {
-		const aValue = a[index] ?? 0;
-		const bValue = b[index] ?? 0;
-		dot += aValue * bValue;
-		aNorm += aValue * aValue;
-		bNorm += bValue * bValue;
-	}
-	return dot / (Math.sqrt(aNorm) * Math.sqrt(bNorm));
-}
-
 export async function embed(text: string): Promise<number[]> {
 	const client = getClient();
 	const response = await client.embeddings.create({
@@ -76,8 +63,14 @@ export async function retrieve(query: string, topK: number): Promise<RetrievedCh
 	if (index.chunks.length === 0) {
 		return [];
 	}
+	if (index.model !== EMBEDDING_MODEL) {
+		throw new Error(`Index uses embedding model "${index.model}", but retrieval uses "${EMBEDDING_MODEL}"`);
+	}
 
 	const queryEmbedding = await embed(query);
+	if (index.chunks.some((chunk) => chunk.embedding.length !== queryEmbedding.length)) {
+		throw new Error("Index embedding dimensions do not match the query embedding");
+	}
 	const scored = index.chunks.map((chunk) => ({
 		path: chunk.path,
 		text: chunk.text,
