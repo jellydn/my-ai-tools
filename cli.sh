@@ -2636,6 +2636,11 @@ install_community_plugin_non_interactive() {
 	local marketplace_repo="$3"
 	local cli_tool="$4"
 
+	if ! command -v "$cli_tool" &>/dev/null; then
+		log_info "Skipping $name plugin ($cli_tool CLI not installed)"
+		return 0
+	fi
+
 	install_cli_dependency "$name"
 
 	setup_tmpdir
@@ -2651,6 +2656,11 @@ install_community_plugin_interactive() {
 	local plugin_spec="$2"
 	local marketplace_repo="$3"
 	local cli_tool="$4"
+
+	if ! command -v "$cli_tool" &>/dev/null; then
+		log_info "Skipping $name plugin ($cli_tool CLI not installed)"
+		return 0
+	fi
 
 	if ! prompt_yn "Install $name"; then
 		return 0

@@ -25,7 +25,7 @@ jobs:
 
   windows-installer:
     name: Windows PowerShell Installer
-    runs-on: windows-2022
+    runs-on: windows-2025
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -47,6 +47,10 @@ jobs:
             $errors | Format-List
             exit 1
           }
+
+      - name: Test Windows prerequisite recovery
+        shell: powershell
+        run: .\tests\windows_installer.ps1
 
       - name: Run native Windows dry-run
         shell: powershell
