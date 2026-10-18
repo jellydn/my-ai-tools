@@ -11,16 +11,6 @@ source "$(dirname "${BASH_SOURCE[0]}")/install-deps.sh"
 
 # ─── Shared helpers ────────────────────────────────────────────────
 
-# Prepend a directory to PATH for the current session if it isn't already present.
-# Keeps PATH-guard conditionals consistent (and scannable) across installers.
-ensure_dir_on_path() {
-	local dir="${1:-}"
-	[ -n "$dir" ] || return 0
-	if case ":$PATH:" in *":$dir:"*) false ;; *) true ;; esac then
-		export PATH="$dir:$PATH"
-	fi
-}
-
 # Use npm on native Windows to avoid the Bash-installed Bun lifecycle launcher.
 # Unix-like systems keep the existing Bun preference.
 # Outputs: package manager command or empty if none found
@@ -842,7 +832,9 @@ install_ctx() {
 		# Keep binary installation failures fatal; history setup is a separate, optional step.
 		if [ "$IS_WINDOWS" = true ]; then
 			if command -v powershell.exe &>/dev/null; then
-				CTX_INSTALL_NO_SETUP=1 execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://ctx.rs/install.ps1 | iex\"" || return 1
+				# Limit the upstream installer to this HOME's binary; our installer
+				# owns skills, PATH and the separate opt-in history setup below.
+				CTX_INSTALL_BIN_DIR="$(cygpath -w "$HOME/.local/bin")" CTX_INSTALL_NO_SETUP=1 execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"& ([scriptblock]::Create((irm https://ctx.rs/install.ps1))) -NoSetup -NoSkill -NoModifyPath -BinDir \\\$env:CTX_INSTALL_BIN_DIR\"" || return 1
 			else
 				log_error "PowerShell is required to install ctx on Windows."
 				log_info "Install manually: https://github.com/ctxrs/ctx"

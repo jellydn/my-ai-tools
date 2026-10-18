@@ -3,30 +3,83 @@
 # PostToolUse hooks, and the standalone MCP server binaries.
 #
 # Sourced by lib/install.sh, which owns the shared helpers used here
-# (ensure_dir_on_path, _verify_package_manager, resolve_installer_checksum,
+# (_verify_package_manager, resolve_installer_checksum,
 # handle_tool_installation) — do not source this file on its own.
 #
 # Requires: lib/common.sh (for log_*, execute_*, prompt_yn, execute_installer)
 # Requires: YES_TO_ALL, DRY_RUN, IS_WINDOWS, AMP_INSTALLED (set in cli.sh)
 
+# Prepend a directory to PATH for the current session if it isn't already present.
+# Windows must also promote existing entries ahead of stale Bun/copied shims.
+ensure_dir_on_path() {
+	local dir="${1:-}"
+	[ -n "$dir" ] || return 0
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		local remaining=":$PATH:"
+		remaining="${remaining//":$dir:"/:}"
+		remaining="${remaining#:}"
+		PATH="${remaining%:}"
+	fi
+	if case ":$PATH:" in *":$dir:"*) false ;; *) true ;; esac then
+		export PATH="$dir:$PATH"
+	fi
+}
+
 # Shared prerequisite for Plannotator hooks, inbox MCP servers, and plugins.
 # Fail before copying enabled integrations if the binary cannot be installed.
 install_plannotator_if_needed() {
-	if command -v plannotator &>/dev/null; then
+	local windows_dir=""
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		windows_dir=$(cygpath -u "${LOCALAPPDATA:-$HOME/AppData/Local}/plannotator")
+		ensure_dir_on_path "$windows_dir"
+	fi
+	if command -v plannotator &>/dev/null && {
+		[ "${IS_WINDOWS:-false}" != true ] || plannotator --version >/dev/null 2>&1
+	}; then
 		return 0
 	fi
 	log_info "Installing Plannotator CLI..."
-	local checksum
-	checksum=$(resolve_installer_checksum "plannotator")
-	if ! execute_installer "https://plannotator.ai/install.sh" "$checksum" "Plannotator CLI"; then
-		log_error "Plannotator installation failed; enabled integrations require the CLI"
-		return 1
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		# Direct binary install avoids upstream PowerShell's $Minimal/$minimal
+		# collision (PowerShell variable names are case-insensitive).
+		local version="v0.28.23" arch checksum
+		case "${PROCESSOR_ARCHITEW6432:-${PROCESSOR_ARCHITECTURE:-}}" in
+		ARM64) arch=arm64; checksum="c18c5c217a0acb9b4fe6d76dffd29e3e02241714b6927bb4118a2c01b62f93b7" ;;
+		AMD64) arch=x64; checksum="78c5f322bb208822782e9e2d8bb47cefb18de4fa7adaf57c4add256ee97ec740" ;;
+		*)
+			log_error "Unsupported Windows architecture for Plannotator"
+			log_info "See https://github.com/backnotprop/plannotator/releases for supported Windows binaries."
+			return 1
+			;;
+		esac
+		local url="https://github.com/backnotprop/plannotator/releases/download/$version/plannotator-win32-$arch.exe"
+		log_info "Windows fallback: download $url, verify SHA-256 $checksum, and place it at $windows_dir/plannotator.exe."
+		if [ "$DRY_RUN" = true ]; then
+			log_info "[DRY RUN] Would install verified Plannotator $version ($arch) binary only"
+			return 0
+		fi
+		local binary
+		binary=$(download_and_verify_file "$url" "$checksum" "Plannotator Windows binary") || return 1
+		if ! execute_quoted mkdir -p "$windows_dir" || ! execute_quoted mv "$binary" "$windows_dir/plannotator.exe"; then
+			execute_quoted rm -f "$binary"
+			return 1
+		fi
+	else
+		local checksum
+		checksum=$(resolve_installer_checksum "plannotator")
+		if ! execute_installer "https://plannotator.ai/install.sh" "$checksum" "Plannotator CLI"; then
+			log_error "Plannotator installation failed; enabled integrations require the CLI"
+			return 1
+		fi
 	fi
 	[ "$DRY_RUN" = true ] && return 0
-	ensure_dir_on_path "$HOME/.local/bin"
+	if [ "${IS_WINDOWS:-false}" != true ]; then ensure_dir_on_path "$HOME/.local/bin"; fi
 	if ! command -v plannotator &>/dev/null; then
 		log_error "Plannotator installer completed but the CLI was not found"
 		return 1
+	fi
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		plannotator --version || return 1
 	fi
 }
 
@@ -148,6 +201,12 @@ _link_binary_on_local_bin() {
 # ─── qmd installation ──────────────────────────────────────────────
 
 install_qmd_now() {
+	if [ "${IS_WINDOWS:-false}" = true ] && command -v npm &>/dev/null; then
+		# A copied extensionless node runs in Bash, but Windows cannot spawn it.
+		local node_exe
+		node_exe=$(command -v node.exe 2>/dev/null) && ensure_dir_on_path "$(dirname "$node_exe")"
+		ensure_dir_on_path "$(_npm_global_bin)"
+	fi
 	local qmd_version
 	if command -v qmd &>/dev/null && qmd_version=$(qmd --version 2>/dev/null || {
 		[ "${IS_WINDOWS:-false}" != true ] && echo "version unknown"
@@ -181,10 +240,14 @@ install_qmd_now() {
 		fi
 		_link_binary_on_local_bin "$(command -v qmd 2>/dev/null)" "qmd"
 		_link_binary_on_local_bin "$(command -v node 2>/dev/null)" "node"
-		qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
-		if [ "${IS_WINDOWS:-false}" = true ] && [ "$DRY_RUN" != true ] && [ "$qmd_version" = "version unknown" ]; then
-			log_error "qmd installation completed but qmd --version failed. Check Node.js and npm's global PATH."
-			return 1
+		if [ "${IS_WINDOWS:-false}" = true ] && [ "$DRY_RUN" != true ]; then
+			if ! qmd_version=$(qmd --version 2>&1); then
+				log_error "qmd installation completed but qmd --version failed: $qmd_version"
+				log_info "Check command -v qmd, npm prefix -g, Node.js >=22, and the npm lifecycle/build errors above."
+				return 1
+			fi
+		else
+			qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
 		fi
 		log_success "qmd installed successfully ($qmd_version)"
 		return 0

@@ -10,10 +10,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 source "$SCRIPT_DIR/lib/install.sh"
 
-# Core tools installed/configured when -y (YES_TO_ALL) is active.
-# This is your personal active tool set. When YES_TO_ALL is false
-# (interactive mode), tool_allowed returns true for everything.
-TOOL_ALLOWLIST_YES=(amp codex ctx cursor deepseek_harness delta fx kilo muse opencode open_code_review pi omp antigravity ai-switcher claude reasonix)
+# Default categories: four core agents, shared skills, and their MCP/plugins.
+# Standalone catalog selection is separate from declared integration dependencies.
+TOOL_ALLOWLIST_YES=(amp pi codex opencode)
+WITH_INTEGRATIONS=true
 
 tool_allowed() {
 	local name="$1"
@@ -26,19 +26,18 @@ tool_allowed() {
 }
 
 # Installers run in this order. Each entry is "<allowlist-key>:<installer>".
-# The "always" key marks cross-tool dependencies that are never gated by the
-# -y allowlist because every managed assistant relies on them.
+# Every entry is selected explicitly in yes mode; interactive runs prompt for extras.
 INSTALL_SEQUENCE=(
+	"qmd:handle_qmd_installation_if_needed"
 	"claude:install_claude_code"
-	# RTK reduces shell-output context for every managed coding assistant.
-	"always:install_rtk"
+	"rtk:install_rtk"
 	# OpenCode 2 is the default `opencode` binary. Do not install OpenCode 1 first.
 	"opencode:install_opencode2"
-	"opencode:install_open_cursor"
+	"open-cursor:install_open_cursor"
 	"fx:install_fx"
 	"muse:install_muse"
 	"amp:install_amp"
-	"always:install_global_tools"
+	"global-tools:install_global_tools"
 	"ccs:install_ccs"
 	"ai-switcher:install_ai_switcher"
 	"codex:install_codex"
@@ -67,8 +66,7 @@ INSTALL_SEQUENCE=(
 	"grok:install_grok"
 	"mimo:install_mimo"
 	"open_code_review:install_open_code_review"
-	# Shared hooks, inbox MCP servers, and manual review commands need this CLI.
-	"always:install_plannotator_if_needed"
+	"plannotator:install_plannotator_if_needed"
 )
 
 run_install_sequence() {
@@ -77,7 +75,13 @@ run_install_sequence() {
 		key="${entry%%:*}"
 		installer="${entry#*:}"
 
-		if [ "$key" = "always" ] || tool_allowed "$key"; then
+		if tool_allowed "$key"; then
+			if [ "$YES_TO_ALL" != true ]; then
+				case "$key" in
+				amp | pi | codex | opencode) ;;
+				*) prompt_yn "Install optional $key" || continue ;;
+				esac
+			fi
 			"$installer"
 		else
 			log_info "Skipping $key installer (not in -y allowlist)"
@@ -119,6 +123,27 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 			YES_TO_ALL=true
 			shift
 			;;
+		--with-integrations)
+			WITH_INTEGRATIONS=true
+			shift
+			;;
+		--without-integrations)
+			WITH_INTEGRATIONS=false
+			shift
+			;;
+		--with-tools=*)
+			IFS=, read -r -a requested_tools <<<"${arg#*=}"
+			[ ${#requested_tools[@]} -gt 0 ] || { log_error "--with-tools requires tool names"; exit 1; }
+			for requested_tool in "${requested_tools[@]}"; do
+				known_tool=false
+				for entry in "${INSTALL_SEQUENCE[@]}"; do
+					[ "${entry%%:*}" != "$requested_tool" ] || known_tool=true
+				done
+				[ "$known_tool" = true ] || { log_error "Unknown optional tool: $requested_tool"; exit 1; }
+				TOOL_ALLOWLIST_YES+=("$requested_tool")
+			done
+			shift
+			;;
 		-v | --verbose)
 			VERBOSE=true
 			shift
@@ -129,6 +154,12 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 			;;
 		-h | --help)
 			echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback]"
+			echo "--yes installs Amp, Pi, Codex, OpenCode, shared skills, and selected agents' MCP/plugin configs."
+			echo "--with-tools=name,... adds optional tools (for example qmd,plannotator,ctx)."
+			echo "--with-integrations is the default; --without-integrations installs standalone CLIs only."
+			echo "Integration dependencies are logged separately; user-memory is never selected by default."
+			for entry in "${INSTALL_SEQUENCE[@]}"; do printf '%s ' "${entry%%:*}"; done
+			echo
 			exit 0
 			;;
 		--rollback)
@@ -258,13 +289,12 @@ check_prerequisites() {
 	elif command -v node &>/dev/null; then
 		NODE_VERSION=$(node --version)
 		log_success "Node.js found ($NODE_VERSION)"
-		handle_optional_bun_installation
+		if [ "$YES_TO_ALL" != true ]; then handle_optional_bun_installation; fi
 	else
 		log_error "Neither Bun nor Node.js is installed."
 		handle_bun_installation
 	fi
 
-	handle_qmd_installation_if_needed
 }
 
 # Helper: Copy a config directory if it exists in source and destination
@@ -2420,19 +2450,6 @@ install_cli_dependency() {
 }
 
 enable_plugins() {
-	log_info "Installing Claude Code plugins..."
-
-	MARKETPLACE_AVAILABLE=false
-	if check_marketplace_support; then
-		MARKETPLACE_AVAILABLE=true
-	else
-		log_warning "Claude plugin marketplace is not available"
-		log_info "Note: Skills can still be installed remotely using bunx/npx skills add command"
-	fi
-
-	# Determine skill installation source
-	determine_skill_install_source
-
 	# Define plugins
 	official_plugins=(
 		"typescript-lsp@claude-plugins-official"
@@ -2465,6 +2482,25 @@ enable_plugins() {
 		"worktrunk|worktrunk@worktrunk|max-sixty/worktrunk|claude"
 		"openai-codex|codex@openai-codex|openai/codex-plugin-cc|claude"
 	)
+
+	# Define the catalog before filtering, so explicitly selected Copilot and
+	# Droid plugins still work without selecting or invoking Claude.
+	if ! tool_allowed claude; then
+		install_local_skills
+		install_local_community_plugins
+		return 0
+	fi
+	log_info "Installing Claude Code plugins..."
+
+	MARKETPLACE_AVAILABLE=false
+	if check_marketplace_support; then
+		MARKETPLACE_AVAILABLE=true
+	else
+		log_warning "Claude plugin marketplace is not available"
+		log_info "Note: Skills can still be installed remotely using bunx/npx skills add command"
+	fi
+
+	determine_skill_install_source
 
 	if ! command -v claude &>/dev/null; then
 		handle_no_claude_cli
@@ -2616,6 +2652,12 @@ install_local_community_plugins() {
 		marketplace_repo="${rest2%%|*}"
 		cli_tool="${rest2##*|}"
 
+		local tool_key="$cli_tool"
+		[ "$tool_key" != droid ] || tool_key=factory
+		if ! tool_allowed "$tool_key"; then
+			log_info "Skipping $name plugin ($tool_key agent not selected)"
+			continue
+		fi
 		if ! command -v "$cli_tool" &>/dev/null; then
 			log_info "Skipping $name ($cli_tool CLI not found)"
 			continue
@@ -2727,21 +2769,24 @@ create_tool_skills_symlinks() {
 
 	# Define tool-specific skills directories that should symlink to universal
 	local tool_dirs=(
-		"$HOME/.claude/skills"
-		"$HOME/.config/opencode/skills"
-		"$HOME/.gemini/skills"
-		"$HOME/.pi/skills"
-		"$HOME/.omp/skills"
-		"$HOME/.cursor/skills"
-		"$HOME/.config/amp/skills"
-		"$HOME/.codex/skills"
-		"$HOME/.kimi-code/skills"
-		"$HOME/.commandcode/skills"
-		"$HOME/.config/mimocode/skills"
-		"$HOME/.cline/skills"
+		"claude:$HOME/.claude/skills"
+		"opencode:$HOME/.config/opencode/skills"
+		"gemini:$HOME/.gemini/skills"
+		"pi:$HOME/.pi/skills"
+		"omp:$HOME/.omp/skills"
+		"cursor:$HOME/.cursor/skills"
+		"amp:$HOME/.config/amp/skills"
+		"codex:$HOME/.codex/skills"
+		"kimi_code:$HOME/.kimi-code/skills"
+		"commandcode:$HOME/.commandcode/skills"
+		"mimo:$HOME/.config/mimocode/skills"
+		"cline:$HOME/.cline/skills"
 	)
 
-	for tool_dir in "${tool_dirs[@]}"; do
+	local entry tool_dir
+	for entry in "${tool_dirs[@]}"; do
+		tool_allowed "${entry%%:*}" || continue
+		tool_dir="${entry#*:}"
 		# Skip if the parent directory doesn't exist (tool not installed)
 		local parent_dir
 		parent_dir=$(dirname "$tool_dir")
@@ -2752,6 +2797,13 @@ create_tool_skills_symlinks() {
 		# Create parent directory if needed
 		execute_quoted mkdir -p "$parent_dir"
 
+		# Git Bash can emulate directory symlinks by copying. Refresh in place
+		# instead of backing up that copy on every rerun; retain custom skills.
+		if [ "${IS_WINDOWS:-false}" = true ] && [ ! -L "$tool_dir" ]; then
+			execute_quoted mkdir -p "$tool_dir"
+			safe_copy_dir "$universal_dir" "$tool_dir"
+			continue
+		fi
 		# Remove existing directory/symlink if it exists
 		if [ -e "$tool_dir" ] || [ -L "$tool_dir" ]; then
 			# Check if it's already correctly symlinked (handle trailing slash variations)
@@ -2821,6 +2873,29 @@ copy_skill_to_universal() {
 	log_success "Copied $skill_name to universal skills directory"
 }
 
+# Dependencies of the bundled core-agent integrations, not standalone defaults.
+install_integration_dependencies() {
+	local tool needs_qmd=false needs_ctx=false needs_plannotator=false
+	for tool in amp pi codex opencode; do
+		tool_allowed "$tool" || continue
+		needs_qmd=true
+		case "$tool" in pi | codex | opencode) needs_ctx=true ;; esac
+		[ "$tool" != codex ] || needs_plannotator=true
+	done
+	if [ "$needs_qmd" = true ]; then
+		log_info "Integration dependency: qmd for selected core agents' qmd MCP"
+		handle_qmd_installation_if_needed
+	fi
+	if [ "$needs_ctx" = true ]; then
+		log_info "Integration dependency: ctx for selected Pi/Codex/OpenCode ctx MCP (no history import)"
+		CTX_INSTALL_NO_SETUP=1 install_ctx
+	fi
+	if [ "$needs_plannotator" = true ]; then
+		log_info "Integration dependency: Plannotator for selected Codex hooks/inbox MCP"
+		install_plannotator_if_needed
+	fi
+}
+
 main() {
 	# --migrate-gemini: lightweight migration-only path (no Node/Bun required)
 	if [ "$MIGRATE_GEMINI" = true ]; then
@@ -2853,18 +2928,28 @@ main() {
 	check_prerequisites
 	echo
 
-	backup_configs
-	echo
+	if [ "$WITH_INTEGRATIONS" = true ]; then backup_configs; fi
 
 	run_install_sequence
 
-	copy_configurations
-	echo
-
-	enable_plugins
-	echo
+	if [ "$WITH_INTEGRATIONS" = true ]; then
+		install_integration_dependencies
+		copy_configurations
+		enable_plugins
+	else
+		log_info "Skipping optional configurations and integrations; existing user configuration is unchanged."
+		log_info "Opt in with --with-integrations; add tools with --with-tools=qmd,plannotator,ctx (or other catalog names)."
+	fi
 
 	log_success "Setup complete!"
+	if [ "$YES_TO_ALL" = true ] && [ "$WITH_INTEGRATIONS" != true ]; then
+		log_info "Run amp, pi, codex, or opencode. No bundled integrations were enabled."
+		return 0
+	fi
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Core agents, shared skills, and selected MCP/plugin configurations installed."
+		return 0
+	fi
 	echo
 	echo "Next steps:"
 	echo "  1. Restart your terminal"

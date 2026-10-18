@@ -272,9 +272,15 @@ load helpers
 		source "$1/lib/common.sh"
 		source "$1/lib/install.sh"
 		IS_WINDOWS=true
-		node() { return 0; }
 		bun() { return 17; }
 		cygpath() { printf "%s\n" "$2"; }
+		mkdir -p "$HOME/.local/bin" "$HOME/Node Runtime" "$HOME/global"
+		printf "%s\n" "#!/bin/sh" "exit 17" >"$HOME/.local/bin/qmd"
+		printf "%s\n" "#!/bin/sh" "exit 18" >"$HOME/.local/bin/node"
+		printf "%s\n" "#!/bin/sh" "exit 0" >"$HOME/Node Runtime/node.exe"
+		printf "%s\n" "#!/bin/sh" "echo native-node" >"$HOME/Node Runtime/node"
+		chmod +x "$HOME/.local/bin/"* "$HOME/Node Runtime/"*
+		PATH="$HOME/.local/bin:$PATH:$HOME/global:$HOME/Node Runtime"
 		npm() {
 			if [ "$1" = prefix ]; then printf "%s\n" "$HOME/global"; return; fi
 			mkdir -p "$HOME/global"
@@ -284,7 +290,12 @@ load helpers
 		}
 		install_qmd_now || exit 1
 		qmd --version || exit 1
-		[ ! -e "$HOME/.local/bin/qmd" ]
+		[ "$(node --version)" = native-node ] || exit 1
+		[ "${PATH%%:*}" = "$HOME/global" ] || exit 1
+		[ -e "$HOME/.local/bin/qmd" ] || exit 1 # do not delete user files
+		npm() { [ "$1" = prefix ] && printf "%s\n" "$HOME/global"; }
+		install_qmd_now || exit 1 # no reinstall; npm install would fail
+		qmd --version
 	' _ "$REPO_ROOT"
 	[ "$status" -eq 0 ]
 	[[ "$output" == *"qmd-test-version"* ]]

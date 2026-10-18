@@ -84,7 +84,7 @@ README="$REPO_ROOT/TOOL_REFERENCE.md"
 	[ "$status" -eq 0 ]
 }
 
-@test "-y allowlist runs the Delta install and config flow" {
+@test "explicit Delta opt-in runs the install and config flow" {
 	run bash -c '
 		set -e
 		home=$(mktemp -d)
@@ -94,6 +94,8 @@ README="$REPO_ROOT/TOOL_REFERENCE.md"
 		unset XDG_CONFIG_HOME
 		source "$1"
 
+		! tool_allowed delta
+		TOOL_ALLOWLIST_YES+=(delta)
 		tool_allowed delta
 		INSTALL_SEQUENCE=("delta:install_delta")
 		install_delta() { touch "$home/install-delta-called"; }

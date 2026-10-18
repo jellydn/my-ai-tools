@@ -50,7 +50,20 @@ $HOME/.config/opencode/skills/qmd-knowledge/
 
 ### 1. Install qmd
 
-Install qmd globally via bun:
+qmd is optional. From a reviewed checkout, install it without enabling the MCP/config bundle:
+
+```bash
+./cli.sh --yes --without-integrations --with-tools=qmd
+qmd --version
+```
+
+On Windows use `powershell -NoProfile -File .\install.ps1 -Yes -WithoutIntegrations -WithTools qmd`.
+Native Windows uses Node.js >=22/npm and keeps the generated shim in npm's global prefix.
+The installer prioritizes that prefix and the real Node directory over stale `~/.local/bin` copies.
+It does not change npm script policy; npm 11.19.1's unreviewed-script warnings alone do not block scripts.
+Windows ARM64 supports keyword indexing/search but currently lacks sqlite-vec vector support.
+
+Alternatively, install qmd globally via Bun on Linux/macOS/WSL:
 
 ```bash
 bun install -g @tobilu/qmd
@@ -58,7 +71,10 @@ bun install -g @tobilu/qmd
 
 ### 2. Configure MCP Server
 
-The MCP server configuration is already included in this repository.
+The MCP server configuration is included by default for the four core agents in `--yes` mode.
+That integration declares qmd as a dependency, so qmd can be installed even without standalone tool selection.
+Use `./cli.sh --yes --backup` for bundled configuration and skills, or add the MCP manually.
+`--without-integrations` leaves existing configuration unchanged and requires explicit `--with-tools=qmd`.
 
 **For Claude Code** (`~/.claude/mcp-servers.json`):
 

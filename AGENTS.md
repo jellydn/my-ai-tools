@@ -32,7 +32,10 @@ Never run `./cli.sh` without `--dry-run` first. Config validation runs automatic
 
 - `--dry-run` — side-effect-free preview
 - `--backup` / `--no-backup` — backup existing configs (auto-prompted interactively)
-- `-y` / `--yes` — non-interactive; only processes your active tools. Auto-activated in CI/piped input. Triggers network installs of ~20 external CLIs before the core config copy.
+- `-y` / `--yes` — non-interactive; installs Amp, Pi, Codex, OpenCode, shared skills, applicable MCP/plugin config, and declared integration dependencies. Auto-activated in CI/piped input. Other standalone catalog entries remain optional; user-memory stays opt-in.
+- `--with-tools=name,...` — opt into extra catalog CLIs such as qmd, plannotator, or ctx.
+- `--with-integrations` — bundled config, plugins, skills, MCPs, and their prerequisites (default); can replace existing config.
+- `--without-integrations` — standalone CLIs only; leaves existing config unchanged.
 - `--migrate-gemini` — one-step Gemini→Antigravity CLI migration
 - `--rollback` — restore from the most recent `$HOME/ai-tools-backup-{timestamp}`
 - `-v` / `--verbose` — verbose logging
@@ -63,8 +66,8 @@ On the cloud VM `bats` is preinstalled — run `bats tests/` directly.
 - **Re-exec guard**: every entry point sources `lib/require_bash.sh` _before_ `lib/common.sh`. `common.sh` uses bash-only syntax (`<()`, arrays, `${var//pat/repl}`) that crashes under `sh`/`dash`.
 - `set -e` goes _after_ the re-exec guard.
 - **Installer layout**: per-tool installers live in `lib/install.sh`; prerequisites (runtimes, formatters, MCP binaries) live in `lib/install-deps.sh`, which `lib/install.sh` **must source** (`source "$(dirname "${BASH_SOURCE[0]}")/install-deps.sh"`).
-- **New installers**: register in the ordered `INSTALL_SEQUENCE` table in `cli.sh` (`"<allowlist-key>:<installer>"`, or `always:` for cross-tool dependencies). The `-y` allowlist matches the `<allowlist-key>` portion. Do not add another `if tool_allowed` block.
-- **PATH**: never `export PATH=` directly — call `ensure_dir_on_path "<dir>"` (defined in `lib/install.sh`).
+- **New installers**: register in the ordered `INSTALL_SEQUENCE` table in `cli.sh` (`"<allowlist-key>:<installer>"`). The `-y` allowlist matches the `<allowlist-key>` portion; extra tools must be optional. Do not add another `if tool_allowed` block.
+- **PATH**: never `export PATH=` directly — call `ensure_dir_on_path "<dir>"` (defined in `lib/install-deps.sh`, sourced by `lib/install.sh`).
 - **Dry-run**: wrap every side-effecting command in `execute()` / `execute_quoted()` (defined in `lib/common.sh`). Never run destructive commands directly.
 - Paths: use `$HOME` / relative. **No absolute paths** in configs or scripts.
 - Quote all variables, use `local`, and use `log_info`/`log_success`/`log_warning`/`log_error` for output.
@@ -73,7 +76,7 @@ On the cloud VM `bats` is preinstalled — run `bats tests/` directly.
 
 - `cli.sh` auto-detects installed tools and skips missing ones — it won't install configs for tools you don't have.
 - `generate.sh` exports _from_ `$HOME` _to_ the repo; it only copies tools it finds installed.
-- `--yes` in CI/non-TTY shells triggers network installs of ~20 external CLIs that can fail/hang. To exercise core config copy deterministically, source the script and call its copy functions against a throwaway `HOME`:
+- `--yes` in CI/non-TTY shells can install the four core CLIs and integration dependencies over the network and copy config/skills. Use `--without-integrations` for standalone CLIs only. To exercise config copy deterministically, source the script and call its copy functions against a throwaway `HOME`:
   ```bash
   H=$(mktemp -d); mkdir -p "$H/.cursor" "$H/.config/opencode" "$H/.codex"
   ( export HOME="$H" DRY_RUN=false YES_TO_ALL=false; source ./cli.sh; copy_configurations )

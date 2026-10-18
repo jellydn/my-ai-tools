@@ -21,16 +21,25 @@ command -v jq
 node --version
 npm --version
 test "$(node -p '6 * 7')" = 42
+printf 'ARGS=%s\n' "$*"
 echo 'PASS: real Git Bash received Node and npm'
 '@ | Set-Content (Join-Path $fixture 'cli.sh') -Encoding ASCII
 
     # Model a terminal opened before installation, including an older Git Bash login PATH.
     $env:Path = "$env:SystemRoot\System32;$env:SystemRoot"
     $env:ORIGINAL_PATH = '/usr/bin:/c/Windows/System32'
-    foreach ($mode in @('saved-yes', 'one-line-default')) {
+    foreach ($mode in @('saved-yes', 'saved-extras', 'standalone-only', 'one-line-default')) {
         if ($mode -eq 'saved-yes') {
             $output = & "$PSHOME\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File (
                 Join-Path $fixture 'install.ps1') -DryRun -Yes 2>&1
+        }
+        elseif ($mode -eq 'saved-extras') {
+            $output = & "$PSHOME\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File (
+                Join-Path $fixture 'install.ps1') -DryRun -Yes -WithTools 'qmd,plannotator' -WithIntegrations 2>&1
+        }
+        elseif ($mode -eq 'standalone-only') {
+            $output = & "$PSHOME\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File (
+                Join-Path $fixture 'install.ps1') -DryRun -Yes -WithoutIntegrations 2>&1
         }
         else {
             # IEX defaults to --yes. Replace only the network clone with the safe cli.sh fixture.
@@ -49,6 +58,12 @@ Get-Content -Raw '$path\install.ps1' | Invoke-Expression
         $output | Out-Host
         if ($result -ne 0 -or ($output -join "`n") -notmatch 'PASS: real Git Bash received Node and npm') {
             throw "Bash handoff failed for $mode (exit $result)"
+        }
+        if ($mode -eq 'saved-extras' -and (($output -join "`n") -notmatch '--with-tools=qmd,plannotator --with-integrations')) {
+            throw 'Optional tool/integration flags were not forwarded intact'
+        }
+        if ($mode -eq 'standalone-only' -and (($output -join "`n") -notmatch '--without-integrations')) {
+            throw 'Integration opt-out was not forwarded intact'
         }
         [Console]::WriteLine("PASS: $mode with stale Windows and Git Bash PATH")
     }

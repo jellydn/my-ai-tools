@@ -219,8 +219,11 @@ EOF
 			IS_WINDOWS=true
 			fixture="$2/ctx-fixture"
 			powershell.exe() { :; }
+			cygpath() { printf "%s\n" "$2"; }
 			execute() {
 				if [[ "$1" == powershell.exe* ]]; then
+					# Model upstream side effects unless the binary-only switches are passed.
+					[[ "$1" == *-NoSetup* && "$1" == *-NoSkill* && "$1" == *-NoModifyPath* ]] || return 97
 					[ "$MODE" != install-fails ] || return 1
 					mkdir -p "$HOME/.local/bin"
 					cp "$fixture" "$HOME/.local/bin/ctx"

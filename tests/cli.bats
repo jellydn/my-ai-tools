@@ -150,12 +150,12 @@ setup() {
 @test "tool_allowed gates correctly under YES_TO_ALL" {
     # Under YES_TO_ALL=true: only the allowed tools return 0
     export YES_TO_ALL=true
-    for tool in amp codex ctx cursor kilo opencode open_code_review pi omp antigravity ai-switcher claude; do
+    for tool in amp pi codex opencode; do
         run tool_allowed "$tool"
         [ "$status" -eq 0 ]
     done
     # Non-allowed tools return 1
-    for tool in cline gemini grok mimo; do
+    for tool in qmd plannotator ctx rtk global-tools open-cursor cursor kilo omp antigravity ai-switcher claude cline gemini grok mimo; do
         run tool_allowed "$tool"
         [ "$status" -eq 1 ]
     done
@@ -166,6 +166,7 @@ setup() {
         [ "$status" -eq 0 ]
     done
 }
+
 @test "cli.sh and generate.sh handle --help and -h flags" {
     run "$BATS_TEST_DIRNAME/../cli.sh" --help
     [ "$status" -eq 0 ]
