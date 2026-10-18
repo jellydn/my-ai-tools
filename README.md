@@ -238,8 +238,9 @@ bun run code-taste export --format markdown
 ```
 
 Analysis state is stored in ignored `.code-taste/`. `CODING_TASTE.md` is intentionally
-not ignored so you can review and commit the resulting guidance. Review its evidence
-before treating inferred preferences as project rules.
+not ignored so you can review and commit the resulting guidance. Markdown omits evidence;
+review the evidence in `.code-taste/profile.json` or the JSON export before treating
+inferred preferences as project rules.
 
 ## 📚 Documentation
 
