@@ -68,7 +68,7 @@ export class PreferenceStore {
 		return this.withLock(async () => {
 			const memory = await this.readMemory();
 			const timestamp = this.now().toISOString();
-			const previous = memory.preferences[key];
+			const previous = Object.hasOwn(memory.preferences, key) ? memory.preferences[key] : undefined;
 			const preference: UserPreference = previous
 				? { key, value, createdAt: previous.createdAt, updatedAt: timestamp }
 				: { key, value, createdAt: timestamp, updatedAt: timestamp };
@@ -101,7 +101,7 @@ export class PreferenceStore {
 	async delete(key: string): Promise<boolean> {
 		return this.withLock(async () => {
 			const memory = await this.readMemory();
-			if (!(key in memory.preferences)) {
+			if (!Object.hasOwn(memory.preferences, key)) {
 				return false;
 			}
 

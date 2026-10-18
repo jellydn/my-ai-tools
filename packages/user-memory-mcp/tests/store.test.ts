@@ -32,6 +32,41 @@ test("stores, retrieves, and updates a preference across store instances", async
 	assert.notEqual(updated.updatedAt, created.updatedAt);
 });
 
+test("stores and updates constructor as an own preference across store instances", async () => {
+	const createdAt = "2026-07-18T10:00:00.000Z";
+	const updatedAt = "2026-07-18T11:00:00.000Z";
+	const { directory, store } = await makeStore(() => new Date(createdAt));
+	const created = await store.set("constructor", "concise");
+	assert.deepEqual(created, { key: "constructor", value: "concise", createdAt, updatedAt: createdAt });
+
+	const reopened = new PreferenceStore({ directory, now: () => new Date(updatedAt) });
+	assert.deepEqual(await reopened.get("constructor"), created);
+	const updated = await reopened.set("constructor", "detailed");
+	assert.deepEqual(updated, { key: "constructor", value: "detailed", createdAt, updatedAt });
+	assert.deepEqual(await new PreferenceStore({ directory }).list(), [updated]);
+});
+
+test("deletes only persisted own preferences, not inherited or nonexistent keys", async () => {
+	const { directory, store } = await makeStore();
+	assert.equal(await store.delete("constructor"), false);
+	assert.equal(await store.delete("nonexistent"), false);
+	await assert.rejects(readFile(store.auditPath, "utf8"), { code: "ENOENT" });
+
+	await store.set("constructor", "concise");
+	await store.set("editor", "vim");
+	const reopened = new PreferenceStore({ directory });
+	assert.equal(await reopened.delete("constructor"), true);
+	assert.equal(await reopened.delete("constructor"), false);
+	assert.equal(await reopened.delete("nonexistent"), false);
+	assert.deepEqual(
+		(await reopened.list()).map(({ key }) => key),
+		["editor"],
+	);
+	assert.equal(await reopened.delete("editor"), true);
+	assert.equal(await reopened.delete("editor"), false);
+	assert.deepEqual(await new PreferenceStore({ directory }).list(), []);
+});
+
 test("lists exactly the stored preferences in deterministic order", async () => {
 	const { store } = await makeStore();
 	await store.set("testRunner", "vitest");
