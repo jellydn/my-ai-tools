@@ -1,0 +1,9 @@
+ui-onboarding:
+  welcomeNoticeVersion: 2026-08-13.1
+agent-default-model:
+  provider: deepseek-official
+  model: deepseek-v4-flash
+llm-deepseek:
+  apiKeyEnv: DEEPSEEK_API_KEY
+  thinking: enabled
+  reasoningEffort: high

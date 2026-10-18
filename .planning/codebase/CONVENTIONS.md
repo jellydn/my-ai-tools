@@ -1,97 +1,98 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-07-14
+**Analysis Date:** 2026-08-04
 
 ## Naming Patterns
 
 **Files:**
-- Shell entry points and libraries: `cli.sh`, `generate.sh`, `install.sh`, `lib/common.sh`, `lib/require_bash.sh`, `lib/install.sh`
-- BATS tests: `tests/<area>.bats` (e.g. `cli.bats`, `pr_claude.bats`, `sh_reexec.bats`); PR-focused config tests use `pr_<tool>.bats`
-- TypeScript: `lib/**/*.ts`, `scripts/*.ts`, `tests/*.test.ts` (e.g. `code-taste.test.ts`)
-- Tool configs under `configs/<tool>/` (e.g. `configs/claude/settings.json`)
+- TypeScript uses descriptive lowercase names with hyphens where needed (`openai-client.ts`, `github-bot.test.ts`).
+- Shell scripts use lowercase names and `.sh`; BATS tests use area-oriented names such as `pr_fusion.bats`.
+- Python tests use `test_<subject>.py`; tool configs use native filenames.
 
 **Functions:**
-- Shell: `snake_case` (`log_info`, `copy_configurations`, `safe_copy_dir`, `execute_quoted`)
-- TypeScript: `camelCase` for functions and variables; `PascalCase` for types (`SemanticChunk`, `TasteProfile`)
+- TypeScript functions use `camelCase` (`createOpenAIClient`, `parseRepoConfig`, `inspectDiff`).
+- Shell functions use `snake_case` (`copy_configurations`, `execute_quoted`, `safe_copy_dir`).
+- Python follows standard `snake_case`.
 
 **Variables:**
-- Shell: `UPPER_SNAKE` for exported flags and globals (`DRY_RUN`, `SCRIPT_DIR`, `YES_TO_ALL`, `REPO_ROOT` in tests)
-- Shell locals: `local` + `snake_case` inside functions
-- TypeScript: `camelCase`; exported types use `type` / `interface` with `PascalCase`
+- TypeScript local variables and parameters use `camelCase`; constants use descriptive `UPPER_SNAKE_CASE` where module-wide.
+- Shell variables are uppercase for exported/environment values and lowercase `local` variables inside functions.
+- Configuration keys follow the native client’s naming conventions.
 
 **Types:**
-- TypeScript: explicit `export type` / `interface` in `lib/`; strict mode enabled (`tsconfig.json`)
+- TypeScript interfaces/types use `PascalCase` (`BotConfig`, `RepoConfig`, `Job`, `ReviewFinding`).
+- Zod schemas are lower camel-case values with inferred exported types where useful.
+- Domain unions and literal tuples are preferred for constrained bot commands/states.
 
 ## Code Style
 
 **Formatting:**
-- **Biome** (`biome.json`): tabs, indent width 1, line width 120
-- JavaScript/TypeScript strings: **double quotes**
-- JSON formatted with tabs
-- **oxfmt** via pre-commit for TS/JS (with excludes for `lib/code-taste/`, `scripts/code-taste.ts`, `tests/code-taste.test.ts`)
+- Biome is configured in `biome.json` for JavaScript/TypeScript/JSON-family files: tabs, 120-column width, and double quotes.
+- Shell formatting follows the repository’s existing tab/quoting style and is checked primarily through syntax/BATS/pre-commit workflows.
+- YAML uses spaces and standard GitHub Actions formatting.
 
 **Linting:**
-- Biome linter **disabled** in repo (`"linter": { "enabled": false }`); formatting is the primary automated gate
-- TypeScript: `bun run typecheck` (`tsc --noEmit`, strict options)
-- Shell: `bash -n cli.sh generate.sh` (and other scripts as needed) before merge
+- Biome formatting/checking is enabled, but the Biome linter is disabled in `biome.json`; do not assume lint rules catch semantic issues.
+- Shell correctness is protected by `bash -n`, BATS tests, and explicit repository instructions in `AGENTS.md`.
+- Python style is conventional but is not governed by a root-level Python formatter configuration.
 
 ## Import Organization
 
 **Order:**
-1. Node built-ins (`node:path`, `node:url`)
-2. Third-party packages (`web-tree-sitter`, `hono`, `openai`, etc.)
-3. Relative project imports (`../lib/code-taste/...`)
+1. Node/Bun built-ins (`node:fs`, `node:path`, `node:crypto`).
+2. External packages (`hono`, `openai`, `zod`, `yaml`).
+3. Relative project modules.
+4. Type-only imports are marked with `import type` where appropriate.
 
 **Path Aliases:**
-- No path aliases in `tsconfig.json`; use relative imports with `.ts` extensions (`allowImportingTsExtensions`, `moduleResolution: "bundler"`)
+- No TypeScript path aliases are used; relative imports include explicit `.ts` extensions in the Bun application.
+- Shell paths use `$HOME` or repository-relative paths; absolute paths are discouraged in managed configs.
 
 ## Error Handling
 
 **Patterns:**
-- Shell: `set -e` on entry points **after** `lib/require_bash.sh`; side effects wrapped in `execute()` / `execute_quoted()` for dry-run safety
-- Shell failures: `log_error` to stderr; many helpers return non-zero and rely on `set -e` or explicit `[ "$status" -eq 0 ]` in BATS
-- TypeScript: `async`/`await` with thrown errors or early returns; tests use `expect(...).toThrow` / status checks where applicable
-- Config install: `jq` validation warns; interactive prompts may allow proceed (see `AGENTS.md`)
+- Throw `Error` (often with a code/status property) for unrecoverable TypeScript boundary failures (`lib/openai-client.ts`, `src/github-bot/github.ts`).
+- Validate external/user input before work: Zod schemas in `server.ts` and `src/github-bot/config.ts`, command allowlists in `security.ts`, and diff/secret checks in `workspace.ts`.
+- Async entry scripts terminate through `main().catch(...)` and non-zero exit (`scripts/index-repo.ts`, `scripts/index-browser.ts`).
+- GitHub worker failures are recorded in durable job history and reported to the issue/PR when possible (`src/github-bot/worker.ts`).
+- Shell entry points source the Bash guard before `set -e`; side effects use `execute()`/`execute_quoted()` for dry-run and quoting support.
 
 ## Logging
 
-**Framework:** Shell — `log_info`, `log_success`, `log_warning`, `log_error` in `lib/common.sh` (colored `printf` to **stderr**). TypeScript — mostly `console.log` / `console.error` in tooling (e.g. `lib/indexer.ts`).
+**Framework:** Console output for server/indexing; structured JSON logger for the GitHub bot; named shell logging helpers (`log_info`, `log_success`, `log_warning`, `log_error`).
 
 **Patterns:**
-- Do not mix log output with stdout used for data piping in shell
-- Dry-run paths log `[DRY RUN]` via `execute` helpers instead of performing mutations
+- Log useful operational state but redact secrets before structured output (`src/github-bot/security.ts`).
+- Shell output should use the shared helpers rather than ad hoc `echo` for status messages.
+- Errors should include enough context to diagnose the failed boundary without exposing keys/tokens.
 
 ## Comments
 
 **When to Comment:**
-- Shell: file headers explain purpose and sourcing order (`require_bash.sh` before `common.sh`); security notes on `eval` in `execute()`
-- TypeScript: brief section comments for non-obvious algorithms (e.g. markdown fence handling in chunker tests)
+- Explain non-obvious safety constraints, generated sections, deployment workarounds, or compatibility decisions.
+- Keep comments close to the guarded behavior; avoid narrating obvious code.
+- Managed/generated regions in config files are marked and should not be hand-edited outside their owning sync workflow.
 
 **JSDoc/TSDoc:**
-- Light usage; types preferred over heavy doc blocks in `lib/code-taste/`
+- Lightweight comments are used for exported security/runtime contracts and tricky algorithms; broad documentation is kept in `docs/`, `README.md`, and skill files.
+- Every significant finding in generated planning docs should cite a concrete repository path.
 
 ## Function Design
 
-**Size:** Shell functions grouped by concern in `lib/common.sh` / `lib/install.sh`; CLI orchestration stays in `cli.sh` / `generate.sh`
+**Size:** Keep functions focused on one operation; large orchestrators remain in `server.ts`, `cli.sh`, `generate.sh`, and `src/github-bot/worker.ts` because they coordinate workflows.
 
-**Parameters:** Quote all shell variables; use `local` in functions; prefer `execute_quoted` when paths may contain spaces
+**Parameters:** Prefer typed objects/config interfaces for multi-value TypeScript operations; use explicit `AbortSignal` parameters for cancellable GitHub/agent work. Shell functions use positional parameters with `local` declarations.
 
-**Return Values:** Shell: exit codes; BATS asserts `[ "$status" -eq 0 ]`. TypeScript: return values and typed promises
+**Return Values:** Use explicit typed results, discriminated unions, or `undefined` for optional lookups. Preserve status/error metadata across API and worker boundaries.
 
 ## Module Design
 
-**Exports:** TypeScript uses named `export` of functions and types; `"type": "module"` in `package.json`
+**Exports:** Export focused functions/classes/interfaces from domain modules; compose them at `server.ts` or `src/github-bot/app.ts` rather than hiding all behavior in one file.
 
-**Barrel Files:** No widespread barrel pattern; import concrete modules under `lib/`
+**Barrel Files:** No broad barrel-file convention; imports generally target the implementation module directly.
 
-## Shell-Specific Conventions
-
-- **Re-exec guard:** Every bash entry point sources `lib/require_bash.sh` **before** `lib/common.sh`
-- **Paths:** Use `$HOME` and paths relative to repo; avoid hard-coded absolute paths in configs/scripts (`AGENTS.md`)
-- **Dry-run:** `DRY_RUN=true` — never run destructive commands outside `execute` / `execute_quoted`
-- **Sourcing vs executing:** `cli.sh` guards CLI parsing with `[[ "${BASH_SOURCE[0]}" == "${0}" ]]` so tests can `source` functions
-- **Git safety:** Prefer `git add <files>`; no force-push without approval (`configs/git-guidelines.md`)
+**Shell modules:** Shared operations live in `lib/`; entry points source helpers rather than duplicating command wrappers.
 
 ---
 
-*Convention analysis: 2026-07-14*
+*Convention analysis: 2026-08-04*

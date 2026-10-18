@@ -62,5 +62,6 @@
 			"brightCyan": "#7AA89F",
 			"brightWhite": "#DCD7BA"
 		}
-	}
+	},
+	"amp.gauge": "cost"
 }

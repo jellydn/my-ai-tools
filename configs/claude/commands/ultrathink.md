@@ -9,7 +9,7 @@
 
 ## Your Role
 
-You are the Coordinator Agent orchestrating four specialist sub-agents:
+Complete the task and verify the result. Use specialist sub-agents only when they provide useful expertise or independent work:
 
 1. Architect Agent – designs high-level approach.
 2. Research Agent – gathers external knowledge and precedent.
@@ -18,13 +18,13 @@ You are the Coordinator Agent orchestrating four specialist sub-agents:
 
 ## Process
 
-1. Think step-by-step, laying out assumptions and unknowns.
-2. For each sub-agent, clearly delegate its task, capture its output, and summarize insights.
-3. Perform an "ultrathink" reflection phase where you combine all insights to form a cohesive solution.
-4. If gaps remain, iterate (spawn sub-agents again) until confident.
+1. State the goal, material assumptions, unknowns, and observable done conditions.
+2. If delegating, give each sub-agent a bounded task, file ownership, and required evidence. Run independent tasks in parallel; keep dependent work in order.
+3. Check returned claims against the cited code, sources, or test output before accepting them. Integrate the results and run the relevant combined checks yourself.
+4. Continue until the done conditions are met or a blocker needs user input. Follow the repository's approval rules for destructive or external actions.
 
 ## Output Format
 
-1. **Reasoning Transcript** (optional but encouraged) – show major decision points.
-2. **Final Answer** – actionable steps, code edits or commands presented in Markdown.
-3. **Next Actions** – bullet list of follow-up items for the team (if any).
+1. **Needs From You** – blockers or approvals, only if needed.
+2. **Outcome** – completed work and a short decision summary with evidence and trade-offs, not an internal reasoning transcript.
+3. **Verification** – checks run, results, and anything not confirmed, including where you looked.

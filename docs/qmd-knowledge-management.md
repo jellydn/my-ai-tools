@@ -18,7 +18,7 @@ The qmd-knowledge skill follows the Agent Skills specification:
 
 ```
 # The skill (one SKILL.md defines the capability)
-~/.config/opencode/skill/qmd-knowledge/
+$HOME/.config/opencode/skills/qmd-knowledge/
 ├── SKILL.md              # Skill definition
 ├── scripts/              # Executable scripts
 │   └── record.sh         # Record learnings/issues/notes
@@ -31,15 +31,17 @@ The qmd-knowledge skill follows the Agent Skills specification:
 # Knowledge storage (qmd collections per project)
 ~/.ai-knowledges/
 ├── my-ai-tools/          # Collection for my-ai-tools project
-│   ├── learnings/
-│   │   ├── 2024-01-26-qmd-integration.md
-│   │   └── 2024-01-27-mcp-servers.md
-│   └── issues/
-│       ├── 123.md
-│       └── 456.md
+│   └── references/
+│       ├── learnings/
+│       │   ├── 2024-01-26-qmd-integration.md
+│       │   └── 2024-01-27-mcp-servers.md
+│       └── issues/
+│           ├── 123.md
+│           └── 456.md
 └── another-project/      # Collection for another-project
-    ├── learnings/
-    └── issues/
+    └── references/
+        ├── learnings/
+        └── issues/
 ```
 
 **Key concept**: One skill (`qmd-knowledge`) manages knowledge for multiple projects. Each project is a qmd collection, not a separate skill.
@@ -92,7 +94,7 @@ The skill is installed when you run the setup script:
 ./cli.sh
 ```
 
-This copies the qmd-knowledge skill to `~/.config/opencode/skill/qmd-knowledge/`.
+`cli.sh` copies the skill to the universal skills directory at `$HOME/.agents/skills/qmd-knowledge/`. Tool-specific paths such as `$HOME/.config/opencode/skills/qmd-knowledge/` resolve to that directory via a symlink (`$HOME/.config/opencode/skills` → `$HOME/.agents/skills`), so the symlink path works at runtime.
 
 ### 4. Create a Knowledge Collection for Your Project
 
@@ -101,7 +103,7 @@ This copies the qmd-knowledge skill to `~/.config/opencode/skill/qmd-knowledge/`
 The `qmd-knowledge` skill now automatically sets up the knowledge base when you first use it. Simply run:
 
 ```bash
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "First learning"
+$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh learning "First learning"
 ```
 
 The script will:
@@ -118,8 +120,8 @@ If you prefer manual setup or need to create collections for multiple projects:
 
 ```bash
 # Create storage directory for your project
-mkdir -p ~/.ai-knowledges/my-ai-tools/learnings
-mkdir -p ~/.ai-knowledges/my-ai-tools/issues
+mkdir -p ~/.ai-knowledges/my-ai-tools/references/learnings
+mkdir -p ~/.ai-knowledges/my-ai-tools/references/issues
 
 # Add qmd collection for this project
 qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
@@ -144,7 +146,7 @@ qmd embed
 #### Record a Learning
 
 ```bash
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "qmd MCP integration"
+$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh learning "qmd MCP integration"
 ```
 
 This creates a timestamped file: `references/learnings/YYYY-MM-DD-qmd-mcp-integration.md`
@@ -152,7 +154,7 @@ This creates a timestamped file: `references/learnings/YYYY-MM-DD-qmd-mcp-integr
 #### Add Issue Note
 
 ```bash
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh issue 123 "Fixed by updating dependencies"
+$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh issue 123 "Fixed by updating dependencies"
 ```
 
 This appends to `references/issues/123.md` (creating it if it doesn't exist).
@@ -160,7 +162,7 @@ This appends to `references/issues/123.md` (creating it if it doesn't exist).
 #### Record General Note
 
 ```bash
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh note "Consider using agent skills for extensibility"
+$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh note "Consider using agent skills for extensibility"
 ```
 
 ### Querying Knowledge
@@ -212,7 +214,7 @@ qmd embed
 **Claude recognizes the skill and executes:**
 
 ```bash
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "qmd MCP autonomous tool use"
+$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh learning "qmd MCP autonomous tool use"
 ```
 
 ### 2. Query Knowledge Later
@@ -244,7 +246,7 @@ qmd search "MCP servers" -c my-ai-tools
 **Claude executes:**
 
 ```bash
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh issue 123 "Fixed by updating qmd dependency to latest version"
+$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh issue 123 "Fixed by updating qmd dependency to latest version"
 ```
 
 ## Multiple Projects
@@ -253,8 +255,8 @@ The qmd-knowledge skill manages knowledge for multiple projects. Each project ge
 
 ```bash
 # Create storage for a different project
-mkdir -p ~/.ai-knowledges/another-project/learnings
-mkdir -p ~/.ai-knowledges/another-project/issues
+mkdir -p ~/.ai-knowledges/another-project/references/learnings
+mkdir -p ~/.ai-knowledges/another-project/references/issues
 
 # Add collection and context
 qmd collection add ~/.ai-knowledges/another-project --name another-project
@@ -285,7 +287,7 @@ Set the `QMD_PROJECT` environment variable to override automatic detection:
 
 ```bash
 export QMD_PROJECT="another-project"
-~/.config/opencode/skill/qmd-knowledge/scripts/record.sh learning "This goes to another-project"
+$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh learning "This goes to another-project"
 ```
 
 ### Handling Existing Collections
@@ -320,6 +322,7 @@ git push
 # On machine 2
 cd ~/.ai-knowledges
 git clone <your-backup-repo> my-ai-tools
+# Entries are stored in references/learnings and references/issues.
 
 # Add collection and generate embeddings
 qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
@@ -342,8 +345,8 @@ bun install -g @tobilu/qmd
 Create the collection for your project:
 
 ```bash
-mkdir -p ~/.ai-knowledges/my-ai-tools/learnings
-mkdir -p ~/.ai-knowledges/my-ai-tools/issues
+mkdir -p ~/.ai-knowledges/my-ai-tools/references/learnings
+mkdir -p ~/.ai-knowledges/my-ai-tools/references/issues
 qmd collection add ~/.ai-knowledges/my-ai-tools --name my-ai-tools
 qmd context add qmd://my-ai-tools "Knowledge base for my-ai-tools project"
 qmd embed
@@ -378,7 +381,7 @@ Contributions welcome! To add features:
 
 1. Fork the repository
 2. Create a feature branch
-3. Add your changes to `configs/opencode/skill/qmd-knowledge/`
+3. Add your changes to `skills/qmd-knowledge/`
 4. Submit a pull request
 
 ## License

@@ -115,6 +115,25 @@ export function run(options: Options) {
 		expect(parts.every((part) => part.length <= 150)).toBe(true);
 	});
 
+	test("preserves every content character at split boundaries", () => {
+		for (const offset of [-1, 0, 1]) {
+			const body = `${"a".repeat(MAX_SEMANTIC_CHUNK_LENGTH + offset)}\n\n${"b".repeat(257)}\nEND`;
+			const stats = { splitUnits: 0, droppedUnits: 0 };
+			const chunks = chunkMarkdown("owner/repo", "README.md", body, stats);
+			expect(
+				chunks
+					.map((chunk) => chunk.text)
+					.join("")
+					.replace(/\s/g, ""),
+			).toBe(body.replace(/\s/g, ""));
+			expect(chunks.every((chunk) => chunk.text.length <= MAX_SEMANTIC_CHUNK_LENGTH)).toBe(true);
+			expect(stats.droppedUnits).toBe(0);
+		}
+		for (const length of [0, -1, 1.5, Number.NaN]) {
+			expect(() => splitTextToMaxLength("content", length)).toThrow(RangeError);
+		}
+	});
+
 	test("splits oversized markdown sections while keeping fences closed", () => {
 		const stats = { splitUnits: 0, droppedUnits: 0 };
 		const body = `${"line inside fence\n".repeat(700)}`;

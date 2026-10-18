@@ -8,12 +8,29 @@ Run shell script syntax check to verify changes:
 bash -n cli.sh
 ```
 
+### Windows installer prerequisites
+
+Run the isolated prerequisite tests with Windows PowerShell 5.1 or PowerShell 7:
+
+```powershell
+powershell -NoProfile -File tests/windows_installer.ps1
+# PowerShell 7 (also works on Linux):
+pwsh -NoProfile -File tests/windows_installer.ps1
+```
+
+These tests use temporary executable fixtures and a simulated `winget`; they do not install software or run
+`cli.sh`. They cover first installation with stale command lookup, inherited PATH, repeated runs, dry-run,
+custom Git locations, existing tools, WSL launcher rejection, missing/failed `winget`, and restart guidance.
+Native Windows CI runs them under PowerShell 5.1 before the real `-DryRun -Yes` smoke test. The Bats Windows
+suite also runs them when `pwsh` is available. Actual package downloads and administrator approval still need
+a clean Windows 11 machine for end-to-end validation.
+
 ## 🔁 CI/Non-Interactive Mode
 
 For automated validation, check all scripts with syntax validation:
 
 ```bash
-bash -n cli.sh generate.sh && echo "All scripts valid"
+bash -n cli.sh generate.sh install.sh lib/*.sh scripts/*.sh && echo "All scripts valid"
 ```
 
 ## 🧹 Code Quality Checks

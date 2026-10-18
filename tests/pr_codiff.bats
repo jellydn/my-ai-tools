@@ -7,7 +7,7 @@ REPO_ROOT="$BATS_TEST_DIRNAME/.."
 LIB_INSTALL="$REPO_ROOT/lib/install.sh"
 CLI_SH="$REPO_ROOT/cli.sh"
 GENERATE_SH="$REPO_ROOT/generate.sh"
-README="$REPO_ROOT/README.md"
+README="$REPO_ROOT/TOOL_REFERENCE.md"
 
 @test "configs/codiff/codiff.jsonc exists" {
 	[ -f "$REPO_ROOT/configs/codiff/codiff.jsonc" ]
@@ -44,7 +44,7 @@ README="$REPO_ROOT/README.md"
 }
 
 @test "cli.sh main() installs codiff" {
-	run grep -E '^[[:space:]]*install_codiff' "$CLI_SH"
+	run grep -F '"codiff:install_codiff"' "$CLI_SH"
 	[ "$status" -eq 0 ]
 	[ -n "$output" ]
 }

@@ -1,5 +1,30 @@
 {
 	"providers": {
+		"omniroute": {
+			"api": "openai-completions",
+			"apiKey": "sk_omniroute",
+			"baseUrl": "http://localhost:20128/v1",
+			"models": [
+				{
+					"contextWindow": 250000,
+					"id": "paid",
+					"input": ["text", "image"],
+					"toolCalling": true
+				},
+				{
+					"contextWindow": 250000,
+					"id": "free",
+					"input": ["text", "image"],
+					"toolCalling": true
+				},
+				{
+					"contextWindow": 250000,
+					"id": "premium",
+					"input": ["text", "image"],
+					"toolCalling": true
+				}
+			]
+		},
 		"vibeproxy": {
 			"api": "openai-completions",
 			"apiKey": "vibeproxy",

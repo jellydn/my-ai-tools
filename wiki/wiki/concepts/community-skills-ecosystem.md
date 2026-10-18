@@ -30,7 +30,6 @@ npx skills add <owner/repo> --skill <name> --yes  # Install a skill
 | `blader/humanizer` | `humanizer` | Remove AI-generated writing style |
 | `openclaw/agent-skills` | `autoreview` | Automated PR review |
 | `GoogleChrome/modern-web-guidance` | `modern-web-guidance` | Web dev best practices |
-| `openai/codex` | `babysit-pr` | Automated PR monitoring |
 | `mvanhorn/last30days-skill` | `last30days` | Recent topic research |
 | `av/facts` | `facts` suite | Track project specs with lifecycle |
 | `github/gh-stack` | `gh-stack` | Stacked branches and PRs |
@@ -38,6 +37,8 @@ npx skills add <owner/repo> --skill <name> --yes  # Install a skill
 | `warpdotdev/oz-skills` | 14 skills | CI fix, PR creation, web testing |
 | `Gentleman-Programming/engram` | `engram-memory` | Persistent agent memory |
 | `privatenumber/mac-ocr` | `mac-ocr` | macOS OCR via Vision framework |
+
+`babysit-pr` is not installed from `openai/codex`. It is a first-party skill in this repository, together with `diagnosing-bugs` and `visual-pr`.
 
 ## Related Pages
 

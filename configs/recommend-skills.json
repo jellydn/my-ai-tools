@@ -1,6 +1,16 @@
 {
 	"recommended_skills": [
 		{
+			"repo": "michael-denyer/pstack-claude",
+			"skill": "poteto-mode",
+			"description": "Route coding tasks through rigorous planning, delegation, review, and verification workflows across Claude Code, Codex, Pi, OpenCode, and other agent harnesses"
+		},
+		{
+			"repo": "BuilderIO/skills",
+			"skill": "visual-recap",
+			"description": "Turn a PR, branch, commit, or git diff into an interactive visual recap with diagrams, file maps, API/schema summaries, and focused review notes"
+		},
+		{
 			"repo": "shadcn/improve",
 			"description": "Audit any codebase and write implementation plans for cheaper models to execute. Uses expensive model for planning, cheap model for execution."
 		},
@@ -41,7 +51,7 @@
 		},
 		{
 			"repo": "jezweb/claude-skills",
-			"description": "97 production-ready skills for Claude Code"
+			"description": "Production-ready skills for Claude Code"
 		},
 		{
 			"repo": "openclaw/agent-skills",
@@ -68,18 +78,23 @@
 			"description": "Search tool for modern web development best practices"
 		},
 		{
-			"repo": "openai/codex",
-			"skill": "babysit-pr",
-			"description": "Continuously monitor open PRs: poll review comments and CI runs, auto-fix branch-related failures, retry flaky checks, and surface fresh review feedback until merged or user help is required"
+			"repo": "dzhng/jevgrep",
+			"skill": "jevgrep",
+			"description": "Find relevant files and source context by asking what code does"
 		},
 		{
 			"repo": "Gentleman-Programming/engram",
 			"skill": "engram-memory",
-			"description": "Persistent agent memory via single Go binary — SQLite + FTS5, 20 MCP tools, zero dependencies, TUI, git-based sync"
+			"description": "Persistent agent memory via a Go binary — SQLite + FTS5, lifecycle hooks, 22 MCP tools at the checked revision, optional Git/cloud sync"
 		},
 		{
 			"repo": "ctxrs/ctx",
 			"description": "Install the ctx agent-history search skill — gives agents the ability to search past coding sessions before editing"
+		},
+		{
+			"repo": "tt-a1i/archify",
+			"skill": "archify",
+			"description": "Turn a codebase or system description into a polished, interactive system map directly in chat"
 		}
 	]
 }

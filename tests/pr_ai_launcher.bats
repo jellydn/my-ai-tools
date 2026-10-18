@@ -26,30 +26,31 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     [[ "$output" != *"big-pickle"* ]]
 }
 
-@test "configs/ai-launcher/config.json ccs tool is registered" {
+@test "configs/ai-launcher/config.json no longer registers deprecated ccs tool" {
     require_jq
-    run jq -r '[.tools[] | select(.name == "ccs")][0].command' "$AI_LAUNCHER_CONFIG"
+    run jq -e '[.tools[] | select(.name == "ccs")] | length == 0' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
-    [[ "$output" == "ccs" ]]
+    [ "$output" = "true" ]
 }
 
-@test "configs/ai-launcher/config.json review template is read-only" {
+@test "configs/ai-launcher/config.json templates no longer declare unused mode metadata" {
     require_jq
-    run jq -r '[.templates[] | select(.name == "review")][0] | "\(.mode) \(.requiresConfirmation)"' "$AI_LAUNCHER_CONFIG"
+    run jq -e 'all(.templates[]; (has("mode") | not) and (has("requiresConfirmation") | not))' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
-    [[ "$output" == "read-only false" ]]
+    [ "$output" = "true" ]
 }
 
-@test "configs/ai-launcher/config.json commit-atomic template requires confirmation" {
+@test "configs/ai-launcher/config.json summary template is registered" {
     require_jq
-    run jq -r '[.templates[] | select(.name == "commit-atomic")][0] | "\(.mode) \(.requiresConfirmation)"' "$AI_LAUNCHER_CONFIG"
+    run jq -r '[.templates[] | select(.name == "summary")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
-    [[ "$output" == "write true" ]]
+    [[ "$output" == "ai summary"* ]]
+    [[ "$output" == *"--provider opencode"* ]]
 }
 
-@test "configs/ai-launcher/config.json all templates declare mode metadata" {
+@test "configs/ai-launcher/config.json commit-staged has gd alias" {
     require_jq
-    run jq -e 'all(.templates[]; has("mode") and has("requiresConfirmation"))' "$AI_LAUNCHER_CONFIG"
+    run jq -e '[.templates[] | select(.name == "commit-staged") | .aliases[]? | select(. == "gd")] | length > 0' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
@@ -69,58 +70,73 @@ AI_LAUNCHER_CONFIG="$REPO_ROOT/configs/ai-launcher/config.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/ai-launcher/config.json review template command no longer uses --model flag" {
+@test "configs/ai-launcher/config.json review template command uses opencode with the muse-spark free model" {
     require_jq
     run jq -r '[.templates[] | select(.name == "review")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode run --agent plan"* ]]
+    [[ "$output" == "opencode run --standalone -m opencode/muse-spark-1.3-contributor-free --auto"* ]]
 }
 
-@test "configs/ai-launcher/config.json commit-zen template command no longer uses --model flag" {
+@test "configs/ai-launcher/config.json commit-zen template command uses opencode with the muse-spark free model" {
     require_jq
     run jq -r '[.templates[] | select(.name == "commit-zen")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode run --agent plan"* ]]
+    [[ "$output" == "opencode run --standalone -m opencode/muse-spark-1.3-contributor-free --auto"* ]]
 }
 
-@test "configs/ai-launcher/config.json commit-staged template command no longer uses --model flag" {
+@test "configs/ai-launcher/config.json commit-staged template command uses opencode with the muse-spark free model" {
     require_jq
     run jq -r '[.templates[] | select(.name == "commit-staged")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode run --agent build"* ]]
+    [[ "$output" == "opencode run --standalone -m opencode/muse-spark-1.3-contributor-free --auto"* ]]
 }
 
-@test "configs/ai-launcher/config.json commit-atomic template command no longer uses --model flag" {
+@test "configs/ai-launcher/config.json commit-atomic template command uses opencode with the muse-spark free model" {
     require_jq
     run jq -r '[.templates[] | select(.name == "commit-atomic")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode run --agent build"* ]]
+    [[ "$output" == "opencode run --standalone -m opencode/muse-spark-1.3-contributor-free --auto"* ]]
 }
 
-@test "configs/ai-launcher/config.json architecture-explanation template command no longer uses --model flag" {
+@test "configs/ai-launcher/config.json architecture-explanation template command uses opencode with the muse-spark free model" {
     require_jq
     run jq -r '[.templates[] | select(.name == "architecture-explanation")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode run --agent plan"* ]]
+    [[ "$output" == "opencode run --standalone -m opencode/muse-spark-1.3-contributor-free --auto"* ]]
 }
 
-@test "configs/ai-launcher/config.json draft-pull-request template command no longer uses --model flag" {
+@test "configs/ai-launcher/config.json draft-pull-request template command uses opencode with the muse-spark free model" {
     require_jq
     run jq -r '[.templates[] | select(.name == "draft-pull-request")][0].command' "$AI_LAUNCHER_CONFIG"
     [ "$status" -eq 0 ]
     [[ "$output" != *"--model"* ]]
     [[ "$output" != *"deepseek-v4-flash-free"* ]]
-    [[ "$output" == "opencode run --agent build"* ]]
+    [[ "$output" == "opencode run --standalone -m opencode/muse-spark-1.3-contributor-free --auto"* ]]
+}
+
+@test "configs/ai-launcher/config.json additional review and explanation templates use opencode with the muse-spark free model" {
+    require_jq
+    for template in "explain" "review-security" "review-refactor" "review-performance"; do
+        run jq -r "[.templates[] | select(.name == \"$template\")][0].command" "$AI_LAUNCHER_CONFIG"
+        [ "$status" -eq 0 ]
+        [[ "$output" == "opencode run --standalone -m opencode/muse-spark-1.3-contributor-free --auto"* ]]
+    done
+}
+
+@test "configs/ai-launcher/config.json no template uses non-interactive plan permission mode" {
+    require_jq
+    run jq -e '[.templates[].command | select(contains("--permission-mode plan"))] | length == 0' "$AI_LAUNCHER_CONFIG"
+    [ "$status" -eq 0 ]
 }
 
 @test "configs/ai-launcher/config.json no longer references deepseek-v4-flash-free" {

@@ -1,0 +1,9 @@
+# Optional Codex profile for the full GPT-5.6 Sol context budget.
+# Select with: codex --profile 1m
+#
+# gpt-5.6-sol: 1,050,000 window, 922,000 max input, 128,000 max output.
+# Compact at 794000 (922000 - 128000) so a full reply still fits under the input cap.
+# Prompts over 272K input tokens are billed at 2x input and 1.5x output for the request.
+model = "gpt-5.6-sol"
+model_context_window = 1050000
+model_auto_compact_token_limit = 794000

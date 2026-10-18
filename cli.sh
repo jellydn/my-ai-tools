@@ -13,7 +13,7 @@ source "$SCRIPT_DIR/lib/install.sh"
 # Core tools installed/configured when -y (YES_TO_ALL) is active.
 # This is your personal active tool set. When YES_TO_ALL is false
 # (interactive mode), tool_allowed returns true for everything.
-TOOL_ALLOWLIST_YES=(amp codex ctx cursor kilo opencode open_code_review pi antigravity ai-switcher)
+TOOL_ALLOWLIST_YES=(amp codex ctx cursor deepseek_harness delta fx kilo muse opencode open_code_review pi omp antigravity ai-switcher claude reasonix)
 
 tool_allowed() {
 	local name="$1"
@@ -23,6 +23,65 @@ tool_allowed() {
 		[ "$t" = "$name" ] && return 0
 	done
 	return 1
+}
+
+# Installers run in this order. Each entry is "<allowlist-key>:<installer>".
+# The "always" key marks cross-tool dependencies that are never gated by the
+# -y allowlist because every managed assistant relies on them.
+INSTALL_SEQUENCE=(
+	"claude:install_claude_code"
+	# RTK reduces shell-output context for every managed coding assistant.
+	"always:install_rtk"
+	# OpenCode 2 is the default `opencode` binary. Do not install OpenCode 1 first.
+	"opencode:install_opencode2"
+	"opencode:install_open_cursor"
+	"fx:install_fx"
+	"muse:install_muse"
+	"amp:install_amp"
+	"always:install_global_tools"
+	"ccs:install_ccs"
+	"ai-switcher:install_ai_switcher"
+	"codex:install_codex"
+	"kimi_code:install_kimi_code"
+	"gemini:install_gemini"
+	"antigravity:install_antigravity"
+	"kilo:install_kilo"
+	"reasonix:install_reasonix"
+	"pi:install_pi"
+	"omp:install_omp"
+	"commandcode:install_commandcode"
+	"copilot:install_copilot"
+	"cursor:install_cursor"
+	"conductor:install_conductor"
+	"herdr:install_herdr"
+	"ctx:install_ctx"
+	"hunk:install_hunk"
+	"qodercli:install_qodercli"
+	"deepseek_harness:install_deepseek_harness"
+	"kiro:install_kiro"
+	"delta:install_delta"
+	"codiff:install_codiff"
+	"devin:install_devin"
+	"factory:install_factory"
+	"cline:install_cline"
+	"grok:install_grok"
+	"mimo:install_mimo"
+	"open_code_review:install_open_code_review"
+)
+
+run_install_sequence() {
+	local entry key installer
+	for entry in "${INSTALL_SEQUENCE[@]}"; do
+		key="${entry%%:*}"
+		installer="${entry#*:}"
+
+		if [ "$key" = "always" ] || tool_allowed "$key"; then
+			"$installer"
+		else
+			log_info "Skipping $key installer (not in -y allowlist)"
+		fi
+		echo
+	done
 }
 
 # Parse command-line arguments first (only when executed, not sourced)
@@ -71,9 +130,13 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 			rollback_transaction
 			exit $?
 			;;
+		-h | --help)
+			echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback] [-h|--help]"
+			exit 0
+			;;
 		*)
 			echo "Unknown option: $arg"
-			echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback]"
+			echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback] [-h|--help]"
 			exit 1
 			;;
 		esac
@@ -271,11 +334,15 @@ backup_configs() {
 		copy_config_dir "$HOME/.claude" "$BACKUP_DIR" "claude"
 		copy_config_dir "$HOME/.config/opencode" "$BACKUP_DIR" "opencode"
 		copy_config_dir "$HOME/.config/amp" "$BACKUP_DIR" "amp"
+		copy_config_file "$HOME/.fx/AGENTS.md" "$BACKUP_DIR/fx" || true
+		copy_config_file "$HOME/.config/muse/settings.json" "$BACKUP_DIR/muse" || true
 		copy_config_dir "$HOME/.codex" "$BACKUP_DIR" "codex"
 		copy_config_dir "$HOME/.kimi-code" "$BACKUP_DIR" "kimi-code"
 		copy_config_dir "$HOME/.gemini" "$BACKUP_DIR" "gemini"
 		copy_config_dir "$HOME/.config/kilo" "$BACKUP_DIR" "kilo"
+		copy_config_dir "$(get_reasonix_dir)" "$BACKUP_DIR" "reasonix"
 		copy_config_dir "$HOME/.pi" "$BACKUP_DIR" "pi"
+		copy_config_dir "$HOME/.omp" "$BACKUP_DIR" "omp"
 		copy_config_dir "$HOME/.cursor" "$BACKUP_DIR" "cursor"
 		copy_config_dir "$HOME/.conductor" "$BACKUP_DIR" "conductor"
 		copy_config_dir "$HOME/.factory" "$BACKUP_DIR" "factory"
@@ -285,10 +352,17 @@ backup_configs() {
 		copy_config_dir "$HOME/.grok" "$BACKUP_DIR" "grok"
 		copy_config_dir "$HOME/.config/mimocode" "$BACKUP_DIR" "mimocode"
 		copy_config_dir "$HOME/.qoder" "$BACKUP_DIR" "qodercli"
+		local dsh_home="${DSH_HOME:-$HOME/.dsh}"
+		copy_config_file "$dsh_home/AGENTS.md" "$BACKUP_DIR/deepseek-harness" || true
+		copy_config_file "$dsh_home/settings.yaml" "$BACKUP_DIR/deepseek-harness" || true
+		copy_config_file "$dsh_home/cordis.patch.yml" "$BACKUP_DIR/deepseek-harness" || true
 		copy_config_dir "$HOME/.kiro" "$BACKUP_DIR" "kiro"
+		copy_config_file "$(get_delta_settings_dir)/settings.json" "$BACKUP_DIR/delta" || true
+		copy_config_file "$HOME/.config/delta/AGENTS.md" "$BACKUP_DIR/delta" || true
 		copy_config_dir "$HOME/.codiff" "$BACKUP_DIR" "codiff"
 		copy_config_dir "$HOME/.config/devin" "$BACKUP_DIR" "devin"
 		copy_config_dir "$HOME/.ctx" "$BACKUP_DIR" "ctx"
+		copy_config_dir "${XDG_CONFIG_HOME:-$HOME/.config}/hunk" "$BACKUP_DIR" "hunk"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -360,6 +434,11 @@ copy_grok_configs() {
 	copy_config_file "$SCRIPT_DIR/configs/grok/AGENTS.md" "$HOME/.grok/" || true
 
 	copy_config_file "$SCRIPT_DIR/configs/grok/config.toml" "$HOME/.grok/" || true
+
+	if [ -d "$SCRIPT_DIR/configs/grok/hooks" ]; then
+		execute_quoted mkdir -p "$HOME/.grok/hooks"
+		safe_copy_dir "$SCRIPT_DIR/configs/grok/hooks" "$HOME/.grok/hooks"
+	fi
 
 	if [ -d "$SCRIPT_DIR/configs/grok/themes" ]; then
 		execute_quoted mkdir -p "$HOME/.grok/themes"
@@ -436,6 +515,16 @@ copy_configurations() {
 	else
 		log_info "Skipping opencode config install (not in -y allowlist)"
 	fi
+	if tool_allowed "fx"; then
+		copy_fx_configs
+	else
+		log_info "Skipping fx config install (not in -y allowlist)"
+	fi
+	if tool_allowed "muse"; then
+		copy_muse_configs
+	else
+		log_info "Skipping muse config install (not in -y allowlist)"
+	fi
 	if tool_allowed "amp"; then
 		copy_amp_configs
 	else
@@ -471,10 +560,20 @@ copy_configurations() {
 	else
 		log_info "Skipping kilo config install (not in -y allowlist)"
 	fi
+	if tool_allowed "reasonix"; then
+		copy_reasonix_configs
+	else
+		log_info "Skipping reasonix config install (not in -y allowlist)"
+	fi
 	if tool_allowed "pi"; then
 		copy_pi_configs
 	else
 		log_info "Skipping pi config install (not in -y allowlist)"
+	fi
+	if tool_allowed "omp"; then
+		copy_omp_configs
+	else
+		log_info "Skipping omp config install (not in -y allowlist)"
 	fi
 	if tool_allowed "commandcode"; then
 		copy_commandcode_configs
@@ -506,15 +605,30 @@ copy_configurations() {
 	else
 		log_info "Skipping ctx config install (not in -y allowlist)"
 	fi
+	if tool_allowed "hunk"; then
+		copy_hunk_configs
+	else
+		log_info "Skipping hunk config install (not in -y allowlist)"
+	fi
 	if tool_allowed "qodercli"; then
 		copy_qodercli_configs
 	else
 		log_info "Skipping qodercli config install (not in -y allowlist)"
 	fi
+	if tool_allowed "deepseek_harness"; then
+		copy_deepseek_harness_configs
+	else
+		log_info "Skipping deepseek_harness config install (not in -y allowlist)"
+	fi
 	if tool_allowed "kiro"; then
 		copy_kiro_configs
 	else
 		log_info "Skipping kiro config install (not in -y allowlist)"
+	fi
+	if tool_allowed "delta"; then
+		copy_delta_configs
+	else
+		log_info "Skipping delta config install (not in -y allowlist)"
 	fi
 	if tool_allowed "codiff"; then
 		copy_codiff_configs
@@ -559,18 +673,24 @@ copy_configurations() {
 # Used by validate_all_configs to skip non-allowlisted tool configs.
 _validate_config_tool_name() {
 	case "$1" in
-		*amp/settings.json*) echo "amp" ;;
-		*ai-launcher/config.json*) echo "ai-switcher" ;;
-		*codex/config.json*) echo "codex" ;;
-		*gemini/settings.json*) echo "gemini" ;;
-		*antigravity-cli/settings.json*) echo "antigravity" ;;
-		*kilo/config.json*) echo "kilo" ;;
-		*kimi-code/mcp.json*) echo "kimi_code" ;;
-		*pi/settings.json*) echo "pi" ;;
-		*commandcode/*.json*) echo "commandcode" ;;
-		*cline/*.json*) echo "cline" ;;
-		*factory/settings.json*) echo "factory" ;;
-		*) echo "unknown" ;;
+	*amp/settings.json*) echo "amp" ;;
+	*ai-launcher/config.json*) echo "ai-switcher" ;;
+	*codex/config.json*) echo "codex" ;;
+	*gemini/settings.json*) echo "gemini" ;;
+	*antigravity-cli/settings.json*) echo "antigravity" ;;
+	*kilo/config.json*) echo "kilo" ;;
+	*reasonix/config.toml*) echo "reasonix" ;;
+	*hunk/config.toml*) echo "hunk" ;;
+	*muse/settings.json*) echo "muse" ;;
+	*deepseek-harness/*.yaml* | *deepseek-harness/*.yml*) echo "deepseek_harness" ;;
+	*delta/settings.json*) echo "delta" ;;
+	*kimi-code/*.json* | *kimi-code/*.toml*) echo "kimi_code" ;;
+	*pi/settings.json*) echo "pi" ;;
+	*omp/*.yml* | *omp/*.yaml* | *omp/*.json*) echo "omp" ;;
+	*commandcode/*.json*) echo "commandcode" ;;
+	*cline/*.json*) echo "cline" ;;
+	*factory/settings.json*) echo "factory" ;;
+	*) echo "unknown" ;;
 	esac
 }
 
@@ -608,8 +728,16 @@ validate_all_configs() {
 		"$SCRIPT_DIR/configs/gemini/settings.json" \
 		"$SCRIPT_DIR/configs/antigravity-cli/settings.json" \
 		"$SCRIPT_DIR/configs/kilo/config.json" \
+		"$SCRIPT_DIR/configs/reasonix/config.toml" \
+		"$SCRIPT_DIR/configs/hunk/config.toml" \
+		"$SCRIPT_DIR/configs/muse/settings.json" \
+		"$SCRIPT_DIR/configs/deepseek-harness/settings.yaml" \
+		"$SCRIPT_DIR/configs/deepseek-harness/cordis.patch.yml" \
+		"$SCRIPT_DIR/configs/delta/settings.json" \
+		"$SCRIPT_DIR/configs/kimi-code/config.toml" \
 		"$SCRIPT_DIR/configs/kimi-code/mcp.json" \
 		"$SCRIPT_DIR/configs/pi/settings.json" \
+		"$SCRIPT_DIR/configs/omp/config.yml" \
 		"$SCRIPT_DIR/configs/commandcode/settings.json" \
 		"$SCRIPT_DIR/configs/commandcode/mcp.json" \
 		"$SCRIPT_DIR/configs/cline/mcp-settings.json" \
@@ -710,50 +838,60 @@ install_mcp_servers_from_registry() {
 
 	local summary_lines=()
 
-	# Extract all server data in a single jq call for efficiency
-	# Fields: server_name, name, description, command, args_delimited, requires_delimited, category
+	# Extract all server data as NDJSON (one object per line) for lossless field parsing
+	# Keys: key, name, description, command, args, requires, category
 	# Read from FD 3 so stdin stays attached to the terminal for prompt_yn.
-	while IFS=$'\t' read -r server_name name description command args_delimited requires_delimited category <&3; do
+	# One compact JSON object per line — lossless for newlines in fields,
+	# empty vs [""] args, and embedded delimiter characters.
+	while IFS= read -r record <&3; do
+		[ -n "$record" ] || continue
+
+		local server_name name description command category
+		server_name=$(jq -r '.key' <<<"$record")
+		name=$(jq -r '.name' <<<"$record")
+		description=$(jq -r '.description' <<<"$record")
+		command=$(jq -r '.command' <<<"$record")
+		category=$(jq -r '.category' <<<"$record")
+
 		# Substitute {{SCRIPT_RUNNER}} placeholder (POSIX: use sed, not ${}//)
 		command=$(printf '%s\n' "$command" | sed "s|{{SCRIPT_RUNNER}}|$script_runner|g")
 
-		# Parse args into array (args are delimited by SOH character)
+		# Parse args by JSON index so empty arrays and empty-string args stay distinct
 		local args_array=()
-		if [ -n "$args_delimited" ]; then
-			while IFS= read -r -d $'\x01' arg; do
-				args_array+=("$arg")
-			done <<<"$args_delimited"
-		fi
+		local args_len i
+		args_len=$(jq '.args | length' <<<"$record")
+		for ((i = 0; i < args_len; i++)); do
+			args_array+=("$(jq -r --argjson i "$i" '.args[$i]' <<<"$record")")
+		done
 
 		# Check prerequisites
 		local prereqs_met=true
 		local missing_prereqs=()
+		local requires_len prereq
+		requires_len=$(jq '.requires | length' <<<"$record")
+		for ((i = 0; i < requires_len; i++)); do
+			prereq=$(jq -r --argjson i "$i" '.requires[$i]' <<<"$record")
+			[ -z "$prereq" ] && continue
 
-		if [ -n "$requires_delimited" ]; then
-			local prereq
-			while IFS= read -r -d $'\x01' prereq; do
-				[ -z "$prereq" ] && continue
-
-				if ! command -v "$prereq" &>/dev/null; then
-					case "$prereq" in
-					"fff-mcp")
-						log_info "Auto-installing prerequisite: $prereq"
-						install_fff_mcp_now && continue
-						;;
-					"logpilot")
-						log_info "Auto-installing prerequisite: $prereq"
-						install_logpilot_now && continue
-						;;
-					"sem-mcp")
-						log_info "Auto-installing prerequisite: $prereq"
-						install_sem_now && continue
-						;;
-					esac
-					prereqs_met=false
-					missing_prereqs+=("$prereq")
-				fi
-			done <<<"$requires_delimited"
-		fi
+			if ! command -v "$prereq" &>/dev/null; then
+				case "$prereq" in
+				"fff-mcp")
+					log_info "Auto-installing prerequisite: $prereq"
+					install_fff_mcp_now && continue
+					;;
+				"logpilot")
+					log_info "Auto-installing prerequisite: $prereq"
+					install_logpilot_now && continue
+					;;
+				"sem-mcp")
+					log_info "Auto-installing prerequisite: $prereq"
+					install_sem_now && continue
+					;;
+				esac
+				prereqs_met=false
+				missing_prereqs+=("$prereq")
+			fi
+		done
 
 		if [ "$prereqs_met" = false ]; then
 			log_info "Skipping $name - requires: ${missing_prereqs[*]}"
@@ -814,17 +952,16 @@ install_mcp_servers_from_registry() {
 			failed_count=$((failed_count + 1))
 		fi
 		rm -f "$err_file"
-	done 3< <(jq -r '
-		.mcpServers | to_entries[] |
-		[
-			.key,
-			(.value.name // empty),
-			(.value.description // empty),
-			(.value.command // empty),
-			(.value.args | join("")),
-			(.value.requires | join("")),
-			(.value.category // empty)
-		] | @tsv
+	done 3< <(jq -c '
+		.mcpServers | to_entries[] | {
+			key: .key,
+			name: (.value.name // ""),
+			description: (.value.description // ""),
+			command: (.value.command // ""),
+			args: (.value.args // []),
+			requires: (.value.requires // []),
+			category: (.value.category // "")
+		}
 	' "$registry_file")
 
 	log_info ""
@@ -959,24 +1096,91 @@ setup_commandcode_mcp_servers() {
 }
 
 copy_opencode_configs() {
-	local opencode_status
-	opencode_status=$(detect_tool --detailed "opencode" "$HOME/.config/opencode") || opencode_status="missing"
+	local opencode_status="missing"
+	# `opencode` is OpenCode 2. `opencode2` is only a leftover beta binary.
+	if _opencode_v2_installed; then
+		opencode_status="command-v2"
+	elif command -v opencode &>/dev/null; then
+		opencode_status="command-v1"
+	elif [ -d "$HOME/.config/opencode" ]; then
+		opencode_status="directory"
+	fi
+
 	if [ "$opencode_status" = "missing" ]; then
-		log_info "OpenCode not detected - skipping OpenCode config installation"
+		log_info "OpenCode 1/2 not detected - skipping OpenCode config installation"
 		return 0
 	fi
 
 	log_info "Detected OpenCode (via $opencode_status)"
 	execute_quoted mkdir -p "$HOME/.config/opencode"
 	execute_quoted cp "$SCRIPT_DIR/configs/opencode/opencode.json" "$HOME/.config/opencode/"
+	copy_config_file "$SCRIPT_DIR/configs/opencode/AGENTS.md" "$HOME/.config/opencode/" || true
 
 	execute_quoted rm -rf "$HOME/.config/opencode/agent"
 	safe_copy_dir "$SCRIPT_DIR/configs/opencode/agent" "$HOME/.config/opencode/agent"
 
 	execute_quoted rm -rf "$HOME/.config/opencode/command"
 	copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/command"
+	# OpenCode 2 also reads commands/. Older Plannotator stubs there shadow the plugin.
+	copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/commands"
 
 	log_success "OpenCode configs copied"
+}
+
+copy_fx_configs() {
+	local fx_status
+	fx_status=$(detect_tool --detailed "fx" "$HOME/.fx") || fx_status="missing"
+	if [ "$fx_status" = "missing" ]; then
+		log_info "fx not detected - skipping fx config installation"
+		return 0
+	fi
+
+	log_info "Detected fx (via $fx_status)"
+	execute_quoted mkdir -p "$HOME/.fx"
+	copy_config_file "$SCRIPT_DIR/configs/fx/AGENTS.md" "$HOME/.fx/" || return 1
+	log_success "fx configs copied"
+}
+
+copy_muse_configs() {
+	local muse_status
+	muse_status=$(detect_tool --detailed "muse" "$HOME/.config/muse") || muse_status="missing"
+	if [ "$muse_status" = "missing" ]; then
+		log_info "Muse Code not detected - skipping Muse Code config installation"
+		return 0
+	fi
+
+	log_info "Detected Muse Code (via $muse_status)"
+	execute_quoted mkdir -p "$HOME/.config/muse"
+	local muse_src="$SCRIPT_DIR/configs/muse/settings.json"
+	local muse_dest="$HOME/.config/muse/settings.json"
+	if [ -f "$muse_dest" ]; then
+		if ! command -v jq &>/dev/null; then
+			log_warning "Existing Muse settings found but jq is not installed. Install jq to merge configs, or manually update $muse_dest"
+			return 1
+		fi
+		local muse_merged
+		muse_merged=$(make_temp_file "muse-settings" "json")
+		if jq -s '
+			.[0] as $existing |
+			.[1] as $src |
+			$existing + ($src | with_entries(select(.key == "schema_version" or .key == "mcpServers" or .key == "mcp_servers")))
+			| with_entries(select(.value != null))
+		' "$muse_dest" "$muse_src" >"$muse_merged"; then
+			execute_quoted cp -p "$muse_merged" "$muse_dest" || {
+				rm -f "$muse_merged"
+				return 1
+			}
+			rm -f "$muse_merged"
+			log_success "Muse Code configs merged"
+			return 0
+		else
+			rm -f "$muse_merged"
+			log_error "Failed to merge Muse Code settings"
+			return 1
+		fi
+	fi
+	copy_config_file "$muse_src" "$HOME/.config/muse/" || return 1
+	log_success "Muse Code configs copied"
 }
 
 copy_amp_configs() {
@@ -1009,6 +1213,23 @@ copy_amp_configs() {
 				copy_config_file "$plugin_dir" "$HOME/.config/amp/plugins"
 			fi
 		done
+	fi
+
+	# Copy shared library modules (not plugins — Amp does not scan lib/)
+	if [ -d "$SCRIPT_DIR/configs/amp/lib" ]; then
+		execute_quoted mkdir -p "$HOME/.config/amp/lib"
+		safe_copy_dir "$SCRIPT_DIR/configs/amp/lib" "$HOME/.config/amp/lib"
+	fi
+
+	# Migration: remove stale helper modules previously installed as plugins.
+	# fusion-watchdog.ts was relocated from plugins/ to lib/ — a stale copy in
+	# the plugins directory causes "Plugin must export a default function" crashes.
+	local stale_plugin="$HOME/.config/amp/plugins/fusion-watchdog.ts"
+	if [ -f "$stale_plugin" ]; then
+		execute "rm -f \"$stale_plugin\""
+		if [ "$DRY_RUN" != true ]; then
+			log_info "Removed stale plugin: fusion-watchdog.ts (relocated to lib/)"
+		fi
 	fi
 
 	log_success "Amp configs copied"
@@ -1046,6 +1267,7 @@ copy_codex_configs() {
 	copy_config_file "$SCRIPT_DIR/configs/codex/config.json" "$HOME/.codex/" || true
 
 	copy_config_file "$SCRIPT_DIR/configs/codex/config.toml" "$HOME/.codex/" || true
+	copy_config_file "$SCRIPT_DIR/configs/codex/1m.config.toml" "$HOME/.codex/" || true
 
 	if [ -d "$SCRIPT_DIR/configs/codex/themes" ]; then
 		execute_quoted mkdir -p "$HOME/.codex/themes"
@@ -1314,6 +1536,80 @@ copy_kilo_configs() {
 	log_success "Kilo CLI configs copied"
 }
 
+copy_reasonix_configs() {
+	local reasonix_dir
+	reasonix_dir=$(get_reasonix_dir)
+	local reasonix_status
+	reasonix_status=$(detect_tool --detailed "reasonix" "$reasonix_dir") || reasonix_status="missing"
+	if [ "$reasonix_status" = "missing" ]; then
+		log_info "Reasonix not detected - skipping Reasonix config installation"
+		return 0
+	fi
+
+	log_info "Detected Reasonix (via $reasonix_status)"
+	# Reasonix home is ~/.reasonix on macOS/Linux (%APPDATA%\reasonix on Windows).
+	# config.toml is the user-global config; AGENTS.md seeds project memory.
+	execute_quoted mkdir -p "$reasonix_dir"
+	copy_config_file "$SCRIPT_DIR/configs/reasonix/config.toml" "$reasonix_dir/" || true
+	copy_config_file "$SCRIPT_DIR/configs/reasonix/AGENTS.md" "$reasonix_dir/" || true
+
+	if [ -f "$SCRIPT_DIR/configs/reasonix/statusline.sh" ]; then
+		copy_config_file "$SCRIPT_DIR/configs/reasonix/statusline.sh" "$reasonix_dir/" || true
+		execute_quoted chmod +x "$reasonix_dir/statusline.sh" || true
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/reasonix/hooks" ]; then
+		execute_quoted mkdir -p "$reasonix_dir/hooks"
+		safe_copy_dir "$SCRIPT_DIR/configs/reasonix/hooks" "$reasonix_dir/hooks"
+		for hook_file in "$reasonix_dir/hooks"/*.sh; do
+			if [ -f "$hook_file" ]; then
+				execute_quoted chmod +x "$hook_file" || true
+			fi
+		done
+	fi
+
+	if [ -d "$SCRIPT_DIR/configs/reasonix/themes" ]; then
+		execute_quoted mkdir -p "$reasonix_dir/themes"
+		safe_copy_dir "$SCRIPT_DIR/configs/reasonix/themes" "$reasonix_dir/themes"
+	fi
+
+	log_success "Reasonix configs copied"
+}
+
+# Usage: write_merged_pi_settings <source_settings> <destination_settings> <required_packages>
+# Normalize package entries so object-form packages (e.g. {"source":"npm:..."})
+# and bare strings both match on their source id.
+write_merged_pi_settings() {
+	local source_settings="$1"
+	local destination_settings="$2"
+	local required_packages="$3"
+	jq --argjson required "$required_packages" '
+		def get_source: if type == "object" then .source else . end;
+		(.packages // []) as $packages
+		| .packages = (
+			reduce $required[] as $req (
+				$packages;
+				if any(.[]; get_source == ($req | get_source)) then .
+				else . + [$req]
+				end
+			)
+		)
+	' "$source_settings" >"$destination_settings"
+}
+
+# Usage: pi_settings_has_required_packages <pi_settings> <required_packages>
+# Checks if the given settings file contains all the required packages.
+pi_settings_has_required_packages() {
+	local pi_settings="$1"
+	local required_packages="$2"
+	jq -e --argjson required "$required_packages" '
+		def get_source: if type == "object" then .source else . end;
+		(.packages // []) as $packages
+		| $required
+		| all(. as $req | $packages | any(.[]; get_source == ($req | get_source)))
+	' "$pi_settings" >/dev/null 2>&1
+}
+
 copy_pi_configs() {
 	local pi_status
 	pi_status=$(detect_tool --detailed "pi" "$HOME/.pi") || pi_status="missing"
@@ -1325,10 +1621,43 @@ copy_pi_configs() {
 	log_info "Detected Pi (via $pi_status)"
 	execute_quoted mkdir -p "$HOME/.pi/agent"
 
+	local fusion_packages='["npm:@tintinweb/pi-subagents"]'
+
 	if [ ! -f "$HOME/.pi/agent/settings.json" ]; then
-		copy_config_file "$SCRIPT_DIR/configs/pi/settings.json" "$HOME/.pi/agent/" || true
+		if ! copy_config_file "$SCRIPT_DIR/configs/pi/settings.json" "$HOME/.pi/agent/"; then
+			log_error "Failed to install Pi settings.json; Fusion subagent support requires @tintinweb/pi-subagents"
+			return 1
+		fi
 	else
-		log_info "Pi settings.json already exists at ~/.pi/agent/, preserving existing config"
+		local pi_settings="$HOME/.pi/agent/settings.json"
+		if ! command -v jq >/dev/null 2>&1; then
+			log_error "Pi settings.json exists but jq is unavailable; cannot ensure @tintinweb/pi-subagents for Fusion"
+			return 1
+		elif pi_settings_has_required_packages "$pi_settings" "$fusion_packages"; then
+			log_info "Pi settings.json already includes Fusion subagent support"
+		elif [ "$DRY_RUN" = true ]; then
+			log_info "[DRY RUN] Would add Fusion subagent support to existing Pi settings"
+		else
+			local merged_settings
+			merged_settings=$(execute_quoted mktemp "$HOME/.pi/agent/.settings.json.my-ai-tools.XXXXXX") || return 1
+			if execute_quoted write_merged_pi_settings "$pi_settings" "$merged_settings" "$fusion_packages"; then
+				if ! pi_settings_has_required_packages "$merged_settings" "$fusion_packages"; then
+					log_error "Merged Pi settings are missing required Fusion packages; refusing to install"
+					execute_quoted rm -f "$merged_settings"
+					return 1
+				fi
+				if ! execute_quoted mv -f "$merged_settings" "$pi_settings"; then
+					execute_quoted rm -f "$merged_settings"
+					log_error "Failed to install merged Pi settings with Fusion subagent support"
+					return 1
+				fi
+				log_success "Pi Fusion subagent support added to existing settings"
+			else
+				log_error "Could not merge Fusion subagent support into existing Pi settings; refusing Fusion executor install"
+				execute_quoted rm -f "$merged_settings"
+				return 1
+			fi
+		fi
 	fi
 
 	if [ -d "$SCRIPT_DIR/configs/pi/themes" ]; then
@@ -1341,6 +1670,9 @@ copy_pi_configs() {
 	copy_config_file "$SCRIPT_DIR/configs/pi/mcp.json" "$HOME/.pi/agent/" || true
 
 	copy_config_file "$SCRIPT_DIR/configs/pi/models.json" "$HOME/.pi/agent/" || true
+	copy_config_file "$SCRIPT_DIR/configs/pi/config.yml" "$HOME/.pi/agent/" || true
+	copy_config_file "$SCRIPT_DIR/configs/pi/config.yaml" "$HOME/.pi/agent/" || true
+	copy_config_file "$SCRIPT_DIR/configs/pi/config.json" "$HOME/.pi/agent/" || true
 
 	if [ -d "$SCRIPT_DIR/configs/pi/agents" ]; then
 		execute_quoted rm -rf "$HOME/.pi/agent/agents"
@@ -1349,6 +1681,38 @@ copy_pi_configs() {
 	fi
 
 	log_success "Pi configs copied"
+}
+copy_omp_configs() {
+	local omp_status
+	omp_status=$(detect_tool --detailed "omp" "$HOME/.omp") || omp_status="missing"
+	if [ "$omp_status" = "missing" ]; then
+		log_info "Oh My Pi (omp) not detected - skipping Oh My Pi config installation"
+		return 0
+	fi
+
+	log_info "Detected Oh My Pi (via $omp_status)"
+	execute_quoted mkdir -p "$HOME/.omp/agent"
+
+	if [ -d "$SCRIPT_DIR/configs/omp" ]; then
+		copy_config_file "$SCRIPT_DIR/configs/omp/config.yml" "$HOME/.omp/agent/" || true
+		if [ -d "$SCRIPT_DIR/configs/omp/themes" ]; then
+			execute_quoted mkdir -p "$HOME/.omp/agent/themes"
+			safe_copy_dir "$SCRIPT_DIR/configs/omp/themes" "$HOME/.omp/agent/themes"
+		fi
+		copy_config_file "$SCRIPT_DIR/configs/omp/AGENTS.md" "$HOME/.omp/agent/" || true
+		copy_config_file "$SCRIPT_DIR/configs/omp/mcp.json" "$HOME/.omp/agent/" || true
+		copy_config_file "$SCRIPT_DIR/configs/omp/models.json" "$HOME/.omp/agent/" || true
+		copy_config_file "$SCRIPT_DIR/configs/omp/config.yml" "$HOME/.omp/agent/" || true
+		copy_config_file "$SCRIPT_DIR/configs/omp/config.yaml" "$HOME/.omp/agent/" || true
+		copy_config_file "$SCRIPT_DIR/configs/omp/config.json" "$HOME/.omp/agent/" || true
+		if [ -d "$SCRIPT_DIR/configs/omp/agents" ]; then
+			execute_quoted rm -rf "$HOME/.omp/agent/agents"
+			safe_copy_dir "$SCRIPT_DIR/configs/omp/agents" "$HOME/.omp/agent/agents"
+			log_success "Oh My Pi agents copied"
+		fi
+	fi
+
+	log_success "Oh My Pi configs copied"
 }
 
 copy_commandcode_configs() {
@@ -1517,6 +1881,26 @@ copy_ctx_configs() {
 	log_success "ctx configs copied"
 }
 
+copy_hunk_configs() {
+	local hunk_status
+	local hunk_dir="${XDG_CONFIG_HOME:-$HOME/.config}/hunk"
+	hunk_status=$(detect_tool --detailed "hunk" "$hunk_dir") || hunk_status="missing"
+	if [ "$hunk_status" = "missing" ]; then
+		log_info "Hunk not detected - skipping Hunk config installation"
+		return 0
+	fi
+
+	log_info "Detected Hunk (via $hunk_status)"
+	execute_quoted mkdir -p "$hunk_dir" || return 1
+
+	if ! copy_config_file "$SCRIPT_DIR/configs/hunk/config.toml" "$hunk_dir/"; then
+		log_error "Failed to copy Hunk config to $hunk_dir"
+		return 1
+	fi
+
+	log_success "Hunk configs copied"
+}
+
 copy_qodercli_configs() {
 	local qodercli_status
 	qodercli_status=$(detect_tool --detailed "qodercli" "$HOME/.qoder") || qodercli_status="missing"
@@ -1532,6 +1916,29 @@ copy_qodercli_configs() {
 	copy_config_file "$SCRIPT_DIR/configs/qodercli/settings.json" "$HOME/.qoder/" || true
 
 	log_success "Qoder CLI configs copied"
+}
+
+copy_deepseek_harness_configs() {
+	local dsh_home="${DSH_HOME:-$HOME/.dsh}"
+	local dsh_status
+	dsh_status=$(detect_tool --detailed "dsh" "$dsh_home") || dsh_status="missing"
+	if [ "$dsh_status" = "missing" ]; then
+		log_info "DeepSeek Harness not detected - skipping DeepSeek Harness config installation"
+		return 0
+	fi
+
+	log_info "Detected DeepSeek Harness (via $dsh_status)"
+	execute_quoted mkdir -p "$dsh_home" || return 1
+
+	local config_file
+	for config_file in AGENTS.md settings.yaml cordis.patch.yml; do
+		if ! copy_config_file "$SCRIPT_DIR/configs/deepseek-harness/$config_file" "$dsh_home/"; then
+			log_error "Failed to copy DeepSeek Harness config: $config_file"
+			return 1
+		fi
+	done
+
+	log_success "DeepSeek Harness configs copied"
 }
 
 copy_kiro_configs() {
@@ -1608,6 +2015,33 @@ copy_kiro_configs() {
 	fi
 
 	log_success "Kiro CLI configs copied"
+}
+
+copy_delta_configs() {
+	local delta_settings_dir
+	delta_settings_dir=$(get_delta_settings_dir)
+	local delta_status
+	delta_status="missing"
+	if [ -d "$delta_settings_dir" ]; then
+		delta_status="directory"
+	elif [ -d "$HOME/.local/delta.app" ] || [ -d "/Applications/Delta.app" ]; then
+		delta_status="application"
+	else
+		log_info "Delta not detected - skipping Delta config installation"
+		return 0
+	fi
+
+	log_info "Detected Delta (via $delta_status)"
+	if ! copy_config_file "$SCRIPT_DIR/configs/delta/settings.json" "$delta_settings_dir/"; then
+		log_error "Failed to copy Delta settings"
+		return 1
+	fi
+	if ! copy_config_file "$SCRIPT_DIR/configs/delta/AGENTS.md" "$HOME/.config/delta/"; then
+		log_error "Failed to copy Delta personal rules"
+		return 1
+	fi
+
+	log_success "Delta configs copied"
 }
 
 copy_codiff_configs() {
@@ -1931,7 +2365,7 @@ install_single_recommended_skill() {
 # Helper: Check if a skill is in the remote/universal skills list
 is_remote_skill() {
 	case "$1" in
-	plannotator-setup-goal | prd | ralph | qmd-knowledge | codemap | adr | handoffs | pickup | pr-review | slop | tdd | commit-atomic | draft-pull-request)
+	plannotator-setup-goal | prd | ralph | qmd-knowledge | codemap | adr | handoffs | pickup | pr-review | slop | tdd | commit-atomic | draft-pull-request | security-audit)
 		return 0
 		;;
 	*)
@@ -2001,6 +2435,7 @@ enable_plugins() {
 
 	# Community plugins: "name|plugin_spec|marketplace_repo|cli_tool"
 	community_plugins=(
+		"caveman|caveman@caveman|JuliusBrussee/caveman|claude"
 		"plannotator|plannotator@plannotator|backnotprop/plannotator|claude"
 		"plannotator-copilot|plannotator-copilot@plannotator|backnotprop/plannotator|copilot"
 		"plannotator-setup-goal|plannotator-setup-goal@my-ai-tools|$SCRIPT_DIR|claude"
@@ -2010,6 +2445,7 @@ enable_plugins() {
 		"codemap|codemap@my-ai-tools|$SCRIPT_DIR|claude"
 		"commit-atomic|commit-atomic@my-ai-tools|$SCRIPT_DIR|claude"
 		"draft-pull-request|draft-pull-request@my-ai-tools|$SCRIPT_DIR|claude"
+		"security-audit|security-audit@my-ai-tools|$SCRIPT_DIR|claude"
 		"claude-hud|claude-hud@claude-hud|jarrodwatts/claude-hud|claude"
 		"worktrunk|worktrunk@worktrunk|max-sixty/worktrunk|claude"
 		"openai-codex|codex@openai-codex|openai/codex-plugin-cc|claude"
@@ -2192,6 +2628,11 @@ install_community_plugin_non_interactive() {
 	local marketplace_repo="$3"
 	local cli_tool="$4"
 
+	if ! command -v "$cli_tool" &>/dev/null; then
+		log_info "Skipping $name plugin ($cli_tool CLI not installed)"
+		return 0
+	fi
+
 	install_cli_dependency "$name"
 
 	setup_tmpdir
@@ -2207,6 +2648,11 @@ install_community_plugin_interactive() {
 	local plugin_spec="$2"
 	local marketplace_repo="$3"
 	local cli_tool="$4"
+
+	if ! command -v "$cli_tool" &>/dev/null; then
+		log_info "Skipping $name plugin ($cli_tool CLI not installed)"
+		return 0
+	fi
 
 	if ! prompt_yn "Install $name"; then
 		return 0
@@ -2269,6 +2715,7 @@ create_tool_skills_symlinks() {
 		"$HOME/.config/opencode/skills"
 		"$HOME/.gemini/skills"
 		"$HOME/.pi/skills"
+		"$HOME/.omp/skills"
 		"$HOME/.cursor/skills"
 		"$HOME/.config/amp/skills"
 		"$HOME/.codex/skills"
@@ -2371,11 +2818,11 @@ main() {
 
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
-	echo "║  Claude • OpenCode • Amp • CCS • Codex • Kimi Code • Gemini          ║"
-	echo "║  Antigravity • Pi • Kilo • Copilot • Cursor • Command Code           ║"
+	echo "║  Claude • OpenCode • fx • Amp • CCS • Codex • Kimi Code • Gemini     ║"
+	echo "║  Muse • Antigravity • Pi • Kilo • Copilot • Cursor • Command Code    ║"
 	echo "║  Factory Droid • Cline • Grok • MiMo-Code • herdr                    ║"
-	echo "║  Qoder CLI • Kiro • Codiff • Devin                                   ║"
-	echo "║  ctx                                                                 ║"
+	echo "║  Qoder CLI • DeepSeek Harness • Kiro • Delta • Codiff • Hunk         ║"
+	echo "║  Devin • ctx • Reasonix                                               ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -2393,190 +2840,7 @@ main() {
 	backup_configs
 	echo
 
-	if tool_allowed "claude"; then
-		install_claude_code
-	else
-		log_info "Skipping claude installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "opencode"; then
-		install_opencode
-	else
-		log_info "Skipping opencode installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "amp"; then
-		install_amp
-	else
-		log_info "Skipping amp installer (not in -y allowlist)"
-	fi
-	echo
-
-	install_global_tools
-	echo
-
-	if tool_allowed "ccs"; then
-		install_ccs
-	else
-		log_info "Skipping ccs installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "ai-switcher"; then
-		install_ai_switcher
-	else
-		log_info "Skipping ai-switcher installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "codex"; then
-		install_codex
-	else
-		log_info "Skipping codex installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "kimi_code"; then
-		install_kimi_code
-	else
-		log_info "Skipping kimi_code installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "gemini"; then
-		install_gemini
-	else
-		log_info "Skipping gemini installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "antigravity"; then
-		install_antigravity
-	else
-		log_info "Skipping antigravity installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "kilo"; then
-		install_kilo
-	else
-		log_info "Skipping kilo installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "pi"; then
-		install_pi
-	else
-		log_info "Skipping pi installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "commandcode"; then
-		install_commandcode
-	else
-		log_info "Skipping commandcode installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "copilot"; then
-		install_copilot
-	else
-		log_info "Skipping copilot installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "cursor"; then
-		install_cursor
-	else
-		log_info "Skipping cursor installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "conductor"; then
-		install_conductor
-	else
-		log_info "Skipping conductor installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "herdr"; then
-		install_herdr
-	else
-		log_info "Skipping herdr installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "ctx"; then
-		install_ctx
-	else
-		log_info "Skipping ctx installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "qodercli"; then
-		install_qodercli
-	else
-		log_info "Skipping qodercli installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "kiro"; then
-		install_kiro
-	else
-		log_info "Skipping kiro installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "codiff"; then
-		install_codiff
-	else
-		log_info "Skipping codiff installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "devin"; then
-		install_devin
-	else
-		log_info "Skipping devin installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "factory"; then
-		install_factory
-	else
-		log_info "Skipping factory installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "cline"; then
-		install_cline
-	else
-		log_info "Skipping cline installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "grok"; then
-		install_grok
-	else
-		log_info "Skipping grok installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "mimo"; then
-		install_mimo
-	else
-		log_info "Skipping mimo installer (not in -y allowlist)"
-	fi
-	echo
-
-	if tool_allowed "open_code_review"; then
-		install_open_code_review
-	else
-		log_info "Skipping open_code_review installer (not in -y allowlist)"
-	fi
-	echo
+	run_install_sequence
 
 	copy_configurations
 	echo

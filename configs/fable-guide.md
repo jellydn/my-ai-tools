@@ -209,13 +209,20 @@ As agents become more capable, **your role shifts**:
 - To: Identifying unknowns and providing context
 
 **Key practices**:
-- Ask agents to explain their reasoning
+- Ask for a short decision summary with assumptions, evidence, and trade-offs, not an internal reasoning transcript
 - Request implementation notes
 - Review deviations from plan
 - Verify your understanding with quizzes
 - Stay engaged with the process
 
 The goal isn't to disconnect—it's to work at a higher level of abstraction while maintaining deep understanding.
+
+### Accountable Engineering (Addy Osmani)
+
+AI increases how much software people can build without transferring accountability for outcomes. For non-trivial
+AI-assisted implementation, architecture, security, or operational work, read
+@~/.agents/skills/accountable-engineering/SKILL.md and use its checkable workflow to keep decisions understandable,
+verification evidenced, and rollout human-owned.
 
 ## Practical Examples
 
@@ -292,6 +299,7 @@ The field is evolving fast. What's impossible today may be trivial tomorrow.
 
 ## References
 
+- [The Future of Software Engineering with AI - Addy Osmani](https://www.youtube.com/watch?v=2fyPnxKu8ZM)
 - [Field Guide to Fable - Thariq Shihipar (AI Engineer 2026)](https://www.youtube.com/watch?v=9fubhllmsBU)
 - [The Biology of a Large Language Model - Anthropic Research](https://www.anthropic.com/)
 - Capability overhang: When model intelligence exceeds our ability to harness it

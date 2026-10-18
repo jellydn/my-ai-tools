@@ -6,13 +6,13 @@
 .DESCRIPTION
     This script sets up the environment and runs the bash-based installer on Windows.
     It handles:
-    - Git Bash detection and PATH setup
-    - jq installation via winget
+    - Git for Windows and jq installation via winget
+    - Current-process PATH setup and executable discovery
     - Proper bash invocation with Windows paths
 .NOTES
     File Name      : install.ps1
     Author         : my-ai-tools
-    Prerequisite   : PowerShell 5.1 or later, Git for Windows
+    Prerequisite   : PowerShell 5.1 or later, winget or preinstalled Git and jq
 .LINK
     https://github.com/jellydn/my-ai-tools
 #>
@@ -32,111 +32,135 @@ $ErrorActionPreference = "Stop"
 # Logging functions
 function Write-Info {
     param([string]$Message)
-    Write-Host "ℹ $Message" -ForegroundColor Blue
+    Write-Host "[INFO] $Message" -ForegroundColor Blue
 }
 
 function Write-Success {
     param([string]$Message)
-    Write-Host "✓ $Message" -ForegroundColor Green
+    Write-Host "[OK] $Message" -ForegroundColor Green
 }
 
 function Write-Warn {
     param([string]$Message)
-    Write-Host "⚠ $Message" -ForegroundColor Yellow
+    Write-Host "[WARN] $Message" -ForegroundColor Yellow
 }
 
 function Write-Err {
     param([string]$Message)
-    Write-Host "✗ $Message" -ForegroundColor Red
+    Write-Host "[ERROR] $Message" -ForegroundColor Red
 }
 
-# Find Git Bash
-function Find-GitBash {
-    $possiblePaths = @(
-        "${env:ProgramFiles}\Git\bin\bash.exe"
-        "${env:ProgramFiles(x86)}\Git\bin\bash.exe"
-        "${env:LOCALAPPDATA}\Programs\Git\bin\bash.exe"
-        "C:\Program Files\Git\bin\bash.exe"
-        "C:\Program Files (x86)\Git\bin\bash.exe"
-    )
+# Keep process-only entries (for example Bun) when picking up installer PATH changes.
+function Update-ProcessPath {
+    param([string[]]$Prepend = @())
 
-    foreach ($path in $possiblePaths) {
-        if (Test-Path $path) {
-            return $path
+    $paths = @()
+    $sources = @($Prepend) + @(
+        $env:Path
+        [Environment]::GetEnvironmentVariable("Path", "Machine")
+        [Environment]::GetEnvironmentVariable("Path", "User")
+    )
+    foreach ($source in $sources) {
+        foreach ($entry in ($source -split ';')) {
+            $entry = [Environment]::ExpandEnvironmentVariables($entry).Trim().Trim('"')
+            if ($entry -and $paths -notcontains $entry) { $paths += $entry }
         }
     }
+    $env:Path = $paths -join ';'
+}
 
-    # Try to find in PATH
-    $bashInPath = Get-Command bash -ErrorAction SilentlyContinue
-    if ($bashInPath) {
-        return $bashInPath.Source
+function Get-GitRoots {
+    $git = Get-Command git.exe -CommandType Application -ErrorAction SilentlyContinue
+    if ($git) { Split-Path (Split-Path $git.Source -Parent) -Parent }
+    foreach ($key in @('HKCU:\SOFTWARE\GitForWindows', 'HKLM:\SOFTWARE\GitForWindows',
+            'HKLM:\SOFTWARE\WOW6432Node\GitForWindows')) {
+        $install = Get-ItemProperty -Path $key -ErrorAction SilentlyContinue
+        if ($install.InstallPath) { $install.InstallPath }
     }
+    if ($env:ProgramFiles) { "${env:ProgramFiles}\Git" }
+    if (${env:ProgramFiles(x86)}) { "${env:ProgramFiles(x86)}\Git" }
+    if ($env:LOCALAPPDATA) { "${env:LOCALAPPDATA}\Programs\Git" }
+}
 
+# Only accept Git Bash, not the Windows WSL bash.exe launcher.
+function Find-GitBash {
+    foreach ($root in (Get-GitRoots | Select-Object -Unique)) {
+        $gitPath = Join-Path $root 'cmd\git.exe'
+        $bashPath = Join-Path $root 'bin\bash.exe'
+        if ((Test-Path $gitPath -PathType Leaf) -and (Test-Path $bashPath -PathType Leaf)) {
+            Update-ProcessPath -Prepend @((Split-Path $gitPath -Parent), (Split-Path $bashPath -Parent))
+            return $bashPath
+        }
+    }
     return $null
 }
 
-# Install jq using winget
-function Install-Jq {
-    Write-Info "Checking for jq installation..."
+function Find-Jq {
+    $jq = Get-Command jq.exe -CommandType Application -ErrorAction SilentlyContinue
+    if ($jq) { return $jq.Source }
 
-    $jqInPath = Get-Command jq -ErrorAction SilentlyContinue
-    if ($jqInPath) {
-        Write-Success "jq found at: $($jqInPath.Source)"
-        return $true
+    $candidates = @()
+    if ($env:LOCALAPPDATA) {
+        $candidates += "$env:LOCALAPPDATA\Microsoft\WinGet\Links\jq.exe"
     }
+    if ($env:ProgramFiles) {
+        $candidates += "$env:ProgramFiles\WinGet\Links\jq.exe", "$env:ProgramFiles\jq\jq.exe"
+    }
+    # WinGet's portable package directory suffix can change with the source.
+    foreach ($packages in @("$env:LOCALAPPDATA\Microsoft\WinGet\Packages",
+            "$env:ProgramFiles\WinGet\Packages")) {
+        $candidates += Get-ChildItem -Path "$packages\jqlang.jq_*\jq.exe" -File -ErrorAction SilentlyContinue |
+            Select-Object -ExpandProperty FullName
+    }
+    foreach ($path in $candidates) {
+        if (Test-Path $path -PathType Leaf) {
+            Update-ProcessPath -Prepend @((Split-Path $path -Parent))
+            return $path
+        }
+    }
+    return $null
+}
 
-    Write-Warn "jq not found. Attempting to install via winget..."
+function Install-WingetPackage {
+    param([string]$Id)
 
-    $winget = Get-Command winget -ErrorAction SilentlyContinue
+    $winget = Get-Command winget.exe -CommandType Application -ErrorAction SilentlyContinue
     if (-not $winget) {
-        Write-Err "winget not found. Please install jq manually:"
-        Write-Info "  1. Download from: https://github.com/jqlang/jq/releases"
-        Write-Info "  2. Extract jq.exe to a folder in your PATH"
-        return $false
+        Write-Err "winget is unavailable. Install or update App Installer: https://aka.ms/getwinget"
+        return
     }
-
     try {
-        # Install jq using winget
-        Write-Info "Installing jq via winget..."
-        & winget install -e --id jqlang.jq --accept-package-agreements --accept-source-agreements
-
-        # Refresh environment variables
-        Write-Info "Refreshing PATH environment variable..."
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-
-        # Check if jq is now available
-        $jqInPath = Get-Command jq -ErrorAction SilentlyContinue
-        if ($jqInPath) {
-            Write-Success "jq installed successfully at: $($jqInPath.Source)"
-            return $true
+        Write-Info "Installing $Id via winget..."
+        & $winget.Source install --exact --id $Id --source winget --silent --disable-interactivity --no-upgrade --accept-package-agreements --accept-source-agreements | Out-Host
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warn "winget returned exit code $LASTEXITCODE for $Id. Checking whether the tools are available."
         }
-
-        # Try common installation paths
-        $jqPaths = @(
-            "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\jqlang.jq_Microsoft.Winget.Source_8wekyb3d8bbwe\jq.exe"
-            "$env:PROGRAMFILES\jq\jq.exe"
-            "$env:PROGRAMFILES\WinGet\Links\jq.exe"
-            "$env:LOCALAPPDATA\Microsoft\WinGet\Links\jq.exe"
-        )
-
-        foreach ($jqPath in $jqPaths) {
-            if (Test-Path $jqPath) {
-                $jqDir = Split-Path $jqPath -Parent
-                Write-Info "Adding jq directory to PATH: $jqDir"
-                $env:Path = "$jqDir;$env:Path"
-                Write-Success "jq found at: $jqPath"
-                return $true
-            }
-        }
-
-        Write-Warn "jq was installed but not found in PATH. Please restart your terminal."
-        return $false
     }
     catch {
-        Write-Err "Failed to install jq: $_"
-        Write-Info "Please install jq manually from: https://github.com/jqlang/jq/releases"
-        return $false
+        Write-Warn "Could not install ${Id}: $_"
     }
+    Update-ProcessPath
+}
+
+function Install-Jq {
+    param([bool]$InstallIfMissing = $true)
+
+    $jqPath = Find-Jq
+    if (-not $jqPath) {
+        if (-not $InstallIfMissing) {
+            Write-Warn "jq not found. Dry-run mode will not install it."
+            return $true
+        }
+        Install-WingetPackage -Id 'jqlang.jq'
+        $jqPath = Find-Jq
+    }
+    if ($jqPath) {
+        Write-Success "jq found at: $jqPath"
+        return $true
+    }
+    Write-Err "jq is still unavailable. Install with: winget install --exact --id jqlang.jq --source winget"
+    Write-Info "Or install jq.exe in PATH from https://jqlang.org/download/"
+    return $false
 }
 
 # Check prerequisites
@@ -144,33 +168,37 @@ function Test-Prerequisites {
     Write-Info "Checking prerequisites..."
 
     $issues = @()
-
-    # Check Git
-    $git = Get-Command git -ErrorAction SilentlyContinue
-    if (-not $git) {
-        $issues += "Git is not installed. Install from: https://git-scm.com/download/win"
-    } else {
-        Write-Success "Git found at: $($git.Source)"
-    }
-
-    # Check Git Bash
+    Update-ProcessPath
     $bashPath = Find-GitBash
+    if (-not $bashPath -and -not $DryRun) {
+        Install-WingetPackage -Id 'Git.Git'
+        $bashPath = Find-GitBash
+    }
     if (-not $bashPath) {
-        $issues += "Git Bash not found. Install Git for Windows: https://git-scm.com/download/win"
+        if ($DryRun) { Write-Warn "Git for Windows not found. Dry-run mode will not install it." }
+        $issues += "Git for Windows (including Git Bash) is required to run cli.sh."
+        Write-Info "Install with: winget install --exact --id Git.Git --source winget"
+        Write-Info "Or use https://git-scm.com/download/win (include Git Bash and command-line Git)."
     } else {
         Write-Success "Git Bash found at: $bashPath"
     }
 
     # Check/Install jq
-    $jqInstalled = Install-Jq
+    $jqInstalled = Install-Jq -InstallIfMissing:(-not $DryRun)
     if (-not $jqInstalled) {
-        $issues += "jq installation failed. Some features may not work."
+        $issues += "jq is required but could not be located."
     }
 
     if ($issues.Count -gt 0) {
         Write-Err "Prerequisites check failed:"
         foreach ($issue in $issues) {
             Write-Err "  - $issue"
+        }
+        if (-not $DryRun) {
+            Write-Info "If installation succeeded but a tool is still unavailable, close all terminal windows and open PowerShell again."
+            Write-Info "Then re-run your saved install.ps1 command with the same options, or run:"
+            Write-Info "  Invoke-RestMethod https://ai-tools.itman.fyi/install.ps1 | Invoke-Expression"
+            Write-Info "If winget failed, resolve the error above or install the missing tool manually before re-running."
         }
         return $false
     }
@@ -219,30 +247,44 @@ function Start-Installation {
         exit 1
     }
 
-    $tmpRoot = Join-Path $HOME ".claude\tmp"
-    New-Item -ItemType Directory -Path $tmpRoot -Force | Out-Null
-    $env:TMPDIR = $tmpRoot
+    $sourceDir = $null
+    $tempDir = $null
+    $exitCode = 1
 
-    $tempDir = Join-Path $tmpRoot ([System.IO.Path]::GetRandomFileName())
-    New-Item -ItemType Directory -Path $tempDir | Out-Null
+    if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot "cli.sh"))) {
+        $sourceDir = $PSScriptRoot
+        Write-Info "Using local repository: $sourceDir"
+    }
+    else {
+        $tmpRoot = Join-Path $HOME ".claude\tmp"
+        New-Item -ItemType Directory -Path $tmpRoot -Force | Out-Null
+        $env:TMPDIR = $tmpRoot
+
+        $tempDir = Join-Path $tmpRoot ([System.IO.Path]::GetRandomFileName())
+        New-Item -ItemType Directory -Path $tempDir | Out-Null
+        $sourceDir = $tempDir
+    }
 
     try {
-        Write-Info "Cloning repository to temporary directory..."
-        & git clone --depth 1 https://github.com/jellydn/my-ai-tools.git $tempDir
+        if ($tempDir) {
+            Write-Info "Cloning repository to temporary directory..."
+            & git clone --depth 1 https://github.com/jellydn/my-ai-tools.git $sourceDir
 
-        if ($LASTEXITCODE -ne 0) {
-            Write-Err "Failed to clone repository"
-            Write-Info "Please check your internet connection and try again"
-            Write-Info "If the problem persists, the repository URL may have changed"
-            exit 1
+            if ($LASTEXITCODE -ne 0) {
+                Write-Err "Failed to clone repository"
+                Write-Info "Please check your internet connection and try again"
+                Write-Info "If the problem persists, the repository URL may have changed"
+                exit 1
+            }
+
+            Write-Success "Repository cloned successfully"
         }
 
-        Write-Success "Repository cloned successfully"
         Write-Info "Running installation script..."
         Write-Info "Bash path: $bashPath"
         Write-Info "Arguments: $($arguments -join ' ')"
 
-        Push-Location $tempDir
+        Push-Location $sourceDir
         try {
             if ($isNonInteractive) {
                 $bashArguments = if ($arguments.Count -gt 0) { $arguments -join ' ' } else { '' }
@@ -251,18 +293,17 @@ function Start-Installation {
             else {
                 & $bashPath "cli.sh" @arguments
             }
+            $exitCode = $LASTEXITCODE
         }
         finally {
             Pop-Location
         }
     }
     finally {
-        if (Test-Path $tempDir) {
+        if ($tempDir -and (Test-Path $tempDir)) {
             Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
         }
     }
-
-    $exitCode = $LASTEXITCODE
 
     if ($exitCode -eq 0) {
         Write-Success "Installation completed successfully!"
@@ -278,10 +319,10 @@ function Start-Installation {
 
 # Main
 Write-Host @"
-╔══════════════════════════════════════════════════════════════════════╗
-║                    AI Tools Setup - Windows                          ║
-║  PowerShell wrapper for Windows installation                        ║
-╚══════════════════════════════════════════════════════════════════════╝
+----------------------------------------------------------------------
+                    AI Tools Setup - Windows
+          PowerShell wrapper for Windows installation
+----------------------------------------------------------------------
 "@ -ForegroundColor Cyan
 
 Write-Info "Starting my-ai-tools installation..."

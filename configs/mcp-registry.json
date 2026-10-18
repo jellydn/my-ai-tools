@@ -4,7 +4,7 @@
 			"name": "context7",
 			"description": "documentation lookup for libraries and frameworks",
 			"command": "npx",
-			"args": ["-y", "@upstash/context7-mcp@latest"],
+			"args": ["-y", "@upstash/context7-mcp@3.2.5"],
 			"requires": [],
 			"category": "documentation"
 		},
@@ -12,7 +12,7 @@
 			"name": "sequential-thinking",
 			"description": "multi-step reasoning and problem solving",
 			"command": "npx",
-			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking@2026.7.4"],
 			"requires": [],
 			"category": "reasoning"
 		},
@@ -44,7 +44,7 @@
 			"name": "react-grab-mcp",
 			"description": "React component capture and inspection",
 			"command": "npx",
-			"args": ["-y", "@react-grab/mcp", "--stdio"],
+			"args": ["-y", "@react-grab/mcp@0.1.37", "--stdio"],
 			"requires": [],
 			"category": "frontend"
 		},
@@ -60,7 +60,7 @@
 			"name": "agentmemory",
 			"description": "persistent memory for AI coding agents",
 			"command": "npx",
-			"args": ["-y", "@agentmemory/mcp"],
+			"args": ["-y", "@agentmemory/mcp@0.9.28"],
 			"requires": [],
 			"category": "knowledge"
 		},

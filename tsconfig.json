@@ -15,5 +15,6 @@
 		"noImplicitOverride": true,
 		"types": ["bun-types"]
 	},
-	"include": ["scripts/**/*.ts", "lib/**/*.ts", "server.ts"]
+	"include": ["scripts/**/*.ts", "lib/**/*.ts", "src/**/*.ts", "server.ts"],
+	"exclude": ["**/*.test.ts"]
 }

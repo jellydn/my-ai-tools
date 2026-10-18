@@ -1,0 +1,40 @@
+version: 1
+enabled: true
+commands:
+  help: true
+  status: true
+  plan: true
+  implement: true
+  review: true
+  fix-ci: true
+  address-review: true
+  cancel: true
+authorization:
+  plan: triage
+  review: triage
+  implement: write
+  fix-ci: write
+  address-review: write
+  cancel: write
+  allowUsers: []
+agent:
+  timeoutSeconds: 900
+  maxTurns: 20
+review:
+  minConfidence: 0.8
+  maxComments: 30
+  autoApprove: false
+implementation:
+  branchPrefix: my-ai-bot
+  maxFiles: 50
+  maxDiffLines: 2000
+  maxDiffBytes: 500000
+  protectWorkflows: true
+  maxRetries: 1
+validation:
+  commands:
+    - bun test
+    - bun run typecheck
+security:
+  prohibitedFiles: [.env, .npmrc]
+  allowActionsBot: false

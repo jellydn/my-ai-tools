@@ -3,7 +3,7 @@
 REPO_ROOT="$BATS_TEST_DIRNAME/.."
 CLI_FILE="$REPO_ROOT/cli.sh"
 GENERATE_FILE="$REPO_ROOT/generate.sh"
-README_FILE="$REPO_ROOT/README.md"
+README_FILE="$REPO_ROOT/TOOL_REFERENCE.md"
 CURSOR_AGENT_FILE="$REPO_ROOT/configs/cursor/agents/code-quality-review.md"
 QUALITY_REVIEW_SKILL_FILE="$REPO_ROOT/skills/code-quality-review/SKILL.md"
 

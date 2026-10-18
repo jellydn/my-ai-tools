@@ -1,90 +1,93 @@
 # Technology Stack
 
-**Analysis Date:** 2026-07-14
+**Analysis Date:** 2026-08-04
 
 ## Languages
 
 **Primary:**
-- Bash — `cli.sh`, `generate.sh`, `lib/common.sh`, `lib/install.sh`, `lib/require_bash.sh`, `install.sh`, and BATS tests under `tests/*.bats`
-- TypeScript (ESNext) — `server.ts`, `lib/*.ts`, `lib/code-taste/*.ts`, `scripts/*.ts`, `tests/code-taste.test.ts`
+- **TypeScript** — HTTP server, repository indexing/retrieval, GitHub bot, Amp plugins, and tests in `server.ts`, `lib/`, `src/`, `scripts/`, and `configs/amp/`.
+- **Bash** — configuration installation/export and dependency bootstrap in `cli.sh`, `generate.sh`, `install.sh`, `lib/`, and `tests/*.bats`.
 
 **Secondary:**
-- JSON / YAML — tool configs under `configs/`, `configs/mcp-registry.json`, `biome.json`, `.github/workflows/*.yml`, `fly.toml`
-- Markdown — `AGENTS.md`, `skills/`, `wiki/`, exported agent instructions
-- PowerShell — `install.ps1` (served by `server.ts`)
+- **Python** — local document Q&A service in `document_qa/` (FastAPI, Streamlit, FAISS-related code).
+- **JavaScript** — browser client and standalone skill scripts in `public/browser-chat.js` and `skills/*/scripts/`.
+- **JSON, JSONC, TOML, YAML, Markdown** — native configuration, workflows, agent instructions, and documentation throughout `configs/`, `.github/`, `skills/`, `docs/`, and `wiki/`.
 
 ## Runtime
 
 **Environment:**
-- **Bun** `>=1.0.0` — declared in `package.json` `engines`; used for `code-taste` CLI (`scripts/code-taste.ts`), `bun test`, and `bun install` in CI (`.github/workflows/test.yml`, `.github/workflows/fly.yml`)
-- **Node.js 20** — `Dockerfile` base image `node:20-slim`; production chat server runs via `tsx` (`npm start` / `npm run dev` in container)
+- **Bun 1.x** — preferred TypeScript runtime, package runner, test runner, and production container runtime (`Dockerfile`, `package.json`).
+- **Node.js >=18** — declared compatibility in `package.json`; `tsx` remains available for Node-oriented scripts and local tooling.
+- **Python** — required for the optional `document_qa/` application; versions and dependencies are declared in `document_qa/requirements.txt`.
+- **Bash** — required for installer and configuration-sync workflows; entry points re-exec under Bash via `lib/require_bash.sh`.
 
 **Package Manager:**
-- **Bun** — primary for local/CI TypeScript tooling; lockfile: `bun.lock` (present)
-- **npm** — Docker build and runtime in `Dockerfile` (`npm ci`, `npm run index`); lockfile: `package-lock.json` (present)
+- **Bun** — primary lockfile is `bun.lock`; `package.json` scripts use `bun test` and Bun’s TypeScript execution.
+- **npm-compatible metadata** — `package-lock.json` is also committed for dependency/security tooling and compatibility.
+- **pip** — Python dependencies are isolated in `document_qa/requirements.txt`.
 
 ## Frameworks
 
 **Core:**
-- **Hono** `^4.6.3` with **@hono/node-server** `^2.0.8` — HTTP app in `server.ts` (static assets, `/api/chat`, install script routes)
-- **OpenAI SDK** `^4.65.0` — embeddings and chat in `lib/retriever.ts`, `scripts/index-repo.ts`, `lib/code-taste/profile.ts`, `server.ts`
-- **Zod** `^3.23.8` — request validation in `server.ts`; LLM output parsing in `lib/code-taste/profile.ts`
-- **web-tree-sitter** `0.26.11` + **@vscode/tree-sitter-wasm** `0.3.1` — semantic chunking in `lib/code-taste/chunker.ts`
+- **Hono** `^4.6.3` with `@hono/node-server` `^2.0.8` — API server and middleware in `server.ts` and `src/github-bot/app.ts`.
+- **FastAPI** — local document-Q&A HTTP API in `document_qa/api.py`.
+- **Streamlit** — local document-Q&A UI in `document_qa/streamlit_app.py`.
+
+**AI and retrieval:**
+- **OpenAI SDK** `^6.0.0` — OpenAI-compatible chat and embedding calls through `lib/openai-client.ts` and `lib/retriever.ts`.
+- **Hugging Face Transformers** `^4.2.0` and **onnxruntime-node** `^1.27.0` — browser/local embedding generation in `scripts/index-browser.ts` and related retrieval code.
+- **Zod** `^4.0.0` — runtime validation for server payloads and GitHub bot configuration/results.
+- **YAML** `^2.9.0` — parsing `.github/my-ai-bot.yml` in `src/github-bot/config.ts`.
 
 **Testing:**
-- **BATS** — shell/config regression tests in `tests/`; CI subset in `.github/workflows/test.yml` (`tests/pr_*.bats`, `tests/generate.bats`, `tests/sh_reexec.bats`)
-- **Bun test** — `tests/code-taste.test.ts` via `package.json` script `test:code-taste`
+- **Bun test** — TypeScript unit/integration tests in `tests/*.test.ts` and `src/**/*.test.ts`.
+- **BATS** — shell/configuration functional tests in `tests/*.bats`.
+- **Python test suite** — document-QA tests in `document_qa/tests/`.
 
 **Build/Dev:**
-- **tsx** `^4.23.0` — runs `server.ts` and indexing scripts without emit (`package.json` `dev` / `start` / `index`)
-- **TypeScript** `^5.6.2` — `tsconfig.json` (`noEmit`, strict, `bun-types`)
-- **@biomejs/biome** `^2.5.3` — formatting in `biome.json` (tabs, 120 cols, double quotes); linter disabled in repo config
-- **@huggingface/transformers** `^4.2.0` + **onnxruntime-node** `^1.27.0` — local browser index embeddings in `scripts/index-browser.ts`
+- **Biome** `^2.5.3` — formatting and checks, configured by `biome.json`.
+- **TypeScript** `^7.0.0` — type checking through `package.json`’s `typecheck` script.
+- **pre-commit** — whitespace, YAML, large-file, and oxfmt hooks in `.pre-commit-config.yaml`.
+- **Docker BuildKit** — multi-stage image build in `Dockerfile`; build-time indexing receives an `OPENAI_API_KEY` secret.
 
 ## Key Dependencies
 
 **Critical:**
-- `hono` / `@hono/node-server` — production RAG chat API and static hosting (`server.ts`)
-- `openai` — vector index build (`scripts/index-repo.ts`), retrieval (`lib/retriever.ts`), coding-taste analysis (`lib/code-taste/profile.ts`)
-- `web-tree-sitter` / `@vscode/tree-sitter-wasm` — GitHub repo semantic extraction for `code-taste` (`lib/code-taste/chunker.ts`)
+- `hono`, `@hono/node-server` — production API serving.
+- `openai`, `zod`, `yaml` — chat/retrieval and GitHub bot configuration/validation.
+- `@huggingface/transformers`, `onnxruntime-node` — browser index generation and local embedding support.
 
-**Infrastructure / tooling (install path):**
-- **jq** — JSON validation and MCP registry handling in `lib/common.sh`, `generate.sh`, `cli.sh`; auto-install hooks in `lib/install.sh`
-- **curl** — remote installers and schema fetch in `lib/common.sh`, `lib/install.sh`
-- **npx / bunx** — MCP servers and recommended skills from `configs/mcp-registry.json` and `configs/recommend-skills.json` (wired in `cli.sh` / `lib/install.sh`)
+**Infrastructure:**
+- `bun-types` — Bun TypeScript declarations.
+- `@biomejs/biome` — formatting/check tooling.
+- Python packages in `document_qa/requirements.txt` — local document ingestion, embeddings, FAISS retrieval, FastAPI, and Streamlit.
 
 ## Configuration
 
 **Environment:**
-- Local secrets: copy `.env.example` → `.env` (`OPENAI_API_KEY`, optional `OPENAI_BASE_URL`, `OPENAI_MODEL`, `OPENAI_EMBEDDING_MODEL`)
-- Fly.io defaults in `fly.toml` `[env]` for OpenRouter model URLs (runtime secret `OPENAI_API_KEY` imported in `.github/workflows/fly.yml`)
-- Optional `GITHUB_TOKEN` for `code-taste` GitHub API rate limits (`lib/code-taste/github.ts`)
-- `PORT` for HTTP server (`server.ts`, default `3000`)
+- Runtime values are supplied through `.env.example`, process environment, GitHub Actions secrets, or Dokku config.
+- Core AI variables: `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`, and `OPENAI_EMBEDDING_MODEL`.
+- GitHub bot variables: `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY`, `GITHUB_APP_WEBHOOK_SECRET`, `GITHUB_BOT_LOGIN`, `BOT_DATA_DIR`, `BOT_WORKSPACE_ROOT`, and worker/security controls documented in `.env.example` and `src/github-bot/config.ts`.
 
 **Build:**
-- `tsconfig.json` — TS sources: `scripts/**/*.ts`, `lib/**/*.ts`, `server.ts`
-- `biome.json` — repo-wide formatter settings
-- `fly.toml` — Fly app `ai-tools-itman-fyi`, region `sin`, 1024MB VM
-- `Dockerfile` — build-time index generation with mounted `OPENAI_API_KEY` secret
-- `.pre-commit-config.yaml` — whitespace/YAML hooks + `oxfmt` (see `tests/pr_pre_commit.bats`)
-
-**Shell CLI:**
-- `cli.sh` — install configs to `$HOME` (`--dry-run`, `--yes`, backup/rollback via `lib/common.sh`)
-- `generate.sh` — export from `$HOME` back into `configs/` and `skills/`
+- `package.json`, `bun.lock`, and `package-lock.json` — dependencies and scripts.
+- `tsconfig.json` — TypeScript project configuration.
+- `biome.json` — formatting/check configuration.
+- `Dockerfile` — production image and build-time repository indexing.
+- `.github/workflows/*.yml` — tests, GitHub Pages, and Dokku deployments.
 
 ## Platform Requirements
 
 **Development:**
-- Bash 4+ (re-exec guard in `lib/require_bash.sh`)
-- Bun and/or Node for TypeScript services and tests
-- `jq` recommended (installed by `cli.sh` when `-y`)
-- `bats-core` for full shell test suite (`AGENTS.md`, `TESTING.md`)
+- Bun, Bash, Git, `jq`, and BATS for the primary project workflows.
+- Python and dependencies from `document_qa/requirements.txt` only when using the local document-QA application.
+- Docker is useful for validating the production image.
 
 **Production:**
-- **Fly.io** — chat/RAG deployment (`.github/workflows/fly.yml`, `Dockerfile`, `fly.toml`)
-- **GitHub Pages** — static site from repo root (`.github/workflows/deploy-pages.yml`, `CNAME`)
-- Prebuilt indexes: `data/index.json` (server retrieval), `public/index-browser.json` (client-side search pipeline)
+- Docker-compatible host running Bun image layers.
+- Dokku app `ai-tools` on the configured Docklight host, or an equivalent Docker deployment.
+- OpenRouter-compatible key and configured BuildKit secret when build-time indexing is enabled.
 
 ---
 
-*Stack analysis: 2026-07-14*
+*Stack analysis: 2026-08-04*

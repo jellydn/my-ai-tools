@@ -1,161 +1,151 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-07-14
+**Analysis Date:** 2026-08-04
 
 ## Directory Layout
 
-```
+```text
 my-ai-tools/
-├── cli.sh                 # Install orchestrator (repo → $HOME)
-├── generate.sh            # Export orchestrator ($HOME → repo)
-├── server.ts              # Hono site + /api/chat RAG
-├── install.sh / install.ps1 # Remote bootstrap installers
-├── index.html             # Landing page served by server.ts
-├── package.json           # TS/Bun scripts and dependencies
-├── lib/
-│   ├── require_bash.sh    # POSIX re-exec guard for bash-only libs
-│   ├── common.sh          # Logging, execute*, copy, validation, backup
-│   ├── install.sh         # install_* functions for external CLIs
-│   ├── indexer.ts         # Repo walk + chunking for RAG index
-│   ├── retriever.ts       # Load index, embed query, top-K retrieve
-│   ├── vector-similarity.ts
-│   └── code-taste/        # GitHub fetch, chunker, profile builder
-├── scripts/
-│   ├── index-repo.ts      # Build data/index.json
-│   ├── index-browser.ts   # Browser-oriented index helper
-│   └── code-taste.ts      # Bun CLI entry (analyze / export)
-├── configs/               # Per-tool source-of-truth configs
-│   ├── mcp-registry.json
-│   ├── recommend-skills.json
-│   └── <tool>/            # claude, opencode, pi, cursor, …
-├── skills/                # Shared skill packages
-├── tests/                 # bats (*.bats) + bun test (code-taste)
-├── data/                  # Generated index.json (not always committed)
-├── docs/                  # Human documentation
-├── wiki/                  # Supplementary wiki content
-├── public/                # Static assets for server
-└── .planning/codebase/    # Architecture/structure notes (this folder)
+├── cli.sh, generate.sh, install.sh, install.ps1  # Config install/export entry points
+├── server.ts, index.html, public/                # Bun/Hono web application
+├── lib/                                          # Shared TypeScript retrieval and shell libraries
+├── scripts/                                      # Indexing and repository automation scripts
+├── src/github-bot/                               # GitHub coding bot service
+├── document_qa/                                  # Standalone Python document-QA app
+├── configs/                                      # Tool-specific configs, hooks, agents, plugins
+├── skills/                                       # Reusable agent skill definitions
+├── tests/                                        # BATS and TypeScript tests
+├── docs/, wiki/                                  # User/developer documentation and knowledge base
+├── .github/workflows/                            # Test, Pages, and Dokku workflows
+├── Dockerfile, .dockerignore                     # Container build/runtime
+├── package.json, bun.lock, package-lock.json     # JS/Bun dependency metadata
+└── .planning/codebase/                           # This generated codebase map
 ```
 
 ## Directory Purposes
 
-**`configs/`:**
-- Purpose: Canonical copies of assistant settings, agents, commands, hooks, MCP snippets, themes.
-- Contains: One subdirectory per product (`configs/claude/`, `configs/codex/`, `configs/pi/`, etc.) plus shared JSON registries at the root of `configs/`.
-- Key files: `configs/mcp-registry.json`, `configs/recommend-skills.json`, per-tool `settings.json` / `AGENTS.md` / `mcp.json` variants.
-
 **`lib/`:**
-- Purpose: Shared implementation for shell tooling and TypeScript indexing/RAG/code-taste.
-- Contains: Bash libraries and `.ts` modules included by `server.ts`, `scripts/*`, and tests.
-- Key files: `lib/common.sh`, `lib/install.sh`, `lib/indexer.ts`, `lib/retriever.ts`, `lib/code-taste/profile.ts`.
+- Purpose: Shared application and shell helpers.
+- Contains: `indexer.ts`, `retriever.ts`, `openai-client.ts`, `common.sh`, `install.sh`, `install-deps.sh`, and `require_bash.sh`.
+- Key files: `lib/indexer.ts`, `lib/retriever.ts`, `lib/common.sh`.
 
-**`scripts/`:**
-- Purpose: Thin CLI entrypoints that are not the main shell installers.
-- Contains: TypeScript runnable via `tsx` or `bun`.
-- Key files: `scripts/index-repo.ts`, `scripts/code-taste.ts`.
+**`src/github-bot/`:**
+- Purpose: GitHub App webhook, queue, agent, workspace, security, and publication logic.
+- Contains: `app.ts`, `worker.ts`, `agent.ts`, `github.ts`, `commands.ts`, `config.ts`, `security.ts`, `store.ts`, `workspace.ts`, `review.ts`, `types.ts`, and `github-bot.test.ts`.
+
+**`document_qa/`:**
+- Purpose: Separate local Python application for uploading documents and asking citation-aware questions.
+- Contains: FastAPI API, Streamlit UI, loaders/chunkers, embeddings, retrieval/vector store, requirements, README, and Python tests.
+
+**`configs/`:**
+- Purpose: Source-of-truth configurations for supported AI coding clients.
+- Contains: tool directories such as `claude/`, `codex/`, `pi/`, `amp/`, `kiro/`, `reasonix/`, `factory/`, and central registries/guidelines.
+- Key files: `configs/mcp-registry.json`, `configs/token-efficiency.md`, per-tool `AGENTS.md`/settings/agent/plugin files.
 
 **`skills/`:**
-- Purpose: Skill content synced into tool-specific skill directories during install.
-- Contains: Named skill folders with `SKILL.md` and supporting files.
-- Key files: Per-skill directories referenced by `skill_exists_in_plugins` in `generate.sh`.
+- Purpose: Reusable agent instructions and automation packages.
+- Contains: one directory per skill with `SKILL.md` and optional templates/scripts.
+- Key files: `skills/codemap/SKILL.md`, `skills/docs-update/SKILL.md`, `skills/orchestrating-fusion/SKILL.md`.
 
 **`tests/`:**
-- Purpose: Regression tests for `cli.sh`, `generate.sh`, skills, and code-taste.
-- Contains: `*.bats` (bash-test), `code-taste.test.ts`.
-- Key files: `tests/cli.bats`, `tests/generate.bats`, `tests/code-taste.test.ts`.
+- Purpose: Shell/config validation and integration-style checks.
+- Contains: `tests/pr_*.bats`, core BATS suites, fixtures/helpers, and `fusion-watchdog.test.ts`.
 
-**`configs/claude/hooks/`:**
-- Purpose: TypeScript hook bundle for Claude Code (git guard, session hooks).
-- Contains: `index.ts`, `package.json`, shell hook wrappers.
-- Key files: `configs/claude/hooks/git-guard.ts`, `configs/claude/hooks/index.ts`.
+**`docs/` and `wiki/`:**
+- Purpose: Human-facing deployment/feature docs and generated/curated knowledge content.
+- Key files: `docs/dokku-deploy.md`, `docs/fusion-orchestration.md`, `docs/TESTING.md` references, and wiki source/entity material.
+
+**`.github/`:**
+- Purpose: CI/CD workflow definitions and GitHub bot example configuration.
+- Key files: `.github/workflows/test.yml`, `.github/workflows/dokku.yml`, `.github/workflows/deploy-pages.yml`, `.github/my-ai-bot.example.yml`.
 
 ## Key File Locations
 
 **Entry Points:**
-- `cli.sh`: Forward install and config deployment.
-- `generate.sh`: Reverse export from installed tools.
-- `server.ts`: HTTP server and RAG chat.
-- `scripts/index-repo.ts`: Offline index generation.
-- `scripts/code-taste.ts`: GitHub coding-style analysis (Bun).
+- `server.ts`: main Hono/Bun server.
+- `cli.sh`: install repository configurations into `$HOME`.
+- `generate.sh`: export user configurations into the repository.
+- `install.sh` / `install.ps1`: bootstrap installers.
+- `document_qa/api.py`: standalone FastAPI API.
 
 **Configuration:**
-- `configs/mcp-registry.json`: Central MCP server definitions for install.
-- `configs/recommend-skills.json`: Npx/marketplace skill recommendations.
-- `biome.json`, `tsconfig.json`, `.pre-commit-config.yaml`: Repo tooling config.
-- `.env.example`: Template for `OPENAI_API_KEY` and related env vars.
+- `package.json`, `bun.lock`, `package-lock.json`: JavaScript dependencies/scripts.
+- `.env.example`: runtime configuration contract.
+- `tsconfig.json`, `biome.json`: TypeScript and formatting configuration.
+- `Dockerfile`: production build/runtime contract.
+- `configs/mcp-registry.json`: shared MCP registry.
 
 **Core Logic:**
-- `lib/common.sh`: Cross-cutting shell utilities (dry-run, copy, validate, rollback).
-- `lib/install.sh`: External binary installers invoked from `cli.sh` `main`.
-- `cli.sh` (`copy_configurations`, `validate_all_configs`): Per-tool install mapping.
-- `lib/indexer.ts` + `lib/retriever.ts`: RAG data path.
-- `lib/code-taste/*.ts`: External-repo analysis pipeline.
+- `lib/indexer.ts` and `lib/retriever.ts`: repository knowledge pipeline.
+- `src/github-bot/worker.ts`: bot workflow orchestration.
+- `src/github-bot/workspace.ts` and `security.ts`: execution/publication boundaries.
+- `lib/common.sh`: shared shell operations and safety wrappers.
 
 **Testing:**
-- `tests/*.bats`: Shell integration tests (CI runs `pr_*.bats`, `generate.bats`, `sh_reexec.bats`).
-- `tests/code-taste.test.ts`: Bun unit/integration tests for chunking and profile helpers.
+- `tests/*.bats`: shell/config behavior and structural tests.
+- `tests/fusion-watchdog.test.ts`: Bun watchdog tests.
+- `src/github-bot/github-bot.test.ts`: GitHub bot unit/integration tests.
+- `document_qa/tests/`: Python document-QA tests.
 
 ## Naming Conventions
 
 **Files:**
-- Shell entrypoints: `*.sh` at repo root or `lib/`; PowerShell `install.ps1`.
-- Per-tool settings: often `settings.json`, `config.json`, `config.toml`, or `opencode.json` under `configs/<tool>/`.
-- Agents/commands: kebab-case `.md` or tool-specific extensions (e.g. `.agent.md`, `.toml`).
-- TypeScript modules: kebab-case filenames (`vector-similarity.ts`, `index-repo.ts`).
+- TypeScript modules use kebab-free descriptive names such as `openai-client.ts`, `fusion-watchdog.ts`, and `github-bot.test.ts`.
+- Shell entry points and helpers use lowercase names with `.sh`.
+- BATS files use `<area>.bats`; Python tests use `test_<area>.py`; skill docs use `SKILL.md`.
+- Tool configurations retain the native client’s expected names (`settings.json`, `config.toml`, `mcp.json`).
 
 **Directories:**
-- Tool configs: lowercase or hyphenated (`antigravity-cli`, `kimi-code`, `commandcode`).
-- Skills: directory per skill name matching marketplace slug.
-- Tests: `tests/<feature>.bats` or `tests/<feature>.test.ts`.
+- Domain/application modules use lowercase directories (`lib`, `src/github-bot`, `document_qa`, `scripts`).
+- Tool config directories use the tool/client name (`configs/<tool>`).
+- Skills are grouped under `skills/<skill-name>`.
 
 ## Where to Add New Code
 
-**New AI tool support:**
-- Primary code: new `configs/<tool>/` tree; add `copy_<tool>_configs` and `install_<tool>` in `cli.sh` / `lib/install.sh`; mirror `generate_<tool>_configs` in `generate.sh`.
-- Tests: `tests/` bats covering copy with temp `HOME`.
+**New feature in the Bun web app:**
+- Primary code: `server.ts` for route composition; a focused module under `lib/` or `src/` for logic.
+- Tests: co-located `*.test.ts` for TypeScript logic, plus a BATS test only if configuration/CLI behavior changes.
 
-**New MCP server defaults:**
-- Implementation: entry in `configs/mcp-registry.json`; optional hook in `install_mcp_servers_from_registry` usage inside relevant `copy_*_configs`.
+**New GitHub bot capability:**
+- Implementation: `src/github-bot/worker.ts` and the nearest focused module (`commands.ts`, `github.ts`, `workspace.ts`, `review.ts`, or `config.ts`).
+- Tests: extend `src/github-bot/github-bot.test.ts` unless a new module warrants a focused test file.
+- Policy/config: update `.github/my-ai-bot.example.yml` and `docs/my-ai-bot.md` when user-facing.
 
-**RAG / docs assistant changes:**
-- Chunking or exclusions: `lib/indexer.ts`
-- Retrieval or caching: `lib/retriever.ts`
-- API behavior: `server.ts`
-- Rebuild index: run `npm run index` → updates `data/index.json`
+**New configuration/tool support:**
+- Config: `configs/<tool>/` using the target tool’s native format.
+- Installer/export integration: `cli.sh`, `generate.sh`, and `lib/install*.sh` according to `AGENTS.md`.
+- Tests: `tests/pr_<tool>.bats` or the nearest existing suite.
 
-**Code-taste features:**
-- Chunking rules: `lib/code-taste/chunker.ts`
-- GitHub selection/fetch: `lib/code-taste/github.ts`
-- Profile format/export: `lib/code-taste/profile.ts`
-- CLI flags: `scripts/code-taste.ts`
-- Tests: `tests/code-taste.test.ts`
+**New document-QA capability:**
+- Implementation: focused module under `document_qa/`.
+- Tests: `document_qa/tests/test_<area>.py`.
 
 **Utilities:**
-- Shared shell helpers: `lib/common.sh`
-- Shared TS math/helpers: `lib/vector-similarity.ts` or new modules under `lib/`
+- Shared TypeScript utility: `lib/` or the nearest domain module.
+- Shared shell helper: `lib/common.sh`, keeping modules below the repository’s size boundary.
 
 ## Special Directories
 
-**`data/`:**
-- Purpose: Stores `index.json` embedding index for `server.ts`.
-- Generated: Yes (via `scripts/index-repo.ts`).
-- Committed: Often gitignored or built in deploy; chat returns 503 if missing.
-
-**`.code-taste/`:**
-- Purpose: Local analysis state (`profile.json`).
-- Generated: Yes (via `code-taste analyze`).
-- Committed: No (listed in `.gitignore`).
-
-**`node_modules/`:**
-- Purpose: npm/bun dependencies for TS tooling.
+**`data/` and generated indexes:**
+- Purpose: runtime/generated retrieval artifacts.
 - Generated: Yes.
-- Committed: No.
+- Committed: Usually no; inspect `.gitignore` before adding artifacts.
 
-**`configs/claude/hooks/node_modules/`:**
-- Purpose: Hook package deps when developing Claude hooks.
-- Generated: Yes (local to hooks package).
-- Committed: No (excluded via copy filters / standard ignore patterns).
+**`.planning/codebase/`:**
+- Purpose: generated architectural map for onboarding/planning.
+- Generated: Yes, by `skills/codemap/SKILL.md`.
+- Committed: Yes in the current repository; refreshes should be reviewed as documentation changes.
+
+**`.freebuff/`:**
+- Purpose: local desktop/session state.
+- Generated: Yes.
+- Committed: No; preserve as local state and do not include in feature commits.
+
+**`configs/` and `skills/`:**
+- Purpose: managed source-of-truth content.
+- Generated: Some exports are generated from user-local tool state; verify the owning sync path before hand-editing.
+- Committed: Yes, except runtime artifacts excluded by repository rules.
 
 ---
 
-*Structure analysis: 2026-07-14*
+*Structure analysis: 2026-08-04*

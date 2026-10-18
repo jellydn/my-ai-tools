@@ -1,191 +1,155 @@
 # Codebase Concerns
 
-**Analysis Date:** 2026-07-14
+**Analysis Date:** 2026-08-04
 
 ## Tech Debt
 
-**CI vs local test surface:**
-- Issue: GitHub Actions runs only `tests/pr_*.bats`, `tests/generate.bats`, and `tests/sh_reexec.bats` (16 + 2 files), while the repo has 23 BATS files total. Seven suites (`cli.bats`, `cursor_configs.bats`, `install.bats`, `lib_common.bats`, `recommend_skills.bats`, plus any future non-`pr_*` files) never run in CI.
-- Files: `.github/workflows/test.yml`, `AGENTS.md`, `tests/cli.bats`, `tests/cursor_configs.bats`, `tests/install.bats`, `tests/lib_common.bats`, `tests/recommend_skills.bats`
-- Impact: Regressions in full `cli.sh` install paths, Cursor agent install/export wiring, `lib/common.sh` helpers, and recommend-skills logic can merge green on CI while failing locally.
-- Fix approach: Either expand the CI `bats` step to `bats tests/` (or an explicit allowlist that includes the omitted files), or document and enforce that PR authors must run the full suite; align `TESTING.md` with the CI subset.
+**Monolithic orchestration scripts:**
+- Issue: `cli.sh` and `generate.sh` coordinate many tools and contain large linear dispatch/export sections.
+- Files: `cli.sh`, `generate.sh`, `lib/install.sh`, `lib/common.sh`.
+- Impact: Changes can have broad blast radius; related install/export behavior is duplicated and difficult to review.
+- Fix approach: Extract tool adapters into smaller modules while preserving the ordered `INSTALL_SEQUENCE`, dry-run wrappers, and existing fixture contracts.
 
-**Dual formatters (biome vs oxfmt):**
-- Issue: Contributors are told to use `biome check --write .` (`CONTRIBUTING.md`, `AGENTS.md`), while pre-commit runs `oxfmt` on TS/JS (with excludes for code-taste paths). CI runs biome only on a narrow code-taste path set, not repo-wide biome or oxfmt.
-- Files: `.pre-commit-config.yaml`, `biome.json`, `CONTRIBUTING.md`, `.github/workflows/test.yml`, `.commandcode/taste/taste.md` (notes biome vs oxfmt preference)
-- Impact: Inconsistent formatting depending on whether developers use pre-commit vs manual biome; drift between hook output and `biome check .` on the rest of the tree.
-- Fix approach: Single source of truth (biome everywhere or oxfmt everywhere), wire the chosen tool into CI, and update CONTRIBUTING/AGENTS to match.
+**Dual application surfaces:**
+- Issue: The repository contains the Bun/Hono service, GitHub bot, and separate Python document-QA application with separate dependency/test ecosystems.
+- Files: `server.ts`, `src/github-bot/`, `document_qa/`, `package.json`, `document_qa/requirements.txt`.
+- Impact: CI and onboarding must account for multiple runtimes; regressions in one surface can be invisible to the other.
+- Fix approach: Add explicit per-surface CI jobs and documented local commands/health checks.
 
-**Config validation is warn-and-continue in CI:**
-- Issue: `validate_all_configs()` logs failures but continues when `--yes` or non-interactive (`CI` auto-enables `-y`), so broken JSON in allowed-tool configs can still install.
-- Files: `cli.sh` (`validate_all_configs`), `lib/common.sh` (`is_non_interactive`, `validate_config`)
-- Impact: Invalid configs land in `$HOME` on automated runs without a hard gate.
-- Fix approach: Fail CI on validation errors (dedicated `jq` validation job) or treat validation failure as exit 1 in CI even with `-y`.
-
-**Monolithic entry scripts:**
-- Issue: `cli.sh` (~2.5k lines) and `README.md` (~3.3k lines) concentrate install, MCP merge, validation, and documentation; changes are high-touch and grep-heavy.
-- Files: `cli.sh`, `generate.sh`, `README.md`
-- Impact: Review burden, merge conflicts, and easy-to-miss side effects when adding a tool.
-- Fix approach: Continue modularizing into `lib/` (pattern already used for `install.sh`, `common.sh`) and split README into wiki sections with a thin root index.
-
-**YAML validation optional:**
-- Issue: `validate_yaml` returns success when no python3/pyyaml, yq, or ruby is available.
-- Files: `lib/common.sh`
-- Impact: Invalid YAML in configs may pass validation on minimal environments.
-- Fix approach: Require `yq` or python in CI validation job; fail closed when validator missing in CI.
+**Generated/configuration drift:**
+- Issue: Tool configs are exported from user-local environments and include large managed/generated content.
+- Files: `configs/`, `generate.sh`, `cli.sh`, `.planning/codebase/`.
+- Impact: Formatting-only or host-specific changes can create noisy diffs and accidentally overwrite unrelated settings.
+- Fix approach: Make ownership markers and generated-file policy more explicit; validate round-trip sync in fixtures.
 
 ## Known Bugs
 
-**macOS BATS / getcwd fragility:**
-- Symptoms: Full `bats tests/` may fail on macOS host due to directory/getcwd behavior.
-- Files: `AGENTS.md`
-- Trigger: Run `bats tests/` on macOS without sandbox.
-- Workaround: Run tests inside microsandbox (`msb run ... ubuntu ... bats tests/`).
+**Local dependency/test environment drift:**
+- Symptoms: TypeScript tests can fail when dependencies are absent or when the local environment does not match the committed Bun/npm lock state.
+- Files: `package.json`, `bun.lock`, `package-lock.json`, `src/github-bot/github-bot.test.ts`.
+- Trigger: Running `bun test` without a complete dependency install.
+- Workaround: Run the project’s documented dependency setup first and use the lockfile-appropriate package manager.
 
-**`set -u` with sourced `cli.sh`:**
-- Symptoms: Sourcing `cli.sh` / copy helpers with `set -u` can error on unset optional vars (e.g. `MSYSTEM`).
-- Files: `AGENTS.md`, `lib/common.sh`
-- Trigger: BATS-style `export HOME=...; source ./cli.sh` with `set -u` enabled.
-- Workaround: Do not enable `set -u` when sourcing install functions (documented in AGENTS).
-
-**Non-TTY `cli.sh` network install noise:**
-- Symptoms: Piped or CI shells auto-enable `--yes` and attempt many global CLI installs before config copy; failures/hangs without network.
-- Files: `cli.sh`, `lib/install.sh`, `AGENTS.md`
-- Trigger: `./cli.sh` without TTY in restricted network.
-- Workaround: Use `--dry-run`, or source `cli.sh` and call copy functions with throwaway `HOME` (as in tests).
+**Deployment build depends on optional external indexing:**
+- Symptoms: Dokku image builds fail if the BuildKit secret, provider key, model, network, or indexing dependency is unavailable.
+- Files: `Dockerfile`, `.github/workflows/dokku.yml`, `docs/dokku-deploy.md`, `scripts/index-repo.ts`, `scripts/index-browser.ts`.
+- Trigger: `OPENAI_API_KEY` is present and indexing executes during the Docker build.
+- Workaround: Fix/supply the OpenRouter-compatible secret and model/network; the Docker step is guarded and skips indexing when no key is mounted.
 
 ## Security Considerations
 
-**Placeholder credentials in example configs:**
-- Risk: Copy-paste of `providers.json.example` or similar into live paths with placeholder tokens left unchanged; example files look like real provider configs.
-- Files: `configs/cline/providers.json.example`, `configs/kimi-code/config.toml` (empty `api_key` fields)
-- Current mitigation: `.example` naming and placeholder strings; not installed as live `providers.json` by default.
-- Recommendations: Ensure `generate.sh` never exports example files to real provider paths; grep CI for committed real tokens; document “never commit `providers.json`”.
+**GitHub bot command execution:**
+- Risk: The bot executes an external coding agent and Git commands based on repository/user-triggered requests.
+- Files: `src/github-bot/agent.ts`, `src/github-bot/workspace.ts`, `src/github-bot/security.ts`, `src/github-bot/config.ts`.
+- Current mitigation: HMAC webhook verification, collaborator authorization, command allowlists, path checks, protected workflow checks, diff limits, secret scanning, redacted logs, ephemeral workspaces, and draft-PR publication defaults.
+- Recommendations: Keep policy defaults fail-closed, add CI tests for every new command/policy setting, and review changes to `.github/my-ai-bot.yml` as security-sensitive.
 
-**MCP and env-based secrets:**
-- Risk: MCP configs reference env vars (`AGENTMEMORY_SECRET`, OAuth tokens) that users must supply; misconfiguration exposes empty auth or local-only assumptions.
-- Files: `configs/opencode/opencode.json`, `configs/copilot/mcp-config.json`, `codex/config.toml`, `configs/mcp-registry.json` (npx pulls `@latest` packages)
-- Current mitigation: `${VAR:-}` patterns; registry documents `requires` for binaries.
-- Recommendations: Pin MCP package versions where feasible; document secret handling in README; audit `npx -y @latest` supply-chain risk.
+**Build/runtime secret handling:**
+- Risk: AI provider keys are required for indexing and runtime; incorrect Docker/Dokku configuration can expose failures or accidentally persist secrets.
+- Files: `Dockerfile`, `.github/workflows/dokku.yml`, `docs/dokku-deploy.md`, `.env.example`.
+- Current mitigation: GitHub secret validation, OpenRouter prefix validation, BuildKit secret mount, and Dokku config synchronization.
+- Recommendations: Avoid echoing secrets in debugging, periodically rotate deploy/provider keys, and verify Dokku Docker options after host changes.
 
-**GitHub Pages deploy uploads entire repo:**
-- Risk: Accidental publication of any file in the default branch tree (including examples with token-shaped strings) if Pages serves raw paths.
-- Files: `.github/workflows/deploy-pages.yml`
-- Current mitigation: Typical Pages site uses `index`/static subset depending on site generator—in this workflow `path: "."` uploads the full checkout.
-- Recommendations: Deploy only `wiki/` or a built `docs/` artifact; exclude `configs/**` examples from the published artifact.
-
-**Orca agent hooks:**
-- Risk: Hooks POST to localhost with `ORCA_AGENT_HOOK_TOKEN`; weak or missing token checks if env unset (scripts exit early when vars missing—good).
-- Files: `orca/agent-hooks/*.sh`
-- Current mitigation: Early exit when port/token/pane key unset.
-- Recommendations: Treat tokens as secrets; do not log hook payloads containing paths or prompts.
+**Public API exposure:**
+- Risk: The chat/retrieval endpoints do not implement account authentication.
+- Files: `server.ts`, `public/browser-chat.js`.
+- Current mitigation: Request validation and IP-based rate limiting.
+- Recommendations: Put the service behind an authenticated gateway or add application-level auth before treating it as a private data/API surface.
 
 ## Performance Bottlenecks
 
-**Parallel install and global tooling:**
-- Problem: `cli.sh` may install many global CLIs sequentially or in parallel bursts; first-run install is slow and network-heavy.
-- Files: `lib/install.sh`, `cli.sh`
-- Cause: Optional tool detection installs jq, biome, formatters, and per-tool CLIs.
-- Improvement path: Lazy-install per tool; cache presence checks; skip network phase when `--dry-run` or explicit `--skip-tool-install`.
+**Build-time embedding/index generation:**
+- Problem: Repository indexing and model embedding happen during Docker image builds.
+- Files: `Dockerfile`, `scripts/index-repo.ts`, `scripts/index-browser.ts`, `lib/indexer.ts`.
+- Cause: Full repository scanning plus batched remote embeddings and local transformer inference on every build.
+- Improvement path: Cache indexes by commit/content hash, move indexing to a separate job/artifact, or make server startup consume a prebuilt versioned index.
 
-**Large README and wiki duplication:**
-- Problem: Loading and searching multi-thousand-line docs is slow for humans and agents.
-- Files: `README.md`, `wiki/raw/README.md`
-- Cause: Duplicated Windows/install sections between root and wiki.
-- Improvement path: Single canonical wiki; README links only.
+**In-memory cosine retrieval:**
+- Problem: `lib/retriever.ts` loads the JSON index and computes similarity across chunks in-process.
+- Files: `lib/retriever.ts`, `data/index.json`.
+- Cause: Linear scan and JSON parsing; no ANN/vector database.
+- Improvement path: Use a compact binary/ANN index or external vector store when corpus/query volume grows.
+
+**Document-QA local vector store:**
+- Problem: The standalone app rebuilds local indexes and uses local filesystem/FAISS operations.
+- Files: `document_qa/service.py`, `document_qa/vector_store.py`.
+- Cause: Designed for local/single-user workloads, not distributed serving.
+- Improvement path: Separate ingestion from serving and use persistent managed vector storage for multi-user scale.
 
 ## Fragile Areas
 
-**Bash re-exec guard ordering:**
-- Files: `cli.sh`, `generate.sh`, `lib/require_bash.sh`, `tests/sh_reexec.bats`
-- Why fragile: `lib/common.sh` uses bash-only syntax; sourcing order must stay `require_bash.sh` before `common.sh`.
-- Safe modification: Run `tests/sh_reexec.bats` and `bash -n` on every shell change.
-- Test coverage: Strong for re-exec; not run if CI subset unchanged.
+**Shell portability and side effects:**
+- Files: `lib/require_bash.sh`, `lib/common.sh`, `cli.sh`, `generate.sh`.
+- Why fragile: Bash-only syntax, path differences, optional tools, and user-home mutations span macOS/Linux/Windows compatibility.
+- Safe modification: Preserve the re-exec guard order, quote variables, use `execute_quoted`, test with temporary `HOME`, and run `bash -n` plus BATS.
+- Test coverage: Good for selected config paths; many installer/export combinations remain environment-dependent.
 
-**MCP registry merge logic:**
-- Files: `cli.sh` (registry parse, `jq` merge into destination MCP files)
-- Why fragile: Requires `jq`; merge failures fall back to warnings or manual steps.
-- Safe modification: Add `pr_*` or integration tests for merge scenarios; require `jq` in CI (already installed in workflow).
-- Test coverage: Partial via `pr_codebase_memory_mcp.bats` and related PR tests; not all tools’ MCP paths.
+**GitHub worker lifecycle:**
+- Files: `src/github-bot/worker.ts`, `src/github-bot/store.ts`, `src/github-bot/workspace.ts`.
+- Why fragile: It coordinates cancellation, retries, external processes, durable state, GitHub side effects, and cleanup.
+- Safe modification: Extend focused tests for state transitions, aborts, retries, duplicate deliveries, and cleanup before changing orchestration.
+- Test coverage: Strong targeted suite exists, but no live GitHub end-to-end test is appropriate/configured.
 
-**Windows path and MSYSTEM detection:**
-- Files: `lib/common.sh`, `install.ps1`, `lib/install.sh`
-- Why fragile: Git Bash vs PowerShell vs MSYS path conversion; winget jq path heuristics.
-- Safe modification: Test on Windows Git Bash; avoid `set -u` with optional `MSYSTEM`.
-- Test coverage: Mostly documentation and manual; no Windows runner in `.github/workflows/test.yml`.
+**Configuration schema compatibility:**
+- Files: `configs/`, `cli.sh`, `generate.sh`, `tests/pr_*.bats`.
+- Why fragile: External AI clients change native config formats; many configs are validated structurally rather than against vendor schemas.
+- Safe modification: Add a targeted BATS test and preserve native keys/merge semantics for each client.
+- Test coverage: Central JSON validation exists; TOML/native schema coverage is limited.
 
 ## Scaling Limits
 
-**Tool proliferation in monorepo:**
-- Current capacity: 14+ tool config trees under `configs/`, each wired in `cli.sh` / `generate.sh`.
-- Limit: Linear growth in install/validate/copy branches; reviewer fatigue.
-- Scaling path: Codegen or shared manifest (`mcp-registry.json` pattern) for per-tool install hooks.
+**JSON job store:**
+- Current capacity: Single-process, filesystem-backed queue/history in `BOT_DATA_DIR`.
+- Limit: Concurrent replicas, high job volume, and shared storage are not supported robustly.
+- Scaling path: Move queue/state to a transactional database or queue service and define distributed worker ownership.
 
-**Backup retention:**
-- Current capacity: Last 5 backups under `$HOME/ai-tools-backup-*` (per AGENTS).
-- Limit: Disk use on frequent installs; no size cap per backup.
-- Scaling path: Document pruning; optional max-age/size in `safe_copy_dir` backup helper.
+**Single-process server:**
+- Current capacity: One Bun process with in-process rate limits and bot worker orchestration.
+- Limit: Rate limits, active jobs, and memory are not shared across replicas.
+- Scaling path: Externalize rate limiting and job state, then add multi-instance coordination.
 
 ## Dependencies at Risk
 
-**Gemini CLI deprecation:**
-- Risk: Google One/unpaid tier cutoff (June 18, 2026) per AGENTS/README.
-- Impact: Users following old Gemini docs break; install paths may still reference deprecated CLI.
-- Migration plan: Antigravity CLI as documented; audit `configs/gemini` and README CTAs.
+**Bun/tsx execution boundary:**
+- Risk: The project supports Bun and Node tooling while some package scripts still invoke `tsx`; earlier Dokku builds exposed a Bun/tsx CJS resolution failure.
+- Impact: Runtime/build behavior can differ between local Node, local Bun, and the Docker image.
+- Migration plan: Prefer direct Bun execution in Bun/Docker paths, keep Node-compatible scripts explicitly tested, and pin/document runtime versions when behavior matters.
 
-**Floating `npx -y ...@latest` MCP servers:**
-- Risk: Registry entries pull latest MCP packages on each cold start.
-- Impact: Breaking API or malicious publish could affect users.
-- Migration plan: Pin versions in `configs/mcp-registry.json` and document upgrade process.
+**AI provider/model availability:**
+- Risk: OpenRouter free models and Hugging Face model downloads can change availability, rate limits, or response schemas.
+- Impact: Index builds, retrieval, and answer generation can fail without code changes.
+- Migration plan: Add provider health checks, fallback models, and an index artifact strategy that decouples deploys from live provider availability.
 
 ## Missing Critical Features
 
-**No Windows CI job:**
-- Problem: Shell logic and `install.ps1` are not exercised on `windows-latest`.
-- Blocks: Confident Windows releases without manual QA.
+**Deployment smoke test:**
+- Problem: CI validates the Dockerfile syntax/check path but does not exercise a complete Dokku push/build/runtime health cycle.
+- Blocks: Early detection of host-specific Docker options, BuildKit secrets, disk pressure, or runtime startup failures.
 
-**No repo-wide format/lint gate in CI:**
-- Problem: `biome check .` and pre-commit are not enforced on push (only code-taste subset + optional local hooks).
-- Blocks: Consistent formatting across contributors who skip hooks.
+**Cross-runtime CI matrix:**
+- Problem: The root CI workflow focuses on BATS and does not run the Bun TypeScript suite, typecheck, or Python tests.
+- Blocks: Reliable regression detection across the actual application surfaces.
 
 ## Test Coverage Gaps
 
-**Cursor custom agents (install + export):**
-- What's not tested: End-to-end copy to throwaway `HOME` for `configs/cursor/agents`; only grep-based presence in `cursor_configs.bats`.
-- Files: `tests/cursor_configs.bats`, `cli.sh`, `generate.sh`
-- Risk: Path or function rename breaks agent sync without CI failure.
-- Priority: Medium
+**TypeScript application and bot in CI:**
+- What's not tested: `bun test` and `bun run typecheck` on every push/PR by the root workflow.
+- Files: `.github/workflows/test.yml`, `package.json`, `src/github-bot/github-bot.test.ts`, `tests/fusion-watchdog.test.ts`.
+- Risk: Server/bot/type regressions can merge while shell/config checks remain green.
+- Priority: High.
 
-**Full `cli.sh` / `install.bats` / `lib_common.bats`:**
-- What's not tested in CI: Behavioral tests in `cli.bats`, `install.bats`, `lib_common.bats`, `recommend_skills.bats`.
-- Files: `tests/cli.bats`, `tests/install.bats`, `tests/lib_common.bats`, `tests/recommend_skills.bats`
-- Risk: Core install and helper regressions.
-- Priority: High
+**Python document-QA integration:**
+- What's not tested: FastAPI/Streamlit service startup, file upload/index rebuild, and end-to-end citation behavior in CI.
+- Files: `document_qa/api.py`, `document_qa/service.py`, `document_qa/tests/`.
+- Risk: Local document-QA deployment or dependency drift may go unnoticed.
+- Priority: Medium.
 
-**Agent export parity across tools:**
-- What's not tested: Many `pr_*.bats` assert `generate.sh` contains `generate_*_configs` and grep for export paths; fewer tests assert symmetric `cli.sh` install for custom agents/subagents across Copilot, Cline, Codex, Pi, etc.
-- Files: `tests/pr_cline.bats`, `tests/pr_copilot.bats`, `tests/pr_grok.bats`, `generate.sh`
-- Risk: Export-from-`$HOME` workflow drifts from install-to-`$HOME` for agent markdown trees.
-- Priority: Medium
-
-**Pre-commit / biome alignment:**
-- What's not tested: CI does not run `pre-commit run --all-files` or full `biome check .`.
-- Files: `tests/pr_pre_commit.bats` (structure only), `.pre-commit-config.yaml`
-- Risk: Hook config changes break contributors silently.
-- Priority: Low–Medium
-
-**Config schema validation:**
-- What's not tested: Automated job that fails on invalid JSON/YAML for all files under `configs/`.
-- Files: `cli.sh`, `configs/**`
-- Risk: Broken configs merge despite local `validate_all_configs` warnings.
-- Priority: High
-
-**macOS / microsandbox:**
-- What's not tested: CI is `ubuntu-latest` only; microsandbox workaround is undocumented in CI.
-- Files: `AGENTS.md`
-- Risk: macOS-only failures discovered late.
-- Priority: Low (documented workaround exists)
+**Production retrieval/index artifacts:**
+- What's not tested: A full keyed indexing run using the same Docker/Dokku build secret and model settings.
+- Files: `Dockerfile`, `scripts/index-repo.ts`, `scripts/index-browser.ts`, `.github/workflows/dokku.yml`.
+- Risk: Provider/network/runtime changes can break deployment after code CI passes.
+- Priority: High.
 
 ---
 
-*Concerns audit: 2026-07-14*
+*Concerns audit: 2026-08-04*

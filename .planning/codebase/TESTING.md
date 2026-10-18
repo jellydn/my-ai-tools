@@ -1,183 +1,150 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-07-14
+**Analysis Date:** 2026-08-04
 
 ## Test Framework
 
 **Runner:**
-- **BATS** (Bash Automated Testing System) for shell/config validation — system package (`bats-core` / `apt-get install bats`)
-- **Bun test** for TypeScript unit tests (`bun:test`)
+- **Bun test** — TypeScript tests using Bun’s built-in runner.
+- **BATS** — shell and configuration tests.
+- **Python test tooling** — tests under `document_qa/tests/`, driven by the Python dependencies/project documentation.
+- Config: `package.json`, `tests/`, `src/github-bot/github-bot.test.ts`, `document_qa/tests/`, `.github/workflows/test.yml`.
 
 **Assertion Library:**
-- BATS: built-in `run`, `[ "$status" -eq 0 ]`, `[[ "$output" == *"..."* ]]`, `grep` / `jq` in tests
-- Bun: `describe`, `test`, `expect` from `bun:test`
+- Bun’s `expect` from `bun:test` for TypeScript.
+- BATS assertions and shell commands for shell/config tests.
+- Python test assertions/framework conventions in `document_qa/tests/`.
 
 **Run Commands:**
 ```bash
-bash -n cli.sh generate.sh     # Shell syntax (cheap CI gate)
-bats tests/                    # All BATS tests locally
-bats tests/cli.bats            # Single BATS file
-bats tests/pr_*.bats tests/generate.bats tests/sh_reexec.bats   # CI subset
-bun run typecheck              # TypeScript strict check
-bunx biome check lib/code-taste lib/vector-similarity.ts lib/retriever.ts scripts/code-taste.ts tests/code-taste.test.ts
-bun test tests/code-taste.test.ts   # or: bun run test:code-taste
-pre-commit run --all-files     # Hooks (whitespace, yaml, oxfmt, etc.)
-biome check .                  # Format check repo-wide
+bun test                                      # TypeScript tests
+bun run typecheck                             # TypeScript type check
+bash -n cli.sh generate.sh lib/*.sh           # Shell syntax validation
+bats tests/                                   # Full local BATS suite
+bats tests/pr_*.bats tests/generate.bats tests/sh_reexec.bats  # CI BATS subset
+biome check .                                 # Formatting/check validation
+pre-commit run --all-files                    # Repository hooks
 ```
 
 ## Test File Organization
 
 **Location:**
-- BATS: dedicated `tests/` directory at repo root (not co-located with shell sources)
-- TypeScript: `tests/code-taste.test.ts` alongside `lib/code-taste/` implementation
+- TypeScript tests are co-located with the GitHub bot (`src/github-bot/github-bot.test.ts`) or placed in `tests/` for shared modules (`tests/fusion-watchdog.test.ts`).
+- BATS tests are centralized in `tests/`.
+- Python tests are in `document_qa/tests/`.
 
 **Naming:**
-- `*.bats` for shell tests; `pr_<feature>.bats` for config contract tests per tool/PR
-- `*.test.ts` for Bun unit tests
+- TypeScript: `*.test.ts`.
+- BATS: `<area>.bats`, with PR-focused suites named `pr_<feature>.bats`.
+- Python: `test_<area>.py`.
 
 **Structure:**
 ```text
-tests/
-  helpers.bash          # REPO_ROOT, require_jq, shared helpers
-  cli.bats              # cli.sh / install behaviors
-  lib_common.bats       # execute, validate_json, backups
-  generate.bats
-  sh_reexec.bats        # require_bash.sh POSIX + re-exec
-  pr_*.bats             # JSON/config invariants per tool
-  code-taste.test.ts    # chunking / profile logic
+tests/*.bats
+ tests/fusion-watchdog.test.ts
+src/github-bot/github-bot.test.ts
+document_qa/tests/test_*.py
 ```
 
 ## Test Structure
 
 **Suite Organization:**
-```bash
-#!/usr/bin/env bats
-
-load helpers
-
-setup() {
-    source "$BATS_TEST_DIRNAME/../lib/common.sh"
-    export DRY_RUN=false
-}
-
-@test "configs/claude/settings.json is valid JSON" {
-    require_jq
-    run jq empty "$CLAUDE_SETTINGS"
-    [ "$status" -eq 0 ]
-}
-```
-
 ```typescript
-import { describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
 
-describe("semantic chunking", () => {
-	test("keeps TypeScript declarations intact", async () => {
-		const chunks = await chunkTypeScript(/* ... */);
-		expect(chunks.map((chunk) => chunk.symbol)).toEqual(["Options", "run"]);
+describe("GitHub bot MVP", () => {
+	test("verifies raw webhook HMAC", () => {
+		expect(verifyWebhook(raw, signature, "secret")).toBeTrue();
 	});
 });
 ```
 
 **Patterns:**
-- **Setup:** `setup()` sources libs and sets `DRY_RUN`, `SCRIPT_DIR`, or isolated `HOME` for copy tests (`AGENTS.md` pattern)
-- **Teardown:** `rm -rf` temp dirs in-test; BATS runs each test in subprocess
-- **Assertion:** BATS `run` captures status/output; strip ANSI in some tests with `sed` when matching log text
+- Tests cover pure parsing/security functions plus filesystem-backed stores/workspaces.
+- Temporary directories are created under the OS temp directory and cleaned with `afterEach`/explicit cleanup.
+- Async behavior is tested with `await expect(promise).rejects...` and controlled abort signals.
+- BATS suites source the target shell modules, set temporary homes/fixtures, and assert output/files/exit status.
+- Security tests assert both rejection of dangerous inputs and acceptance of exact configured prefixes.
 
 ## Mocking
 
-**Framework:** Manual stubs in TypeScript (`mockAnalysisClient` in `tests/code-taste.test.ts`); shell tests mock environment (`PATH` without `jq`, temp `HOME`, `DRY_RUN=true`)
+**Framework:**
+- No separate mocking library; Bun tests inject fetcher/client functions and use temporary filesystem fixtures.
+- BATS uses shell fixtures, environment overrides, and stub commands where needed.
 
 **Patterns:**
 ```typescript
-function mockAnalysisClient(content: string): AnalysisClient {
-	return {
-		embeddings: { create: async (request) => ({ /* fixed vectors */ }) },
-		chat: { completions: { create: async () => ({ choices: [{ message: { content } }] }) } },
-	};
-}
+const fetcher = async (input: RequestInfo | URL, init?: RequestInit) => {
+	requests.push({ method: init?.method ?? "GET", body: init?.body });
+	return new Response(JSON.stringify({ ok: true }), { status: 200 });
+};
+const client = new GitHubClient("secret", fetcher);
 ```
 
 **What to Mock:**
-- External APIs (OpenAI embeddings/chat) in code-taste tests
-- Filesystem layout under `mktemp` / fixture dirs for `copy_configurations`
-- `command -v` behavior via `PATH` manipulation for missing-tool cases
+- GitHub `fetch` calls, timers/abort behavior, external agent execution boundaries, and temporary filesystem state.
 
 **What NOT to Mock:**
-- `jq` validation when installed — prefer real `jq empty` on committed JSON configs
-- `lib/require_bash.sh` behavior — tested with real `sh -n` and static grep assertions
+- Pure command parsing, HMAC verification, config validation, redaction, diff parsing, and other deterministic security logic.
 
 ## Fixtures and Factories
 
 **Test Data:**
-- Inline strings for markdown/TypeScript chunk fixtures in `code-taste.test.ts`
-- Ephemeral dirs: `/tmp/test-backup-$$`, `mktemp -d` for install/copy tests
-- `tests/fixtures/` referenced in some `cli.bats` cases (created in-test)
+```typescript
+const config = {
+	...defaultRepoConfig,
+	validation: { ...defaultRepoConfig.validation, commands: ["bash -n"] },
+};
+```
 
 **Location:**
-- No large shared fixture tree; config truth is `configs/` validated by `pr_*.bats`
+- BATS fixtures/helpers: `tests/fixtures/` and `tests/helpers.bash`.
+- TypeScript test setup is mostly inline in `src/github-bot/github-bot.test.ts`.
+- Python fixtures are in `document_qa/tests/` or constructed per test.
 
 ## Coverage
 
-**Requirements:** None enforced in CI (no coverage threshold in workflows)
+**Requirements:** No numeric repository-wide coverage threshold is enforced. CI covers a deliberate BATS subset; TypeScript/Python test execution is not part of `.github/workflows/test.yml`.
 
 **View Coverage:**
 ```bash
-# Not configured — add bun coverage flags locally if needed
-bun test tests/code-taste.test.ts
+# No standard coverage script is currently defined.
+# Use the relevant runner/tooling manually when investigating a module.
 ```
 
 ## Test Types
 
 **Unit Tests:**
-- `lib_common.bats`, `sh_reexec.bats`: isolated shell helpers and guard
-- `code-taste.test.ts`: chunker, profile selection, GitHub file selection with mocked client
+- Pure TypeScript parsing, validation, security, HMAC, retrieval/watchdog logic, and Python chunking/answering/retrieval behavior.
 
 **Integration Tests:**
-- `cli.bats`, `install.bats`, `generate.bats`: source real scripts, exercise copy/backup/preflight with temp HOME
-- `pr_*.bats`: integration with committed config files + `jq` schema checks
+- GitHub bot store/worker/workspace tests with temporary directories and injected fetchers.
+- BATS tests exercise shell functions, generated config layouts, validation, and installer behavior.
 
 **E2E Tests:**
-- Not used; no browser/server E2E in CI (`server.ts` dev is manual)
-
-## CI (GitHub Actions)
-
-**Workflow:** `.github/workflows/test.yml`
-
-- **bats job:** `bats tests/pr_*.bats tests/generate.bats tests/sh_reexec.bats` on `ubuntu-latest` with `jq` + `bats`
-- **code-taste job:** `bun install --frozen-lockfile`, `bun run typecheck`, scoped `biome check`, `bun test tests/code-taste.test.ts`
-
-Local `bats tests/` runs **more** files than CI (e.g. `cli.bats`, `install.bats`, skill-specific tests) — do not assume CI runs full suite (`AGENTS.md`).
+- No browser E2E framework is configured in the current repository. `public/browser-chat.js` and the Hono routes are primarily validated through source/config checks and targeted tests.
 
 ## Common Patterns
 
 **Async Testing:**
 ```typescript
-test("keeps TypeScript declarations intact", async () => {
-	const chunks = await chunkTypeScript("owner/repo", "src/example.ts", source);
-	expect(chunks[1]?.text).toContain("interface Options");
-});
+await expect(new GitHubClient("app", fetcher).installationToken(1, undefined, controller.signal)).rejects.toThrow();
 ```
 
 **Error Testing:**
-```bash
-@test "preflight_check fails on missing jq" {
-    PATH=$(echo "$PATH" | tr ':' '\n' | grep -v '/jq' | tr '\n' ':')
-    run preflight_check
-    [ "$status" -ne 0 ]
+```typescript
+try {
+	await operation();
+	throw new Error("should have rejected");
+} catch (error) {
+	expect(error).toBeInstanceOf(ExecutorWaitError);
 }
 ```
 
-**Skip when tool missing:**
-```bash
-require_jq() {
-    if ! command -v jq &>/dev/null; then
-        skip "jq not installed"
-    fi
-}
-```
-
-**macOS note:** Host BATS may fail on directory issues; use microsandbox per `AGENTS.md` — cloud VM runs `bats tests/` directly.
+**CI boundary:**
+- `.github/workflows/test.yml` installs `bats` and `jq` and runs `tests/pr_*.bats`, `tests/generate.bats`, and `tests/sh_reexec.bats`.
+- `.github/my-ai-bot.example.yml` documents `bun test` and `bun run typecheck` as repository validation commands for bot changes.
 
 ---
 
-*Testing analysis: 2026-07-14*
+*Testing analysis: 2026-08-04*

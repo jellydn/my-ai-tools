@@ -6,7 +6,20 @@
 # Requires: lib/common.sh (for log_*, execute_*, prompt_yn, execute_installer)
 # Requires: YES_TO_ALL, DRY_RUN, IS_WINDOWS, AMP_INSTALLED (set in cli.sh)
 
+# Prerequisites (runtimes, formatters, MCP server binaries) live in their own module.
+source "$(dirname "${BASH_SOURCE[0]}")/install-deps.sh"
+
 # ─── Shared helpers ────────────────────────────────────────────────
+
+# Prepend a directory to PATH for the current session if it isn't already present.
+# Keeps PATH-guard conditionals consistent (and scannable) across installers.
+ensure_dir_on_path() {
+	local dir="${1:-}"
+	[ -n "$dir" ] || return 0
+	if case ":$PATH:" in *":$dir:"*) false ;; *) true ;; esac then
+		export PATH="$dir:$PATH"
+	fi
+}
 
 # Detect available package manager (bun preferred, fallback to npm)
 # Outputs: package manager command or empty if none found
@@ -80,6 +93,12 @@ resolve_installer_checksum() {
 		;;
 	sem)
 		checksum_url="${SEM_INSTALL_SHA256_URL:-}"
+		;;
+	rtk)
+		checksum_url="${RTK_INSTALL_SHA256_URL:-}"
+		;;
+	muse)
+		checksum_url="${MUSE_INSTALL_SHA256_URL:-}"
 		;;
 	esac
 
@@ -187,452 +206,6 @@ install_npm_tool() {
 	run_installer "$display_name" "_run_install_npm_body" "command -v $binary" "$version_cmd"
 }
 
-# ─── Bun installation ──────────────────────────────────────────────
-
-install_bun_now() {
-	log_info "Installing Bun..."
-
-	local bun_checksum
-	bun_checksum=$(resolve_installer_checksum "bun")
-	if execute_installer "https://bun.sh/install" "$bun_checksum" "Bun"; then
-		# Source shell profiles to get Bun environment
-		[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc" 2>/dev/null || true
-		[ -f "$HOME/.zshrc" ] && source "$HOME/.zshrc" 2>/dev/null || true
-
-		# Fallback to default Bun location
-		if [ -z "$BUN_INSTALL" ]; then
-			export BUN_INSTALL="$HOME/.bun"
-		fi
-		export PATH="$BUN_INSTALL/bin:$PATH"
-
-		if command -v bun &>/dev/null; then
-			BUN_VERSION=$(bun --version)
-			log_success "Bun installed successfully ($BUN_VERSION)"
-		else
-			log_error "Bun installation completed but 'bun' command not found in PATH"
-			exit 1
-		fi
-	else
-		log_error "Failed to install Bun"
-		exit 1
-	fi
-}
-
-handle_optional_bun_installation() {
-	if command -v bun &>/dev/null; then
-		return 0
-	fi
-
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-installing Bun (--yes flag)..."
-		install_bun_now
-	elif [ -t 0 ]; then
-		if prompt_yn "Bun is not installed. Install it now"; then
-			install_bun_now
-		else
-			log_warning "Continuing with Node.js only. Some scripts prefer Bun."
-		fi
-	else
-		log_warning "Bun is not installed. Continuing with Node.js only."
-	fi
-}
-
-handle_bun_installation() {
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-installing Bun (--yes flag)..."
-		install_bun_now
-	elif [ -t 0 ]; then
-		if prompt_yn "Would you like to install Bun now"; then
-			install_bun_now
-		else
-			log_error "Please install Bun or Node.js first."
-			exit 1
-		fi
-	else
-		log_error "Please install Bun or Node.js first."
-		exit 1
-	fi
-}
-
-# ─── qmd installation ──────────────────────────────────────────────
-
-install_qmd_now() {
-	if command -v qmd &>/dev/null; then
-		local qmd_version
-		qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
-		log_success "qmd already installed ($qmd_version)"
-		return 0
-	fi
-
-	# Prefer Bun for qmd (install if missing)
-	if ! command -v bun &>/dev/null; then
-		log_info "qmd works best with Bun. Installing Bun first..."
-		handle_bun_installation
-	fi
-
-	local pkg_manager
-	pkg_manager=$(_verify_package_manager "qmd")
-
-	if [ -z "$pkg_manager" ]; then
-		log_error "No package manager found. Install Bun or Node.js/npm to install qmd."
-		return 1
-	fi
-
-	log_info "Installing qmd CLI via $pkg_manager..."
-	if execute "$pkg_manager install -g @tobilu/qmd"; then
-		# Ensure bun's global bin directory is in PATH for the current session (if using bun)
-		if command -v bun &>/dev/null; then
-			local bun_global_bin
-			bun_global_bin="$(bun pm bin -g 2>/dev/null)"
-			if [ -n "$bun_global_bin" ] && case ":$PATH:" in *":$bun_global_bin:"*) false ;; *) true ;; esac; then
-				export PATH="$bun_global_bin:$PATH"
-			fi
-		fi
-		local qmd_version
-		qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
-		log_success "qmd installed successfully ($qmd_version)"
-		return 0
-	fi
-
-	log_error "Failed to install qmd"
-	return 1
-}
-
-handle_qmd_installation_if_needed() {
-	handle_tool_installation "qmd" "install_qmd_now" "command -v qmd" "qmd" "Knowledge features"
-}
-
-# ─── fff-mcp installation ──────────────────────────────────────────
-
-install_fff_mcp_now() {
-	if command -v fff-mcp &>/dev/null; then
-		log_success "fff-mcp already installed"
-		return 0
-	fi
-
-	log_info "Installing fff-mcp via official installer..."
-	if execute_installer "https://dmtrkovalenko.dev/install-fff-mcp.sh" "" "fff-mcp"; then
-		# Ensure ~/.local/bin is in PATH for the current session
-		local local_bin="$HOME/.local/bin"
-		if case ":$PATH:" in *":$local_bin:"*) false ;; *) true ;; esac; then
-			export PATH="$local_bin:$PATH"
-		fi
-		log_success "fff-mcp installed successfully"
-		return 0
-	fi
-
-	log_error "Failed to install fff-mcp"
-	log_info "You can install it manually: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
-	return 1
-}
-
-handle_fff_mcp_installation_if_needed() {
-	handle_tool_installation "fff-mcp" "install_fff_mcp_now" "command -v fff-mcp" "fff-mcp" "Fast file search MCP"
-}
-
-# ─── logpilot installation ─────────────────────────────────────────
-
-install_logpilot_now() {
-	if command -v logpilot &>/dev/null; then
-		log_success "logpilot already installed"
-		return 0
-	fi
-
-	if ! command -v cargo &>/dev/null; then
-		log_error "cargo not found. Cannot install logpilot. Install Rust first: https://rustup.rs/"
-		return 1
-	fi
-
-	log_info "Installing logpilot via cargo..."
-	if execute "cargo install logpilot"; then
-		# Ensure cargo bin is in PATH
-		local cargo_bin="${CARGO_HOME:-$HOME/.cargo}/bin"
-		if case ":$PATH:" in *":$cargo_bin:"*) false ;; *) true ;; esac; then
-			export PATH="$cargo_bin:$PATH"
-		fi
-		log_success "logpilot installed successfully"
-		return 0
-	fi
-
-	log_error "Failed to install logpilot"
-	log_info "You can install it manually: cargo install logpilot"
-	return 1
-}
-
-handle_logpilot_installation_if_needed() {
-	handle_tool_installation "logpilot" "install_logpilot_now" "command -v logpilot" "logpilot" "Log monitoring MCP"
-}
-
-# ─── sem installation ──────────────────────────────────────────────
-
-install_sem_now() {
-	if command -v sem &>/dev/null && command -v sem-mcp &>/dev/null; then
-		log_success "sem and sem-mcp already installed"
-		return 0
-	fi
-
-	# Install sem CLI via official installer with checksum verification
-	if ! command -v sem &>/dev/null; then
-		log_info "Installing sem via official installer..."
-		local sem_checksum
-		sem_checksum=$(resolve_installer_checksum "sem")
-		if execute_installer "https://raw.githubusercontent.com/Ataraxy-Labs/sem/main/install.sh" "$sem_checksum" "sem CLI"; then
-			log_success "sem installed successfully"
-		else
-			log_error "Failed to install sem"
-			log_info "You can install manually: curl -fsSL https://raw.githubusercontent.com/Ataraxy-Labs/sem/main/install.sh | sh"
-			return 1
-		fi
-	fi
-
-	# Install sem-mcp via cargo
-	if ! command -v sem-mcp &>/dev/null; then
-		if ! command -v cargo &>/dev/null; then
-			log_error "cargo not found. sem-mcp requires Rust to build from source."
-			log_info "Install Rust first: https://rustup.rs/, then run: cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp"
-			return 1
-		fi
-
-		log_info "Installing sem-mcp via cargo..."
-		if execute "cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp"; then
-			local cargo_bin="${CARGO_HOME:-$HOME/.cargo}/bin"
-			if case ":$PATH:" in *":$cargo_bin:"*) false ;; *) true ;; esac; then
-				export PATH="$cargo_bin:$PATH"
-			fi
-			log_success "sem-mcp installed successfully"
-		else
-			log_error "Failed to install sem-mcp"
-			log_info "You can install manually: cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp"
-			return 1
-		fi
-	fi
-}
-
-handle_sem_installation_if_needed() {
-	handle_tool_installation "sem" "install_sem_now" "command -v sem-mcp" "sem" "Semantic version control MCP"
-}
-
-# ─── Global tooling (jq, biome, gofmt, ruff, rustfmt, shfmt, stylua, backlog) ──
-
-install_global_tools() {
-	log_info "Checking global tools for PostToolUse hooks..."
-
-	install_jq_if_needed
-	install_biome_if_needed
-	check_gofmt
-	install_ruff_if_needed
-	install_rustfmt_if_needed
-	install_shfmt_if_needed
-	install_stylua_if_needed
-	install_backlog_if_needed
-
-	log_success "Global tools check complete"
-}
-
-install_jq_if_needed() {
-	if command -v jq &>/dev/null; then
-		log_success "jq found"
-		return 0
-	fi
-
-	log_warning "jq not found. Installing jq..."
-	local jq_installed=false
-
-	if [ "$IS_WINDOWS" = true ]; then
-		if command -v choco &>/dev/null; then
-			execute "choco install jq -y" && jq_installed=true
-		elif command -v winget &>/dev/null; then
-			execute "winget install -e --id jqlang.jq --accept-package-agreements --accept-source-agreements" && jq_installed=true
-		fi
-
-		if [ "$jq_installed" = true ]; then
-			local jq_path=""
-			if [ -f "$LOCALAPPDATA/Microsoft/WinGet/Packages/jqlang.jq_Microsoft.Winget.Source_8wekyb3d8bbwe/jq.exe" ]; then
-				jq_path="$LOCALAPPDATA/Microsoft/WinGet/Packages/jqlang.jq_Microsoft.Winget.Source_8wekyb3d8bbwe"
-			elif [ -f "$PROGRAMFILES/jq/jq.exe" ]; then
-				jq_path="$PROGRAMFILES/jq"
-			elif [ -f "$PROGRAMFILES/WinGet/Links/jq.exe" ]; then
-				jq_path="$PROGRAMFILES/WinGet/Links"
-			fi
-
-			if [ -n "$jq_path" ]; then
-				export PATH="$jq_path:$PATH"
-				log_info "Added jq to PATH: $jq_path"
-			fi
-
-			if ! command -v jq &>/dev/null; then
-				log_warning "jq installed but not found in PATH. Please restart your terminal."
-				jq_installed=false
-			fi
-		fi
-	else
-		if command -v brew &>/dev/null; then
-			execute "brew install jq" && jq_installed=true
-		elif command -v apt-get &>/dev/null; then
-			if ([ "$YES_TO_ALL" = true ] && sudo -n true 2>/dev/null) || ([ "$YES_TO_ALL" = false ] && [ -t 0 ]); then
-				execute "sudo apt-get install -y jq" && jq_installed=true
-			else
-				log_warning "Cannot install jq non-interactively (requires sudo with password)"
-			fi
-		fi
-	fi
-
-	if [ "$jq_installed" = false ]; then
-		log_warning "Please install jq manually: https://jqlang.github.io/jq/download/"
-		if [ "$IS_WINDOWS" = true ]; then
-			log_info "Windows installation options:"
-			log_info "  - winget: winget install -e --id jqlang.jq"
-			log_info "  - chocolatey: choco install jq"
-			log_info "  - Scoop: scoop install jq"
-			log_info "  - GitHub: https://github.com/jqlang/jq/releases"
-		fi
-	fi
-}
-
-install_biome_if_needed() {
-	if command -v biome &>/dev/null; then
-		log_success "biome found"
-		return 0
-	fi
-
-	local pkg_manager
-	pkg_manager=$(_verify_package_manager "biome")
-
-	if [ -z "$pkg_manager" ]; then
-		log_warning "biome not found. No package manager available to install. Install Bun or Node.js/npm."
-		return 1
-	fi
-
-	log_warning "biome not found. Installing biome globally with $pkg_manager..."
-	if execute "$pkg_manager install -g @biomejs/biome"; then
-		log_success "biome installed"
-	else
-		log_warning "Failed to install biome"
-	fi
-}
-
-check_gofmt() {
-	if command -v gofmt &>/dev/null; then
-		log_success "gofmt found"
-		return 0
-	fi
-
-	log_warning "gofmt not found. Go is not installed."
-	if [ "$IS_WINDOWS" = true ]; then
-		if command -v choco &>/dev/null; then
-			log_info "Install Go with: choco install golang -y"
-		elif command -v winget &>/dev/null; then
-			log_info "Install Go with: winget install GoLang.Go"
-		else
-			log_info "Please install Go manually: https://golang.org/dl/"
-		fi
-	else
-		if command -v brew &>/dev/null; then
-			log_info "Install Go with: brew install go"
-		elif command -v apt-get &>/dev/null; then
-			log_info "Install Go with: sudo apt-get install -y golang"
-		else
-			log_info "Please install Go manually: https://golang.org/dl/"
-		fi
-	fi
-}
-
-install_ruff_if_needed() {
-	if command -v ruff &>/dev/null; then
-		log_success "ruff found"
-		return 0
-	fi
-
-	log_warning "ruff not found. Installing ruff..."
-	if command -v mise &>/dev/null; then
-		execute "mise use -g ruff@latest"
-	elif command -v pipx &>/dev/null; then
-		execute "pipx install ruff"
-	elif command -v pip3 &>/dev/null; then
-		execute "pip3 install ruff"
-	elif command -v pip &>/dev/null; then
-		execute "pip install ruff"
-	else
-		log_warning "No Python package manager found. Install ruff manually: https://docs.astral.sh/ruff/installation/"
-	fi
-}
-
-install_rustfmt_if_needed() {
-	if command -v rustfmt &>/dev/null; then
-		log_success "rustfmt found"
-		return 0
-	fi
-
-	log_warning "rustfmt not found. Installing Rust..."
-	if command -v mise &>/dev/null; then
-		execute "mise use -g rust@latest"
-	elif command -v brew &>/dev/null; then
-		execute "brew install rust"
-	else
-		local rust_checksum
-		rust_checksum=$(resolve_installer_checksum "rust")
-		execute_installer "https://sh.rustup.rs" "$rust_checksum" "Rust" "-y"
-	fi
-}
-
-install_shfmt_if_needed() {
-	if command -v shfmt &>/dev/null; then
-		log_success "shfmt found"
-		return 0
-	fi
-
-	log_warning "shfmt not found. Installing shfmt..."
-	if command -v mise &>/dev/null; then
-		execute "mise use -g shfmt@latest"
-	elif command -v brew &>/dev/null; then
-		execute "brew install shfmt"
-	elif command -v go &>/dev/null; then
-		execute "go install mvdan.cc/sh/v3/cmd/shfmt@latest"
-	else
-		log_warning "No package manager found for shfmt. Install manually: https://github.com/mvdan/sh"
-	fi
-}
-
-install_stylua_if_needed() {
-	if command -v stylua &>/dev/null; then
-		log_success "stylua found"
-		return 0
-	fi
-
-	log_warning "stylua not found. Installing stylua..."
-	if command -v mise &>/dev/null; then
-		execute "mise use -g stylua@latest"
-	elif command -v brew &>/dev/null; then
-		execute "brew install stylua"
-	elif command -v cargo &>/dev/null; then
-		execute "cargo install stylua"
-	else
-		log_warning "No package manager found for stylua. Install manually: https://github.com/JohnnyMorganz/StyLua"
-	fi
-}
-
-install_backlog_if_needed() {
-	if [ "$AMP_INSTALLED" = false ]; then
-		return 0
-	fi
-
-	if command -v backlog &>/dev/null; then
-		log_success "backlog.md found"
-		return 0
-	fi
-
-	local pkg_manager
-	pkg_manager=$(_verify_package_manager "backlog.md")
-
-	if [ -z "$pkg_manager" ]; then
-		log_warning "backlog.md not found. No package manager available. Install Bun or Node.js/npm."
-		return 1
-	fi
-
-	log_info "Installing backlog.md for Amp integration with $pkg_manager..."
-	execute "$pkg_manager install -g backlog.md"
-}
-
 # ─── AI coding tool installers ─────────────────────────────────────
 
 install_claude_code() {
@@ -682,6 +255,119 @@ install_claude_code() {
 	fi
 }
 
+install_fx() {
+	_run_fx_install() {
+		local fx_platform
+		local fx_archive_sha256
+		local fx_install_dir="${FX_INSTALL_DIR:-$HOME/.local/bin}"
+		local fx_version="v0.0.4"
+
+		if command -v fx &>/dev/null; then
+			log_warning "fx is already installed"
+			return 0
+		fi
+
+		if [ "$IS_WINDOWS" = true ]; then
+			log_warning "fx supports macOS and Linux only."
+			log_info "Install fx manually in a supported environment: https://fx.sh/docs/getting-started/installation"
+			return 0
+		fi
+
+		case "$(uname -s):$(uname -m)" in
+		Linux:x86_64 | Linux:amd64)
+			fx_platform="linux-x86_64"
+			fx_archive_sha256="be9428636afb1196cb662b48ed57bbed3b95e7c37f2bc7849e02c0960fae1f01"
+			;;
+		Linux:arm64 | Linux:aarch64)
+			fx_platform="linux-aarch64"
+			fx_archive_sha256="9905a51c213d1b7fe3b5079f00fd3e61f2dba5bde707397991e9535c4a700caf"
+			;;
+		Darwin:x86_64 | Darwin:amd64)
+			fx_platform="macos-x86_64"
+			fx_archive_sha256="41d3c2cd78bdb53aa9df16fbd5ae9415c8a2e3e8851ebe6423db0cc32128bf7c"
+			;;
+		Darwin:arm64 | Darwin:aarch64)
+			fx_platform="macos-aarch64"
+			fx_archive_sha256="395ac3832f6f6c231f6ba7a46ba6ec70eefaddb68662e6fd6c4fb8e0d6d72f59"
+			;;
+		*)
+			log_error "Unsupported fx platform: $(uname -s) $(uname -m)"
+			return 1
+			;;
+		esac
+
+		if [ "$DRY_RUN" = true ]; then
+			log_info "[DRY RUN] Would install fx $fx_version for $fx_platform to $fx_install_dir"
+			return 0
+		fi
+
+		local fx_archive
+		local fx_extract_dir
+		fx_archive=$(download_and_verify_file "https://releases.fx.sh/$fx_version/fx-$fx_platform.tar.gz" "$fx_archive_sha256" "fx $fx_version ($fx_platform)") || return 1
+		fx_extract_dir="$(get_temp_dir)/fx-$fx_version-$$"
+
+		if ! execute_quoted mkdir -p "$fx_extract_dir" ||
+			! execute_quoted tar -xzf "$fx_archive" -C "$fx_extract_dir" ||
+			! execute_quoted mkdir -p "$fx_install_dir" ||
+			! execute_quoted cp "$fx_extract_dir/fx" "$fx_install_dir/fx" ||
+			! execute_quoted chmod +x "$fx_install_dir/fx"; then
+			execute_quoted rm -rf "$fx_extract_dir" "$fx_archive"
+			log_error "Failed to install fx"
+			log_info "You can install manually: curl -fsSL https://fx.sh/setup.sh | bash"
+			return 1
+		fi
+
+		execute_quoted rm -rf "$fx_extract_dir" "$fx_archive"
+		ensure_dir_on_path "$fx_install_dir"
+		log_success "fx installed"
+	}
+	run_installer "fx" "_run_fx_install" "command -v fx" "fx --version"
+}
+
+install_muse() {
+	if [ "$IS_WINDOWS" = true ]; then
+		log_warning "Muse Code supports macOS and Linux only."
+		log_info "Install Muse Code in a supported environment: https://dev.meta.ai/docs/muse-code"
+		return 0
+	fi
+
+	ensure_dir_on_path "$HOME/.local/bin"
+
+	_run_muse_install() {
+		ensure_dir_on_path "$HOME/.local/bin"
+		local muse_checksum
+		muse_checksum=$(resolve_installer_checksum "muse")
+		execute_installer "https://dev.meta.ai/install.sh" "$muse_checksum" "Muse Code"
+		ensure_dir_on_path "$HOME/.local/bin"
+	}
+	run_installer "Muse Code" "_run_muse_install" "command -v muse || test -x \"\$HOME/.local/bin/muse\"" "if [ -x \"\$HOME/.local/bin/muse\" ]; then \"\$HOME/.local/bin/muse\" --version; else muse --version; fi"
+}
+
+install_rtk() {
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		log_warning "RTK automatic installation is unavailable on native Windows"
+		log_info "Use WSL for hook support or install the Windows release manually: https://github.com/rtk-ai/rtk/releases"
+		return 0
+	fi
+
+	_run_rtk_install() {
+		local rtk_checksum
+		rtk_checksum=$(resolve_installer_checksum "rtk")
+		execute_installer "https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh" "$rtk_checksum" "RTK"
+		ensure_dir_on_path "$HOME/.local/bin"
+
+		if [ "$DRY_RUN" = false ] && ! "$HOME/.local/bin/rtk" gain --help >/dev/null 2>&1; then
+			log_error "RTK installation did not produce the expected binary at $HOME/.local/bin/rtk"
+			return 1
+		fi
+	}
+
+	local check_cmd='if [ -x "$HOME/.local/bin/rtk" ]; then "$HOME/.local/bin/rtk" gain --help; else command -v rtk >/dev/null 2>&1 && rtk gain --help; fi'
+	local version_cmd='if [ -x "$HOME/.local/bin/rtk" ]; then "$HOME/.local/bin/rtk" --version; else rtk --version; fi'
+	run_installer "RTK command-output compressor" "_run_rtk_install" "$check_cmd" "$version_cmd"
+}
+
+# Legacy OpenCode 1 installer. cli.sh does not call this; OpenCode 2 is the default.
 install_opencode() {
 	_run_opencode_install() {
 		if command -v opencode &>/dev/null; then
@@ -692,6 +378,88 @@ install_opencode() {
 		fi
 	}
 	run_installer "OpenCode" "_run_opencode_install" "command -v opencode" ""
+}
+
+# True when stable OpenCode 2 (`opencode` v2.x) or the leftover beta `opencode2` binary is on PATH.
+_opencode_v2_installed() {
+	if command -v opencode2 >/dev/null 2>&1; then
+		return 0
+	fi
+	if command -v opencode >/dev/null 2>&1; then
+		case "$(opencode --version 2>/dev/null || true)" in
+		*v2.* | *V2.*) return 0 ;;
+		esac
+	fi
+	return 1
+}
+
+install_opencode2() {
+	_run_opencode2_install() {
+		if _opencode_v2_installed; then
+			log_warning "OpenCode 2 is already installed"
+			return 0
+		fi
+
+		local package_manager=""
+		if command -v bun >/dev/null 2>&1; then
+			package_manager="bun"
+		elif command -v npm >/dev/null 2>&1; then
+			package_manager="npm"
+		elif command -v pnpm >/dev/null 2>&1; then
+			package_manager="pnpm"
+		elif command -v yarn >/dev/null 2>&1; then
+			package_manager="yarn"
+		fi
+
+		if [ -n "$package_manager" ]; then
+			if ! case "$package_manager" in
+				bun) execute "bun install -g --trust @opencode/cli" ;;
+				npm) execute "npm install -g @opencode/cli" ;;
+				pnpm) execute "pnpm add -g --allow-build=@opencode/cli @opencode/cli" ;;
+				yarn) execute "yarn global add @opencode/cli" ;;
+				esac then
+				log_error "OpenCode 2 installation failed"
+				return 1
+			fi
+
+			if [ "$DRY_RUN" = false ]; then
+				local global_bin=""
+				case "$package_manager" in
+				bun)
+					global_bin="$(bun pm bin -g 2>/dev/null)"
+					[ -n "$global_bin" ] || global_bin="${BUN_INSTALL:-$HOME/.bun}/bin"
+					;;
+				npm) global_bin="$(npm prefix -g 2>/dev/null)/bin" ;;
+				pnpm) global_bin="$(pnpm bin -g 2>/dev/null)" ;;
+				yarn) global_bin="$(yarn global bin 2>/dev/null)" ;;
+				esac
+				ensure_dir_on_path "$global_bin"
+				hash -r 2>/dev/null || true
+			fi
+		else
+			execute_installer "https://opencode.ai/v2/install" "" "OpenCode 2"
+		fi
+
+		if [ "$DRY_RUN" = true ]; then
+			log_info "[DRY RUN] Would install OpenCode 2 as opencode"
+		elif ! command -v opencode >/dev/null 2>&1 && ! command -v opencode2 >/dev/null 2>&1; then
+			log_error "OpenCode 2 installation completed but opencode is not on PATH"
+			return 1
+		else
+			log_success "OpenCode 2 installed as opencode"
+		fi
+	}
+	run_installer "OpenCode 2" "_run_opencode2_install" "_opencode_v2_installed" "opencode --version 2>/dev/null || opencode2 --version 2>/dev/null || true"
+}
+
+# Usage: install_opencode_cursor
+# Cursor ACP bridge for OpenCode (https://github.com/Nomadcxx/opencode-cursor).
+# Config lives in configs/opencode/opencode.json — do not run `open-cursor install`
+# here; that CLI rewrites managed OpenCode config.
+install_open_cursor() {
+	install_npm_tool "open-cursor" "open-cursor" "@rama_nigg/open-cursor" \
+		"npm install -g @rama_nigg/open-cursor" \
+		"open-cursor --version"
 }
 
 install_amp() {
@@ -844,9 +612,18 @@ install_kilo() {
 		"npm install -g @kilocode/cli"
 }
 
+install_reasonix() {
+	install_npm_tool "Reasonix" "reasonix" "reasonix" \
+		"npm install -g reasonix"
+}
+
 install_pi() {
-	install_npm_tool "Pi" "pi" "@mariozechner/pi-coding-agent" \
-		"npm install -g @mariozechner/pi-coding-agent"
+	install_npm_tool "Pi" "pi" "@earendil-works/pi-coding-agent" \
+		"npm install -g @earendil-works/pi-coding-agent"
+}
+install_omp() {
+	install_npm_tool "Oh My Pi" "omp" "@oh-my-pi/pi-coding-agent" \
+		"npm install -g @oh-my-pi/pi-coding-agent"
 }
 
 is_commandcode_installed() {
@@ -954,6 +731,78 @@ install_mimo() {
 install_open_code_review() {
 	install_npm_tool "Alibaba Open Code Review" "ocr" "@alibaba-group/open-code-review" \
 		"npm install -g @alibaba-group/open-code-review"
+}
+
+install_deepseek_harness() {
+	_run_deepseek_harness_install() {
+		if ! command -v node &>/dev/null || ! command -v npm &>/dev/null || ! command -v npx &>/dev/null; then
+			log_error "DeepSeek Harness requires Node.js with npm and npx."
+			log_info "Install Node.js, then run this installer again."
+			return 1
+		fi
+
+		local node_major node_minor
+		read -r node_major node_minor <<<"$(node -p 'process.versions.node.split(".").slice(0, 2).join(" ")' 2>/dev/null)"
+		if ! [[ "$node_major" =~ ^[0-9]+$ && "$node_minor" =~ ^[0-9]+$ ]] ||
+			! { [ "$node_major" -eq 22 ] && [ "$node_minor" -ge 19 ] || [ "$node_major" -ge 24 ]; }; then
+			log_error "DeepSeek Harness requires Node.js 22.19+ or 24+ (found: $(node --version 2>/dev/null || echo unknown))."
+			return 1
+		fi
+
+		log_info "Installing DeepSeek Harness with npm..."
+		if execute "npm install --global @deepseek-ai/dsh"; then
+			log_success "DeepSeek Harness installed"
+		else
+			log_error "Failed to install DeepSeek Harness"
+			log_info "You can install it manually: npm install --global @deepseek-ai/dsh"
+			return 1
+		fi
+	}
+
+	run_installer "DeepSeek Harness" "_run_deepseek_harness_install" "command -v dsh" "dsh --version" || {
+		log_warning "Continuing without DeepSeek Harness."
+		return 0
+	}
+}
+
+install_hunk() {
+	_run_hunk_install() {
+		if ! command -v node &>/dev/null; then
+			log_error "Hunk's npm package requires Node.js 18 or newer."
+			log_info "Install Node.js 18+ or install Hunk through Homebrew or mise."
+			return 1
+		fi
+
+		local node_major
+		node_major=$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null) || node_major=""
+		if ! [[ "$node_major" =~ ^[0-9]+$ ]] || [ "$node_major" -lt 18 ]; then
+			log_error "Hunk requires Node.js 18 or newer (found: $(node --version 2>/dev/null || echo unknown))."
+			return 1
+		fi
+
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "Hunk")
+		if [ -z "$pkg_manager" ]; then
+			log_error "No package manager found. Install npm or Bun to install Hunk."
+			return 1
+		fi
+
+		log_info "Installing Hunk with $pkg_manager..."
+		if ! execute "$pkg_manager install -g hunkdiff"; then
+			log_error "Failed to install Hunk"
+			log_info "You can install it manually: npm install --global hunkdiff"
+			return 1
+		fi
+
+		if ! execute "hunk --version >/dev/null"; then
+			log_error "Hunk was installed but could not start."
+			return 1
+		fi
+
+		log_success "Hunk installed and verified"
+	}
+
+	run_installer "Hunk" "_run_hunk_install" "command -v hunk && hunk --version" "hunk --version"
 }
 
 install_conductor() {
@@ -1066,6 +915,23 @@ install_kiro() {
 		fi
 	}
 	run_installer "Kiro CLI" "_run_kiro_install" "command -v kiro-cli || command -v kiro" "kiro-cli --version 2>/dev/null || true"
+}
+
+# ─── delta installation ───────────────────────────────────────────
+
+install_delta() {
+	local delta_settings_dir
+	delta_settings_dir=$(get_delta_settings_dir)
+	if [ -d "$delta_settings_dir" ] || [ -d "/Applications/Delta.app" ] || [ -d "$HOME/.local/delta.app" ]; then
+		log_warning "Delta is already installed"
+		return 0
+	fi
+
+	# Delta is a beta with nightly, access-controlled builds. Its official docs
+	# do not expose a stable archive URL that is safe to automate here. Do not
+	# detect `command -v delta`: the unrelated git-delta pager uses that name too.
+	log_info "Delta installation is currently manual: https://delta.dev/download"
+	log_info "Follow the platform steps at https://delta.dev/docs/getting-started"
 }
 
 # ─── codiff installation ──────────────────────────────────────────

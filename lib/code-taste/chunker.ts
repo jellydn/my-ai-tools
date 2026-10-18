@@ -25,6 +25,7 @@ const MIN_PART_LENGTH = 200;
 
 /** Split text into parts each ≤ maxLen, preferring paragraph then line breaks (P0). */
 export function splitTextToMaxLength(text: string, maxLen: number): string[] {
+	if (!Number.isInteger(maxLen) || maxLen < 1) throw new RangeError("Chunk length must be a positive integer");
 	const normalized = text.replace(/\r\n/g, "\n").trim();
 	if (normalized.length === 0) return [];
 	if (normalized.length <= maxLen) return [normalized];
@@ -58,7 +59,7 @@ export function splitTextToMaxLength(text: string, maxLen: number): string[] {
 		}
 	}
 
-	return parts.every((part) => part.length <= maxLen) ? parts : [];
+	return parts;
 }
 
 /** Split one markdown block; re-wrap fenced code so each part opens and closes the fence (P2). */
@@ -113,7 +114,8 @@ function splitMarkdownOversized(text: string, maxLen: number): string[] {
 	}
 	if (current) merged.push(current);
 
-	return merged.filter((part) => part.length > 0 && part.length <= maxLen);
+	// Let the caller account for an invalid unit instead of silently dropping pieces.
+	return merged;
 }
 
 function partSymbol(base: string, partIndex: number): string {

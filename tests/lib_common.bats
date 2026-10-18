@@ -30,6 +30,31 @@ setup() {
     [[ "$output" == *"[DRY RUN]"* ]]
 }
 
+@test "safe_copy_dir skips an unreadable file with errexit enabled" {
+    local source_dir="$BATS_TEST_TMPDIR/source"
+    local dest_dir="$BATS_TEST_TMPDIR/dest"
+    mkdir -p "$source_dir"
+    printf 'blocked\n' > "$source_dir/a-blocked.txt"
+    printf 'copied\n' > "$source_dir/z-copied.txt"
+
+    run bash -c '
+        set -e
+        source "$1"
+        DRY_RUN=false
+        rsync() { return 1; }
+        cp() {
+            case "$1" in
+                *a-blocked.txt) return 1 ;;
+            esac
+            command cp "$@"
+        }
+        safe_copy_dir "$2" "$3"
+        test -f "$3/z-copied.txt"
+    ' _ "$BATS_TEST_DIRNAME/../lib/common.sh" "$source_dir" "$dest_dir"
+
+    [ "$status" -eq 0 ]
+}
+
 @test "validate_json returns 0 for valid JSON" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
@@ -202,4 +227,105 @@ EOF
     [ "$status" -eq 0 ]
     [[ "$output" == *"one"* ]]
     [[ "$output" == *"two"* ]]
+}
+
+@test "get_reasonix_dir returns non-empty path" {
+    run get_reasonix_dir
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
+@test "validate_config validates TOML file" {
+    if ! command -v python3 &>/dev/null && ! command -v taplo &>/dev/null; then
+        skip "no TOML validator available"
+    fi
+
+    local toml_file="/tmp/my-ai-tools-valid-$$.toml"
+    printf 'key = "value"\n' > "$toml_file"
+
+    run validate_config "$toml_file"
+    [ "$status" -eq 0 ]
+
+    rm -f "$toml_file"
+}
+
+@test "validate_toml returns 0 for valid TOML" {
+    if ! command -v python3 &>/dev/null && ! command -v taplo &>/dev/null; then
+        skip "no TOML validator available"
+    fi
+
+    local toml_file="/tmp/my-ai-tools-valid-toml-$$.toml"
+    printf 'key = "value"\n[section]\nnum = 42\n' > "$toml_file"
+
+    run validate_toml "$toml_file"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"TOML validated"* ]]
+
+    rm -f "$toml_file"
+}
+
+@test "validate_toml returns 1 for invalid TOML" {
+    if ! command -v python3 &>/dev/null && ! command -v taplo &>/dev/null; then
+        skip "no TOML validator available"
+    fi
+
+    local toml_file="/tmp/my-ai-tools-invalid-toml-$$.toml"
+    printf 'key = = 1\n' > "$toml_file"
+
+    run validate_toml "$toml_file"
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"Invalid TOML"* ]]
+
+    rm -f "$toml_file"
+}
+
+@test "validate_toml returns 1 for missing file" {
+    run validate_toml "/tmp/my-ai-tools-missing-toml-$$.toml"
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"File not found"* ]]
+}
+
+@test "validate_toml skips when no TOML validator is available" {
+    local fake_bin_dir="/tmp/my-ai-tools-fake-bin-toml-$$"
+
+    mkdir -p "$fake_bin_dir"
+    cat > "$fake_bin_dir/python3" <<'EOF'
+#!/bin/sh
+exit 1
+EOF
+    chmod +x "$fake_bin_dir/python3"
+
+    local toml_file="/tmp/my-ai-tools-skip-toml-$$.toml"
+    printf 'key = "value"\n' > "$toml_file"
+
+    # Stubbed python3 (import fails) and no taplo on a restricted PATH -> should skip
+    run bash -c 'source "$0/../lib/common.sh"; PATH="$1"; validate_toml "$2"' "$BATS_TEST_DIRNAME" "$fake_bin_dir" "$toml_file"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"No TOML validator available"* ]]
+
+    rm -f "$fake_bin_dir/python3" "$toml_file"
+    rmdir "$fake_bin_dir"
+}
+
+@test "run_installer omits an empty version in the already-installed message" {
+    run bash -ec '
+        source "$1/lib/common.sh"
+        YES_TO_ALL=true
+        DRY_RUN=false
+        run_installer "Demo Tool" "true" "true" "false"
+    ' _ "$BATS_TEST_DIRNAME/.."
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Demo Tool is already installed"* ]]
+    [[ "$output" != *"already installed ()"* ]]
+}
+
+@test "run_installer includes the version when it is available" {
+    run bash -c '
+        source "$1/lib/common.sh"
+        YES_TO_ALL=true
+        DRY_RUN=false
+        run_installer "Demo Tool" "true" "true" "echo 1.2.3"
+    ' _ "$BATS_TEST_DIRNAME/.."
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Demo Tool is already installed (1.2.3)"* ]]
 }
