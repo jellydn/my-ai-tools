@@ -317,12 +317,13 @@ function Start-Installation {
 
         Push-Location $sourceDir
         try {
+            # Login profiles can restore a stale ORIGINAL_PATH and hide newly installed tools.
             if ($isNonInteractive) {
                 $bashArguments = if ($arguments.Count -gt 0) { $arguments -join ' ' } else { '' }
-                & $bashPath -lc "bash cli.sh $bashArguments </dev/null"
+                & $bashPath --noprofile --norc -c "bash cli.sh $bashArguments </dev/null"
             }
             else {
-                & $bashPath "cli.sh" @arguments
+                & $bashPath --noprofile --norc "cli.sh" @arguments
             }
             $exitCode = $LASTEXITCODE
         }

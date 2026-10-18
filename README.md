@@ -72,6 +72,11 @@ Invoke-RestMethod https://ai-tools.itman.fyi/install.ps1 | Invoke-Expression
 This downloads and executes a remote script. Review [install.ps1](install.ps1) before trusting it. It installs
 missing prerequisites through `winget`, reuses existing tools, refreshes PATH for the current process, and starts
 the shared installer in Git Bash. Windows may request administrator approval for Git or Node.js installation.
+Package installation uses `--source winget`, not the Microsoft Store. Node and npm are discovered again after
+installation and passed to Git Bash in the same process; no separate prerequisite command or terminal restart
+is needed after a successful install. The wrapper skips Git Bash login profiles so an older shell PATH cannot
+hide these tools. Approve only the package installer's elevation prompt; the wrapper does not relaunch the full
+configuration installer as administrator. If approval is denied, setup stops and can be rerun safely.
 Native Windows uses Node/npm, not Bun, for package installation; Linux, macOS, and WSL keep Bun-first behavior.
 
 The installer can replace existing configuration. To inspect the script, preview changes, and request a backup,
@@ -93,6 +98,16 @@ cannot be found, close all terminal windows and reopen PowerShell. If `winget` i
 [`jq`](https://jqlang.org/download/), and [Node.js LTS with npm](https://nodejs.org/) manually. In Git setup,
 select **Git from the command line and also from 3rd-party software**. Do not bypass package lifecycle errors
 with `--ignore-scripts`: native binaries can remain uninstalled.
+
+If the wrapper says all prerequisites are met but Bash then reports missing Node/npm, check that the downloaded
+`install.ps1` includes `Find-Node` and the `OpenJS.NodeJS.LTS` installation step. A stale web deployment can serve
+an older wrapper while cloning the latest Bash installer. Maintainers must check the **Dokku Deploy** workflow
+for `ai-tools.itman.fyi`; a successful **Deploy GitHub Pages** run does not update that domain. Until the domain
+is updated, use a reviewed repository checkout and run:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Yes
+```
 
 ### Repository checkout
 

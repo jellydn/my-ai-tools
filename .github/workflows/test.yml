@@ -109,6 +109,10 @@ jobs:
         shell: powershell
         run: .\tests\windows_installer.ps1
 
+      - name: Test real Git Bash prerequisite handoff
+        shell: powershell
+        run: .\tests\windows_bash_handoff.ps1
+
       - name: Run native Windows dry-run
         shell: powershell
         run: .\install.ps1 -DryRun -Yes
