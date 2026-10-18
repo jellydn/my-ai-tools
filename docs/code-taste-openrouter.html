@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Code taste with OpenRouter — my-ai-tools documentation"><title>Code taste with OpenRouter · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="30-day-applied-ai-learnings.html">30-Day Applied AI Learning Sprint</a>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="code-taste-openrouter.html">Code taste with OpenRouter</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="linux-omarchy-setup.html">Selective Setup on Omarchy (Linux, Hyprland)</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+<a href="rag-architecture.html">Repository RAG architecture</a>
+<a href="rag-retrieval-quality.html">Day 11: retrieval quality</a>
+<a href="skill-upstreams.html">Skill upstream maintenance</a>
+</nav><main><article>
+<h1>Code taste with OpenRouter</h1>
+<p><code>code-taste</code> uses the <a href="https://github.com/openai/openai-node">OpenAI Node SDK</a> with an optional <strong><code>OPENAI_BASE_URL</code></strong>, so you can point analysis and embeddings at <a href="https://openrouter.ai/">OpenRouter</a> instead of OpenAI directly. No code changes are required—only environment variables.</p>
+<h2>Prerequisites</h2>
+<ul>
+<li><strong>Bun</strong> (<code>&gt;=1.0.0</code>) — see <a href="../README.md#-github-coding-taste-generator">README § GitHub Coding Taste Generator</a></li>
+<li>An <a href="https://openrouter.ai/settings/keys">OpenRouter API key</a> (<code>sk-or-v1-...</code>)</li>
+<li>Models on OpenRouter that support <strong>chat completions</strong> (preference extraction) and <strong>embeddings</strong> (chunk ranking)</li>
+</ul>
+<h2>Quick setup</h2>
+<ol>
+<li><p>Copy the repo template (already tuned for OpenRouter):</p>
+<pre><code class="language-bash">cp .env.example .env
+</code></pre>
+</li>
+<li><p>Edit <code>.env</code>:</p>
+<pre><code class="language-bash">OPENAI_BASE_URL=https://openrouter.ai/api/v1
+OPENAI_API_KEY=sk-or-v1-your-key-here
+OPENAI_MODEL=openrouter/free
+OPENAI_EMBEDDING_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free
+</code></pre>
+</li>
+<li><p>Load env and run (Bun):</p>
+<pre><code class="language-bash">bun install
+set -a &amp;&amp; source .env &amp;&amp; set +a
+
+bun run code-taste analyze jellydn
+bun run code-taste export --format markdown
+</code></pre>
+<p>Optional: <code>GITHUB_TOKEN</code> increases GitHub API rate limits when listing repos and downloading files.</p>
+</li>
+</ol>
+<h2>Environment variables</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Required</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>OPENAI_API_KEY</code></td>
+<td>Yes</td>
+<td>OpenRouter key (same variable name as OpenAI; SDK convention)</td>
+</tr>
+<tr>
+<td><code>OPENAI_BASE_URL</code></td>
+<td>For OpenRouter</td>
+<td>Set to <code>https://openrouter.ai/api/v1</code></td>
+</tr>
+<tr>
+<td><code>OPENAI_MODEL</code></td>
+<td>No</td>
+<td>Chat model for preference inference (default in code: <code>gpt-4o-mini</code>)</td>
+</tr>
+<tr>
+<td><code>OPENAI_EMBEDDING_MODEL</code></td>
+<td>No</td>
+<td>Embedding model for chunk selection (default in code: <code>text-embedding-3-small</code>)</td>
+</tr>
+<tr>
+<td><code>GITHUB_TOKEN</code></td>
+<td>No</td>
+<td>GitHub REST API (recommended for user-wide repo discovery)</td>
+</tr>
+</tbody></table>
+<p>Implementation: <code>lib/code-taste/profile.ts</code> constructs the client with <code>apiKey</code> and <code>baseURL</code> from these variables.</p>
+<h2>Choosing models</h2>
+<p>Browse <a href="https://openrouter.ai/models">OpenRouter models</a> or the curated <strong><a href="https://openrouter.ai/collections/free-models">Free models collection</a></strong> (rankings updated from real usage; capacity can change over time).</p>
+<p><code>code-taste</code> calls two APIs on the same base URL:</p>
+<ol>
+<li><strong>Embeddings</strong> — ranks repository chunks before LLM analysis (<code>OPENAI_EMBEDDING_MODEL</code>).</li>
+<li><strong>Chat completions</strong> — extracts preferences as JSON (<code>OPENAI_MODEL</code>, <code>response_format: json_object</code> in <code>lib/code-taste/profile.ts</code>).</li>
+</ol>
+<h3>Recommended free stack (matches <code>.env.example</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Variable</th>
+<th>Suggested value</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>API base</td>
+<td><code>OPENAI_BASE_URL</code></td>
+<td><code>https://openrouter.ai/api/v1</code></td>
+<td>Required for OpenRouter</td>
+</tr>
+<tr>
+<td>Key</td>
+<td><code>OPENAI_API_KEY</code></td>
+<td><code>sk-or-v1-...</code></td>
+<td>From <a href="https://openrouter.ai/settings/keys">OpenRouter keys</a></td>
+</tr>
+<tr>
+<td>Embeddings</td>
+<td><code>OPENAI_EMBEDDING_MODEL</code></td>
+<td><code>nvidia/llama-nemotron-embed-vl-1b-v2:free</code></td>
+<td><a href="https://openrouter.ai/collections/free-models">Llama Nemotron Embed VL 1B V2</a> — text + image document embedding; works for text-only chunk strings</td>
+</tr>
+<tr>
+<td>Analysis</td>
+<td><code>OPENAI_MODEL</code></td>
+<td><code>openrouter/free</code></td>
+<td><a href="https://openrouter.ai/openrouter/free">OpenRouter free router</a> — picks an available free model per request</td>
+</tr>
+</tbody></table>
+<p>Example <code>.env</code> (copy-paste):</p>
+<pre><code class="language-bash">OPENAI_BASE_URL=https://openrouter.ai/api/v1
+OPENAI_API_KEY=sk-or-v1-...
+OPENAI_MODEL=openrouter/free
+OPENAI_EMBEDDING_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free
+</code></pre>
+<h3>If <code>openrouter/free</code> or embeddings fail</h3>
+<p>Try a <strong>fixed free chat model</strong> from the <a href="https://openrouter.ai/collections/free-models">free collection</a> that supports tool calling / structured or JSON-style output, for example:</p>
+<ul>
+<li><code>tencent/hy3:free</code> — reasoning / agent workflows, 262K context</li>
+<li><code>nvidia/nemotron-3-ultra:free</code> — long context, strong on multi-step tasks</li>
+<li><code>openai/gpt-oss-20b:free</code> — structured outputs / function calling</li>
+<li>Poolside <strong>Laguna</strong> variants (<code>poolside/...:free</code>) — agentic coding (check exact model id on OpenRouter)</li>
+</ul>
+<p>Keep <strong><code>OPENAI_EMBEDDING_MODEL</code></strong> on an embedding-specific free model (e.g. <code>nvidia/llama-nemotron-embed-vl-1b-v2:free</code>). Do not point embeddings at chat-only models.</p>
+<h3>Free tier caveats</h3>
+<ul>
+<li>OpenRouter <a href="https://openrouter.ai/collections/free-models">documents free inference</a> as capacity they support but do not guarantee forever.</li>
+<li>Some free providers (e.g. Poolside) may use inputs/outputs for training when used at $0 — read each model’s card before production use.</li>
+<li>Free routers can return different backends per call; for reproducible taste profiles, pin a single <code>OPENAI_MODEL</code> id instead of <code>openrouter/free</code>.</li>
+</ul>
+<p>The repository&#39;s <code>.env.example</code> supplies these OpenRouter settings. Export them before running
+<code>code-taste analyze</code>; Docker does not configure this CLI. Unlike the public-only repository
+chat indexer, <code>code-taste</code> can use <code>GITHUB_TOKEN</code> for authenticated GitHub API requests.</p>
+<h2>Review and retain a profile</h2>
+<p>Analysis writes <code>.code-taste/profile.json</code> and <code>CODING_TASTE.md</code>. The Markdown export omits
+evidence, so review the JSON evidence before treating inferred preferences as project rules.
+<code>.code-taste/</code> and <code>CODING_TASTE.json</code> are ignored by Git; <code>CODING_TASTE.md</code> can be committed
+after review. These inferred profiles are separate from user-memory MCP, which stores only
+explicit user preferences.</p>
+<h2>Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>What to check</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>OPENAI_API_KEY is required</code></td>
+<td>Export key after sourcing <code>.env</code></td>
+</tr>
+<tr>
+<td>401 / invalid key</td>
+<td>Key is OpenRouter <code>sk-or-v1-...</code>, not an OpenAI <code>sk-...</code> unless you use OpenAI’s URL</td>
+</tr>
+<tr>
+<td>Embedding errors</td>
+<td><code>OPENAI_EMBEDDING_MODEL</code> must exist on OpenRouter (or switch <code>OPENAI_BASE_URL</code> back to OpenAI for embeddings only—mixed providers need two runs or a single provider that offers both)</td>
+</tr>
+<tr>
+<td>GitHub rate limit</td>
+<td>Set <code>GITHUB_TOKEN</code> with read access to the repositories you intend to analyze; do not grant write access for analysis</td>
+</tr>
+</tbody></table>
+<h2>Related</h2>
+<ul>
+<li>CLI help: <code>bun scripts/code-taste.ts --help</code></li>
+<li>Repo assistant: <a href="../TOOL_REFERENCE.md#-chat-with-the-repo">Chat with the repo</a></li>
+</ul>
+</article></main></div></body></html>

@@ -29,7 +29,7 @@
 
    ```bash
    bun install
-   set -a && source .env && set +a   # or: export $(grep -v '^#' .env | xargs)
+   set -a && source .env && set +a
 
    bun run code-taste analyze jellydn
    bun run code-taste export --format markdown
@@ -93,7 +93,17 @@ Keep **`OPENAI_EMBEDDING_MODEL`** on an embedding-specific free model (e.g. `nvi
 - Some free providers (e.g. Poolside) may use inputs/outputs for training when used at $0 — read each model’s card before production use.
 - Free routers can return different backends per call; for reproducible taste profiles, pin a single `OPENAI_MODEL` id instead of `openrouter/free`.
 
-This repository’s `.env.example`, `fly.toml`, and Docker build args use the same OpenRouter defaults for the **repo chat** stack; those values apply to **`code-taste analyze`** when both embedding and chat models succeed on your account.
+The repository's `.env.example` supplies these OpenRouter settings. Export them before running
+`code-taste analyze`; Docker does not configure this CLI. Unlike the public-only repository
+chat indexer, `code-taste` can use `GITHUB_TOKEN` for authenticated GitHub API requests.
+
+## Review and retain a profile
+
+Analysis writes `.code-taste/profile.json` and `CODING_TASTE.md`. The Markdown export omits
+evidence, so review the JSON evidence before treating inferred preferences as project rules.
+`.code-taste/` and `CODING_TASTE.json` are ignored by Git; `CODING_TASTE.md` can be committed
+after review. These inferred profiles are separate from user-memory MCP, which stores only
+explicit user preferences.
 
 ## Troubleshooting
 
@@ -102,9 +112,9 @@ This repository’s `.env.example`, `fly.toml`, and Docker build args use the sa
 | `OPENAI_API_KEY is required` | Export key after sourcing `.env` |
 | 401 / invalid key | Key is OpenRouter `sk-or-v1-...`, not an OpenAI `sk-...` unless you use OpenAI’s URL |
 | Embedding errors | `OPENAI_EMBEDDING_MODEL` must exist on OpenRouter (or switch `OPENAI_BASE_URL` back to OpenAI for embeddings only—mixed providers need two runs or a single provider that offers both) |
-| GitHub rate limit | Set `GITHUB_TOKEN` with `public_repo` (or broader) scope |
+| GitHub rate limit | Set `GITHUB_TOKEN` with read access to the repositories you intend to analyze; do not grant write access for analysis |
 
 ## Related
 
 - CLI help: `bun scripts/code-taste.ts --help`
-- Repo assistant (same OpenRouter env): [README § Chat with the repo](../README.md#-chat-with-the-repo)
+- Repo assistant: [Chat with the repo](../TOOL_REFERENCE.md#-chat-with-the-repo)

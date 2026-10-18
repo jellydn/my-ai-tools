@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Selective Setup on Omarchy (Linux, Hyprland) — my-ai-tools documentation"><title>Selective Setup on Omarchy (Linux, Hyprland) · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="30-day-applied-ai-learnings.html">30-Day Applied AI Learning Sprint</a>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="code-taste-openrouter.html">Code taste with OpenRouter</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="linux-omarchy-setup.html">Selective Setup on Omarchy (Linux, Hyprland)</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+<a href="rag-architecture.html">Repository RAG architecture</a>
+<a href="rag-retrieval-quality.html">Day 11: retrieval quality</a>
+<a href="skill-upstreams.html">Skill upstream maintenance</a>
+</nav><main><article>
+<h1>Selective Setup on Omarchy (Linux, Hyprland)</h1>
+<p>A tested walkthrough for applying these AI-tool configurations to a Linux
+desktop that already runs its own set of CLIs — specifically <strong>Omarchy</strong>
+(Arch Linux ARM, Hyprland). The installer is desktop-agnostic, but a few
+Linux-specific details are worth knowing before you run <code>cli.sh</code>.</p>
+<h2>What</h2>
+<ul>
+<li>Run the installer non-interactively with the active tool set and config
+backups:
+<code>bash cli.sh --yes --backup</code>.</li>
+<li>Install and configure the allowlisted tools: <code>claude</code>, <code>codex</code>, <code>ctx</code>,
+<code>delta</code>, <code>fx</code>, <code>kilo</code>, <code>muse</code>, <code>amp</code>, <code>opencode</code>, <code>open_code_review</code>, <code>pi</code>,
+<code>omp</code> (Oh My Pi), <code>antigravity</code>, <code>ai-switcher</code>, <code>reasonix</code>, plus the
+always-run shared infra (<code>rtk</code>, <code>global_tools</code>, <code>ccs</code>).</li>
+<li>Copy managed configs into <code>~/.claude/</code>, <code>~/.config/opencode/</code>, <code>~/.codex/</code>,
+<code>~/.fx/</code>, <code>~/.config/amp/</code>, <code>~/.pi/agent/</code>, etc.</li>
+<li>Install MCP servers (context7, sequential-thinking, qmd,
+codebase-memory-mcp, agentmemory, sem, ctx) into the tools that support them.</li>
+<li>Install shared skills into <code>~/.agents/skills</code>.</li>
+</ul>
+<p>Managed configs are <strong>backed up</strong> to <code>~/ai-tools-backup-&lt;timestamp&gt;/</code>
+with <code>--backup</code>. These are filtered configuration backups, not full-directory
+snapshots. Runtime data such as <code>node_modules</code>, caches, and databases is excluded.
+The installer keeps the last five backups.</p>
+<h2>Why</h2>
+<ul>
+<li><code>./cli.sh --yes</code> non-interactive mode is the right fit when you know you
+want the active tool set; it also auto-accepts the backup step without
+prompting.</li>
+<li><code>--backup</code> is especially valuable on a machine that already has configs.
+Check the backup contents before you rely on them. Make a separate full backup
+if you also need runtime data or files excluded by <code>safe_copy_dir</code>.</li>
+<li>Tool installers write their CLIs in different places depending on the
+platform; on this Linux box they landed in <code>~/.local/bin</code> and under mise
+install dirs (<code>~/.local/share/mise/installs/&lt;tool&gt;/latest/bin</code>). Those paths
+must be on <code>PATH</code> for the CLIs to resolve.</li>
+<li>Tools not in the allowlist (kimi_code, gemini, commandcode, copilot,
+conductor, herdr) are skipped cleanly in <code>-y</code> mode rather than attempted.</li>
+</ul>
+<h2>How</h2>
+<h3>1. Prerequisites</h3>
+<pre><code class="language-bash"># Arch / Omarchy
+sudo pacman -S --noconfirm git
+# A script runner for the installers (bunx preferred, npx fallback)
+curl -fsSL https://bun.sh/install | bash
+export PATH=&quot;${BUN_INSTALL:-$HOME/.bun}/bin:$PATH&quot;
+bun --version
+</code></pre>
+<p>If Node.js and <code>npx</code> are already available, you can use them instead of installing Bun.
+Free disk space first if your root partition is small — see Troubleshooting.</p>
+<h3>2. Clone and run</h3>
+<pre><code class="language-bash">git clone https://github.com/jellydn/my-ai-tools.git
+cd my-ai-tools
+bash cli.sh --dry-run
+</code></pre>
+<p>Inspect the plan before starting the installation:</p>
+<pre><code class="language-bash">bash cli.sh --yes --backup
+</code></pre>
+<p><code>cli.sh</code> and <code>generate.sh</code> are bash-only; the bundled <code>lib/require_bash.sh</code>
+re-launches under bash transparently if invoked via <code>sh</code>.</p>
+<h3>3. Verify the results</h3>
+<pre><code class="language-bash">export PATH=&quot;$HOME/.local/bin:$HOME/.local/share/mise/installs/node/latest/bin:$PATH&quot;
+if command -v bun &gt;/dev/null 2&gt;&amp;1; then
+  export PATH=&quot;$(bun pm bin -g):$PATH&quot;
+fi
+
+claude --version    # Claude Code
+codex --version     # OpenAI Codex
+amp --version       # Amp
+command -v fx       # Vercel Labs fx
+command -v muse
+command -v kilo     # Kilo CLI
+command -v ctx
+command -v agy      # Antigravity CLI
+command -v ai       # ai-switcher (binary is `ai`)
+
+# Managed skills (fx, Muse, agents share this directory)
+ls ~/.agents/skills
+# MCP server report printed at end of install
+# backups
+ls ~/ai-tools-backup-*/
+</code></pre>
+<h3>4. Restart your shell</h3>
+<p>Installed CLIs land in <code>~/.local/bin</code> and mise install dirs. If the terminal
+was already open:</p>
+<pre><code class="language-bash">exec bash        # or: exec zsh / exec fish
+hash -r
+</code></pre>
+<p>On fish shells the Antigravity CLI installer appends a <code>set -gx PATH &quot;$HOME/.local/bin&quot; $PATH</code> line to <code>~/.config/fish/config.fish</code>; a sourced
+shell sees the new tools without restart.</p>
+<h2>What was skipped on this machine</h2>
+<pre><code class="language-text">cursor       -&gt; Cursor not detected (no Cursor install on this machine)
+kimi_code    -&gt; not in -y allowlist
+gemini       -&gt; not in -y allowlist
+commandcode  -&gt; not in -y allowlist
+copilot      -&gt; not in -y allowlist
+conductor    -&gt; not in -y allowlist
+herdr        -&gt; not in -y allowlist
+plannotator  -&gt; aarch64: installer has no checksum URL and download failed
+</code></pre>
+<p>All other skipped tools simply printed <code>Skipped: &lt;tool&gt;</code> without interrupting
+the run.</p>
+<h2>Verification on this machine</h2>
+<pre><code class="language-text">Claude MCP servers:   Installed 7 | Skipped 3 | Failed 0
+Shared skills:        33 entries under ~/.agents/skills
+Backup dir:           ~/ai-tools-backup-20260915-104034/
+                        claude/themes  codex/  opencode/  pi/
+</code></pre>
+<h2>Troubleshooting</h2>
+<ul>
+<li><strong><code>No space left on device</code> mid-install</strong> — this 24 GB root partition filled
+up during the run; the failing copy aborted the last config step. Inspect disk
+usage and remove only disposable files you have checked. Do not delete entire
+cache or temporary directories blindly: other tools can keep active state there.<pre><code class="language-bash">du -sh ~/.cache ~/.npm ~/.claude/tmp 2&gt;/dev/null
+df -h /          # confirm headroom
+bash cli.sh --dry-run
+</code></pre>
+After freeing space, inspect the plan and confirm that your backup is usable:<pre><code class="language-bash">bash cli.sh --yes --no-backup   # idempotent re-run finishes the job
+</code></pre>
+</li>
+<li><strong><code>claude</code> not found after install</strong> — a disk-full write during <code>-y</code> install
+left the global npm bin partial. Re-install:<pre><code class="language-bash">npm install -g @anthropic-ai/claude-code
+</code></pre>
+</li>
+<li><strong>CLIs installed but not on <code>PATH</code></strong> — new tools go to <code>~/.local/bin</code> and
+mise install dirs. Ensure those are on <code>PATH</code>, then <code>exec bash</code> (or
+<code>mise reshim</code> if using mise shims).</li>
+<li><strong>Plugins print <code>install failed (may already be installed)</code></strong> — this can be a
+real failure, not only an existing installation. Check that the target CLI is
+available, inspect its installed plugins, and read the original error before
+retrying.</li>
+<li><strong><code>cli.sh</code> complains bash is not found</strong> — the guard in <code>lib/require_bash.sh</code>
+is executed via <code>#!/bin/bash</code>; run the script with <code>bash cli.sh</code> explicitly.</li>
+</ul>
+</article></main></div></body></html>

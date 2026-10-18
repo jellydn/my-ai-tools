@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Repository RAG architecture — my-ai-tools documentation"><title>Repository RAG architecture · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="30-day-applied-ai-learnings.html">30-Day Applied AI Learning Sprint</a>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="code-taste-openrouter.html">Code taste with OpenRouter</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="linux-omarchy-setup.html">Selective Setup on Omarchy (Linux, Hyprland)</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+<a href="rag-architecture.html">Repository RAG architecture</a>
+<a href="rag-retrieval-quality.html">Day 11: retrieval quality</a>
+<a href="skill-upstreams.html">Skill upstream maintenance</a>
+</nav><main><article>
+<h1>Repository RAG architecture</h1>
+<p>The repository assistant uses this repository as its knowledge base. It intentionally does not use LangChain so retrieval, grounding, and prompt construction remain visible and explainable.</p>
+<pre><code class="language-text">Repository + GitHub Issues/PRs
+            │
+            ▼
+       Document loader
+            │
+            ▼
+  1,000 character chunks
+    (150 character overlap)
+            │
+            ▼
+ OpenAI-compatible embeddings
+            │
+            ▼
+ In-image vector index (JSON)
+            │
+            ▼
+ Cosine retriever + metadata filter
+            │
+            ▼
+ Grounding prompt policy
+            │
+            ▼
+OpenRouter + retrieval trace
+</code></pre>
+<h2>Indexed data</h2>
+<ul>
+<li><code>README.md</code>, <code>docs/</code>, and any <code>CHANGELOG*</code> or <code>SOUL.md</code> file</li>
+<li>CLI implementation and help in <code>cli.sh</code> and <code>generate.sh</code></li>
+<li>supported TypeScript, JavaScript, Markdown, shell, PowerShell, JSON/JSONC, YAML, and TOML files</li>
+<li>example configs under <code>configs/</code></li>
+<li>up to 100 recent GitHub Issues and 100 recent Pull Requests, fetched when the index is built; each type is capped at 200 chunks and every included item keeps a summary chunk before extra body chunks are selected</li>
+</ul>
+<p>Both server and browser builds use a <strong>public-only corpus</strong>. They fetch a fresh,
+anonymous Git checkout of <code>GITHUB_REPOSITORY</code> at <code>GITHUB_SOURCE_REF</code> (default <code>main</code>).
+They never index the caller&#39;s working tree, untracked files, unpublished commits,
+or private repositories. Git runs without inherited credentials or Git configuration.
+Issue/PR requests also ignore <code>GITHUB_TOKEN</code> and reject redirects. The browser index
+publishes its complete plaintext corpus, not just the snippets retrieved by a query.</p>
+<p>Generated indexes, dependencies, caches, secret-file patterns, and repository metadata
+are excluded. Source files are limited to 1 MiB each, 20 MiB total input, and 5,000
+chunks. Failure to fetch the public checkout stops the build. Optional Issue/PR API
+failure only omits conversation enrichment. Publicly committed secrets are already
+public: this filter is not a substitute for secret scanning and credential rotation.</p>
+<p>Git and network access are required when building indexes. Set <code>GITHUB_REPOSITORY=owner/repo</code>
+and <code>GITHUB_SOURCE_REF</code> to a publicly fetchable ref or commit. Docker accepts these as
+build arguments. Citation URLs use the resolved immutable commit SHA. No GitHub token
+or private-corpus fallback is supported.</p>
+<p>GitHub entries contain bounded title, state, author, and body excerpts. They do not include comments, reviews, changed-file diffs, or the complete conversation.</p>
+<p>Each chunk stores a source path and metadata:</p>
+<pre><code class="language-ts">type ChunkMetadata = {
+  type: &quot;documentation&quot; | &quot;issue&quot; | &quot;pull_request&quot; | &quot;cli_help&quot; | &quot;example_config&quot; | &quot;source&quot;;
+  author?: string;
+  url?: string;
+};
+</code></pre>
+<p>This supports pre-filtering by document type without changing the index schema. Path and author filters remain future extensions.</p>
+<h2>Retrieval and grounding</h2>
+<p>The server embeds the question with the same model used at index time, optionally filters candidates by document type, calculates cosine similarity, and sends the requested top 3, 5, 10, or 20 chunks to the answer model. Top 5 remains the default. The prompt treats excerpts as untrusted data, requires answers to use only those excerpts, cite relevant paths, and return <code>This is not documented in the repository.</code> when the evidence is insufficient. The UI appends deduplicated links for the retrieved sources, including direct links for Issues and Pull Requests. Source-file links use the resolved checkout SHA even when <code>GITHUB_SOURCE_REF</code> is a branch name. Pin a public commit to keep source content fixed between builds; Issue/PR content remains mutable. These links are a retrieval trace rather than a claim-level citation validator.</p>
+<p>The JSON vector index is an intentional first production step: the corpus fits in a container image and there is no external vector database to operate. pgvector becomes appropriate when the corpus or update frequency makes rebuilding the image too slow, or when multiple application instances need incremental index updates.</p>
+<h2>Observability</h2>
+<p>Server mode emits one JSON log per accepted request:</p>
+<pre><code class="language-json">{
+  &quot;event&quot;: &quot;rag_request&quot;,
+  &quot;questionLength&quot;: 27,
+  &quot;topK&quot;: 5,
+  &quot;filters&quot;: { &quot;types&quot;: [&quot;documentation&quot;, &quot;example_config&quot;] },
+  &quot;retrievedChunks&quot;: [{ &quot;path&quot;: &quot;README.md&quot;, &quot;type&quot;: &quot;documentation&quot;, &quot;score&quot;: 0.8123 }],
+  &quot;retrievalLatencyMs&quot;: 18,
+  &quot;promptTokens&quot;: 1420,
+  &quot;responseTokens&quot;: 186,
+  &quot;latencyMs&quot;: 934
+}
+</code></pre>
+<p>Failures include an <code>error</code> stage. Token counts are <code>null</code> if an OpenAI-compatible provider does not report streaming usage. Browser mode logs equivalent retrieval and timing details to the browser console.</p>
+<p>These logs make it possible to inspect poor retrieval, compare settings, and track latency/cost without logging raw questions, prompt hashes, embeddings, or API credentials. Production log retention and access controls are still required.</p>
+<h2>Production roadmap</h2>
+<ol>
+<li>Add filter controls to the chat UI and extend filtering to path and author.</li>
+<li>Add BM25 retrieval, merge it with vector results, and retrieve an initial top 20.</li>
+<li>Rerank those 20 candidates down to the five chunks sent to the model.</li>
+<li>Move vectors to pgvector when incremental updates or horizontal scaling justify the operational cost.</li>
+<li>Cache unchanged document embeddings by content hash and cache short-lived retrieval results.</li>
+<li>Re-embed changed documents after repository updates and rebuild everything after an embedding-model upgrade.</li>
+</ol>
+<p>Chunk size is a relevance tradeoff: very small chunks lose surrounding meaning, while very large chunks dilute matches and consume prompt tokens. A 150-character overlap (15% of the target size) preserves text that crosses boundaries. Metadata narrows irrelevant candidates, hybrid search improves exact command and filename matching, reranking improves final context quality, and citations let users verify the answer instead of trusting model memory.</p>
+<h2>Learning notes</h2>
+<ol>
+<li>Retrieval quality depends more on chunking, metadata, and retrieval strategy than on the answer model itself.</li>
+<li>A grounded RAG system should answer only from retrieved context and provide source citations instead of relying on model memory.</li>
+<li>Production RAG benefits from hybrid search, reranking, and observability—retrieved chunks, similarity scores, latency, and token usage—to improve accuracy and debuggability.</li>
+</ol>
+</article></main></div></body></html>

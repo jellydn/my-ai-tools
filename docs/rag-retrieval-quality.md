@@ -70,14 +70,14 @@ The MCP filter also hid the useful `wiki/wiki/concepts/mcp-registry.md` source b
 | Public checkout unavailable or private | Fail indexing without consulting credentials or local files. | Keep the last published index; do not publish private data. |
 | Empty GitHub corpus | Continue if local chunks exist and report zero GitHub documents. | Conversation filters return the grounded abstention. |
 | Empty full corpus | Fail indexing and deployment. | Do not serve a knowingly empty knowledge base. |
-| Stale index | Keep serving for availability, log index age, and alert/rebuild. | Prefer a visible “knowledge updated at” indicator in a future UI. |
+| Stale index | A compatible index remains usable. The evaluation script warns when it is older than 24 hours; the server has no automatic age alert. | Rebuild explicitly; an age indicator and production alerts remain future work. |
 | Embedding model/dimension mismatch | Reject retrieval and require a rebuild. | Return HTTP 500 with a generic retrieval error; log `retrieval_failed` without sensitive input. |
 
 This separates optional remote enrichment from required local grounding. A stale but compatible index is usually better than no service; an incompatible index is unsafe because its similarity scores are meaningless.
 
 ## Observability review
 
-The old logs included raw questions, which can contain secrets or private text. Logs now contain question length, top-k, active type filters, retrieved path/type/author/score, retrieval latency, provider token usage, total latency, and failure stage. They do not contain raw prompts, prompt hashes, chunk text, embeddings, tokens, or credentials. Index generation already reports corpus counts; a production metrics backend should aggregate corpus age/counts and retrieval latency without adding user text.
+The old logs included raw questions, which can contain secrets or private text. Server logs now contain question length, top-k, active type filters, retrieved path/type/score, retrieval latency, provider token counts, total latency, and failure stage. Browser diagnostics also include source authors. They do not contain raw prompts, prompt hashes, chunk text, embeddings, API tokens, or credentials. Index generation already reports corpus counts; a production metrics backend should aggregate corpus age/counts and retrieval latency without adding user text.
 
 Unsalted prompt hashing was rejected because common questions can be guessed offline. If correlation later becomes necessary, server logs should use a dedicated, rotatable HMAC key; browser logs should remain uncorrelated. Access controls, short retention, and secret scanning/redaction at the log sink remain necessary.
 
