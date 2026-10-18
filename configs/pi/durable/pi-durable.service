@@ -1,0 +1,17 @@
+[Unit]
+Description=Experimental Pi Durable TUI (private SSH terminal)
+StartLimitIntervalSec=120
+StartLimitBurst=3
+
+[Service]
+Type=simple
+UMask=0077
+ExecStart=tmux -D -S %h/.local/state/pi-durable/tmux.sock -f %h/.config/pi-durable/tmux.conf
+KillMode=control-group
+Restart=always
+RestartSec=15
+TimeoutStopSec=30
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

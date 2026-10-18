@@ -158,6 +158,10 @@ Antigravity CLI.
 
 See [`configs/`](configs/) for the source configuration of each tool and [`skills/`](skills/) for shared skills.
 
+For an opt-in VPS terminal accessed from a Mac over Tailscale, see the
+[Pi Durable setup](configs/pi/durable/README.md). It uses a pinned experimental
+TUI, private persistent storage, and a user service; the general installer does not enable it.
+
 ## 🔌 Shared configuration
 
 The installer manages these common resources where the target tool supports them:

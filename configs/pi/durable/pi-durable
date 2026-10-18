@@ -1,0 +1,24 @@
+#!/bin/sh
+# Keep the working directory stable: Pi uses its canonical path to select sessions.
+set -eu
+umask 077
+
+case "${1:---continue}" in
+	--continue|--new) mode=${1:---continue} ;;
+	*) echo 'Usage: pi-durable [--continue|--new]' >&2; exit 2 ;;
+esac
+[ "$#" -le 1 ] || { echo 'Expected at most one argument' >&2; exit 2; }
+
+source_dir="$HOME/.local/share/pi-durable/source"
+export PI_CODING_AGENT_DIR="$HOME/.local/state/pi-durable/agent"
+export TERM=xterm-256color
+cd "$HOME/work/pi-durable"
+
+# Never create a replacement session on a recovery failure.
+set --
+if [ "$mode" = --continue ]; then
+	set -- --continue
+fi
+exec "$HOME/.local/share/pi-durable/node" \
+	--import "$source_dir/packages/coding-agent/src/experimental/source-resolver.ts" \
+	"$source_dir/packages/coding-agent/src/experimental/durable/main.ts" "$@"
