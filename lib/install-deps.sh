@@ -355,7 +355,21 @@ check_gofmt() {
 		return 0
 	fi
 
-	log_warning "gofmt not found. Go is not installed."
+	log_warning "gofmt not found. Installing Go..."
+	if command -v mise &>/dev/null; then
+		if execute "mise use -g go@latest"; then
+			if [ "$DRY_RUN" = true ]; then
+				return 0
+			elif command -v gofmt &>/dev/null; then
+				log_success "Go installed"
+				return 0
+			fi
+			log_warning "gofmt is not available in PATH after mise installation; falling back to manual install"
+		else
+			log_warning "mise could not install Go; falling back to manual install"
+		fi
+	fi
+
 	if [ "$IS_WINDOWS" = true ]; then
 		if command -v choco &>/dev/null; then
 			log_info "Install Go with: choco install golang -y"
