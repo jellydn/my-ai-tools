@@ -67,6 +67,8 @@ INSTALL_SEQUENCE=(
 	"grok:install_grok"
 	"mimo:install_mimo"
 	"open_code_review:install_open_code_review"
+	# Shared hooks, inbox MCP servers, and manual review commands need this CLI.
+	"always:install_plannotator_if_needed"
 )
 
 run_install_sequence() {
@@ -2386,13 +2388,7 @@ install_cli_dependency() {
 
 	case "$name" in
 	plannotator | plannotator-copilot | plannotator-droid)
-		if command -v plannotator &>/dev/null; then
-			return 0
-		fi
-		log_info "Installing Plannotator CLI..."
-		local plannotator_checksum
-		plannotator_checksum=$(resolve_installer_checksum "plannotator")
-		execute_installer "https://plannotator.ai/install.sh" "$plannotator_checksum" "Plannotator CLI" || log_warning "Plannotator installation failed"
+		install_plannotator_if_needed
 		;;
 	qmd-knowledge)
 		handle_qmd_installation_if_needed
@@ -2641,7 +2637,7 @@ install_community_plugin_non_interactive() {
 		return 0
 	fi
 
-	install_cli_dependency "$name"
+	install_cli_dependency "$name" || return 1
 
 	setup_tmpdir
 	execute "$cli_tool plugin marketplace add '$marketplace_repo' 2>/dev/null || true"
@@ -2666,7 +2662,7 @@ install_community_plugin_interactive() {
 		return 0
 	fi
 
-	install_cli_dependency "$name"
+	install_cli_dependency "$name" || return 1
 
 	setup_tmpdir
 	if ! execute "$cli_tool plugin marketplace add '$marketplace_repo' 2>/dev/null"; then
