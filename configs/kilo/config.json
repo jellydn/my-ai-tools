@@ -64,7 +64,16 @@
 			}
 		}
 	},
-	"plugin": ["@plannotator/opencode@latest", "@mohak34/opencode-notifier@latest"],
+	"plugin": [
+		[
+			"@plannotator/opencode@latest",
+			{
+				"workflow": "plan-agent",
+				"planningAgents": ["plan"]
+			}
+		],
+		"@mohak34/opencode-notifier@latest"
+	],
 	"formatter": {
 		"biome": {
 			"command": ["biome", "check", "--write", "$FILE"],

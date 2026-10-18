@@ -9,6 +9,7 @@
 		"agentmemory": { "command": "npx", "args": ["-y", "@agentmemory/mcp"] },
 		"sem": { "command": "sem-mcp", "args": [] },
 		"ctx": { "command": "ctx", "args": ["mcp", "serve"] },
-		"codebase-memory-mcp": { "command": "codebase-memory-mcp", "args": [] }
+		"codebase-memory-mcp": { "command": "codebase-memory-mcp", "args": [] },
+		"plannotator-inbox": { "command": "plannotator", "args": ["inbox", "mcp"] }
 	}
 }

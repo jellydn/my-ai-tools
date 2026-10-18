@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Skill upstream maintenance — my-ai-tools documentation"><title>Skill upstream maintenance · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+<a href="skill-upstreams.html">Skill upstream maintenance</a>
+</nav><main><article>
+<h1>Skill upstream maintenance</h1>
+<p>Last checked: 2026-10-07. Repository base: <code>163951e</code> (PR #417).</p>
+<p><code>skills/</code> is canonical. The Amp bundle in
+<code>configs/amp/plugins/my-ai-tools-skills/skills/</code> must contain identical files.
+The Claude marketplace points directly to canonical directories. <code>generate.sh</code>
+exports installed home configuration; it is not an upstream skill updater.</p>
+<h2>Refresh policy</h2>
+<ul>
+<li>Read local history before replacing an upstream-inspired skill. Preserve local
+tool names, resource paths, approval rules, and intentional workflow changes.</li>
+<li>Fetch upstream text at a recorded commit. Review scripts, hooks, MCP startup,
+credential access, network destinations, and external-state changes before import.</li>
+<li>Copy changed canonical bundles to the Amp mirror and run the mirror test.</li>
+<li>Recommendations are live upstream installations, not vendored or locked bundles.
+A checked commit records the review point, not a promise that a future install
+uses that revision. Review executable content again before installation or use.</li>
+</ul>
+<p>The October 2 refresh was an unpushed commit on another executor. Its thread was
+read for the method and decisions; its patch was not copied. This refresh compares
+current files directly with current upstream sources. Later local changes take
+precedence, including the restored <code>babysit-pr</code> and first-party <code>visual-pr</code>.</p>
+<h2>Canonical skills: 36 checked</h2>
+<table>
+<thead>
+<tr>
+<th>Skills</th>
+<th>Source revision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>plannotator-setup-goal</code></td>
+<td><a href="https://github.com/backnotprop/plannotator/commit/1d9fe3f10fb34af0ef3ce9eed8db1c103a0b05cc">backnotprop/plannotator@1d9fe3f</a>, latest release v0.28.6</td>
+<td>Update interview/fact bundles, result persistence, accepted fact metadata, optional grilling, and browser-session patience. Keep portable metadata and plan gate.</td>
+</tr>
+<tr>
+<td><code>portless-local</code></td>
+<td><a href="https://github.com/vercel-labs/portless/commit/7abf4df5d939fe3b527a120e20bc270c681c3536">vercel-labs/portless@7abf4df</a>, latest release v0.15.7</td>
+<td>Update workspace/configuration support, state directory, diagnostics, sharing, routing, and framework flag limits. Gate privileged/system/network changes.</td>
+</tr>
+<tr>
+<td><code>codemap</code></td>
+<td><a href="https://github.com/glittercowboy/get-shit-done/commit/bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815">glittercowboy/get-shit-done@bdcaab2</a></td>
+<td>Adapt scoped mapping, sequential fallback, dates, output checks, and secret scanning. Keep seven compact local templates and standalone operation; do not import GSD SDK dependencies. Reject invalid scope rather than falling back to a whole-repository scan.</td>
+</tr>
+<tr>
+<td><code>diagnosing-bugs</code></td>
+<td><a href="https://github.com/mattpocock/skills/commit/6fd947921b935b7e1e69293a200400f0fdd5c15f">mattpocock/skills@6fd9479</a></td>
+<td>Add the non-blocking ranked-hypothesis checkpoint. Preserve local red-capable feedback loop and regression-seam rules.</td>
+</tr>
+<tr>
+<td><code>code-review</code>, <code>implement-spec</code>, <code>pr</code>, <code>retro</code>, <code>tdd</code></td>
+<td>Same Matt Pocock revision</td>
+<td>Keep local adaptations: portable context discovery, safe worktree integration, PR evidence, human-selected retrospectives, and Red-Green-Refactor. Do not require absent setup skills, invent issue-tracker configuration, or import upstream resets.</td>
+</tr>
+<tr>
+<td><code>prd</code>, <code>ralph</code></td>
+<td><a href="https://github.com/snarktank/ralph/commit/6c53cb0b831ebe8739c6a003e22af14902d8b0b5">snarktank/ralph@6c53cb0</a></td>
+<td>No applicable behavioral update; retain local metadata and formatting.</td>
+</tr>
+<tr>
+<td><code>tmux</code></td>
+<td><a href="https://github.com/mitsuhiko/agent-stuff/commit/0865c849befd2021490679f96a8dee58c84ac857">mitsuhiko/agent-stuff@0865c84</a></td>
+<td>Preserve intentional LogPilot/socket adaptation.</td>
+</tr>
+<tr>
+<td><code>visual-pr</code></td>
+<td><a href="https://github.com/humanlayer/skills/commit/ca7c8088db69e315a8b2deea43820270457f8f3c">humanlayer/skills@ca7c808</a></td>
+<td>Preserve first-party marked-comment publisher; upstream replaces the PR body. Keep comment template and publisher tests.</td>
+</tr>
+<tr>
+<td><code>babysit-pr</code></td>
+<td><a href="https://github.com/openai/codex/commit/5e96aabd68dc6194f5ad928cb7f5d0bc71b72df9">openai/codex@5e96aab</a>, final pre-removal source</td>
+<td>Current upstream path returns 404. Preserve the explicitly restored local watcher and its tests; do not remove it again.</td>
+</tr>
+</tbody></table>
+<p>The following 22 skills are local designs or adaptations of ideas/standards, not
+maintained upstream file copies. Their current repository versions remain canonical:</p>
+<p><code>accountable-engineering</code>, <code>adr</code>, <code>blindspot-pass</code>, <code>capability-experiments</code>,
+<code>code-quality-review</code>, <code>commit-atomic</code>, <code>context-discovery</code>, <code>doc-search</code>,
+<code>docs-update</code>, <code>draft-pull-request</code>, <code>git-context</code>, <code>handoffs</code>,
+<code>implementation-logger</code>, <code>llm-wiki</code>, <code>orchestrating-fusion</code>, <code>pickup</code>, <code>pr-review</code>,
+<code>qmd-knowledge</code>, <code>quiz-me</code>, <code>security-audit</code>, <code>slop</code>, <code>spec-interview</code>.</p>
+<p>The 15 tool-specific SKILL.md files under <code>configs/{amp,cline,kimi-code}/skills/</code>
+are local adapters for <code>code-reviewer</code>, <code>test-generator</code>, <code>documentation-writer</code>,
+<code>ai-slop-remover</code>, and <code>security-audit</code>. They have no independent external upstream;
+keep their tool-specific guidance. Do not replace the short adapter security skill
+with the larger canonical audit workflow.</p>
+<h2>Recommendations: 21 entries, 20 repositories checked</h2>
+<p>All checked repositories are reachable and unarchived; API trees were not truncated.
+Named skill selectors were checked against frontmatter, not only directory names.
+In particular, Engram&#39;s <code>plugin/claude-code/skills/memory/SKILL.md</code> declares
+<code>name: engram-memory</code>; the existing selector is correct despite the directory name.
+Collection entries remain live collections; this check is not a security audit of
+every skill they may install. Preserve the local pstack-first order.</p>
+<table>
+<thead>
+<tr>
+<th>Repository</th>
+<th>Checked commit</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BuilderIO/skills</td>
+<td><a href="https://github.com/BuilderIO/skills/commit/530d9eee0453be9672960ef7b0a265c949cd8b08">530d9ee</a></td>
+<td><code>visual-recap</code>; supports local-files privacy mode.</td>
+</tr>
+<tr>
+<td>Gentleman-Programming/engram</td>
+<td><a href="https://github.com/Gentleman-Programming/engram/commit/3423d7484ca11d5222640a1e6880ff5f54f589c5">3423d74</a></td>
+<td>Latest release v3.1.0; checked MCP contract has 22 tools. Update stale 20-tool wording.</td>
+</tr>
+<tr>
+<td>GoogleChrome/modern-web-guidance</td>
+<td><a href="https://github.com/GoogleChrome/modern-web-guidance/commit/650eb83619134adb947b1ee8755e6511270bc444">650eb83</a></td>
+<td><code>modern-web-guidance</code>; linked guide bundle.</td>
+</tr>
+<tr>
+<td>av/facts</td>
+<td><a href="https://github.com/av/facts/commit/30911b8efe3fd4dc641463ed6de57ca5bedd0d72">30911b8</a></td>
+<td>Collection; verification commands execute shell code.</td>
+</tr>
+<tr>
+<td>blader/humanizer</td>
+<td><a href="https://github.com/blader/humanizer/commit/225a6f39ac85f76ee48dbad772ea4abe4ed6c9d8">225a6f3</a></td>
+<td>Root skill.</td>
+</tr>
+<tr>
+<td>ctxrs/ctx</td>
+<td><a href="https://github.com/ctxrs/ctx/commit/56aaf35233ce7f8aa739c207525a3d67e6ddddbd">56aaf35</a></td>
+<td>Agent-history skill; keep sensitive transcripts out of shared outputs.</td>
+</tr>
+<tr>
+<td>dzhng/jevgrep</td>
+<td><a href="https://github.com/dzhng/jevgrep/commit/703aba1a36a3b854be405244ea748f607cd630c0">703aba1</a></td>
+<td><code>jevgrep</code>; interactive saved-provider credentials, Node.js 22+.</td>
+</tr>
+<tr>
+<td>expo/skills</td>
+<td><a href="https://github.com/expo/skills/commit/d4f484024fec15196bfd3c272e953e3f983972cf">d4f4840</a></td>
+<td>Live collection.</td>
+</tr>
+<tr>
+<td>factory-ai/factory-plugins</td>
+<td><a href="https://github.com/factory-ai/factory-plugins/commit/d362dc1823301bee56315bd73f22b5614392365c">d362dc1</a></td>
+<td><code>no-use-effect</code>.</td>
+</tr>
+<tr>
+<td>github/gh-stack</td>
+<td><a href="https://github.com/github/gh-stack/commit/d4ab7ab47e5b3e3708a27c8c42abcdf4bc321419">d4ab7ab</a></td>
+<td>Skill metadata 0.2.0; authenticated GitHub writes and history operations require authorization.</td>
+</tr>
+<tr>
+<td>jezweb/claude-skills</td>
+<td><a href="https://github.com/jezweb/claude-skills/commit/64965d9d9fc76ad2caeea2e27dd8d679ec7521b3">64965d9</a></td>
+<td>Remove stale 97-skill count; live collection.</td>
+</tr>
+<tr>
+<td>mattpocock/skills</td>
+<td><a href="https://github.com/mattpocock/skills/commit/6fd947921b935b7e1e69293a200400f0fdd5c15f">6fd9479</a></td>
+<td>Both <code>grill-with-docs</code> and <code>improve-codebase-architecture</code>.</td>
+</tr>
+<tr>
+<td>michael-denyer/pstack-claude</td>
+<td><a href="https://github.com/michael-denyer/pstack-claude/commit/552b1c85f990f1b0bb7d9806aa2e8461ce5438d0">552b1c8</a></td>
+<td><code>poteto-mode</code>; playbooks and reviewer scripts remain upstream.</td>
+</tr>
+<tr>
+<td>modem-dev/hunk</td>
+<td><a href="https://github.com/modem-dev/hunk/commit/252f59dd39409b2390d02b0f9e003819c9d41176">252f59d</a></td>
+<td>Latest release v0.23.0; correct path is <code>packages/hunk/skills/hunk-review/SKILL.md</code>.</td>
+</tr>
+<tr>
+<td>mvanhorn/last30days-skill</td>
+<td><a href="https://github.com/mvanhorn/last30days-skill/commit/7f582ad8c2e140eca08098b245f9e31b68e28b60">7f582ad</a></td>
+<td>Network research; credential/config loading includes env, Keychain, and pass.</td>
+</tr>
+<tr>
+<td>openclaw/agent-skills</td>
+<td><a href="https://github.com/openclaw/agent-skills/commit/0595f725087f0208c69edbaf74cb968ca876fd04">0595f72</a></td>
+<td><code>autoreview</code>; see transmission warning below.</td>
+</tr>
+<tr>
+<td>privatenumber/mac-ocr</td>
+<td><a href="https://github.com/privatenumber/mac-ocr/commit/d9f25baecc7258a3479f3a067e001838ca4e9c71">d9f25ba</a></td>
+<td><code>mac-ocr</code>; macOS-only runtime, optional piped network input.</td>
+</tr>
+<tr>
+<td>shadcn/improve</td>
+<td><a href="https://github.com/shadcn/improve/commit/cac56e1ebd3c279aa9153616cfeac7b174ab90f9">cac56e1</a></td>
+<td>Explicit issue publication flag; sensitive public findings require confirmation.</td>
+</tr>
+<tr>
+<td>tt-a1i/archify</td>
+<td><a href="https://github.com/tt-a1i/archify/commit/73aaa0696e8f72c232ea710e6fa94fd953f3e773">73aaa06</a></td>
+<td><code>archify</code>; local rendering/browser checks, optional brand-URL capture.</td>
+</tr>
+<tr>
+<td>vercel-labs/agent-skills</td>
+<td><a href="https://github.com/vercel-labs/agent-skills/commit/063bee94c3f4df8453406c830b0a7df0f2860278">063bee9</a></td>
+<td>Live collection.</td>
+</tr>
+</tbody></table>
+<h2>Security review notes</h2>
+<ul>
+<li>No new executable scripts, hooks, MCP declarations, endpoints, or credentials
+are imported by this refresh. Existing scripts remain unchanged.</li>
+<li>Portless may change trust stores and hosts files, expose servers, install a
+root/SYSTEM startup service, or terminate processes. The local skill now makes
+those approval boundaries explicit. Do not print TLS keys or ngrok tokens.</li>
+<li>Codemap&#39;s supplementary secret check prints only filenames. It does not prove
+absence of all secrets. Invalid scope does not authorize wider exploration.</li>
+<li>Plannotator JSON can contain private goal details. Keep it in the goal directory;
+browser idleness is not permission to terminate the user&#39;s session. Commands use
+direct stdout redirection so a pipeline cannot hide a CLI failure.</li>
+<li>Engram hooks perform session writes, import Git-synced memory, and may start a
+local server with cloud autosync enabled. Cloud transmission depends on configured
+credentials/settings. Review those settings and consent before enabling cloud sync
+or an external <code>ENGRAM_URL</code>; installing a skill alone is not installing its hooks.</li>
+<li>Visual Recap normally publishes to hosted Plan MCP. Use its supported
+<code>AGENT_NATIVE_PLANS_MODE=local-files</code> mode when hosted database writes are not
+authorized. This refresh does not change personal environment settings.</li>
+<li>Autoreview sends captured diffs/source to a reviewer provider and deliberately
+has no pre-transmission secret scanner. Reviewer findings occur <strong>after</strong> sending.
+Run approved local secret checks first and authorize provider transmission. Its
+executable isolates reviewer credentials/settings; do not weaken isolation.</li>
+<li>Jevgrep and Last 30 Days use external providers and saved credentials. Do not
+ask for keys in chat, print them, or execute imported setup scripts during a refresh.</li>
+<li>Live collection installs and upstream CLI downloads remain a supply-chain risk.
+The snapshot above is not a blanket security approval for their current or future
+scripts. No upstream helper was executed for this refresh.</li>
+</ul>
+<h2>Validation on this refresh</h2>
+<ul>
+<li>Full Bats suite with PyYAML and jsonschema: 589 passed, 1 failed. The failure,
+<code>validate_config_with_schema fails when schema mismatches</code>, also reproduces on
+the unchanged base. Its unquoted shell heredoc expands <code>$schema</code> to an empty
+key, so the fixture does not declare a schema. Leave that unrelated bug unchanged.</li>
+<li>Focused recommendation and Amp bundle tests: 75 passed.</li>
+<li>Bun tests: 48 passed; TypeScript typecheck passed.</li>
+<li>Babysit PR watcher tests: 5 passed.</li>
+<li>Shell syntax, token-efficiency sync, installer/export dry runs, mirror equality,
+and skill frontmatter checks passed. No real installation was run.</li>
+<li>Changed JSON passes Biome. Full repository Biome reports 427 errors and one
+informational diagnostic, identical to the unchanged base. No unrelated
+formatting changes are included.</li>
+</ul>
+</article></main></div></body></html>

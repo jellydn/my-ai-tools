@@ -290,6 +290,7 @@
     "autoresearch@factory-plugins": true,
     "core@factory-plugins": true,
     "droid-evolved@factory-plugins": true,
+    "plannotator@plannotator": true,
     "security-engineer@factory-plugins": true
   },
   "hooks": {

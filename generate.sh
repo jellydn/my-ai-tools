@@ -210,12 +210,15 @@ generate_opencode_configs() {
 	# Copy skills with filtering
 	copy_skills_with_filter "$HOME/.config/opencode/skills" "$SCRIPT_DIR/configs/opencode/skills" "OpenCode"
 
-	# Copy agent and configs directories
-	for subdir in agent configs; do
+	# Keep one repo layout; V2 plural definitions override matching legacy files.
+	local subdir dest_subdir
+	for subdir in agent agents configs; do
+		dest_subdir="$subdir"
+		[ "$subdir" = "agents" ] && dest_subdir="agent"
 		if [ -d "$HOME/.config/opencode/$subdir" ]; then
-			execute "mkdir -p $SCRIPT_DIR/configs/opencode/$subdir"
+			execute_quoted mkdir -p "$SCRIPT_DIR/configs/opencode/$dest_subdir"
 			if [ -n "$(ls -A "$HOME/.config/opencode/$subdir" 2>/dev/null)" ]; then
-				if execute "cp -r '$HOME/.config/opencode/$subdir'/* '$SCRIPT_DIR/configs/opencode/$subdir'/ 2>/dev/null"; then
+				if execute_quoted cp -r "$HOME/.config/opencode/$subdir/". "$SCRIPT_DIR/configs/opencode/$dest_subdir/"; then
 					log_success "Copied $subdir directory"
 				fi
 			fi
@@ -223,20 +226,24 @@ generate_opencode_configs() {
 	done
 
 	# Copy commands (skip ai/ folder which is generated from local skills)
-	if [ -d "$HOME/.config/opencode/command" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/opencode/command"
-		if [ -n "$(ls -A "$HOME/.config/opencode/command" 2>/dev/null)" ]; then
-			for item in "$HOME/.config/opencode/command"/*; do
-				local item_name
-				item_name=$(basename "$item")
-				if [ "$item_name" = "ai" ]; then
-					log_info "Skipping ai/ command folder (generated from local skills)"
-				elif execute "cp -r '$item' '$SCRIPT_DIR/configs/opencode/command'/ 2>/dev/null"; then
-					log_success "Copied command: $item_name"
-				fi
-			done
+	local item item_name
+	for subdir in command commands; do
+		if [ ! -d "$HOME/.config/opencode/$subdir" ]; then
+			continue
 		fi
-	fi
+		execute_quoted mkdir -p "$SCRIPT_DIR/configs/opencode/command"
+		# Include hidden definitions, but never "." or ".."; an unmatched glob
+		# stays literal and is skipped by the -e guard below.
+		for item in "$HOME/.config/opencode/$subdir"/* "$HOME/.config/opencode/$subdir"/.[!.]* "$HOME/.config/opencode/$subdir"/..?*; do
+			[ -e "$item" ] || continue
+			item_name=$(basename "$item")
+			if [ "$item_name" = "ai" ]; then
+				log_info "Skipping ai/ command folder (generated from local skills)"
+			elif execute_quoted cp -r "$item" "$SCRIPT_DIR/configs/opencode/command/"; then
+				log_success "Copied command: $item_name"
+			fi
+		done
+	done
 
 	log_success "OpenCode configs generated"
 }
