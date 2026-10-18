@@ -21,6 +21,7 @@
     ]
   },
   "mcpServers": {
+    "user-memory": { "command": "user-memory-mcp", "args": [] },
     "agentmemory": {
       "args": [
         "-y",

@@ -173,6 +173,11 @@ The installer manages these common resources where the target tool supports them
 The MCP registry includes integrations such as Context7, sequential thinking, qmd, codebase memory, agent memory,
 fff, React Grab, logpilot, sem, and ctx. Installation depends on each server's runtime and credentials.
 
+For explicit cross-project user preferences, [user-memory MCP](packages/user-memory-mcp/README.md) provides
+five preference tools backed by local files. From this checkout, run `npm ci && npm run link:user-memory`
+to build and link the `user-memory-mcp` binary; the installer also performs this local setup when it is missing.
+See [the memory guide](MEMORY.md) for the distinction between preferences, project knowledge, and session handoffs.
+
 Do not commit secrets. Keep API keys in environment variables or the target tool's credential store. Review
 `.env.example` for server-side environment variable names used by this repository.
 

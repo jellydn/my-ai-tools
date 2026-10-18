@@ -312,6 +312,10 @@ command = "npx"
 args    = ["-y", "@agentmemory/mcp"]
 
 [[plugins]]
+name    = "user-memory"
+command = "user-memory-mcp"
+
+[[plugins]]
 name    = "sem"
 command = "sem-mcp"
 
