@@ -371,7 +371,7 @@ JSON
 	[ "$status" -eq 0 ]
 }
 
-@test "OpenCode ships open-cursor with cursor-acp provider and omniroute/free default" {
+@test "OpenCode offers optional open-cursor with cursor-acp provider and omniroute/free default" {
 	require_jq
 	run jq -e '
 		.model == "omniroute/free" and
@@ -381,7 +381,7 @@ JSON
 		.provider["cursor-acp"].models["cursor-grok-4.5-medium"].name == "Grok 4.5 Medium"
 	' "$REPO_ROOT/configs/opencode/opencode.json"
 	[ "$status" -eq 0 ]
-	run grep -F 'opencode:install_open_cursor' "$REPO_ROOT/cli.sh"
+	run grep -F 'open-cursor:install_open_cursor' "$REPO_ROOT/cli.sh"
 	[ "$status" -eq 0 ]
 	run grep -F 'install_open_cursor()' "$REPO_ROOT/lib/install.sh"
 	[ "$status" -eq 0 ]
