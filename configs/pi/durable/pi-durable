@@ -14,7 +14,7 @@ export PI_CODING_AGENT_DIR="$HOME/.local/state/pi-durable/agent"
 export TERM=xterm-256color
 cd "$HOME/work/pi-durable"
 
-# Never create a replacement session on a recovery failure.
+# Never retry a failed continuation as a new-session request.
 set --
 if [ "$mode" = --continue ]; then
 	set -- --continue

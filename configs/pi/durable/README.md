@@ -143,9 +143,17 @@ always uses `~/work/pi-durable` as its working directory. Confirm the model,
 submit a harmless prompt, then exit with Ctrl+D. Without credentials, startup
 can still be checked, but model generation cannot.
 
-`--continue` fails if no session exists. It never silently creates a replacement
-after a storage or lock error. Avoid creating another session after service
-activation: continuation selects the newest session for this working directory.
+`--continue` fails if no session directory exists. The wrapper never retries a
+failed continuation without `--continue`. Avoid creating another session after
+service activation: continuation selects the newest session for this working
+directory, not the newest valid database.
+
+**Upstream recovery limit:** Pi 1.0.4 can initialize an empty conversation if
+the selected directory contains a missing or zero-byte `session.sqlite`.
+The directory identity alone does not prove that history survived. If a
+previous transcript unexpectedly disappears, stop the service and investigate
+the storage or restore a complete backup. Do not treat a blank transcript as
+successful recovery or continue work against it.
 
 ## Phase 4: supervise and connect
 
