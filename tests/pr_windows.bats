@@ -32,6 +32,12 @@ TEST_WORKFLOW="$REPO_ROOT/.github/workflows/test.yml"
 }
 
 @test "Windows prerequisite recovery works with stale PATH and missing tools" {
+    # pwsh is also present on Ubuntu runners, but this fixture uses Windows
+    # drives, registry paths and semicolon-separated PATH. Native CI runs it too.
+    case "$(uname -s)" in
+        MINGW*|MSYS*|CYGWIN*) ;;
+        *) skip "Windows prerequisite fixture requires native Windows" ;;
+    esac
     command -v pwsh >/dev/null || skip "PowerShell is required (also tested in native Windows CI)"
     run pwsh -NoProfile -File "$REPO_ROOT/tests/windows_installer.ps1"
     [ "$status" -eq 0 ]

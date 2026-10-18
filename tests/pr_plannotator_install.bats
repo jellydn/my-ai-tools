@@ -12,8 +12,8 @@ setup() {
 install_for_tool() {
 	bash -c '
 		source "$1/cli.sh"
-		DRY_RUN=false YES_TO_ALL=true
-		TOOL_ALLOWLIST_YES=("$2")
+		DRY_RUN=false YES_TO_ALL=true IS_WINDOWS=false
+		TOOL_ALLOWLIST_YES=("$2" plannotator)
 		command() {
 			if [ "$1" = -v ]; then
 				case "$2" in
@@ -44,7 +44,7 @@ install_for_tool() {
 	' _ "$REPO_ROOT" "$1"
 }
 
-@test "Codex-only install provisions CLI and copies Stop hook and inbox MCP" {
+@test "Codex with optional Plannotator provisions CLI and copies Stop hook and inbox MCP" {
 	run install_for_tool codex
 	[ "$status" -eq 0 ]
 	[ -x "$HOME/.local/bin/plannotator" ]
@@ -52,14 +52,14 @@ install_for_tool() {
 	grep -F '[mcp_servers.plannotator-inbox]' "$HOME/.codex/config.toml"
 }
 
-@test "Cursor-only install provisions CLI and copies inbox MCP" {
+@test "Cursor with optional Plannotator provisions CLI and copies inbox MCP" {
 	run install_for_tool cursor
 	[ "$status" -eq 0 ]
 	[ -x "$HOME/.local/bin/plannotator" ]
 	jq -e '.mcpServers["plannotator-inbox"] == {command: "plannotator", args: ["inbox", "mcp"]}' "$HOME/.cursor/mcp.json"
 }
 
-@test "Gemini-only install provisions CLI and copies inbox MCP" {
+@test "Gemini with optional Plannotator provisions CLI and copies inbox MCP" {
 	run install_for_tool gemini
 	[ "$status" -eq 0 ]
 	[ -x "$HOME/.local/bin/plannotator" ]
@@ -105,6 +105,7 @@ install_for_tool() {
 @test "Plannotator dry-run is side-effect free and missing binary after installer is an error" {
 	run bash -c '
 		source "$1/cli.sh"
+		IS_WINDOWS=false
 		command() { [ "$1" != -v ] || [ "$2" != plannotator ] || return 1; builtin command "$@"; }
 		resolve_installer_checksum() { echo test; }
 		DRY_RUN=true
@@ -117,6 +118,53 @@ install_for_tool() {
 	[ "$status" -ne 0 ]
 	[[ "$output" == *"[DRY RUN] Would execute installer"* ]]
 	[[ "$output" == *"CLI was not found"* ]]
+}
+
+@test "Windows Plannotator uses a verified binary-only install and discovers it without restarting" {
+	run env PATH="/usr/bin:/bin" bash -c '
+		set -e
+		source "$1/lib/common.sh"
+		source "$1/lib/install.sh"
+		IS_WINDOWS=true DRY_RUN=false LOCALAPPDATA="$HOME/Local AppData" PROCESSOR_ARCHITECTURE=AMD64
+		cygpath() { printf "%s\n" "$2"; }
+		execute_installer() { echo unexpected-unix-installer; return 99; }
+		download_and_verify_file() {
+			printf "%s\n" "#!/bin/sh" "echo plannotator-test-version" >"$HOME/installer"
+			echo "$HOME/installer"
+		}
+		plannotator() { bash "$LOCALAPPDATA/plannotator/plannotator.exe" "$@"; }
+		DRY_RUN=true
+		install_plannotator_if_needed
+		[ ! -e "$HOME/installer" ] && [ ! -d "$LOCALAPPDATA" ]
+		DRY_RUN=false
+		install_plannotator_if_needed
+		[ ! -e "$HOME/installer" ]
+		[ "${PATH%%:*}" = "$LOCALAPPDATA/plannotator" ]
+		plannotator --version
+		download_and_verify_file() { echo unexpected-reinstall; return 99; }
+		install_plannotator_if_needed
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 0 ]
+	[[ "$output" == *"binary only"* ]]
+	[[ "$output" == *"plannotator-test-version"* ]]
+	[[ "$output" != *unexpected-* ]]
+}
+
+@test "Windows Plannotator fails closed on checksum failure or unsupported architecture" {
+	for failure in checksum architecture; do
+		run env PATH="/usr/bin:/bin" bash -c '
+			source "$1/lib/common.sh"
+			source "$1/lib/install.sh"
+			IS_WINDOWS=true DRY_RUN=false LOCALAPPDATA="$HOME/Local AppData" PROCESSOR_ARCHITECTURE=ARM64
+			unset PROCESSOR_ARCHITEW6432
+			cygpath() { printf "%s\n" "$2"; }
+			curl() { printf tampered >"${@: -1}"; }
+			[ "$2" != architecture ] || PROCESSOR_ARCHITECTURE=x86
+			install_plannotator_if_needed
+		' _ "$REPO_ROOT" "$failure"
+		[ "$status" -ne 0 ]
+		[ ! -d "$HOME/Local AppData" ]
+	done
 }
 
 @test "enable_plugins installs Copilot and Droid plugins without Claude in dry-run and real execution" {

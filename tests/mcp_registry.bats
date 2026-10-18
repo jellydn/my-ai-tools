@@ -76,7 +76,8 @@ teardown() {
 }
 EOF
 
-    # First verify that claude is in the allowlist
+    # This test explicitly opts into Claude; it is not a yes-mode default.
+    TOOL_ALLOWLIST_YES+=(claude)
     run tool_allowed "claude"
     [ "$status" -eq 0 ]
 

@@ -10,14 +10,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 source "$SCRIPT_DIR/lib/install.sh"
 
-# Core tools installed/configured when -y (YES_TO_ALL) is active.
-# This is your personal active tool set. When YES_TO_ALL is false
-# (interactive mode), tool_allowed returns true for everything.
-TOOL_ALLOWLIST_YES=(amp codex ctx cursor deepseek_harness delta fx kilo muse opencode open_code_review pi omp antigravity ai-switcher claude reasonix)
+# Yes mode selects only the four core CLIs, not the integration/config bundles.
+TOOL_ALLOWLIST_YES=(amp pi codex opencode)
+WITH_INTEGRATIONS=false
 
 tool_allowed() {
 	local name="$1"
 	[ "$YES_TO_ALL" != true ] && return 0
+	if [ "$WITH_INTEGRATIONS" = true ]; then
+		case "$name" in qmd | plannotator | rtk | global-tools) return 0 ;; esac
+	fi
 	local t
 	for t in "${TOOL_ALLOWLIST_YES[@]}"; do
 		[ "$t" = "$name" ] && return 0
@@ -26,19 +28,18 @@ tool_allowed() {
 }
 
 # Installers run in this order. Each entry is "<allowlist-key>:<installer>".
-# The "always" key marks cross-tool dependencies that are never gated by the
-# -y allowlist because every managed assistant relies on them.
+# Every entry is selected explicitly in yes mode; interactive runs prompt for extras.
 INSTALL_SEQUENCE=(
+	"qmd:handle_qmd_installation_if_needed"
 	"claude:install_claude_code"
-	# RTK reduces shell-output context for every managed coding assistant.
-	"always:install_rtk"
+	"rtk:install_rtk"
 	# OpenCode 2 is the default `opencode` binary. Do not install OpenCode 1 first.
 	"opencode:install_opencode2"
-	"opencode:install_open_cursor"
+	"open-cursor:install_open_cursor"
 	"fx:install_fx"
 	"muse:install_muse"
 	"amp:install_amp"
-	"always:install_global_tools"
+	"global-tools:install_global_tools"
 	"ccs:install_ccs"
 	"ai-switcher:install_ai_switcher"
 	"codex:install_codex"
@@ -67,8 +68,7 @@ INSTALL_SEQUENCE=(
 	"grok:install_grok"
 	"mimo:install_mimo"
 	"open_code_review:install_open_code_review"
-	# Shared hooks, inbox MCP servers, and manual review commands need this CLI.
-	"always:install_plannotator_if_needed"
+	"plannotator:install_plannotator_if_needed"
 )
 
 run_install_sequence() {
@@ -77,7 +77,13 @@ run_install_sequence() {
 		key="${entry%%:*}"
 		installer="${entry#*:}"
 
-		if [ "$key" = "always" ] || tool_allowed "$key"; then
+		if tool_allowed "$key"; then
+			if [ "$YES_TO_ALL" != true ]; then
+				case "$key" in
+				amp | pi | codex | opencode) ;;
+				*) prompt_yn "Install optional $key" || continue ;;
+				esac
+			fi
 			"$installer"
 		else
 			log_info "Skipping $key installer (not in -y allowlist)"
@@ -119,6 +125,23 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 			YES_TO_ALL=true
 			shift
 			;;
+		--with-integrations)
+			WITH_INTEGRATIONS=true
+			shift
+			;;
+		--with-tools=*)
+			IFS=, read -r -a requested_tools <<<"${arg#*=}"
+			[ ${#requested_tools[@]} -gt 0 ] || { log_error "--with-tools requires tool names"; exit 1; }
+			for requested_tool in "${requested_tools[@]}"; do
+				known_tool=false
+				for entry in "${INSTALL_SEQUENCE[@]}"; do
+					[ "${entry%%:*}" != "$requested_tool" ] || known_tool=true
+				done
+				[ "$known_tool" = true ] || { log_error "Unknown optional tool: $requested_tool"; exit 1; }
+				TOOL_ALLOWLIST_YES+=("$requested_tool")
+			done
+			shift
+			;;
 		-v | --verbose)
 			VERBOSE=true
 			shift
@@ -129,6 +152,11 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 			;;
 		-h | --help)
 			echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback]"
+			echo "--yes installs only Amp, Pi, Codex, OpenCode. Existing configuration is unchanged."
+			echo "--with-tools=name,... adds optional tools (for example qmd,plannotator,ctx)."
+			echo "--with-integrations opts into bundled configs, plugins, skills, MCPs, and their prerequisites."
+			for entry in "${INSTALL_SEQUENCE[@]}"; do printf '%s ' "${entry%%:*}"; done
+			echo
 			exit 0
 			;;
 		--rollback)
@@ -258,13 +286,12 @@ check_prerequisites() {
 	elif command -v node &>/dev/null; then
 		NODE_VERSION=$(node --version)
 		log_success "Node.js found ($NODE_VERSION)"
-		handle_optional_bun_installation
+		if [ "$YES_TO_ALL" != true ]; then handle_optional_bun_installation; fi
 	else
 		log_error "Neither Bun nor Node.js is installed."
 		handle_bun_installation
 	fi
 
-	handle_qmd_installation_if_needed
 }
 
 # Helper: Copy a config directory if it exists in source and destination
@@ -2853,18 +2880,27 @@ main() {
 	check_prerequisites
 	echo
 
-	backup_configs
-	echo
+	if [ "$WITH_INTEGRATIONS" != true ] && [ "$YES_TO_ALL" != true ] &&
+		prompt_yn "Install bundled configurations, plugins, skills and MCP integrations"; then
+		WITH_INTEGRATIONS=true
+	fi
+	if [ "$WITH_INTEGRATIONS" = true ]; then backup_configs; fi
 
 	run_install_sequence
 
-	copy_configurations
-	echo
-
-	enable_plugins
-	echo
+	if [ "$WITH_INTEGRATIONS" = true ]; then
+		copy_configurations
+		enable_plugins
+	else
+		log_info "Skipping optional configurations and integrations; existing user configuration is unchanged."
+		log_info "Opt in with --with-integrations; add tools with --with-tools=qmd,plannotator,ctx (or other catalog names)."
+	fi
 
 	log_success "Setup complete!"
+	if [ "$YES_TO_ALL" = true ] && [ "$WITH_INTEGRATIONS" != true ]; then
+		log_info "Run amp, pi, codex, or opencode. No bundled integrations were enabled."
+		return 0
+	fi
 	echo
 	echo "Next steps:"
 	echo "  1. Restart your terminal"

@@ -46,10 +46,10 @@ setup() {
     [ -n "$output" ]
 }
 
-@test "cli.sh includes omp in TOOL_ALLOWLIST_YES" {
-    run grep -E 'TOOL_ALLOWLIST_YES=.*omp' "$CLI_SH"
-    [ "$status" -eq 0 ]
-    [ -n "$output" ]
+@test "Oh My Pi is optional in yes mode" {
+    YES_TO_ALL=true
+    run tool_allowed omp
+    [ "$status" -eq 1 ]
 }
 
 @test "cli.sh includes omp in INSTALL_SEQUENCE" {

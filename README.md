@@ -79,6 +79,24 @@ hide these tools. Approve only the package installer's elevation prompt; the wra
 configuration installer as administrator. If approval is denied, setup stops and can be rerun safely.
 Native Windows uses Node/npm, not Bun, for package installation; Linux, macOS, and WSL keep Bun-first behavior.
 
+The one-line command and `-y` / `--yes` install only **Amp, Pi, Codex, and OpenCode** by default. They leave
+existing configuration unchanged. qmd, Plannotator, ctx, formatters, memory MCPs, plugins, skills, and the rest
+of the catalog are optional. Interactive runs prompt for optional tools and the integration bundle.
+
+From a reviewed checkout, select extra tools without enabling integrations:
+
+```bash
+./cli.sh --yes --with-tools=qmd,plannotator,ctx --dry-run
+./cli.sh --yes --with-tools=qmd,plannotator,ctx
+# Opt into bundled configuration, plugins, skills, MCPs and their prerequisites:
+./cli.sh --yes --with-integrations --backup
+```
+
+Windows equivalents are `-WithTools 'qmd,plannotator,ctx'` and `-WithIntegrations -Backup` on a saved
+`install.ps1`. Tool names are comma-separated; `./cli.sh --help` lists the catalog. The integration bundle
+is a separate, explicit opt-in and can replace configuration. Selecting an extra tool alone installs its
+CLI, not its MCP or plugin. Noninteractive/CI runs use the same four-tool default as `--yes`.
+
 The installer can replace existing configuration. To inspect the script, preview changes, and request a backup,
 use the saved-script path instead:
 
@@ -98,6 +116,20 @@ cannot be found, close all terminal windows and reopen PowerShell. If `winget` i
 [`jq`](https://jqlang.org/download/), and [Node.js LTS with npm](https://nodejs.org/) manually. In Git setup,
 select **Git from the command line and also from 3rd-party software**. Do not bypass package lifecycle errors
 with `--ignore-scripts`: native binaries can remain uninstalled.
+
+Optional qmd requires Node.js >=22 on native Windows. Its installer prioritizes the real `node.exe` directory
+and npm's global prefix in the same Git Bash session, ahead of stale Bun launchers or extensionless Node copies
+in `~/.local/bin`. Those old files are not deleted. In npm 11.19.1, unreviewed `allowScripts` entries warn but
+still run unless strict policy is enabled. The installer does not change npm script policy. Review actual
+build errors and approve only required packages if your policy requires it; do not enable all scripts globally.
+On Windows ARM64, qmd keyword indexing/search works, but sqlite-vec currently warns that vector search is unsupported.
+
+Optional Plannotator installs only the official v0.28.23 Windows release binary (x64 or ARM64), with a pinned
+SHA-256 hash. It uses `%LOCALAPPDATA%\plannotator` and updates only the current Git Bash PATH. No remote
+PowerShell script, policy bypass, persistent PATH change, sidecar, skill, or agent-settings edit is used.
+The direct method avoids an upstream PowerShell `$Minimal`/`$minimal` variable collision. Failure output gives
+the release URL, expected hash, and destination for manual recovery. In a separate terminal, add that directory
+and npm's global prefix to your user PATH, or use full executable paths. Unix/WSL installation paths are unchanged.
 
 If the wrapper says all prerequisites are met but Bash then reports missing Node/npm, check that the downloaded
 `install.ps1` includes `Find-Node` and the `OpenJS.NodeJS.LTS` installation step. A stale web deployment can serve
@@ -134,13 +166,16 @@ Set-Location my-ai-tools
 | `--dry-run` | `-DryRun` | Show planned changes without applying them. |
 | `--backup` | `-Backup` | Back up existing files before installation. |
 | `--no-backup` | `-NoBackup` | Skip the interactive backup prompt. |
-| `--yes` / `-y` | `-Yes` | Run non-interactively for the active-tool allowlist. |
+| `--yes` / `-y` | `-Yes` | Install only Amp, Pi, Codex, and OpenCode; leave configuration unchanged. |
+| `--with-tools=qmd,plannotator` | `-WithTools 'qmd,plannotator'` | Add optional catalog CLIs without enabling integrations. |
+| `--with-integrations` | `-WithIntegrations` | Opt into bundled configs, plugins, skills, MCPs, and their prerequisites. |
 | `--rollback` | `-Rollback` | Restore the most recent backup. |
 | `--verbose` / `-v` | `-Verbose` | Show detailed installer output. |
 | `--migrate-gemini` | — | Migrate Gemini CLI configuration to Antigravity CLI. |
 
-Non-interactive Bash and PowerShell pipelines automatically add `--yes`. This mode installs dependencies and
-processes only the active tool allowlist. Review [`cli.sh`](cli.sh) before using it in automation.
+Non-interactive Bash and PowerShell pipelines automatically add `--yes`. This mode installs the four core CLIs
+and required runtimes only. All other tools and bundled integrations need explicit opt-in. Review
+[`cli.sh`](cli.sh) before using it in automation.
 
 ## 🤖 Supported tools
 

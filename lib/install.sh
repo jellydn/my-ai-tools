@@ -11,16 +11,6 @@ source "$(dirname "${BASH_SOURCE[0]}")/install-deps.sh"
 
 # ─── Shared helpers ────────────────────────────────────────────────
 
-# Prepend a directory to PATH for the current session if it isn't already present.
-# Keeps PATH-guard conditionals consistent (and scannable) across installers.
-ensure_dir_on_path() {
-	local dir="${1:-}"
-	[ -n "$dir" ] || return 0
-	if case ":$PATH:" in *":$dir:"*) false ;; *) true ;; esac then
-		export PATH="$dir:$PATH"
-	fi
-}
-
 # Use npm on native Windows to avoid the Bash-installed Bun lifecycle launcher.
 # Unix-like systems keep the existing Bun preference.
 # Outputs: package manager command or empty if none found

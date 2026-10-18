@@ -44,6 +44,8 @@ README="$REPO_ROOT/TOOL_REFERENCE.md"
 		export HOME="$(mktemp -d)" DRY_RUN=true YES_TO_ALL=true VERBOSE=false
 		trap '\''rm -rf "$HOME"'\'' EXIT
 		source "$1/cli.sh"
+		! tool_allowed deepseek_harness
+		TOOL_ALLOWLIST_YES+=(deepseek_harness)
 		tool_allowed deepseek_harness
 	' _ "$REPO_ROOT"
 	[ "$status" -eq 0 ]

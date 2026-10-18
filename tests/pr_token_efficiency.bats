@@ -40,14 +40,14 @@ SYNC_SH="$REPO_ROOT/scripts/sync-token-efficiency.sh"
 	[ "$status" -eq 0 ]
 }
 
-@test "INSTALL_SEQUENCE lists RTK once as an ungated dependency" {
+@test "INSTALL_SEQUENCE lists RTK once as an optional dependency" {
 	run bash -c 'source "$1/cli.sh"; printf "%s\n" "${INSTALL_SEQUENCE[@]}"' _ "$REPO_ROOT"
 	[ "$status" -eq 0 ]
 	[ "$(grep -c 'install_rtk$' <<<"$output")" -eq 1 ]
-	[[ "$output" == *"always:install_rtk"* ]]
+	[[ "$output" == *"rtk:install_rtk"* ]]
 }
 
-@test "RTK still installs when no tool is in the -y allowlist" {
+@test "RTK does not install when no tool is in the -y allowlist" {
 	run bash -c '
 		source "$1/cli.sh"
 		YES_TO_ALL=true
@@ -58,7 +58,7 @@ SYNC_SH="$REPO_ROOT/scripts/sync-token-efficiency.sh"
 		run_install_sequence
 	' _ "$REPO_ROOT"
 	[ "$status" -eq 0 ]
-	[ "$(grep -c '^ran install_rtk$' <<<"$output")" -eq 1 ]
+	[[ "$output" != *"ran install_rtk"* ]]
 	[[ "$output" != *"ran install_claude_code"* ]]
 }
 
