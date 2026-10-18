@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Agent Teams Usage Examples — my-ai-tools documentation"><title>Agent Teams Usage Examples · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+</nav><main><article>
+<h1>Agent Teams Usage Examples</h1>
+<p>This guide provides practical examples of using Claude Code Agent Teams for common development workflows.</p>
+<h2>Example 1: Feature Development with Team Coordination</h2>
+<p>When building a new feature, use the <code>feature-team-coordinator</code> to orchestrate the entire workflow:</p>
+<pre><code class="language-markdown">@feature-team-coordinator
+
+Implement a new user authentication endpoint:
+
+- POST /api/auth/login
+- Accept email and password
+- Return JWT token
+- Include proper error handling
+
+Requirements:
+
+- Validate inputs
+- Hash password comparison
+- Rate limiting
+- Comprehensive tests
+- API documentation
+</code></pre>
+<p>The coordinator will:</p>
+<ol>
+<li>Implement the endpoint</li>
+<li>Delegate to <code>code-reviewer</code> for security review</li>
+<li>Delegate to <code>test-generator</code> for test coverage</li>
+<li>Delegate to <code>documentation-writer</code> for API docs</li>
+<li>Use <code>ai-slop-remover</code> for final polish</li>
+</ol>
+<h2>Example 2: Code Review Only</h2>
+<p>For quick code reviews without full feature development:</p>
+<pre><code class="language-markdown">@code-reviewer
+
+Review the authentication middleware in:
+
+- src/middleware/auth.ts
+- src/utils/jwt.ts
+
+Focus on:
+
+- Security vulnerabilities
+- Error handling completeness
+- Token validation logic
+</code></pre>
+<h2>Example 3: Test Generation</h2>
+<p>Generate tests for existing code:</p>
+<pre><code class="language-markdown">@test-generator
+
+Create comprehensive tests for the UserService class in src/services/UserService.ts
+
+Include:
+
+- Unit tests for all public methods
+- Edge cases (null/undefined inputs)
+- Error scenarios
+- Integration tests with database
+
+Match the existing test patterns in tests/services/
+</code></pre>
+<h2>Example 4: Documentation Writing</h2>
+<p>Create or update documentation:</p>
+<pre><code class="language-markdown">@documentation-writer
+
+Document the new payment processing API:
+
+- POST /api/payments/process
+- GET /api/payments/:id
+- POST /api/payments/refund
+
+Include:
+
+- Request/response examples
+- Error responses
+- Authentication requirements
+- Rate limiting info
+</code></pre>
+<h2>Example 5: Clean Up AI Patterns</h2>
+<p>After making changes, clean up AI-generated patterns:</p>
+<pre><code class="language-markdown">@ai-slop-remover
+
+Review all changes in the current branch and remove:
+
+- Unnecessary comments
+- Excessive defensive checks
+- Over-engineered abstractions
+
+Focus on making code match the existing codebase style.
+</code></pre>
+<h2>Example 6: Sequential Workflow</h2>
+<p>Chain agents for a complete workflow:</p>
+<pre><code class="language-markdown">Step 1: Implement feature
+[Make your code changes]
+
+Step 2: Generate tests
+@test-generator
+Create tests for the new feature in src/features/export.ts
+
+Step 3: Review code
+@code-reviewer
+Review src/features/export.ts for quality and security
+
+Step 4: Clean up
+@ai-slop-remover
+Clean up the export feature code
+
+Step 5: Document
+@documentation-writer
+Document the export feature API
+</code></pre>
+<h2>Example 7: Parallel Review</h2>
+<p>Get multiple perspectives simultaneously:</p>
+<pre><code class="language-markdown">I&#39;ve implemented a new caching layer. I need parallel reviews:
+
+@code-reviewer
+Review src/cache/RedisCache.ts for:
+
+- Performance implications
+- Error handling
+- Resource cleanup
+
+@test-generator
+Create tests for src/cache/RedisCache.ts covering:
+
+- Cache hits/misses
+- Connection failures
+- TTL expiration
+
+@documentation-writer
+Document the caching API in docs/caching.md
+</code></pre>
+<h2>Tips for Effective Team Usage</h2>
+<h3>Be Specific</h3>
+<p>❌ &quot;Review this code&quot;
+✅ &quot;Review auth.ts focusing on security vulnerabilities and session management&quot;</p>
+<h3>Provide Context</h3>
+<p>Include:</p>
+<ul>
+<li>Which files to examine</li>
+<li>Specific concerns or requirements</li>
+<li>Related code locations</li>
+<li>Expected patterns or conventions</li>
+</ul>
+<h3>Use Appropriate Agent</h3>
+<ul>
+<li>Security review → <code>code-reviewer</code></li>
+<li>Test creation → <code>test-generator</code></li>
+<li>API docs → <code>documentation-writer</code></li>
+<li>Style cleanup → <code>ai-slop-remover</code></li>
+<li>Full feature → <code>feature-team-coordinator</code></li>
+</ul>
+<h3>Iterate When Needed</h3>
+<p>If results aren&#39;t satisfactory:</p>
+<ol>
+<li>Provide more specific feedback</li>
+<li>Reference existing examples</li>
+<li>Clarify expectations</li>
+<li>Re-delegate with refined instructions</li>
+</ol>
+<h2>Advanced Patterns</h2>
+<h3>Custom Workflow</h3>
+<p>Create your own orchestration:</p>
+<pre><code class="language-markdown">Phase 1: Implementation
+[Your code changes]
+
+Phase 2: Quality Gates
+Parallel execution:
+
+- @code-reviewer: Security and quality
+- @test-generator: Test coverage
+
+Phase 3: Address Feedback
+[Fix issues from reviews]
+
+Phase 4: Polish
+
+- @ai-slop-remover: Style cleanup
+- @documentation-writer: Documentation
+
+Phase 5: Final Verification
+Run tests and verify all checks pass
+</code></pre>
+<h3>Specialized Focus</h3>
+<p>Target specific aspects:</p>
+<pre><code class="language-markdown">@code-reviewer
+
+Quick security audit only:
+
+- SQL injection risks
+- XSS vulnerabilities
+- Authentication bypass potential
+
+Skip style and minor issues - focus on critical security only.
+</code></pre>
+<h2>Common Workflows</h2>
+<h3>Bug Fix</h3>
+<pre><code class="language-markdown">1. Identify and fix bug
+2. @test-generator: Add regression test
+3. @code-reviewer: Quick review of fix
+</code></pre>
+<h3>Refactoring</h3>
+<pre><code class="language-markdown">1. Refactor code
+2. @code-reviewer: Verify logic preservation
+3. @test-generator: Ensure test coverage
+4. @ai-slop-remover: Clean up patterns
+</code></pre>
+<h3>New API Endpoint</h3>
+<pre><code class="language-markdown">1. @feature-team-coordinator: Implement complete endpoint
+   - Code implementation
+   - Tests
+   - Documentation
+   - Security review
+</code></pre>
+<h3>Fusion Lead &amp; Executor Orchestration</h3>
+<p>In Amp, OpenCode, Pi, and Codex, use the <code>orchestrating-fusion</code> skill pattern to pair a strong read-only Lead agent (planning, verification) with a faster implementation Executor agent (code edits, unit tests). See <a href="fusion-orchestration.html">Fusion Orchestration Guide</a> for full details.</p>
+<pre><code class="language-markdown">1. Lead Agent: Analyzes codebase, generates phase plan and boundaries
+2. Executor Agent: Implements code changes for Phase 1 and runs verification tests
+3. Lead Agent: Reviews diff and test output independently
+4. Repeat phase-by-phase until verification passes
+</code></pre>
+<h3>Pull Request Review &amp; Fixes</h3>
+<p>Use the <code>pr-review</code> skill to efficiently address review feedback. The skill supports auto-detection from your current branch, specific PR numbers, or full URLs.</p>
+<pre><code class="language-markdown"># Method 1: Auto-detect from current branch
+
+/pr-review
+
+# Method 2: Use a specific PR number
+
+/pr-review 123
+
+# Method 3: Use a full GitHub PR URL
+
+/pr-review https://github.com/owner/repo/pull/123
+</code></pre>
+<p><strong>What happens:</strong></p>
+<ol>
+<li>The agent fetches all review comments and issue comments for the PR.</li>
+<li>It analyzes which comments are still open (unresolved).</li>
+<li>It creates a prioritized TODO list based on severity (Critical → High → Medium → Low).</li>
+<li>It implements fixes for each comment, runs tests, and commits the changes.</li>
+</ol>
+<h3>Documentation Update</h3>
+<pre><code class="language-markdown">@documentation-writer
+
+Update docs for the new webhook system:
+
+- Architecture changes
+- API modifications
+- Migration guide
+</code></pre>
+<h2>Troubleshooting</h2>
+<h3>Agent Not Responding</h3>
+<ul>
+<li>Verify agent file exists in <code>configs/claude/agents/</code></li>
+<li>Check YAML frontmatter is valid</li>
+<li>Ensure <code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: &quot;1&quot;</code> is set</li>
+</ul>
+<h3>Unexpected Results</h3>
+<ul>
+<li>Provide more context and examples</li>
+<li>Reference specific files and line numbers</li>
+<li>Clarify expected output format</li>
+<li>Show examples of desired patterns</li>
+</ul>
+<h3>Agent Conflicts</h3>
+<ul>
+<li>Prioritize critical feedback</li>
+<li>Consider trade-offs</li>
+<li>Document decisions</li>
+<li>Iterate with refined instructions</li>
+</ul>
+<h2>Resources</h2>
+<ul>
+<li><a href="claude-code-teams.html">Agent Teams Documentation</a></li>
+<li><a href="https://github.com/jellydn/my-ai-tools/tree/main/configs/claude/agents">Agent Definitions</a></li>
+<li><a href="../configs/claude/settings.json">Settings Configuration</a></li>
+</ul>
+</article></main></div></body></html>

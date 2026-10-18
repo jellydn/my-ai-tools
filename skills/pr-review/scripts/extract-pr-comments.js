@@ -1,8 +1,61 @@
 #!/usr/bin/env node
 
-const fs = require("node:fs");
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
 
-function extractPrComments(reviewCommentsFile, issueCommentsFile, outputFile) {
+function loadJson(filePath) {
+	return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function commentKey(id) {
+	if (typeof id === "number" && Number.isFinite(id)) return id;
+	if (typeof id === "string" && /^[0-9]+$/.test(id)) return Number(id);
+	return null;
+}
+
+function threadList(payload) {
+	if (Array.isArray(payload)) return payload;
+	if (payload && Array.isArray(payload.threads)) return payload.threads;
+	const nodes =
+		payload?.data?.repository?.pullRequest?.reviewThreads?.nodes ||
+		payload?.repository?.pullRequest?.reviewThreads?.nodes ||
+		payload?.reviewThreads?.nodes;
+	if (Array.isArray(nodes)) return nodes;
+	throw new Error(
+		"Unrecognized thread-resolution file. Expected a thread array or a GitHub reviewThreads payload with isResolved.",
+	);
+}
+
+function threadComments(thread) {
+	const comments = thread?.comments;
+	if (Array.isArray(comments)) return comments;
+	if (comments && Array.isArray(comments.nodes)) return comments.nodes;
+	return [];
+}
+
+function resolvedCommentIds(threads) {
+	const resolved = new Set();
+	for (const thread of threads) {
+		const isResolved = thread?.isResolved === true || thread?.is_resolved === true;
+		if (!isResolved) continue;
+		for (const comment of threadComments(thread)) {
+			const id = commentKey(comment?.databaseId ?? comment?.database_id ?? comment?.id);
+			if (id !== null) resolved.add(id);
+		}
+	}
+	return resolved;
+}
+
+function extractPrComments(reviewCommentsFile, issueCommentsFile, outputFile, threadsFile) {
+	if (!threadsFile) {
+		throw new Error("Thread-resolution file is required. Do not infer resolution from replies.");
+	}
+	if (!fs.existsSync(threadsFile)) {
+		throw new Error(`Thread-resolution file not found: ${threadsFile}`);
+	}
+
+	const threads = threadList(loadJson(threadsFile));
+	const resolvedIds = resolvedCommentIds(threads);
 	let allComments = [];
 
 	if (fs.existsSync(reviewCommentsFile)) {
@@ -28,14 +81,13 @@ function extractPrComments(reviewCommentsFile, issueCommentsFile, outputFile) {
 	}
 
 	const comments = allComments;
-	const commentIdsWithReplies = new Set(
-		comments.filter((comment) => comment.in_reply_to_id).map((comment) => comment.in_reply_to_id),
-	);
 
 	const relevantComments = comments
 		.filter((comment) => {
+			// Replies stay out of the TODO list, but they do not resolve the thread.
 			if (comment.in_reply_to_id) return false;
-			if (commentIdsWithReplies.has(comment.id)) return false;
+			const id = commentKey(comment.id);
+			if (id !== null && resolvedIds.has(id)) return false;
 			if (!comment.body || comment.body.trim() === "") return false;
 
 			const isBot = comment.user?.type === "Bot" || comment.user?.login?.includes("[bot]");
@@ -83,11 +135,16 @@ function extractPrComments(reviewCommentsFile, issueCommentsFile, outputFile) {
 	const summaryContent = createSummaryFile(summaryStats, relevantComments.length, comments.length);
 	fs.writeFileSync(summaryFile, summaryContent, "utf8");
 
-	const resolvedCount = commentIdsWithReplies.size;
+	const replyCount = comments.filter((comment) => comment.in_reply_to_id).length;
+	const resolvedCount = comments.filter((comment) => {
+		const id = commentKey(comment.id);
+		return id !== null && resolvedIds.has(id) && !comment.in_reply_to_id;
+	}).length;
 	console.log(
 		`Extracted ${relevantComments.length} unresolved comments from ${comments.length} total comments`,
 	);
-	console.log(`Skipped ${resolvedCount} comments with replies (likely resolved)`);
+	console.log(`Skipped ${resolvedCount} comments on resolved review threads`);
+	console.log(`Left ${replyCount} replies in place; replies are not treated as resolution`);
 	console.log(
 		`Severity breakdown: Critical: ${summaryStats.severity.critical}, High: ${summaryStats.severity.high}, Medium: ${summaryStats.severity.medium}, Low: ${summaryStats.severity.low}`,
 	);
@@ -269,7 +326,7 @@ function createSummaryFile(stats, relevantCount, totalCount) {
 		}
 	});
 
-	content += `\n📊 **Total Comments:** ${relevantCount} actionable (${totalCount - relevantCount} resolved/skipped)\n\n`;
+	content += `\n📊 **Total Comments:** ${relevantCount} actionable (${totalCount - relevantCount} not actionable)\n\n`;
 
 	content += `📋 **Category Breakdown:**\n`;
 	Object.entries(stats.categories)
@@ -315,35 +372,48 @@ function createTodoFile(comments, inputFile) {
 	return `# PR #${prNumber} Review Comments - TODO List\n\n🎯 **Priority Order:** 🔴 Critical → 🟠 High → 🟡 Medium → 🟢 Low\n\n${todoItems}`;
 }
 
-if (require.main === module) {
+const isDirectRun = (() => {
+	const entry = process.argv[1];
+	if (!entry) return false;
+	try {
+		return fs.realpathSync(entry) === fs.realpathSync(fileURLToPath(import.meta.url));
+	} catch {
+		return false;
+	}
+})();
+
+if (isDirectRun) {
 	const args = process.argv.slice(2);
 
-	if (args.length < 2) {
+	if (args.length < 3) {
 		console.log(
-			"Usage: node extract-pr-comments.js <review-comments-file> <issue-comments-file> [output-file]",
+			"Usage: node extract-pr-comments.js <review-comments-file> <issue-comments-file> <threads-file> [output-file]",
 		);
 		console.log(
-			"Example: node .claude/extract-pr-comments.js pr-4972-review-comments-raw.json pr-4972-issue-comments-raw.json pr-4972-comments.ndjson",
+			"Example: node extract-pr-comments.js pr-4972-review-comments-raw.json pr-4972-issue-comments-raw.json pr-4972-threads.json pr-4972-comments.ndjson",
 		);
 		console.log("");
 		console.log(
-			"Note: This script processes both review comments (inline code comments) and issue comments (general PR discussion).",
-		);
-		console.log(
-			"It filters out comments with replies (likely resolved) and only shows top-level comments that need attention.",
+			"The threads file is GitHub review-thread state (isResolved on each thread). A reply does not mark a thread resolved.",
 		);
 		process.exit(1);
 	}
 
 	const reviewCommentsFile = args[0];
 	const issueCommentsFile = args[1];
+	const threadsFile = args[2];
 	const outputFile =
-		args[2] ||
+		args[3] ||
 		reviewCommentsFile
 			.replace("-review-comments-raw.json", "-comments.ndjson")
 			.replace(".claude/", "");
 
-	extractPrComments(reviewCommentsFile, issueCommentsFile, outputFile);
+	try {
+		extractPrComments(reviewCommentsFile, issueCommentsFile, outputFile, threadsFile);
+	} catch (error) {
+		console.error(error.message);
+		process.exit(1);
+	}
 }
 
-module.exports = { extractPrComments };
+export { extractPrComments };

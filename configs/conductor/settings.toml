@@ -1,5 +1,5 @@
 "$schema" = "https://conductor.build/schemas/settings.schema.json"
-claude_provider = "custom"
+claude_provider = "default"
 enterprise_data_privacy = true
 
 [git]
@@ -8,10 +8,10 @@ branch_prefix_type = "github_username"
 delete_branch_on_archive = false
 
 [models]
-default = "opencode:openrouter/tencent/hy3:free"
+default = "auto"
 default_plan_mode = true
-review = "gpt-5.5"
-visible_provider_models = "{\"claude\":[],\"codex\":[],\"cursor\":[],\"opencode\":[\"opencode:openrouter/tencent/hy3:free\",\"opencode:opencode/deepseek-v4-flash-free\",\"opencode:opencode/hy3-free\"],\"pi\":[]}"
+review = "opencode:omniroute/paid"
+visible_provider_models = "{\"claude\":[],\"codex\":[],\"cursor\":[],\"opencode\":[\"opencode:alibaba-token-plan/glm-5.2\",\"opencode:alibaba-token-plan/qwen3.8-max-preview\",\"opencode:omniroute/free\",\"opencode:omniroute/kc/openrouter/free\",\"opencode:omniroute/oc/deepseek-v4-flash-free\",\"opencode:omniroute/cu/auto\",\"opencode:omniroute/paid\",\"opencode:omniroute/premium\",\"opencode:opencode/deepseek-v4-flash-free\",\"opencode:opencode/big-pickle\",\"opencode:openrouter/poolside/laguna-s-2.1:free\",\"opencode:openrouter/inclusionai/ling-3.0-flash:free\",\"opencode:omniroute/sf/step-3.7-flash\"],\"pi\":[]}"
 
 [models.codex]
 default_thinking_level = "high"

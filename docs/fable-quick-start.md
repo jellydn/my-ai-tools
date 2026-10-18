@@ -54,11 +54,11 @@ Create `.implementation-log.md`:
 ```markdown
 ### Decision 1: Used GitHub App Installation Flow
 
-**Context**: Testing revealed org access requires App Installation
-**Original Plan**: Standard OAuth with PAT
-**Reality**: GitHub deprecated PAT for org access
-**Decision**: Implement App Installation flow
-**Rationale**: Only way to get org-level repo access
+**Context**: The example organization blocks personal access tokens on its repositories
+**Original Plan**: Standard OAuth with a personal access token
+**Reality**: That organization requires a GitHub App installation for repository access
+**Decision**: Implement the App Installation flow for this organization
+**Rationale**: Matches the organization's access policy. GitHub still allows PATs where policy permits them
 **Impact**: Added webhook endpoint, token caching
 ```
 
@@ -214,7 +214,7 @@ User: /blindspots Add Stripe payment integration
 Agent:
 - Found existing PayPal integration (better pattern)
 - Webhook signature verification required (security)
-- Idempotency keys mandatory (PCI compliance)
+- Idempotency keys on payment requests (prevents duplicate charges when a retry replays the same request)
 - VCR for API mocking in tests
 - Questions: currencies? Connect? failed retry strategy?
 

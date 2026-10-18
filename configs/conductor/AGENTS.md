@@ -1,5 +1,9 @@
 # 🤖 Conductor Agent Guidelines
 
+## Communication
+
+Use ASD-STE100 Simplified Technical English. Read a relevant `CONTEXT.md` when it governs terms or behavior you change.
+
 Conductor orchestrates parallel AI coding agents (Claude Code, Codex, Cursor, OpenCode) in isolated workspaces with automatic branch management, diff review, and merge workflows.
 
 ## Key Concepts
@@ -10,9 +14,17 @@ Conductor orchestrates parallel AI coding agents (Claude Code, Codex, Cursor, Op
 
 ## Configuration
 
+## Token Efficiency
+
+- Keep responses concise and actionable; lead with conclusions, file paths, and verification.
+- Read only task-relevant files and instructions. Do not preload repository maps, architecture docs, memory, or skills.
+- Scope searches and command output with paths, filters, and line ranges.
+- Use `~/.local/bin/rtk` for supported shell commands when available; bypass it with `RTK_DISABLED=1` when raw output is required.
+- Prefer `codebase-memory-mcp` graph tools for structural code discovery when available.
+
 ## Learning Recording
 
-Read @~/.ai-tools/MEMORY.md and @~/.ai-tools/agent-memory.md for the full decision rule.
+Read `~/.ai-tools/MEMORY.md` and `~/.ai-tools/agent-memory.md` only when deciding whether or where to persist a learning.
 
 After fixing a bug (confirmed by human), introducing a new tech choice, or encountering something important, ask the user:
 

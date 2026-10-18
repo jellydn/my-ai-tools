@@ -148,14 +148,14 @@ setup() {
 }
 
 @test "tool_allowed gates correctly under YES_TO_ALL" {
-    # Under YES_TO_ALL=true: only the 8 allowed tools return 0
+    # Under YES_TO_ALL=true: only the allowed tools return 0
     export YES_TO_ALL=true
-    for tool in amp codex ctx cursor kilo opencode open_code_review pi antigravity ai-switcher; do
+    for tool in amp codex ctx cursor kilo opencode open_code_review pi omp antigravity ai-switcher claude; do
         run tool_allowed "$tool"
         [ "$status" -eq 0 ]
     done
     # Non-allowed tools return 1
-    for tool in claude cline gemini grok mimo; do
+    for tool in cline gemini grok mimo; do
         run tool_allowed "$tool"
         [ "$status" -eq 1 ]
     done
@@ -165,4 +165,35 @@ setup() {
         run tool_allowed "$tool"
         [ "$status" -eq 0 ]
     done
+}
+@test "cli.sh and generate.sh handle --help and -h flags" {
+    run "$BATS_TEST_DIRNAME/../cli.sh" --help
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Usage:"* ]]
+
+    run "$BATS_TEST_DIRNAME/../cli.sh" -h
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Usage:"* ]]
+
+    run "$BATS_TEST_DIRNAME/../generate.sh" --help
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Usage:"* ]]
+
+    run "$BATS_TEST_DIRNAME/../generate.sh" -h
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Usage:"* ]]
+}
+
+@test "community plugins are skipped when their CLI tool is missing" {
+    command() {
+        if [ "$1" = "-v" ] && [ "$2" = "copilot" ]; then
+            return 1
+        fi
+        builtin command "$@"
+    }
+    run install_community_plugin_non_interactive \
+        "plannotator-copilot" "plannotator-copilot@plannotator" "backnotprop/plannotator" "copilot"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Skipping plannotator-copilot plugin (copilot CLI not installed)"* ]]
+    [[ "$output" != *"install failed"* ]]
 }

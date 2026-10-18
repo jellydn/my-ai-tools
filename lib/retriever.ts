@@ -1,15 +1,15 @@
-import { readFile, stat } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type OpenAI from "openai";
+import { createIndexLoader } from "./index-loader.ts";
 import type { DocumentType } from "./indexer.ts";
-import { createOpenAIClient } from "./openai-client.ts";
+import { createOpenAIClient, getDefaultEmbeddingModel } from "./openai-client.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const INDEX_PATH = resolve(__dirname, "..", "data", "index.json");
 
-const EMBEDDING_MODEL = process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small";
+const EMBEDDING_MODEL = process.env.OPENAI_EMBEDDING_MODEL ?? getDefaultEmbeddingModel();
 
 export type Chunk = {
 	path: string;
@@ -42,9 +42,7 @@ export type Index = {
 };
 
 let openai: OpenAI | null = null;
-let indexCache: Index | null = null;
-let indexCacheMtime = 0;
-let indexCacheSize = 0;
+const indexLoader = createIndexLoader(INDEX_PATH);
 
 function getClient(): OpenAI {
 	if (!openai) {
@@ -65,10 +63,16 @@ export function validateIndex(value: unknown): Index {
 	if (dimension === 0) throw new Error("Invalid index: empty embedding");
 	for (const chunk of index.chunks) {
 		if (
+			!chunk ||
 			typeof chunk.path !== "string" ||
 			typeof chunk.text !== "string" ||
 			!chunk.metadata ||
+			typeof chunk.metadata !== "object" ||
+			!["documentation", "source", "issue", "pull_request", "cli_help", "example_config"].includes(chunk.metadata.type) ||
+			(chunk.metadata.url !== undefined && typeof chunk.metadata.url !== "string") ||
+			(chunk.metadata.author !== undefined && typeof chunk.metadata.author !== "string") ||
 			!Array.isArray(chunk.embedding) ||
+			!chunk.embedding.every((value) => typeof value === "number" && Number.isFinite(value)) ||
 			chunk.embedding.length !== dimension
 		) {
 			throw new Error("Invalid index: inconsistent chunk or embedding dimensions");
@@ -77,19 +81,10 @@ export function validateIndex(value: unknown): Index {
 	return index as Index;
 }
 
-async function loadIndex(): Promise<Index> {
-	const raw = await readFile(INDEX_PATH, "utf-8");
-	return validateIndex(JSON.parse(raw));
-}
+export const clearIndexCache = () => indexLoader.clear();
 
 async function getIndex(): Promise<Index> {
-	const stats = await stat(INDEX_PATH);
-	if (!indexCache || stats.mtimeMs !== indexCacheMtime || stats.size !== indexCacheSize) {
-		indexCache = await loadIndex();
-		indexCacheMtime = stats.mtimeMs;
-		indexCacheSize = stats.size;
-	}
-	return indexCache;
+	return validateIndex(await indexLoader.load());
 }
 
 function cosineSimilarity(a: number[], b: number[]): number {

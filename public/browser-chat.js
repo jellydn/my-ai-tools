@@ -34,9 +34,10 @@ export function linkifySource(source) {
 	const canonicalUrl = typeof source === "object" ? source.url : undefined;
 	const isGitHubConversation = /^(issues|pull)\/\d+$/.test(path);
 	const route = isGitHubConversation ? path : `blob/main/${encodeSourcePath(path)}`;
-	const url = canonicalUrl?.startsWith("https://github.com/")
-		? canonicalUrl
-		: `https://github.com/jellydn/my-ai-tools/${route}`;
+	const url =
+		typeof canonicalUrl === "string" && canonicalUrl.startsWith("https://github.com/")
+			? canonicalUrl
+			: `https://github.com/jellydn/my-ai-tools/${route}`;
 	return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(path)}</a>`;
 }
 
@@ -68,11 +69,25 @@ async function getIndex() {
 		binary.byteOffset,
 		binary.byteLength / Float32Array.BYTES_PER_ELEMENT,
 	);
+	if (
+		!embeddings.every(Number.isFinite) ||
+		json.chunks.some(
+			(chunk) =>
+				!chunk ||
+				typeof chunk.path !== "string" ||
+				typeof chunk.text !== "string" ||
+				!chunk.metadata ||
+				!DOCUMENT_TYPES.has(chunk.metadata.type) ||
+				(chunk.metadata.url !== undefined && typeof chunk.metadata.url !== "string") ||
+				(chunk.metadata.author !== undefined && typeof chunk.metadata.author !== "string"),
+		)
+	)
+		throw new Error("Browser index has invalid chunk data.");
 
 	const chunks = json.chunks.map((chunk, index) => ({
 		path: chunk.path,
 		text: chunk.text,
-		metadata: chunk.metadata ?? { type: "source" },
+		metadata: chunk.metadata,
 		embedding: embeddings.subarray(index * json.dim, (index + 1) * json.dim),
 	}));
 

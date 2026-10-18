@@ -6,7 +6,7 @@ load helpers
 CLINE_CONFIG_DIR="$REPO_ROOT/configs/cline"
 CLI_SH="$REPO_ROOT/cli.sh"
 GENERATE_SH="$REPO_ROOT/generate.sh"
-README="$REPO_ROOT/README.md"
+README="$REPO_ROOT/TOOL_REFERENCE.md"
 
 @test "configs/cline/AGENTS.md exists" {
 	[ -f "$CLINE_CONFIG_DIR/AGENTS.md" ]

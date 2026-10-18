@@ -7,7 +7,7 @@ REPO_ROOT="$BATS_TEST_DIRNAME/.."
 LIB_INSTALL="$REPO_ROOT/lib/install.sh"
 CLI_SH="$REPO_ROOT/cli.sh"
 GENERATE_SH="$REPO_ROOT/generate.sh"
-README="$REPO_ROOT/README.md"
+README="$REPO_ROOT/TOOL_REFERENCE.md"
 
 @test "configs/ctx/config.toml exists" {
 	[ -f "$REPO_ROOT/configs/ctx/config.toml" ]
@@ -32,7 +32,7 @@ README="$REPO_ROOT/README.md"
 }
 
 @test "cli.sh main() installs ctx" {
-	run grep -E '^[[:space:]]*install_ctx' "$CLI_SH"
+	run grep -F '"ctx:install_ctx"' "$CLI_SH"
 	[ "$status" -eq 0 ]
 	[ -n "$output" ]
 }

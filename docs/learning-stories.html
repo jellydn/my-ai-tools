@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="My AI Coding Tools Learning Notes — my-ai-tools documentation"><title>My AI Coding Tools Learning Notes · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+</nav><main><article>
+<h1>My AI Coding Tools Learning Notes</h1>
+<p>Personal notes from experimenting with AI coding tools, workflows, and frameworks.</p>
+<hr>
+<h2>Keybinder</h2>
+<p><strong>A modern, intuitive macOS app for managing skhd keyboard shortcuts.</strong></p>
+<ul>
+<li><strong>Repository:</strong> <a href="https://github.com/jellydn/keybinder">jellydn/keybinder</a></li>
+<li><strong>Built with:</strong> <a href="https://claude.com/product/claude-code">Claude</a> + <a href="https://github.com/github/spec-kit">spec-kit</a></li>
+<li><strong>Tech Stack:</strong> Svelte 5, Rust 1.75+, Tauri v2, Vite 5, Bun</li>
+</ul>
+<h3>Features</h3>
+<ul>
+<li><strong>Auto-Detection</strong> - Finds skhd config from standard locations</li>
+<li><strong>Visual Editor</strong> - Clean interface for editing keyboard shortcuts</li>
+<li><strong>Safety Controls</strong> - Confirmation for destructive commands</li>
+<li><strong>Real-time Log Viewer</strong> - Live streaming of service logs</li>
+<li><strong>System Theme Integration</strong> - Automatic light/dark mode</li>
+</ul>
+<h3>Development Approach</h3>
+<p>Used <strong>spec-kit</strong> for specification-driven development:</p>
+<ol>
+<li>Initial feature planning with structured specs</li>
+<li>Implementation tasks generated from specifications</li>
+<li>Pragmatic deviation during actual development (specs as reference, not strict rules)</li>
+</ol>
+<hr>
+<h2>SealCode (VS Code Extension)</h2>
+<p><strong>Smart Code Review with AI-Powered Insights</strong></p>
+<ul>
+<li><strong>Repository:</strong> <a href="https://github.com/jellydn/vscode-seal-code">jellydn/vscode-seal-code</a></li>
+<li><strong>Marketplace:</strong> <a href="https://marketplace.visualstudio.com/items?itemName=jellydn.seal-code">VS Code Marketplace</a></li>
+<li><strong>Built with:</strong> <a href="https://ampcode.com/">Amp</a> + <a href="https://github.com/snarktank/ralph">Ralph</a></li>
+<li><strong>Tech Stack:</strong> TypeScript, VS Code Extension API, reactive-vscode</li>
+</ul>
+<h3>Features</h3>
+<ul>
+<li><strong>AI-Powered Review</strong> - Send comments to Claude, Copilot, OpenCode, or Amp</li>
+<li><strong>Prompt Templates</strong> - Built-in templates for review, security, refactor workflows</li>
+<li><strong>Categorized Comments</strong> - Bug, Question, Suggestion, Nitpick, Note</li>
+<li><strong>Rich Visual Feedback</strong> - Inline decorations, gutter icons, line backgrounds</li>
+<li><strong>Export Options</strong> - Export reviews to Markdown or HTML</li>
+</ul>
+<h3>Development Approach</h3>
+<p>Built autonomously using <strong>Ralph</strong> (AI agent system) with <strong>Amp</strong> as the coding assistant:</p>
+<ul>
+<li>PRD-driven development with task decomposition</li>
+<li>Autonomous implementation of extension features</li>
+<li>Integrated testing and quality validation</li>
+</ul>
+<hr>
+<h2>Ralph</h2>
+<p><strong>Autonomous AI agent loop for PRD-driven development.</strong></p>
+<ul>
+<li><strong>Repository:</strong> <a href="https://github.com/jellydn/ralph">jellydn/ralph</a></li>
+<li><strong>Upstream:</strong> <a href="https://github.com/snarktank/ralph">snarktank/ralph</a></li>
+<li><strong>Status:</strong> Temporary fork pending upstream PRs (<a href="https://github.com/snarktank/ralph/pull/6">#6</a>, <a href="https://github.com/snarktank/ralph/pull/21">#21</a>)</li>
+<li><strong>Tech Stack:</strong> TypeScript, Shell, JavaScript</li>
+</ul>
+<p>Minimal Ralph implementation: PRD → task decomposition → autonomous execution → loop until complete. Used in SealCode development. Will deprecate once upstream PRs land.</p>
+<hr>
+<h2>AI Launcher</h2>
+<p><strong>Fast launcher for switching between AI coding assistants.</strong></p>
+<ul>
+<li><strong>Repository:</strong> <a href="https://github.com/jellydn/ai-launcher">jellydn/ai-launcher</a></li>
+</ul>
+<p>Fuzzy search interface for Claude Code, OpenCode, Amp, etc. Quick switching without managing multiple terminals.</p>
+<hr>
+<h2>Tiny Coding Agent</h2>
+<p><strong>Minimal coding agent focused on simplicity.</strong></p>
+<ul>
+<li><strong>Repository:</strong> <a href="https://github.com/jellydn/tiny-coding-agent">jellydn/tiny-coding-agent</a></li>
+</ul>
+<p>Lightweight agent with minimal dependencies. Response to heavy frameworks that waste tokens on orchestration overhead.</p>
+<hr>
+<h2>HermesHub</h2>
+<p><strong>Web app for deploying and managing a self-hosted Hermes AI Agent on any VPS — no terminal required.</strong></p>
+<ul>
+<li><strong>Repository:</strong> <a href="https://github.com/jellydn/hermes-hub">jellydn/hermes-hub</a></li>
+<li><strong>Website:</strong> <a href="https://hermes-hub.itman.fyi/">hermes-hub.itman.fyi</a></li>
+<li><strong>Built with:</strong> GPT-5.5 (planning) + <a href="https://x.ai/cli">Grok CLI</a> Composer 2.5 (implementation)</li>
+<li><strong>Tech Stack:</strong> TanStack Start, Tailwind CSS v4, shadcn/ui, Hono, PostgreSQL, Drizzle ORM, Better Auth, Vitest</li>
+</ul>
+<h3>Features</h3>
+<ul>
+<li><strong>Guided VPS setup</strong> — Step-by-step server connection wizard for non-technical users</li>
+<li><strong>One-click Hermes deployment</strong> — Install Docker, Compose, and Hermes from the dashboard with live SSE progress</li>
+<li><strong>AI provider configuration</strong> — OpenAI, Anthropic, OpenRouter, Ollama, and custom endpoints without editing env files</li>
+<li><strong>Telegram onboarding</strong> — Connect a bot, verify the token, and approve pairing codes from one screen</li>
+<li><strong>Agent persona editor</strong> — Define how Hermes speaks via <code>SOUL.md</code>, then deploy to a chosen VPS</li>
+<li><strong>MCP server manager</strong> — Add stdio or HTTP MCP servers (with presets) and deploy to Hermes <code>config.yaml</code></li>
+<li><strong>Built-in Hermes Web UI</strong> — Deploy and open the Hermes browser interface from the server detail page</li>
+</ul>
+<h3>Development Approach</h3>
+<p>Split planning and implementation across two models:</p>
+<ol>
+<li><strong>GPT-5.5 for planning</strong> — Architecture, API design, feature specs, and execution plans before writing code</li>
+<li><strong>Grok CLI Composer 2.5 for implementation</strong> — Fast iteration on TanStack Start routes, Hono API handlers, SSH deploy pipelines, and Vitest coverage</li>
+</ol>
+<p>The planner produced bite-sized tasks with file paths and verification steps; Composer 2.5 executed them in focused sessions. Review and docs passes stayed in the same Grok CLI workflow.</p>
+<hr>
+<h2>Key Takeaways</h2>
+<table>
+<thead>
+<tr>
+<th>Tool Combination</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Claude + spec-kit</strong></td>
+<td>Greenfield projects requiring structured planning</td>
+</tr>
+<tr>
+<td><strong>GPT-5.5 + Grok CLI Composer 2.5</strong></td>
+<td>Plan-heavy web apps with fast, tool-aware implementation</td>
+</tr>
+<tr>
+<td><strong>Amp + Ralph</strong></td>
+<td>Autonomous development with PRD-to-implementation pipelines</td>
+</tr>
+<tr>
+<td><strong>AI CLI Switcher</strong></td>
+<td>Developers working with multiple AI tools</td>
+</tr>
+<tr>
+<td><strong>Tiny Agent</strong></td>
+<td>Cost-conscious development with minimal overhead</td>
+</tr>
+</tbody></table>
+<p>Focused, single-purpose solutions &gt; heavy, all-in-one frameworks.</p>
+<hr>
+<h2>Tools I Tried But Didn&#39;t Keep</h2>
+<p>Not every tool fits every workflow. Here are tools I evaluated but chose not to adopt:</p>
+<h3>Task Master (claude-task-master)</h3>
+<p><strong>Repository:</strong> <a href="https://github.com/eyaltoledano/claude-task-master">eyaltoledano/claude-task-master</a></p>
+<p>An AI-powered task management system designed for Cursor, Windsurf, and other editors.</p>
+<p><strong>Why I didn&#39;t keep it:</strong></p>
+<ul>
+<li><strong>Complexity</strong> - Requires multiple API keys (Anthropic, OpenAI, Perplexity, etc.)</li>
+<li><strong>Heavy setup</strong> - MCP configuration, environment variables, PRD structure</li>
+<li><strong>Overkill</strong> - 36 tools available, ~21,000 tokens context usage in full mode</li>
+<li><strong>Too structured</strong> - Strict PRD-to-task workflow doesn&#39;t fit iterative development</li>
+</ul>
+<h3>SuperClaude</h3>
+<p><strong>Website:</strong> <a href="https://superclaude.netlify.app/">superclaude.netlify.app</a></p>
+<p>A meta-programming configuration framework for Claude Code.</p>
+<p><strong>Why I didn&#39;t keep it:</strong></p>
+<ul>
+<li><strong>Context hungry</strong> - Uses too much context for the framework overhead</li>
+<li><strong>Mental overhead</strong> - Learning the framework&#39;s abstractions vs just coding</li>
+<li><strong>Over-engineered</strong> - Adds complexity without proportional benefit</li>
+</ul>
+<h3>Oh My OpenCode</h3>
+<p><strong>Repository:</strong> <a href="https://github.com/code-yeongyu/oh-my-opencode">code-yeongyu/oh-my-opencode</a></p>
+<p>A feature-rich plugin for OpenCode with multi-model orchestration, background agents, and &quot;Sisyphus&quot; workflow.</p>
+<p><strong>Why I didn&#39;t keep it:</strong></p>
+<ul>
+<li><strong>Too opinionated</strong> - Enforces specific workflows (ultrawork, ralph-loop, Sisyphus mode)</li>
+<li><strong>Multi-model complexity</strong> - Requires multiple API keys (Claude, GPT, Gemini, Grok)</li>
+<li><strong>Magic keywords</strong> - <code>ultrawork</code>, <code>ulw</code>, <code>ultrathink</code> - adds cognitive overhead</li>
+<li><strong>Feature bloat</strong> - LSP tools, AST-grep, background agents, keyword detectors</li>
+<li><strong>Not my style</strong> - Aggressive automation doesn&#39;t fit my iterative workflow</li>
+</ul>
+<hr>
+<h2>Addy Osmani — Accountable Engineering with AI</h2>
+<p><strong>Video:</strong> <a href="https://www.youtube.com/watch?v=2fyPnxKu8ZM">The Future of Software Engineering with AI</a></p>
+<p>Addy Osmani (Chrome, DevTools, Core Web Vitals, AI developer experience) argues AI will not eliminate software engineering — it changes what valuable engineering looks like.</p>
+<h3>Key Takeaways</h3>
+<ul>
+<li><strong>AI expands the software market</strong> — when building got easier historically, more people built more software; expect expansion, not just job reduction.</li>
+<li><strong>Accountability shifts</strong> — AI generates code; humans remain responsible for correctness, security, maintainability, and fitness for users.</li>
+<li><strong>Avoid cognitive surrender</strong> — you do not need every line inspected, but you must understand major architectural, security, and business decisions.</li>
+<li><strong>Mutual amplification</strong> — agents record decisions and lessons; developers review and internalize them. The goal is a better feedback loop, not only faster output.</li>
+<li><strong>Management is technical again</strong> — AI lowers the barrier to building; senior leaders are coding weekend projects again.</li>
+<li><strong>Memory debugging lags</strong> — profiling and tracing improved; memory management tooling has not advanced as much.</li>
+<li><strong>Broaden beyond coding</strong> — product thinking, UX, evangelism, go-to-market, and customer understanding increasingly matter.</li>
+</ul>
+<h3>Practical Workflow (Captured as a Skill)</h3>
+<p>The <a href="../skills/accountable-engineering/SKILL.md"><code>accountable-engineering</code> skill</a> turns these lessons into one
+authoritative eight-step workflow with explicit completion criteria from definition through operational ownership.</p>
+<h3>Senior AI Engineer Profile</h3>
+<p>Own complete outcomes, not just AI features:</p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Technical depth</td>
+<td>RAG, agents, evaluation, deployment, observability</td>
+</tr>
+<tr>
+<td>AI leverage</td>
+<td>Use coding agents; verify their work</td>
+</tr>
+<tr>
+<td>Product sense</td>
+<td>Know who benefits and what success means</td>
+</tr>
+<tr>
+<td>Operational ownership</td>
+<td>Reliability, cost, security, monitoring</td>
+</tr>
+<tr>
+<td>Communication</td>
+<td>Explain trade-offs to any audience</td>
+</tr>
+</tbody></table>
+<p>The valuable engineer is an <strong>accountable system builder</strong>, not merely a fast coder.</p>
+<hr>
+<h2>Worth Learning From</h2>
+<p>These tools aren&#39;t for me daily, but are valuable references for understanding AI-assisted workflows:</p>
+<h3>Superpowers</h3>
+<p><strong>Repository:</strong> <a href="https://github.com/obra/superpowers">obra/superpowers</a></p>
+<p>A complete software development workflow for coding agents with composable &quot;skills&quot;.</p>
+<p><strong>Key concepts worth studying:</strong></p>
+<ul>
+<li><strong>Brainstorming phase</strong> - Agent asks questions before coding, refines specs iteratively</li>
+<li><strong>Writing plans</strong> - Bite-sized tasks (2-5 min each) with exact file paths and verification steps</li>
+<li><strong>Subagent-driven development</strong> - Fresh subagent per task with two-stage review</li>
+<li><strong>TDD enforcement</strong> - RED-GREEN-REFACTOR cycle, deletes code written before tests</li>
+<li><strong>Git worktrees</strong> - Isolated workspaces on new branches</li>
+</ul>
+<p><strong>Why it&#39;s a good reference:</strong></p>
+<ul>
+<li>Well-structured skill composition patterns</li>
+<li>Philosophy: systematic over ad-hoc, evidence over claims</li>
+<li>Shows how to build layered agent workflows</li>
+</ul>
+<hr>
+<h2>My Philosophy: Keep It Simple</h2>
+<blockquote>
+<p><strong>&quot;Add only if needed&quot;</strong></p>
+</blockquote>
+<p>Instead of adopting heavy frameworks, I prefer:</p>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Minimal tooling</strong></td>
+<td>Less context usage, more tokens for actual work</td>
+</tr>
+<tr>
+<td><strong>AGENTS.md</strong></td>
+<td>Simple, portable project guidance</td>
+</tr>
+<tr>
+<td><strong>Native AI features</strong></td>
+<td>Use built-in Claude/Amp capabilities first</td>
+</tr>
+<tr>
+<td><strong>Add incrementally</strong></td>
+<td>Only add tools when there&#39;s clear friction</td>
+</tr>
+</tbody></table>
+<p>The best tool is the one you don&#39;t have to think about.</p>
+</article></main></div></body></html>

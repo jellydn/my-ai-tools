@@ -11,18 +11,37 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/pi/settings.json defaultModel is cline-pass/deepseek-v4-flash" {
+@test "configs/pi/settings.json defaultModel is meta/muse-spark-1.3-contributor" {
     require_jq
     run jq -r '.defaultModel' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "cline-pass/deepseek-v4-flash" ]
+    [ "$output" = "meta/muse-spark-1.3-contributor" ]
 }
 
-@test "configs/pi/settings.json defaultProvider is clinepass" {
+@test "configs/pi/settings.json defaultProvider is commandcode" {
     require_jq
     run jq -r '.defaultProvider' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "clinepass" ]
+    [ "$output" = "commandcode" ]
+}
+
+@test "configs/pi/settings.json enables OmniRoute paid/free/premium models" {
+    require_jq
+    run jq -e '
+        (.enabledModels | index("omniroute/paid") != null) and
+        (.enabledModels | index("omniroute/free") != null) and
+        (.enabledModels | index("omniroute/premium") != null) and
+        ([.enabledModels[] | select(startswith("9router/"))] | length == 0)
+    ' "$PI_SETTINGS"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "configs/pi/settings.json default provider/model pair is enabled" {
+    require_jq
+    run jq -e '. as $s | $s.enabledModels | index($s.defaultProvider + "/" + $s.defaultModel) != null' "$PI_SETTINGS"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
 }
 
 @test "configs/pi/settings.json enabledModels no longer contains vibeproxy models" {
@@ -32,9 +51,19 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels no longer contains xai-auth/grok-composer-2.5-fast" {
+@test "configs/pi/settings.json enabledModels contains commandcode/meta/muse-spark-1.3-contributor" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "xai-auth/grok-composer-2.5-fast")] | length == 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(. == "commandcode/meta/muse-spark-1.3-contributor")] | length > 0' "$PI_SETTINGS"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "configs/pi/settings.json enabledModels no longer contains clinepass or qw models" {
+    require_jq
+    run jq -e '
+        ([.enabledModels[] | select(startswith("clinepass/"))] | length == 0) and
+        ([.enabledModels[] | select(startswith("qw/"))] | length == 0)
+    ' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
@@ -81,9 +110,9 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json packages contains pi-dynamic-workflows" {
+@test "configs/pi/settings.json packages contains pi-cursor-sdk" {
     require_jq
-    run jq -e '[.packages[] | select(type == "string" and . == "npm:pi-dynamic-workflows")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.packages[] | select(type == "string" and . == "npm:pi-cursor-sdk")] | length > 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
@@ -95,9 +124,23 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json packages no longer contains pi-xai-oauth" {
+@test "configs/pi/settings.json packages contains pi-qwencloud-provider" {
     require_jq
-    run jq -e '[.packages[] | select(type == "string" and . == "npm:pi-xai-oauth")] | length == 0' "$PI_SETTINGS"
+    run jq -e '[.packages[] | select(type == "string" and . == "npm:pi-qwencloud-provider")] | length > 0' "$PI_SETTINGS"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "configs/pi/settings.json packages contains @juicesharp/rpiv-todo" {
+    require_jq
+    run jq -e '[.packages[] | select(type == "string" and . == "npm:@juicesharp/rpiv-todo")] | length > 0' "$PI_SETTINGS"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "configs/pi/settings.json packages no longer contains pi-manage-todo-list" {
+    require_jq
+    run jq -e '[.packages[] | select(type == "string" and . == "npm:pi-manage-todo-list")] | length == 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }

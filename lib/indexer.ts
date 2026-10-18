@@ -1,4 +1,6 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { extname, relative, resolve } from "node:path";
 
 export const MAX_CHUNK_SIZE = 1000;
@@ -85,7 +87,6 @@ export const EXCLUDED_FILE_PATTERNS = [
 	/accounts\.json$/,
 	/sessions\.json$/,
 	/delegation-.*\.json$/,
-	/\.codex\/skills\/babysit-pr$/,
 ];
 
 export type Chunk = {
@@ -103,7 +104,7 @@ export type ChunkMetadata = {
 };
 
 export function shouldIndexFile(filePath: string, repoRoot: string): boolean {
-	const relativePath = relative(repoRoot, filePath);
+	const relativePath = relative(repoRoot, filePath).replaceAll("\\", "/");
 	const parts = relativePath.split("/");
 
 	for (const part of parts) {
@@ -192,14 +193,16 @@ function classifyPath(path: string): DocumentType {
 	return "source";
 }
 
-function localSourceUrl(path: string): string {
+function localSourceUrl(path: string, sourceRef: string): string {
 	const repo = process.env.GITHUB_REPOSITORY ?? "jellydn/my-ai-tools";
-	const sourceRef = process.env.GITHUB_SOURCE_REF?.trim() || "main";
 	const encodedPath = path.split("/").map(encodeURIComponent).join("/");
 	return `https://github.com/${repo}/blob/${encodeURIComponent(sourceRef)}/${encodedPath}`;
 }
 
-export function indexRepository(repoRoot: string): Chunk[] {
+export function indexRepository(
+	repoRoot: string,
+	sourceRef = process.env.GITHUB_SOURCE_REF?.trim() || "main",
+): Chunk[] {
 	const filePaths = walk(repoRoot, repoRoot);
 	console.log(`Found ${filePaths.length} supported files`);
 
@@ -222,11 +225,11 @@ export function indexRepository(repoRoot: string): Chunk[] {
 				throw new Error(`Repository exceeds ${MAX_LOCAL_CHUNKS} local chunk indexing limit`);
 			}
 			for (const text of chunks) {
-				const path = relative(repoRoot, filePath);
+				const path = relative(repoRoot, filePath).replaceAll("\\", "/");
 				allChunks.push({
 					path,
 					text,
-					metadata: { type: classifyPath(path), url: localSourceUrl(path) },
+					metadata: { type: classifyPath(path), url: localSourceUrl(path, sourceRef) },
 				});
 			}
 			console.log(`  ${relative(repoRoot, filePath)}: ${chunks.length} chunks`);
@@ -253,12 +256,11 @@ async function fetchGitHubPage(url: string): Promise<GitHubItem[]> {
 		Accept: "application/vnd.github+json",
 		"User-Agent": "my-ai-tools-indexer",
 	};
-	const token = process.env.GITHUB_TOKEN?.trim();
-	if (token) headers.Authorization = `Bearer ${token}`;
+	// Published indexes must never contain content visible only to a token holder.
 
 	for (let attempt = 1; attempt <= 2; attempt++) {
 		try {
-			const response = await fetch(url, { headers, signal: AbortSignal.timeout(10_000) });
+			const response = await fetch(url, { headers, redirect: "error", signal: AbortSignal.timeout(10_000) });
 			if (!response.ok) {
 				throw new Error(`GitHub API returned ${response.status} ${response.statusText}`);
 			}
@@ -326,12 +328,42 @@ export async function indexGitHub(repo = process.env.GITHUB_REPOSITORY ?? "jelly
 	}
 }
 
-export async function indexKnowledgeBase(repoRoot: string): Promise<Chunk[]> {
-	const localChunks = indexRepository(repoRoot);
-	const githubChunks = await indexGitHub();
-	const chunks = [...localChunks, ...githubChunks];
-	console.log(`Total chunks to embed: ${chunks.length}`);
-	return chunks;
+export async function indexKnowledgeBase(): Promise<Chunk[]> {
+	const repo = process.env.GITHUB_REPOSITORY ?? "jellydn/my-ai-tools";
+	const ref = process.env.GITHUB_SOURCE_REF?.trim() || "main";
+	if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !/^[\w][\w./-]*$/.test(ref)) {
+		throw new Error("Invalid public repository or source ref");
+	}
+	const directory = mkdtempSync(resolve(tmpdir(), "public-rag-"));
+	try {
+		// A fresh anonymous checkout is the publication boundary. Never read the
+		// caller's working tree, credentials, Git configuration, or unpublished commits.
+		const git = (args: string[]) =>
+			execFileSync("git", args, {
+				cwd: directory,
+				env: {
+					PATH: process.env.PATH,
+					HOME: directory,
+					GIT_CONFIG_NOSYSTEM: "1",
+					GIT_CONFIG_GLOBAL: "/dev/null",
+					GIT_TERMINAL_PROMPT: "0",
+				},
+				encoding: "utf8",
+				timeout: 120_000,
+				maxBuffer: 2 * 1024 * 1024,
+			});
+		git(["init", "--quiet"]);
+		git(["-c", "http.followRedirects=false", "fetch", "--quiet", "--depth=1", `https://github.com/${repo}.git`, ref]);
+		git(["checkout", "--quiet", "--detach", "FETCH_HEAD"]);
+		const sha = git(["rev-parse", "HEAD"]).trim();
+		const localChunks = indexRepository(directory, sha);
+		const githubChunks = await indexGitHub(repo);
+		const chunks = [...localChunks, ...githubChunks];
+		console.log(`Public corpus ${repo}@${sha}: ${chunks.length} chunks`);
+		return chunks;
+	} finally {
+		rmSync(directory, { recursive: true, force: true });
+	}
 }
 
 export function isTextFile(filePath: string): boolean {

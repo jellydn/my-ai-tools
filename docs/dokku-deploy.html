@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Dokku deploy (GitHub Actions) — my-ai-tools documentation"><title>Dokku deploy (GitHub Actions) · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+</nav><main><article>
+<h1>Dokku deploy (GitHub Actions)</h1>
+<p>The workflow <a href="../.github/workflows/dokku.yml"><code>.github/workflows/dokku.yml</code></a> deploys Dokku app <code>ai-tools</code> to <code>dokku@docklight.itman.fyi</code> on push to <code>main</code> or via <strong>workflow_dispatch</strong>. Public URL: <code>https://ai-tools.itman.fyi</code>.</p>
+<h2>Required GitHub Actions secrets</h2>
+<p>Configure under <strong>Settings → Secrets and variables → Actions</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Secret</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>DOKKU_SSH_PRIVATE_KEY</code></td>
+<td>Private key whose public half is registered on the Dokku host (<code>dokku ssh-keys:list</code>). Prefer a dedicated deploy key with no passphrase.</td>
+</tr>
+<tr>
+<td><code>OPENROUTER_API_KEY</code></td>
+<td><strong>Recommended.</strong> Your <a href="https://openrouter.ai/">OpenRouter</a> API key (<code>sk-or-v1-...</code>).</td>
+</tr>
+<tr>
+<td><code>OPENAI_API_KEY</code></td>
+<td><strong>Optional (legacy).</strong> Same OpenRouter key if you already use this name. If both are set, <code>OPENROUTER_API_KEY</code> wins. Dokku config + the Docker build secret still use the env name <code>OPENAI_API_KEY</code>. <strong>Not</strong> an OpenAI <code>sk-proj-...</code> key.</td>
+</tr>
+</tbody></table>
+<p>If <code>DOKKU_SSH_PRIVATE_KEY</code> is missing, or neither OpenRouter secret is set, or the chosen key does not start with <code>sk-or-v1-</code>, the workflow fails at <strong>Validate required secrets</strong>.</p>
+<h2>One-time Dokku host setup</h2>
+<p>Already applied for this migration (re-run if recreating the app):</p>
+<pre><code class="language-bash">dokku apps:create ai-tools
+dokku domains:set ai-tools ai-tools.itman.fyi
+dokku ports:set ai-tools http:80:3000
+dokku git:set ai-tools deploy-branch main
+dokku builder:set ai-tools selected dockerfile
+dokku config:set --no-restart ai-tools \
+  OPENAI_BASE_URL=https://openrouter.ai/api/v1 \
+  OPENAI_MODEL=openrouter/free \
+  OPENAI_EMBEDDING_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free \
+  PORT=3000
+dokku docker-options:add ai-tools build &#39;--secret id=OPENAI_API_KEY,env=OPENAI_API_KEY&#39;
+</code></pre>
+<p>Register the CI public key (requires root / <code>dokku</code> sudo):</p>
+<pre><code class="language-bash">echo &#39;ssh-ed25519 AAAA... github-actions-ai-tools-dokku&#39; | dokku ssh-keys:add github-actions-ai-tools
+</code></pre>
+<p>After the first successful HTTP deploy and DNS cutover:</p>
+<pre><code class="language-bash">dokku letsencrypt:enable ai-tools
+</code></pre>
+<h2>DNS cutover</h2>
+<p><code>ai-tools.itman.fyi</code> must resolve to the Docklight VPS (<code>95.111.232.131</code>), not Fly.</p>
+<ol>
+<li>Remove the Fly CNAME (<code>*.fly.dev</code>).</li>
+<li>Add an A record: <code>ai-tools.itman.fyi</code> → <code>95.111.232.131</code> (or a CNAME to <code>docklight.itman.fyi</code> if you prefer).</li>
+<li>Wait for TTL, then enable Let&#39;s Encrypt as above.</li>
+</ol>
+<h2>Runtime model configuration</h2>
+<p>Non-secret OpenAI-compatible settings live in Dokku config (same values as <a href="../.env.example"><code>.env.example</code></a>):</p>
+<ul>
+<li><code>OPENAI_BASE_URL</code> = <code>https://openrouter.ai/api/v1</code></li>
+<li><code>OPENAI_MODEL</code> = <code>openrouter/free</code></li>
+<li><code>OPENAI_EMBEDDING_MODEL</code> = <code>nvidia/llama-nemotron-embed-vl-1b-v2:free</code></li>
+</ul>
+<p>The Dockerfile indexes the repo at build time using a BuildKit secret <code>OPENAI_API_KEY</code>. Dokku passes that secret from app config via <code>docker-options</code> (<code>--secret id=OPENAI_API_KEY,env=OPENAI_API_KEY</code>). The deploy workflow re-syncs the <strong>full</strong> config above (key, base URL, models) into Dokku before <code>git push</code>, so host-side drift cannot break the build — a bare <code>OPENAI_API_KEY</code> alone used to fail with <code>401 invalid_api_key</code> because the OpenAI SDK defaulted to <code>api.openai.com</code>, which rejects <code>sk-or-v1-...</code> keys.</p>
+<p>The code is defensive too: <a href="../lib/openai-client.ts"><code>lib/openai-client.ts</code></a> detects <code>sk-or-v1-...</code> keys and automatically targets <code>https://openrouter.ai/api/v1</code> when <code>OPENAI_BASE_URL</code> is unset, and picks a matching embedding default — OpenRouter&#39;s free <code>nvidia/llama-nemotron-embed-vl-1b-v2:free</code> for OpenRouter keys, OpenAI&#39;s <code>text-embedding-3-small</code> otherwise (indexed at build and queried at runtime with the same default).</p>
+<h2>Local deploy (optional)</h2>
+<p>With SSH access as <code>dokku@docklight.itman.fyi</code>:</p>
+<pre><code class="language-bash">export OPENAI_API_KEY=&quot;sk-or-v1-...&quot;
+# --encoded stores a base64 value so the raw key is not in the SSH command.
+encoded=$(printf &#39;%s&#39; &quot;$OPENAI_API_KEY&quot; | base64 | tr -d &#39;\n&#39;)
+ssh dokku@docklight.itman.fyi config:set --encoded --no-restart ai-tools &quot;OPENAI_API_KEY=$encoded&quot;
+git remote add dokku dokku@docklight.itman.fyi:ai-tools 2&gt;/dev/null || true
+git push dokku main:main
+</code></pre>
+<h2>Disk space warning</h2>
+<p>The Docklight node was near full disk during migration. If builds fail with &quot;no space left on device&quot;, free Docker leftovers on the host (<code>dokku cleanup</code>) before retrying.</p>
+</article></main></div></body></html>

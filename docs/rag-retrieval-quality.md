@@ -1,6 +1,6 @@
 # Day 11: retrieval quality
 
-This evaluation changes retrieval, not the answer model. The repeatable benchmark uses the browser index and the three questions in `scripts/evaluate-retrieval.ts`. Build with the exact source revision, then run:
+This evaluation changes retrieval, not the answer model. The smoke benchmark uses the browser index and the three questions in `scripts/evaluate-retrieval.ts`. Each build is a new point-in-time evaluation: pinning a public source revision does not freeze mutable Issue/PR content. Archive the index if you need to repeat the same corpus. Build from a publicly available revision, then run:
 
 ```bash
 GITHUB_SOURCE_REF="$(git rev-parse HEAD)" npm run index:browser
@@ -12,7 +12,7 @@ npm run eval:retrieval -- --check-links
 
 ## Top-k trade-offs
 
-Measured on 2,234 chunks with `Xenova/all-MiniLM-L6-v2` (three-question smoke set; ranking latency excludes query embedding and generation):
+Historical measurements on 2,234 chunks with `Xenova/all-MiniLM-L6-v2` (three-question smoke set; ranking latency excludes query embedding and generation). The original index was not archived; these values are not reproducible baseline guarantees:
 
 | top-k | Relevance density | Answer-support rate | Estimated prompt tokens | Retrieval latency |
 |---:|---:|---:|---:|---:|
@@ -58,16 +58,16 @@ The MCP filter also hid the useful `wiki/wiki/concepts/mcp-registry.md` source b
 ## Retrieval trace validation
 
 - GitHub Issues and Pull Requests retain their canonical API-provided URL.
-- Local sources are generated with `GITHUB_SOURCE_REF`. Pass the deployment commit SHA with `flyctl deploy --build-arg "GITHUB_SOURCE_REF=$(git rev-parse HEAD)"` so the linked bytes are the indexed bytes rather than whatever later appears on `main`.
-- The benchmark verifies that each URL matches its indexed path and warns when the index is older than 24 hours. `--check-links` also issues bounded HTTP `HEAD` requests and reports failures without aborting the local evaluation.
+- Source files come from an anonymous public checkout selected by `GITHUB_SOURCE_REF`; links use its resolved commit SHA.
+- The benchmark checks URLs in the unfiltered top-five retrieval traces, not every indexed URL, and warns when the index is older than 24 hours. `--check-links` also issues bounded HTTP `HEAD` requests and reports failures without aborting the local evaluation.
 - Retrieved sources remain a retrieval trace, not claim-level citation proof. Users must be able to open the source and verify the answer.
 
 ## Degraded retrieval policy
 
 | Scenario | Index/build behavior | Deployment/user behavior |
 |---|---|---|
-| GitHub API unavailable | Continue with the local corpus and a warning. | Chat remains available; Issue/PR questions may abstain. |
-| Invalid GitHub token | Treat the failed GitHub fetch like an outage; never print the token. | Continue with local corpus and expose only a generic corpus warning to operators. |
+| GitHub Issue/PR API unavailable | Continue with the public checkout and a warning. | Chat remains available; Issue/PR questions may abstain. |
+| Public checkout unavailable or private | Fail indexing without consulting credentials or local files. | Keep the last published index; do not publish private data. |
 | Empty GitHub corpus | Continue if local chunks exist and report zero GitHub documents. | Conversation filters return the grounded abstention. |
 | Empty full corpus | Fail indexing and deployment. | Do not serve a knowingly empty knowledge base. |
 | Stale index | Keep serving for availability, log index age, and alert/rebuild. | Prefer a visible “knowledge updated at” indicator in a future UI. |

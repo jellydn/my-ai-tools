@@ -1,9 +1,9 @@
 #!/usr/bin/env bats
-# Test suite for configs/recommend-skills.json and related README.md content
+# Test suite for configs/recommend-skills.json and related tool-reference content
 
 REPO_ROOT="$BATS_TEST_DIRNAME/.."
 RECOMMEND_SKILLS_JSON="$REPO_ROOT/configs/recommend-skills.json"
-README_FILE="$REPO_ROOT/README.md"
+README_FILE="$REPO_ROOT/TOOL_REFERENCE.md"
 
 # ---------------------------------------------------------------------------
 # configs/recommend-skills.json – structural / schema tests
@@ -294,50 +294,10 @@ README_FILE="$REPO_ROOT/README.md"
 }
 
 @test "README.md table row references modem-dev/hunk hunk-review SKILL.md URL" {
-    run grep -F 'https://github.com/modem-dev/hunk/blob/main/skills/hunk-review/SKILL.md' "$README_FILE"
+    run grep -F 'https://github.com/modem-dev/hunk/blob/main/packages/hunk/skills/hunk-review/SKILL.md' "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
-# ---------------------------------------------------------------------------
-# openai/codex babysit-pr entry (newly added)
-# ---------------------------------------------------------------------------
-
-@test "recommend-skills.json contains openai/codex babysit-pr skill entry" {
-    if ! command -v jq &>/dev/null; then
-        skip "jq not installed"
-    fi
-    run jq -e '[.recommended_skills[] | select(.repo == "openai/codex" and .skill == "babysit-pr")] | length > 0' "$RECOMMEND_SKILLS_JSON"
-    [ "$status" -eq 0 ]
-    [ "$output" = "true" ]
-}
-
-@test "babysit-pr entry has non-empty description" {
-    if ! command -v jq &>/dev/null; then
-        skip "jq not installed"
-    fi
-    run jq -r '[.recommended_skills[] | select(.skill == "babysit-pr")][0].description' "$RECOMMEND_SKILLS_JSON"
-    [ "$status" -eq 0 ]
-    [ -n "$output" ]
-}
-
-@test "babysit-pr description mentions monitor or review comments" {
-    if ! command -v jq &>/dev/null; then
-        skip "jq not installed"
-    fi
-    run jq -r '[.recommended_skills[] | select(.skill == "babysit-pr")][0].description' "$RECOMMEND_SKILLS_JSON"
-    [ "$status" -eq 0 ]
-    [[ "$output" == *"monitor"* ]] || [[ "$output" == *"review"* ]]
-}
-
-@test "README.md install block contains openai/codex babysit-pr install command" {
-    run grep -F 'npx skills add openai/codex --skill babysit-pr' "$README_FILE"
-    [ "$status" -eq 0 ]
-}
-
-@test "README.md table row references openai/codex babysit-pr SKILL.md URL" {
-    run grep -F 'https://github.com/openai/codex/blob/main/.codex/skills/babysit-pr/SKILL.md' "$README_FILE"
-    [ "$status" -eq 0 ]
-}
 
 # ---------------------------------------------------------------------------
 # shadcn/improve entry (newly added)
@@ -371,13 +331,13 @@ README_FILE="$REPO_ROOT/README.md"
     [ "$status" -eq 0 ]
 }
 
-@test "shadcn/improve is the first entry in recommended_skills" {
+@test "pstack remains the first recommendation after upstream refresh" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
     fi
     run jq -r '.recommended_skills[0].repo' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
-    [ "$output" = "shadcn/improve" ]
+    [ "$output" = "michael-denyer/pstack-claude" ]
 }
 
 @test "shadcn/improve entry has no skill subfield" {
@@ -433,6 +393,16 @@ README_FILE="$REPO_ROOT/README.md"
     [ "$output" -ge 1 ]
 }
 
+@test "Engram documentation describes hooks and optional network sync" {
+    run jq -r '.recommended_skills[] | select(.repo == "Gentleman-Programming/engram") | .description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"lifecycle hooks"* ]]
+    [[ "$output" == *"22 MCP tools at the checked revision"* ]]
+    [[ "$output" == *"optional Git/cloud sync"* ]]
+    run grep -F '22 MCP tools at the checked revision' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
 @test "recommend-skills.json contains privatenumber/mac-ocr skill entry" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
@@ -440,4 +410,124 @@ README_FILE="$REPO_ROOT/README.md"
     run jq -e '[.recommended_skills[] | select(.repo == "privatenumber/mac-ocr" and .skill == "mac-ocr")] | length > 0' "$RECOMMEND_SKILLS_JSON"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
+}
+
+@test "recommend-skills.json contains tt-a1i/archify skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "tt-a1i/archify" and .skill == "archify")] | length == 1' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "archify entry describes interactive system maps" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.skill == "archify")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"interactive system map"* ]]
+}
+
+@test "README.md documents Archify and its install command" {
+    run grep -F 'https://github.com/tt-a1i/archify' "$README_FILE"
+    [ "$status" -eq 0 ]
+
+    run grep -F 'npx skills add tt-a1i/archify --skill archify --global --agent claude-code' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+# ---------------------------------------------------------------------------
+# BuilderIO/skills visual-recap entry (newly added)
+# ---------------------------------------------------------------------------
+
+@test "recommend-skills.json contains BuilderIO visual-recap skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "BuilderIO/skills" and .skill == "visual-recap")] | length == 1' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "BuilderIO visual-recap entry has non-empty description" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "BuilderIO/skills" and .skill == "visual-recap")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
+@test "README.md documents BuilderIO visual-recap install command" {
+    run grep -F 'npx skills add BuilderIO/skills --skill visual-recap --global --agent claude-code' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md visual-recap table row references BuilderIO skills" {
+    run grep -F 'https://github.com/BuilderIO/skills' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+# ---------------------------------------------------------------------------
+# dzhng/jevgrep entry
+# ---------------------------------------------------------------------------
+
+@test "recommend-skills.json contains dzhng/jevgrep skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "dzhng/jevgrep" and .skill == "jevgrep")] | length == 1' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "jevgrep entry describes behavior-based code discovery" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "dzhng/jevgrep" and .skill == "jevgrep")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"asking what code does"* ]]
+}
+
+@test "README.md documents jevgrep and its install command" {
+    run grep -F 'https://github.com/dzhng/jevgrep' "$README_FILE"
+    [ "$status" -eq 0 ]
+
+    run grep -F 'npx skills add dzhng/jevgrep --skill jevgrep --global --agent claude-code' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+# ---------------------------------------------------------------------------
+# michael-denyer/pstack-claude entry
+# ---------------------------------------------------------------------------
+
+@test "recommend-skills.json contains pstack poteto-mode skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "michael-denyer/pstack-claude" and .skill == "poteto-mode")] | length == 1' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "pstack poteto-mode entry has non-empty description" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "michael-denyer/pstack-claude" and .skill == "poteto-mode")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
+@test "README.md documents pstack poteto-mode install command" {
+    run grep -F 'npx skills add michael-denyer/pstack-claude --skill poteto-mode --global --agent claude-code' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md pstack table row references michael-denyer/pstack-claude" {
+    run grep -F 'https://github.com/michael-denyer/pstack-claude' "$README_FILE"
+    [ "$status" -eq 0 ]
 }

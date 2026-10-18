@@ -1,13 +1,15 @@
 import { readFile } from "node:fs/promises";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import type { Context, Next } from "hono";
 import { Hono } from "hono";
 import { stream } from "hono/streaming";
 import { z } from "zod";
 import { createOpenAIClient } from "./lib/openai-client.ts";
 import { buildContextMessage, RAG_SYSTEM_PROMPT } from "./lib/rag-prompt.ts";
+import { createRateLimiter } from "./lib/rate-limit.ts";
 import { type RetrievedChunk, retrieve } from "./lib/retriever.ts";
+import { installGitHubBot } from "./src/github-bot/app.ts";
+import { botConfigFromEnv } from "./src/github-bot/config.ts";
 
 const [indexHtml, installSh, installPs1] = await Promise.all([
 	readFile("index.html", "utf-8"),
@@ -17,47 +19,23 @@ const [indexHtml, installSh, installPs1] = await Promise.all([
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX = 30;
-const requestTimestamps = new Map<string, number[]>();
-
-function rateLimitMiddleware(c: Context, next: Next) {
-	const forwarded = c.req.header("x-forwarded-for");
-	const clientIp = c.req.header("fly-client-ip") || (forwarded ? forwarded.split(",")[0]?.trim() : undefined);
-	const key = clientIp ?? "unknown";
-	const now = Date.now();
-	const timestamps = requestTimestamps.get(key) ?? [];
-	const recent = timestamps.filter((timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS);
-
-	if (recent.length >= RATE_LIMIT_MAX) {
-		return c.json({ error: "Rate limit exceeded. Try again later." }, 429);
-	}
-
-	recent.push(now);
-	requestTimestamps.set(key, recent);
-	return next();
-}
-
-function pruneRateLimitMap() {
-	const now = Date.now();
-	for (const [key, timestamps] of requestTimestamps.entries()) {
-		const recent = timestamps.filter((timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS);
-		if (recent.length === 0) {
-			requestTimestamps.delete(key);
-		} else {
-			requestTimestamps.set(key, recent);
-		}
-	}
-}
-
-setInterval(pruneRateLimitMap, 5 * 60 * 1000);
+const rateLimiter = createRateLimiter(RATE_LIMIT_WINDOW_MS, RATE_LIMIT_MAX);
+const pruneTimer = setInterval(() => rateLimiter.prune(), 5 * 60 * 1000);
+pruneTimer.unref();
 
 const app = new Hono();
 
-if (!process.env.OPENAI_API_KEY) {
-	console.error("OPENAI_API_KEY is not set. Copy .env.example to .env and add your key.");
-	process.exit(1);
-}
+const openai = process.env.OPENAI_API_KEY ? createOpenAIClient() : undefined;
+const botConfig = botConfigFromEnv(process.env);
+const bot = botConfig ? await installGitHubBot(app, botConfig) : undefined;
 
-const openai = createOpenAIClient();
+app.get("/healthz", (c) => c.json({ status: "ok" }));
+app.get("/readyz", (c) =>
+	c.json(
+		{ status: bot?.ready() === false ? "not-ready" : "ready", bot: Boolean(bot) },
+		bot?.ready() === false ? 503 : 200,
+	),
+);
 
 const documentTypeSchema = z.enum(["documentation", "source", "issue", "pull_request", "cli_help", "example_config"]);
 const chatRequestSchema = z.object({
@@ -68,7 +46,8 @@ const chatRequestSchema = z.object({
 
 app.use("/data/*", async (c) => c.text("Forbidden", 403));
 
-app.post("/api/chat", rateLimitMiddleware, async (c) => {
+app.post("/api/chat", rateLimiter.middleware, async (c) => {
+	if (!openai) return c.json({ error: "Chat is not configured." }, 503);
 	const startedAt = performance.now();
 	let body: unknown;
 	try {
@@ -225,12 +204,23 @@ app.use(
 
 app.get("/", (c) => c.html(indexHtml));
 app.get("/index.html", (c) => c.redirect("/"));
+app.get("/docs", (c) => c.redirect("/docs/"));
+app.use(
+	"/docs/*",
+	serveStatic({
+		root: "./docs",
+		rewriteRequestPath: (requestPath) => {
+			const relativePath = requestPath.replace(/^\/docs\/?/, "");
+			return relativePath === "" ? "index.html" : relativePath;
+		},
+	}),
+);
 app.get("/install.sh", (c) => c.text(installSh));
 app.get("/install.ps1", (c) => c.text(installPs1));
 
 const port = Number.parseInt(process.env.PORT ?? "3000", 10);
 
-serve(
+const server = serve(
 	{
 		fetch: app.fetch,
 		port,
@@ -240,3 +230,18 @@ serve(
 		console.log(`Server running at http://${info.address}:${info.port}`);
 	},
 );
+
+let shuttingDown = false;
+async function shutdown() {
+	if (shuttingDown) return;
+	shuttingDown = true;
+	const forcedExit = setTimeout(() => process.exit(1), 10_000);
+	forcedExit.unref();
+	clearInterval(pruneTimer);
+	server.close();
+	await bot?.shutdown();
+	clearTimeout(forcedExit);
+	process.exit(0);
+}
+process.once("SIGTERM", () => void shutdown());
+process.once("SIGINT", () => void shutdown());

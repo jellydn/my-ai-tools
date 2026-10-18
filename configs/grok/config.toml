@@ -39,8 +39,24 @@ args = [
     "@agentmemory/mcp",
 ]
 
+[mcp_servers.sem]
+command = "sem-mcp"
+args = []
+
+[mcp_servers.ctx]
+command = "ctx"
+args = [
+    "mcp",
+    "serve",
+]
+
+[mcp_servers.codebase-memory-mcp]
+type = "stdio"
+command = "codebase-memory-mcp"
+
 [models]
-default = "grok-composer-2.5-fast"
+default = "omniroute"
+default_reasoning_effort = "high"
 
 [ui]
 theme = "auto"
@@ -49,31 +65,35 @@ auto_light_theme = "grokday"
 max_thoughts_width = 120
 fork_secondary_model = "grok-build"
 yolo = false
-compact_mode = false
+compact_mode = true
 permission_mode = "always-approve"
 simple_mode = true
 vim_mode = true
 show_timestamps = true
+show_timeline = true
+hunk_tracker_mode = "agent_only"
+screen_mode = "fullscreen"
 
 [cli]
-installer = "internal"
+installer = "npm"
 auto_update = true
 
 [marketplace]
 official_marketplace_auto_installed = true
+default_skills_installs_purged = true
 
 [[marketplace.sources]]
 name = "xAI Official"
 git = "https://github.com/xai-org/plugin-marketplace.git"
 
-[mcp_servers.sem]
-command = "sem-mcp"
-args = []
+[model.omniroute]
+model = "paid"
+base_url = "http://127.0.0.1:20128/v1"
+name = "OmniRoute"
+description = "Routed via OmniRoute gateway"
+api_backend = "chat_completions"
+api_key = "sk_omniroute"
+context_window = 200000
 
-[mcp_servers.ctx]
-command = "ctx"
-args = ["mcp", "serve"]
-
-[mcp_servers.codebase-memory-mcp]
-type = "stdio"
-command = "codebase-memory-mcp"
+[privacy]
+privacy_banner_acked = "2026-08-17T08:51:39Z"

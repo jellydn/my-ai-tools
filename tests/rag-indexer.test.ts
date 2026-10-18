@@ -3,7 +3,15 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { CHUNK_OVERLAP, chunkMarkdown, chunkText, indexRepository, MAX_CHUNK_SIZE } from "../lib/indexer.ts";
+import {
+	CHUNK_OVERLAP,
+	chunkMarkdown,
+	chunkText,
+	indexGitHub,
+	indexRepository,
+	MAX_CHUNK_SIZE,
+} from "../lib/indexer.ts";
+import { getDefaultEmbeddingModel } from "../lib/openai-client.ts";
 import { buildContextMessage, RAG_SYSTEM_PROMPT } from "../lib/rag-prompt.ts";
 import { type Chunk, rankChunks, validateIndex } from "../lib/retriever.ts";
 
@@ -58,7 +66,7 @@ test("server index validation rejects stale schemas and dimensions", () => {
 		() =>
 			validateIndex({
 				schemaVersion: 2,
-				model: process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small",
+				model: process.env.OPENAI_EMBEDDING_MODEL ?? getDefaultEmbeddingModel(),
 				generatedAt: new Date().toISOString(),
 				chunks: [
 					{ path: "README.md", text: "one", metadata: { type: "documentation" }, embedding: [1, 2] },
@@ -86,6 +94,53 @@ test("retrieval supports top-k and metadata pre-filtering", () => {
 		["pull/315"],
 	);
 	assert.equal(rankChunks([0, 0], chunks, { topK: 3 })[0]?.score, 0);
+});
+
+test("published GitHub corpus never uses token-only content", async () => {
+	const originalFetch = globalThis.fetch;
+	const token = process.env.GITHUB_TOKEN;
+	process.env.GITHUB_TOKEN = "test-token-not-a-real-secret";
+	globalThis.fetch = (async (_url, options) => {
+		const authenticated = new Headers(options?.headers).has("Authorization");
+		return Response.json([
+			{
+				number: 7,
+				title: "Public",
+				state: "open",
+				user: null,
+				body: authenticated ? "PRIVATE_SENTINEL" : "PUBLIC_SENTINEL",
+				html_url: "https://github.com/owner/repo/issues/7",
+			},
+		]);
+	}) as typeof fetch;
+	try {
+		const chunks = await indexGitHub("owner/repo");
+		assert.ok(chunks.length > 0);
+		assert.ok(chunks.every((chunk) => chunk.text.includes("PUBLIC_SENTINEL")));
+		assert.ok(chunks.every((chunk) => !chunk.text.includes("PRIVATE_SENTINEL")));
+	} finally {
+		globalThis.fetch = originalFetch;
+		if (token === undefined) delete process.env.GITHUB_TOKEN;
+		else process.env.GITHUB_TOKEN = token;
+	}
+});
+
+test("index validation rejects malformed metadata and non-finite vectors", () => {
+	const chunk = { path: "README.md", text: "Public", metadata: { type: "documentation" }, embedding: [1, 0] };
+	const index = {
+		schemaVersion: 2,
+		model: process.env.OPENAI_EMBEDDING_MODEL ?? getDefaultEmbeddingModel(),
+		chunks: [chunk],
+	};
+	assert.equal(validateIndex(index).chunks.length, 1);
+	for (const invalid of [
+		{ ...chunk, metadata: { type: "secret" } },
+		{ ...chunk, metadata: { type: "documentation", url: 17 } },
+		{ ...chunk, embedding: [1, "0"] },
+		{ ...chunk, embedding: [1, Number.NaN] },
+		{ ...chunk, embedding: [1, Number.POSITIVE_INFINITY] },
+	])
+		assert.throws(() => validateIndex({ ...index, chunks: [invalid] }), /Invalid index/);
 });
 
 test("indexRepository classifies documentation, CLI help, configs, and source", () => {

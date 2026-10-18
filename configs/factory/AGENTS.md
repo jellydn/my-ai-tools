@@ -1,5 +1,9 @@
 # 🤖 Factory Droid Agent Guidelines
 
+## Communication
+
+Use ASD-STE100 Simplified Technical English. Read a relevant `CONTEXT.md` when it governs terms or behavior you change.
+
 ## Session Management with tmux
 
 Run dev servers, tests, and interactive CLIs inside tmux with the **current directory name as the session name** for easy debugging:
@@ -18,21 +22,25 @@ fi
 tmux capture-pane -p -t "$SESSION" -S -20  # check output
 ```
 
-See @~/.ai-tools/best-practices.md for full details.
-
 ## AI Tool Guidelines
 
 - Use the fff MCP tools for all file search operations instead of default tools.
 - Use the sem MCP tools for semantic version control and git operations.
 - When using bash commands for file/content search, prefer `fd` (fdfind) and `rg` (ripgrep) over standard `find` and `grep` for better performance and git-awareness.
 
+## Token Efficiency
+
+- Keep responses concise and actionable; lead with conclusions, file paths, and verification.
+- Read only task-relevant files and instructions. Do not preload repository maps, architecture docs, memory, or skills.
+- Scope searches and command output with paths, filters, and line ranges.
+- Use `~/.local/bin/rtk` for supported shell commands when available; bypass it with `RTK_DISABLED=1` when raw output is required.
+- Prefer `codebase-memory-mcp` graph tools for structural code discovery when available.
+
 ## General Practices
 
-- Follow my software development practice @~/.ai-tools/best-practices.md
-- Read @~/.ai-tools/MEMORY.md first — qmd (durable) vs agentmemory (session); follow the decision rule there
-- Read @~/.ai-tools/agent-memory.md — auto-capture learnings, persist bug fixes, keep memories concise. After fixing a bug (confirmed by human), introducing a new tech choice, or encountering something important, ask: "Would you like me to record this as a learning?"
-- Follow git safety guidelines @~/.ai-tools/git-guidelines.md
-- Keep responses concise and actionable.
+- Read `~/.ai-tools/best-practices.md` only when the repository lacks equivalent guidance or the task needs its detailed workflow.
+- Read `~/.ai-tools/MEMORY.md` and `~/.ai-tools/agent-memory.md` only when deciding whether or where to persist a learning.
+- Read `~/.ai-tools/git-guidelines.md` before destructive or history-changing git operations.
 - Ask before destructive operations — don't guess safety
 - Code is communication — prefer clarity and simplicity
 - Self-documenting code through meaningful names and structure

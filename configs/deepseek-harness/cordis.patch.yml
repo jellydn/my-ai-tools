@@ -1,0 +1,41 @@
+- insert:
+    - id: mcp-context7
+      name: "@deepseek-ai/dsh-mcp-client"
+      config:
+        serverName: context7
+        transport: stdio
+        command: npx
+        args: ["-y", "@upstash/context7-mcp@3.2.5"]
+    - id: mcp-sequential-thinking
+      name: "@deepseek-ai/dsh-mcp-client"
+      config:
+        serverName: sequential-thinking
+        transport: stdio
+        command: npx
+        args: ["-y", "@modelcontextprotocol/server-sequential-thinking@2026.7.4"]
+    - id: mcp-qmd
+      name: "@deepseek-ai/dsh-mcp-client"
+      config:
+        serverName: qmd
+        transport: stdio
+        command: qmd
+        args: ["mcp"]
+    - id: mcp-fff
+      name: "@deepseek-ai/dsh-mcp-client"
+      config:
+        serverName: fff
+        transport: stdio
+        command: fff-mcp
+    - id: mcp-sem
+      name: "@deepseek-ai/dsh-mcp-client"
+      config:
+        serverName: sem
+        transport: stdio
+        command: sem-mcp
+    - id: mcp-ctx
+      name: "@deepseek-ai/dsh-mcp-client"
+      config:
+        serverName: ctx
+        transport: stdio
+        command: ctx
+        args: ["mcp", "serve"]

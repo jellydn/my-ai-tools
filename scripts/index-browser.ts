@@ -41,7 +41,7 @@ function encodeEmbeddingsToBase64(embeddings: number[][], dim: number): string {
 }
 
 async function main() {
-	const chunks = await indexKnowledgeBase(REPO_ROOT);
+	const chunks = await indexKnowledgeBase();
 	if (chunks.length === 0) {
 		console.error("No chunks found to index.");
 		process.exit(1);
