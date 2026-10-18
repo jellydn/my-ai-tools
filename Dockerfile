@@ -1,9 +1,13 @@
 FROM oven/bun:1 AS build
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json bun.lock ./
 COPY packages/ ./packages/
 RUN bun install --frozen-lockfile
 COPY . .
+ARG GITHUB_REPOSITORY=jellydn/my-ai-tools
+ARG GITHUB_SOURCE_REF=main
+ENV GITHUB_REPOSITORY=${GITHUB_REPOSITORY} GITHUB_SOURCE_REF=${GITHUB_SOURCE_REF}
 RUN --mount=type=secret,id=OPENAI_API_KEY,env=OPENAI_API_KEY \
     if [ -n "$OPENAI_API_KEY" ]; then bun scripts/index-repo.ts && bun scripts/index-browser.ts; fi
 # index-browser.ts is the only consumer. The running bot embeds through the API.

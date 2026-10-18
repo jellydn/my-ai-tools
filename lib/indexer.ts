@@ -1,10 +1,32 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { extname, relative, resolve } from "node:path";
 
 export const MAX_CHUNK_SIZE = 1000;
-export const CHUNK_OVERLAP = 200;
+export const CHUNK_OVERLAP = 150;
+const MAX_GITHUB_ITEMS_PER_TYPE = 100;
+const MAX_GITHUB_BODY_CHARS = 6000;
+const MAX_GITHUB_CHUNKS_PER_ITEM = 4;
+const MAX_GITHUB_CHUNKS_PER_TYPE = 200;
+const MAX_GITHUB_PAGES = 10;
+const MAX_LOCAL_FILE_BYTES = 1024 * 1024;
+const MAX_LOCAL_INPUT_BYTES = 20 * 1024 * 1024;
+const MAX_LOCAL_CHUNKS = 5000;
 
-export const SUPPORTED_EXTS = new Set([".md", ".txt", ".json", ".yaml", ".yml", ".sh", ".ps1"]);
+export const SUPPORTED_EXTS = new Set([
+	".md",
+	".txt",
+	".json",
+	".jsonc",
+	".yaml",
+	".yml",
+	".toml",
+	".sh",
+	".ps1",
+	".ts",
+	".js",
+]);
 
 export const EXCLUDED_DIRS = new Set([
 	".git",
@@ -70,10 +92,19 @@ export const EXCLUDED_FILE_PATTERNS = [
 export type Chunk = {
 	path: string;
 	text: string;
+	metadata: ChunkMetadata;
+};
+
+export type DocumentType = "documentation" | "issue" | "pull_request" | "cli_help" | "example_config" | "source";
+
+export type ChunkMetadata = {
+	type: DocumentType;
+	author?: string;
+	url?: string;
 };
 
 export function shouldIndexFile(filePath: string, repoRoot: string): boolean {
-	const relativePath = relative(repoRoot, filePath);
+	const relativePath = relative(repoRoot, filePath).replaceAll("\\", "/");
 	const parts = relativePath.split("/");
 
 	for (const part of parts) {
@@ -110,6 +141,9 @@ export function walk(dir: string, repoRoot: string): string[] {
 }
 
 export function chunkText(text: string, maxSize: number, overlap: number): string[] {
+	if (!Number.isInteger(maxSize) || maxSize <= 0 || !Number.isInteger(overlap) || overlap < 0 || overlap >= maxSize) {
+		throw new Error("Chunk size must be positive and overlap must be between zero and chunk size");
+	}
 	const normalized = text.replace(/\r\n/g, "\n").trim();
 	if (normalized.length === 0) return [];
 	if (normalized.length <= maxSize) return [normalized];
@@ -120,50 +154,26 @@ export function chunkText(text: string, maxSize: number, overlap: number): strin
 	while (start < normalized.length) {
 		let end = Math.min(start + maxSize, normalized.length);
 		if (end < normalized.length) {
-			const nextBreak = normalized.lastIndexOf("\n\n", end);
-			if (nextBreak !== -1 && nextBreak > start) {
+			const nextBreak = normalized.lastIndexOf("\n\n", end - 2);
+			if (nextBreak !== -1 && nextBreak + 2 > start + overlap) {
 				end = nextBreak + 2;
 			} else {
-				const nextLine = normalized.lastIndexOf("\n", end);
-				if (nextLine !== -1 && nextLine > start) {
+				const nextLine = normalized.lastIndexOf("\n", end - 1);
+				if (nextLine !== -1 && nextLine + 1 > start + overlap) {
 					end = nextLine + 1;
 				}
 			}
 		}
-		chunks.push(normalized.slice(start, end).trim());
-		start += maxSize - overlap;
-		if (start >= end) start = end;
+		chunks.push(normalized.slice(start, end));
+		if (end === normalized.length) break;
+		start = Math.max(end - overlap, start + 1);
 	}
 
-	return chunks.filter((chunk) => chunk.length > 0);
+	return chunks.filter((chunk) => chunk.trim().length > 0);
 }
 
 export function chunkMarkdown(text: string): string[] {
-	const normalized = text.replace(/\r\n/g, "\n").trim();
-	if (normalized.length === 0) return [];
-
-	const sections = normalized.split(/(?=\n*^#{1,4} .+$)/m);
-	const chunks: string[] = [];
-
-	for (const section of sections) {
-		const trimmed = section.trim();
-		if (trimmed.length === 0) continue;
-		if (trimmed.length <= MAX_CHUNK_SIZE) {
-			chunks.push(trimmed);
-			continue;
-		}
-
-		const paragraphs = trimmed.split(/\n\n+/);
-		for (const paragraph of paragraphs) {
-			if (paragraph.length <= MAX_CHUNK_SIZE) {
-				if (paragraph.trim().length > 0) chunks.push(paragraph.trim());
-				continue;
-			}
-			chunks.push(...chunkText(paragraph, MAX_CHUNK_SIZE, CHUNK_OVERLAP));
-		}
-	}
-
-	return chunks.filter((chunk) => chunk.length > 0);
+	return chunkText(text, MAX_CHUNK_SIZE, CHUNK_OVERLAP);
 }
 
 export function chunkByFileType(filePath: string, content: string): string[] {
@@ -174,30 +184,186 @@ export function chunkByFileType(filePath: string, content: string): string[] {
 	return chunkText(content, MAX_CHUNK_SIZE, CHUNK_OVERLAP);
 }
 
-export function indexRepository(repoRoot: string): Chunk[] {
+function classifyPath(path: string): DocumentType {
+	if (path === "cli.sh" || path === "generate.sh") return "cli_help";
+	if (path.startsWith("configs/")) return "example_config";
+	if (path === "README.md" || path === "SOUL.md" || path.startsWith("CHANGELOG") || path.startsWith("docs/")) {
+		return "documentation";
+	}
+	return "source";
+}
+
+function localSourceUrl(path: string, sourceRef: string): string {
+	const repo = process.env.GITHUB_REPOSITORY ?? "jellydn/my-ai-tools";
+	const encodedPath = path.split("/").map(encodeURIComponent).join("/");
+	return `https://github.com/${repo}/blob/${encodeURIComponent(sourceRef)}/${encodedPath}`;
+}
+
+export function indexRepository(
+	repoRoot: string,
+	sourceRef = process.env.GITHUB_SOURCE_REF?.trim() || "main",
+): Chunk[] {
 	const filePaths = walk(repoRoot, repoRoot);
 	console.log(`Found ${filePaths.length} supported files`);
 
 	const allChunks: Chunk[] = [];
+	let totalInputBytes = 0;
 
 	for (const filePath of filePaths) {
 		try {
+			const fileBytes = statSync(filePath).size;
+			if (fileBytes > MAX_LOCAL_FILE_BYTES) {
+				throw new Error(`File exceeds ${MAX_LOCAL_FILE_BYTES} byte indexing limit; exclude or split it`);
+			}
+			totalInputBytes += fileBytes;
+			if (totalInputBytes > MAX_LOCAL_INPUT_BYTES) {
+				throw new Error(`Repository exceeds ${MAX_LOCAL_INPUT_BYTES} byte indexing limit`);
+			}
 			const content = readFileSync(filePath, "utf-8");
 			const chunks = chunkByFileType(filePath, content);
+			if (allChunks.length + chunks.length > MAX_LOCAL_CHUNKS) {
+				throw new Error(`Repository exceeds ${MAX_LOCAL_CHUNKS} local chunk indexing limit`);
+			}
 			for (const text of chunks) {
+				const path = relative(repoRoot, filePath).replaceAll("\\", "/");
 				allChunks.push({
-					path: relative(repoRoot, filePath),
+					path,
 					text,
+					metadata: { type: classifyPath(path), url: localSourceUrl(path, sourceRef) },
 				});
 			}
 			console.log(`  ${relative(repoRoot, filePath)}: ${chunks.length} chunks`);
 		} catch (error) {
-			console.error(`  Failed to read ${filePath}: ${error}`);
+			throw new Error(`Failed to index ${relative(repoRoot, filePath)}: ${error}`);
 		}
 	}
 
 	console.log(`Total chunks to embed: ${allChunks.length}`);
 	return allChunks;
+}
+
+type GitHubItem = {
+	number: number;
+	title: string;
+	body: string | null;
+	state: string;
+	html_url: string;
+	user: { login: string } | null;
+};
+
+async function fetchGitHubPage(url: string): Promise<GitHubItem[]> {
+	const headers: Record<string, string> = {
+		Accept: "application/vnd.github+json",
+		"User-Agent": "my-ai-tools-indexer",
+	};
+	// Published indexes must never contain content visible only to a token holder.
+
+	for (let attempt = 1; attempt <= 2; attempt++) {
+		try {
+			const response = await fetch(url, { headers, redirect: "error", signal: AbortSignal.timeout(10_000) });
+			if (!response.ok) {
+				throw new Error(`GitHub API returned ${response.status} ${response.statusText}`);
+			}
+			return (await response.json()) as GitHubItem[];
+		} catch (error) {
+			if (attempt === 2) throw error;
+			await new Promise((resolve) => setTimeout(resolve, 500));
+		}
+	}
+	return [];
+}
+
+function chunkGitHubItem(item: GitHubItem, type: "issue" | "pull_request"): Chunk[] {
+	const label = type === "issue" ? "Issue" : "Pull Request";
+	const path = type === "issue" ? `issues/${item.number}` : `pull/${item.number}`;
+	const body = (item.body ?? "No description provided.").slice(0, MAX_GITHUB_BODY_CHARS);
+	const content = `# ${label} #${item.number}: ${item.title}\n\nState: ${item.state}\nAuthor: ${item.user?.login ?? "unknown"}\n\n${body}`;
+	return chunkMarkdown(content)
+		.slice(0, MAX_GITHUB_CHUNKS_PER_ITEM)
+		.map((text) => ({
+			path,
+			text,
+			metadata: {
+				type,
+				author: item.user?.login,
+				url: item.html_url,
+			},
+		}));
+}
+
+function selectGitHubChunks(items: GitHubItem[], type: "issue" | "pull_request"): Chunk[] {
+	const chunksByItem = items.map((item) => chunkGitHubItem(item, type));
+	const summaries = chunksByItem.flatMap((chunks) => chunks.slice(0, 1));
+	const details = chunksByItem.flatMap((chunks) => chunks.slice(1));
+	return [...summaries, ...details].slice(0, MAX_GITHUB_CHUNKS_PER_TYPE);
+}
+
+export async function indexGitHub(repo = process.env.GITHUB_REPOSITORY ?? "jellydn/my-ai-tools"): Promise<Chunk[]> {
+	if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) {
+		throw new Error(`Invalid GITHUB_REPOSITORY: ${repo}`);
+	}
+
+	try {
+		const issues: GitHubItem[] = [];
+		for (let page = 1; issues.length < MAX_GITHUB_ITEMS_PER_TYPE && page <= MAX_GITHUB_PAGES; page++) {
+			const items = await fetchGitHubPage(
+				`https://api.github.com/repos/${repo}/issues?state=all&sort=created&direction=desc&per_page=100&page=${page}`,
+			);
+			issues.push(...items.filter((item) => !("pull_request" in item)));
+			if (items.length < 100) break;
+		}
+		issues.splice(MAX_GITHUB_ITEMS_PER_TYPE);
+		if (issues.length < MAX_GITHUB_ITEMS_PER_TYPE) {
+			console.warn(`GitHub issue scan found ${issues.length} issues after at most ${MAX_GITHUB_PAGES} pages`);
+		}
+		const pulls = await fetchGitHubPage(
+			`https://api.github.com/repos/${repo}/pulls?state=all&sort=created&direction=desc&per_page=${MAX_GITHUB_ITEMS_PER_TYPE}`,
+		);
+		const chunks = [...selectGitHubChunks(issues, "issue"), ...selectGitHubChunks(pulls, "pull_request")];
+		console.log(`GitHub: ${issues.length} issues, ${pulls.length} pull requests, ${chunks.length} bounded chunks`);
+		return chunks;
+	} catch (error) {
+		console.warn(`GitHub documents were not indexed: ${error}`);
+		return [];
+	}
+}
+
+export async function indexKnowledgeBase(): Promise<Chunk[]> {
+	const repo = process.env.GITHUB_REPOSITORY ?? "jellydn/my-ai-tools";
+	const ref = process.env.GITHUB_SOURCE_REF?.trim() || "main";
+	if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !/^[\w][\w./-]*$/.test(ref)) {
+		throw new Error("Invalid public repository or source ref");
+	}
+	const directory = mkdtempSync(resolve(tmpdir(), "public-rag-"));
+	try {
+		// A fresh anonymous checkout is the publication boundary. Never read the
+		// caller's working tree, credentials, Git configuration, or unpublished commits.
+		const git = (args: string[]) =>
+			execFileSync("git", args, {
+				cwd: directory,
+				env: {
+					PATH: process.env.PATH,
+					HOME: directory,
+					GIT_CONFIG_NOSYSTEM: "1",
+					GIT_CONFIG_GLOBAL: "/dev/null",
+					GIT_TERMINAL_PROMPT: "0",
+				},
+				encoding: "utf8",
+				timeout: 120_000,
+				maxBuffer: 2 * 1024 * 1024,
+			});
+		git(["init", "--quiet"]);
+		git(["-c", "http.followRedirects=false", "fetch", "--quiet", "--depth=1", `https://github.com/${repo}.git`, ref]);
+		git(["checkout", "--quiet", "--detach", "FETCH_HEAD"]);
+		const sha = git(["rev-parse", "HEAD"]).trim();
+		const localChunks = indexRepository(directory, sha);
+		const githubChunks = await indexGitHub(repo);
+		const chunks = [...localChunks, ...githubChunks];
+		console.log(`Public corpus ${repo}@${sha}: ${chunks.length} chunks`);
+		return chunks;
+	} finally {
+		rmSync(directory, { recursive: true, force: true });
+	}
 }
 
 export function isTextFile(filePath: string): boolean {

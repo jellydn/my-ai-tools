@@ -4,8 +4,8 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { stream } from "hono/streaming";
 import { z } from "zod";
-import { buildSystemPrompt } from "./lib/chat-prompt.ts";
 import { createOpenAIClient } from "./lib/openai-client.ts";
+import { buildContextMessage, RAG_SYSTEM_PROMPT } from "./lib/rag-prompt.ts";
 import { createRateLimiter } from "./lib/rate-limit.ts";
 import { type RetrievedChunk, retrieve } from "./lib/retriever.ts";
 import { installGitHubBot } from "./src/github-bot/app.ts";
@@ -37,14 +37,18 @@ app.get("/readyz", (c) =>
 	),
 );
 
+const documentTypeSchema = z.enum(["documentation", "source", "issue", "pull_request", "cli_help", "example_config"]);
 const chatRequestSchema = z.object({
 	message: z.string().min(1).max(4000),
+	topK: z.union([z.literal(3), z.literal(5), z.literal(10), z.literal(20)]).default(5),
+	types: z.array(documentTypeSchema).max(6).optional(),
 });
 
 app.use("/data/*", async (c) => c.text("Forbidden", 403));
 
 app.post("/api/chat", rateLimiter.middleware, async (c) => {
 	if (!openai) return c.json({ error: "Chat is not configured." }, 503);
+	const startedAt = performance.now();
 	let body: unknown;
 	try {
 		body = await c.req.json();
@@ -56,67 +60,129 @@ app.post("/api/chat", rateLimiter.middleware, async (c) => {
 		return c.json({ error: "Invalid request body" }, 400);
 	}
 
-	const { message } = parsed.data;
+	const { message, topK, types } = parsed.data;
 	let chunks: RetrievedChunk[];
+	const retrievalStartedAt = performance.now();
 	try {
-		chunks = await retrieve(message, 5);
+		chunks = await retrieve(message, { topK, types });
 	} catch (error) {
-		if (
-			error &&
-			typeof error === "object" &&
-			"code" in error &&
-			(error as { code: unknown }).code === "ENOENT"
-		) {
-			return c.json(
-				{ error: "Index not found. Run `bun run index` to build data/index.json." },
-				503,
-			);
+		console.error(
+			JSON.stringify({
+				event: "rag_request",
+				questionLength: message.length,
+				topK,
+				filters: { types: types ?? [] },
+				retrievedChunks: [],
+				retrievalLatencyMs: Math.round(performance.now() - retrievalStartedAt),
+				latencyMs: Math.round(performance.now() - startedAt),
+				error: "retrieval_failed",
+			}),
+		);
+		if (error && typeof error === "object" && "code" in error && (error as { code: unknown }).code === "ENOENT") {
+			return c.json({ error: "Index not found. Run `bun run index` to build data/index.json." }, 503);
 		}
 		return c.json({ error: "Failed to retrieve context from the index." }, 500);
 	}
 
 	if (chunks.length === 0) {
+		console.log(
+			JSON.stringify({
+				event: "rag_request",
+				questionLength: message.length,
+				topK,
+				filters: { types: types ?? [] },
+				retrievedChunks: [],
+				retrievalLatencyMs: Math.round(performance.now() - retrievalStartedAt),
+				promptTokens: 0,
+				responseTokens: 0,
+				latencyMs: Math.round(performance.now() - startedAt),
+			}),
+		);
 		c.header("Content-Type", "text/plain; charset=utf-8");
 		return stream(c, async (stream) => {
-			await stream.write(
-				`${JSON.stringify({ type: "text", content: "This is not documented in the repository." })}\n`,
-			);
-			await stream.write(`${JSON.stringify({ type: "sources", paths: [] })}\n`);
+			await stream.write(`${JSON.stringify({ type: "text", content: "This is not documented in the repository." })}\n`);
+			await stream.write(`${JSON.stringify({ type: "sources", sources: [] })}\n`);
 		});
 	}
 
 	const CHAT_MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
-	const systemPrompt = buildSystemPrompt(chunks);
 	let completion;
 	try {
 		completion = await openai.chat.completions.create({
 			model: CHAT_MODEL,
 			messages: [
-				{ role: "system", content: systemPrompt },
-				{ role: "user", content: message },
+				{ role: "system", content: RAG_SYSTEM_PROMPT },
+				{ role: "user", content: buildContextMessage(message, chunks) },
 			],
 			stream: true,
+			stream_options: { include_usage: true },
 			temperature: 0.2,
 		});
 	} catch {
+		console.error(
+			JSON.stringify({
+				event: "rag_request",
+				questionLength: message.length,
+				topK,
+				filters: { types: types ?? [] },
+				retrievedChunks: chunks.map((chunk) => ({
+					path: chunk.path,
+					type: chunk.metadata.type,
+					score: Number(chunk.score.toFixed(4)),
+				})),
+				retrievalLatencyMs: Math.round(performance.now() - retrievalStartedAt),
+				latencyMs: Math.round(performance.now() - startedAt),
+				error: "generation_unavailable",
+			}),
+		);
 		return c.json({ error: "The language model is unavailable. Please try again later." }, 502);
 	}
 
 	c.header("Content-Type", "text/plain; charset=utf-8");
 	return stream(c, async (stream) => {
+		let promptTokens: number | null = null;
+		let responseTokens: number | null = null;
+		let streamError = false;
 		try {
 			for await (const part of completion) {
+				if (part.usage) {
+					promptTokens = part.usage.prompt_tokens;
+					responseTokens = part.usage.completion_tokens;
+				}
 				const content = part.choices[0]?.delta?.content;
 				if (content) {
 					await stream.write(`${JSON.stringify({ type: "text", content })}\n`);
 				}
 			}
 
-			const sourcePaths = [...new Set(chunks.map((chunk) => chunk.path))];
-			await stream.write(`${JSON.stringify({ type: "sources", paths: sourcePaths })}\n`);
+			const sources = [
+				...new Map(chunks.map((chunk) => [chunk.path, { path: chunk.path, url: chunk.metadata.url }])).values(),
+			];
+			await stream.write(`${JSON.stringify({ type: "sources", sources })}\n`);
 		} catch {
+			streamError = true;
 			await stream.write(
 				`${JSON.stringify({ type: "error", message: "Response generation failed. Please try again later." })}\n`,
+			);
+		} finally {
+			console.log(
+				JSON.stringify({
+					event: "rag_request",
+					questionLength: message.length,
+					topK,
+					filters: { types: types ?? [] },
+					retrievedChunks: chunks.map((chunk) => ({
+						path: chunk.path,
+						type: chunk.metadata.type,
+						author: chunk.metadata.author,
+						score: Number(chunk.score.toFixed(4)),
+					})),
+					retrievalLatencyMs: Math.round(performance.now() - retrievalStartedAt),
+					promptTokens,
+					responseTokens,
+					latencyMs: Math.round(performance.now() - startedAt),
+					...(streamError ? { error: "generation_failed" } : {}),
+				}),
 			);
 		}
 	});

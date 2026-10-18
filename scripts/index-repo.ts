@@ -1,12 +1,8 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { indexRepository } from "../lib/indexer.ts";
-import {
-	createOpenAIClient,
-	getDefaultEmbeddingModel,
-	resolveApiKey,
-} from "../lib/openai-client.ts";
+import { indexKnowledgeBase } from "../lib/indexer.ts";
+import { createOpenAIClient, getDefaultEmbeddingModel, resolveApiKey } from "../lib/openai-client.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -49,13 +45,11 @@ async function createEmbeddings(chunks: string[]): Promise<number[][]> {
 async function main() {
 	const apiKey = resolveApiKey();
 	if (!apiKey) {
-		console.error(
-			"OPENAI_API_KEY (or OPENROUTER_API_KEY) is not set. Copy .env.example to .env and add your key.",
-		);
+		console.error("OPENAI_API_KEY (or OPENROUTER_API_KEY) is not set. Copy .env.example to .env and add your key.");
 		process.exit(1);
 	}
 
-	const chunks = indexRepository(REPO_ROOT);
+	const chunks = await indexKnowledgeBase();
 	if (chunks.length === 0) {
 		console.error("No chunks found to index.");
 		process.exit(1);
@@ -67,6 +61,7 @@ async function main() {
 	const indexedChunks = chunks.map((chunk, index) => ({
 		path: chunk.path,
 		text: chunk.text,
+		metadata: chunk.metadata,
 		embedding: embeddings[index],
 	}));
 
@@ -74,8 +69,11 @@ async function main() {
 	writeFileSync(
 		INDEX_PATH,
 		JSON.stringify({
+			schemaVersion: 2,
 			generatedAt: new Date().toISOString(),
 			model: EMBEDDING_MODEL,
+			repository: process.env.GITHUB_REPOSITORY ?? "jellydn/my-ai-tools",
+			sourceRef: process.env.GITHUB_SOURCE_REF?.trim() || "main",
 			chunks: indexedChunks,
 		}),
 		"utf-8",
