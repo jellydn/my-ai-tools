@@ -84,12 +84,12 @@ fi
 claude --version    # Claude Code
 codex --version     # OpenAI Codex
 amp --version       # Amp
-fx                   # Vercel Labs fx
-muse
-kilo              # Kilo CLI
-ctx               # ctx
-agy               # Antigravity CLI
-ai                # ai-switcher (binary is `ai`)
+command -v fx       # Vercel Labs fx
+command -v muse
+command -v kilo     # Kilo CLI
+command -v ctx
+command -v agy      # Antigravity CLI
+command -v ai       # ai-switcher (binary is `ai`)
 
 # Managed skills (fx, Muse, agents share this directory)
 ls ~/.agents/skills
