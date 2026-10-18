@@ -15,24 +15,24 @@ Linux-specific details are worth knowing before you run `cli.sh`.
   `omp` (Oh My Pi), `antigravity`, `ai-switcher`, `reasonix`, plus the
   always-run shared infra (`rtk`, `global_tools`, `ccs`).
 - Copy managed configs into `~/.claude/`, `~/.config/opencode/`, `~/.codex/`,
-  `~/.fx/`, `~/.amp/`, `~/.config/pi/`, etc.
+  `~/.fx/`, `~/.config/amp/`, `~/.pi/agent/`, etc.
 - Install MCP servers (context7, sequential-thinking, qmd,
   codebase-memory-mcp, agentmemory, sem, ctx) into the tools that support them.
 - Install shared skills into `~/.agents/skills`.
 
-Existing configs are **backed up** to `~/ai-tools-backup-<timestamp>/`
-(`--backup`), never deleted.
+Managed configs are **backed up** to `~/ai-tools-backup-<timestamp>/`
+with `--backup`. These are filtered configuration backups, not full-directory
+snapshots. Runtime data such as `node_modules`, caches, and databases is excluded.
+The installer keeps the last five backups.
 
 ## Why
 
 - `./cli.sh --yes` non-interactive mode is the right fit when you know you
   want the active tool set; it also auto-accepts the backup step without
   prompting.
-- `--backup` is especially valuable on a machine that already has configs: the
-  first run replaced an existing `~/.config/opencode/` (with `opencode.json`,
-  `tui.json`, a `node_modules/`, and an `opencode.json.tui-migration.bak`) and
-  an existing Claude Code `themes/` directory. Both were preserved intact at
-  `~/ai-tools-backup-20260915-104034/` so nothing was lost.
+- `--backup` is especially valuable on a machine that already has configs.
+  Check the backup contents before you rely on them. Make a separate full backup
+  if you also need runtime data or files excluded by `safe_copy_dir`.
 - Tool installers write their CLIs in different places depending on the
   platform; on this Linux box they landed in `~/.local/bin` and under mise
   install dirs (`~/.local/share/mise/installs/<tool>/latest/bin`). Those paths
@@ -49,9 +49,11 @@ Existing configs are **backed up** to `~/ai-tools-backup-<timestamp>/`
 sudo pacman -S --noconfirm git
 # A script runner for the installers (bunx preferred, npx fallback)
 curl -fsSL https://bun.sh/install | bash
-npm install -g bun  # or use npx; the installer detects it automatically
+export PATH="${BUN_INSTALL:-$HOME/.bun}/bin:$PATH"
+bun --version
 ```
 
+If Node.js and `npx` are already available, you can use them instead of installing Bun.
 Free disk space first if your root partition is small — see Troubleshooting.
 
 ### 2. Clone and run
@@ -59,6 +61,12 @@ Free disk space first if your root partition is small — see Troubleshooting.
 ```bash
 git clone https://github.com/jellydn/my-ai-tools.git
 cd my-ai-tools
+bash cli.sh --dry-run
+```
+
+Inspect the plan before starting the installation:
+
+```bash
 bash cli.sh --yes --backup
 ```
 
@@ -69,6 +77,9 @@ re-launches under bash transparently if invoked via `sh`.
 
 ```bash
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/installs/node/latest/bin:$PATH"
+if command -v bun >/dev/null 2>&1; then
+  export PATH="$(bun pm bin -g):$PATH"
+fi
 
 claude --version    # Claude Code
 codex --version     # OpenAI Codex
@@ -129,13 +140,16 @@ Backup dir:           ~/ai-tools-backup-20260915-104034/
 ## Troubleshooting
 
 - **`No space left on device` mid-install** — this 24 GB root partition filled
-  up during the run; the failing copy aborted the last config step. Freed by
-  clearing caches and re-running:
+  up during the run; the failing copy aborted the last config step. Inspect disk
+  usage and remove only disposable files you have checked. Do not delete entire
+  cache or temporary directories blindly: other tools can keep active state there.
   ```bash
-  npm cache clean --force
-  rm -rf ~/.cache/* ~/.npm/_cacache
-  rm -rf ~/.claude/tmp/*
+  du -sh ~/.cache ~/.npm ~/.claude/tmp 2>/dev/null
   df -h /          # confirm headroom
+  bash cli.sh --dry-run
+  ```
+  After freeing space, inspect the plan and confirm that your backup is usable:
+  ```bash
   bash cli.sh --yes --no-backup   # idempotent re-run finishes the job
   ```
 - **`claude` not found after install** — a disk-full write during `-y` install
@@ -146,7 +160,9 @@ Backup dir:           ~/ai-tools-backup-20260915-104034/
 - **CLIs installed but not on `PATH`** — new tools go to `~/.local/bin` and
   mise install dirs. Ensure those are on `PATH`, then `exec bash` (or
   `mise reshim` if using mise shims).
-- **Plugins print `install failed (may already be installed)`** — harmless on
-  re-runs; the plugin exists from the previous run.
+- **Plugins print `install failed (may already be installed)`** — this can be a
+  real failure, not only an existing installation. Check that the target CLI is
+  available, inspect its installed plugins, and read the original error before
+  retrying.
 - **`cli.sh` complains bash is not found** — the guard in `lib/require_bash.sh`
   is executed via `#!/bin/bash`; run the script with `bash cli.sh` explicitly.
