@@ -17,7 +17,7 @@
 		"explorer": {
 			"description": "Fast explorer subagent for codebase exploration",
 			"mode": "subagent",
-			"model": "omnirouter/free"
+			"model": "omniroute/free"
 		}
 	},
 	"default_agent": "plan",
@@ -55,11 +55,6 @@
 		"agentmemory": {
 			"command": ["npx", "-y", "@agentmemory/mcp"],
 			"enabled": true,
-			"environment": {
-				"AGENTMEMORY_SECRET": "${AGENTMEMORY_SECRET:-}",
-				"AGENTMEMORY_TOOLS": "${AGENTMEMORY_TOOLS:-all}",
-				"AGENTMEMORY_URL": "${AGENTMEMORY_URL:-http://localhost:3111}"
-			},
 			"type": "local"
 		},
 		"context7": {
@@ -108,7 +103,7 @@
 			"command": ["codebase-memory-mcp"]
 		}
 	},
-	"model": "omnirouter/free",
+	"model": "omniroute/free",
 	"plugin": [
 		[
 			"@plannotator/opencode@latest",
