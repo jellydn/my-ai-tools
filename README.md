@@ -34,9 +34,9 @@ repository.
 ### Windows 11
 
 - Windows PowerShell 5.1 or PowerShell 7
-- [Git for Windows](https://git-scm.com/download/win), including Git Bash
-- [`winget`](https://learn.microsoft.com/windows/package-manager/winget/) to install `jq` automatically, or a
-  manual [`jq` installation](https://jqlang.org/download/)
+- [`winget`](https://learn.microsoft.com/windows/package-manager/winget/) to install missing Git for Windows
+  (including Git Bash) and `jq` automatically, or install [Git for Windows](https://git-scm.com/download/win)
+  and [`jq`](https://jqlang.org/download/) manually
 - Bun or Node.js LTS for JavaScript-based tools
 
 During Git for Windows setup, select **Git from the command line and also from 3rd-party software**. The native
@@ -83,9 +83,27 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -DryRun
 powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Backup
 ```
 
-The PowerShell installer detects Git Bash, installs `jq` with `winget` when needed, and forwards options to
-`cli.sh`. When run from a repository checkout, it uses that checkout. When downloaded by itself or piped to
-PowerShell, it clones the latest repository into a temporary directory.
+The PowerShell installer installs missing Git for Windows and `jq` with `winget` and forwards options to
+`cli.sh`. Package installation uses `--source winget` (not `msstore`), accepts package/source agreements, and
+disables installer prompts and upgrades. Windows may still require administrator approval for Git installation.
+Existing prerequisites are reused. `-DryRun` never installs prerequisites; Git Bash must already be available
+to run the shared installer's preview.
+
+The wrapper merges machine, user, and current-process PATH entries, then checks registered Git locations and
+WinGet links/package folders. It adds discovered executable directories to the current process so Git Bash
+inherits them, without changing the saved PATH itself. This normally avoids a terminal restart. When run from
+a repository checkout, it uses that checkout. When downloaded by itself or piped to PowerShell, it clones the
+latest repository into a temporary directory.
+
+If a prerequisite remains unavailable after a successful package install, close **all** terminal windows,
+open PowerShell again, and re-run the same installer command with your original options. If `winget` reports
+an error, resolve it first or use the manual download links printed by the installer. If `winget` is missing,
+install or update [App Installer](https://aka.ms/getwinget). You can also install the prerequisites separately:
+
+```powershell
+winget install --exact --id Git.Git --source winget
+winget install --exact --id jqlang.jq --source winget
+```
 
 For a direct one-line installation:
 
@@ -213,6 +231,7 @@ HTML pages in [`docs/`](docs/index.html) are generated from the Markdown sources
 - [Detailed tool and skill reference](TOOL_REFERENCE.md)
 - [Fusion orchestration](docs/fusion-orchestration.md)
 - [Claude Code agent teams](docs/claude-code-teams.md)
+- [30-day applied AI learning sprint](docs/30-day-applied-ai-learnings.md)
 - [qmd knowledge management](docs/qmd-knowledge-management.md)
 - [My AI Bot](docs/my-ai-bot.md)
 - [Applied AI and GenAI cheat sheet](docs/ai-applied-genai-cheat-sheet.md)

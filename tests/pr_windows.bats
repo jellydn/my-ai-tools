@@ -31,6 +31,14 @@ TEST_WORKFLOW="$REPO_ROOT/.github/workflows/test.yml"
     [ "$status" -eq 0 ]
 }
 
+@test "Windows prerequisite recovery works with stale PATH and missing tools" {
+    command -v pwsh >/dev/null || skip "PowerShell is required (also tested in native Windows CI)"
+    run pwsh -NoProfile -File "$REPO_ROOT/tests/windows_installer.ps1"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"PASS: fresh install, stale PATH, inherited PATH, idempotence"* ]]
+    [[ "$output" == *"PASS: failed-winget"* ]]
+}
+
 @test "Windows installer uses the checkout when cli.sh is beside it" {
     run grep -F 'Test-Path (Join-Path $PSScriptRoot "cli.sh")' "$INSTALL_PS1"
     [ "$status" -eq 0 ]

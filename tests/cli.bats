@@ -183,3 +183,17 @@ setup() {
     [ "$status" -eq 0 ]
     [[ "$output" == *"Usage:"* ]]
 }
+
+@test "community plugins are skipped when their CLI tool is missing" {
+    command() {
+        if [ "$1" = "-v" ] && [ "$2" = "copilot" ]; then
+            return 1
+        fi
+        builtin command "$@"
+    }
+    run install_community_plugin_non_interactive \
+        "plannotator-copilot" "plannotator-copilot@plannotator" "backnotprop/plannotator" "copilot"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Skipping plannotator-copilot plugin (copilot CLI not installed)"* ]]
+    [[ "$output" != *"install failed"* ]]
+}
