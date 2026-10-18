@@ -66,9 +66,12 @@ jobs:
             printf '\n' >> ~/.ssh/dokku_deploy
           fi
 
+          # Identify the CI key without printing private or public key material.
+          ssh-keygen -y -P '' -f ~/.ssh/dokku_deploy | ssh-keygen -lf -
           ssh-keyscan -H "$DOKKU_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
           SSH=(ssh -i ~/.ssh/dokku_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes "dokku@$DOKKU_HOST")
+          "${SSH[@]}" ps:report "$DOKKU_APP"
 
           # BuildKit secret + runtime both read app config. Re-set the full
           # OpenAI-compatible config on every deploy so host-side drift (e.g. a
@@ -80,11 +83,13 @@ jobs:
           encode() {
             printf '%s' "$1" | base64 -w 0
           }
-          "${SSH[@]}" config:set --encoded --no-restart "$DOKKU_APP" \
+          # Keep the app first for ACL plugins that inspect positional arguments.
+          # Dokku may print decoded config values; suppress successful stdout.
+          "${SSH[@]}" config:set "$DOKKU_APP" --encoded --no-restart \
             "OPENAI_API_KEY=$(encode "$EFFECTIVE_OPENAI_API_KEY")" \
             "OPENAI_BASE_URL=$(encode "https://openrouter.ai/api/v1")" \
             "OPENAI_MODEL=$(encode "openrouter/free")" \
-            "OPENAI_EMBEDDING_MODEL=$(encode "nvidia/llama-nemotron-embed-vl-1b-v2:free")"
+            "OPENAI_EMBEDDING_MODEL=$(encode "nvidia/llama-nemotron-embed-vl-1b-v2:free")" >/dev/null
 
       - name: Deploy to Dokku
         uses: dokku/github-action@master
