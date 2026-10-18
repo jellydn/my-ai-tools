@@ -48,7 +48,7 @@ TEST_WORKFLOW="$REPO_ROOT/.github/workflows/test.yml"
 }
 
 @test "CI parses and dry-runs the installer on native Windows" {
-    run grep -F 'runs-on: windows-2022' "$TEST_WORKFLOW"
+    run grep -F 'runs-on: windows-2025' "$TEST_WORKFLOW"
     [ "$status" -eq 0 ]
 
     run grep -F 'uses: oven-sh/setup-bun@v2' "$TEST_WORKFLOW"
