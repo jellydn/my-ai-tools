@@ -4,10 +4,12 @@ load helpers
 
 setup() {
     export HOME="$BATS_TEST_TMPDIR/home with spaces"
+    export TERM=screen-256color
     mkdir -p "$HOME/.local/share/pi-durable" "$HOME/work/pi-durable"
     cat > "$HOME/.local/share/pi-durable/node" <<'NODE'
 #!/bin/sh
 printf 'cwd=%s\nagent=%s\nmask=%s\n' "$PWD" "$PI_CODING_AGENT_DIR" "$(umask)"
+printf 'term=%s\n' "$TERM"
 printf 'arg=%s\n' "$@"
 exit 23
 NODE
@@ -20,6 +22,7 @@ NODE
     [[ "$output" == *"cwd=$HOME/work/pi-durable"* ]]
     [[ "$output" == *"agent=$HOME/.local/state/pi-durable/agent"* ]]
     [[ "$output" == *"mask=0077"* ]]
+    [[ "$output" == *"term=screen-256color"* ]]
     [[ "$output" == *"arg=$HOME/.local/share/pi-durable/source/packages/coding-agent/src/experimental/source-resolver.ts"* ]]
     [[ "$output" == *"arg=$HOME/.local/share/pi-durable/source/packages/coding-agent/src/experimental/durable/main.ts"* ]]
     [[ "$output" == *"arg=--continue" ]]
