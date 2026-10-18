@@ -1,6 +1,7 @@
 FROM oven/bun:1 AS build
 WORKDIR /app
 COPY package.json bun.lock ./
+COPY packages/ ./packages/
 RUN bun install --frozen-lockfile
 COPY . .
 RUN --mount=type=secret,id=OPENAI_API_KEY,env=OPENAI_API_KEY \
