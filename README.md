@@ -34,15 +34,10 @@ repository.
 ### Windows 11
 
 - Windows PowerShell 5.1 or PowerShell 7
-- [`winget`](https://learn.microsoft.com/windows/package-manager/winget/) to install missing Git for Windows
-  (including Git Bash), `jq`, and Node.js LTS automatically, or install
-  [Git for Windows](https://git-scm.com/download/win), [`jq`](https://jqlang.org/download/), and
-  [Node.js LTS with npm](https://nodejs.org/) manually
-- Node.js LTS with npm is required for native Windows JavaScript package installation. Bun alone is not sufficient.
+- [`winget`](https://learn.microsoft.com/windows/package-manager/winget/) (App Installer) for automatic prerequisite setup
 
-During Git for Windows setup, select **Git from the command line and also from 3rd-party software**. The native
-Windows installer uses PowerShell for setup and Git Bash to run the shared Bash installer. WSL remains supported
-and can use the Linux instructions.
+The installer handles Git for Windows (including Git Bash), `jq`, and Node.js LTS with npm. You do not need to
+install them separately or open Git Bash first. WSL users can use the Linux instructions.
 
 ## 🚀 Installation
 
@@ -68,61 +63,36 @@ curl -fsSL https://ai-tools.itman.fyi/install.sh | bash
 
 ### Windows 11
 
-Open PowerShell and review the installer before execution:
-
-```powershell
-Invoke-RestMethod https://ai-tools.itman.fyi/install.ps1 -OutFile install.ps1
-Get-Content .\install.ps1
-.\install.ps1 -DryRun
-.\install.ps1 -Backup
-```
-
-If the PowerShell execution policy blocks the saved script, run it for this process only:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -DryRun
-powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Backup
-```
-
-The PowerShell installer installs missing Git for Windows, `jq`, and Node.js LTS with `winget` and forwards options to
-`cli.sh`. Package installation uses `--source winget` (not `msstore`), accepts package/source agreements, and
-disables installer prompts and upgrades. Windows may still require administrator approval for Git or Node.js installation.
-Existing prerequisites are reused. `-DryRun` never installs prerequisites; Git Bash and Node.js/npm must already
-be available to run the shared installer's preview.
-
-The wrapper merges machine, user, and current-process PATH entries, then checks registered Git locations and
-WinGet links/package folders. It adds discovered executable directories to the current process so Git Bash
-inherits them, without changing the saved PATH itself. This normally avoids a terminal restart. When run from
-a repository checkout, it uses that checkout. When downloaded by itself or piped to PowerShell, it clones the
-latest repository into a temporary directory.
-
-Native Windows uses **npm** for global packages and **npx** for package runners, even when Bun is present.
-The Bash Bun bootstrap can leave an extensionless `bun` executable on Windows. Bun 1.4.3 then fails to
-launch lifecycle scripts with `Failed to run script install/postinstall due to error ENOENT`, even with
-Node.js on PATH; the same binary named `bun.exe` does not have this failure. Using Node/npm avoids that
-launcher problem and supplies the runtime for packages whose lifecycle scripts invoke `node`. The installer
-requires both Node.js and npm before installing packages and adds npm's global prefix (not `prefix/bin`)
-to the current Git Bash PATH. It does not copy npm shims to `~/.local/bin`, which would break their relative
-module paths on Windows. Direct Git Bash users must install Node.js LTS with npm first. Linux, macOS,
-and WSL keep the existing Bun-first behavior. Do not use `--ignore-scripts` to bypass this error: it can
-leave native package binaries uninstalled.
-
-If a prerequisite remains unavailable after a successful package install, close **all** terminal windows,
-open PowerShell again, and re-run the same installer command with your original options. If `winget` reports
-an error, resolve it first or use the manual download links printed by the installer. If `winget` is missing,
-install or update [App Installer](https://aka.ms/getwinget). You can also install the prerequisites separately:
-
-```powershell
-winget install --exact --id Git.Git --source winget
-winget install --exact --id jqlang.jq --source winget
-winget install --exact --id OpenJS.NodeJS.LTS --source winget
-```
-
-For a direct one-line installation:
+Open PowerShell and run the canonical installer:
 
 ```powershell
 Invoke-RestMethod https://ai-tools.itman.fyi/install.ps1 | Invoke-Expression
 ```
+
+This downloads and executes a remote script. Review [install.ps1](install.ps1) before trusting it. It installs
+missing prerequisites through `winget`, reuses existing tools, refreshes PATH for the current process, and starts
+the shared installer in Git Bash. Windows may request administrator approval for Git or Node.js installation.
+Native Windows uses Node/npm, not Bun, for package installation; Linux, macOS, and WSL keep Bun-first behavior.
+
+The installer can replace existing configuration. To inspect the script, preview changes, and request a backup,
+use the saved-script path instead:
+
+```powershell
+Invoke-RestMethod https://ai-tools.itman.fyi/install.ps1 -OutFile install.ps1
+Get-Content .\install.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -DryRun
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Backup
+```
+
+Execution-policy bypass applies only to that process. `-DryRun` does not install prerequisites; install them first
+if the preview reports they are missing. The one-line command is non-interactive and automatically uses `--yes`.
+
+If setup fails, resolve the reported error and rerun the same command. If a newly installed prerequisite still
+cannot be found, close all terminal windows and reopen PowerShell. If `winget` is missing, install or update
+[App Installer](https://aka.ms/getwinget), or install [Git for Windows](https://git-scm.com/download/win),
+[`jq`](https://jqlang.org/download/), and [Node.js LTS with npm](https://nodejs.org/) manually. In Git setup,
+select **Git from the command line and also from 3rd-party software**. Do not bypass package lifecycle errors
+with `--ignore-scripts`: native binaries can remain uninstalled.
 
 ### Repository checkout
 
@@ -187,9 +157,14 @@ The MCP registry includes integrations such as Context7, sequential thinking, qm
 fff, React Grab, logpilot, sem, and ctx. Installation depends on each server's runtime and credentials.
 
 For explicit cross-project user preferences, [user-memory MCP](packages/user-memory-mcp/README.md) provides
-five preference tools backed by local files. From this checkout, run `npm ci && npm run link:user-memory`
-to build and link the `user-memory-mcp` binary; the installer also performs this local setup when it is missing.
+five preference tools backed by local files. It is **optional**: the installer does not install or configure it.
+The existing qmd, codebase-memory-mcp, and agentmemory integrations remain unchanged. Follow the package guide
+to build, link, and register user-memory only if you need a separate explicit-preference store.
 See [the memory guide](MEMORY.md) for the distinction between preferences, project knowledge, and session handoffs.
+
+ctx's initial history indexing is optional. If provider paths cannot be inspected safely, the installer retains
+the verified binary and continues with a warning. Retry with `ctx setup`; see [ctx troubleshooting](TOOL_REFERENCE.md#-ctx-optional)
+for exact-path imports without bypassing its safety checks.
 
 Do not commit secrets. Keep API keys in environment variables or the target tool's credential store. Review
 `.env.example` for server-side environment variable names used by this repository.

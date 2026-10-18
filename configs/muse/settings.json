@@ -5,11 +5,6 @@
     "foreign_context_notice_shown": true
   },
   "mcpServers": {
-    "user-memory": {
-      "mode": "optional",
-      "transport": "stdio",
-      "command": "user-memory-mcp"
-    },
     "agentmemory": {
       "mode": "optional",
       "transport": "stdio",

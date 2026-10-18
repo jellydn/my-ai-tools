@@ -137,6 +137,9 @@ If you find yourself wanting both "remember this for me next time" and "let me c
 `user-memory` stores structured user preferences in `~/.ai-tools/user-memory/preferences.json`. It is independent of
 the current project, uses deterministic key/value lookup, and writes value-free mutation records to `audit.jsonl`.
 
+This integration is optional and is not installed or configured by default. Follow the
+[manual setup guide](packages/user-memory-mcp/README.md) before using its tools.
+
 ### Use `user-memory` for
 
 - Preferences the user explicitly states, such as `responseStyle = concise` or `packageManager = pnpm`

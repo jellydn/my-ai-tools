@@ -573,42 +573,6 @@ install_stylua_if_needed() {
 	fi
 }
 
-install_user_memory_mcp_now() {
-	if command -v user-memory-mcp &>/dev/null; then
-		log_success "user-memory-mcp already installed"
-		return 0
-	fi
-	local repo_root="${SCRIPT_DIR:-}"
-	if [ ! -f "$repo_root/packages/user-memory-mcp/package.json" ] || ! command -v npm &>/dev/null; then
-		log_error "user-memory-mcp requires npm and this monorepo checkout"
-		return 1
-	fi
-	log_info "Installing dependencies, building and linking local user-memory-mcp..."
-	if (
-		cd "$repo_root" &&
-			execute "npm ci" &&
-			execute "npm run build --workspace @jellydn/user-memory-mcp" &&
-			execute "npm link --workspace @jellydn/user-memory-mcp"
-	); then
-		[ "$DRY_RUN" = true ] && return 0
-		local npm_prefix
-		npm_prefix=$(npm prefix -g) || return 1
-		ensure_dir_on_path "$npm_prefix/bin"
-		command -v user-memory-mcp &>/dev/null && return 0
-	fi
-	log_error "Failed to link user-memory-mcp; run npm ci && npm run link:user-memory from the repo root"
-	return 1
-}
-
-handle_user_memory_mcp_installation_if_needed() {
-	handle_tool_installation "user-memory-mcp" "install_user_memory_mcp_now" "command -v user-memory-mcp" "user-memory-mcp" "Cross-project user preference MCP"
-	[ "$DRY_RUN" = true ] && return 0
-	if ! command -v user-memory-mcp &>/dev/null; then
-		log_error "Stopping before enabling configs: user-memory-mcp is unavailable"
-		return 1
-	fi
-}
-
 install_backlog_if_needed() {
 	if [ "$AMP_INSTALLED" = false ]; then
 		return 0

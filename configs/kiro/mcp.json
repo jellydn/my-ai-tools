@@ -55,10 +55,6 @@
         "@agentmemory/mcp@latest"
       ]
     },
-    "user-memory": {
-      "command": "user-memory-mcp",
-      "args": []
-    },
     "sem": {
       "command": "sem-mcp",
       "args": []

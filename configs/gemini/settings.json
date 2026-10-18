@@ -1,7 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
   "mcpServers": {
-    "user-memory": { "command": "user-memory-mcp", "args": [], "env": {}, "timeout": 60000 },
     "agentmemory": {
       "command": "npx",
       "args": [

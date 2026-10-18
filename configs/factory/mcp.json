@@ -1,6 +1,5 @@
 {
   "mcpServers": {
-    "user-memory": { "type": "stdio", "command": "user-memory-mcp", "args": [], "disabled": false },
     "context7": {
       "type": "stdio",
       "command": "npx",

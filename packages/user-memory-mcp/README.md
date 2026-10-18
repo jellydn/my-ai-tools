@@ -32,9 +32,12 @@ Files are written with user-only permissions. Best-effort audit entries contain 
 never the preference value. Preference state is committed atomically; an audit write failure does not roll back or
 misreport a successful preference update. Set `USER_MEMORY_HOME` to override the storage directory, including for tests.
 
-## Install (npm link)
+## Optional installation (npm link)
 
-Until the package is published to npm, install the binary from this monorepo:
+The main installer does not install or configure this server. Existing qmd, codebase-memory-mcp, and agentmemory
+integrations remain available. Opt in only if you also need a separate explicit-preference store.
+
+Until the package is published to npm, install the binary from a persistent monorepo checkout:
 
 ```bash
 # from the my-ai-tools repo root
@@ -43,12 +46,30 @@ npm run link:user-memory
 # exposes `user-memory-mcp` on your PATH via npm link
 ```
 
-`./cli.sh` also auto-links the binary when the MCP registry prerequisite `user-memory-mcp` is missing.
-
-Run `./cli.sh --dry-run` before applying the installer. Automatic setup requires npm and
-this checkout, and stops before enabling the integration if the binary remains unavailable.
 Keep the checkout: `npm link` points to its built package. After updating the checkout,
-rerun `npm ci && npm run link:user-memory` to rebuild; the installer retains an existing binary.
+rerun `npm ci && npm run link:user-memory` to rebuild. On Windows, run the two npm commands separately in
+PowerShell 5.1 and ensure npm's global prefix (`npm prefix -g`) is on PATH; on Unix, use its `bin` subdirectory.
+
+Then register it only in the assistants where you want it. For Claude Code:
+
+```bash
+claude mcp add --scope user --transport stdio user-memory -- user-memory-mcp
+```
+
+For assistants with an `mcpServers` JSON map, merge this entry into your local configuration (do not replace
+the rest of the file):
+
+```json
+{
+  "mcpServers": {
+    "user-memory": { "command": "user-memory-mcp", "args": [] }
+  }
+}
+```
+
+OpenCode uses `"mcp": { "user-memory": { "type": "local", "command": ["user-memory-mcp"], "enabled": true } }`.
+To remove an existing registration, use each assistant's MCP settings. No binary uninstall or preference-store
+deletion is performed by the main installer.
 
 ## Run
 

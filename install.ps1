@@ -339,9 +339,9 @@ function Start-Installation {
     if ($exitCode -eq 0) {
         Write-Success "Installation completed successfully!"
         Write-Info "Next steps:"
-        Write-Info "  1. Restart your terminal"
-        Write-Info "  2. Run 'claude' to start Claude Code"
-        Write-Info "  3. Check the README.md for more information"
+        Write-Info "  Run your coding assistant (for example, 'claude')."
+        Write-Info "  If a new command is not found, reopen your terminal."
+        Write-Info "  See README.md for options and troubleshooting."
     } else {
         Write-Err "Installation failed with exit code: $exitCode"
         exit $exitCode

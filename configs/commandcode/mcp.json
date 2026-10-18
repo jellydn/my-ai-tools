@@ -59,12 +59,6 @@
         "@agentmemory/mcp"
       ]
     },
-    "user-memory": {
-      "transport": "stdio",
-      "enabled": true,
-      "command": "user-memory-mcp",
-      "args": []
-    },
     "sem": {
       "transport": "stdio",
       "enabled": true,

@@ -87,9 +87,9 @@ The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONS
 | `sem`                 | Semantic version control - entity-level diffs, blame, and impact analysis                 | `sem-mcp` (via [Ataraxy-Labs/sem](https://github.com/Ataraxy-Labs/sem)) |
 | `ctx`                 | Local agent-history search across coding sessions                                         | `ctx mcp serve`                                                         |
 
-The bundled MCP configurations also include `user-memory`, which runs the locally built
-`user-memory-mcp` binary. It stores explicit user preferences, not inferred coding tastes
-or project knowledge. See the [installation and storage guide](packages/user-memory-mcp/README.md).
+`user-memory` is an optional, manually configured integration, not part of the default installer or MCP templates.
+Its locally built `user-memory-mcp` binary stores explicit user preferences, not inferred coding tastes
+or project knowledge. See the [opt-in installation and storage guide](packages/user-memory-mcp/README.md).
 Codex, Cursor, and Gemini also configure `plannotator-inbox` with `plannotator inbox mcp`.
 
 ## 🎬 Demo
@@ -3338,6 +3338,22 @@ ctx setup
 # Search prior sessions
 ctx search "failed migration"
 ```
+
+The repository installer verifies the ctx binary first, then attempts optional initial history setup. If no
+provider history can be inspected safely, setup warnings remain visible but do not abort the rest of the install.
+Binary download, verification, or launch failures still stop installation. Retry indexing with `ctx setup` after
+resolving the reported paths or permissions.
+
+For `all_provider_terminal_coverage_unavailable` or a link/network/consent-boundary warning, do not disable ctx's
+safety checks. If you approve a specific local history source, import that exact path instead, for example:
+
+```powershell
+ctx import --provider pi --path "C:\Users\you\.pi\agent\sessions"
+```
+
+Replace the provider and path with the exact source you intend to read. `--path` belongs to `ctx import`, not
+`ctx setup`; `ctx import --help` lists the supported options. The installer does not grant consent, follow unsafe
+links, or widen source discovery to make indexing pass. A retained ctx binary does not mean its history index is ready.
 
 See the full [ctx docs](https://ctx.rs/first-search) for details.
 

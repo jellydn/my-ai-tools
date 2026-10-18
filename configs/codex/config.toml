@@ -61,11 +61,6 @@ AGENTMEMORY_SECRET = "${AGENTMEMORY_SECRET:-}"
 AGENTMEMORY_TOOLS = "${AGENTMEMORY_TOOLS:-all}"
 AGENTMEMORY_URL = "${AGENTMEMORY_URL:-http://localhost:3111}"
 
-[mcp_servers.user-memory]
-type = "stdio"
-command = "user-memory-mcp"
-args = []
-
 [mcp_servers.ctx]
 command = "ctx"
 args = ["mcp", "serve"]

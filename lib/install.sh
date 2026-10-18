@@ -839,21 +839,28 @@ install_herdr() {
 
 install_ctx() {
 	_run_ctx_install() {
-		if command -v ctx &>/dev/null; then
-			log_warning "ctx is already installed"
-			return 0
-		fi
-
+		# Keep binary installation failures fatal; history setup is a separate, optional step.
 		if [ "$IS_WINDOWS" = true ]; then
 			if command -v powershell.exe &>/dev/null; then
-				execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://ctx.rs/install.ps1 | iex\""
+				CTX_INSTALL_NO_SETUP=1 execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://ctx.rs/install.ps1 | iex\"" || return 1
 			else
 				log_error "PowerShell is required to install ctx on Windows."
 				log_info "Install manually: https://github.com/ctxrs/ctx"
 				return 1
 			fi
 		else
-			execute_installer "https://ctx.rs/install" "" "ctx"
+			CTX_INSTALL_NO_SETUP=1 execute_installer "https://ctx.rs/install" "" "ctx" || return 1
+		fi
+		ensure_dir_on_path "$HOME/.local/bin"
+		[ "$DRY_RUN" = true ] && return 0
+		ctx --version || return 1
+		[ "${CTX_INSTALL_NO_SETUP:-0}" = 1 ] && return 0
+		local setup_args="--wait"
+		[ "${CTX_INSTALL_NO_DAEMON:-0}" = 1 ] && setup_args="--no-daemon"
+		if ! execute "ctx setup $setup_args"; then
+			log_warning "ctx is installed, but optional history setup failed. Continuing without an initial index."
+			log_info "Retry: ctx setup"
+			log_info 'For an approved exact history path: ctx import --provider pi --path "/exact/local/history" (replace provider and path).'
 		fi
 	}
 	run_installer "ctx" "_run_ctx_install" "command -v ctx" "ctx --version 2>/dev/null || true"
