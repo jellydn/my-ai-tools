@@ -258,6 +258,8 @@ HTML pages in [`docs/`](docs/index.html) are generated from the Markdown sources
 - [30-day applied AI learning sprint](docs/30-day-applied-ai-learnings.md)
 - [qmd knowledge management](docs/qmd-knowledge-management.md)
 - [My AI Bot](docs/my-ai-bot.md)
+- [Public repository knowledge base](docs/rag-architecture.md)
+- [Retrieval evaluation](docs/rag-retrieval-quality.md)
 - [Applied AI and GenAI cheat sheet](docs/ai-applied-genai-cheat-sheet.md)
 - [Testing guide](TESTING.md)
 

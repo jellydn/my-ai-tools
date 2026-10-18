@@ -19,6 +19,8 @@
 		"dev": "tsx server.ts",
 		"bot:dev": "tsx --watch server.ts",
 		"start": "tsx server.ts",
+		"eval:retrieval": "tsx scripts/evaluate-retrieval.ts",
+		"test:rag": "tsx --test tests/rag-indexer.test.ts",
 		"test:code-taste": "bun test tests/code-taste.test.ts",
 		"typecheck": "bun node_modules/typescript/lib/tsc.js --noEmit",
 		"build:packages": "npm run build --workspaces --if-present",

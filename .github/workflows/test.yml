@@ -41,6 +41,21 @@ jobs:
       - name: Run config validation tests
         run: bats tests/pr_*.bats tests/generate.bats tests/sh_reexec.bats
 
+  rag:
+    name: RAG Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Test retrieval and public corpus boundaries
+        run: bun run test:rag
+
   code-taste:
     name: Code Taste Tests
     runs-on: ubuntu-latest

@@ -8,7 +8,7 @@ test("retrieve rejects incompatible indexes and preserves empty and ranked resul
 			"-e",
 			`
 import { expect, mock } from "bun:test";
-let index = { model: "other-model", chunks: [] };
+let index = { schemaVersion: 2, model: "test-model", chunks: [] };
 let calls = 0;
 mock.module("./lib/index-loader.ts", () => ({
   createIndexLoader: () => ({ load: async () => index, clear() {} }),
@@ -21,19 +21,25 @@ mock.module("./lib/openai-client.ts", () => ({
   } } }),
 }));
 const { retrieve } = await import("./lib/retriever.ts");
-const chunk = (path, embedding) => ({ path, text: path, embedding });
-expect(await retrieve("query", 1)).toEqual([]);
+const chunk = (path, embedding) => ({ path, text: path, metadata: { type: "source" }, embedding });
+expect(await retrieve("query", { topK: 3 })).toEqual([]);
 expect(calls).toBe(0);
 index.chunks = [chunk("a", [1, 0])];
-await expect(retrieve("query", 1)).rejects.toThrow("Index uses embedding model");
+index.model = "other-model";
+await expect(retrieve("query", { topK: 3 })).rejects.toThrow("does not match configured model");
 expect(calls).toBe(0);
 index.model = "test-model";
 for (const embedding of [[1], [1, 0, 1]]) {
   index.chunks = [chunk("valid", [1, 0]), chunk("invalid", embedding)];
-  await expect(retrieve("query", 1)).rejects.toThrow("Index embedding dimensions");
+  await expect(retrieve("query", { topK: 3 })).rejects.toThrow("inconsistent chunk or embedding dimensions");
+  index.chunks = [chunk("uniform-but-incompatible", embedding)];
+  await expect(retrieve("query", { topK: 3 })).rejects.toThrow("Query embedding dimension");
 }
 index.chunks = [chunk("orthogonal", [0, 1]), chunk("matching", [1, 0])];
-expect(await retrieve("query", 1)).toEqual([{ path: "matching", text: "matching", score: 1 }]);
+expect(await retrieve("query", { topK: 3 })).toEqual([
+  { path: "matching", text: "matching", metadata: { type: "source" }, score: 1 },
+  { path: "orthogonal", text: "orthogonal", metadata: { type: "source" }, score: 0 },
+]);
 `,
 		],
 		{
