@@ -98,6 +98,10 @@ args = ["mcp"]
 cwd = "."
 enabled = false
 
+[mcp_servers.plannotator-inbox]
+command = "plannotator"
+args = ["inbox", "mcp"]
+
 [notice]
 fast_default_opt_out = true
 hide_rate_limit_model_nudge = true

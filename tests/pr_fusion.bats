@@ -371,11 +371,11 @@ JSON
 	[ "$status" -eq 0 ]
 }
 
-@test "OpenCode ships open-cursor with cursor-acp provider and omnirouter/free default" {
+@test "OpenCode ships open-cursor with cursor-acp provider and omniroute/free default" {
 	require_jq
 	run jq -e '
-		.model == "omnirouter/free" and
-		.agent.explorer.model == "omnirouter/free" and
+		.model == "omniroute/free" and
+		.agent.explorer.model == "omniroute/free" and
 		.provider["cursor-acp"].options.baseURL == "http://127.0.0.1:32124/v1" and
 		.provider["cursor-acp"].models.auto.name == "Auto" and
 		.provider["cursor-acp"].models["cursor-grok-4.5-medium"].name == "Grok 4.5 Medium"

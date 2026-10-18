@@ -9,6 +9,27 @@
 # Requires: lib/common.sh (for log_*, execute_*, prompt_yn, execute_installer)
 # Requires: YES_TO_ALL, DRY_RUN, IS_WINDOWS, AMP_INSTALLED (set in cli.sh)
 
+# Shared prerequisite for Plannotator hooks, inbox MCP servers, and plugins.
+# Fail before copying enabled integrations if the binary cannot be installed.
+install_plannotator_if_needed() {
+	if command -v plannotator &>/dev/null; then
+		return 0
+	fi
+	log_info "Installing Plannotator CLI..."
+	local checksum
+	checksum=$(resolve_installer_checksum "plannotator")
+	if ! execute_installer "https://plannotator.ai/install.sh" "$checksum" "Plannotator CLI"; then
+		log_error "Plannotator installation failed; enabled integrations require the CLI"
+		return 1
+	fi
+	[ "$DRY_RUN" = true ] && return 0
+	ensure_dir_on_path "$HOME/.local/bin"
+	if ! command -v plannotator &>/dev/null; then
+		log_error "Plannotator installer completed but the CLI was not found"
+		return 1
+	fi
+}
+
 # ─── Bun installation ──────────────────────────────────────────────
 
 install_bun_now() {
