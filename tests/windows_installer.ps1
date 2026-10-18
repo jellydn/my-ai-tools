@@ -174,3 +174,7 @@ finally {
     ${env:ProgramFiles(x86)} = $originalProgramFilesX86
     if (Test-Path $fixture) { Remove-Item $fixture -Recurse -Force }
 }
+
+# The final fixture simulates a nonzero winget result. Do not let GitHub Actions
+# use that mocked native exit code as the result of this successful test suite.
+$global:LASTEXITCODE = 0
