@@ -32,9 +32,10 @@ Never run `./cli.sh` without `--dry-run` first. Config validation runs automatic
 
 - `--dry-run` — side-effect-free preview
 - `--backup` / `--no-backup` — backup existing configs (auto-prompted interactively)
-- `-y` / `--yes` — non-interactive; installs only Amp, Pi, Codex, and OpenCode. Auto-activated in CI/piped input. Does not copy config or enable integrations by default.
+- `-y` / `--yes` — non-interactive; installs Amp, Pi, Codex, OpenCode, shared skills, applicable MCP/plugin config, and declared integration dependencies. Auto-activated in CI/piped input. Other standalone catalog entries remain optional; user-memory stays opt-in.
 - `--with-tools=name,...` — opt into extra catalog CLIs such as qmd, plannotator, or ctx.
-- `--with-integrations` — opt into bundled config, plugins, skills, MCPs, and their prerequisites; can replace existing config.
+- `--with-integrations` — bundled config, plugins, skills, MCPs, and their prerequisites (default); can replace existing config.
+- `--without-integrations` — standalone CLIs only; leaves existing config unchanged.
 - `--migrate-gemini` — one-step Gemini→Antigravity CLI migration
 - `--rollback` — restore from the most recent `$HOME/ai-tools-backup-{timestamp}`
 - `-v` / `--verbose` — verbose logging
@@ -75,7 +76,7 @@ On the cloud VM `bats` is preinstalled — run `bats tests/` directly.
 
 - `cli.sh` auto-detects installed tools and skips missing ones — it won't install configs for tools you don't have.
 - `generate.sh` exports _from_ `$HOME` _to_ the repo; it only copies tools it finds installed.
-- `--yes` in CI/non-TTY shells can install the four core CLIs over the network; optional config copying needs `--with-integrations`. To exercise config copy deterministically, source the script and call its copy functions against a throwaway `HOME`:
+- `--yes` in CI/non-TTY shells can install the four core CLIs and integration dependencies over the network and copy config/skills. Use `--without-integrations` for standalone CLIs only. To exercise config copy deterministically, source the script and call its copy functions against a throwaway `HOME`:
   ```bash
   H=$(mktemp -d); mkdir -p "$H/.cursor" "$H/.config/opencode" "$H/.codex"
   ( export HOME="$H" DRY_RUN=false YES_TO_ALL=false; source ./cli.sh; copy_configurations )

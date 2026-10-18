@@ -167,11 +167,12 @@ install_for_tool() {
 	done
 }
 
-@test "enable_plugins installs Copilot and Droid plugins without Claude in dry-run and real execution" {
+@test "enable_plugins installs explicitly selected Copilot and Droid plugins without Claude" {
 	for dry_run in true false; do
 		run bash -c '
 			source "$1/cli.sh"
 			DRY_RUN="$2" YES_TO_ALL=true
+			TOOL_ALLOWLIST_YES+=(copilot factory)
 			command() {
 				if [ "$1" = -v ]; then
 					case "$2" in claude) return 1 ;; copilot|droid|plannotator) return 0 ;; esac

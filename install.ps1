@@ -26,6 +26,7 @@ param(
     [ValidatePattern('^$|^[a-zA-Z0-9_-]+(,[a-zA-Z0-9_-]+)*$')]
     [string]$WithTools = "",
     [switch]$WithIntegrations,
+    [switch]$WithoutIntegrations,
     [switch]$Rollback
 )
 
@@ -266,7 +267,9 @@ function Start-Installation {
     if ($NoBackup) { $arguments += "--no-backup" }
     if ($Yes) { $arguments += "--yes" }
     if ($WithTools) { $arguments += "--with-tools=$WithTools" }
+    if ($WithIntegrations -and $WithoutIntegrations) { throw 'Choose only one integration switch.' }
     if ($WithIntegrations) { $arguments += "--with-integrations" }
+    if ($WithoutIntegrations) { $arguments += "--without-integrations" }
     if ($isVerboseRequested) { $arguments += "--verbose" }
     if ($Rollback) { $arguments += "--rollback" }
 
@@ -346,7 +349,8 @@ function Start-Installation {
         Write-Success "Installation completed successfully!"
         Write-Info "Next steps:"
         Write-Info "  Run amp, pi, codex, or opencode."
-        Write-Info "  Optional tools: -WithTools 'qmd,plannotator,ctx'. Config bundles: -WithIntegrations."
+        Write-Info "  Shared skills and applicable MCP/plugin configs are included unless -WithoutIntegrations is set."
+        Write-Info "  Optional standalone tools: -WithTools 'qmd,plannotator,ctx'."
         Write-Info "  If a new command is not found, reopen your terminal."
         Write-Info "  See README.md for options and troubleshooting."
     } else {

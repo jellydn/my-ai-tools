@@ -79,23 +79,35 @@ hide these tools. Approve only the package installer's elevation prompt; the wra
 configuration installer as administrator. If approval is denied, setup stops and can be rerun safely.
 Native Windows uses Node/npm, not Bun, for package installation; Linux, macOS, and WSL keep Bun-first behavior.
 
-The one-line command and `-y` / `--yes` install only **Amp, Pi, Codex, and OpenCode** by default. They leave
-existing configuration unchanged. qmd, Plannotator, ctx, formatters, memory MCPs, plugins, skills, and the rest
-of the catalog are optional. Interactive runs prompt for optional tools and the integration bundle.
+The one-line command and `-y` / `--yes` use these default categories:
+
+- **Core agents:** Amp, Pi, Codex, and OpenCode.
+- **Shared skills:** bundled local skills, installed for the selected agents.
+- **Applicable MCP/plugin configuration:** bundled configuration for the selected agents. The three memory
+  MCP choices (qmd, codebase-memory-mcp, agentmemory) remain available; `user-memory` stays opt-in.
+- **Optional standalone catalog:** all other CLIs, formatters, and tools need selection. Interactive runs
+  prompt for them; automation can use `--with-tools`.
+
+Integration dependencies are a separate, explicitly logged exception: the core templates require qmd;
+Pi/Codex/OpenCode require ctx; Codex hooks/inbox MCP require Plannotator. These binaries can therefore be
+installed even when not selected as standalone tools. ctx dependency installation does not import history,
+start its daemon, install upstream skills, or change persistent Windows PATH. Other MCP commands keep their
+existing external prerequisites. No unrelated agent's plugin or skill directory is configured in yes mode.
 
 From a reviewed checkout, select extra tools without enabling integrations:
 
 ```bash
-./cli.sh --yes --with-tools=qmd,plannotator,ctx --dry-run
-./cli.sh --yes --with-tools=qmd,plannotator,ctx
-# Opt into bundled configuration, plugins, skills, MCPs and their prerequisites:
-./cli.sh --yes --with-integrations --backup
+./cli.sh --yes --without-integrations --with-tools=qmd,plannotator,ctx --dry-run
+./cli.sh --yes --without-integrations --with-tools=qmd,plannotator,ctx
+# Default configuration, plugins, shared skills and MCPs (can replace existing config):
+./cli.sh --yes --backup
 ```
 
-Windows equivalents are `-WithTools 'qmd,plannotator,ctx'` and `-WithIntegrations -Backup` on a saved
-`install.ps1`. Tool names are comma-separated; `./cli.sh --help` lists the catalog. The integration bundle
-is a separate, explicit opt-in and can replace configuration. Selecting an extra tool alone installs its
-CLI, not its MCP or plugin. Noninteractive/CI runs use the same four-tool default as `--yes`.
+Windows equivalents are `-WithoutIntegrations -WithTools 'qmd,plannotator,ctx'` and `-Yes -Backup` on a saved
+`install.ps1`. Tool names are comma-separated; `./cli.sh --help` lists the catalog. `--without-integrations`
+(`-WithoutIntegrations`) installs standalone CLIs only and leaves existing configuration unchanged.
+`--with-integrations` remains accepted but is now the default. Selecting an extra tool does not select
+another agent's configuration. Noninteractive/CI runs use the same default categories as `--yes`.
 
 The installer can replace existing configuration. To inspect the script, preview changes, and request a backup,
 use the saved-script path instead:
@@ -166,15 +178,16 @@ Set-Location my-ai-tools
 | `--dry-run` | `-DryRun` | Show planned changes without applying them. |
 | `--backup` | `-Backup` | Back up existing files before installation. |
 | `--no-backup` | `-NoBackup` | Skip the interactive backup prompt. |
-| `--yes` / `-y` | `-Yes` | Install only Amp, Pi, Codex, and OpenCode; leave configuration unchanged. |
-| `--with-tools=qmd,plannotator` | `-WithTools 'qmd,plannotator'` | Add optional catalog CLIs without enabling integrations. |
-| `--with-integrations` | `-WithIntegrations` | Opt into bundled configs, plugins, skills, MCPs, and their prerequisites. |
+| `--yes` / `-y` | `-Yes` | Install four core agents, shared skills, applicable MCP/plugin config and declared dependencies. |
+| `--with-tools=qmd,plannotator` | `-WithTools 'qmd,plannotator'` | Add optional standalone catalog CLIs. |
+| `--with-integrations` | `-WithIntegrations` | Install bundled config, plugins, skills and MCP dependencies (default). |
+| `--without-integrations` | `-WithoutIntegrations` | Install standalone CLIs only; leave configuration unchanged. |
 | `--rollback` | `-Rollback` | Restore the most recent backup. |
 | `--verbose` / `-v` | `-Verbose` | Show detailed installer output. |
 | `--migrate-gemini` | — | Migrate Gemini CLI configuration to Antigravity CLI. |
 
-Non-interactive Bash and PowerShell pipelines automatically add `--yes`. This mode installs the four core CLIs
-and required runtimes only. All other tools and bundled integrations need explicit opt-in. Review
+Non-interactive Bash and PowerShell pipelines automatically add `--yes`. This mode uses the same default
+categories above; it is not a configuration-free install. Review
 [`cli.sh`](cli.sh) before using it in automation.
 
 ## 🤖 Supported tools

@@ -832,7 +832,9 @@ install_ctx() {
 		# Keep binary installation failures fatal; history setup is a separate, optional step.
 		if [ "$IS_WINDOWS" = true ]; then
 			if command -v powershell.exe &>/dev/null; then
-				CTX_INSTALL_NO_SETUP=1 execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"irm https://ctx.rs/install.ps1 | iex\"" || return 1
+				# Limit the upstream installer to this HOME's binary; our installer
+				# owns skills, PATH and the separate opt-in history setup below.
+				CTX_INSTALL_BIN_DIR="$(cygpath -w "$HOME/.local/bin")" CTX_INSTALL_NO_SETUP=1 execute "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"& ([scriptblock]::Create((irm https://ctx.rs/install.ps1))) -NoSetup -NoSkill -NoModifyPath -BinDir \\\$env:CTX_INSTALL_BIN_DIR\"" || return 1
 			else
 				log_error "PowerShell is required to install ctx on Windows."
 				log_info "Install manually: https://github.com/ctxrs/ctx"
