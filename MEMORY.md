@@ -128,7 +128,7 @@ echo "  Storage: ~/.ai-knowledges/$PROJECT_NAME"
 | `agentmemory` | Today, same session/project           | `mcp__agentmemory__memory_save`                         |
 | `/handoffs`   | Continue a task in a future session   | `/handoffs` slash command → resume with `/pickup`       |
 
-If you find yourself wanting both "remember this for me next time" and "let me continue this tomorrow" — that is two separate stores; pick the lane that matches the actual horizon.
+If you find yourself wanting both "remember this for me next time" and "let me continue this tomorrow" — those are two separate stores; pick the lane that matches the actual horizon.
 
 ---
 

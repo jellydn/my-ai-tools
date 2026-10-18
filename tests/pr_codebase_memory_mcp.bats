@@ -3,7 +3,7 @@
 
 REPO_ROOT="$BATS_TEST_DIRNAME/.."
 MCP_REGISTRY="$REPO_ROOT/configs/mcp-registry.json"
-README_FILE="$REPO_ROOT/README.md"
+README_FILE="$REPO_ROOT/TOOL_REFERENCE.md"
 
 @test "configs/mcp-registry.json contains codebase-memory-mcp server entry" {
     if ! command -v jq &>/dev/null; then

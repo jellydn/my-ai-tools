@@ -2,16 +2,23 @@
 
 ## AI Tool Guidelines
 
-- Use the fff MCP tools for all file search operations instead of default tools.
+- Prefer `codebase-memory-mcp` graph tools (`search_graph`, `trace_path`, `get_code_snippet`, `query_graph`, `get_architecture`) for structural code discovery.
+- Use the fff MCP tools for file search operations instead of default tools.
 - Use the sem MCP tools for semantic version control and git operations.
+
+## Token Efficiency
+
+- Keep responses concise and actionable; lead with conclusions, file paths, and verification.
+- Read only task-relevant files and instructions. Do not preload repository maps, architecture docs, memory, or skills.
+- Scope searches and command output with paths, filters, and line ranges.
+- Use `~/.local/bin/rtk` for supported shell commands when available; bypass it with `RTK_DISABLED=1` when raw output is required.
+- Prefer `codebase-memory-mcp` graph tools for structural code discovery when available.
 
 ## General Practices
 
-- Follow my software development practice @~/.ai-tools/best-practices.md
-- Read @~/.ai-tools/MEMORY.md first — qmd (durable) vs agentmemory (session); follow the decision rule there
-- Read @~/.ai-tools/agent-memory.md — auto-capture learnings, persist bug fixes, keep memories concise.
-- Keep responses concise and actionable.
-- Always propose a plan before edits. Use phases to break down tasks into manageable steps.
+- Read `~/.ai-tools/best-practices.md` only when the repository lacks equivalent guidance or the task needs its detailed workflow.
+- Read `~/.ai-tools/MEMORY.md` and `~/.ai-tools/agent-memory.md` only when deciding whether or where to persist a learning.
+- Propose a phased plan before large or risky edits; make focused routine edits directly.
 - Run typecheck, lint and biome on js/ts file changes after finish
 - Prefer to use Bun to run scripts if possible, otherwise use tsx to run ts files.
 - Ask before destructive operations — don't guess safety

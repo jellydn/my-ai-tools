@@ -1,6 +1,5 @@
 {
 	"$schema": "https://opencode.ai/config.json",
-	"instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md", "~/.ai-tools/agent-memory.md"],
 	"theme": "kanagawa",
 	"default_agent": "plan",
 	"mcp": {
@@ -64,7 +63,7 @@
 					"qmd query": "allow",
 					"qmd get": "allow",
 					"qmd search": "allow",
-					"$HOME/.config/opencode/skill/qmd-knowledge/scripts/record.sh": "allow",
+					"$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh": "allow",
 					"$HOME/.claude/skills/qmd-knowledge/scripts/record.sh": "allow"
 				}
 			}

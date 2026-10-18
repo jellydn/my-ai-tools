@@ -7,6 +7,19 @@ on:
     branches: [main]
 
 jobs:
+  packages:
+    name: Workspace package tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run build:packages
+      - run: npm run test:packages
+
   bats:
     name: Config Validation Tests
     runs-on: ubuntu-latest
@@ -23,24 +36,43 @@ jobs:
       - name: Run config validation tests
         run: bats tests/pr_*.bats tests/generate.bats tests/sh_reexec.bats
 
-  packages:
-    name: Workspace package tests
-    runs-on: ubuntu-latest
+  windows-installer:
+    name: Windows PowerShell Installer
+    runs-on: windows-2025
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-          cache: npm
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Parse installer
+        shell: powershell
+        run: |
+          $tokens = $null
+          $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path .\install.ps1),
+            [ref]$tokens,
+            [ref]$errors
+          )
+          if ($errors.Count -gt 0) {
+            $errors | Format-List
+            exit 1
+          }
 
-      - name: Build packages
-        run: npm run build:packages
+      - name: Test Windows prerequisite recovery
+        shell: powershell
+        run: .\tests\windows_installer.ps1
 
-      - name: Test packages
-        run: npm run test:packages
+      - name: Run native Windows dry-run
+        shell: powershell
+        run: .\install.ps1 -DryRun -Yes
+
+      - name: Install StyLua without compiling Rust
+        shell: bash
+        run: |
+          source lib/common.sh
+          source lib/install.sh
+          install_stylua_if_needed
+          stylua --version

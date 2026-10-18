@@ -1,20 +1,33 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, test } from "node:test";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
 import { createServer } from "../src/server.js";
 
 const temporaryDirectories: string[] = [];
 
-afterEach(async () => {
-	await Promise.all(
-		temporaryDirectories
-			.splice(0)
-			.map((directory) => rm(directory, { recursive: true, force: true })),
+test("server can be imported when argv names a nonexistent entrypoint", () => {
+	const result = spawnSync(
+		"node",
+		[
+			"--import",
+			"tsx",
+			"--input-type=module",
+			"-e",
+			`process.argv[1] = '/nonexistent-user-memory-entrypoint'; await import(${JSON.stringify(new URL("../src/server.ts", import.meta.url).href)});`,
+		],
+		{ encoding: "utf8" },
 	);
+	assert.equal(result.status, 0, result.stderr);
+});
+
+afterEach(async () => {
+	await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
 });
 
 async function connect(directory: string) {
@@ -26,7 +39,7 @@ async function connect(directory: string) {
 }
 
 function textContent(result: Awaited<ReturnType<Client["callTool"]>>): unknown {
-	const block = result.content[0];
+	const block = CallToolResultSchema.parse(result).content[0];
 	assert.equal(block?.type, "text");
 	return JSON.parse(block.text);
 }

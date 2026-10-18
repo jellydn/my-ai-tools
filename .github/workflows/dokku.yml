@@ -1,0 +1,94 @@
+name: Dokku Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    concurrency: deploy-group
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # Dokku rejects shallow pushes ("shallow update not allowed").
+          fetch-depth: 0
+
+      - name: Validate required secrets
+        env:
+          DOKKU_SSH_PRIVATE_KEY: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          missing=0
+
+          if [ -z "$DOKKU_SSH_PRIVATE_KEY" ]; then
+            echo "::error::GitHub secret DOKKU_SSH_PRIVATE_KEY is not set. Add the private key whose public half is registered on the Dokku host (dokku ssh-keys:list)."
+            missing=1
+          fi
+
+          EFFECTIVE_OPENAI_API_KEY="${OPENROUTER_API_KEY:-$OPENAI_API_KEY}"
+          EFFECTIVE_OPENAI_API_KEY="$(printf '%s' "$EFFECTIVE_OPENAI_API_KEY" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+          if [ -z "$EFFECTIVE_OPENAI_API_KEY" ]; then
+            echo "::error::Set GitHub secret OPENROUTER_API_KEY (recommended) or OPENAI_API_KEY to your OpenRouter key (sk-or-v1-...)."
+            missing=1
+          elif ! printf '%s' "$EFFECTIVE_OPENAI_API_KEY" | grep -q '^sk-or-v1-'; then
+            echo "::error::The configured OpenRouter secret must start with sk-or-v1-. Dokku build uses OpenRouter via OPENAI_BASE_URL — an OpenAI sk-proj- key will fail with 401 during image build."
+            missing=1
+          fi
+
+          exit "$missing"
+
+      - name: Sync OpenRouter API key to Dokku
+        env:
+          DOKKU_SSH_PRIVATE_KEY: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DOKKU_HOST: docklight.itman.fyi
+          DOKKU_APP: ai-tools
+        run: |
+          EFFECTIVE_OPENAI_API_KEY="${OPENROUTER_API_KEY:-$OPENAI_API_KEY}"
+          EFFECTIVE_OPENAI_API_KEY="$(printf '%s' "$EFFECTIVE_OPENAI_API_KEY" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          install -m 600 /dev/null ~/.ssh/dokku_deploy
+          printf '%s\n' "$DOKKU_SSH_PRIVATE_KEY" > ~/.ssh/dokku_deploy
+          # Normalize Windows/CRLF and ensure trailing newline for OpenSSH
+          tr -d '\r' < ~/.ssh/dokku_deploy > ~/.ssh/dokku_deploy.tmp
+          mv ~/.ssh/dokku_deploy.tmp ~/.ssh/dokku_deploy
+          chmod 600 ~/.ssh/dokku_deploy
+          if [[ "$(tail -c1 ~/.ssh/dokku_deploy | wc -l)" -eq 0 ]]; then
+            printf '\n' >> ~/.ssh/dokku_deploy
+          fi
+
+          ssh-keyscan -H "$DOKKU_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          SSH=(ssh -i ~/.ssh/dokku_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes "dokku@$DOKKU_HOST")
+
+          # BuildKit secret + runtime both read app config. Re-set the full
+          # OpenAI-compatible config on every deploy so host-side drift (e.g. a
+          # missing OPENAI_BASE_URL sending the sk-or-v1- key to api.openai.com
+          # with a 401) can't break the image build.
+          # Dokku --encoded base64-decodes each value before storing, so the
+          # key never appears raw in SSH_ORIGINAL_COMMAND (not shell-escaped).
+          # GNU base64 -w 0 is available on ubuntu-latest.
+          encode() {
+            printf '%s' "$1" | base64 -w 0
+          }
+          "${SSH[@]}" config:set --encoded --no-restart "$DOKKU_APP" \
+            "OPENAI_API_KEY=$(encode "$EFFECTIVE_OPENAI_API_KEY")" \
+            "OPENAI_BASE_URL=$(encode "https://openrouter.ai/api/v1")" \
+            "OPENAI_MODEL=$(encode "openrouter/free")" \
+            "OPENAI_EMBEDDING_MODEL=$(encode "nvidia/llama-nemotron-embed-vl-1b-v2:free")"
+
+      - name: Deploy to Dokku
+        uses: dokku/github-action@master
+        with:
+          git_remote_url: ssh://dokku@docklight.itman.fyi:22/ai-tools
+          ssh_private_key: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
+          branch: main

@@ -77,6 +77,31 @@ get_temp_dir() {
 	echo "$temp_dir"
 }
 
+# Get platform-specific Reasonix home directory
+# Usage: get_reasonix_dir
+get_reasonix_dir() {
+	if [ "$IS_WINDOWS" = true ] && [ -n "${APPDATA:-}" ]; then
+		normalize_path "$APPDATA/reasonix"
+	else
+		echo "$HOME/.reasonix"
+	fi
+}
+
+# Get Delta's platform-specific settings directory. Personal rules and provider
+# credentials always live in ~/.config/delta, independently of this path.
+# Usage: get_delta_settings_dir
+get_delta_settings_dir() {
+	if [ -n "${DELTA_CONFIG_DIR:-}" ]; then
+		normalize_path "$DELTA_CONFIG_DIR"
+	elif [ "$IS_WINDOWS" = true ] && [ -n "${APPDATA:-}" ]; then
+		normalize_path "$APPDATA/delta"
+	elif [ "$(uname -s 2>/dev/null || echo "")" = "Darwin" ]; then
+		echo "$HOME/Library/Application Support/delta"
+	else
+		echo "${XDG_CONFIG_HOME:-$HOME/.config}/delta"
+	fi
+}
+
 # Quote a path if it contains spaces or special characters
 # Usage: quote_path "path with spaces"
 quote_path() {
@@ -282,40 +307,46 @@ execute_quoted() {
 	fi
 }
 
-# Download and verify script with checksum (if available)
-# Usage: download_and_verify_script "url" "expected_sha256" "description"
-download_and_verify_script() {
+# Download and verify a file with SHA-256 (if available)
+# Usage: download_and_verify_file "url" "expected_sha256" "description"
+download_and_verify_file() {
 	local url="$1"
 	local expected_sha256="$2"
 	local description="$3"
 
 	local tmpdir
 	tmpdir=$(get_temp_dir)
-	local temp_script
-	temp_script="${tmpdir}/install-$(date +%s)-$$"
+	local temp_file
+	temp_file="${tmpdir}/download-$(date +%s)-$$"
 
 	log_info "Downloading $description..."
-	if ! curl -fsSL "$url" -o "$temp_script" 2>/dev/null; then
+	if ! execute_quoted curl -fsSL "$url" -o "$temp_file" 2>/dev/null; then
 		log_error "Failed to download $description"
 		return 1
 	fi
 
-	chmod +x "$temp_script"
-
 	if [ -n "$expected_sha256" ]; then
 		local actual_sha256
-		actual_sha256=$(sha256sum "$temp_script" 2>/dev/null | cut -d' ' -f1)
+		if command -v sha256sum &>/dev/null; then
+			actual_sha256=$(sha256sum "$temp_file" 2>/dev/null | cut -d' ' -f1)
+		elif command -v shasum &>/dev/null; then
+			actual_sha256=$(shasum -a 256 "$temp_file" 2>/dev/null | cut -d' ' -f1)
+		else
+			log_error "SHA-256 verification requires sha256sum or shasum"
+			execute_quoted rm -f "$temp_file"
+			return 1
+		fi
 		if [ "$actual_sha256" != "$expected_sha256" ]; then
 			log_error "Checksum verification failed for $description"
 			log_error "Expected: $expected_sha256"
 			log_error "Actual: $actual_sha256"
-			rm -f "$temp_script"
+			execute_quoted rm -f "$temp_file"
 			return 1
 		fi
 		log_success "Checksum verified for $description"
 	fi
 
-	echo "$temp_script"
+	echo "$temp_file"
 }
 
 # Execute external installer script with verification
@@ -343,14 +374,15 @@ execute_installer() {
 	export TMPDIR="$tmp_dir"
 
 	local temp_script
-	temp_script=$(download_and_verify_script "$url" "$expected_sha256" "$description")
+	temp_script=$(download_and_verify_file "$url" "$expected_sha256" "$description")
 	if [ -z "$temp_script" ]; then
 		return 1
 	fi
 
+	execute_quoted chmod +x "$temp_script"
 	"$temp_script" "$@"
 	local result=$?
-	rm -f "$temp_script"
+	execute_quoted rm -f "$temp_script"
 	return $result
 }
 
@@ -451,6 +483,51 @@ validate_yaml() {
 	return 0
 }
 
+# Validate TOML file syntax with detailed error reporting
+# Usage: validate_toml "filepath"
+# Returns: 0 if valid, 1 if invalid
+validate_toml() {
+	local filepath="$1"
+
+	if [ ! -f "$filepath" ]; then
+		log_error "File not found: $filepath"
+		return 1
+	fi
+
+	if command -v python3 &>/dev/null; then
+		if python3 -c 'import tomllib' >/dev/null 2>&1; then
+			if FILEPATH="$filepath" python3 -c 'import os, tomllib; tomllib.loads(open(os.environ["FILEPATH"]).read())' 2>/dev/null; then
+				log_success "TOML validated: $filepath (Python/tomllib)"
+				return 0
+			else
+				log_error "Invalid TOML in: $filepath"
+				return 1
+			fi
+		elif python3 -c 'import tomli' >/dev/null 2>&1; then
+			if FILEPATH="$filepath" python3 -c 'import os, tomli; tomli.loads(open(os.environ["FILEPATH"]).read())' 2>/dev/null; then
+				log_success "TOML validated: $filepath (Python/tomli)"
+				return 0
+			else
+				log_error "Invalid TOML in: $filepath"
+				return 1
+			fi
+		fi
+	fi
+
+	if command -v taplo &>/dev/null; then
+		if taplo check "$filepath" 2>/dev/null; then
+			log_success "TOML validated: $filepath (taplo)"
+			return 0
+		else
+			log_error "Invalid TOML in: $filepath"
+			return 1
+		fi
+	fi
+
+	log_warning "No TOML validator available (python3 tomllib/tomli or taplo), skipping TOML validation for: $filepath"
+	return 0
+}
+
 # Validate config file based on extension
 # Usage: validate_config "filepath"
 # Returns: 0 if valid or validation skipped, 1 if invalid
@@ -465,6 +542,10 @@ validate_config() {
 		;;
 	yaml | yml)
 		validate_yaml "$filepath"
+		return $?
+		;;
+	toml)
+		validate_toml "$filepath"
 		return $?
 		;;
 	*)
@@ -529,8 +610,10 @@ run_installer() {
 	_install() {
 		log_info "Installing $tool_name..."
 		if eval "$check_cmd" &>/dev/null; then
-			if [ -n "$version_cmd" ]; then
-				log_warning "$tool_name is already installed ($($version_cmd 2>/dev/null))"
+			local installed_version=""
+			[ -n "$version_cmd" ] && installed_version=$($version_cmd 2>/dev/null) || installed_version=""
+			if [ -n "$installed_version" ]; then
+				log_warning "$tool_name is already installed ($installed_version)"
 			else
 				log_warning "$tool_name is already installed"
 			fi
@@ -570,15 +653,14 @@ prompt_yn() {
 		return 1
 	fi
 
-	# POSIX: no -n or -p on read. Print prompt separately, then read one byte
-	# from the terminal (dd is the portable way to read exactly one char).
+	# Read a full line. A one-byte read (dd/read -n 1) leaves the Enter key
+	# in stdin, so the next prompt_yn sees a blank answer and skips.
 	printf '%s (y/n) ' "$prompt" >&2
-	response=$(dd bs=1 count=1 2>/dev/null)
-	printf '\n' >&2
+	IFS= read -r response || return 1
+	response=$(printf '%s' "$response" | tr -d '\r')
 
-	# Return 0 only if response is y or Y
 	case "$response" in
-		[Yy]) return 0 ;;
+		[Yy] | [Yy][Ee][Ss]) return 0 ;;
 		*) return 1 ;;
 	esac
 }
@@ -701,8 +783,8 @@ safe_copy_dir() {
 		local dest_file="$dest_dir/$rel_path"
 		mkdir -p "$(dirname "$dest_file")"
 		if ! cp "$file" "$dest_file" 2>/dev/null; then
-			((errors++))
-			((skipped++))
+			errors=$((errors + 1))
+			skipped=$((skipped + 1))
 			[ "${VERBOSE:-false}" = true ] && log_warning "Skipped busy file: $rel_path"
 		fi
 	done < "$_find_list"

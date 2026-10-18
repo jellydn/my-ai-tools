@@ -1,193 +1,150 @@
-# Testing
+# Testing Patterns
 
-**Analysis Date:** 2026-07-10
+**Analysis Date:** 2026-08-04
 
----
+## Test Framework
 
-## Framework
+**Runner:**
+- **Bun test** — TypeScript tests using Bun’s built-in runner.
+- **BATS** — shell and configuration tests.
+- **Python test tooling** — tests under `document_qa/tests/`, driven by the Python dependencies/project documentation.
+- Config: `package.json`, `tests/`, `src/github-bot/github-bot.test.ts`, `document_qa/tests/`, `.github/workflows/test.yml`.
 
-| Aspect | Detail |
-|--------|--------|
-| **Framework** | [bats-core](https://github.com/bats-core/bats-core) — Bash Automated Testing System |
-| **Install** | `brew install bats-core` (macOS), `apt-get install bats` (Linux) |
-| **Test runner** | `bats tests/` (all), `bats tests/cli.bats` (single file) |
-| **CI** | `.github/workflows/test.yml` — runs `bash -n` + `bats tests/` + `biome check .` |
+**Assertion Library:**
+- Bun’s `expect` from `bun:test` for TypeScript.
+- BATS assertions and shell commands for shell/config tests.
+- Python test assertions/framework conventions in `document_qa/tests/`.
 
----
+**Run Commands:**
+```bash
+bun test                                      # TypeScript tests
+bun run typecheck                             # TypeScript type check
+bash -n cli.sh generate.sh lib/*.sh           # Shell syntax validation
+bats tests/                                   # Full local BATS suite
+bats tests/pr_*.bats tests/generate.bats tests/sh_reexec.bats  # CI BATS subset
+biome check .                                 # Formatting/check validation
+pre-commit run --all-files                    # Repository hooks
+```
+
+## Test File Organization
+
+**Location:**
+- TypeScript tests are co-located with the GitHub bot (`src/github-bot/github-bot.test.ts`) or placed in `tests/` for shared modules (`tests/fusion-watchdog.test.ts`).
+- BATS tests are centralized in `tests/`.
+- Python tests are in `document_qa/tests/`.
+
+**Naming:**
+- TypeScript: `*.test.ts`.
+- BATS: `<area>.bats`, with PR-focused suites named `pr_<feature>.bats`.
+- Python: `test_<area>.py`.
+
+**Structure:**
+```text
+tests/*.bats
+ tests/fusion-watchdog.test.ts
+src/github-bot/github-bot.test.ts
+document_qa/tests/test_*.py
+```
 
 ## Test Structure
 
-### Directory Layout
+**Suite Organization:**
+```typescript
+import { afterEach, describe, expect, test } from "bun:test";
 
-```
-tests/
-├── helpers.bash          # Shared test helpers (loaded via `load helpers`)
-├── cli.bats              # Core CLI workflow tests
-├── lib_common.bats       # Library unit tests (lib/common.sh)
-├── generate.bats         # Generate script tests
-├── install.bats          # Installation tests
-├── sh_reexec.bats        # Shell re-exec guard tests
-├── pr_*.bats             # Per-tool config-gating PR tests (16 files)
-└── recommend_skills.bats # Skill recommendation tests (47 tests — largest)
+describe("GitHub bot MVP", () => {
+	test("verifies raw webhook HMAC", () => {
+		expect(verifyWebhook(raw, signature, "secret")).toBeTrue();
+	});
+});
 ```
 
-### Test Counts
+**Patterns:**
+- Tests cover pure parsing/security functions plus filesystem-backed stores/workspaces.
+- Temporary directories are created under the OS temp directory and cleaned with `afterEach`/explicit cleanup.
+- Async behavior is tested with `await expect(promise).rejects...` and controlled abort signals.
+- BATS suites source the target shell modules, set temporary homes/fixtures, and assert output/files/exit status.
+- Security tests assert both rejection of dangerous inputs and acceptance of exact configured prefixes.
 
-| File | Tests |
-|------|-------|
-| `recommend_skills.bats` | 47 |
-| `pr_ctx.bats` | 31 |
-| `pr_cline.bats` | 29 |
-| `pr_kiro.bats` | 25 |
-| `pr_claude.bats` | 20 |
-| `pr_grok.bats` | 19 |
-| `pr_kimi_code.bats` | 17 |
-| `pr_copilot.bats` | 15 |
-| `cli.bats` | 15 |
-| Others | 5–14 each |
+## Mocking
 
-Total: ~280 tests across 23 files.
+**Framework:**
+- No separate mocking library; Bun tests inject fetcher/client functions and use temporary filesystem fixtures.
+- BATS uses shell fixtures, environment overrides, and stub commands where needed.
 
----
+**Patterns:**
+```typescript
+const fetcher = async (input: RequestInfo | URL, init?: RequestInit) => {
+	requests.push({ method: init?.method ?? "GET", body: init?.body });
+	return new Response(JSON.stringify({ ok: true }), { status: 200 });
+};
+const client = new GitHubClient("secret", fetcher);
+```
 
-## Test Patterns
+**What to Mock:**
+- GitHub `fetch` calls, timers/abort behavior, external agent execution boundaries, and temporary filesystem state.
 
-### Setup Pattern
+**What NOT to Mock:**
+- Pure command parsing, HMAC verification, config validation, redaction, diff parsing, and other deterministic security logic.
 
-Every test file follows this setup:
+## Fixtures and Factories
 
+**Test Data:**
+```typescript
+const config = {
+	...defaultRepoConfig,
+	validation: { ...defaultRepoConfig.validation, commands: ["bash -n"] },
+};
+```
+
+**Location:**
+- BATS fixtures/helpers: `tests/fixtures/` and `tests/helpers.bash`.
+- TypeScript test setup is mostly inline in `src/github-bot/github-bot.test.ts`.
+- Python fixtures are in `document_qa/tests/` or constructed per test.
+
+## Coverage
+
+**Requirements:** No numeric repository-wide coverage threshold is enforced. CI covers a deliberate BATS subset; TypeScript/Python test execution is not part of `.github/workflows/test.yml`.
+
+**View Coverage:**
 ```bash
-#!/usr/bin/env bats
+# No standard coverage script is currently defined.
+# Use the relevant runner/tooling manually when investigating a module.
+```
 
-setup() {
-    # Source libraries
-    source "$BATS_TEST_DIRNAME/../lib/common.sh"
-    source "$BATS_TEST_DIRNAME/../lib/install.sh"
-    source "$BATS_TEST_DIRNAME/../cli.sh"
+## Test Types
 
-    # Export control variables (always reset after sourcing)
-    export DRY_RUN=false
-    export YES_TO_ALL=false
-    export SCRIPT_DIR="$BATS_TEST_DIRNAME/.."
+**Unit Tests:**
+- Pure TypeScript parsing, validation, security, HMAC, retrieval/watchdog logic, and Python chunking/answering/retrieval behavior.
+
+**Integration Tests:**
+- GitHub bot store/worker/workspace tests with temporary directories and injected fetchers.
+- BATS tests exercise shell functions, generated config layouts, validation, and installer behavior.
+
+**E2E Tests:**
+- No browser E2E framework is configured in the current repository. `public/browser-chat.js` and the Hono routes are primarily validated through source/config checks and targeted tests.
+
+## Common Patterns
+
+**Async Testing:**
+```typescript
+await expect(new GitHubClient("app", fetcher).installationToken(1, undefined, controller.signal)).rejects.toThrow();
+```
+
+**Error Testing:**
+```typescript
+try {
+	await operation();
+	throw new Error("should have rejected");
+} catch (error) {
+	expect(error).toBeInstanceOf(ExecutorWaitError);
 }
 ```
 
-### Test Naming
-
-- Descriptive names: `@test "should detect claude code CLI when installed"`
-- Pattern: `should <expected behavior> when <condition>`
-- No generic names like `test1` or `works`
-
-### Assertion Patterns
-
-```bash
-# Exit code assertions
-run some_function
-[ "$status" -eq 0 ]
-
-# Output assertions
-[ "${lines[0]}" = "Expected output" ]
-
-# Regex assertions
-[[ "$output" =~ "expected pattern" ]]
-
-# Multi-line assertions
-[ "${#lines[@]}" -eq 3 ]
-[ "${lines[1]}" = "line two" ]
-```
-
-### Tool-Specific Test Patterns
-
-PR tests (`pr_*.bats`) test config installation end-to-end:
-
-```bash
-# Create temp home with pre-existing tool config dirs
-H=$(mktemp -d)
-mkdir -p "$H/.claude" "$H/.config/opencode"
-
-# Source scripts against the temp home, call copy functions
-( export HOME="$H" DRY_RUN=false YES_TO_ALL=false
-  source ./cli.sh
-  copy_claude_configs )
-
-# Assert files landed correctly
-[ -f "$H/.claude/settings.json" ]
-```
+**CI boundary:**
+- `.github/workflows/test.yml` installs `bats` and `jq` and runs `tests/pr_*.bats`, `tests/generate.bats`, and `tests/sh_reexec.bats`.
+- `.github/my-ai-bot.example.yml` documents `bun test` and `bun run typecheck` as repository validation commands for bot changes.
 
 ---
 
-## Test Helpers (`tests/helpers.bash`)
-
-| Helper | Purpose |
-|--------|---------|
-| `skip_if_missing` | Skip test if a required tool is not installed |
-| Shared setup | Common environment variable exports |
-
----
-
-## CI Testing
-
-### GitHub Actions (`test.yml`)
-
-```yaml
-# Runs on push and PR
-# Steps:
-# 1. Checkout
-# 2. Setup bun
-# 3. bash -n cli.sh generate.sh lib/*.sh   # Syntax validation
-# 4. bats tests/                            # Functional tests
-# 5. biome check .                          # Code formatting
-```
-
-### Pre-commit Hooks
-
-```yaml
-# .pre-commit-config.yaml
-- trailing-whitespace    # Remove trailing whitespace
-- end-of-file-fixer      # Ensure files end with newline
-- check-yaml             # Validate YAML syntax
-- check-added-large-files # Prevent large file commits
-- oxfmt                  # Format TypeScript/JavaScript
-```
-
----
-
-## Test Culture
-
-- **All new features should have tests** — CONTRIBUTING.md: "Test changes with `./cli.sh --dry-run` first"
-- **Tests reset global state**: `export DRY_RUN=false` after every `source`
-- **Tests use temp directories**: Never mutate the real `$HOME`
-- **Color output stripped in assertions**: `sed -E 's/\x1B\[[0-9;]*m//g'`
-- **Tests run in isolation**: Each `@test` block is a subshell
-
----
-
-## Testing the App Safely
-
-Never run `./cli.sh` directly during development — use temp homes:
-
-```bash
-H=$(mktemp -d)
-mkdir -p "$H/.claude" "$H/.config/opencode" "$H/.codex"
-( export HOME="$H" DRY_RUN=false YES_TO_ALL=false
-  source ./cli.sh
-  copy_configurations )
-find "$H" -type f   # verify configs landed
-```
-
-Or use `./cli.sh --dry-run` for a side-effect-free preview.
-
----
-
-## microsandbox Testing
-
-For macOS users, bats tests can fail due to `getcwd` restrictions. Use microsandbox:
-
-```bash
-msb run -m 512M -v "$(pwd):/project:ro" ubuntu -- \
-  bash -c 'apt-get update -qq && apt-get install -y -qq bats && cd /project && bats tests/'
-```
-
-The `:ro` mount keeps the project read-only inside the sandbox, preventing accidental writes.
-
-_Last updated: 2026-07-10_
+*Testing analysis: 2026-08-04*

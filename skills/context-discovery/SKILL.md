@@ -1,6 +1,6 @@
 ---
 name: "context-discovery"
-description: "Discover context using MCP tools — fff, sem, ctx, qmd, codebase-memory-mcp for codebase understanding"
+description: "Use MCP tools to trace behavior that spans multiple modules or history sources."
 license: "MIT"
 compatibility: "cline, claude, opencode, amp, codex, gemini, cursor, pi"
 hint: "Use before starting work to understand codebase context via available MCP tools"

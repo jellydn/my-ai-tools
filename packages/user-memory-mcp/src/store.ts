@@ -3,12 +3,7 @@ import { appendFile, chmod, mkdir, readFile, rename, unlink, writeFile } from "n
 import { homedir } from "node:os";
 import { join } from "node:path";
 import lockfile from "proper-lockfile";
-import {
-	emptyUserMemory,
-	type UserMemory,
-	type UserPreference,
-	userMemorySchema,
-} from "./schema.js";
+import { emptyUserMemory, type UserMemory, type UserPreference, userMemorySchema } from "./schema.js";
 
 const KEY_PATTERN = /^[A-Za-z][A-Za-z0-9._-]{0,99}$/;
 const MAX_VALUE_LENGTH = 1_000;
@@ -60,10 +55,7 @@ export class PreferenceStore {
 	private readonly now: () => Date;
 
 	constructor(options: PreferenceStoreOptions = {}) {
-		this.directory =
-			options.directory ??
-			process.env.USER_MEMORY_HOME ??
-			join(homedir(), ".ai-tools", "user-memory");
+		this.directory = options.directory ?? process.env.USER_MEMORY_HOME ?? join(homedir(), ".ai-tools", "user-memory");
 		this.memoryPath = join(this.directory, "preferences.json");
 		this.auditPath = join(this.directory, "audit.jsonl");
 		this.lockPath = join(this.directory, ".lock");
@@ -103,7 +95,7 @@ export class PreferenceStore {
 		const memory = await this.readMemory();
 		return Object.entries(memory.preferences)
 			.map(([key, preference]) => ({ key, ...preference }))
-			.sort((left, right) => left.key.localeCompare(right.key));
+			.sort((left, right) => (left.key < right.key ? -1 : left.key > right.key ? 1 : 0));
 	}
 
 	async delete(key: string): Promise<boolean> {
@@ -139,9 +131,7 @@ export class PreferenceStore {
 			);
 		}
 		if (value.length === 0 || value.length > MAX_VALUE_LENGTH) {
-			throw new Error(
-				`Preference values must contain between 1 and ${MAX_VALUE_LENGTH} characters.`,
-			);
+			throw new Error(`Preference values must contain between 1 and ${MAX_VALUE_LENGTH} characters.`);
 		}
 
 		const normalizedKey = key.toLowerCase().replaceAll(/[^a-z0-9]/g, "");
@@ -149,9 +139,7 @@ export class PreferenceStore {
 			SECRET_KEY_PARTS.some((part) => normalizedKey.includes(part)) ||
 			SECRET_VALUE_PATTERNS.some((pattern) => pattern.test(value))
 		) {
-			throw new Error(
-				"Secrets, credentials, API keys, tokens, and passwords cannot be stored as preferences.",
-			);
+			throw new Error("Secrets, credentials, API keys, tokens, and passwords cannot be stored as preferences.");
 		}
 	}
 
@@ -197,10 +185,7 @@ export class PreferenceStore {
 			});
 			await chmod(this.auditPath, 0o600);
 		} catch (error) {
-			console.error(
-				"user-memory: preference was saved, but its audit entry could not be written",
-				error,
-			);
+			console.error("user-memory: preference was saved, but its audit entry could not be written", error);
 		}
 	}
 

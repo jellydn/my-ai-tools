@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { chmod, mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, test } from "node:test";
@@ -14,18 +14,12 @@ async function makeStore(now?: () => Date): Promise<{ directory: string; store: 
 }
 
 afterEach(async () => {
-	await Promise.all(
-		temporaryDirectories
-			.splice(0)
-			.map((directory) => rm(directory, { recursive: true, force: true })),
-	);
+	await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
 });
 
 test("stores, retrieves, and updates a preference across store instances", async () => {
 	const timestamps = [new Date("2026-07-18T10:00:00.000Z"), new Date("2026-07-18T11:00:00.000Z")];
-	const { directory, store } = await makeStore(
-		() => timestamps.shift() ?? new Date("2026-07-18T12:00:00.000Z"),
-	);
+	const { directory, store } = await makeStore(() => timestamps.shift() ?? new Date("2026-07-18T12:00:00.000Z"));
 
 	const created = await store.set("responseStyle", "concise");
 	assert.equal(created.key, "responseStyle");
@@ -52,6 +46,17 @@ test("lists exactly the stored preferences in deterministic order", async () => 
 	);
 });
 
+test("list ordering is independent of locale for case and punctuation", async () => {
+	const { store } = await makeStore();
+	for (const key of ["a_b", "a", "A", "a-b"]) {
+		await store.set(key, "example");
+	}
+	assert.deepEqual(
+		(await store.list()).map(({ key }) => key),
+		["A", "a", "a-b", "a_b"],
+	);
+});
+
 test("deletes one preference and resets all preferences", async () => {
 	const { store } = await makeStore();
 	await store.set("responseStyle", "concise");
@@ -67,14 +72,8 @@ test("deletes one preference and resets all preferences", async () => {
 test("rejects secrets in preference keys and values", async () => {
 	const { store } = await makeStore();
 	await assert.rejects(store.set("openaiApiKey", "not-even-a-real-key"), /cannot be stored/);
-	await assert.rejects(
-		store.set("preferredHeader", "Bearer abcdefghijklmnopqrstuvwxyz"),
-		/cannot be stored/,
-	);
-	await assert.rejects(
-		store.set("credentialExample", "sk-or-v1-abcdefghijklmnop"),
-		/cannot be stored/,
-	);
+	await assert.rejects(store.set("preferredHeader", "Bearer abcdefghijklmnopqrstuvwxyz"), /cannot be stored/);
+	await assert.rejects(store.set("credentialExample", "sk-or-v1-abcdefghijklmnop"), /cannot be stored/);
 	assert.deepEqual(await store.list(), []);
 });
 
@@ -113,4 +112,16 @@ test("serializes concurrent writers without losing preferences", async () => {
 		new Set(preferences.map(({ key }) => key)),
 		new Set(Array.from({ length: 20 }, (_, index) => `preference${index}`)),
 	);
+});
+
+test("mutations tighten permissions on existing storage and audit files", async () => {
+	const { directory, store } = await makeStore();
+	await store.set("editor", "vim");
+	await chmod(directory, 0o755);
+	await chmod(store.memoryPath, 0o644);
+	await chmod(store.auditPath, 0o644);
+	await store.set("editor", "zed");
+	assert.equal((await stat(directory)).mode & 0o777, 0o700);
+	assert.equal((await stat(store.memoryPath)).mode & 0o777, 0o600);
+	assert.equal((await stat(store.auditPath)).mode & 0o777, 0o600);
 });

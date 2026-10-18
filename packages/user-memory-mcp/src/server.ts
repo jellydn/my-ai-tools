@@ -18,7 +18,15 @@ export async function main(): Promise<void> {
 	await server.connect(new StdioServerTransport());
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === realpathSync(process.argv[1])) {
+function isEntrypoint(): boolean {
+	try {
+		return !!process.argv[1] && fileURLToPath(import.meta.url) === realpathSync(process.argv[1]);
+	} catch {
+		return false;
+	}
+}
+
+if (isEntrypoint()) {
 	main().catch((error: unknown) => {
 		console.error("user-memory MCP server failed:", error);
 		process.exitCode = 1;
