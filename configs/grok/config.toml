@@ -39,6 +39,10 @@ args = [
     "@agentmemory/mcp",
 ]
 
+[mcp_servers.user-memory]
+command = "user-memory-mcp"
+args = []
+
 [mcp_servers.sem]
 command = "sem-mcp"
 args = []

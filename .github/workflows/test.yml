@@ -7,6 +7,19 @@ on:
     branches: [main]
 
 jobs:
+  packages:
+    name: Workspace package tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run build:packages
+      - run: npm run test:packages
+
   bats:
     name: Config Validation Tests
     runs-on: ubuntu-latest

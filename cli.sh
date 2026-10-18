@@ -39,6 +39,7 @@ INSTALL_SEQUENCE=(
 	"muse:install_muse"
 	"amp:install_amp"
 	"always:install_global_tools"
+	"always:handle_user_memory_mcp_installation_if_needed"
 	"ccs:install_ccs"
 	"ai-switcher:install_ai_switcher"
 	"codex:install_codex"
@@ -894,6 +895,10 @@ install_mcp_servers_from_registry() {
 				"sem-mcp")
 					log_info "Auto-installing prerequisite: $prereq"
 					install_sem_now && continue
+					;;
+				"user-memory-mcp")
+					log_info "Auto-installing prerequisite: $prereq"
+					install_user_memory_mcp_now && continue
 					;;
 				esac
 				prereqs_met=false
