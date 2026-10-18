@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Day 11: retrieval quality — my-ai-tools documentation"><title>Day 11: retrieval quality · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="30-day-applied-ai-learnings.html">30-Day Applied AI Learning Sprint</a>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="code-taste-openrouter.html">Code taste with OpenRouter</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="linux-omarchy-setup.html">Selective Setup on Omarchy (Linux, Hyprland)</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+<a href="rag-architecture.html">Repository RAG architecture</a>
+<a href="rag-retrieval-quality.html">Day 11: retrieval quality</a>
+<a href="skill-upstreams.html">Skill upstream maintenance</a>
+</nav><main><article>
+<h1>Day 11: retrieval quality</h1>
+<p>This evaluation changes retrieval, not the answer model. The smoke benchmark uses the browser index and the three questions in <code>scripts/evaluate-retrieval.ts</code>. Each build is a new point-in-time evaluation: pinning a public source revision does not freeze mutable Issue/PR content. Archive the index if you need to repeat the same corpus. Build from a publicly available revision, then run:</p>
+<pre><code class="language-bash">GITHUB_SOURCE_REF=&quot;$(git rev-parse HEAD)&quot; npm run index:browser
+npm run eval:retrieval
+npm run eval:retrieval -- --check-links
+</code></pre>
+<p>“Answer-support rate” is a retrieval-only proxy: at least one human-labeled supporting path was retrieved. It is not an LLM-as-judge score. Prompt tokens are estimated from context characters because the embedding-only benchmark deliberately does not invoke or change the LLM. Provider-reported prompt and response tokens remain available in live <code>rag_request</code> logs.</p>
+<h2>Top-k trade-offs</h2>
+<p>Historical measurements on 2,234 chunks with <code>Xenova/all-MiniLM-L6-v2</code> (three-question smoke set; ranking latency excludes query embedding and generation). The original index was not archived; these values are not reproducible baseline guarantees:</p>
+<table>
+<thead>
+<tr>
+<th align="right">top-k</th>
+<th align="right">Relevance density</th>
+<th align="right">Answer-support rate</th>
+<th align="right">Estimated prompt tokens</th>
+<th align="right">Retrieval latency</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">3</td>
+<td align="right">22%</td>
+<td align="right">67%</td>
+<td align="right">529</td>
+<td align="right">7.57 ms</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td align="right">40%</td>
+<td align="right">100%</td>
+<td align="right">866</td>
+<td align="right">5.96 ms</td>
+</tr>
+<tr>
+<td align="right">10</td>
+<td align="right">33%</td>
+<td align="right">100%</td>
+<td align="right">1,818</td>
+<td align="right">4.78 ms</td>
+</tr>
+<tr>
+<td align="right">20</td>
+<td align="right">40%</td>
+<td align="right">100%</td>
+<td align="right">3,993</td>
+<td align="right">4.93 ms</td>
+</tr>
+</tbody></table>
+<p>Top 3 missed supporting Pull Request evidence for one question; top 5 was the smallest setting with 100% answer support. Prompt usage grew by 7.5× from top 3 to top 20, while ranking latency stayed within measurement noise because every candidate is scored before slicing. Top 5 therefore remains the default, while 10 and 20 are better treated as future reranker candidate pools than direct prompt input.</p>
+<h2>Metadata filtering</h2>
+<p><code>POST /api/chat</code> accepts an optional filter before vector scoring:</p>
+<pre><code class="language-json">{
+  &quot;message&quot;: &quot;How do I add an MCP server?&quot;,
+  &quot;topK&quot;: 5,
+  &quot;types&quot;: [&quot;documentation&quot;, &quot;example_config&quot;]
+}
+</code></pre>
+<p>Supported types are <code>documentation</code>, <code>source</code>, <code>issue</code>, <code>pull_request</code>, <code>cli_help</code>, and <code>example_config</code>. The benchmark compares each example question unfiltered and with these expected filters:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Suggested filter</th>
+<th>Expected trade-off</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>How do I add an MCP server?</td>
+<td><code>documentation</code>, <code>example_config</code></td>
+<td>Removes source and conversation noise, but can hide implementation details.</td>
+</tr>
+<tr>
+<td>How does the repository chat work?</td>
+<td><code>documentation</code>, <code>source</code></td>
+<td>Focuses on architecture and implementation; excludes useful historical PR rationale.</td>
+</tr>
+<tr>
+<td>What changed in recent pull requests?</td>
+<td><code>pull_request</code></td>
+<td>Removes nearly all local-corpus noise; intentionally hides docs that summarize landed changes.</td>
+</tr>
+</tbody></table>
+<p>Filters are therefore optional and caller-selected, never inferred as a hard constraint. An empty filtered candidate set returns the grounded abstention instead of falling back silently to unfiltered results.</p>
+<p>Measured at top 5:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th align="right">Unfiltered relevant/noise</th>
+<th align="right">Filtered relevant/noise</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>How do I add an MCP server?</td>
+<td align="right">2/3</td>
+<td align="right">5/0</td>
+<td>Noise disappeared, but all five filtered chunks came from <code>README.md</code>; source diversity needs improvement.</td>
+</tr>
+<tr>
+<td>How does the repository chat work?</td>
+<td align="right">2/3</td>
+<td align="right">3/2</td>
+<td>Filtering helped modestly; two broadly related skill chunks remained.</td>
+</tr>
+<tr>
+<td>What changed in recent pull requests?</td>
+<td align="right">2/3</td>
+<td align="right">5/0</td>
+<td>The <code>pull_request</code> filter produced the clearest gain.</td>
+</tr>
+</tbody></table>
+<p>The MCP filter also hid the useful <code>wiki/wiki/concepts/mcp-registry.md</code> source because wiki pages are currently classified as <code>source</code>. Filtering removed noise overall but can hide useful cross-type evidence, which is why it is not inferred automatically.</p>
+<h2>Retrieval trace validation</h2>
+<ul>
+<li>GitHub Issues and Pull Requests retain their canonical API-provided URL.</li>
+<li>Source files come from an anonymous public checkout selected by <code>GITHUB_SOURCE_REF</code>; links use its resolved commit SHA.</li>
+<li>The benchmark checks URLs in the unfiltered top-five retrieval traces, not every indexed URL, and warns when the index is older than 24 hours. <code>--check-links</code> also issues bounded HTTP <code>HEAD</code> requests and reports failures without aborting the local evaluation.</li>
+<li>Retrieved sources remain a retrieval trace, not claim-level citation proof. Users must be able to open the source and verify the answer.</li>
+</ul>
+<h2>Degraded retrieval policy</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Index/build behavior</th>
+<th>Deployment/user behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GitHub Issue/PR API unavailable</td>
+<td>Continue with the public checkout and a warning.</td>
+<td>Chat remains available; Issue/PR questions may abstain.</td>
+</tr>
+<tr>
+<td>Public checkout unavailable or private</td>
+<td>Fail indexing without consulting credentials or local files.</td>
+<td>Keep the last published index; do not publish private data.</td>
+</tr>
+<tr>
+<td>Empty GitHub corpus</td>
+<td>Continue if local chunks exist and report zero GitHub documents.</td>
+<td>Conversation filters return the grounded abstention.</td>
+</tr>
+<tr>
+<td>Empty full corpus</td>
+<td>Fail indexing and deployment.</td>
+<td>Do not serve a knowingly empty knowledge base.</td>
+</tr>
+<tr>
+<td>Stale index</td>
+<td>A compatible index remains usable. The evaluation script warns when it is older than 24 hours; the server has no automatic age alert.</td>
+<td>Rebuild explicitly; an age indicator and production alerts remain future work.</td>
+</tr>
+<tr>
+<td>Embedding model/dimension mismatch</td>
+<td>Reject retrieval and require a rebuild.</td>
+<td>Return HTTP 500 with a generic retrieval error; log <code>retrieval_failed</code> without sensitive input.</td>
+</tr>
+</tbody></table>
+<p>This separates optional remote enrichment from required local grounding. A stale but compatible index is usually better than no service; an incompatible index is unsafe because its similarity scores are meaningless.</p>
+<h2>Observability review</h2>
+<p>The old logs included raw questions, which can contain secrets or private text. Server logs now contain question length, top-k, active type filters, retrieved path/type/score, retrieval latency, provider token counts, total latency, and failure stage. Browser diagnostics also include source authors. They do not contain raw prompts, prompt hashes, chunk text, embeddings, API tokens, or credentials. Index generation already reports corpus counts; a production metrics backend should aggregate corpus age/counts and retrieval latency without adding user text.</p>
+<p>Unsalted prompt hashing was rejected because common questions can be guessed offline. If correlation later becomes necessary, server logs should use a dedicated, rotatable HMAC key; browser logs should remain uncorrelated. Access controls, short retention, and secret scanning/redaction at the log sink remain necessary.</p>
+<h2>Production improvement proposal (design only)</h2>
+<ol>
+<li><strong>Hybrid BM25 + vector search:</strong> union lexical and semantic candidates so exact commands, filenames, and acronyms are not lost when embedding similarity is weak. Retrieve about 20 candidates.</li>
+<li><strong>Metadata pre-filtering:</strong> already implemented for type; extend to path, author, state, branch, and time windows so scoring starts with the right corpus slice.</li>
+<li><strong>Cross-encoder reranking:</strong> jointly score the query and each of the 20 candidates, then send only the best five. This should improve relevance density without paying top-20 prompt cost.</li>
+<li><strong>Content-hash embedding cache:</strong> key embeddings by model plus normalized content hash. Unchanged chunks avoid paid, variable re-embedding and make experiments faster and reproducible.</li>
+<li><strong>Incremental indexing:</strong> update only changed files and GitHub records, while atomically publishing a versioned index. This reduces staleness and rebuild time.</li>
+<li><strong>Retrieval evaluation benchmark:</strong> grow the current three smoke questions into reviewed relevance judgments with Recall@k, MRR/nDCG, filter false-negative rate, abstention accuracy, token usage, and latency gates in CI.</li>
+</ol>
+<p>The next implementation should be hybrid top-20 retrieval followed by reranking to five, but only after the benchmark has enough labeled queries to prove the extra complexity and latency improve quality.</p>
+<h2>Learning notes</h2>
+<ol>
+<li>The largest answer-quality issue was irrelevant document types crowding a small top-k, especially broad queries about recent Pull Requests.</li>
+<li>Metadata pre-filtering gave the biggest targeted gain because it removed noise before scoring without changing embeddings or the LLM.</li>
+<li>Hybrid retrieval plus reranking is next: lexical search recovers exact repository vocabulary, while reranking preserves a compact, high-quality prompt.</li>
+</ol>
+</article></main></div></body></html>

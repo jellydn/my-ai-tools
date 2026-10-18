@@ -38,12 +38,17 @@ Until the package is published to npm, install the binary from this monorepo:
 
 ```bash
 # from the my-ai-tools repo root
-npm install
+npm ci
 npm run link:user-memory
 # exposes `user-memory-mcp` on your PATH via npm link
 ```
 
 `./cli.sh` also auto-links the binary when the MCP registry prerequisite `user-memory-mcp` is missing.
+
+Run `./cli.sh --dry-run` before applying the installer. Automatic setup requires npm and
+this checkout, and stops before enabling the integration if the binary remains unavailable.
+Keep the checkout: `npm link` points to its built package. After updating the checkout,
+rerun `npm ci && npm run link:user-memory` to rebuild; the installer retains an existing binary.
 
 ## Run
 

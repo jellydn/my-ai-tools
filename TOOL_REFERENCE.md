@@ -87,6 +87,11 @@ The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONS
 | `sem`                 | Semantic version control - entity-level diffs, blame, and impact analysis                 | `sem-mcp` (via [Ataraxy-Labs/sem](https://github.com/Ataraxy-Labs/sem)) |
 | `ctx`                 | Local agent-history search across coding sessions                                         | `ctx mcp serve`                                                         |
 
+The bundled MCP configurations also include `user-memory`, which runs the locally built
+`user-memory-mcp` binary. It stores explicit user preferences, not inferred coding tastes
+or project knowledge. See the [installation and storage guide](packages/user-memory-mcp/README.md).
+Codex, Cursor, and Gemini also configure `plannotator-inbox` with `plannotator inbox mcp`.
+
 ## 🎬 Demo
 
 [![IT Man Channel](https://img.shields.io/badge/YouTube-IT%20Man%20Channel-red?logo=youtube)](https://github.com/jellydn/itman-channel)
@@ -232,21 +237,28 @@ The pre-1.0 SDK supports starting and resuming sessions, streaming responses, ha
 
 ## 🤖 Chat with the repo
 
-The landing page includes a repository assistant that answers questions from the indexed README, docs, configs, and scripts.
+The landing page includes a repository assistant grounded in a public GitHub checkout and bounded Issue/PR excerpts.
+Both index builders ignore local files, unpublished commits, and GitHub credentials. Set `GITHUB_REPOSITORY`
+and `GITHUB_SOURCE_REF` to select a publicly accessible repository and ref; the default is `jellydn/my-ai-tools` at `main`.
+Git and network access are required. See the [public corpus policy](docs/rag-architecture.md).
 
 To run it locally:
 
 ```bash
 cp .env.example .env
 # Add OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_MODEL, and OPENAI_EMBEDDING_MODEL to .env
-npm install
+set -a
+source .env            # export configuration before indexing and starting the server
+set +a
+npm ci
 npm run index          # build data/index.json (server mode)
 npm run index:browser  # build public/index-browser.json (browser mode)
-source .env            # load OPENAI_BASE_URL for server mode
 npm run dev            # serve http://localhost:3000
 ```
 
-The assistant only answers from the retrieved repository excerpts, cites the source file paths, and says "This is not documented in the repository." when the context is insufficient.
+The grounding prompt asks the model to use only retrieved excerpts and abstain when context is insufficient.
+The **Retrieved sources** links show the retrieval trace, not proof that every generated claim is supported.
+Source-file links use the resolved commit SHA. Rebuild the server index when changing the embedding model.
 
 The landing page also has a browser mode that runs the embedding and an instruction-tuned model (Qwen2.5-Coder-0.5B-Instruct) in the browser via WebGPU. Browser mode downloads the ~9 MB index and the ~300 MB model on the user's device.
 
@@ -632,7 +644,7 @@ Auto-format after file edits:
 
 - `jq` - JSON parsing (required)
 - `biome` - JavaScript/TypeScript formatting
-- `gofmt` - Go formatting (requires Go installation)
+- `gofmt` - Go formatting (installs Go through mise when available; otherwise reports manual setup steps)
 - `prettier` - Markdown formatting (used via `npx`)
 - `ruff` - Python formatting (installed via mise, pipx, or pip)
 - `rustfmt` - Rust formatting (installed via mise or rustup)
@@ -3556,6 +3568,15 @@ Copy [`configs/ai-launcher/config.json`](configs/ai-launcher/config.json) to `~/
 ### Plannotator
 
 [**Plannotator**](https://plannotator.ai/) - Review a plan or a code diff outside the terminal. Plan review is automatic only where the agent has a hook or a `submit_plan` tool. Code review is a manual command (`/plannotator-review`, `!plannotator review`, or the Amp command palette). ([GitHub](https://github.com/backnotprop/plannotator))
+
+`./cli.sh` installs the CLI as a shared prerequisite before copying enabled integrations,
+including installations without Claude Code. It stops if installation fails or the binary
+is still unavailable. An existing binary is retained, not upgraded. Preview with `./cli.sh --dry-run` first.
+
+Codex enables its `Stop` hook; Gemini hooks `exit_plan_mode`. Codex, Cursor, and Gemini
+also use the inbox MCP server. Factory enables Claude-hook imports; its Plannotator
+commands remain a manual review path. OpenCode, Kilo, and MiMo use the `plan-agent`
+plugin workflow. These integrations require the `plannotator` command on the agent's `PATH`.
 
 ### Waku
 
