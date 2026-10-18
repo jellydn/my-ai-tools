@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   bats:
     name: Config Validation Tests
@@ -44,10 +47,10 @@ jobs:
         run: bun run typecheck
 
       - name: Biome check (code-taste)
-        run: bunx biome check lib/code-taste lib/vector-similarity.ts lib/retriever.ts scripts/code-taste.ts tests/code-taste.test.ts
+        run: bunx biome check lib/code-taste lib/vector-similarity.ts lib/retriever.ts scripts/code-taste.ts tests/code-taste.test.ts tests/retriever.test.ts
 
       - name: Run code taste tests
-        run: bun test tests/code-taste.test.ts
+        run: bun test tests/code-taste.test.ts tests/retriever.test.ts
 
   windows-installer:
     name: Windows PowerShell Installer
