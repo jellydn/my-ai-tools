@@ -63,8 +63,14 @@ export async function retrieve(query: string, topK: number): Promise<RetrievedCh
 	if (index.chunks.length === 0) {
 		return [];
 	}
+	if (index.model !== EMBEDDING_MODEL) {
+		throw new Error(`Index uses embedding model "${index.model}", but retrieval uses "${EMBEDDING_MODEL}"`);
+	}
 
 	const queryEmbedding = await embed(query);
+	if (index.chunks.some((chunk) => chunk.embedding.length !== queryEmbedding.length)) {
+		throw new Error("Index embedding dimensions do not match the query embedding");
+	}
 	const scored = index.chunks.map((chunk) => ({
 		path: chunk.path,
 		text: chunk.text,
