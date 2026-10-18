@@ -4,6 +4,7 @@ import type OpenAI from "openai";
 import { createIndexLoader } from "./index-loader.ts";
 import type { DocumentType } from "./indexer.ts";
 import { createOpenAIClient, getDefaultEmbeddingModel } from "./openai-client.ts";
+import { cosineSimilarity } from "./vector-similarity.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -58,7 +59,8 @@ export function validateIndex(value: unknown): Index {
 	if (index.model !== EMBEDDING_MODEL) {
 		throw new Error(`Index model ${index.model ?? "unknown"} does not match configured model ${EMBEDDING_MODEL}`);
 	}
-	if (!Array.isArray(index.chunks) || index.chunks.length === 0) throw new Error("Invalid index: no chunks");
+	if (!Array.isArray(index.chunks)) throw new Error("Invalid index: no chunks");
+	if (index.chunks.length === 0) return index as Index;
 	const dimension = index.chunks[0]?.embedding?.length ?? 0;
 	if (dimension === 0) throw new Error("Invalid index: empty embedding");
 	for (const chunk of index.chunks) {
@@ -85,21 +87,6 @@ export const clearIndexCache = () => indexLoader.clear();
 
 async function getIndex(): Promise<Index> {
 	return validateIndex(await indexLoader.load());
-}
-
-function cosineSimilarity(a: number[], b: number[]): number {
-	let dot = 0;
-	let aNorm = 0;
-	let bNorm = 0;
-	for (let index = 0; index < a.length; index++) {
-		const aValue = a[index] ?? 0;
-		const bValue = b[index] ?? 0;
-		dot += aValue * bValue;
-		aNorm += aValue * aValue;
-		bNorm += bValue * bValue;
-	}
-	const denominator = Math.sqrt(aNorm) * Math.sqrt(bNorm);
-	return denominator === 0 ? 0 : dot / denominator;
 }
 
 export function rankChunks(

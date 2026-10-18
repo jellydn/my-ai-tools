@@ -228,6 +228,25 @@ biome check .
 See [`TESTING.md`](TESTING.md) for focused test commands and [`CONTRIBUTING.md`](CONTRIBUTING.md) for repository
 conventions.
 
+## 🎨 GitHub Coding Taste Generator
+
+`code-taste` analyzes public GitHub repositories and generates an evidence-backed
+coding preference profile. This command requires Bun and an OpenAI-compatible API
+key. Tree-sitter extracts TypeScript/TSX declarations; Markdown chunks retain headings
+and fenced code. See [setup and model configuration](docs/code-taste-openrouter.md).
+
+```bash
+bun install
+bun run code-taste analyze jellydn/my-ai-tools
+bun run code-taste analyze jellydn --repos 3 --language TypeScript
+bun run code-taste export --format markdown
+```
+
+Analysis state is stored in ignored `.code-taste/`. `CODING_TASTE.md` is intentionally
+not ignored so you can review and commit the resulting guidance. Markdown omits evidence;
+review the evidence in `.code-taste/profile.json` or the JSON export before treating
+inferred preferences as project rules.
+
 ## 📚 Documentation
 
 HTML pages in [`docs/`](docs/index.html) are generated from the Markdown sources. Regenerate them with `bun scripts/render-docs.ts`.

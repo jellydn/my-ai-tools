@@ -7,6 +7,8 @@ __pycache__/
 out
 dist
 *.tgz
+.code-taste/
+CODING_TASTE.json
 
 coverage
 *.lcov
