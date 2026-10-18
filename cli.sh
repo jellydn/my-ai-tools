@@ -245,7 +245,15 @@ check_prerequisites() {
 	fi
 	log_success "Git found"
 
-	if command -v bun &>/dev/null; then
+	if [ "$IS_WINDOWS" = true ]; then
+		if ! command -v node &>/dev/null || ! command -v npm &>/dev/null; then
+			log_error "Native Windows package installation requires Node.js LTS with npm (Bun alone is not sufficient)."
+			log_info "Run install.ps1 or install with: winget install --exact --id OpenJS.NodeJS.LTS --source winget"
+			exit 1
+		fi
+		log_success "Node.js found ($(node --version)); using npm on native Windows"
+		ensure_dir_on_path "$(_npm_global_bin)"
+	elif command -v bun &>/dev/null; then
 		BUN_VERSION=$(bun --version)
 		log_success "Bun found ($BUN_VERSION)"
 	elif command -v node &>/dev/null; then

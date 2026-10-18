@@ -21,10 +21,15 @@ ensure_dir_on_path() {
 	fi
 }
 
-# Detect available package manager (bun preferred, fallback to npm)
+# Use npm on native Windows to avoid the Bash-installed Bun lifecycle launcher.
+# Unix-like systems keep the existing Bun preference.
 # Outputs: package manager command or empty if none found
 _detect_package_manager() {
-	if command -v bun &>/dev/null; then
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		if command -v node &>/dev/null && command -v npm &>/dev/null; then
+			echo "npm"
+		fi
+	elif command -v bun &>/dev/null; then
 		echo "bun"
 	elif command -v npm &>/dev/null; then
 		echo "npm"
@@ -54,25 +59,13 @@ _verify_package_manager() {
 		return 0
 	fi
 
-	if [ "$pkg_manager" = "npm" ] && command -v bun &>/dev/null; then
+	if [ "${IS_WINDOWS:-false}" != true ] && [ "$pkg_manager" = "npm" ] && command -v bun &>/dev/null; then
 		log_info "Falling back to bun for $tool_name installation"
 		echo "bun"
 		return 0
 	fi
 
 	return 1
-}
-
-# Detect available script runner (bunx preferred, fallback to npx)
-# Outputs: script runner command or empty if none found
-_detect_script_runner() {
-	if command -v bunx &>/dev/null; then
-		echo "bunx"
-	elif command -v npx &>/dev/null; then
-		echo "npx"
-	else
-		echo ""
-	fi
 }
 
 # Resolve installer checksum URL for trusted installations
@@ -382,7 +375,9 @@ install_opencode() {
 
 # True when stable OpenCode 2 (`opencode` v2.x) or the leftover beta `opencode2` binary is on PATH.
 _opencode_v2_installed() {
-	if command -v opencode2 >/dev/null 2>&1; then
+	if command -v opencode2 >/dev/null 2>&1 && {
+		[ "${IS_WINDOWS:-false}" != true ] || opencode2 --version >/dev/null 2>&1
+	}; then
 		return 0
 	fi
 	if command -v opencode >/dev/null 2>&1; then
@@ -401,13 +396,13 @@ install_opencode2() {
 		fi
 
 		local package_manager=""
-		if command -v bun >/dev/null 2>&1; then
-			package_manager="bun"
-		elif command -v npm >/dev/null 2>&1; then
-			package_manager="npm"
-		elif command -v pnpm >/dev/null 2>&1; then
+		package_manager=$(_detect_package_manager)
+		if [ -z "$package_manager" ] && [ "${IS_WINDOWS:-false}" = true ]; then
+			log_error "OpenCode 2 requires Node.js and npm on native Windows. Run install.ps1 or install Node.js LTS."
+			return 1
+		elif [ -z "$package_manager" ] && command -v pnpm >/dev/null 2>&1; then
 			package_manager="pnpm"
-		elif command -v yarn >/dev/null 2>&1; then
+		elif [ -z "$package_manager" ] && command -v yarn >/dev/null 2>&1; then
 			package_manager="yarn"
 		fi
 
@@ -429,7 +424,7 @@ install_opencode2() {
 					global_bin="$(bun pm bin -g 2>/dev/null)"
 					[ -n "$global_bin" ] || global_bin="${BUN_INSTALL:-$HOME/.bun}/bin"
 					;;
-				npm) global_bin="$(npm prefix -g 2>/dev/null)/bin" ;;
+				npm) global_bin="$(_npm_global_bin)" ;;
 				pnpm) global_bin="$(pnpm bin -g 2>/dev/null)" ;;
 				yarn) global_bin="$(yarn global bin 2>/dev/null)" ;;
 				esac

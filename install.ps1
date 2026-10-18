@@ -6,13 +6,13 @@
 .DESCRIPTION
     This script sets up the environment and runs the bash-based installer on Windows.
     It handles:
-    - Git for Windows and jq installation via winget
+    - Git for Windows, jq, and Node.js LTS installation via winget
     - Current-process PATH setup and executable discovery
     - Proper bash invocation with Windows paths
 .NOTES
     File Name      : install.ps1
     Author         : my-ai-tools
-    Prerequisite   : PowerShell 5.1 or later, winget or preinstalled Git and jq
+    Prerequisite   : PowerShell 5.1 or later, winget or preinstalled Git, jq, and Node.js/npm
 .LINK
     https://github.com/jellydn/my-ai-tools
 #>
@@ -121,6 +121,23 @@ function Find-Jq {
     return $null
 }
 
+# Node lifecycle scripts must resolve a real node.exe, even when Bun is installed.
+function Find-Node {
+    $roots = @()
+    $node = Get-Command node.exe -CommandType Application -ErrorAction SilentlyContinue
+    if ($node) { $roots += Split-Path $node.Source -Parent }
+    $roots += "$env:ProgramFiles\nodejs", "${env:ProgramFiles(x86)}\nodejs",
+        "$env:LOCALAPPDATA\Programs\nodejs"
+    foreach ($root in ($roots | Select-Object -Unique)) {
+        if ((Test-Path "$root\node.exe" -PathType Leaf) -and
+            (Test-Path "$root\npm.cmd" -PathType Leaf)) {
+            Update-ProcessPath -Prepend @($root)
+            return "$root\node.exe"
+        }
+    }
+    return $null
+}
+
 function Install-WingetPackage {
     param([string]$Id)
 
@@ -187,6 +204,20 @@ function Test-Prerequisites {
     $jqInstalled = Install-Jq -InstallIfMissing:(-not $DryRun)
     if (-not $jqInstalled) {
         $issues += "jq is required but could not be located."
+    }
+
+    $nodePath = Find-Node
+    if (-not $nodePath -and -not $DryRun) {
+        Install-WingetPackage -Id 'OpenJS.NodeJS.LTS'
+        $nodePath = Find-Node
+    }
+    if ($nodePath) {
+        Write-Success "Node.js and npm found at: $nodePath"
+    } else {
+        if ($DryRun) { Write-Warn "Node.js/npm not found. Dry-run mode will not install them." }
+        $issues += "Node.js LTS with npm is required for native Windows package installation."
+        Write-Info "Install with: winget install --exact --id OpenJS.NodeJS.LTS --source winget"
+        Write-Info "Or install Node.js LTS (including npm): https://nodejs.org/"
     }
 
     if ($issues.Count -gt 0) {

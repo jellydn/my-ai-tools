@@ -218,3 +218,74 @@ load helpers
 	[[ "$output" != *"UNEXPECTED INSTALL"* ]]
 	[[ "$output" != *"Go installed"* ]]
 }
+
+@test "qmd and OpenCode use npm on native Windows and keep Bun on Unix" {
+	for platform in true false; do
+		run env PATH="/usr/bin:/bin" bash -c '
+			source "$1/lib/common.sh"
+			source "$1/lib/install.sh"
+			IS_WINDOWS="$2" DRY_RUN=true YES_TO_ALL=true
+			bun() { return 0; }
+			node() { return 0; }
+			npm() { printf "/tmp/npm-prefix\n"; }
+			npx() { return 0; }
+			bunx() { return 0; }
+			cygpath() { printf "%s\n" "$2"; }
+			install_qmd_now
+			install_opencode2
+			printf "runner=%s\n" "$(_detect_script_runner)"
+		' _ "$REPO_ROOT" "$platform"
+		[ "$status" -eq 0 ]
+		if [ "$platform" = true ]; then
+			[[ "$output" == *"npm install -g @tobilu/qmd"* ]]
+			[[ "$output" == *"npm install -g @opencode/cli"* ]]
+			[[ "$output" == *"runner=npx"* ]]
+			[[ "$output" != *"bun install"* ]]
+		else
+			[[ "$output" == *"bun install -g @tobilu/qmd"* ]]
+			[[ "$output" == *"bun install -g --trust @opencode/cli"* ]]
+			[[ "$output" == *"runner=bunx"* ]]
+		fi
+	done
+}
+
+@test "native Windows rejects Bun-only setup before installing packages" {
+	run env PATH="/usr/bin:/bin" bash -c '
+		source "$1/cli.sh"
+		IS_WINDOWS=true DRY_RUN=false YES_TO_ALL=true
+		bun() { return 0; }
+		git() { return 0; }
+		command() {
+			if [ "$1" = -v ] && { [ "$2" = node ] || [ "$2" = npm ]; }; then return 1; fi
+			builtin command "$@"
+		}
+		check_prerequisites
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 1 ]
+	[[ "$output" == *"requires Node.js LTS with npm"* ]]
+	[[ "$output" != *"Installing qmd"* ]]
+}
+
+@test "native Windows keeps relative npm shims in their global prefix" {
+	run env PATH="/usr/bin:/bin" bash -c '
+		export HOME="$(mktemp -d)" DRY_RUN=false YES_TO_ALL=true
+		source "$1/lib/common.sh"
+		source "$1/lib/install.sh"
+		IS_WINDOWS=true
+		node() { return 0; }
+		bun() { return 17; }
+		cygpath() { printf "%s\n" "$2"; }
+		npm() {
+			if [ "$1" = prefix ]; then printf "%s\n" "$HOME/global"; return; fi
+			mkdir -p "$HOME/global"
+			printf "%s\n" "#!/bin/sh" "cat \"\$0.version\"" >"$HOME/global/qmd"
+			printf "qmd-test-version\n" >"$HOME/global/qmd.version"
+			chmod +x "$HOME/global/qmd"
+		}
+		install_qmd_now || exit 1
+		qmd --version || exit 1
+		[ ! -e "$HOME/.local/bin/qmd" ]
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 0 ]
+	[[ "$output" == *"qmd-test-version"* ]]
+}

@@ -35,9 +35,10 @@ repository.
 
 - Windows PowerShell 5.1 or PowerShell 7
 - [`winget`](https://learn.microsoft.com/windows/package-manager/winget/) to install missing Git for Windows
-  (including Git Bash) and `jq` automatically, or install [Git for Windows](https://git-scm.com/download/win)
-  and [`jq`](https://jqlang.org/download/) manually
-- Bun or Node.js LTS for JavaScript-based tools
+  (including Git Bash), `jq`, and Node.js LTS automatically, or install
+  [Git for Windows](https://git-scm.com/download/win), [`jq`](https://jqlang.org/download/), and
+  [Node.js LTS with npm](https://nodejs.org/) manually
+- Node.js LTS with npm is required for native Windows JavaScript package installation. Bun alone is not sufficient.
 
 During Git for Windows setup, select **Git from the command line and also from 3rd-party software**. The native
 Windows installer uses PowerShell for setup and Git Bash to run the shared Bash installer. WSL remains supported
@@ -83,17 +84,28 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -DryRun
 powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Backup
 ```
 
-The PowerShell installer installs missing Git for Windows and `jq` with `winget` and forwards options to
+The PowerShell installer installs missing Git for Windows, `jq`, and Node.js LTS with `winget` and forwards options to
 `cli.sh`. Package installation uses `--source winget` (not `msstore`), accepts package/source agreements, and
-disables installer prompts and upgrades. Windows may still require administrator approval for Git installation.
-Existing prerequisites are reused. `-DryRun` never installs prerequisites; Git Bash must already be available
-to run the shared installer's preview.
+disables installer prompts and upgrades. Windows may still require administrator approval for Git or Node.js installation.
+Existing prerequisites are reused. `-DryRun` never installs prerequisites; Git Bash and Node.js/npm must already
+be available to run the shared installer's preview.
 
 The wrapper merges machine, user, and current-process PATH entries, then checks registered Git locations and
 WinGet links/package folders. It adds discovered executable directories to the current process so Git Bash
 inherits them, without changing the saved PATH itself. This normally avoids a terminal restart. When run from
 a repository checkout, it uses that checkout. When downloaded by itself or piped to PowerShell, it clones the
 latest repository into a temporary directory.
+
+Native Windows uses **npm** for global packages and **npx** for package runners, even when Bun is present.
+The Bash Bun bootstrap can leave an extensionless `bun` executable on Windows. Bun 1.4.3 then fails to
+launch lifecycle scripts with `Failed to run script install/postinstall due to error ENOENT`, even with
+Node.js on PATH; the same binary named `bun.exe` does not have this failure. Using Node/npm avoids that
+launcher problem and supplies the runtime for packages whose lifecycle scripts invoke `node`. The installer
+requires both Node.js and npm before installing packages and adds npm's global prefix (not `prefix/bin`)
+to the current Git Bash PATH. It does not copy npm shims to `~/.local/bin`, which would break their relative
+module paths on Windows. Direct Git Bash users must install Node.js LTS with npm first. Linux, macOS,
+and WSL keep the existing Bun-first behavior. Do not use `--ignore-scripts` to bypass this error: it can
+leave native package binaries uninstalled.
 
 If a prerequisite remains unavailable after a successful package install, close **all** terminal windows,
 open PowerShell again, and re-run the same installer command with your original options. If `winget` reports
@@ -103,6 +115,7 @@ install or update [App Installer](https://aka.ms/getwinget). You can also instal
 ```powershell
 winget install --exact --id Git.Git --source winget
 winget install --exact --id jqlang.jq --source winget
+winget install --exact --id OpenJS.NodeJS.LTS --source winget
 ```
 
 For a direct one-line installation:

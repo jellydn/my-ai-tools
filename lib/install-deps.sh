@@ -30,6 +30,32 @@ install_plannotator_if_needed() {
 	fi
 }
 
+# Native Windows uses npx so package lifecycle scripts have a real Node runtime.
+_detect_script_runner() {
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		if command -v node &>/dev/null && command -v npx &>/dev/null; then
+			echo "npx"
+		fi
+	elif command -v bunx &>/dev/null; then
+		echo "bunx"
+	elif command -v npx &>/dev/null; then
+		echo "npx"
+	else
+		echo ""
+	fi
+}
+
+# npm puts Windows command shims in the prefix itself, not prefix/bin.
+_npm_global_bin() {
+	local prefix
+	prefix=$(npm prefix -g 2>/dev/null) || return 1
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		cygpath -u "$prefix"
+	else
+		printf '%s/bin\n' "$prefix"
+	fi
+}
+
 # ─── Bun installation ──────────────────────────────────────────────
 
 install_bun_now() {
@@ -106,6 +132,8 @@ handle_bun_installation() {
 _link_binary_on_local_bin() {
 	local src_bin="$1"
 	local link_name="$2"
+	# Git Bash can copy instead of symlink; npm shims then resolve the wrong node_modules.
+	[ "${IS_WINDOWS:-false}" = true ] && return 0
 	if [ -z "$src_bin" ] || [ ! -e "$src_bin" ]; then
 		return 0
 	fi
@@ -120,17 +148,18 @@ _link_binary_on_local_bin() {
 # ─── qmd installation ──────────────────────────────────────────────
 
 install_qmd_now() {
-	if command -v qmd &>/dev/null; then
+	local qmd_version
+	if command -v qmd &>/dev/null && qmd_version=$(qmd --version 2>/dev/null || {
+		[ "${IS_WINDOWS:-false}" != true ] && echo "version unknown"
+	}); then
 		_link_binary_on_local_bin "$(command -v qmd)" "qmd"
 		_link_binary_on_local_bin "$(command -v node 2>/dev/null)" "node"
-		local qmd_version
-		qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
 		log_success "qmd already installed ($qmd_version)"
 		return 0
 	fi
 
-	# Prefer Bun for qmd (install if missing)
-	if ! command -v bun &>/dev/null; then
+	# Keep the Bun preference on Unix; native Windows uses Node/npm.
+	if [ "${IS_WINDOWS:-false}" != true ] && ! command -v bun &>/dev/null; then
 		log_info "qmd works best with Bun. Installing Bun first..."
 		handle_bun_installation
 	fi
@@ -145,14 +174,18 @@ install_qmd_now() {
 
 	log_info "Installing qmd CLI via $pkg_manager..."
 	if execute "$pkg_manager install -g @tobilu/qmd"; then
-		# Ensure bun's global bin directory is in PATH for the current session (if using bun)
-		if command -v bun &>/dev/null; then
+		if [ "$pkg_manager" = npm ]; then
+			ensure_dir_on_path "$(_npm_global_bin)"
+		elif [ "$pkg_manager" = bun ]; then
 			ensure_dir_on_path "$(bun pm bin -g 2>/dev/null)"
 		fi
 		_link_binary_on_local_bin "$(command -v qmd 2>/dev/null)" "qmd"
 		_link_binary_on_local_bin "$(command -v node 2>/dev/null)" "node"
-		local qmd_version
 		qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
+		if [ "${IS_WINDOWS:-false}" = true ] && [ "$DRY_RUN" != true ] && [ "$qmd_version" = "version unknown" ]; then
+			log_error "qmd installation completed but qmd --version failed. Check Node.js and npm's global PATH."
+			return 1
+		fi
 		log_success "qmd installed successfully ($qmd_version)"
 		return 0
 	fi
@@ -162,7 +195,9 @@ install_qmd_now() {
 }
 
 handle_qmd_installation_if_needed() {
-	handle_tool_installation "qmd" "install_qmd_now" "command -v qmd" "qmd" "Knowledge features"
+	local check_cmd="command -v qmd"
+	if [ "${IS_WINDOWS:-false}" = true ]; then check_cmd="qmd --version"; fi
+	handle_tool_installation "qmd" "install_qmd_now" "$check_cmd" "qmd" "Knowledge features"
 }
 
 # ─── fff-mcp installation ──────────────────────────────────────────

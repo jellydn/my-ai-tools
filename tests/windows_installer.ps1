@@ -89,6 +89,10 @@ function Invoke-FixtureWinget {
             'jqlang.jq' {
                 New-ExecutableFixture (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages\jqlang.jq_NewSource\jq.exe')
             }
+            'OpenJS.NodeJS.LTS' {
+                New-ExecutableFixture (Join-Path $env:ProgramFiles 'nodejs\node.exe')
+                New-ExecutableFixture (Join-Path $env:ProgramFiles 'nodejs\npm.cmd')
+            }
             default { throw "Unexpected package: $id" }
         }
     }
@@ -108,11 +112,12 @@ try {
     Assert-ProcessPathContains (Join-Path $env:ProgramFiles 'Git\cmd')
     Assert-ProcessPathContains (Join-Path $env:ProgramFiles 'Git\bin')
     Assert-ProcessPathContains (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages\jqlang.jq_NewSource')
+    Assert-ProcessPathContains (Join-Path $env:ProgramFiles 'nodejs')
     Assert-ProcessPathContains 'C:\process-only'
     Assert-True ((@($env:Path -split ';' | Where-Object { $_ -ieq 'C:\process-only' })).Count -eq 1) 'PATH must be deduplicated'
-    Assert-True (($script:installedPackages -join ',') -eq 'Git.Git,jqlang.jq') 'Both prerequisites must be installed'
+    Assert-True (($script:installedPackages -join ',') -eq 'Git.Git,jqlang.jq,OpenJS.NodeJS.LTS') 'All prerequisites must be installed'
     Assert-True (Test-Prerequisites) 'Repeated installation must succeed'
-    Assert-True ($script:installedPackages.Count -eq 2) 'Repeated run must not reinstall existing packages'
+    Assert-True ($script:installedPackages.Count -eq 3) 'Repeated run must not reinstall existing packages'
     Assert-True (-not (($script:messages -join "`n") -match 'close all terminal')) 'Successful discovery must not request a restart'
     [Console]::WriteLine('PASS: fresh install, stale PATH, inherited PATH, idempotence')
 
@@ -128,6 +133,8 @@ try {
     New-ExecutableFixture (Join-Path $script:registryRoot 'cmd\git.exe')
     New-ExecutableFixture (Join-Path $script:registryRoot 'bin\bash.exe')
     New-ExecutableFixture (Join-Path $env:ProgramFiles 'WinGet\Links\jq.exe')
+    New-ExecutableFixture (Join-Path $env:ProgramFiles 'nodejs\node.exe')
+    New-ExecutableFixture (Join-Path $env:ProgramFiles 'nodejs\npm.cmd')
     $script:wingetAvailable = $false
     Assert-True (Test-Prerequisites) 'Custom Git and machine jq must work without winget'
     Assert-ProcessPathContains (Join-Path $script:registryRoot 'cmd')
@@ -140,9 +147,23 @@ try {
     New-ExecutableFixture $script:commands['git.exe']
     New-ExecutableFixture (Join-Path $caseRoot 'Portable Git\bin\bash.exe')
     $script:commands['jq.exe'] = 'C:\existing\jq.exe'
+    $script:commands['node.exe'] = Join-Path $caseRoot 'Portable Node\node.exe'
+    New-ExecutableFixture $script:commands['node.exe']
+    New-ExecutableFixture (Join-Path $caseRoot 'Portable Node\npm.cmd')
     Assert-True (Test-Prerequisites) 'Git discovered through PATH must work'
     Assert-True ($script:installedPackages.Count -eq 0) 'Existing tools must not be installed again'
+    Assert-ProcessPathContains (Join-Path $caseRoot 'Portable Node')
     [Console]::WriteLine('PASS: existing Git on PATH and jq do not trigger installation')
+
+    Reset-Fixture
+    New-ExecutableFixture (Join-Path $env:ProgramFiles 'Git\cmd\git.exe')
+    New-ExecutableFixture (Join-Path $env:ProgramFiles 'Git\bin\bash.exe')
+    $script:commands['jq.exe'] = 'C:\existing\jq.exe'
+    New-ExecutableFixture (Join-Path $env:ProgramFiles 'nodejs\node.exe')
+    $script:wingetAvailable = $false
+    Assert-True (-not (Test-Prerequisites)) 'Node without npm must not pass prerequisites'
+    Assert-True (($script:messages -join "`n") -match 'https://nodejs.org/') 'Missing npm needs recovery instructions'
+    [Console]::WriteLine('PASS: Node without npm is rejected')
 
     foreach ($mode in @('missing-winget', 'failed-winget', 'unresolved-install', 'already-installed')) {
         Reset-Fixture
