@@ -50,7 +50,7 @@ Open an issue or reach out via support channels listed in README.md.
 
 1. **Create skill directory**: Create a new directory under `.claude/skills/{skill-name}/`
 2. **Create SKILL.md file**: Add `SKILL.md` with skill frontmatter and content
-3. **Write evals**: Add 3-5 prompts that prove the skill works, including at least one negative case. See [`docs/skill-evals.md`](docs/skill-evals.md).
+3. **Write evals**: Add 2-3 happy-path prompts, 1-2 near-miss prompts, and 1 edge-case prompt. See [`docs/skill-evals.md`](docs/skill-evals.md).
 4. **Update skill-rules.json**: Add triggers and keywords for your new skill
 5. **Document**: Add skill to `skills/README.md` if it exists
 
@@ -128,7 +128,7 @@ Edit `.claude/hooks/skill-rules.json` to:
 
 Before submitting a PR or commit:
 
-1. **Test skill evaluation**: Run the eval prompts for the new skill and confirm the intended skill triggers on happy paths and stays quiet on near-miss prompts.
+1. **Test skill evaluation**: Run the happy-path, near-miss, and edge-case prompts. Confirm the expected trigger and behavior for each case, and record pass/fail results with notes.
 2. **Test hooks**: Edit a file on main branch to verify branch protection
 3. **Test agents**: Run `/code-reviewer` to verify review quality
 4. **Test commands**: Try new commands in a test directory

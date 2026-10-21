@@ -51,9 +51,14 @@ skill-name/
 A test case should usually include:
 
 - `prompt`: realistic user input
-- `expected_output`: human-readable success criteria
+- `should_trigger` (required): whether the skill is expected to trigger; use `false` for near-miss cases
+- `expected_behavior`: human-readable success criteria
 - `files` (optional): input files the skill needs
 - `assertions` (optional at first): concrete checks added after the first run
+
+After each run, record the case ID, pass/fail result, and notes in a separate
+results file. Include results for happy-path, near-miss, and edge-case prompts;
+unrun starter cases are not passing results.
 
 ## Evaluation loop
 
@@ -107,6 +112,7 @@ If every run keeps recreating the same helper logic, consider moving it into the
 
 - [ ] The skill has eval prompts, not just a description
 - [ ] At least one negative case is included
+- [ ] At least one prompt exercises a documented edge case, boundary, or failure mode
 - [ ] The prompts are realistic and varied
 - [ ] Expected outputs are specific enough to review manually
 - [ ] The evals were run before the skill was published
