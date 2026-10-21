@@ -90,7 +90,7 @@ Without the preceding lines, we lose the fact that we are talking about vector e
       <section class="card">
         <h2>3. Semantic Chunking (AST & Headings)</h2>
         <p>Standard chunking slices text at arbitrary lengths (with minor adjustments for newlines). This often cuts code blocks, functions, or markdown sections in half.</p>
-        <p>In <strong>PR 309</strong>, we introduced a <strong>Semantic Chunker</strong> (<a href="file:///Users/huynhdung/src/tries/2026-07-14-my-ai-tools-pr-309/lib/code-taste/chunker.ts">lib/code-taste/chunker.ts</a>) that solves this for codebases:</p>
+        <p>In <strong>PR 309</strong>, we introduced a <strong>Semantic Chunker</strong> (<a href="https://github.com/jellydn/my-ai-tools/blob/main/lib/code-taste/chunker.ts">lib/code-taste/chunker.ts</a>) that solves this for codebases:</p>
         <ol>
           <li><strong>TypeScript (AST):</strong> Uses <code>web-tree-sitter</code> to identify top-level nodes (class, function, interface). It keeps declarations intact and prepends supporting type interfaces if referenced in the function body.</li>
           <li><strong>Markdown:</strong> Slices documents by heading blocks (e.g. <code># Heading 1</code>) to ensure sections remain together, while avoiding splitting code fences (<code>```</code>).</li>
@@ -146,6 +146,9 @@ Without the preceding lines, we lose the fact that we are talking about vector e
     const chunksList = document.getElementById('chunks-list');
 
     function chunkText(text, maxSize, overlap) {
+      if (!Number.isInteger(maxSize) || !Number.isInteger(overlap) || maxSize <= 0 || overlap < 0 || overlap >= maxSize) {
+        throw new RangeError("Chunk size must be positive and overlap must be between zero and chunk size minus one.");
+      }
       const normalized = text.replace(/\r\n/g, "\n").trim();
       if (normalized.length === 0) return [];
       if (normalized.length <= maxSize) return [{ text: normalized, overlapStart: 0, overlapEnd: 0 }];

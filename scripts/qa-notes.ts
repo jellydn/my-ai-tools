@@ -1,4 +1,4 @@
-import { readline } from "bun";
+import { createInterface } from "node:readline/promises";
 
 type Note = {
 	path: string;
@@ -82,8 +82,12 @@ async function main() {
 
 	let query = process.argv.slice(2).join(" ");
 	if (query.trim().length === 0) {
-		process.stdout.write("Enter your question: ");
-		query = (await readline()) || "";
+		const input = createInterface({ input: process.stdin, output: process.stdout });
+		try {
+			query = await input.question("Enter your question: ");
+		} finally {
+			input.close();
+		}
 	} else {
 		console.log(`Question: ${query}`);
 	}
