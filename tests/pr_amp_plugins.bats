@@ -34,7 +34,7 @@ PLUGINS_DIR="$REPO_ROOT/configs/amp/plugins"
 }
 
 @test "generate.sh exports AMP plugins" {
-	run grep -F 'copy_directory' "$GENERATE_FILE"
+	run grep -F 'safe_copy_dir' "$GENERATE_FILE"
 	[ "$status" -eq 0 ]
 	echo "$output" | grep -F 'amp/plugins'
 }

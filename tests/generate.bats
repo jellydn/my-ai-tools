@@ -11,19 +11,24 @@ setup() {
     HOME="$(mktemp -d)"
     export SCRIPT_DIR
     SCRIPT_DIR="$(mktemp -d)"
+    # generate.sh resets SCRIPT_DIR to the checkout; never use it for cleanup.
+    export _TEMP_SCRIPT_DIR="$SCRIPT_DIR"
     export DRY_RUN=false
 
     # Source common.sh for execute_quoted / log_* helpers
     source "$REPO_ROOT/lib/common.sh"
     # Source generate.sh; main() runs but all generate_* functions return early
     # because the expected config directories do not exist under the temp HOME.
+    # Do not pass Bats' test-name arguments to the generator's CLI parser.
+    set --
     source "$REPO_ROOT/generate.sh"
+    SCRIPT_DIR="$_TEMP_SCRIPT_DIR"
 }
 
 teardown() {
     # Restore HOME and clean up temp directories
     rm -rf "$HOME"
-    rm -rf "$SCRIPT_DIR"
+    rm -rf "$_TEMP_SCRIPT_DIR"
     export HOME="$ORIG_HOME"
 }
 

@@ -2,7 +2,7 @@
 
 # Re-exec under bash if invoked via sh/dash. lib/require_bash.sh is POSIX-compatible
 # so sh can source it and trigger the re-exec before lib/common.sh is reached.
-source "$(dirname "${BASH_SOURCE[0]}")/lib/require_bash.sh"
+. "$(dirname "${BASH_SOURCE:-$0}")/lib/require_bash.sh"
 
 set -e
 
