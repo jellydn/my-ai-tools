@@ -81,29 +81,28 @@ Native Windows uses Node/npm, not Bun, for package installation; Linux, macOS, a
 
 The one-line command and `-y` / `--yes` use these default categories:
 
-- **Core agents:** Amp, Pi, Codex, and OpenCode.
+- **Default tools:** Amp, Pi, Codex, OpenCode, Claude Code, Grok, qmd, rtk, ctx, open-cursor, ai-switcher, open_code_review, and Plannotator.
 - **Shared skills:** bundled local skills, installed for the selected agents.
 - **Applicable MCP/plugin configuration:** bundled configuration for the selected agents. The three memory
   MCP choices (qmd, codebase-memory-mcp, agentmemory) remain available; `user-memory` stays opt-in.
-- **Optional standalone catalog:** all other CLIs, formatters, and tools need selection. Interactive runs
+- **Optional standalone catalog:** remaining CLIs, formatters, and tools need selection. Interactive runs
   prompt for them; automation can use `--with-tools`.
 
-Integration dependencies are a separate, explicitly logged exception: the core templates require qmd;
-Pi/Codex/OpenCode require ctx; Codex hooks/inbox MCP require Plannotator. These binaries can therefore be
-installed even when not selected as standalone tools. ctx dependency installation does not import history,
-start its daemon, install upstream skills, or change persistent Windows PATH. Other MCP commands keep their
-existing external prerequisites. No unrelated agent's plugin or skill directory is configured in yes mode.
+qmd, ctx, and Plannotator are also logged as integration dependencies of the core agent templates.
+ctx installation in `-y` mode does not import history, start its daemon, install upstream skills, or change
+persistent Windows PATH. Other MCP commands keep their existing external prerequisites. No unrelated agent's
+plugin or skill directory is configured in yes mode.
 
 From a reviewed checkout, select extra tools without enabling integrations:
 
 ```bash
-./cli.sh --yes --without-integrations --with-tools=qmd,plannotator,ctx --dry-run
-./cli.sh --yes --without-integrations --with-tools=qmd,plannotator,ctx
+./cli.sh --yes --without-integrations --with-tools=fx,cursor --dry-run
+./cli.sh --yes --without-integrations --with-tools=fx,cursor
 # Default configuration, plugins, shared skills and MCPs (can replace existing config):
 ./cli.sh --yes --backup
 ```
 
-Windows equivalents are `-WithoutIntegrations -WithTools 'qmd,plannotator,ctx'` and `-Yes -Backup` on a saved
+Windows equivalents are `-WithoutIntegrations -WithTools 'fx,cursor'` and `-Yes -Backup` on a saved
 `install.ps1`. Tool names are comma-separated; `./cli.sh --help` lists the catalog. `--without-integrations`
 (`-WithoutIntegrations`) installs standalone CLIs only and leaves existing configuration unchanged.
 `--with-integrations` remains accepted but is now the default. Selecting an extra tool does not select
@@ -178,8 +177,8 @@ Set-Location my-ai-tools
 | `--dry-run` | `-DryRun` | Show planned changes without applying them. |
 | `--backup` | `-Backup` | Back up existing files before installation. |
 | `--no-backup` | `-NoBackup` | Skip the interactive backup prompt. |
-| `--yes` / `-y` | `-Yes` | Install four core agents, shared skills, applicable MCP/plugin config and declared dependencies. |
-| `--with-tools=qmd,plannotator` | `-WithTools 'qmd,plannotator'` | Add optional standalone catalog CLIs. |
+| `--yes` / `-y` | `-Yes` | Install the default tool set, shared skills, applicable MCP/plugin config and declared dependencies. |
+| `--with-tools=fx,cursor` | `-WithTools 'fx,cursor'` | Add optional standalone catalog CLIs. |
 | `--with-integrations` | `-WithIntegrations` | Install bundled config, plugins, skills and MCP dependencies (default). |
 | `--without-integrations` | `-WithoutIntegrations` | Install standalone CLIs only; leave configuration unchanged. |
 | `--rollback` | `-Rollback` | Restore the most recent backup. |

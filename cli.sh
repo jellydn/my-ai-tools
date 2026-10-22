@@ -10,9 +10,24 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 source "$SCRIPT_DIR/lib/install.sh"
 
-# Default categories: four core agents, shared skills, and their MCP/plugins.
-# Standalone catalog selection is separate from declared integration dependencies.
-TOOL_ALLOWLIST_YES=(amp pi codex opencode)
+# Default -y categories: these tools, shared skills, and their MCP/plugins.
+# Other catalog entries stay optional. Integration dependencies are separate.
+# Order matches INSTALL_SEQUENCE so the two lists stay easy to compare.
+TOOL_ALLOWLIST_YES=(
+	qmd
+	claude
+	rtk
+	opencode
+	open-cursor
+	amp
+	ai-switcher
+	codex
+	pi
+	ctx
+	grok
+	open_code_review
+	plannotator
+)
 WITH_INTEGRATIONS=true
 
 tool_allowed() {
@@ -82,7 +97,12 @@ run_install_sequence() {
 				*) prompt_yn "Install optional $key" || continue ;;
 				esac
 			fi
-			"$installer"
+			# -y installs the ctx binary only. History import stays opt-in.
+			if [ "$YES_TO_ALL" = true ] && [ "$key" = "ctx" ]; then
+				CTX_INSTALL_NO_SETUP=1 "$installer"
+			else
+				"$installer"
+			fi
 		else
 			log_info "Skipping $key installer (not in -y allowlist)"
 		fi
@@ -154,8 +174,8 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 			;;
 		-h | --help)
 			echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--migrate-gemini] [--rollback]"
-			echo "--yes installs Amp, Pi, Codex, OpenCode, shared skills, and selected agents' MCP/plugin configs."
-			echo "--with-tools=name,... adds optional tools (for example qmd,plannotator,ctx)."
+			echo "--yes installs Amp, Pi, Codex, OpenCode, Claude, Grok, qmd, rtk, ctx, open-cursor, ai-switcher, open_code_review, Plannotator, shared skills, and selected agents' MCP/plugin configs."
+			echo "--with-tools=name,... adds optional tools (for example fx,cursor)."
 			echo "--with-integrations is the default; --without-integrations installs standalone CLIs only."
 			echo "Integration dependencies are logged separately; user-memory is never selected by default."
 			for entry in "${INSTALL_SEQUENCE[@]}"; do printf '%s ' "${entry%%:*}"; done
@@ -2938,12 +2958,12 @@ main() {
 		enable_plugins
 	else
 		log_info "Skipping optional configurations and integrations; existing user configuration is unchanged."
-		log_info "Opt in with --with-integrations; add tools with --with-tools=qmd,plannotator,ctx (or other catalog names)."
+		log_info "Opt in with --with-integrations; add tools with --with-tools=fx,cursor (or other catalog names)."
 	fi
 
 	log_success "Setup complete!"
 	if [ "$YES_TO_ALL" = true ] && [ "$WITH_INTEGRATIONS" != true ]; then
-		log_info "Run amp, pi, codex, or opencode. No bundled integrations were enabled."
+		log_info "Default CLIs installed. No bundled integrations were enabled."
 		return 0
 	fi
 	if [ "$YES_TO_ALL" = true ]; then
