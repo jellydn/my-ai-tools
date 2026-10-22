@@ -1,20 +1,9 @@
-import {
-	env,
-	pipeline,
-	TextStreamer,
-} from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/+esm";
+import { env, pipeline, TextStreamer } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/+esm";
 
 const EMBEDDING_MODEL = "Xenova/all-MiniLM-L6-v2";
 const LLM_MODEL = "onnx-community/Qwen2.5-Coder-0.5B-Instruct";
 const INDEX_PATH = "/public/index-browser.json";
-const DOCUMENT_TYPES = new Set([
-	"documentation",
-	"source",
-	"issue",
-	"pull_request",
-	"cli_help",
-	"example_config",
-]);
+const DOCUMENT_TYPES = new Set(["documentation", "source", "issue", "pull_request", "cli_help", "example_config"]);
 
 let indexData = null;
 let extractorPromise = null;
@@ -136,13 +125,8 @@ function dotProduct(a, b) {
 
 function retrieveTopK(queryEmbedding, chunks, k, types = []) {
 	const allowedTypes = types.length > 0 ? new Set(types) : null;
-	const candidates = allowedTypes
-		? chunks.filter((chunk) => allowedTypes.has(chunk.metadata?.type))
-		: chunks;
-	const scored = candidates.map((chunk) => ({
-		chunk,
-		score: dotProduct(queryEmbedding, chunk.embedding),
-	}));
+	const candidates = allowedTypes ? chunks.filter((chunk) => allowedTypes.has(chunk.metadata?.type)) : chunks;
+	const scored = candidates.map((chunk) => ({ chunk, score: dotProduct(queryEmbedding, chunk.embedding) }));
 	scored.sort((a, b) => b.score - a.score);
 	return scored.slice(0, k).map((item) => ({ ...item.chunk, score: item.score }));
 }
@@ -179,11 +163,7 @@ export async function runBrowserChat(question, callbacks, options = {}) {
 	const topK = options.topK === undefined ? 5 : options.topK;
 	const types = options.types === undefined ? [] : options.types;
 	if (![3, 5, 10, 20].includes(topK)) throw new Error("topK must be 3, 5, 10, or 20");
-	if (
-		!Array.isArray(types) ||
-		types.length > 6 ||
-		types.some((type) => !DOCUMENT_TYPES.has(type))
-	) {
+	if (!Array.isArray(types) || types.length > 6 || types.some((type) => !DOCUMENT_TYPES.has(type))) {
 		throw new Error("types contains an unsupported document type");
 	}
 	updateStatus(callbacks, "Loading index...");
@@ -212,9 +192,7 @@ export async function runBrowserChat(question, callbacks, options = {}) {
 	updateStatus(callbacks, "Generating answer...");
 	const messages = buildMessages(topChunks, question);
 	const sources = [
-		...new Map(
-			topChunks.map((chunk) => [chunk.path, { path: chunk.path, url: chunk.metadata?.url }]),
-		).values(),
+		...new Map(topChunks.map((chunk) => [chunk.path, { path: chunk.path, url: chunk.metadata?.url }])).values(),
 	];
 	let responseText = "";
 

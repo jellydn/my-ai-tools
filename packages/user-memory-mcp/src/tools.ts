@@ -14,14 +14,10 @@ export function registerPreferenceTools(server: McpServer, store: PreferenceStor
 				"Store a cross-project user preference only after the user explicitly states or confirms it. Never infer preferences.",
 			inputSchema: {
 				key: z.string().describe("Stable preference key, such as responseStyle or packageManager"),
-				value: z
-					.string()
-					.describe("The explicit preference value; secrets and credentials are rejected"),
+				value: z.string().describe("The explicit preference value; secrets and credentials are rejected"),
 				confirmed: z
 					.literal(true)
-					.describe(
-						"Must be true only when the user explicitly stated or confirmed this preference",
-					),
+					.describe("Must be true only when the user explicitly stated or confirmed this preference"),
 			},
 			annotations: { readOnlyHint: false, destructiveHint: false },
 		},
@@ -60,12 +56,9 @@ export function registerPreferenceTools(server: McpServer, store: PreferenceStor
 	server.registerTool(
 		"memory_preference_reset",
 		{
-			description:
-				"Delete all stored user preferences. Requires explicit confirmation for this destructive action.",
+			description: "Delete all stored user preferences. Requires explicit confirmation for this destructive action.",
 			inputSchema: {
-				confirmed: z
-					.literal(true)
-					.describe("Must be true only after the user confirms resetting all preferences"),
+				confirmed: z.literal(true).describe("Must be true only after the user confirms resetting all preferences"),
 			},
 			annotations: { readOnlyHint: false, destructiveHint: true },
 		},

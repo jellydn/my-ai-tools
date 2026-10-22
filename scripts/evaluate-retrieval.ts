@@ -24,14 +24,12 @@ const evaluationCases: EvaluationCase[] = [
 	{
 		question: "How do I add an MCP server?",
 		preferredTypes: ["documentation", "example_config"],
-		relevantPath:
-			/^(README\.md|configs\/mcp-registry\.json|wiki\/wiki\/concepts\/mcp-registry\.md)$/,
+		relevantPath: /^(README\.md|configs\/mcp-registry\.json|wiki\/wiki\/concepts\/mcp-registry\.md)$/,
 	},
 	{
 		question: "How does the repository chat work?",
 		preferredTypes: ["documentation", "source"],
-		relevantPath:
-			/^(README\.md|docs\/rag-architecture\.md|server\.ts|lib\/retriever\.ts|public\/browser-chat\.js)$/,
+		relevantPath: /^(README\.md|docs\/rag-architecture\.md|server\.ts|lib\/retriever\.ts|public\/browser-chat\.js)$/,
 	},
 	{
 		question: "What changed in recent pull requests?",
@@ -46,12 +44,7 @@ function dotProduct(a: Float32Array, b: Float32Array): number {
 	return sum;
 }
 
-function rank(
-	query: Float32Array,
-	chunks: BrowserChunk[],
-	topK: number,
-	types: DocumentType[] = [],
-) {
+function rank(query: Float32Array, chunks: BrowserChunk[], topK: number, types: DocumentType[] = []) {
 	const allowedTypes = types.length > 0 ? new Set(types) : null;
 	return chunks
 		.filter((chunk) => !allowedTypes || allowedTypes.has(chunk.metadata.type))
@@ -84,19 +77,13 @@ async function loadIndex(): Promise<{
 		!value.repository ||
 		!value.sourceRef
 	) {
-		throw new Error(
-			"Browser index is empty, stale, or uses a different embedding model; run npm run index:browser",
-		);
+		throw new Error("Browser index is empty, stale, or uses a different embedding model; run npm run index:browser");
 	}
 	const bytes = Buffer.from(value.embeddings, "base64");
 	if (bytes.byteLength !== value.chunks.length * value.dim * Float32Array.BYTES_PER_ELEMENT) {
 		throw new Error("Browser index embedding dimensions are inconsistent; rebuild the index");
 	}
-	const vectors = new Float32Array(
-		bytes.buffer,
-		bytes.byteOffset,
-		bytes.byteLength / Float32Array.BYTES_PER_ELEMENT,
-	);
+	const vectors = new Float32Array(bytes.buffer, bytes.byteOffset, bytes.byteLength / Float32Array.BYTES_PER_ELEMENT);
 	return {
 		generatedAt: value.generatedAt,
 		repository: value.repository,
@@ -109,17 +96,10 @@ async function loadIndex(): Promise<{
 }
 
 function estimatedPromptTokens(chunks: BrowserChunk[]): number {
-	return Math.ceil(
-		chunks.reduce((total, chunk) => total + chunk.path.length + chunk.text.length, 0) / 4,
-	);
+	return Math.ceil(chunks.reduce((total, chunk) => total + chunk.path.length + chunk.text.length, 0) / 4);
 }
 
-async function validateLinks(
-	chunks: BrowserChunk[],
-	repository: string,
-	sourceRef: string,
-	checkLinks: boolean,
-) {
+async function validateLinks(chunks: BrowserChunk[], repository: string, sourceRef: string, checkLinks: boolean) {
 	const unique = [...new Map(chunks.map((chunk) => [chunk.metadata.url, chunk])).values()];
 	let structurallyValid = 0;
 	let opened = 0;
@@ -164,9 +144,7 @@ async function main() {
 		const startedAt = performance.now();
 		for (const evaluationCase of evaluationCases) {
 			const ranked = rank(queryVectors.get(evaluationCase.question)!, index.chunks, topK);
-			const relevantCount = ranked.filter((chunk) =>
-				evaluationCase.relevantPath.test(chunk.path),
-			).length;
+			const relevantCount = ranked.filter((chunk) => evaluationCase.relevantPath.test(chunk.path)).length;
 			relevant += relevantCount;
 			supported += Number(relevantCount > 0);
 			tokens += estimatedPromptTokens(ranked);
@@ -187,9 +165,7 @@ async function main() {
 		] as const) {
 			const ranked = rank(queryVectors.get(evaluationCase.question)!, index.chunks, 5, [...types]);
 			if (mode === "unfiltered") traceChunks.push(...ranked);
-			const relevant = ranked.filter((chunk) =>
-				evaluationCase.relevantPath.test(chunk.path),
-			).length;
+			const relevant = ranked.filter((chunk) => evaluationCase.relevantPath.test(chunk.path)).length;
 			const noise = ranked.filter((chunk) => !evaluationCase.relevantPath.test(chunk.path)).length;
 			console.log(
 				`| ${evaluationCase.question} | ${mode} | ${relevant}/${ranked.length} | ${noise}/${ranked.length} | ${ranked.map((chunk) => `\`${chunk.path}\``).join(", ")} |`,
@@ -211,9 +187,7 @@ async function main() {
 		`- HTTP link checks: ${links.opened === null ? "not run (pass --check-links)" : `${links.opened}/${links.checked}`}`,
 	);
 	if (indexAgeHours > 24)
-		console.log(
-			"- Warning: index is older than 24 hours; rebuild before using results for release decisions.",
-		);
+		console.log("- Warning: index is older than 24 hours; rebuild before using results for release decisions.");
 	console.log(
 		"\nAnswer-support rate is a retrieval-only proxy: it means at least one human-labeled source was present. It is not an LLM judge score.",
 	);

@@ -7,10 +7,7 @@ If the retrieved context is insufficient, say exactly: "This is not documented i
 Support factual claims with the relevant source file paths.
 Keep answers concise and grounded.`;
 
-export function buildContextMessage(
-	question: string,
-	chunks: { path: string; text: string }[],
-): string {
+export function buildContextMessage(question: string, chunks: { path: string; text: string }[]): string {
 	return JSON.stringify({
 		question,
 		repositoryExcerpts: chunks.map((chunk) => ({ source: chunk.path, content: chunk.text })),
