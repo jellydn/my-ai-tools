@@ -1,6 +1,6 @@
 {
   "collapseChangelog": true,
-  "defaultModel": "meta/muse-spark-1.3-contributor",
+  "defaultModel": "deepseek/deepseek-v4.1-flash",
   "defaultProvider": "commandcode",
   "defaultThinkingLevel": "high",
   "editorPaddingX": 1,
