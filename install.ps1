@@ -348,9 +348,9 @@ function Start-Installation {
     if ($exitCode -eq 0) {
         Write-Success "Installation completed successfully!"
         Write-Info "Next steps:"
-        Write-Info "  Run amp, pi, codex, or opencode."
+        Write-Info "  Run amp, pi, codex, opencode, claude, or grok."
         Write-Info "  Shared skills and applicable MCP/plugin configs are included unless -WithoutIntegrations is set."
-        Write-Info "  Optional standalone tools: -WithTools 'qmd,plannotator,ctx'."
+        Write-Info "  Optional standalone tools: -WithTools 'fx,cursor'."
         Write-Info "  If a new command is not found, reopen your terminal."
         Write-Info "  See README.md for options and troubleshooting."
     } else {

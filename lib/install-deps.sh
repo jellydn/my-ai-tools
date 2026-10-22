@@ -369,6 +369,41 @@ handle_sem_installation_if_needed() {
 	handle_tool_installation "sem" "install_sem_now" "command -v sem-mcp" "sem" "Semantic version control MCP"
 }
 
+# ─── codebase-memory-mcp installation ──────────────────────────────
+
+install_codebase_memory_mcp_now() {
+	if command -v codebase-memory-mcp &>/dev/null; then
+		log_success "codebase-memory-mcp already installed ($(codebase-memory-mcp --version 2>/dev/null | head -n 1 || echo unknown))"
+		return 0
+	fi
+
+	local pkg_manager
+	pkg_manager=$(_verify_package_manager "codebase-memory-mcp")
+	if [ -z "$pkg_manager" ]; then
+		log_error "No package manager found. Install Bun or Node.js/npm to install codebase-memory-mcp."
+		return 1
+	fi
+
+	log_info "Installing codebase-memory-mcp via $pkg_manager..."
+	if execute "$pkg_manager install -g codebase-memory-mcp"; then
+		if [ "$pkg_manager" = npm ]; then
+			ensure_dir_on_path "$(_npm_global_bin)"
+		elif [ "$pkg_manager" = bun ]; then
+			ensure_dir_on_path "$(bun pm bin -g 2>/dev/null)"
+		fi
+		log_success "codebase-memory-mcp installed"
+		return 0
+	fi
+
+	log_error "Failed to install codebase-memory-mcp"
+	log_info "You can install it manually: npm install -g codebase-memory-mcp"
+	return 1
+}
+
+handle_codebase_memory_mcp_installation_if_needed() {
+	handle_tool_installation "codebase-memory-mcp" "install_codebase_memory_mcp_now" "command -v codebase-memory-mcp" "codebase-memory-mcp" "Code intelligence MCP"
+}
+
 # ─── Global tooling (jq, biome, gofmt, ruff, rustfmt, shfmt, stylua, backlog) ──
 
 install_global_tools() {

@@ -2,7 +2,7 @@
 
 load helpers
 
-@test "yes without integrations runs only four core installers and leaves configuration alone" {
+@test "yes without integrations runs the default installers and leaves configuration alone" {
     for dry_run in true false; do
         run bash -c '
             source "$1/cli.sh"
@@ -18,7 +18,10 @@ load helpers
             main
         ' _ "$REPO_ROOT" "$dry_run"
         [ "$status" -eq 0 ]
-        [ "$(printf '%s\n' "$output" | grep '^ATTEMPT:' | sort)" = "$(printf '%s\n' ATTEMPT:amp ATTEMPT:codex ATTEMPT:opencode ATTEMPT:pi)" ]
+        [ "$(printf '%s\n' "$output" | grep '^ATTEMPT:' | sort)" = "$(printf '%s\n' \
+            ATTEMPT:ai-switcher ATTEMPT:amp ATTEMPT:claude ATTEMPT:codex ATTEMPT:ctx \
+            ATTEMPT:grok ATTEMPT:open-cursor ATTEMPT:open_code_review ATTEMPT:opencode \
+            ATTEMPT:pi ATTEMPT:plannotator ATTEMPT:qmd ATTEMPT:rtk | sort)" ]
         [[ "$output" != *UNEXPECTED:* ]]
     done
 }
@@ -27,24 +30,24 @@ load helpers
     run bash -c '
         source "$1/cli.sh"
         YES_TO_ALL=true
-        TOOL_ALLOWLIST_YES+=(qmd plannotator ctx)
+        TOOL_ALLOWLIST_YES+=(fx herdr)
         for entry in "${INSTALL_SEQUENCE[@]}"; do
             eval "${entry#*:}() { echo ATTEMPT:${entry%%:*}; }"
         done
         run_install_sequence
         echo INTERACTIVE
         YES_TO_ALL=false
-        prompt_yn() { [ "$1" = "Install optional ctx" ]; }
+        prompt_yn() { [ "$1" = "Install optional herdr" ]; }
         run_install_sequence
     ' _ "$REPO_ROOT"
     [ "$status" -eq 0 ]
-    [ "$(grep -c '^ATTEMPT:qmd$' <<<"$output")" -eq 1 ]
-    [ "$(grep -c '^ATTEMPT:plannotator$' <<<"$output")" -eq 1 ]
-    [ "$(grep -c '^ATTEMPT:ctx$' <<<"$output")" -eq 2 ]
+    [ "$(grep -c '^ATTEMPT:fx$' <<<"$output")" -eq 1 ]
+    [ "$(grep -c '^ATTEMPT:herdr$' <<<"$output")" -eq 2 ]
     [[ "$output" != *ATTEMPT:global-tools* ]]
+    [[ "$output" != *ATTEMPT:muse* ]]
 }
 
-@test "default yes categories include integrations and only declared dependencies beyond four core agents" {
+@test "default yes categories install the allowlist and declared integration dependencies" {
     run bash -c '
         source "$1/cli.sh"
         YES_TO_ALL=true DRY_RUN=true MIGRATE_GEMINI=false
@@ -59,9 +62,17 @@ load helpers
         main
     ' _ "$REPO_ROOT"
     [ "$status" -eq 0 ]
-    [ "$(printf '%s\n' "$output" | grep '^ATTEMPT:' | sort)" = "$(printf '%s\n' ATTEMPT:amp ATTEMPT:codex ATTEMPT:ctx ATTEMPT:opencode ATTEMPT:pi ATTEMPT:plannotator ATTEMPT:qmd)" ]
+    [ "$(printf '%s\n' "$output" | grep '^ATTEMPT:' | sort)" = "$(printf '%s\n' \
+        ATTEMPT:ai-switcher ATTEMPT:amp ATTEMPT:claude ATTEMPT:codex \
+        ATTEMPT:ctx ATTEMPT:ctx ATTEMPT:grok ATTEMPT:open-cursor ATTEMPT:open_code_review \
+        ATTEMPT:opencode ATTEMPT:pi ATTEMPT:plannotator ATTEMPT:plannotator \
+        ATTEMPT:qmd ATTEMPT:qmd ATTEMPT:rtk | sort)" ]
     [[ "$output" == *"NO_SETUP:1"* ]]
     [[ "$output" == *"Integration dependency: qmd"* ]]
+    [[ "$output" == *"Integration dependency: fff-mcp"* ]]
+    [[ "$output" == *"Integration dependency: logpilot"* ]]
+    [[ "$output" == *"Integration dependency: sem"* ]]
+    [[ "$output" == *"Integration dependency: codebase-memory-mcp"* ]]
     [[ "$output" == *"Integration dependency: ctx"* ]]
     [[ "$output" == *"Integration dependency: Plannotator"* ]]
     [ "$(printf '%s\n' "$output" | grep '^BUNDLE:')" = "$(printf '%s\n' BUNDLE:backup BUNDLE:config BUNDLE:plugins)" ]
@@ -88,14 +99,22 @@ load helpers
         cp "$SCRIPT_DIR/configs/"{best-practices,git-guidelines,agent-memory-guidelines,fable-guide}.md "$local_bundle/configs/"
         cp -r "$SCRIPT_DIR/skills/adr" "$local_bundle/skills/"
         SCRIPT_DIR="$local_bundle"
-        mkdir -p "$HOME/.claude" "$HOME/.config/opencode" "$HOME/.config/amp" "$HOME/.codex" "$HOME/.pi"
-        echo preserve > "$HOME/.claude/sentinel"
+        mkdir -p "$HOME/.cursor" "$HOME/.config/opencode" "$HOME/.config/amp" "$HOME/.codex" "$HOME/.pi"
+        echo preserve > "$HOME/.cursor/sentinel"
+        # Claude is allowlisted, but this fixture has no Claude config tree.
+        copy_claude_configs() { echo COPY:claude; }
+        command() {
+            if [ "$1" = -v ] && [ "$2" = claude ]; then
+                return 1
+            fi
+            builtin command "$@"
+        }
+        claude() { echo UNEXPECTED:claude; return 98; }
         preflight_check() { :; }; check_prerequisites() { :; }
         for entry in "${INSTALL_SEQUENCE[@]}"; do
             eval "${entry#*:}() { echo ATTEMPT:${entry%%:*}; }"
         done
         install_ctx() { :; }
-        claude() { echo UNEXPECTED:claude; return 98; }
         for iteration in 1 2; do
             main
             test -s "$HOME/.config/amp/settings.json"
@@ -106,8 +125,9 @@ load helpers
             test -s "$HOME/.agents/skills/adr/SKILL.md"
             test -s "$HOME/.codex/skills/adr/SKILL.md"
             test ! -d "$HOME/.my-ai-tools-backups/skills"
-            test "$(cat "$HOME/.claude/sentinel")" = preserve
-            test ! -e "$HOME/.claude/skills"
+            test "$(cat "$HOME/.cursor/sentinel")" = preserve
+            test ! -e "$HOME/.cursor/skills"
+            test ! -e "$HOME/.cursor/mcp.json"
             test ! -e "$HOME/.claude/settings.json"
         done
         echo PASS:core-config-skills-rerun
@@ -115,6 +135,7 @@ load helpers
     rm -rf "$home_dir"
     [ "$status" -eq 0 ]
     [[ "$output" == *PASS:core-config-skills-rerun* ]]
+    [[ "$output" == *COPY:claude* ]]
     [[ "$output" != *UNEXPECTED:* ]]
 }
 

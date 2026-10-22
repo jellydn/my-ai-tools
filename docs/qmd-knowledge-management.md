@@ -71,10 +71,10 @@ bun install -g @tobilu/qmd
 
 ### 2. Configure MCP Server
 
-The MCP server configuration is included by default for the four core agents in `--yes` mode.
-That integration declares qmd as a dependency, so qmd can be installed even without standalone tool selection.
+The MCP server configuration is included by default for the selected agents in `--yes` mode.
+qmd is a default `-y` tool, and the core agent templates also declare it as an integration dependency.
 Use `./cli.sh --yes --backup` for bundled configuration and skills, or add the MCP manually.
-`--without-integrations` leaves existing configuration unchanged and requires explicit `--with-tools=qmd`.
+`--without-integrations` installs the qmd binary and leaves existing configuration unchanged.
 
 **For Claude Code** (`~/.claude/mcp-servers.json`):
 

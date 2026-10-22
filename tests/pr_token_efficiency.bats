@@ -40,7 +40,7 @@ SYNC_SH="$REPO_ROOT/scripts/sync-token-efficiency.sh"
 	[ "$status" -eq 0 ]
 }
 
-@test "INSTALL_SEQUENCE lists RTK once as an optional dependency" {
+@test "INSTALL_SEQUENCE lists RTK once" {
 	run bash -c 'source "$1/cli.sh"; printf "%s\n" "${INSTALL_SEQUENCE[@]}"' _ "$REPO_ROOT"
 	[ "$status" -eq 0 ]
 	[ "$(grep -c 'install_rtk$' <<<"$output")" -eq 1 ]

@@ -49,7 +49,7 @@ The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONS
 | **OpenCode**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | @plannotator/opencode                                                                                                                                                                                                                          |
 | **Codex**       | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Plannotator `Stop` hook (`hooks.json`); `[features] hooks = true`                                                                                                                                                                              |
 | **Kimi Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, logpilot, sem, ctx                              | Skills, MCP servers, and hooks via `~/.kimi-code/`                                                                                                                                                                                             |
-| **Pi**          | context7, sequential-thinking, qmd, codebase-memory-mcp, fff, react-grab-mcp, agentmemory, sem, ctx                        | Packages (pi-extension, pi-subagents, autoresearch, fff, mcp-adapter, simplify, rpiv-todo, btw, code-previews, codex-goal, commandcode-provider, pi-web-access, footer, tps-meter, pi-qwencloud-provider, pi-cursor-sdk) |
+| **Pi**          | context7, sequential-thinking, qmd, codebase-memory-mcp, fff, react-grab-mcp, logpilot, agentmemory, sem, ctx              | Packages (pi-extension, pi-subagents, autoresearch, fff, mcp-adapter, simplify, rpiv-todo, btw, code-previews, codex-goal, commandcode-provider, pi-web-access, footer, tps-meter, pi-qwencloud-provider, pi-cursor-sdk) |
 | **Oh My Pi**  | Pi-compatible layout; MCP servers via `~/.omp/agent/mcp.json` when present                                                  | Pi fork (`@oh-my-pi/pi-coding-agent`); configs managed under `configs/omp/`                                                                                                                                          |
 | **Muse Code**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Workflows, session messaging, rewind, shared `~/.agents/skills`, developer-preview SDK                                                                                                                                                         |
 | **Amp**         | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Agent modes: fusion, glm-5.2, grok45, inkling, cursor-composer-2.5; plannotator; orca-agent-status                                                                                                                                             |
@@ -167,7 +167,7 @@ cd my-ai-tools
 - `--dry-run` - Preview changes without making them
 - `--backup` - Backup existing configs before installing
 - `--no-backup` - Skip backup prompt
-- `-y` / `--yes` - Non-interactive mode; only installs/configures your active tool set (amp, codex, ctx, cursor, fx, kilo, muse, opencode, open_code_review, pi, omp, antigravity, ai-switcher, claude, reasonix). Shared infra (plugins, skills, global tools) still installed. Auto-activated in CI/piped input.
+- `-y` / `--yes` - Non-interactive mode. Installs and configures qmd, claude, rtk, opencode, open-cursor, amp, ai-switcher, codex, pi, ctx, grok, open_code_review, and plannotator, plus shared skills and applicable MCP/plugin config. Other catalog entries stay optional. ctx does not import history. Auto-activated in CI/piped input.
 - `--migrate-gemini` - One-step Gemini→Antigravity CLI migration
 
 ## 🔄 Bidirectional Config Sync
@@ -1829,11 +1829,11 @@ Located in [`configs/pi/`](configs/pi/):
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 - [`models.json`](configs/pi/models.json) - Provider and model definitions (google-antigravity, ollama)
 
-The installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `commandcode` as the default provider with `meta/muse-spark-1.3-contributor` as the default model (OmniRoute `paid`/`free`/`premium` remain available in `enabledModels`). You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+The installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `commandcode` as the default provider with `deepseek/deepseek-v4.1-flash` as the default model (OmniRoute `paid`/`free`/`premium` remain available in `enabledModels`). You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `meta/muse-spark-1.3-contributor`
+- **Default Model**: `deepseek/deepseek-v4.1-flash`
 - **Default Provider**: `commandcode`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
@@ -1922,7 +1922,7 @@ Pi is configured with multi-provider model access (`settings.json` `enabledModel
 
 | Provider           | Models                                                                                                                                             |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| commandcode        | `meta/muse-spark-1.3-contributor` (default)                                                                                                       |
+| commandcode        | `deepseek/deepseek-v4.1-flash` (default), `meta/muse-spark-1.3-contributor`                                                                       |
 | cursor             | `auto`, `composer-2-5`, `grok-4.5`                                                                                                                 |
 | openai-codex       | `gpt-5.4-mini`, `gpt-5.5`, `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra`                                                                          |
 | google-antigravity | `gemini-3.5-flash`, `gemini-3-pro`, `claude-opus-4-6`                                                                                              |

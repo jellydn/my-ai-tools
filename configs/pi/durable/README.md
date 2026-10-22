@@ -14,11 +14,11 @@ Mac terminal → Tailscale → VPS sshd → dedicated account → tmux → Durab
 ## Scope and trust boundary
 
 This extends [issue #419](https://github.com/jellydn/my-ai-tools/issues/419), which
-originally excluded Durable installation. Keep normal Pi settings unchanged:
-Codemode remains opt-in, `tuiMode` stays `regular`, and `lastChangelogVersion`
-stays `1.0.3` so installation does not hide unread release notes. Durable is not
-a `settings.json` package or setting. The experimental TUI does not support the
-normal extension system or `/login`.
+originally excluded Durable installation. Installing Durable changes no normal
+Pi settings: Codemode remains opt-in, and the exported `settings.json` keeps
+`tuiMode: "fullscreen"` with `lastChangelogVersion` at the version you have
+already read. Durable is not a `settings.json` package or setting. The
+experimental TUI does not support the normal extension system or `/login`.
 
 Use a dedicated, non-sudo Linux account on a non-production VPS. Do not give it
 Docker access, SSH agent forwarding, production repositories, or unrelated
