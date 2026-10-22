@@ -39,6 +39,7 @@ load helpers
 		source "$1/lib/install.sh"
 		for fn in install_rust_if_needed install_global_tools install_jq_if_needed \
 			install_qmd_now install_fff_mcp_now install_logpilot_now install_sem_now \
+			install_codebase_memory_mcp_now \
 			handle_bun_installation cargo_bin_dir; do
 			declare -F "$fn" >/dev/null || {
 				echo "missing: $fn"

@@ -953,6 +953,10 @@ install_mcp_servers_from_registry() {
 					log_info "Auto-installing prerequisite: $prereq"
 					install_sem_now && continue
 					;;
+				"codebase-memory-mcp")
+					log_info "Auto-installing prerequisite: $prereq"
+					install_codebase_memory_mcp_now && continue
+					;;
 				esac
 				prereqs_met=false
 				missing_prereqs+=("$prereq")
@@ -2893,21 +2897,32 @@ copy_skill_to_universal() {
 	log_success "Copied $skill_name to universal skills directory"
 }
 
-# Dependencies of the bundled core-agent integrations, not standalone defaults.
+# Dependencies of the bundled agent integrations, not standalone defaults.
+# The shared MCP set is context7, sequential-thinking, qmd, codebase-memory-mcp,
+# fff, react-grab-mcp, logpilot, agentmemory, sem, and ctx. npx servers need no
+# binary install. user-memory stays opt-in.
 install_integration_dependencies() {
-	local tool needs_qmd=false needs_ctx=false needs_plannotator=false
-	for tool in amp pi codex opencode; do
+	local tool needs_shared_mcp=false needs_ctx=false needs_plannotator=false
+	for tool in amp pi codex opencode claude grok; do
 		tool_allowed "$tool" || continue
-		needs_qmd=true
-		case "$tool" in pi | codex | opencode) needs_ctx=true ;; esac
+		needs_shared_mcp=true
+		needs_ctx=true
 		[ "$tool" != codex ] || needs_plannotator=true
 	done
-	if [ "$needs_qmd" = true ]; then
-		log_info "Integration dependency: qmd for selected core agents' qmd MCP"
+	if [ "$needs_shared_mcp" = true ]; then
+		log_info "Integration dependency: qmd for selected agents' qmd MCP"
 		handle_qmd_installation_if_needed
+		log_info "Integration dependency: fff-mcp for selected agents' fff MCP"
+		handle_fff_mcp_installation_if_needed
+		log_info "Integration dependency: logpilot for selected agents' logpilot MCP"
+		handle_logpilot_installation_if_needed
+		log_info "Integration dependency: sem for selected agents' sem MCP"
+		handle_sem_installation_if_needed
+		log_info "Integration dependency: codebase-memory-mcp for selected agents' codebase-memory MCP"
+		handle_codebase_memory_mcp_installation_if_needed
 	fi
 	if [ "$needs_ctx" = true ]; then
-		log_info "Integration dependency: ctx for selected Pi/Codex/OpenCode ctx MCP (no history import)"
+		log_info "Integration dependency: ctx for selected agents' ctx MCP (no history import)"
 		CTX_INSTALL_NO_SETUP=1 install_ctx
 	fi
 	if [ "$needs_plannotator" = true ]; then

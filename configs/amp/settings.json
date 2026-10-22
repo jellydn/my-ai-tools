@@ -35,6 +35,10 @@
 			"command": "sem-mcp",
 			"args": []
 		},
+		"ctx": {
+			"command": "ctx",
+			"args": ["mcp", "serve"]
+		},
 		"codebase-memory-mcp": {
 			"command": "codebase-memory-mcp",
 			"args": []
