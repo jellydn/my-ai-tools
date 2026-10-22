@@ -14,12 +14,18 @@ async function makeStore(now?: () => Date): Promise<{ directory: string; store: 
 }
 
 afterEach(async () => {
-	await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
+	await Promise.all(
+		temporaryDirectories
+			.splice(0)
+			.map((directory) => rm(directory, { recursive: true, force: true })),
+	);
 });
 
 test("stores, retrieves, and updates a preference across store instances", async () => {
 	const timestamps = [new Date("2026-07-18T10:00:00.000Z"), new Date("2026-07-18T11:00:00.000Z")];
-	const { directory, store } = await makeStore(() => timestamps.shift() ?? new Date("2026-07-18T12:00:00.000Z"));
+	const { directory, store } = await makeStore(
+		() => timestamps.shift() ?? new Date("2026-07-18T12:00:00.000Z"),
+	);
 
 	const created = await store.set("responseStyle", "concise");
 	assert.equal(created.key, "responseStyle");
@@ -37,7 +43,12 @@ test("stores and updates constructor as an own preference across store instances
 	const updatedAt = "2026-07-18T11:00:00.000Z";
 	const { directory, store } = await makeStore(() => new Date(createdAt));
 	const created = await store.set("constructor", "concise");
-	assert.deepEqual(created, { key: "constructor", value: "concise", createdAt, updatedAt: createdAt });
+	assert.deepEqual(created, {
+		key: "constructor",
+		value: "concise",
+		createdAt,
+		updatedAt: createdAt,
+	});
 
 	const reopened = new PreferenceStore({ directory, now: () => new Date(updatedAt) });
 	assert.deepEqual(await reopened.get("constructor"), created);
@@ -109,8 +120,14 @@ test("deletes one preference and resets all preferences", async () => {
 test("rejects secrets in preference keys and values", async () => {
 	const { store } = await makeStore();
 	await assert.rejects(store.set("openaiApiKey", "not-even-a-real-key"), /cannot be stored/);
-	await assert.rejects(store.set("preferredHeader", "Bearer abcdefghijklmnopqrstuvwxyz"), /cannot be stored/);
-	await assert.rejects(store.set("credentialExample", "sk-or-v1-abcdefghijklmnop"), /cannot be stored/);
+	await assert.rejects(
+		store.set("preferredHeader", "Bearer abcdefghijklmnopqrstuvwxyz"),
+		/cannot be stored/,
+	);
+	await assert.rejects(
+		store.set("credentialExample", "sk-or-v1-abcdefghijklmnop"),
+		/cannot be stored/,
+	);
 	assert.deepEqual(await store.list(), []);
 });
 

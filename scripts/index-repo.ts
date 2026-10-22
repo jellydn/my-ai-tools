@@ -2,7 +2,11 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { indexKnowledgeBase } from "../lib/indexer.ts";
-import { createOpenAIClient, getDefaultEmbeddingModel, resolveApiKey } from "../lib/openai-client.ts";
+import {
+	createOpenAIClient,
+	getDefaultEmbeddingModel,
+	resolveApiKey,
+} from "../lib/openai-client.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -45,7 +49,9 @@ async function createEmbeddings(chunks: string[]): Promise<number[][]> {
 async function main() {
 	const apiKey = resolveApiKey();
 	if (!apiKey) {
-		console.error("OPENAI_API_KEY (or OPENROUTER_API_KEY) is not set. Copy .env.example to .env and add your key.");
+		console.error(
+			"OPENAI_API_KEY (or OPENROUTER_API_KEY) is not set. Copy .env.example to .env and add your key.",
+		);
 		process.exit(1);
 	}
 
