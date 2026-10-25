@@ -73,6 +73,7 @@ INSTALL_SEQUENCE=(
 	"qodercli:install_qodercli"
 	"deepseek_harness:install_deepseek_harness"
 	"kiro:install_kiro"
+	"thinkrail:install_thinkrail"
 	"delta:install_delta"
 	"codiff:install_codiff"
 	"devin:install_devin"

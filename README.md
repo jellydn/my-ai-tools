@@ -197,11 +197,14 @@ The repository currently contains configuration or integration support for:
 | --- | --- |
 | Primary assistants | Claude Code, OpenCode, Amp, Codex, Cursor, Pi, Oh My Pi, Antigravity, Kilo, Kimi Code, Muse Code |
 | Additional CLIs | CommandCode, GitHub Copilot CLI, Gemini CLI, Grok CLI, MiMo-Code, Qoder CLI, DeepSeek Harness, Kiro CLI, Devin CLI, Factory Droid, Cline, Reasonix |
-| Workflow and desktop tools | Conductor, Delta, Codiff, Hunk, ctx, herdr, Orca, AI Launcher, CCS, fx, Open Code Review |
+| Workflow and desktop tools | Conductor, ThinkRail, Delta, Codiff, Hunk, ctx, herdr, Orca, AI Launcher, CCS, fx, Open Code Review |
 
 Some installers are platform-specific, and optional tools are skipped when they are not detected. Gemini CLI is
 deprecated for Google One and unpaid tiers; use the `--migrate-gemini` option to move its configuration to
 Antigravity CLI.
+
+ThinkRail is an optional Pi-based workspace UI, not a separate managed configuration profile. Select it with
+`--with-tools=thinkrail`; see [installation, resource reuse, and limits](TOOL_REFERENCE.md#-thinkrail-optional).
 
 See [`configs/`](configs/) for the source configuration of each tool and [`skills/`](skills/) for shared skills.
 
