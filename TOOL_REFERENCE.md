@@ -3707,6 +3707,8 @@ npx skills add vercel-labs/agent-browser
 npm install -D agent-qa
 ```
 
+For Codex or Claude Code subscription authentication, also run `npm install -D @vostride/agent-qa-subscription-auth`.
+
 Requires Node.js 24+ and a configured model. Follow the [quickstart](https://vostride.com/docs/agent-qa/quickstart) for browser installation and project setup. Runtime license: [FSL-1.1-ALv2](https://github.com/vostride/agent-qa/blob/main/LICENSE.md).
 
 ### React Tools
