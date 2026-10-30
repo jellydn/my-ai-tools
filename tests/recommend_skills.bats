@@ -531,3 +531,35 @@ README_FILE="$REPO_ROOT/TOOL_REFERENCE.md"
     run grep -F 'https://github.com/michael-denyer/pstack-claude' "$README_FILE"
     [ "$status" -eq 0 ]
 }
+
+# ---------------------------------------------------------------------------
+# unclebob/ub-mode entry (newly added)
+# ---------------------------------------------------------------------------
+
+@test "recommend-skills.json contains unclebob ub-mode skill entry" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -e '[.recommended_skills[] | select(.repo == "unclebob/ub-mode" and .skill == "ub-mode")] | length == 1' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "ub-mode entry has non-empty description mentioning quality gates" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
+    run jq -r '[.recommended_skills[] | select(.repo == "unclebob/ub-mode" and .skill == "ub-mode")][0].description' "$RECOMMEND_SKILLS_JSON"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"quality gates"* ]]
+}
+
+@test "README.md documents ub-mode install command" {
+    run grep -F 'npx skills add unclebob/ub-mode --skill ub-mode --global --agent claude-code' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md ub-mode table row references unclebob/ub-mode" {
+    run grep -F 'https://github.com/unclebob/ub-mode' "$README_FILE"
+    [ "$status" -eq 0 ]
+}
