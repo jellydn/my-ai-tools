@@ -6,6 +6,11 @@
 			"description": "Route coding tasks through rigorous planning, delegation, review, and verification workflows across Claude Code, Codex, Pi, OpenCode, and other agent harnesses"
 		},
 		{
+			"repo": "unclebob/ub-mode",
+			"skill": "ub-mode",
+			"description": "Enforce disciplined software engineering workflows: first make it work, then make it right, with TDD, root-cause fixes, complexity and duplication quality gates, mutation testing, and small verified commits"
+		},
+		{
 			"repo": "BuilderIO/skills",
 			"skill": "visual-recap",
 			"description": "Turn a PR, branch, commit, or git diff into an interactive visual recap with diagrams, file maps, API/schema summaries, and focused review notes"

@@ -843,6 +843,7 @@ reported, and Visual Recap uses hosted Plan storage unless local-files privacy m
 | **mac-OCR**                | [privatenumber/mac-ocr](https://github.com/privatenumber/mac-ocr)                                             | macOS CLI for OCR and searchable PDFs using Apple's Vision framework                                                                                                                                                           |
 | **Archify**                | [tt-a1i/archify](https://github.com/tt-a1i/archify)                                                           | Turn a codebase or system description into a polished, interactive system map directly in chat. Supports architecture, workflow, sequence, data-flow, and lifecycle diagrams.                                                  |
 | **pstack**                 | [michael-denyer/pstack-claude](https://github.com/michael-denyer/pstack-claude)                               | Rigorous agent workflows for planning, implementation, review, and verification. The `poteto-mode` skill routes goals to the appropriate playbook across multiple agent harnesses.                                                     |
+| **ub-mode**                | [unclebob/ub-mode](https://github.com/unclebob/ub-mode)                                                       | Disciplined software engineering workflow: make it work, make it right, then practice with TDD, root-cause fixes, CRAP/Dryer/Mutator quality gates, and small verified commits.                                            |
 
 **Installation:**
 
@@ -870,6 +871,7 @@ npx skills add Gentleman-Programming/engram --skill engram-memory --global --age
 npx skills add ctxrs/ctx --global --agent claude-code
 npx skills add tt-a1i/archify --skill archify --global --agent claude-code
 npx skills add michael-denyer/pstack-claude --skill poteto-mode --global --agent claude-code
+npx skills add unclebob/ub-mode --skill ub-mode --global --agent claude-code
 ```
 
 ### Configuration Files

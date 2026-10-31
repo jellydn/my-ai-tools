@@ -1,6 +1,6 @@
 # Skill upstream maintenance
 
-Last checked: 2026-10-07. Repository base: `163951e` (PR #417).
+Last checked: 2026-10-30. Repository base: `920edf1` (origin/main).
 
 `skills/` is canonical. The Amp bundle in
 `configs/amp/plugins/my-ai-tools-skills/skills/` must contain identical files.
@@ -52,7 +52,7 @@ are local adapters for `code-reviewer`, `test-generator`, `documentation-writer`
 keep their tool-specific guidance. Do not replace the short adapter security skill
 with the larger canonical audit workflow.
 
-## Recommendations: 21 entries, 20 repositories checked
+## Recommendations: 22 entries, 21 repositories checked
 
 All checked repositories are reachable and unarchived; API trees were not truncated.
 Named skill selectors were checked against frontmatter, not only directory names.
@@ -82,6 +82,7 @@ every skill they may install. Preserve the local pstack-first order.
 | privatenumber/mac-ocr | [d9f25ba](https://github.com/privatenumber/mac-ocr/commit/d9f25baecc7258a3479f3a067e001838ca4e9c71) | `mac-ocr`; macOS-only runtime, optional piped network input. |
 | shadcn/improve | [cac56e1](https://github.com/shadcn/improve/commit/cac56e1ebd3c279aa9153616cfeac7b174ab90f9) | Explicit issue publication flag; sensitive public findings require confirmation. |
 | tt-a1i/archify | [73aaa06](https://github.com/tt-a1i/archify/commit/73aaa0696e8f72c232ea710e6fa94fd953f3e773) | `archify`; local rendering/browser checks, optional brand-URL capture. |
+| unclebob/ub-mode | [57a8bdd](https://github.com/unclebob/ub-mode/commit/57a8bdd28e45ed41900ace0bafa2ff76dd9ed70f) | `ub-mode`; prompt-only workflow skill; references companion quality-gate tools but imports no scripts, hooks, MCP declarations, or credentials. |
 | vercel-labs/agent-skills | [063bee9](https://github.com/vercel-labs/agent-skills/commit/063bee94c3f4df8453406c830b0a7df0f2860278) | Live collection. |
 
 ## Security review notes
