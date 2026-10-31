@@ -69,6 +69,7 @@ The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONS
 | **DeepSeek Harness** | context7, sequential-thinking, qmd, fff, sem, ctx                                                                     | Cordis plugin composition; global `AGENTS.md`; native DeepSeek model route                                                                                                                                                                      |
 | **Kiro CLI**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Steering files (AGENTS.md), slash commands, MCP servers, ACP. Plannotator agent is manual (`plannotator-review`, `plannotator-annotate`)                                                                                                       |
 | **Reasonix**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | DeepSeek-native; prefix-cache loop; `[[plugins]]` MCP in config.toml; ACP (`reasonix acp`); `REASONIX.md`/`AGENTS.md` memory; Kanagawa theme staged                                                                                            |
+| **ThinkRail**   | Reads Pi's `~/.pi/agent/mcp.json`; project servers require approval                                                         | Pi-based IDE; reuses portable skills, isolated Git worktrees, and a spec graph; no separate managed profile                                                                                                                                   |
 | **Delta**       | — (desktop app — model providers are configured in settings)                                                              | Personal rules (`~/.config/delta/AGENTS.md`), isolated checkouts, collaborative threads                                                                                                                                                        |
 | **Codiff**      | — (desktop app — uses configured agent backend via settings)                                                               | —                                                                                                                                                                                                                                              |
 
@@ -3143,6 +3144,66 @@ hunk session list  # List live review sessions for agent interaction
 The recommended [Hunk Review skill](https://github.com/modem-dev/hunk/blob/main/packages/hunk/skills/hunk-review/SKILL.md) teaches coding agents to inspect live sessions and add inline comments without launching the interactive TUI themselves.
 
 See the official [install guide](https://www.hunk.dev/docs/start/install/) and [config reference](https://www.hunk.dev/docs/reference/config) for all platforms and preferences.
+
+</details>
+
+---
+
+## 🚆 ThinkRail (Optional)
+
+[ThinkRail](https://thinkrail.ai) is an Apache-2.0 JetBrains InnovationHub IDE around the Pi coding agent.
+It provides parallel Git-worktree workspaces, editor tabs, terminals, diffs, and a graph of versioned
+`SPEC.md` files. It complements the existing Pi setup and belongs with optional workflow tools, not the
+default assistant set. [Source](https://github.com/JetBrains/thinkrail) · [Releases](https://github.com/JetBrains/thinkrail/releases)
+
+<details>
+<summary><strong>Installation &amp; Configuration</strong></summary>
+
+### Installation
+
+From a reviewed checkout:
+
+```bash
+./cli.sh --yes --without-integrations --with-tools=thinkrail --dry-run
+./cli.sh --yes --without-integrations --with-tools=thinkrail
+thinkrail --version
+thinkrail .
+```
+
+`--with-tools` adds ThinkRail to the usual default CLI set; it does not select ThinkRail alone.
+The installer uses the official Bash installer (also supported in Git Bash), which selects the stable
+release and checks the downloaded binary against upstream `SHA256SUMS`. The installer script itself is
+fetched from upstream `main`, not checksum-pinned by this repository. Review it before use.
+We pass `--no-modify-path` to leave shell startup files unchanged and add `~/.local/bin` to the current
+installer process's PATH. Add that directory to your own PATH if it is not already present.
+
+Prebuilt CLI targets are macOS Apple Silicon, Linux x64/ARM64, and Windows x64. Intel macOS needs a source
+build. Git and a model provider are required; connect a provider through Pi or sign in from ThinkRail.
+The CLI opens a browser UI and does not require a separate Pi CLI installation.
+
+For a native desktop app, use the official [releases](https://github.com/JetBrains/thinkrail/releases).
+Linux desktop builds require glibc 2.38+ and GTK/WebKitGTK dependencies (Ubuntu 24.04+); Windows desktop
+builds are x64 and macOS desktop builds are Apple Silicon only. See the upstream README for current
+platform requirements and signing status.
+
+### Existing resources, not a second config profile
+
+ThinkRail uses Pi resources, including `~/.pi/agent/mcp.json` and trusted project `.pi/mcp.json`.
+It also discovers portable skills from other assistants, including `~/.claude/skills` and
+`~/.codex/skills`. Use the existing [Pi configuration](configs/pi/) and shared skills; this repository
+does not create `configs/thinkrail/`, copy another MCP template, or export `~/.thinkrail` app state.
+Project resources and project-defined MCP servers need trust or approval in ThinkRail.
+Compatibility covers portable skills, not other assistants' hooks, model settings, or agent definitions.
+Check resource loading in your installed version before relying on a specific extension.
+
+### Privacy and updates
+
+ThinkRail is an early-stage tool (stable v0.2.0 was published on October 18, 2026).
+Upstream documents basic usage analytics and error reports as always sent; the Privacy setting and
+`--no-analytics` disable **additional** sharing, not all telemetry. Review the upstream
+[privacy notes](https://github.com/JetBrains/thinkrail#analytics--privacy) before use with sensitive code.
+Keep credentials local. Update the CLI with `thinkrail update`; `thinkrail uninstall` keeps app state
+unless you explicitly request its removal.
 
 </details>
 

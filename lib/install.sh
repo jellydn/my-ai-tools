@@ -911,6 +911,16 @@ install_kiro() {
 	run_installer "Kiro CLI" "_run_kiro_install" "command -v kiro-cli || command -v kiro" "kiro-cli --version 2>/dev/null || true"
 }
 
+# ─── thinkrail installation ──────────────────────────────────────
+
+install_thinkrail() {
+	run_installer "ThinkRail" \
+		'execute_installer "https://raw.githubusercontent.com/JetBrains/thinkrail/main/install.sh" "" "ThinkRail" --no-modify-path &&
+		ensure_dir_on_path "$HOME/.local/bin" &&
+		{ [ "$DRY_RUN" = true ] || thinkrail --version; }' \
+		"command -v thinkrail" "thinkrail --version"
+}
+
 # ─── delta installation ───────────────────────────────────────────
 
 install_delta() {
