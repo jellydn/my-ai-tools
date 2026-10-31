@@ -3701,6 +3701,18 @@ npx skills add vercel-labs/agent-browser
 /plugin install dev-browser@sawyerhood/dev-browser
 ```
 
+### agent-qa
+
+[**agent-qa**](https://github.com/vostride/agent-qa) - Natural-language web and mobile testing from vostride, with advanced memidex memory and self-improvement through learned application knowledge and replay. Run tests and inspect recorded evidence through the CLI or MCP server.
+
+```bash
+npm install -D agent-qa
+```
+
+For Codex or Claude Code subscription authentication, also run `npm install -D @vostride/agent-qa-subscription-auth`.
+
+Requires Node.js 24+ and a configured model. Follow the [quickstart](https://vostride.com/docs/agent-qa/quickstart) for browser installation and project setup. Runtime license: [FSL-1.1-ALv2](https://github.com/vostride/agent-qa/blob/main/LICENSE.md).
+
 ### React Tools
 
 For React developers:
