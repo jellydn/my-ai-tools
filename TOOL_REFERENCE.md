@@ -3624,6 +3624,27 @@ See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for det
 /claude-hud:setup
 ```
 
+### ghui
+
+[**ghui**](https://github.com/kitlangton/ghui) is a terminal UI for keeping up with open GitHub pull requests across repositories. It supports reviewing PR details and diffs, leaving diff comments, managing labels, changing draft state, merging, and opening PRs in GitHub.
+
+This repository documents ghui but does not install or configure it. Install it using one of the upstream-supported methods:
+
+```bash
+# macOS or Linux (recommended)
+brew install kitlangton/tap/ghui
+
+# Or with npm
+npm install -g @kitlangton/ghui
+```
+
+ghui requires the [GitHub CLI](https://cli.github.com/) to be installed and authenticated:
+
+```bash
+gh auth login
+ghui
+```
+
 ### Ponytail
 
 [**Ponytail**](https://ponytail.dev/) - Cross-agent ruleset that steers AI coding agents toward the least code that works. ([GitHub](https://github.com/DietrichGebert/ponytail))
