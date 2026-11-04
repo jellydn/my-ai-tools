@@ -66,6 +66,11 @@ Show the ranked list to the user before testing so they can supply domain eviden
 
 Probe one prediction at a time. Prefer a debugger or REPL, then targeted logs at boundaries that distinguish hypotheses. Tag temporary logs with a unique prefix such as `[DEBUG-1234]` so cleanup is mechanical. For performance issues, measure a baseline and use a profiler or timing harness instead of logging everything.
 
+If two attempted fixes share an assumption and fail the same check, pause before a third variation. State the shared
+assumption in one sentence and test it against the reproduction. For state or resource imbalances, trace which actors
+create, own, update, and release the resource. Change ownership only when the evidence supports it; a guard that merely
+hides the crash is not a root-cause fix. Update the ranked hypotheses from the result.
+
 ### 5. Add the regression test before the fix
 
 When a correct seam exists:
@@ -106,3 +111,34 @@ Before declaring the bug fixed:
 - [ ] A regression test covers the real behavior or the missing seam is documented.
 - [ ] The original loop, regression test, and broader checks were run.
 - [ ] Temporary logs, harnesses, and artifacts were removed.
+
+## Attribution
+
+The repeated-fix checkpoint is adapted from Robert C. Martin's
+[`ub-mode` — Attack the Premise and Fix Root Causes](https://github.com/unclebob/ub-mode/blob/3da62bf3fcfd2034de41f30d920d2739e566171f/SKILL.md).
+The existing Matt Pocock source metadata continues to describe the base workflow. The upstream notice is included
+here so it stays with this skill:
+
+```text
+MIT License
+
+Copyright (c) 2026 Robert C. Martin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

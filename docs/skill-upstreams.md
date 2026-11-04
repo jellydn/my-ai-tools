@@ -7,6 +7,39 @@ Last checked: 2026-10-30. Repository base: `920edf1` (origin/main).
 The Claude marketplace points directly to canonical directories. `generate.sh`
 exports installed home configuration; it is not an upstream skill updater.
 
+## Focused ub-mode adaptation — 2026-11-04
+
+Reviewed Robert C. Martin's [unclebob/ub-mode](https://github.com/unclebob/ub-mode) at
+[`3da62bf`](https://github.com/unclebob/ub-mode/commit/3da62bf3fcfd2034de41f30d920d2739e566171f):
+the README, SKILL.md, and MIT LICENSE. This is a focused adaptation, not a refresh of the other sources below.
+The README credits portions of @poteto's rules (`poteto-mode` / `pstack`); no pstack files or companion tools
+were imported. No upstream code was executed.
+
+| Upstream guidance | Existing owner and decision |
+| --- | --- |
+| TDD; Test Behavior; Mutator | Extend `tdd` with plausible-wrong-implementation checks, an honest manual-verification fallback, and optional existing mutation tooling. Inspect meaningful survivors, not scores alone. |
+| Attack the Premise; Fix Root Causes | Extend `diagnosing-bugs` with a checkpoint after two fixes fail the same check: test their shared assumption and trace resource ownership before another variation. Do not blindly remove an assignment. |
+| Architecture; Crapper; Dryer | Extend `code-quality-review` with scoped input/domain, retry/interruption, and mutable-ownership checks. Use available metrics as evidence, not mandatory thresholds or tools. |
+| Laziness; Subtract Before You Add; verifiable units; Refactoring | Already covered by `code-quality-review`, `accountable-engineering`, and `tdd`. Keep the current small-change, behavior-preserving workflow rather than duplicate it. |
+| Keep a Log | `implementation-logger` already owns material deviations and rationale. Do not require a log of every action. |
+| Redesign; Build the Lever; domain glossary; pure business logic | Do not mandate redesign, tool creation, a new glossary, or pure-function extraction for every change. Follow existing boundaries and relevant domain terms; add structure only when the task needs it. |
+| Guard the Context Window; Worktree Cleanup; Commit and Push | Do not force delegation, delete unrelated work, or push to the main line automatically. Preserve task scope, ownership, and explicit approval rules. |
+
+No new skill, command, dependency, hook, MCP declaration, or default installation is added. The existing optional
+`ub-mode` recommendation remains an upstream choice, not a prerequisite for these local skills. Its blanket rules
+do not override repository instructions or approval boundaries.
+
+Each adapted SKILL.md includes revision-pinned attribution and the full upstream MIT notice inline, including
+Copyright (c) 2026 Robert C. Martin. MIT requires retaining the notice, not a separate license file. Keeping it inside
+each independently distributable skill avoids extra files and broken references when a skill is copied alone.
+The Amp mirror includes the same text. A root-only notice would not travel with standalone skill distributions.
+The root project license and prior source metadata remain unchanged.
+
+Validation: `bunx --yes bats tests/pr_amp_skills_plugin.bats tests/recommend_skills.bats` passed all 79 tests.
+All six canonical/mirrored SKILL.md files passed YAML, directory-name, description-length, line-limit, and local-link
+checks. All six inline license notices match the pinned upstream LICENSE byte for byte. Full bundle equality and
+`git diff --check` passed. These are instruction-only changes; no JS/TS checks or runtime behavior tests were needed.
+
 ## Refresh policy
 
 - Read local history before replacing an upstream-inspired skill. Preserve local
