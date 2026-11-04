@@ -36,6 +36,24 @@ Check each meaningful change for:
    partially applied when a clearer atomic design exists.
 7. **Legibility** — Prefer direct, boring code with clear names and comments that explain only non-obvious reasons.
 
+### Boundary and state checks
+
+Apply these checks only where the diff touches the relevant contract:
+
+- **Input and domain model** — Validate external data at entry and carry that validated contract internally. Prefer
+  existing types that exclude invalid combinations over repeated guards or casts that hide a broken model. Do not
+  remove checks at a separate trust boundary or require a type-system redesign for clear, local code.
+- **Retries and partial failure** — For operations that can be retried, check the outcome after a second run and after
+  interruption between side effects. Flag duplicate effects or incomplete recovery against the operation's contract;
+  do not assume that every operation must be idempotent.
+- **Mutable ownership** — Before proposing locks or serialized execution, check whether independent actors can own
+  separate state. When state must be shared, identify the writer and the mechanism that enforces safe updates. Preserve
+  a correct existing transaction or synchronization model rather than forcing a single-writer rewrite.
+
+Use existing complexity and duplication reports as evidence when available, not universal pass/fail thresholds.
+Recommend a split or shared helper only when it improves cohesion or gives one business decision one owner; similar
+syntax alone is not enough. Do not require Crapper, Dryer, or new tooling to complete a review.
+
 ## Finding Bar
 
 Report a finding only when you can name:
@@ -74,3 +92,8 @@ Fix: smallest practical remedy
 
 End with `APPROVE` when no blocking finding remains, or `CHANGES REQUESTED` with the blocker count. Be direct and
 respectful.
+
+## Attribution
+
+Boundary and state checks and metric limits are adapted from Robert C. Martin's
+[`ub-mode` — Architecture, Crapper, and Dryer](https://github.com/unclebob/ub-mode/blob/3da62bf3fcfd2034de41f30d920d2739e566171f/SKILL.md).

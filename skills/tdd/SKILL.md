@@ -58,6 +58,17 @@ Guides you through the complete TDD workflow with Red-Green-Refactor cycle.
 
 Before the first Red phase, discover the repository's test runner and command from its manifest, task runner, docs, or CI. Do not assume TypeScript, Vitest, npm, or pnpm. Record the exact command used for the red failure and why it failed; a syntax/import error is not a valid Red state.
 
+### Check that tests can detect mistakes
+
+For risky behavior, name a plausible wrong implementation and choose an input whose expected result differs from it.
+A test that still passes when the relevant result or side effect is removed does not protect that behavior. Strengthen
+the observable assertion, not checks of private calls. If no honest automated test is practical, record the missing seam
+and use a repeatable manual check; do not claim automated regression coverage.
+
+If the project already uses mutation testing, run it on the affected scope when useful. Inspect uncovered paths and
+surviving mutations against the contract. Add a test for a meaningful missed behavior; do not chase equivalent mutations
+or a perfect score, install a new tool by default, or delete code solely because coverage did not exercise it.
+
 ## Process
 
 ### For "start <FEATURE>":
@@ -116,3 +127,8 @@ describe("functionName", () => {
 - Run tests: `npm test` or `pnpm test`
 - Watch mode: `npm test --watch`
 - With coverage: `npm test --coverage`
+
+## Attribution
+
+Test-strength guidance is adapted from Robert C. Martin's
+[`ub-mode` — TDD, Test Behavior, and Mutator](https://github.com/unclebob/ub-mode/blob/3da62bf3fcfd2034de41f30d920d2739e566171f/SKILL.md).
