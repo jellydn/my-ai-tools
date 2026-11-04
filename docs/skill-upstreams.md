@@ -29,15 +29,14 @@ No new skill, command, dependency, hook, MCP declaration, or default installatio
 `ub-mode` recommendation remains an upstream choice, not a prerequisite for these local skills. Its blanket rules
 do not override repository instructions or approval boundaries.
 
-Each adapted SKILL.md includes revision-pinned attribution and the full upstream MIT notice inline, including
-Copyright (c) 2026 Robert C. Martin. MIT requires retaining the notice, not a separate license file. Keeping it inside
-each independently distributable skill avoids extra files and broken references when a skill is copied alone.
-The Amp mirror includes the same text. A root-only notice would not travel with standalone skill distributions.
+Each adapted SKILL.md keeps revision-pinned attribution to the upstream skill and commit. The full upstream MIT
+text is not repeated inline, so each skill file stays lean while credit remains in its attribution line. The Amp
+mirror contains the same text, so copied distributions still carry the upstream link.
 The root project license and prior source metadata remain unchanged.
 
 Validation: `bunx --yes bats tests/pr_amp_skills_plugin.bats tests/recommend_skills.bats` passed all 79 tests.
 All six canonical/mirrored SKILL.md files passed YAML, directory-name, description-length, line-limit, and local-link
-checks. All six inline license notices match the pinned upstream LICENSE byte for byte. Full bundle equality and
+checks. All six attribution lines point to the pinned upstream revision. Full bundle equality and
 `git diff --check` passed. These are instruction-only changes; no JS/TS checks or runtime behavior tests were needed.
 
 ## Refresh policy
