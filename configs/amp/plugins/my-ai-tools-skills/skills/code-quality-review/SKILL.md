@@ -96,4 +96,4 @@ respectful.
 ## Attribution
 
 Boundary and state checks and metric limits are adapted from Robert C. Martin's
-[`ub-mode` — Architecture, Laziness Protocol, Crapper, and Dryer](https://github.com/unclebob/ub-mode/blob/3da62bf3fcfd2034de41f30d920d2739e566171f/SKILL.md).
+[`ub-mode` — Architecture, Crapper, and Dryer](https://github.com/unclebob/ub-mode/blob/3da62bf3fcfd2034de41f30d920d2739e566171f/SKILL.md).
