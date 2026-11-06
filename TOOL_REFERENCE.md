@@ -515,7 +515,7 @@ npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
 
-# Available skills: accountable-engineering, prd, ralph, qmd-knowledge, codemap, adr, babysit-pr, handoffs, pickup, pr-review, slop, tdd, code-quality-review, commit-atomic, draft-pull-request, diagnosing-bugs, docs-update, llm-wiki, plannotator-setup-goal, portless-local, security-audit, tmux, visual-pr, blindspot-pass, implementation-logger, quiz-me, spec-interview, capability-experiments, code-review, context-discovery, doc-search, git-context, orchestrating-fusion
+# Available skills: accountable-engineering, prd, ralph, qmd-knowledge, codemap, adr, amp-orb, babysit-pr, handoffs, pickup, pr-review, slop, tdd, code-quality-review, commit-atomic, draft-pull-request, diagnosing-bugs, docs-update, llm-wiki, plannotator-setup-goal, portless-local, security-audit, tmux, visual-pr, blindspot-pass, implementation-logger, quiz-me, spec-interview, capability-experiments, code-review, context-discovery, doc-search, git-context, orchestrating-fusion
 # Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
@@ -760,6 +760,7 @@ Located in [`configs/claude/agents/`](configs/claude/agents/):
 
 - `accountable-engineering` - Checkpoint-driven workflow for accountable AI-assisted implementation, architecture, security, and operational work
 - `adr` - Architecture Decision Records
+- `amp-orb` - Run Amp orbs on this Mac with smolvm. Provider `itman-vm`, host directory `~/src/tries`, controller session `amp-orb`
 - `babysit-pr` - Monitor an open GitHub pull request for CI failures, review feedback, mergeability, and safe retries or fixes
 - `code-review` - Two-axis diff review (Conventions + Intent) with parallel sub-agents — checks bash idioms, Tidy First practices, and whether the change does what it claims. Intent comes from the linked issue, spec, or pull request description, and falls back to commit messages
 - `codemap` - Parallel codebase analysis producing structured documentation

@@ -6,6 +6,7 @@ export const description =
 const SKILLS = [
 	"accountable-engineering",
 	"adr",
+	"amp-orb",
 	"babysit-pr",
 	"blindspot-pass",
 	"capability-experiments",
