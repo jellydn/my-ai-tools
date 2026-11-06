@@ -195,12 +195,15 @@ EOF
 }
 
 @test "validate_config_with_schema fails when schema mismatches" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
     if ! command -v python3 &>/dev/null || ! python3 -c "import jsonschema" &>/dev/null; then
         skip "python jsonschema not available"
     fi
 
-    local schema_file="/tmp/my-ai-tools-schema.json"
-    local data_file="/tmp/my-ai-tools-data.json"
+    local schema_file="$BATS_TEST_TMPDIR/schema.json"
+    local data_file="$BATS_TEST_TMPDIR/data.json"
 
     cat > "$schema_file" <<'EOF'
 {"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","required":["name"],"properties":{"name":{"type":"string"}}}
@@ -208,13 +211,20 @@ EOF
 
     local schema_url="file://$schema_file"
     cat > "$data_file" <<EOF
-{"$schema":"$schema_url","name": 123}
+{"\$schema":"$schema_url","name": 123}
 EOF
 
     run validate_config_with_schema "$data_file"
-    [ "$status" -ne 0 ]
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"Schema validation failed"* ]]
 
-    rm -f "$schema_file" "$data_file"
+    cat > "$data_file" <<EOF
+{"\$schema":"$schema_url","name": "valid"}
+EOF
+
+    run validate_config_with_schema "$data_file"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Schema validation passed"* ]]
 }
 
 @test "run_parallel handles empty command list" {
