@@ -10,6 +10,15 @@
             "type": "command"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash "$HOME/.config/devin/herdr-agent-state.sh" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -17,6 +26,15 @@
         "hooks": [
           {
             "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash "$HOME/.config/devin/herdr-agent-state.sh" session",
             "timeout": 10,
             "type": "command"
           }
@@ -32,6 +50,15 @@
             "type": "command"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash "$HOME/.config/devin/herdr-agent-state.sh" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
       }
     ],
     "SessionStart": [
@@ -39,6 +66,15 @@
         "hooks": [
           {
             "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash "$HOME/.config/devin/herdr-agent-state.sh" session",
             "timeout": 10,
             "type": "command"
           }
@@ -54,6 +90,15 @@
             "type": "command"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash "$HOME/.config/devin/herdr-agent-state.sh" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -61,6 +106,15 @@
         "hooks": [
           {
             "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash "$HOME/.config/devin/herdr-agent-state.sh" session",
             "timeout": 10,
             "type": "command"
           }
