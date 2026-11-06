@@ -1231,7 +1231,7 @@ curl -fsSL https://ampcode.com/install.sh | bash
 
 ### Configuration
 
-Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/`:
+Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/`. `./cli.sh` links [`configs/amp/orb-dispatch.sh`](configs/amp/orb-dispatch.sh) to `~/.config/amp/orb-dispatch.sh`.
 
 ```json
 {

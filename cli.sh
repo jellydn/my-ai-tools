@@ -1264,6 +1264,9 @@ copy_amp_configs() {
 	log_info "Detected Amp (via $amp_status)"
 	execute_quoted mkdir -p "$HOME/.config/amp"
 	execute_quoted cp "$SCRIPT_DIR/configs/amp/settings.json" "$HOME/.config/amp/"
+	if [ -f "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" ]; then
+		execute_quoted ln -sfn "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" "$HOME/.config/amp/orb-dispatch.sh"
+	fi
 
 	if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
 		execute_quoted cp "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/amp/"

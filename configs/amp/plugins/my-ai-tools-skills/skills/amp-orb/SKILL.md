@@ -39,7 +39,7 @@ tmux new-session -d -s amp-orb -c "$HOME/src/tries" \
 amp orb provider "$HOME/.config/amp/orb-dispatch.sh"
 ```
 
-The dispatch script is `common/.config/amp/orb-dispatch.sh` in the dotfiles repo. mise links it to `~/.config/amp/orb-dispatch.sh`.
+The dispatch script is `configs/amp/orb-dispatch.sh` in this repository. `./cli.sh` links it to `~/.config/amp/orb-dispatch.sh`.
 
 ## Orb shape
 
