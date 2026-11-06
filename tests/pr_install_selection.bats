@@ -80,8 +80,8 @@ load helpers
 
 @test "yes copies core MCP plugins and shared skills without touching unrelated agents on rerun" {
     require_jq
-    local home_dir
-    home_dir=$(mktemp -d)
+    local home_dir="$BATS_TEST_TMPDIR/home"
+    mkdir -p "$home_dir"
     run bash -c '
         export HOME="$2"
         source "$1/cli.sh"
@@ -114,7 +114,8 @@ load helpers
         for entry in "${INSTALL_SEQUENCE[@]}"; do
             eval "${entry#*:}() { echo ATTEMPT:${entry%%:*}; }"
         done
-        install_ctx() { :; }
+        # Dependency selection is covered separately; keep this copy fixture offline.
+        install_integration_dependencies() { :; }
         for iteration in 1 2; do
             main
             test -s "$HOME/.config/amp/settings.json"
@@ -132,7 +133,6 @@ load helpers
         done
         echo PASS:core-config-skills-rerun
     ' _ "$REPO_ROOT" "$home_dir"
-    rm -rf "$home_dir"
     [ "$status" -eq 0 ]
     [[ "$output" == *PASS:core-config-skills-rerun* ]]
     [[ "$output" == *COPY:claude* ]]
