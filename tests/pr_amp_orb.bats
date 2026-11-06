@@ -2,41 +2,70 @@
 
 setup() {
 	REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/.." && pwd)"
-	SKILL="$REPO_ROOT/skills/amp-orb/SKILL.md"
-	MARKETPLACE="$REPO_ROOT/.claude-plugin/marketplace.json"
+	export HOME="$BATS_TEST_TMPDIR/home"
+	export AMP_ORB_WORKDIR="$HOME/missing-workspace"
+	export XDG_STATE_HOME="$HOME/state"
+	export ORB_ID=test-orb ORB_TOKEN=test-token
+	export SMOLVM="$BATS_TEST_TMPDIR/smolvm"
+	export MOCK_STATE=running MOCK_STATE_FILE="$BATS_TEST_TMPDIR/state"
+	cat > "$SMOLVM" <<'MOCK'
+#!/usr/bin/env bash
+state=${MOCK_STATE}
+[[ ! -f "$MOCK_STATE_FILE" ]] || state=$(cat "$MOCK_STATE_FILE")
+case "$2" in
+status)
+	[[ "$state" != missing ]] || exit 1
+	printf '{"state":"%s"}\n' "$state"
+	;;
+create) printf 'created\n' > "$MOCK_STATE_FILE" ;;
+start | resume) printf 'running\n' > "$MOCK_STATE_FILE" ;;
+pause) printf 'paused\n' > "$MOCK_STATE_FILE" ;;
+delete) printf 'missing\n' > "$MOCK_STATE_FILE" ;;
+exec) [[ "$state" == running ]] && printf 'bootstrap started\n' ;;
+*) exit 1 ;;
+esac
+MOCK
+	chmod +x "$SMOLVM"
 }
 
-@test "amp-orb records this Mac's smolvm provider" {
-	run grep -F 'name: amp-orb' "$SKILL"
+@test "orb cleanup works repeatedly without the host workspace" {
+	export ORB_OPERATION=pause
+	run "$REPO_ROOT/configs/amp/orb-dispatch.sh"
 	[ "$status" -eq 0 ]
-	run grep -F 'itman-vm' "$SKILL"
+	[ "$(cat "$MOCK_STATE_FILE")" = paused ]
+	run "$REPO_ROOT/configs/amp/orb-dispatch.sh"
 	[ "$status" -eq 0 ]
-	run grep -F '~/src/tries' "$SKILL"
-	[ "$status" -eq 0 ]
-	run grep -F '/home/user/tries' "$SKILL"
-	[ "$status" -eq 0 ]
-	run grep -F 'amp-orb' "$SKILL"
-	[ "$status" -eq 0 ]
-	run grep -F 'smol-machines/tap/smolvm' "$SKILL"
-	[ "$status" -eq 0 ]
-	run grep -F 'configs/amp/orb-dispatch.sh' "$SKILL"
-	[ "$status" -eq 0 ]
-	run grep -F '~/.config/amp/orb-dispatch.sh' "$SKILL"
-	[ "$status" -eq 0 ]
-	run grep -F 'Leave the token unprinted.' "$SKILL"
-	[ "$status" -eq 0 ]
-	run grep -F 'The user runs the command in a private terminal.' "$SKILL"
-	[ "$status" -eq 0 ]
-	run grep -F 'Do not run it.' "$SKILL"
-	[ "$status" -eq 0 ]
-	run grep -F '`amp orb provider create itman-vm`' "$SKILL"
-	[ "$status" -eq 0 ]
-	run grep -F 'Do not ask for the token or the command output.' "$SKILL"
-	[ "$status" -eq 0 ]
-	[ -x "$REPO_ROOT/configs/amp/orb-dispatch.sh" ]
+	[ "$(cat "$MOCK_STATE_FILE")" = paused ]
 
-	run jq -e '[.plugins[] | select(.name == "amp-orb" and .source == "./skills/amp-orb")] | length == 1' \
-		"$MARKETPLACE"
+	export ORB_OPERATION=delete
+	run "$REPO_ROOT/configs/amp/orb-dispatch.sh"
 	[ "$status" -eq 0 ]
-	[ "$output" = "true" ]
+	[ "$(cat "$MOCK_STATE_FILE")" = missing ]
+	run "$REPO_ROOT/configs/amp/orb-dispatch.sh"
+	[ "$status" -eq 0 ]
+}
+
+@test "orb spawn resumes an existing machine without the host workspace" {
+	export ORB_OPERATION=spawn MOCK_STATE=paused
+	run "$REPO_ROOT/configs/amp/orb-dispatch.sh"
+	[ "$status" -eq 0 ]
+	[ "$(cat "$MOCK_STATE_FILE")" = running ]
+	[ "$output" = "bootstrap started" ]
+}
+
+@test "fresh orb spawn requires the host workspace" {
+	export ORB_OPERATION=spawn MOCK_STATE=missing
+	run "$REPO_ROOT/configs/amp/orb-dispatch.sh"
+	[ "$status" -ne 0 ]
+	[[ "$output" == *"working directory $AMP_ORB_WORKDIR does not exist"* ]]
+	[ ! -e "$MOCK_STATE_FILE" ]
+}
+
+@test "orb spawn falls back to the image when the project snapshot is missing" {
+	export ORB_OPERATION=spawn MOCK_STATE=missing ORB_SNAPSHOT_ID=missing-snapshot
+	mkdir -p "$AMP_ORB_WORKDIR"
+	run "$REPO_ROOT/configs/amp/orb-dispatch.sh"
+	[ "$status" -eq 0 ]
+	[ "$(cat "$MOCK_STATE_FILE")" = running ]
+	[ "$output" = "bootstrap started" ]
 }

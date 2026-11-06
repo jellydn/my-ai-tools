@@ -1,0 +1,81 @@
+# Self-hosted Amp orbs with smolvm
+
+The [dispatcher](../configs/amp/orb-dispatch.sh) runs one smolvm machine per orb.
+No Amp skill or shell function is required. See the [Amp dispatch contract](https://ampcode.com/docs/orbs/self-hosted#dispatch-contract).
+
+## Set up the Mac
+
+Install Amp, Bash, Python 3, and [smolvm](https://github.com/smol-machines/smolvm).
+Make `amp`, `smolvm`, and `python3` available on the controller's PATH. With Homebrew:
+
+```bash
+brew install smol-machines/tap/smolvm
+mkdir -p "$HOME/src/tries"
+```
+
+From this repository, preview the configuration install before running it:
+
+```bash
+./cli.sh --dry-run
+./cli.sh
+```
+
+The installer links the dispatcher to `~/.config/amp/orb-dispatch.sh`.
+Keep this checkout in place. `./generate.sh --dry-run` previews export;
+`./generate.sh` exports a separate home copy and skips a link to the repository file.
+
+If a provider is not configured, the user runs `amp orb provider create itman-vm`
+in a private terminal. It prints a token once and saves it for the controller.
+Agents must not run this command, capture its output, read credential files, or ask
+the user to paste the token. Ask only whether provider creation succeeded.
+
+## Start and check the controller
+
+Run this on the Mac that hosts the VMs:
+
+```bash
+amp orb provider "$HOME/.config/amp/orb-dispatch.sh"
+```
+
+Keep exactly one controller per provider token. The dispatcher selects the ARM64
+image on Apple Silicon; no fish setup or image export is needed. Keep the Mac awake.
+The foreground controller stops when its process exits. Use a host service manager
+for automatic restart after a crash or reboot, with the same PATH and credentials.
+
+`READY` and `listening for jobs` indicate that the controller is connected.
+Provider logs are under `~/.cache/amp/logs/orb-provider`. Use Ctrl-C to drain jobs
+and stop the foreground controller before starting a replacement.
+Select `itman-vm` in the new thread's self-hosted provider picker.
+
+## Resources and lifecycle
+
+| Setting | Default |
+| --- | --- |
+| Host mount (`AMP_ORB_WORKDIR`) | `$HOME/src/tries` |
+| Guest mount | `/home/user/tries` |
+| CPU (`ORB_CPUS`) | 4 |
+| Memory (`ORB_MEMORY_MIB`) | 8192 MiB |
+| Disk (`ORB_STORAGE_GIB`) | 40 GiB |
+| Image (`ORB_IMAGE`) | Amp ARM64 image on Apple Silicon; Amp x64 image otherwise |
+| Snapshots | `${XDG_STATE_HOME:-$HOME/.local/state}/amp-orbs/snapshots/` |
+
+Set overrides in the controller's environment before starting it. `SMOLVM` can
+select a different executable. Custom images are preserved. The guest bootstrap
+runs as `user`. Amp normally checks out the project in `/home/user/workspace/repo`;
+the shared mount is an additional directory, not the project checkout.
+
+- **Spawn:** resume an existing machine, or create one from a local project
+  checkpoint. If the checkpoint is unavailable, use the image, as Amp permits.
+  Only fresh image creation checks that the host mount exists.
+- **Pause:** keep the VM's RAM and disk. If Amp requests a project snapshot, save
+  a checkpoint with `--host-mounts` before pausing.
+- **Delete:** remove the VM and its disk. Pause and delete do not require the host
+  mount directory to exist. Archiving a thread pauses its orb; it does not delete it.
+
+All VMs share the same writable host mount. Treat it as shared data, not isolated
+thread storage. Checkpoints retain the mount mapping, not a private copy of its
+host files. Keep thread work in its project checkout to avoid cross-thread edits.
+
+After changing the dispatcher or smolvm version, smoke-test spawn → pause → resume
+→ delete on the host. The Bats tests use a mock CLI; they do not verify real VM or
+checkpoint behavior.

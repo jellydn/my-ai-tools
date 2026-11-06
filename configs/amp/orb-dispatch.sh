@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 # Amp self-hosted orb provider for this Mac. One smolvm machine per orb.
 # ~/src/tries is mounted at /home/user/tries.
-# Start with `amp-orb` (fish). That exports the arm64 ORB_IMAGE.
+# Start with: amp orb provider "$HOME/.config/amp/orb-dispatch.sh"
 # smolvm's own example is examples/amp-orbs/dispatch-smolvm.sh.
 set -euo pipefail
-
-export PATH="/opt/homebrew/bin:/usr/bin:/bin:${PATH:-}"
 
 SMOLVM="${SMOLVM:-smolvm}"
 TRIES="${AMP_ORB_WORKDIR:-$HOME/src/tries}"
@@ -31,11 +29,6 @@ arm64 | aarch64)
 	;;
 esac
 
-if [[ ! -d "$TRIES" ]]; then
-	printf 'amp orb: working directory %s does not exist\n' "$TRIES" >&2
-	exit 1
-fi
-
 # smolvm names: letters, digits, "-" and "_". No doubled or trailing hyphen.
 sanitize() {
 	local raw=$1
@@ -50,7 +43,7 @@ state_of() {
 		printf ''
 		return 0
 	fi
-	printf '%s' "$out" | /usr/bin/python3 -c '
+	printf '%s' "$out" | python3 -c '
 import json, sys
 raw = sys.stdin.read().strip()
 if not raw:
@@ -82,6 +75,10 @@ create_machine() {
 	if [[ -n "$snap" && -f "$snap" ]]; then
 		"$SMOLVM" machine create --name "$name" --from "$snap"
 	else
+		if [[ ! -d "$TRIES" ]]; then
+			printf 'amp orb: working directory %s does not exist\n' "$TRIES" >&2
+			return 1
+		fi
 		"$SMOLVM" machine create \
 			--name "$name" \
 			--image "$IMAGE" \

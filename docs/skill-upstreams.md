@@ -69,10 +69,10 @@ precedence, including the restored `babysit-pr` and first-party `visual-pr`.
 | `visual-pr` | [humanlayer/skills@ca7c808](https://github.com/humanlayer/skills/commit/ca7c8088db69e315a8b2deea43820270457f8f3c) | Preserve first-party marked-comment publisher; upstream replaces the PR body. Keep comment template and publisher tests. |
 | `babysit-pr` | [openai/codex@5e96aab](https://github.com/openai/codex/commit/5e96aabd68dc6194f5ad928cb7f5d0bc71b72df9), final pre-removal source | Current upstream path returns 404. Preserve the explicitly restored local watcher and its tests; do not remove it again. |
 
-The following 23 skills are local designs or adaptations of ideas/standards, not
+The following 22 skills are local designs or adaptations of ideas/standards, not
 maintained upstream file copies. Their current repository versions remain canonical:
 
-`accountable-engineering`, `adr`, `amp-orb`, `blindspot-pass`, `capability-experiments`,
+`accountable-engineering`, `adr`, `blindspot-pass`, `capability-experiments`,
 `code-quality-review`, `commit-atomic`, `context-discovery`, `doc-search`,
 `docs-update`, `draft-pull-request`, `git-context`, `handoffs`,
 `implementation-logger`, `llm-wiki`, `orchestrating-fusion`, `pickup`, `pr-review`,
