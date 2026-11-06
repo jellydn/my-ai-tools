@@ -230,7 +230,7 @@ export default function fusionAgents(amp: PluginAPI) {
 
 	const lead = amp.createAgent({
 		name: "fusion-lead",
-		model: "xai/grok-4.6",
+		model: "xai/grok-4.7",
 		instructions: LEAD_INSTRUCTIONS,
 		tools: LEAD_TOOLS,
 		reasoningEffort: "high",
