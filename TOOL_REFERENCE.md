@@ -1456,10 +1456,18 @@ args = [ "-y", "@react-grab/mcp", "--stdio" ]
 command = "logpilot"
 args = ["mcp-server"]
 
-# node_repl ships inside ChatGPT.app. Leave it disabled when that binary is absent.
 [mcp_servers.node_repl]
-command = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
 enabled = false
+args = []
+command = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
+env_vars = [
+  "BROWSER_USE_ACCESS_EXECUTOR_ID",
+  "BROWSER_USE_ACCESS_PIPE_PATH",
+  "BROWSER_USE_ACCESS_VERIFYING_IDENTITY",
+]
+startup_timeout_sec = 120
+# Requires the ChatGPT.app cua_node binary; Codex fails MCP startup without it.
+# The [mcp_servers.node_repl.env] block in configs/codex/config.toml carries the browser-use overrides.
 ```
 
 ### Custom Agents
@@ -1833,12 +1841,12 @@ Located in [`configs/pi/`](configs/pi/):
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 - [`models.json`](configs/pi/models.json) - Provider and model definitions (google-antigravity, ollama)
 
-The installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `commandcode` as the default provider with `deepseek/deepseek-v4.1-flash` as the default model (OmniRoute `paid`/`free`/`premium` remain available in `enabledModels`). You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+The installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `openrouter` as the default provider with `~deepseek/deepseek-v4-flash-latest` as the default model (OmniRoute `paid`/`free`/`premium` remain available in `enabledModels`). You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `deepseek/deepseek-v4.1-flash`
-- **Default Provider**: `commandcode`
+- **Default Model**: `~deepseek/deepseek-v4-flash-latest`
+- **Default Provider**: `openrouter`
 - **Default Thinking Level**: `high`
 - **Theme**: `kanagawa`
 - **Permission Level**: `high`

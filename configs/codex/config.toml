@@ -73,6 +73,7 @@ args = ["mcp", "serve"]
 command = "codebase-memory-mcp"
 
 [mcp_servers.node_repl]
+enabled = false
 args = []
 command = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
 env_vars = [

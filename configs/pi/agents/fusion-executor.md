@@ -1,6 +1,6 @@
 ---
 description: Implements bounded Fusion specifications with a fast coding model
-model: cursor/auto
+model: openai-codex/gpt-6-luna
 thinking: medium
 tools: "read, grep, find, write, edit, bash"
 extensions: false

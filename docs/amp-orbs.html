@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Self-hosted Amp orbs with smolvm — my-ai-tools documentation"><title>Self-hosted Amp orbs with smolvm · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="30-day-applied-ai-learnings.html">30-Day Applied AI Learning Sprint</a>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="amp-orbs.html">Self-hosted Amp orbs with smolvm</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="code-taste-openrouter.html">Code taste with OpenRouter</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="linux-omarchy-setup.html">Selective Setup on Omarchy (Linux, Hyprland)</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+<a href="rag-architecture.html">Repository RAG architecture</a>
+<a href="rag-retrieval-quality.html">Day 11: retrieval quality</a>
+<a href="skill-upstreams.html">Skill upstream maintenance</a>
+</nav><main><article>
+<h1>Self-hosted Amp orbs with smolvm</h1>
+<p>The <a href="../configs/amp/orb-dispatch.sh">dispatcher</a> runs one smolvm machine per orb.
+No Amp skill or shell function is required. See the <a href="https://ampcode.com/docs/orbs/self-hosted#dispatch-contract">Amp dispatch contract</a>.</p>
+<h2>Set up the Mac</h2>
+<p>Install Amp, Bash, Python 3, and <a href="https://github.com/smol-machines/smolvm">smolvm</a>.
+Make <code>amp</code>, <code>smolvm</code>, and <code>python3</code> available on the controller&#39;s PATH. With Homebrew:</p>
+<pre><code class="language-bash">brew install smol-machines/tap/smolvm
+mkdir -p &quot;$HOME/src/tries&quot;
+</code></pre>
+<p>From this repository, preview the configuration install before running it:</p>
+<pre><code class="language-bash">./cli.sh --dry-run
+./cli.sh
+</code></pre>
+<p>The installer links the dispatcher to <code>~/.config/amp/orb-dispatch.sh</code>.
+Keep this checkout in place. <code>./generate.sh --dry-run</code> previews export;
+<code>./generate.sh</code> exports a separate home copy and skips a link to the repository file.</p>
+<p>If a provider is not configured, the user runs <code>amp orb provider create itman-vm</code>
+in a private terminal. It prints a token once and saves it for the controller.
+Agents must not run this command, capture its output, read credential files, or ask
+the user to paste the token. Ask only whether provider creation succeeded.</p>
+<h2>Start and check the controller</h2>
+<p>Run this on the Mac that hosts the VMs:</p>
+<pre><code class="language-bash">amp orb provider &quot;$HOME/.config/amp/orb-dispatch.sh&quot;
+</code></pre>
+<p>Keep exactly one controller per provider token. The dispatcher selects the ARM64
+image on Apple Silicon; no fish setup or image export is needed. Keep the Mac awake.
+The foreground controller stops when its process exits. Use a host service manager
+for automatic restart after a crash or reboot, with the same PATH and credentials.</p>
+<p><code>READY</code> and <code>listening for jobs</code> indicate that the controller is connected.
+Provider logs are under <code>~/.cache/amp/logs/orb-provider</code>. Use Ctrl-C to drain jobs
+and stop the foreground controller before starting a replacement.
+Select <code>itman-vm</code> in the new thread&#39;s self-hosted provider picker.</p>
+<h2>Resources and lifecycle</h2>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Host mount (<code>AMP_ORB_WORKDIR</code>)</td>
+<td><code>$HOME/src/tries</code></td>
+</tr>
+<tr>
+<td>Guest mount</td>
+<td><code>/home/user/tries</code></td>
+</tr>
+<tr>
+<td>CPU (<code>ORB_CPUS</code>)</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Memory (<code>ORB_MEMORY_MIB</code>)</td>
+<td>8192 MiB</td>
+</tr>
+<tr>
+<td>Disk (<code>ORB_STORAGE_GIB</code>)</td>
+<td>40 GiB</td>
+</tr>
+<tr>
+<td>Image (<code>ORB_IMAGE</code>)</td>
+<td>Amp ARM64 image on Apple Silicon; Amp x64 image otherwise</td>
+</tr>
+<tr>
+<td>Snapshots</td>
+<td><code>${XDG_STATE_HOME:-$HOME/.local/state}/amp-orbs/snapshots/</code></td>
+</tr>
+</tbody></table>
+<p>Set overrides in the controller&#39;s environment before starting it. <code>SMOLVM</code> can
+select a different executable. Custom images are preserved. The guest bootstrap
+runs as <code>user</code>. Amp normally checks out the project in <code>/home/user/workspace/repo</code>;
+the shared mount is an additional directory, not the project checkout.</p>
+<ul>
+<li><strong>Spawn:</strong> resume an existing machine, or create one from a local project
+checkpoint. If the checkpoint is unavailable, use the image, as Amp permits.
+Only fresh image creation checks that the host mount exists.</li>
+<li><strong>Pause:</strong> keep the VM&#39;s RAM and disk. If Amp requests a project snapshot, save
+a checkpoint with <code>--host-mounts</code> before pausing.</li>
+<li><strong>Delete:</strong> remove the VM and its disk. Pause and delete do not require the host
+mount directory to exist. Archiving a thread pauses its orb; it does not delete it.</li>
+</ul>
+<p>All VMs share the same writable host mount. Treat it as shared data, not isolated
+thread storage. Checkpoints retain the mount mapping, not a private copy of its
+host files. Keep thread work in its project checkout to avoid cross-thread edits.</p>
+<p>After changing the dispatcher or smolvm version, smoke-test spawn → pause → resume
+→ delete on the host. The Bats tests use a mock CLI; they do not verify real VM or
+checkpoint behavior.</p>
+</article></main></div></body></html>
