@@ -125,6 +125,23 @@ Edit `.claude/hooks/skill-rules.json` to:
 
 ## Testing Changes
 
+### Amp orbs
+
+`.agents/setup` prepares fresh orbs for reusable project snapshots. It uses the
+orb's Node.js 24+, Bun, and uv, installs missing shell-test packages, installs
+JavaScript dependencies from `bun.lock`, prepares `.venv` from
+`document_qa/requirements.txt`, and builds workspace packages. Repeated setup runs
+reuse installed packages and dependency caches. Python requirements use the
+repository's version ranges; they are not locked.
+
+`.agents/resume` checks readiness without installing anything. To repair missing
+dependencies, run `.agents/setup`. Use `.venv/bin/python -m pytest document_qa/tests`
+for Python tests and `bun run`, `bun test`, or `bats` for the other checks.
+
+Setup does not run `cli.sh`, change user configs, copy placeholder credentials,
+or start application servers. Tests do not need API keys. Running API-backed
+applications still requires the credentials described in their documentation.
+
 Before submitting a PR or commit:
 
 1. **Test skill evaluation**: Run `/onboard <test>` to verify skills activate

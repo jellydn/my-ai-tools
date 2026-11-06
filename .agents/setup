@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+SECONDS=0
+
+# Orbs provide Node, Bun, and uv. Keep their installs in the base image;
+# install only the extra system packages this repository needs.
+missing=()
+for package in bats jq python3-venv libgomp1; do
+	if ! dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -qx 'install ok installed'; then
+		missing+=("$package")
+	fi
+done
+if ((${#missing[@]})); then
+	echo "Installing system packages: ${missing[*]}"
+	sudo apt-get update -qq
+	sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${missing[@]}"
+fi
+echo "System packages ready (${SECONDS}s)"
+
+node -e 'if (Number(process.versions.node.split(".")[0]) < 24) throw new Error("Node.js 24+ required")'
+bun --version
+uv --version
+
+echo "Installing locked JavaScript workspace dependencies"
+bun install --frozen-lockfile
+echo "JavaScript dependencies ready (${SECONDS}s)"
+
+echo "Installing Document Q&A dependencies"
+if [[ ! -x .venv/bin/python ]]; then
+	uv venv --python python3 .venv
+fi
+uv pip install --python .venv/bin/python -r document_qa/requirements.txt
+echo "Python dependencies ready (${SECONDS}s)"
+
+echo "Building workspace packages"
+bun run build:packages
+echo "Orb setup finished (${SECONDS}s)"

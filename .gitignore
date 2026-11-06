@@ -23,6 +23,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .env.production.local
 .env.local
 
+# Orb portal metadata is specific to each remote machine.
+.amp/portals/
+
 .eslintcache
 .cache
 *.tsbuildinfo

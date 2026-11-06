@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+# Dependencies belong in setup and its snapshot, never in the wake-up path.
+for tool in node bun uv bats jq; do
+	command -v "$tool" >/dev/null
+done
+if [[ ! -d node_modules || ! -x .venv/bin/python || ! -f packages/user-memory-mcp/dist/server.js ]]; then
+	echo "Orb dependencies are missing; run .agents/setup to repair them." >&2
+	exit 1
+fi
+echo "Orb toolchain and dependencies ready"
