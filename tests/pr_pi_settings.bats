@@ -11,18 +11,18 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/pi/settings.json defaultModel is deepseek/deepseek-v4.1-flash" {
+@test "configs/pi/settings.json defaultModel is ~deepseek/deepseek-v4-flash-latest" {
     require_jq
     run jq -r '.defaultModel' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "deepseek/deepseek-v4.1-flash" ]
+    [ "$output" = "~deepseek/deepseek-v4-flash-latest" ]
 }
 
-@test "configs/pi/settings.json defaultProvider is commandcode" {
+@test "configs/pi/settings.json defaultProvider is openrouter" {
     require_jq
     run jq -r '.defaultProvider' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "commandcode" ]
+    [ "$output" = "openrouter" ]
 }
 
 @test "configs/pi/settings.json enables OmniRoute paid/free/premium models" {
@@ -51,9 +51,9 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains commandcode/meta/muse-spark-1.3-contributor" {
+@test "configs/pi/settings.json enabledModels no longer contains commandcode models" {
     require_jq
-    run jq -e '[.enabledModels[] | select(. == "commandcode/meta/muse-spark-1.3-contributor")] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(startswith("commandcode/"))] | length == 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
@@ -68,9 +68,9 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$output" = "true" ]
 }
 
-@test "configs/pi/settings.json enabledModels contains cursor models" {
+@test "configs/pi/settings.json enabledModels no longer contains cursor models" {
     require_jq
-    run jq -e '[.enabledModels[] | select(startswith("cursor/"))] | length > 0' "$PI_SETTINGS"
+    run jq -e '[.enabledModels[] | select(startswith("cursor/"))] | length == 0' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }

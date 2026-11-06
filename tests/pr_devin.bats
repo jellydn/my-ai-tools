@@ -57,6 +57,22 @@ CONFIG_DIR="$REPO_ROOT/configs/devin"
     [ "$status" -eq 0 ]
 }
 
+@test "Devin session hooks run once per event with a spaced HOME path" {
+    local test_home="$BATS_TEST_TMPDIR/home with spaces"
+    mkdir -p "$test_home/.config/devin"
+    printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$1"\n' > "$test_home/.config/devin/herdr-agent-state.sh"
+
+    local event hook_command
+    for event in PermissionRequest PostToolUse PreToolUse SessionStart Stop UserPromptSubmit; do
+        run jq -e --arg event "$event" '.hooks[$event] | length == 1 and (.[0].hooks | length == 1)' "$CONFIG_DIR/config.json"
+        [ "$status" -eq 0 ]
+        hook_command=$(jq -r --arg event "$event" '.hooks[$event][0].hooks[0].command' "$CONFIG_DIR/config.json")
+        run env HOME="$test_home" bash -c "$hook_command"
+        [ "$status" -eq 0 ]
+        [ "$output" = "session" ]
+    done
+}
+
 @test "configs/devin/AGENTS.md exists" {
     [ -f "$CONFIG_DIR/AGENTS.md" ]
 }

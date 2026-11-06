@@ -63,7 +63,7 @@ install_for_tool() {
 	run install_for_tool gemini
 	[ "$status" -eq 0 ]
 	[ -x "$HOME/.local/bin/plannotator" ]
-	jq -e '.mcpServers["plannotator-inbox"].command == "plannotator"' "$HOME/.gemini/settings.json"
+	jq -e '.mcpServers["plannotator-inbox"] == {command: "$HOME/.local/bin/plannotator", args: ["inbox", "mcp"]}' "$HOME/.gemini/settings.json"
 }
 
 @test "Kilo and MiMo install real manual command definitions" {

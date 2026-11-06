@@ -55,12 +55,9 @@ function getClient(): OpenAI {
 export function validateIndex(value: unknown): Index {
 	if (!value || typeof value !== "object") throw new Error("Invalid index: expected an object");
 	const index = value as Partial<Index>;
-	if (index.schemaVersion !== 2)
-		throw new Error("Unsupported index schema; rebuild the repository index");
+	if (index.schemaVersion !== 2) throw new Error("Unsupported index schema; rebuild the repository index");
 	if (index.model !== EMBEDDING_MODEL) {
-		throw new Error(
-			`Index model ${index.model ?? "unknown"} does not match configured model ${EMBEDDING_MODEL}`,
-		);
+		throw new Error(`Index model ${index.model ?? "unknown"} does not match configured model ${EMBEDDING_MODEL}`);
 	}
 	if (!Array.isArray(index.chunks)) throw new Error("Invalid index: no chunks");
 	if (index.chunks.length === 0) return index as Index;
@@ -73,9 +70,7 @@ export function validateIndex(value: unknown): Index {
 			typeof chunk.text !== "string" ||
 			!chunk.metadata ||
 			typeof chunk.metadata !== "object" ||
-			!["documentation", "source", "issue", "pull_request", "cli_help", "example_config"].includes(
-				chunk.metadata.type,
-			) ||
+			!["documentation", "source", "issue", "pull_request", "cli_help", "example_config"].includes(chunk.metadata.type) ||
 			(chunk.metadata.url !== undefined && typeof chunk.metadata.url !== "string") ||
 			(chunk.metadata.author !== undefined && typeof chunk.metadata.author !== "string") ||
 			!Array.isArray(chunk.embedding) ||
@@ -100,9 +95,7 @@ export function rankChunks(
 	{ topK, types }: RetrievalOptions,
 ): RetrievedChunk[] {
 	const allowedTypes = types?.length ? new Set(types) : null;
-	const candidates = allowedTypes
-		? chunks.filter((chunk) => allowedTypes.has(chunk.metadata.type))
-		: chunks;
+	const candidates = allowedTypes ? chunks.filter((chunk) => allowedTypes.has(chunk.metadata.type)) : chunks;
 	const scored = candidates.map((chunk) => ({
 		path: chunk.path,
 		text: chunk.text,
@@ -127,24 +120,17 @@ export async function embed(text: string): Promise<number[]> {
 	return response.data[0].embedding;
 }
 
-export async function retrieve(
-	query: string,
-	options: RetrievalOptions,
-): Promise<RetrievedChunk[]> {
+export async function retrieve(query: string, options: RetrievalOptions): Promise<RetrievedChunk[]> {
 	const index = await getIndex();
 	const allowedTypes = options.types?.length ? new Set(options.types) : null;
-	const candidates = allowedTypes
-		? index.chunks.filter((chunk) => allowedTypes.has(chunk.metadata.type))
-		: index.chunks;
+	const candidates = allowedTypes ? index.chunks.filter((chunk) => allowedTypes.has(chunk.metadata.type)) : index.chunks;
 	if (candidates.length === 0) {
 		return [];
 	}
 
 	const queryEmbedding = await embed(query);
 	if (queryEmbedding.length !== index.chunks[0]?.embedding.length) {
-		throw new Error(
-			"Query embedding dimension does not match the repository index; rebuild the index",
-		);
+		throw new Error("Query embedding dimension does not match the repository index; rebuild the index");
 	}
 	return rankChunks(queryEmbedding, candidates, { ...options, types: undefined });
 }

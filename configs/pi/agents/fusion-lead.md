@@ -1,6 +1,6 @@
 ---
 description: Read-only lead that plans, delegates implementation, reviews, and verifies
-model: xai/grok-4.6
+model: openai-codex/gpt-6-astra
 thinking: high
 tools: "read, grep, find"
 extensions: false
