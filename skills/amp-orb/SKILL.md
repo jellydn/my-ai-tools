@@ -64,13 +64,11 @@ brew install smol-machines/tap/smolvm
 
 mise requests `brew:smol-machines/tap/smolvm` from `common/.config/mise/config.macos.toml`.
 
-Create the provider only when `~/.local/share/amp/secrets.json` has no `orb-provider-token@https://ampcode.com/` entry:
+Create the provider only when `~/.local/share/amp/secrets.json` has no `orb-provider-token@https://ampcode.com/` entry. The user runs the command in a private terminal. Do not run it. Do not read its output.
 
-```bash
-amp orb provider create itman-vm
-```
+`amp orb provider create itman-vm`
 
-That command prints the token once. Keep that output private.
+That command prints the token once. Ask the user only whether the provider now exists. A yes or no is enough. Do not ask for the token or the command output.
 
 ## Thread
 
