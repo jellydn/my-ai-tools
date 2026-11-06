@@ -40,6 +40,17 @@
 			"category": "productivity"
 		},
 		{
+			"name": "amp-orb",
+			"description": "Runs Amp orbs on this Mac with smolvm. Covers provider itman-vm, ~/src/tries, and the amp-orb controller.",
+			"version": "1.0.0",
+			"author": {
+				"name": "Dung Huynh Duc",
+				"email": "dung@productsway.com"
+			},
+			"source": "./skills/amp-orb",
+			"category": "terminal-automation"
+		},
+		{
 			"name": "codemap",
 			"description": "Orchestrate parallel codebase analysis to produce 7 structured documents (STACK, INTEGRATIONS, ARCHITECTURE, STRUCTURE, CONVENTIONS, TESTING, CONCERNS) in .planning/codebase/.",
 			"version": "1.0.0",
