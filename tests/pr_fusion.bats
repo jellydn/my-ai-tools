@@ -221,7 +221,7 @@ JSON
 	[ "$status" -eq 0 ]
 	run grep -F 'model: "zhipuai/glm-5.3-flash"' "$plugin"
 	[ "$status" -eq 0 ]
-	run grep -F 'model: "xai/grok-4.6"' "$plugin"
+	run grep -F 'model: "xai/grok-4.7"' "$plugin"
 	[ "$status" -eq 0 ]
 	run grep -F 'event.tool === "fusion_executor"' "$plugin"
 	[ "$status" -eq 0 ]
