@@ -5,6 +5,7 @@
 <a href="30-day-applied-ai-learnings.html">30-Day Applied AI Learning Sprint</a>
 <a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
 <a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="amp-orbs.html">Self-hosted Amp orbs with smolvm</a>
 <a href="claude-code-teams.html">🤝 Claude Code Teams</a>
 <a href="code-taste-openrouter.html">Code taste with OpenRouter</a>
 <a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
@@ -63,11 +64,23 @@ $HOME/.config/opencode/skills/qmd-knowledge/
 <p><strong>Key concept</strong>: One skill (<code>qmd-knowledge</code>) manages knowledge for multiple projects. Each project is a qmd collection, not a separate skill.</p>
 <h2>Installation</h2>
 <h3>1. Install qmd</h3>
-<p>Install qmd globally via bun:</p>
+<p>qmd is optional. From a reviewed checkout, install it without enabling the MCP/config bundle:</p>
+<pre><code class="language-bash">./cli.sh --yes --without-integrations --with-tools=qmd
+qmd --version
+</code></pre>
+<p>On Windows use <code>powershell -NoProfile -File .\install.ps1 -Yes -WithoutIntegrations -WithTools qmd</code>.
+Native Windows uses Node.js &gt;=22/npm and keeps the generated shim in npm&#39;s global prefix.
+The installer prioritizes that prefix and the real Node directory over stale <code>~/.local/bin</code> copies.
+It does not change npm script policy; npm 11.19.1&#39;s unreviewed-script warnings alone do not block scripts.
+Windows ARM64 supports keyword indexing/search but currently lacks sqlite-vec vector support.</p>
+<p>Alternatively, install qmd globally via Bun on Linux/macOS/WSL:</p>
 <pre><code class="language-bash">bun install -g @tobilu/qmd
 </code></pre>
 <h3>2. Configure MCP Server</h3>
-<p>The MCP server configuration is already included in this repository.</p>
+<p>The MCP server configuration is included by default for the selected agents in <code>--yes</code> mode.
+qmd is a default <code>-y</code> tool, and the core agent templates also declare it as an integration dependency.
+Use <code>./cli.sh --yes --backup</code> for bundled configuration and skills, or add the MCP manually.
+<code>--without-integrations</code> installs the qmd binary and leaves existing configuration unchanged.</p>
 <p><strong>For Claude Code</strong> (<code>~/.claude/mcp-servers.json</code>):</p>
 <pre><code class="language-json">{
 	&quot;mcpServers&quot;: {

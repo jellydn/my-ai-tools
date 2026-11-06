@@ -5,6 +5,7 @@
 <a href="30-day-applied-ai-learnings.html">30-Day Applied AI Learning Sprint</a>
 <a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
 <a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="amp-orbs.html">Self-hosted Amp orbs with smolvm</a>
 <a href="claude-code-teams.html">🤝 Claude Code Teams</a>
 <a href="code-taste-openrouter.html">Code taste with OpenRouter</a>
 <a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
@@ -20,11 +21,64 @@
 <a href="skill-upstreams.html">Skill upstream maintenance</a>
 </nav><main><article>
 <h1>Skill upstream maintenance</h1>
-<p>Last checked: 2026-10-07. Repository base: <code>163951e</code> (PR #417).</p>
+<p>Last checked: 2026-10-30. Repository base: <code>920edf1</code> (origin/main).</p>
 <p><code>skills/</code> is canonical. The Amp bundle in
 <code>configs/amp/plugins/my-ai-tools-skills/skills/</code> must contain identical files.
 The Claude marketplace points directly to canonical directories. <code>generate.sh</code>
 exports installed home configuration; it is not an upstream skill updater.</p>
+<h2>Focused ub-mode adaptation — 2026-11-04</h2>
+<p>Reviewed Robert C. Martin&#39;s <a href="https://github.com/unclebob/ub-mode">unclebob/ub-mode</a> at
+<a href="https://github.com/unclebob/ub-mode/commit/3da62bf3fcfd2034de41f30d920d2739e566171f"><code>3da62bf</code></a>:
+the README, SKILL.md, and MIT LICENSE. This is a focused adaptation, not a refresh of the other sources below.
+The README credits portions of @poteto&#39;s rules (<code>poteto-mode</code> / <code>pstack</code>); no pstack files or companion tools
+were imported. No upstream code was executed.</p>
+<table>
+<thead>
+<tr>
+<th>Upstream guidance</th>
+<th>Existing owner and decision</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TDD; Test Behavior; Mutator</td>
+<td>Extend <code>tdd</code> with plausible-wrong-implementation checks, an honest manual-verification fallback, and optional existing mutation tooling. Inspect meaningful survivors, not scores alone.</td>
+</tr>
+<tr>
+<td>Attack the Premise; Fix Root Causes</td>
+<td>Extend <code>diagnosing-bugs</code> with a checkpoint after two fixes fail the same check: test their shared assumption and trace resource ownership before another variation. Do not blindly remove an assignment.</td>
+</tr>
+<tr>
+<td>Architecture; Crapper; Dryer</td>
+<td>Extend <code>code-quality-review</code> with scoped input/domain, retry/interruption, and mutable-ownership checks. Use available metrics as evidence, not mandatory thresholds or tools.</td>
+</tr>
+<tr>
+<td>Laziness; Subtract Before You Add; verifiable units; Refactoring</td>
+<td>Already covered by <code>code-quality-review</code>, <code>accountable-engineering</code>, and <code>tdd</code>. Keep the current small-change, behavior-preserving workflow rather than duplicate it.</td>
+</tr>
+<tr>
+<td>Keep a Log</td>
+<td><code>implementation-logger</code> already owns material deviations and rationale. Do not require a log of every action.</td>
+</tr>
+<tr>
+<td>Redesign; Build the Lever; domain glossary; pure business logic</td>
+<td>Do not mandate redesign, tool creation, a new glossary, or pure-function extraction for every change. Follow existing boundaries and relevant domain terms; add structure only when the task needs it.</td>
+</tr>
+<tr>
+<td>Guard the Context Window; Worktree Cleanup; Commit and Push</td>
+<td>Do not force delegation, delete unrelated work, or push to the main line automatically. Preserve task scope, ownership, and explicit approval rules.</td>
+</tr>
+</tbody></table>
+<p>No new skill, command, dependency, hook, MCP declaration, or default installation is added. The existing optional
+<code>ub-mode</code> recommendation remains an upstream choice, not a prerequisite for these local skills. Its blanket rules
+do not override repository instructions or approval boundaries.</p>
+<p>Each adapted SKILL.md keeps revision-pinned attribution to the upstream skill and commit. The full upstream MIT
+text is not repeated inline, so each skill file stays lean while credit remains in its attribution line. The Amp
+mirror contains the same text, so copied distributions still carry the upstream link.
+The root project license and prior source metadata remain unchanged.</p>
+<p>Validation: <code>bunx --yes bats tests/pr_amp_skills_plugin.bats tests/recommend_skills.bats</code> passed all 79 tests.
+All six canonical/mirrored SKILL.md files passed YAML, directory-name, description-length, line-limit, and local-link
+checks. All six attribution lines point to the pinned upstream revision. Full bundle equality and
+<code>git diff --check</code> passed. These are instruction-only changes; no JS/TS checks or runtime behavior tests were needed.</p>
 <h2>Refresh policy</h2>
 <ul>
 <li>Read local history before replacing an upstream-inspired skill. Preserve local
@@ -107,7 +161,7 @@ are local adapters for <code>code-reviewer</code>, <code>test-generator</code>, 
 <code>ai-slop-remover</code>, and <code>security-audit</code>. They have no independent external upstream;
 keep their tool-specific guidance. Do not replace the short adapter security skill
 with the larger canonical audit workflow.</p>
-<h2>Recommendations: 21 entries, 20 repositories checked</h2>
+<h2>Recommendations: 22 entries, 21 repositories checked</h2>
 <p>All checked repositories are reachable and unarchived; API trees were not truncated.
 Named skill selectors were checked against frontmatter, not only directory names.
 In particular, Engram&#39;s <code>plugin/claude-code/skills/memory/SKILL.md</code> declares
@@ -216,6 +270,11 @@ every skill they may install. Preserve the local pstack-first order.</p>
 <td>tt-a1i/archify</td>
 <td><a href="https://github.com/tt-a1i/archify/commit/73aaa0696e8f72c232ea710e6fa94fd953f3e773">73aaa06</a></td>
 <td><code>archify</code>; local rendering/browser checks, optional brand-URL capture.</td>
+</tr>
+<tr>
+<td>unclebob/ub-mode</td>
+<td><a href="https://github.com/unclebob/ub-mode/commit/57a8bdd28e45ed41900ace0bafa2ff76dd9ed70f">57a8bdd</a></td>
+<td><code>ub-mode</code>; prompt-only workflow skill; references companion quality-gate tools but imports no scripts, hooks, MCP declarations, or credentials.</td>
 </tr>
 <tr>
 <td>vercel-labs/agent-skills</td>
