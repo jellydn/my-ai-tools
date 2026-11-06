@@ -278,6 +278,130 @@ generate_muse_configs() {
 	log_success "Muse Code configs generated"
 }
 
+# Print the path with symlinks resolved. Return 1 when the path is missing.
+physical_path() {
+	local path="$1"
+	local dir target
+	local hops=0
+
+	while [ -L "$path" ]; do
+		hops=$((hops + 1))
+		[ "$hops" -le 8 ] || return 1
+		dir="$(cd "$(dirname "$path")" && pwd)" || return 1
+		target="$(readlink "$path")" || return 1
+		case "$target" in
+		/*) path="$target" ;;
+		*) path="$dir/$target" ;;
+		esac
+	done
+
+	[ -e "$path" ] || return 1
+	dir="$(cd "$(dirname "$path")" && pwd)" || return 1
+	printf '%s/%s\n' "$dir" "$(basename "$path")"
+}
+
+# Copy an installed file into the repo. Print "copied" or "skipped".
+# cli.sh installs orb-dispatch.sh as a symlink to the repo file. Copying that
+# link onto itself fails, so a source that already is the destination is skipped.
+copy_repo_file() {
+	local src="$1"
+	local dest="$2"
+	local src_real dest_real
+
+	if [ ! -e "$src" ] && [ ! -L "$src" ]; then
+		log_info "Skipped (not found): $src"
+		printf 'skipped\n'
+		return 0
+	fi
+
+	src_real="$(physical_path "$src")" || {
+		log_warning "Skipped (unresolved): $src"
+		printf 'skipped\n'
+		return 0
+	}
+
+	if [ -e "$dest" ] || [ -L "$dest" ]; then
+		dest_real="$(physical_path "$dest")" || dest_real=""
+		if [ -n "$dest_real" ] && [ "$src_real" = "$dest_real" ]; then
+			log_info "Skipped (already the repo file): $src"
+			printf 'skipped\n'
+			return 0
+		fi
+	fi
+
+	copy_single "$src" "$dest"
+	printf 'copied\n'
+}
+
+# Copy a skill directory. Skip the installer marker and a source that is already dest.
+copy_skill_tree() {
+	local src="$1"
+	local dest="$2"
+	local src_real dest_real file rel list
+
+	src_real="$(physical_path "$src")" || {
+		log_warning "Skipped (unresolved): $src"
+		return 0
+	}
+	if [ -d "$dest" ]; then
+		dest_real="$(physical_path "$dest")" || dest_real=""
+		if [ -n "$dest_real" ] && [ "$src_real" = "$dest_real" ]; then
+			log_info "Skipped (already the repo skill): $src"
+			return 0
+		fi
+	fi
+	if [ "$DRY_RUN" = true ]; then
+		log_info "[DRY RUN] copy skill $src → $dest"
+		return 0
+	fi
+
+	list="$(mktemp)"
+	find "$src" -type f ! -name '.my-ai-tools-managed' >"$list"
+	while IFS= read -r file; do
+		[ -n "$file" ] || continue
+		rel="${file#"$src"/}"
+		execute_quoted mkdir -p "$dest/$(dirname "$rel")"
+		execute_quoted cp "$file" "$dest/$rel"
+	done <"$list"
+	rm -f "$list"
+	log_success "Copied skill: $src → $dest"
+}
+
+copy_amp_orb_dispatch() {
+	local dest="$SCRIPT_DIR/configs/amp/orb-dispatch.sh"
+	local action
+
+	action="$(copy_repo_file "$HOME/.config/amp/orb-dispatch.sh" "$dest")"
+	# The provider runs this file. A home copy may not keep the executable bit.
+	if [ "$action" = "copied" ]; then
+		execute_quoted chmod +x "$dest"
+	fi
+}
+
+copy_amp_orb_skill() {
+	local src="" candidate
+	local -a candidates=(
+		"$HOME/.agents/skills/amp-orb"
+		"$HOME/.config/amp/skills/amp-orb"
+		"$HOME/.config/amp/plugins/my-ai-tools-skills/skills/amp-orb"
+	)
+
+	for candidate in "${candidates[@]}"; do
+		if [ -f "$candidate/SKILL.md" ]; then
+			src="$candidate"
+			break
+		fi
+	done
+	if [ -z "$src" ]; then
+		log_info "Skipped amp-orb skill (not installed)"
+		return 0
+	fi
+
+	# skills/ is canonical. The Amp bundle must stay an identical copy.
+	copy_skill_tree "$src" "$SCRIPT_DIR/skills/amp-orb"
+	copy_skill_tree "$src" "$SCRIPT_DIR/configs/amp/plugins/my-ai-tools-skills/skills/amp-orb"
+}
+
 generate_amp_configs() {
 	log_info "Generating Amp configs..."
 
@@ -314,6 +438,11 @@ generate_amp_configs() {
 	if [ -d "$HOME/.config/amp/lib" ]; then
 		safe_copy_dir "$HOME/.config/amp/lib" "$SCRIPT_DIR/configs/amp/lib"
 	fi
+
+	# The dispatch script is linked into ~/.config/amp by cli.sh, outside settings and plugins.
+	copy_amp_orb_dispatch
+	# copy_skills_with_filter skips amp-orb because skills/amp-orb already exists.
+	copy_amp_orb_skill
 
 	log_success "Amp configs generated"
 }

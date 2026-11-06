@@ -250,3 +250,55 @@ teardown() {
     run grep -F "'\$HOME/foo/bar'" "$file"
     [ "$status" -ne 0 ]
 }
+
+# ---------------------------------------------------------------------------
+# Amp orb export
+# ---------------------------------------------------------------------------
+
+@test "generate_amp_configs exports the orb dispatch script and amp-orb skill" {
+    mkdir -p "$HOME/.config/amp" "$HOME/.agents/skills/amp-orb/references"
+    printf 'echo dispatch\n' > "$HOME/.config/amp/orb-dispatch.sh"
+    printf 'name: amp-orb\n' > "$HOME/.agents/skills/amp-orb/SKILL.md"
+    printf 'detail\n' > "$HOME/.agents/skills/amp-orb/references/note.md"
+    printf 'marker\n' > "$HOME/.agents/skills/amp-orb/.my-ai-tools-managed"
+
+    run generate_amp_configs
+
+    [ "$status" -eq 0 ]
+    [ "$(cat "$SCRIPT_DIR/configs/amp/orb-dispatch.sh")" = "echo dispatch" ]
+    [ -x "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" ]
+    [ "$(cat "$SCRIPT_DIR/skills/amp-orb/SKILL.md")" = "name: amp-orb" ]
+    [ "$(cat "$SCRIPT_DIR/skills/amp-orb/references/note.md")" = "detail" ]
+    [ ! -e "$SCRIPT_DIR/skills/amp-orb/.my-ai-tools-managed" ]
+    [ "$(cat "$SCRIPT_DIR/configs/amp/plugins/my-ai-tools-skills/skills/amp-orb/SKILL.md")" = "name: amp-orb" ]
+    [ "$(cat "$SCRIPT_DIR/configs/amp/plugins/my-ai-tools-skills/skills/amp-orb/references/note.md")" = "detail" ]
+    [ ! -e "$SCRIPT_DIR/configs/amp/plugins/my-ai-tools-skills/skills/amp-orb/.my-ai-tools-managed" ]
+}
+
+@test "generate_amp_configs leaves a repo-linked orb dispatch script unchanged" {
+    mkdir -p "$HOME/.config/amp" "$SCRIPT_DIR/configs/amp"
+    printf 'repo script\n' > "$SCRIPT_DIR/configs/amp/orb-dispatch.sh"
+    chmod +x "$SCRIPT_DIR/configs/amp/orb-dispatch.sh"
+    ln -s "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" "$HOME/.config/amp/orb-dispatch.sh"
+
+    run generate_amp_configs
+
+    [ "$status" -eq 0 ]
+    [ ! -L "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" ]
+    [ "$(cat "$SCRIPT_DIR/configs/amp/orb-dispatch.sh")" = "repo script" ]
+}
+
+@test "generate_amp_configs dry-run does not write the orb script or skill" {
+    export DRY_RUN=true
+    mkdir -p "$HOME/.config/amp" "$HOME/.agents/skills/amp-orb"
+    printf 'echo dispatch\n' > "$HOME/.config/amp/orb-dispatch.sh"
+    printf 'name: amp-orb\n' > "$HOME/.agents/skills/amp-orb/SKILL.md"
+
+    run generate_amp_configs
+
+    [ "$status" -eq 0 ]
+    [ ! -e "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" ]
+    [ ! -e "$SCRIPT_DIR/skills/amp-orb/SKILL.md" ]
+
+    export DRY_RUN=false
+}
