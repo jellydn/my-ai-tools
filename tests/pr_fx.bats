@@ -15,32 +15,47 @@ FX_CONFIG_DIR="$REPO_ROOT/configs/fx"
 }
 
 @test "install_fx verifies a pinned archive and honors FX_INSTALL_DIR" {
-	local test_home="$BATS_TEST_TMPDIR/fx-install-home"
-	local install_dir="$BATS_TEST_TMPDIR/fx-custom-bin"
 	local archive_log="$BATS_TEST_TMPDIR/fx-archive-call"
 	local path_log="$BATS_TEST_TMPDIR/fx-installer-path"
 	local archive_root="$BATS_TEST_TMPDIR/fx-archive-root"
 	local fake_archive="$BATS_TEST_TMPDIR/fx-test-archive.tar.gz"
-	mkdir -p "$test_home" "$archive_root"
+	local arch checksum test_home install_dir
+	mkdir -p "$archive_root"
 	printf '#!/bin/sh\nprintf "fx test binary\\n"\n' >"$archive_root/fx"
-	tar -czf "$fake_archive" -C "$archive_root" fx
 
-	run env HOME="$test_home" PATH="/usr/bin:/bin" FX_INSTALL_DIR="$install_dir" FAKE_ARCHIVE="$fake_archive" ARCHIVE_LOG="$archive_log" PATH_LOG="$path_log" REPO_ROOT="$REPO_ROOT" bash -c '
-		export DRY_RUN=false YES_TO_ALL=true VERBOSE=false IS_WINDOWS=false
-		source "$REPO_ROOT/cli.sh"
-		download_and_verify_file() { printf "%s\n" "$@" >"$ARCHIVE_LOG"; printf "%s\n" "$FAKE_ARCHIVE"; }
-		ensure_dir_on_path() { printf "%s\n" "$1" >"$PATH_LOG"; }
-		install_fx
-	'
+	for arch in x86_64 aarch64; do
+		test_home="$BATS_TEST_TMPDIR/fx-home-$arch"
+		install_dir="$BATS_TEST_TMPDIR/fx-bin-$arch"
+		mkdir -p "$test_home"
+		tar -czf "$fake_archive" -C "$archive_root" fx
+		case "$arch" in
+		x86_64) checksum=be9428636afb1196cb662b48ed57bbed3b95e7c37f2bc7849e02c0960fae1f01 ;;
+		aarch64) checksum=9905a51c213d1b7fe3b5079f00fd3e61f2dba5bde707397991e9535c4a700caf ;;
+		esac
 
-	[ "$status" -eq 0 ]
-	run cat "$archive_log"
-	[ "$output" = $'https://releases.fx.sh/v0.0.4/fx-linux-x86_64.tar.gz\nbe9428636afb1196cb662b48ed57bbed3b95e7c37f2bc7849e02c0960fae1f01\nfx v0.0.4 (linux-x86_64)' ]
-	run cat "$path_log"
-	[ "$output" = "$install_dir" ]
-	[ -x "$install_dir/fx" ]
-	run "$install_dir/fx"
-	[ "$output" = "fx test binary" ]
+		run env HOME="$test_home" PATH="/usr/bin:/bin" FX_TEST_ARCH="$arch" FX_INSTALL_DIR="$install_dir" FAKE_ARCHIVE="$fake_archive" ARCHIVE_LOG="$archive_log" PATH_LOG="$path_log" REPO_ROOT="$REPO_ROOT" bash -c '
+			uname() {
+				case "$1" in
+				-s) printf "Linux\n" ;;
+				-m) printf "%s\n" "$FX_TEST_ARCH" ;;
+				esac
+			}
+			export DRY_RUN=false YES_TO_ALL=true VERBOSE=false IS_WINDOWS=false
+			source "$REPO_ROOT/cli.sh"
+			download_and_verify_file() { printf "%s\n" "$@" >"$ARCHIVE_LOG"; printf "%s\n" "$FAKE_ARCHIVE"; }
+			ensure_dir_on_path() { printf "%s\n" "$1" >"$PATH_LOG"; }
+			install_fx
+		'
+
+		[ "$status" -eq 0 ]
+		run cat "$archive_log"
+		[ "$output" = "$(printf '%s\n' "https://releases.fx.sh/v0.0.4/fx-linux-$arch.tar.gz" "$checksum" "fx v0.0.4 (linux-$arch)")" ]
+		run cat "$path_log"
+		[ "$output" = "$install_dir" ]
+		[ -x "$install_dir/fx" ]
+		run "$install_dir/fx"
+		[ "$output" = "fx test binary" ]
+	done
 }
 
 @test "copy_fx_configs installs guidance without changing private MCP state" {
