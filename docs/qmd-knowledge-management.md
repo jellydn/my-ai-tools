@@ -50,12 +50,15 @@ $HOME/.config/opencode/skills/qmd-knowledge/
 
 ### 1. Install qmd
 
-qmd is optional. From a reviewed checkout, install it without enabling the MCP/config bundle:
+From a reviewed checkout, install qmd and the default CLI tools without enabling the MCP/config bundle:
 
 ```bash
 ./cli.sh --yes --without-integrations --with-tools=qmd
 qmd --version
 ```
+
+`--with-tools=qmd` adds qmd to the selection; it does not restrict `--yes` to qmd.
+`--without-integrations` skips bundled configuration and integration setup, but can still install missing default CLIs.
 
 On Windows use `powershell -NoProfile -File .\install.ps1 -Yes -WithoutIntegrations -WithTools qmd`.
 Native Windows uses Node.js >=22/npm and keeps the generated shim in npm's global prefix.
@@ -63,7 +66,7 @@ The installer prioritizes that prefix and the real Node directory over stale `~/
 It does not change npm script policy; npm 11.19.1's unreviewed-script warnings alone do not block scripts.
 Windows ARM64 supports keyword indexing/search but currently lacks sqlite-vec vector support.
 
-Alternatively, install qmd globally via Bun on Linux/macOS/WSL:
+To install only qmd, use Bun on Linux/macOS/WSL:
 
 ```bash
 bun install -g @tobilu/qmd
@@ -73,8 +76,8 @@ bun install -g @tobilu/qmd
 
 The MCP server configuration is included by default for the selected agents in `--yes` mode.
 qmd is a default `-y` tool, and the core agent templates also declare it as an integration dependency.
-Use `./cli.sh --yes --backup` for bundled configuration and skills, or add the MCP manually.
-`--without-integrations` installs the qmd binary and leaves existing configuration unchanged.
+Use `./cli.sh --yes --backup` to install the default CLI set and apply bundled configuration and skills, with backups of existing configuration, or add the MCP manually.
+`--without-integrations` leaves existing configuration unchanged; it does not limit the CLI installer selection.
 
 **For Claude Code** (`~/.claude/mcp-servers.json`):
 

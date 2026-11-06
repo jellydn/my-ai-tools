@@ -1457,6 +1457,7 @@ command = "logpilot"
 args = ["mcp-server"]
 
 [mcp_servers.node_repl]
+enabled = false
 args = []
 command = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
 env_vars = [
