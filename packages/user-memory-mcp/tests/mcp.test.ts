@@ -27,7 +27,11 @@ test("server can be imported when argv names a nonexistent entrypoint", () => {
 });
 
 afterEach(async () => {
-	await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
+	await Promise.all(
+		temporaryDirectories
+			.splice(0)
+			.map((directory) => rm(directory, { recursive: true, force: true })),
+	);
 });
 
 async function connect(directory: string) {

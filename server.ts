@@ -37,7 +37,14 @@ app.get("/readyz", (c) =>
 	),
 );
 
-const documentTypeSchema = z.enum(["documentation", "source", "issue", "pull_request", "cli_help", "example_config"]);
+const documentTypeSchema = z.enum([
+	"documentation",
+	"source",
+	"issue",
+	"pull_request",
+	"cli_help",
+	"example_config",
+]);
 const chatRequestSchema = z.object({
 	message: z.string().min(1).max(4000),
 	topK: z.union([z.literal(3), z.literal(5), z.literal(10), z.literal(20)]).default(5),
@@ -78,8 +85,16 @@ app.post("/api/chat", rateLimiter.middleware, async (c) => {
 				error: "retrieval_failed",
 			}),
 		);
-		if (error && typeof error === "object" && "code" in error && (error as { code: unknown }).code === "ENOENT") {
-			return c.json({ error: "Index not found. Run `bun run index` to build data/index.json." }, 503);
+		if (
+			error &&
+			typeof error === "object" &&
+			"code" in error &&
+			(error as { code: unknown }).code === "ENOENT"
+		) {
+			return c.json(
+				{ error: "Index not found. Run `bun run index` to build data/index.json." },
+				503,
+			);
 		}
 		return c.json({ error: "Failed to retrieve context from the index." }, 500);
 	}
@@ -100,7 +115,9 @@ app.post("/api/chat", rateLimiter.middleware, async (c) => {
 		);
 		c.header("Content-Type", "text/plain; charset=utf-8");
 		return stream(c, async (stream) => {
-			await stream.write(`${JSON.stringify({ type: "text", content: "This is not documented in the repository." })}\n`);
+			await stream.write(
+				`${JSON.stringify({ type: "text", content: "This is not documented in the repository." })}\n`,
+			);
 			await stream.write(`${JSON.stringify({ type: "sources", sources: [] })}\n`);
 		});
 	}
@@ -156,7 +173,9 @@ app.post("/api/chat", rateLimiter.middleware, async (c) => {
 			}
 
 			const sources = [
-				...new Map(chunks.map((chunk) => [chunk.path, { path: chunk.path, url: chunk.metadata.url }])).values(),
+				...new Map(
+					chunks.map((chunk) => [chunk.path, { path: chunk.path, url: chunk.metadata.url }]),
+				).values(),
 			];
 			await stream.write(`${JSON.stringify({ type: "sources", sources })}\n`);
 		} catch {
