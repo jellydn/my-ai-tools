@@ -25,6 +25,14 @@ setup() {
 	[ "$status" -eq 0 ]
 	run grep -F 'Leave the token unprinted.' "$SKILL"
 	[ "$status" -eq 0 ]
+	run grep -F 'The user runs the command in a private terminal.' "$SKILL"
+	[ "$status" -eq 0 ]
+	run grep -F 'Do not run it.' "$SKILL"
+	[ "$status" -eq 0 ]
+	run grep -F '`amp orb provider create itman-vm`' "$SKILL"
+	[ "$status" -eq 0 ]
+	run grep -F 'Do not ask for the token or the command output.' "$SKILL"
+	[ "$status" -eq 0 ]
 	[ -x "$REPO_ROOT/configs/amp/orb-dispatch.sh" ]
 
 	run jq -e '[.plugins[] | select(.name == "amp-orb" and .source == "./skills/amp-orb")] | length == 1' \
