@@ -179,7 +179,10 @@ export default function fusionAgents(amp: PluginAPI) {
 		inputSchema: {
 			type: "object",
 			properties: {
-				task: { type: "string", description: "Bounded implementation specification." },
+				task: {
+					type: "string",
+					description: "Bounded implementation specification.",
+				},
 			},
 			required: ["task"],
 		},

@@ -95,7 +95,13 @@ export type Chunk = {
 	metadata: ChunkMetadata;
 };
 
-export type DocumentType = "documentation" | "issue" | "pull_request" | "cli_help" | "example_config" | "source";
+export type DocumentType =
+	| "documentation"
+	| "issue"
+	| "pull_request"
+	| "cli_help"
+	| "example_config"
+	| "source";
 
 export type ChunkMetadata = {
 	type: DocumentType;
@@ -141,7 +147,13 @@ export function walk(dir: string, repoRoot: string): string[] {
 }
 
 export function chunkText(text: string, maxSize: number, overlap: number): string[] {
-	if (!Number.isInteger(maxSize) || maxSize <= 0 || !Number.isInteger(overlap) || overlap < 0 || overlap >= maxSize) {
+	if (
+		!Number.isInteger(maxSize) ||
+		maxSize <= 0 ||
+		!Number.isInteger(overlap) ||
+		overlap < 0 ||
+		overlap >= maxSize
+	) {
 		throw new Error("Chunk size must be positive and overlap must be between zero and chunk size");
 	}
 	const normalized = text.replace(/\r\n/g, "\n").trim();
@@ -187,7 +199,12 @@ export function chunkByFileType(filePath: string, content: string): string[] {
 function classifyPath(path: string): DocumentType {
 	if (path === "cli.sh" || path === "generate.sh") return "cli_help";
 	if (path.startsWith("configs/")) return "example_config";
-	if (path === "README.md" || path === "SOUL.md" || path.startsWith("CHANGELOG") || path.startsWith("docs/")) {
+	if (
+		path === "README.md" ||
+		path === "SOUL.md" ||
+		path.startsWith("CHANGELOG") ||
+		path.startsWith("docs/")
+	) {
 		return "documentation";
 	}
 	return "source";
@@ -213,7 +230,9 @@ export function indexRepository(
 		try {
 			const fileBytes = statSync(filePath).size;
 			if (fileBytes > MAX_LOCAL_FILE_BYTES) {
-				throw new Error(`File exceeds ${MAX_LOCAL_FILE_BYTES} byte indexing limit; exclude or split it`);
+				throw new Error(
+					`File exceeds ${MAX_LOCAL_FILE_BYTES} byte indexing limit; exclude or split it`,
+				);
 			}
 			totalInputBytes += fileBytes;
 			if (totalInputBytes > MAX_LOCAL_INPUT_BYTES) {
@@ -260,7 +279,11 @@ async function fetchGitHubPage(url: string): Promise<GitHubItem[]> {
 
 	for (let attempt = 1; attempt <= 2; attempt++) {
 		try {
-			const response = await fetch(url, { headers, redirect: "error", signal: AbortSignal.timeout(10_000) });
+			const response = await fetch(url, {
+				headers,
+				redirect: "error",
+				signal: AbortSignal.timeout(10_000),
+			});
 			if (!response.ok) {
 				throw new Error(`GitHub API returned ${response.status} ${response.statusText}`);
 			}
@@ -298,14 +321,20 @@ function selectGitHubChunks(items: GitHubItem[], type: "issue" | "pull_request")
 	return [...summaries, ...details].slice(0, MAX_GITHUB_CHUNKS_PER_TYPE);
 }
 
-export async function indexGitHub(repo = process.env.GITHUB_REPOSITORY ?? "jellydn/my-ai-tools"): Promise<Chunk[]> {
+export async function indexGitHub(
+	repo = process.env.GITHUB_REPOSITORY ?? "jellydn/my-ai-tools",
+): Promise<Chunk[]> {
 	if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) {
 		throw new Error(`Invalid GITHUB_REPOSITORY: ${repo}`);
 	}
 
 	try {
 		const issues: GitHubItem[] = [];
-		for (let page = 1; issues.length < MAX_GITHUB_ITEMS_PER_TYPE && page <= MAX_GITHUB_PAGES; page++) {
+		for (
+			let page = 1;
+			issues.length < MAX_GITHUB_ITEMS_PER_TYPE && page <= MAX_GITHUB_PAGES;
+			page++
+		) {
 			const items = await fetchGitHubPage(
 				`https://api.github.com/repos/${repo}/issues?state=all&sort=created&direction=desc&per_page=100&page=${page}`,
 			);
@@ -314,13 +343,20 @@ export async function indexGitHub(repo = process.env.GITHUB_REPOSITORY ?? "jelly
 		}
 		issues.splice(MAX_GITHUB_ITEMS_PER_TYPE);
 		if (issues.length < MAX_GITHUB_ITEMS_PER_TYPE) {
-			console.warn(`GitHub issue scan found ${issues.length} issues after at most ${MAX_GITHUB_PAGES} pages`);
+			console.warn(
+				`GitHub issue scan found ${issues.length} issues after at most ${MAX_GITHUB_PAGES} pages`,
+			);
 		}
 		const pulls = await fetchGitHubPage(
 			`https://api.github.com/repos/${repo}/pulls?state=all&sort=created&direction=desc&per_page=${MAX_GITHUB_ITEMS_PER_TYPE}`,
 		);
-		const chunks = [...selectGitHubChunks(issues, "issue"), ...selectGitHubChunks(pulls, "pull_request")];
-		console.log(`GitHub: ${issues.length} issues, ${pulls.length} pull requests, ${chunks.length} bounded chunks`);
+		const chunks = [
+			...selectGitHubChunks(issues, "issue"),
+			...selectGitHubChunks(pulls, "pull_request"),
+		];
+		console.log(
+			`GitHub: ${issues.length} issues, ${pulls.length} pull requests, ${chunks.length} bounded chunks`,
+		);
 		return chunks;
 	} catch (error) {
 		console.warn(`GitHub documents were not indexed: ${error}`);
@@ -353,7 +389,15 @@ export async function indexKnowledgeBase(): Promise<Chunk[]> {
 				maxBuffer: 2 * 1024 * 1024,
 			});
 		git(["init", "--quiet"]);
-		git(["-c", "http.followRedirects=false", "fetch", "--quiet", "--depth=1", `https://github.com/${repo}.git`, ref]);
+		git([
+			"-c",
+			"http.followRedirects=false",
+			"fetch",
+			"--quiet",
+			"--depth=1",
+			`https://github.com/${repo}.git`,
+			ref,
+		]);
 		git(["checkout", "--quiet", "--detach", "FETCH_HEAD"]);
 		const sha = git(["rev-parse", "HEAD"]).trim();
 		const localChunks = indexRepository(directory, sha);
