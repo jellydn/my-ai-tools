@@ -19,8 +19,13 @@ setup() {
 	[ "$status" -eq 0 ]
 	run grep -F 'smol-machines/tap/smolvm' "$SKILL"
 	[ "$status" -eq 0 ]
+	run grep -F 'configs/amp/orb-dispatch.sh' "$SKILL"
+	[ "$status" -eq 0 ]
+	run grep -F '~/.config/amp/orb-dispatch.sh' "$SKILL"
+	[ "$status" -eq 0 ]
 	run grep -F 'Leave the token unprinted.' "$SKILL"
 	[ "$status" -eq 0 ]
+	[ -x "$REPO_ROOT/configs/amp/orb-dispatch.sh" ]
 
 	run jq -e '[.plugins[] | select(.name == "amp-orb" and .source == "./skills/amp-orb")] | length == 1' \
 		"$MARKETPLACE"
