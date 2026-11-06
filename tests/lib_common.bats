@@ -158,11 +158,11 @@ setup() {
 }
 
 @test "validate_yaml fails on invalid yaml with spaces in path" {
-    if ! command -v python3 &>/dev/null && ! command -v yq &>/dev/null && ! command -v ruby &>/dev/null; then
+    if ! python3 -c 'import yaml' &>/dev/null && ! command -v yq &>/dev/null && ! command -v ruby &>/dev/null; then
         skip "no YAML validator available"
     fi
 
-    local yaml_file="/tmp/my ai tools invalid.yaml"
+    local yaml_file="$BATS_TEST_TMPDIR/my ai tools invalid.yaml"
     printf 'key: [1, 2\n' > "$yaml_file"
 
     run validate_yaml "$yaml_file"
