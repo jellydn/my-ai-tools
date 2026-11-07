@@ -69,8 +69,11 @@ the shared mount is an additional directory, not the project checkout.
   Only fresh image creation checks that the host mount exists. If a machine is
   registered but cannot resume or start (for example, its checkpoint was lost
   to a crash, an interrupted pause, or a second controller's racing delete),
-  the dispatcher discards it and recreates it from the image or snapshot. The
-  host mount and any saved snapshot survive.
+  the dispatcher retries it once, then discards and recreates it from the
+  image or snapshot. It refuses to discard a machine when the replacement
+  workspace or snapshot is missing, so the operator can restore the
+  directory without losing the existing disk. The host mount and any saved
+  snapshot survive.
 
 A second controller for the same token is the common cause of these wedged
 machines: both receive the same job, derive the same machine name, and their

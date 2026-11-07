@@ -137,12 +137,24 @@ recover_machine() {
 		printf 'amp orb: cannot create machine %s\n' "$name" >&2
 		return 1
 		;;
-	*)
-		printf 'amp orb: machine %s is wedged (state %s); discarding and recreating\n' "$name" "$st" >&2
-		"$SMOLVM" machine delete --name "$name" -f || return 1
-		create_machine "$name" "$snap"
+	paused | stopped | created)
+		# The machine may be healthy — the earlier probes only failed
+		# transiently. Retry resume/start before discarding it.
+		if bring_up "$name"; then
+			return 0
+		fi
 		;;
 	esac
+	# Recreating needs a usable snapshot or the host working directory.
+	# Refuse to delete the existing disk when neither holds, so the
+	# operator can fix the prerequisite without losing saved state.
+	if [[ -z "$snap" || ! -f "$snap" ]] && [[ ! -d "$TRIES" ]]; then
+		printf 'amp orb: working directory %s does not exist\n' "$TRIES" >&2
+		return 1
+	fi
+	printf 'amp orb: machine %s is wedged (state %s); discarding and recreating\n' "$name" "$st" >&2
+	"$SMOLVM" machine delete --name "$name" -f || return 1
+	create_machine "$name" "$snap"
 }
 
 # --secret-env reads ORB_TOKEN in this process. The value stays off the command line.
