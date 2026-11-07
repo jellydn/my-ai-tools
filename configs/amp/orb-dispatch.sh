@@ -39,11 +39,8 @@ sanitize() {
 
 state_of() {
 	local out
-	if ! out=$("$SMOLVM" machine status --name "$1" --json 2>/dev/null); then
-		printf ''
-		return 0
-	fi
-	printf '%s' "$out" | python3 -c '
+	if out=$("$SMOLVM" machine status --name "$1" --json 2>/dev/null); then
+		printf '%s' "$out" | python3 -c '
 import json, sys
 raw = sys.stdin.read().strip()
 if not raw:
@@ -53,6 +50,27 @@ if isinstance(data, list):
     data = data[0] if data else {}
 print((data.get("state") or "").lower())
 '
+		return 0
+	fi
+	# `machine status` failed: the machine is absent, or smolvm is wedged
+	# (e.g. another controller's operation is in flight). Confirm against
+	# the machine index so a machine that exists is not re-created. When
+	# even the index is unreachable, assume absence; creating a machine
+	# that actually exists fails loudly and is recovered by the caller.
+	if out=$("$SMOLVM" machine list --json 2>/dev/null); then
+		printf '%s' "$out" | python3 -c '
+import json, sys
+try:
+    machines = json.load(sys.stdin)
+except Exception:
+    raise SystemExit
+for machine in machines:
+    if machine.get("name") == sys.argv[1]:
+        print((machine.get("state") or "").lower())
+        raise SystemExit
+' "$1"
+	fi
+	return 0
 }
 
 bring_up() {
@@ -73,13 +91,18 @@ create_machine() {
 	local name=$1
 	local snap=${2:-}
 	if [[ -n "$snap" && -f "$snap" ]]; then
-		"$SMOLVM" machine create --name "$name" --from "$snap"
-	else
-		if [[ ! -d "$TRIES" ]]; then
-			printf 'amp orb: working directory %s does not exist\n' "$TRIES" >&2
+		if ! "$SMOLVM" machine create --name "$name" --from "$snap"; then
 			return 1
 		fi
-		"$SMOLVM" machine create \
+	elif [[ ! -d "$TRIES" ]]; then
+		printf 'amp orb: working directory %s does not exist\n' "$TRIES" >&2
+		return 1
+	else
+		# A second controller for the same token may have created the
+		# machine between our check and this create. Guarded so the
+		# "already exists" conflict returns to the caller for recovery
+		# instead of aborting the dispatch under `set -e`.
+		if ! "$SMOLVM" machine create \
 			--name "$name" \
 			--image "$IMAGE" \
 			--net \
@@ -88,13 +111,50 @@ create_machine() {
 			--storage "$STORAGE_GIB" \
 			--workdir "$GUEST_WORKDIR" \
 			--user user \
-			--volume "$TRIES:$GUEST_WORKDIR"
+			--volume "$TRIES:$GUEST_WORKDIR"; then
+			return 1
+		fi
 	fi
 	case "$(state_of "$name")" in
 	running) ;;
 	paused) "$SMOLVM" machine resume --name "$name" ;;
 	*) "$SMOLVM" machine start --name "$name" ;;
 	esac
+}
+
+# Discard a machine that is registered but cannot run, then recreate it.
+# Applies when resume/start hit a missing checkpoint after an interrupted
+# pause or a concurrent delete overlapped. The orb is disposable: its disk
+# rebuilds from the image (or snapshot) and the host mount survives.
+recover_machine() {
+	local name=$1
+	local snap=${2:-}
+	local st
+	st=$(state_of "$name")
+	case "$st" in
+	running) return 0 ;;
+	"")
+		printf 'amp orb: cannot create machine %s\n' "$name" >&2
+		return 1
+		;;
+	paused | stopped | created)
+		# The machine may be healthy — the earlier probes only failed
+		# transiently. Retry resume/start before discarding it.
+		if bring_up "$name"; then
+			return 0
+		fi
+		;;
+	esac
+	# Recreating needs a usable snapshot or the host working directory.
+	# Refuse to delete the existing disk when neither holds, so the
+	# operator can fix the prerequisite without losing saved state.
+	if [[ -z "$snap" || ! -f "$snap" ]] && [[ ! -d "$TRIES" ]]; then
+		printf 'amp orb: working directory %s does not exist\n' "$TRIES" >&2
+		return 1
+	fi
+	printf 'amp orb: machine %s is wedged (state %s); discarding and recreating\n' "$name" "$st" >&2
+	"$SMOLVM" machine delete --name "$name" -f || return 1
+	create_machine "$name" "$snap"
 }
 
 # --secret-env reads ORB_TOKEN in this process. The value stays off the command line.
@@ -127,7 +187,9 @@ spawn)
 		if [[ -n "${ORB_SNAPSHOT_ID:-}" ]]; then
 			snap=$(snap_path "$ORB_SNAPSHOT_ID")
 		fi
-		create_machine "$name" "$snap"
+		if ! create_machine "$name" "$snap"; then
+			recover_machine "$name" "$snap" || exit 1
+		fi
 	fi
 	bootstrap "$name"
 	;;

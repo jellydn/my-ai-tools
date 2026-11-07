@@ -66,7 +66,18 @@ the shared mount is an additional directory, not the project checkout.
 
 - **Spawn:** resume an existing machine, or create one from a local project
   checkpoint. If the checkpoint is unavailable, use the image, as Amp permits.
-  Only fresh image creation checks that the host mount exists.
+  Only fresh image creation checks that the host mount exists. If a machine is
+  registered but cannot resume or start (for example, its checkpoint was lost
+  to a crash, an interrupted pause, or a second controller's racing delete),
+  the dispatcher retries it once, then discards and recreates it from the
+  image or snapshot. It refuses to discard a machine when the replacement
+  workspace or snapshot is missing, so the operator can restore the
+  directory without losing the existing disk. The host mount and any saved
+  snapshot survive.
+
+A second controller for the same token is the common cause of these wedged
+machines: both receive the same job, derive the same machine name, and their
+pause/create/resume operations race. Keep exactly one controller per token.
 - **Pause:** keep the VM's RAM and disk. If Amp requests a project snapshot, save
   a checkpoint with `--host-mounts` before pausing.
 - **Delete:** remove the VM and its disk. Pause and delete do not require the host
