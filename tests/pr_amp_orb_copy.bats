@@ -66,3 +66,26 @@ setup() {
 	printf '#!/bin/sh\necho canary\n' > "$BATS_TEST_TMPDIR/expected-canary"
 	cmp -s "$canary" "$BATS_TEST_TMPDIR/expected-canary"
 }
+
+@test "copy_amp_configs keeps the installed dispatcher when the copy fails" {
+	if [ "$(id -u)" -eq 0 ]; then
+		skip "an unreadable source needs a non-root user"
+	fi
+
+	local dest="$HOME/.config/amp/orb-dispatch.sh"
+	printf 'previous dispatcher\n' > "$dest"
+	chmod +x "$dest"
+
+	# An unreadable source fails the copy. The staged copy keeps the
+	# installed dispatcher, so a failed install cannot leave the provider
+	# without a script.
+	chmod 000 "$FAKE_CHECKOUT/configs/amp/orb-dispatch.sh"
+	run copy_amp_configs
+	chmod 644 "$FAKE_CHECKOUT/configs/amp/orb-dispatch.sh"
+
+	[ "$status" -eq 0 ]
+	[ -f "$dest" ]
+	[ ! -L "$dest" ]
+	[ -x "$dest" ]
+	[ "$(cat "$dest")" = "previous dispatcher" ]
+}

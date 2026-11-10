@@ -33,9 +33,12 @@ mkdir -p &quot;$HOME/src/tries&quot;
 <pre><code class="language-bash">./cli.sh --dry-run
 ./cli.sh
 </code></pre>
-<p>The installer links the dispatcher to <code>~/.config/amp/orb-dispatch.sh</code>.
-Keep this checkout in place. <code>./generate.sh --dry-run</code> previews export;
-<code>./generate.sh</code> exports a separate home copy and skips a link to the repository file.</p>
+<p>The installer copies the dispatcher to <code>~/.config/amp/orb-dispatch.sh</code>.
+The copy keeps working after this checkout is removed, for example when the
+one-line installer deletes its temporary download.
+<code>./generate.sh --dry-run</code> previews export. The dispatcher is tracked source,
+not user configuration, so the export keeps the tracked copy and restores it
+only when the tracked file is missing.</p>
 <p>If a provider is not configured, the user runs <code>amp orb provider create itman-vm</code>
 in a private terminal. It prints a token once and saves it for the controller.
 Agents must not run this command, capture its output, read credential files, or ask

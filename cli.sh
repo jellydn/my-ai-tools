@@ -1280,11 +1280,24 @@ copy_amp_configs() {
 	execute_quoted cp "$SCRIPT_DIR/configs/amp/settings.json" "$HOME/.config/amp/"
 	if [ -f "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" ]; then
 		# Copy a real file, not a link: install.sh removes its temporary
-		# checkout after install, so a link would go dangling. Remove the
-		# destination first so cp cannot follow a link into the source tree.
-		execute_quoted rm -f "$HOME/.config/amp/orb-dispatch.sh"
-		execute_quoted cp "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" "$HOME/.config/amp/orb-dispatch.sh"
-		execute_quoted chmod +x "$HOME/.config/amp/orb-dispatch.sh"
+		# checkout after install, so a link would go dangling. Stage the copy
+		# next to the destination and rename it into place, so the swap is
+		# atomic and a failed copy keeps the installed dispatcher. The rename
+		# replaces a destination link instead of writing through it.
+		local amp_dispatch="$HOME/.config/amp/orb-dispatch.sh"
+		local amp_dispatch_stage="$HOME/.config/amp/.orb-dispatch.sh.tmp"
+		if execute_quoted cp "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" "$amp_dispatch_stage"; then
+			execute_quoted chmod +x "$amp_dispatch_stage"
+			# A link to a directory would make the rename move the staged file
+			# into it instead of replacing the path.
+			if [ -L "$amp_dispatch" ] && [ -d "$amp_dispatch" ]; then
+				execute_quoted rm -f "$amp_dispatch"
+			fi
+			execute_quoted mv -f "$amp_dispatch_stage" "$amp_dispatch"
+		else
+			log_warning "Failed to copy the orb dispatcher - keeping the installed one"
+			execute_quoted rm -f "$amp_dispatch_stage"
+		fi
 	fi
 
 	if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then

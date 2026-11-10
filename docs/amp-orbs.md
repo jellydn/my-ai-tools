@@ -23,8 +23,9 @@ From this repository, preview the configuration install before running it:
 The installer copies the dispatcher to `~/.config/amp/orb-dispatch.sh`.
 The copy keeps working after this checkout is removed, for example when the
 one-line installer deletes its temporary download.
-`./generate.sh --dry-run` previews export; `./generate.sh` exports a separate
-home copy back to this repository.
+`./generate.sh --dry-run` previews export. The dispatcher is tracked source,
+not user configuration, so the export keeps the tracked copy and restores it
+only when the tracked file is missing.
 
 If a provider is not configured, the user runs `amp orb provider create itman-vm`
 in a private terminal. It prints a token once and saves it for the controller.
