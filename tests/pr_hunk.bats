@@ -15,8 +15,10 @@ README="$REPO_ROOT/TOOL_REFERENCE.md"
 	[ "$status" -eq 0 ]
 }
 
-@test "Hunk config enables the built-in Kanagawa theme and disables agent notes" {
-	run grep -F 'theme = "kanagawa-wave"' "$CONFIG"
+@test "Hunk config enables the Cobalt custom theme and disables agent notes" {
+	run grep -F 'theme = "cobalt2"' "$CONFIG"
+	[ "$status" -eq 0 ]
+	run grep -F '[themes.cobalt2]' "$CONFIG"
 	[ "$status" -eq 0 ]
 	run grep -F 'agent_notes = false' "$CONFIG"
 	[ "$status" -eq 0 ]

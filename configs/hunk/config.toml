@@ -1,4 +1,4 @@
-theme = "kanagawa-wave"
+theme = "cobalt2"
 mode = "auto"
 line_numbers = true
 wrap_lines = false
@@ -7,3 +7,23 @@ menu_bar = true
 agent_notes = false
 copy_decorations = false
 cursor_line = "number"
+
+[themes.cobalt2]
+base = "kanagawa-wave"
+label = "Cobalt"
+accent = "#FFC600"
+panel = "#193549"
+noteBorder = "#00E5FF"
+
+[themes.cobalt2.syntax_scopes]
+"comment" = "#608BA8"
+"punctuation.definition.comment" = "#608BA8"
+"keyword" = "#FF628C"
+"keyword.operator" = "#FFC600"
+"entity.name.function" = "#0088FF"
+"entity.name.tag" = "#FFC600"
+"entity.other.attribute-name" = "#00E5FF"
+"string" = "#3AD900"
+"constant.numeric" = "#CF7DFF"
+"variable" = "#E1EFFF"
+"storage.type" = "#0088FF"

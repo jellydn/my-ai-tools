@@ -65,6 +65,26 @@
 			"brightMagenta": "#938AA9",
 			"brightCyan": "#7AA89F",
 			"brightWhite": "#DCD7BA"
+		},
+		"cobalt": {
+			"background": "#193549",
+			"foreground": "#E1EFFF",
+			"black": "#122738",
+			"red": "#FF628C",
+			"green": "#3AD900",
+			"yellow": "#FFC600",
+			"blue": "#0088FF",
+			"magenta": "#CF7DFF",
+			"cyan": "#00E5FF",
+			"white": "#E1EFFF",
+			"brightBlack": "#5C7685",
+			"brightRed": "#FF0088",
+			"brightGreen": "#2AFFDF",
+			"brightYellow": "#FFC600",
+			"brightBlue": "#5DA9FF",
+			"brightMagenta": "#FF9D00",
+			"brightCyan": "#80FCFF",
+			"brightWhite": "#FFFFFF"
 		}
 	},
 	"amp.gauge": "cost"

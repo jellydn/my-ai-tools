@@ -68,7 +68,7 @@ The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONS
 | **Qoder CLI**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                                                                              |
 | **DeepSeek Harness** | context7, sequential-thinking, qmd, fff, sem, ctx                                                                     | Cordis plugin composition; global `AGENTS.md`; native DeepSeek model route                                                                                                                                                                      |
 | **Kiro CLI**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Steering files (AGENTS.md), slash commands, MCP servers, ACP. Plannotator agent is manual (`plannotator-review`, `plannotator-annotate`)                                                                                                       |
-| **Reasonix**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | DeepSeek-native; prefix-cache loop; `[[plugins]]` MCP in config.toml; ACP (`reasonix acp`); `REASONIX.md`/`AGENTS.md` memory; Kanagawa theme staged                                                                                            |
+| **Reasonix**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | DeepSeek-native; prefix-cache loop; `[[plugins]]` MCP in config.toml; ACP (`reasonix acp`); `REASONIX.md`/`AGENTS.md` memory; Cobalt theme staged (custom `themes/cobalt/theme.json`)                                                                                            |
 | **Delta**       | — (desktop app — model providers are configured in settings)                                                              | Personal rules (`~/.config/delta/AGENTS.md`), isolated checkouts, collaborative threads                                                                                                                                                        |
 | **Codiff**      | — (desktop app — uses configured agent backend via settings)                                                               | —                                                                                                                                                                                                                                              |
 
@@ -958,11 +958,12 @@ curl -fsSL https://opencode.ai/install | bash
 
 Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.config/opencode/`:
 
+The terminal-UI theme is not part of this file: OpenCode 2 keeps it in the user-owned `~/.config/opencode/cli.json` (`{"theme": {"name": "cobalt2"}}`), which this repo does not manage.
+
 ```json
 {
 	"$schema": "https://opencode.ai/config.json",
 	"instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
-	"theme": "kanagawa",
 	"default_agent": "plan",
 	"mcp": {
 		"context7": {
@@ -1848,7 +1849,7 @@ The installer copies the repo-managed files `configs/pi/settings.json` and `conf
 - **Default Model**: `~deepseek/deepseek-v4-flash-latest`
 - **Default Provider**: `openrouter`
 - **Default Thinking Level**: `high`
-- **Theme**: `kanagawa`
+- **Theme**: `cobalt` (custom theme in `~/.pi/agent/themes/`)
 - **Permission Level**: `high`
 - **Quiet Startup**: Enabled (skips changelog on launch)
 - **Hide Thinking Block**: Enabled (hides thinking process)
@@ -3133,7 +3134,7 @@ Or run this repo's installer:
 
 ### Configuration
 
-The checked-in [`configs/hunk/config.toml`](configs/hunk/config.toml) is installed to `$XDG_CONFIG_HOME/hunk/config.toml`, or `~/.config/hunk/config.toml` when `XDG_CONFIG_HOME` is unset. It selects Hunk's built-in Kanagawa Wave theme and shows agent notes when a review opens.
+The checked-in [`configs/hunk/config.toml`](configs/hunk/config.toml) is installed to `$XDG_CONFIG_HOME/hunk/config.toml`, or `~/.config/hunk/config.toml` when `XDG_CONFIG_HOME` is unset. It selects the Cobalt custom theme (`[themes.cobalt2]`, based on `kanagawa-wave`) and hides agent notes when a review opens.
 
 Repository-specific settings can override the user config in `.hunk/config.toml`. CLI flags have the highest precedence. This integration does not change the global Git pager; opt in separately if desired:
 
