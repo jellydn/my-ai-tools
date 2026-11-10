@@ -128,6 +128,18 @@ cannot be found, close all terminal windows and reopen PowerShell. If `winget` i
 select **Git from the command line and also from 3rd-party software**. Do not bypass package lifecycle errors
 with `--ignore-scripts`: native binaries can remain uninstalled.
 
+Claude is skipped only when `claude --version` succeeds with nonempty output. A broken shim (including a
+missing native binary) is repaired even with `--yes`, then checked again. npm installs for Claude and OpenCode
+explicitly include optional platform packages and enable lifecycle scripts for that command only; Claude
+repair also uses `--force`. These flags do not change global npm settings. If script approval policy blocks
+installation, review the error and approve only the required packages.
+If OpenCode postinstall reports `ECONNRESET`, its platform download failed; the log alone does not identify
+the network cause. Check registry connectivity and your network/proxy policy, then retry
+`npm install -g @opencode/cli --include=optional --ignore-scripts=false`, verify `opencode --version`, and rerun
+setup. If OpenCode 2 installation or verification fails, setup warns, skips that component, and continues
+installing the remaining tools. An OpenCode-only failure does not make the whole setup fail; other required
+tool failures still stop setup with a nonzero exit code.
+
 Optional qmd requires Node.js >=22 on native Windows. Its installer prioritizes the real `node.exe` directory
 and npm's global prefix in the same Git Bash session, ahead of stale Bun launchers or extensionless Node copies
 in `~/.local/bin`. Those old files are not deleted. In npm 11.19.1, unreviewed `allowScripts` entries warn but

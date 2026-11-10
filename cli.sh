@@ -100,6 +100,10 @@ run_install_sequence() {
 			# -y installs the ctx binary only. History import stays opt-in.
 			if [ "$YES_TO_ALL" = true ] && [ "$key" = "ctx" ]; then
 				CTX_INSTALL_NO_SETUP=1 "$installer"
+			elif [ "$key" = "opencode" ]; then
+				if ! "$installer"; then
+					log_warning "Skipping OpenCode 2 after installation or verification failed; continuing with remaining tools."
+				fi
 			else
 				"$installer"
 			fi

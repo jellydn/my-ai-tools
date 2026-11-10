@@ -194,48 +194,46 @@ install_npm_tool() {
 install_claude_code() {
 	log_info "Installing Claude Code..."
 
-	local pkg_manager
-	pkg_manager=$(_verify_package_manager "Claude Code")
-
-	if [ -z "$pkg_manager" ]; then
-		log_error "No package manager found. Install Bun (preferred) or Node.js/npm:"
-		log_info "  Bun:    curl -fsSL https://bun.sh/install | bash"
-		log_info "  Node:   https://nodejs.org/ (includes npm)"
-		return 1
-	fi
-
-	log_info "Using package manager: $pkg_manager"
-
-	if ! command -v claude &>/dev/null; then
-		if execute "$pkg_manager install -g @anthropic-ai/claude-code"; then
-			log_success "Claude Code installed"
+	local version="" repair=false
+	if command -v claude &>/dev/null; then
+		if version=$(claude --version 2>/dev/null) && [ -n "$version" ]; then
+			log_warning "Claude Code is already installed ($version)"
+			if [ "$YES_TO_ALL" = true ]; then
+				log_info "Auto-skipping reinstall (--yes flag)"
+				return 0
+			elif [ ! -t 0 ]; then
+				log_info "Skipping reinstall in non-interactive mode"
+				return 0
+			fi
+			prompt_yn "Do you want to reinstall" || return 0
 		else
-			log_error "Failed to install Claude Code"
-			return 1
+			log_warning "Claude Code is on PATH but cannot report its version; repairing installation"
+			repair=true
 		fi
-		return 0
 	fi
 
-	log_warning "Claude Code is already installed ($(claude --version))"
-
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-skipping reinstall (--yes flag)"
-		return 0
-	elif [ -t 0 ]; then
-		if ! prompt_yn "Do you want to reinstall"; then
-			return 0
-		fi
-	else
-		log_info "Skipping reinstall in non-interactive mode"
-		return 0
-	fi
-
-	if execute "$pkg_manager install -g @anthropic-ai/claude-code"; then
-		log_success "Claude Code reinstalled"
-	else
-		log_error "Failed to reinstall Claude Code"
+	local pkg_manager npm_options=""
+	if ! pkg_manager=$(_verify_package_manager "Claude Code"); then
+		log_error "Claude Code requires Bun or Node.js/npm; native Windows requires Node.js/npm"
 		return 1
 	fi
+	if [ "$pkg_manager" = npm ]; then
+		# Override only this invocation, not the user's global npm settings.
+		npm_options=" --include=optional --ignore-scripts=false"
+		[ "$repair" != true ] || npm_options+=" --force"
+	fi
+	if ! execute "$pkg_manager install -g @anthropic-ai/claude-code$npm_options"; then
+		log_error "Failed to install Claude Code; review the package manager error above and rerun setup"
+		return 1
+	fi
+	[ "$DRY_RUN" != true ] || return 0
+	if [ "$pkg_manager" = npm ]; then ensure_dir_on_path "$(_npm_global_bin)"; fi
+	hash -r 2>/dev/null || true
+	if ! version=$(claude --version) || [ -z "$version" ]; then
+		log_error "Claude Code installation completed but claude --version failed; check native dependencies and npm script policy"
+		return 1
+	fi
+	log_success "Claude Code installed ($version)"
 }
 
 install_fx() {
@@ -370,8 +368,9 @@ _opencode_v2_installed() {
 	}; then
 		return 0
 	fi
-	if command -v opencode >/dev/null 2>&1; then
-		case "$(opencode --version 2>/dev/null || true)" in
+	local version
+	if command -v opencode >/dev/null 2>&1 && version=$(opencode --version 2>/dev/null); then
+		case "$version" in
 		*v2.* | *V2.*) return 0 ;;
 		esac
 	fi
@@ -399,11 +398,14 @@ install_opencode2() {
 		if [ -n "$package_manager" ]; then
 			if ! case "$package_manager" in
 				bun) execute "bun install -g --trust @opencode/cli" ;;
-				npm) execute "npm install -g @opencode/cli" ;;
+				npm) execute "npm install -g @opencode/cli --include=optional --ignore-scripts=false" ;;
 				pnpm) execute "pnpm add -g --allow-build=@opencode/cli @opencode/cli" ;;
 				yarn) execute "yarn global add @opencode/cli" ;;
 				esac then
 				log_error "OpenCode 2 installation failed"
+				log_info "For ECONNRESET, check network/proxy access to the npm registry and retry after connectivity is restored."
+				log_info "Retry with npm: npm install -g @opencode/cli --include=optional --ignore-scripts=false"
+				log_info "Then verify opencode --version and rerun setup. Do not bypass postinstall with --ignore-scripts."
 				return 1
 			fi
 
@@ -422,13 +424,13 @@ install_opencode2() {
 				hash -r 2>/dev/null || true
 			fi
 		else
-			execute_installer "https://opencode.ai/v2/install" "" "OpenCode 2"
+			execute_installer "https://opencode.ai/v2/install" "" "OpenCode 2" || return 1
 		fi
 
 		if [ "$DRY_RUN" = true ]; then
 			log_info "[DRY RUN] Would install OpenCode 2 as opencode"
-		elif ! command -v opencode >/dev/null 2>&1 && ! command -v opencode2 >/dev/null 2>&1; then
-			log_error "OpenCode 2 installation completed but opencode is not on PATH"
+		elif ! _opencode_v2_installed; then
+			log_error "OpenCode 2 installation completed but no working v2 CLI was found; check opencode --version and native dependencies"
 			return 1
 		else
 			log_success "OpenCode 2 installed as opencode"
