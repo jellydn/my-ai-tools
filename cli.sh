@@ -1279,7 +1279,12 @@ copy_amp_configs() {
 	execute_quoted mkdir -p "$HOME/.config/amp"
 	execute_quoted cp "$SCRIPT_DIR/configs/amp/settings.json" "$HOME/.config/amp/"
 	if [ -f "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" ]; then
-		execute_quoted ln -sfn "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" "$HOME/.config/amp/orb-dispatch.sh"
+		# Copy a real file, not a link: install.sh removes its temporary
+		# checkout after install, so a link would go dangling. Remove the
+		# destination first so cp cannot follow a link into the source tree.
+		execute_quoted rm -f "$HOME/.config/amp/orb-dispatch.sh"
+		execute_quoted cp "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" "$HOME/.config/amp/orb-dispatch.sh"
+		execute_quoted chmod +x "$HOME/.config/amp/orb-dispatch.sh"
 	fi
 
 	if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then

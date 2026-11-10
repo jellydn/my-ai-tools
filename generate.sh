@@ -301,8 +301,7 @@ physical_path() {
 }
 
 # Copy an installed file into the repo. Print "copied" or "skipped".
-# cli.sh installs orb-dispatch.sh as a symlink to the repo file. Copying that
-# link onto itself fails, so a source that already is the destination is skipped.
+# cli.sh copies orb-dispatch.sh as a real file, but the self-skip still protects a source that already is the destination.
 copy_repo_file() {
 	local src="$1"
 	local dest="$2"
