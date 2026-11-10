@@ -68,7 +68,7 @@ The lead hands off exact skill paths plus `OBJECTIVE / FILES / INTERFACES / CONS
 | **Qoder CLI**   | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | -                                                                                                                                                                                                                                              |
 | **DeepSeek Harness** | context7, sequential-thinking, qmd, fff, sem, ctx                                                                     | Cordis plugin composition; global `AGENTS.md`; native DeepSeek model route                                                                                                                                                                      |
 | **Kiro CLI**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | Steering files (AGENTS.md), slash commands, MCP servers, ACP. Plannotator agent is manual (`plannotator-review`, `plannotator-annotate`)                                                                                                       |
-| **Reasonix**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | DeepSeek-native; prefix-cache loop; `[[plugins]]` MCP in config.toml; ACP (`reasonix acp`); `REASONIX.md`/`AGENTS.md` memory; Cobalt theme (custom `themes/cobalt/theme.json`)                                                                                            |
+| **Reasonix**    | context7, sequential-thinking, qmd, codebase-memory-mcp, agentmemory, fff, react-grab-mcp, logpilot, sem, ctx              | DeepSeek-native; prefix-cache loop; `[[plugins]]` MCP in config.toml; ACP (`reasonix acp`); `REASONIX.md`/`AGENTS.md` memory; Cobalt theme staged (custom `themes/cobalt/theme.json`)                                                                                            |
 | **Delta**       | — (desktop app — model providers are configured in settings)                                                              | Personal rules (`~/.config/delta/AGENTS.md`), isolated checkouts, collaborative threads                                                                                                                                                        |
 | **Codiff**      | — (desktop app — uses configured agent backend via settings)                                                               | —                                                                                                                                                                                                                                              |
 
@@ -958,11 +958,12 @@ curl -fsSL https://opencode.ai/install | bash
 
 Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.config/opencode/`:
 
+The terminal-UI theme is not part of this file: OpenCode 2 keeps it in the user-owned `~/.config/opencode/cli.json` (`{"theme": {"name": "cobalt2"}}`), which this repo does not manage.
+
 ```json
 {
 	"$schema": "https://opencode.ai/config.json",
 	"instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
-	"theme": "cobalt2",
 	"default_agent": "plan",
 	"mcp": {
 		"context7": {
