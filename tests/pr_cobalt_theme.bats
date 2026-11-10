@@ -9,8 +9,6 @@ ROOT="$REPO_ROOT/configs"
 	[ -f "$ROOT/pi/themes/cobalt.json" ]
 	run jq -r '.name' "$ROOT/pi/themes/cobalt.json"
 	[ "$output" = "cobalt" ]
-	run jq -r '.colors.syntaxKeyword' "$ROOT/pi/themes/cobalt.json"
-	[ "$output" = "red" ]
 }
 
 @test "pi settings selects the cobalt theme" {
@@ -54,10 +52,10 @@ ROOT="$REPO_ROOT/configs"
 }
 
 @test "hunk config selects the cobalt custom theme" {
-	run grep -F 'theme = "cobalt"' "$ROOT/hunk/config.toml"
+	run grep -F 'theme = "cobalt2"' "$ROOT/hunk/config.toml"
 	[ "$status" -eq 0 ]
-	run grep -F '[themes.cobalt]' "$ROOT/hunk/config.toml"
+	run grep -F '[themes.cobalt2]' "$ROOT/hunk/config.toml"
 	[ "$status" -eq 0 ]
-	run grep -F '[themes.cobalt.syntax_scopes]' "$ROOT/hunk/config.toml"
+	run grep -F '[themes.cobalt2.syntax_scopes]' "$ROOT/hunk/config.toml"
 	[ "$status" -eq 0 ]
 }

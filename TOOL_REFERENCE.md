@@ -3134,7 +3134,7 @@ Or run this repo's installer:
 
 ### Configuration
 
-The checked-in [`configs/hunk/config.toml`](configs/hunk/config.toml) is installed to `$XDG_CONFIG_HOME/hunk/config.toml`, or `~/.config/hunk/config.toml` when `XDG_CONFIG_HOME` is unset. It selects the Cobalt custom theme (`[themes.cobalt]`, based on `kanagawa-wave`) and hides agent notes when a review opens.
+The checked-in [`configs/hunk/config.toml`](configs/hunk/config.toml) is installed to `$XDG_CONFIG_HOME/hunk/config.toml`, or `~/.config/hunk/config.toml` when `XDG_CONFIG_HOME` is unset. It selects the Cobalt custom theme (`[themes.cobalt2]`, based on `kanagawa-wave`) and hides agent notes when a review opens.
 
 Repository-specific settings can override the user config in `.hunk/config.toml`. CLI flags have the highest precedence. This integration does not change the global Git pager; opt in separately if desired:
 

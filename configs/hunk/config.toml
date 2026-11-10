@@ -1,4 +1,4 @@
-theme = "cobalt"
+theme = "cobalt2"
 mode = "auto"
 line_numbers = true
 wrap_lines = false
@@ -8,14 +8,14 @@ agent_notes = false
 copy_decorations = false
 cursor_line = "number"
 
-[themes.cobalt]
+[themes.cobalt2]
 base = "kanagawa-wave"
 label = "Cobalt"
 accent = "#FFC600"
 panel = "#193549"
 noteBorder = "#00E5FF"
 
-[themes.cobalt.syntax_scopes]
+[themes.cobalt2.syntax_scopes]
 "comment" = "#608BA8"
 "punctuation.definition.comment" = "#608BA8"
 "keyword" = "#FF628C"

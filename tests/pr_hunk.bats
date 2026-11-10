@@ -16,9 +16,9 @@ README="$REPO_ROOT/TOOL_REFERENCE.md"
 }
 
 @test "Hunk config enables the Cobalt custom theme and disables agent notes" {
-	run grep -F 'theme = "cobalt"' "$CONFIG"
+	run grep -F 'theme = "cobalt2"' "$CONFIG"
 	[ "$status" -eq 0 ]
-	run grep -F '[themes.cobalt]' "$CONFIG"
+	run grep -F '[themes.cobalt2]' "$CONFIG"
 	[ "$status" -eq 0 ]
 	run grep -F 'agent_notes = false' "$CONFIG"
 	[ "$status" -eq 0 ]
