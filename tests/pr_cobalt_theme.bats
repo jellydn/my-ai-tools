@@ -27,9 +27,9 @@ ROOT="$REPO_ROOT/configs"
 	[ "$status" -eq 0 ]
 }
 
-@test "amp settings select cobalt while preserving kanagawa" {
+@test "amp keeps the default theme and stages cobalt as an option" {
 	run jq -r '."amp.terminal.theme"' "$ROOT/amp/settings.json"
-	[ "$output" = "cobalt" ]
+	[ "$output" = "kanagawa" ]
 	run jq -r '."amp.terminal.customThemes" | has("cobalt")' "$ROOT/amp/settings.json"
 	[ "$output" = "true" ]
 	run jq -r '."amp.terminal.customThemes" | has("kanagawa")' "$ROOT/amp/settings.json"

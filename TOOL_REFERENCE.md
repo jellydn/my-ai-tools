@@ -1268,7 +1268,7 @@ For self-hosted smolvm orbs, follow the [setup and operations runbook](docs/amp-
 			"args": ["-y", "@agentmemory/mcp"]
 		}
 	},
-	"amp.terminal.theme": "cobalt"
+	"amp.terminal.theme": "kanagawa"
 }
 ```
 

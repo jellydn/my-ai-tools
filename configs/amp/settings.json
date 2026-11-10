@@ -44,7 +44,7 @@
 			"args": []
 		}
 	},
-	"amp.terminal.theme": "cobalt",
+	"amp.terminal.theme": "kanagawa",
 	"amp.terminal.customThemes": {
 		"kanagawa": {
 			"background": "#1F1F28",
