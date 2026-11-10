@@ -140,6 +140,59 @@ TEST_WORKFLOW="$REPO_ROOT/.github/workflows/test.yml"
     done
 }
 
+@test "Claude permits only its own lifecycle scripts when npm supports scoped approval" {
+    for policy in supported legacy probe-failed; do
+        for mode in fresh repair; do
+            run env PATH="/usr/bin:/bin" bash -c '
+                export HOME="$2/User With Spaces" DRY_RUN=false YES_TO_ALL=true
+                source "$1/lib/common.sh"
+                source "$1/lib/install.sh"
+                IS_WINDOWS=true POLICY="$3" MODE="$4"
+                node() { return 0; }
+                cygpath() { printf "%s\n" "$2"; }
+                mkdir -p "$HOME/npm prefix"
+                PATH="$HOME/npm prefix:$PATH"
+                if [ "$MODE" = repair ]; then
+                    printf "#!/bin/sh\nexit 1\n" > "$HOME/npm prefix/claude"
+                    chmod +x "$HOME/npm prefix/claude"
+                fi
+                npm() {
+                    case "$1" in
+                        prefix) printf "%s\n" "$HOME/npm prefix"; return ;;
+                        config)
+                            [ "$*" = "config get allow-scripts" ] || return 98
+                            case "$POLICY" in
+                                supported) printf "\n" ;;
+                                legacy) echo undefined ;;
+                                probe-failed) return 1 ;;
+                            esac
+                            return ;;
+                    esac
+                    [ "$1" = install ] || return 98
+                    case " $* " in
+                        *" --dangerously-allow-all-scripts"*|*" --allow-scripts="*","*) return 97 ;;
+                    esac
+                    case " $* " in
+                        *" --allow-scripts=@anthropic-ai/claude-code "*)
+                            [ "$POLICY" = supported ] || return 96 ;;
+                        *)
+                            if [ "$POLICY" = supported ]; then
+                                echo "postinstall not covered by allowScripts" >&2
+                                return 0
+                            fi ;;
+                    esac
+                    printf "#!/bin/sh\necho Claude-approved-version\n" > "$HOME/npm prefix/claude"
+                    chmod +x "$HOME/npm prefix/claude"
+                }
+                install_claude_code
+            ' _ "$REPO_ROOT" "$BATS_TEST_TMPDIR/$policy-$mode" "$policy" "$mode"
+            [ "$status" -eq 0 ]
+            [[ "$output" == *"Claude Code installed (Claude-approved-version)"* ]]
+            [[ "$output" != *"not covered by allowScripts"* ]]
+        done
+    done
+}
+
 @test "Claude skips a healthy installation and dry-run does not attempt repair" {
     for mode in healthy dry-run; do
         run bash -c '

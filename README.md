@@ -131,8 +131,10 @@ with `--ignore-scripts`: native binaries can remain uninstalled.
 Claude is skipped only when `claude --version` succeeds with nonempty output. A broken shim (including a
 missing native binary) is repaired even with `--yes`, then checked again. npm installs for Claude and OpenCode
 explicitly include optional platform packages and enable lifecycle scripts for that command only; Claude
-repair also uses `--force`. These flags do not change global npm settings. If script approval policy blocks
-installation, review the error and approve only the required packages.
+repair also uses `--force`. When npm supports script approval, Claude installation adds
+`--allow-scripts=@anthropic-ai/claude-code` to permit only that package's lifecycle scripts for that invocation.
+Older npm versions without this setting omit the flag. These options do not change user/global npm settings
+or approve scripts for other packages. Installation still fails if the final `claude --version` check fails.
 If OpenCode postinstall reports `ECONNRESET`, its platform download failed; the log alone does not identify
 the network cause. Check registry connectivity and your network/proxy policy, then retry
 `npm install -g @opencode/cli --include=optional --ignore-scripts=false`, verify `opencode --version`, and rerun

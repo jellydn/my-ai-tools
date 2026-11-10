@@ -221,6 +221,11 @@ install_claude_code() {
 		# Override only this invocation, not the user's global npm settings.
 		npm_options=" --include=optional --ignore-scripts=false"
 		[ "$repair" != true ] || npm_options+=" --force"
+		# Older npm returns "undefined" for this setting and needs no approval flag.
+		local allowed_scripts
+		if allowed_scripts=$(npm config get allow-scripts 2>/dev/null) && [ "$allowed_scripts" != undefined ]; then
+			npm_options+=" --allow-scripts=@anthropic-ai/claude-code"
+		fi
 	fi
 	if ! execute "$pkg_manager install -g @anthropic-ai/claude-code$npm_options"; then
 		log_error "Failed to install Claude Code; review the package manager error above and rerun setup"
