@@ -320,24 +320,32 @@ download_and_verify_file() {
 	temp_file="${tmpdir}/download-$(date +%s)-$$"
 
 	log_info "Downloading $description..."
-	local attempt=1 download_status
+	local attempt=1 download_status download_error retry_download
 	while true; do
-		if execute_quoted curl -fsSL --connect-timeout 15 --max-time 120 "$url" -o "$temp_file"; then
-			break
+		# The body goes to -o; capture only this attempt's stderr, not stdout.
+		if download_error=$(execute_quoted curl -fsSL --connect-timeout 15 --max-time 120 "$url" -o "$temp_file" 2>&1 >/dev/null); then
+			download_status=0
 		else
 			download_status=$?
 		fi
+		[ -z "$download_error" ] || printf '%s\n' "$download_error" >&2
+		[ "$download_status" -ne 0 ] || break
 		# Retry only read-only transfers, never the downloaded installer itself.
+		retry_download=false
 		case "$download_status" in
-		7 | 18 | 28 | 52 | 56)
-			if [ "$attempt" -lt 3 ]; then
-				log_warning "$description download failed (curl $download_status); retrying ($attempt/2)"
-				sleep "$attempt"
-				attempt=$((attempt + 1))
-				continue
+		7 | 18 | 28 | 52 | 56) retry_download=true ;;
+		35)
+			if printf '%s\n' "$download_error" | LC_ALL=C grep -Ei 'connection (was )?reset' >/dev/null; then
+				retry_download=true
 			fi
 			;;
 		esac
+		if [ "$retry_download" = true ] && [ "$attempt" -lt 3 ]; then
+			log_warning "$description download failed (curl $download_status); retrying ($attempt/2)"
+			sleep "$attempt"
+			attempt=$((attempt + 1))
+			continue
+		fi
 		log_error "Failed to download $description (curl $download_status, $attempt attempt(s))"
 		execute_quoted rm -f "$temp_file"
 		return 1

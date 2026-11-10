@@ -312,7 +312,7 @@ TEST_WORKFLOW="$REPO_ROOT/.github/workflows/test.yml"
 }
 
 @test "Windows launcher retries reset downloads, preserves the old binary on failure, and never reruns a script" {
-    for result in recovered exhausted checksum health http tls; do
+    for result in tls-generic tls-stdout tls-stale tls-recovered tls-exhausted recovered exhausted checksum health http tls; do
         run env PATH="/usr/bin:/bin" bash -c '
             export HOME="$2/User With Spaces" TMPDIR="$2/Temp With Spaces"
             source "$1/cli.sh"
@@ -332,6 +332,7 @@ TEST_WORKFLOW="$REPO_ROOT/.github/workflows/test.yml"
                 target="" url=""
                 while [ "$#" -gt 0 ]; do
                     case "$1" in
+                        -k|--insecure|--proxy-insecure) echo UNEXPECTED:tls-bypass >&2; return 99 ;;
                         -o) shift; target="$1" ;;
                         https:*) url="$1" ;;
                     esac
@@ -346,6 +347,23 @@ TEST_WORKFLOW="$REPO_ROOT/.github/workflows/test.yml"
                         count=$((count + 1)); echo "$count" > "$HOME/attempts"
                         [ "$RESULT" != http ] || return 22
                         [ "$RESULT" != tls ] || return 60
+                        if [ "$RESULT" = tls-generic ] || [ "$RESULT" = tls-stdout ] || { [ "$RESULT" = tls-stale ] && [ "$count" -gt 1 ]; }; then
+                            [ "$RESULT" != tls-stdout ] || echo "Connection was reset"
+                            echo "curl: (35) SSL connect error: unsupported protocol" >&2
+                            return 35
+                        fi
+                        if [ "$RESULT" = tls-stale ]; then
+                            echo "curl: (35) Recv failure: Connection was reset" >&2
+                            return 35
+                        fi
+                        if [ "$RESULT" = tls-exhausted ] || { [ "$RESULT" = tls-recovered ] && [ "$count" -eq 1 ]; }; then
+                            if [ "$RESULT" = tls-recovered ]; then
+                                echo "curl: (35) Recv failure: cOnNeCtIoN rEsEt" >&2
+                            else
+                                echo "curl: (35) Recv failure: Connection was reset" >&2
+                            fi
+                            echo partial > "$target"; return 35
+                        fi
                         if [ "$RESULT" = exhausted ] || { [ "$RESULT" = recovered ] && [ "$count" -eq 1 ]; }; then
                             echo partial > "$target"; return 56
                         fi
@@ -354,15 +372,18 @@ TEST_WORKFLOW="$REPO_ROOT/.github/workflows/test.yml"
                 esac
             }
             result=0; install_ai_switcher || result=$?
-            if [ "$RESULT" = recovered ]; then
+            if [ "$RESULT" = recovered ] || [ "$RESULT" = tls-recovered ]; then
                 [ "$result" -eq 0 ] || exit 81
                 [ "$(cat "$HOME/attempts")" -eq 2 ] || exit 82
                 cmp "$HOME/release" "$HOME/.local/bin/ai.exe" || exit 83
             else
                 [ "$result" -ne 0 ] || exit 84
                 cmp "$HOME/original" "$HOME/.local/bin/ai.exe" || exit 85
-                [ "$RESULT" != exhausted ] || [ "$(cat "$HOME/attempts")" -eq 3 ] || exit 86
-                case "$RESULT" in http|tls) [ "$(cat "$HOME/attempts")" -eq 1 ] || exit 88 ;; esac
+                case "$RESULT" in
+                    exhausted|tls-exhausted) [ "$(cat "$HOME/attempts")" -eq 3 ] || exit 86 ;;
+                    tls-stale) [ "$(cat "$HOME/attempts")" -eq 2 ] || exit 90 ;;
+                    http|tls|tls-generic|tls-stdout) [ "$(cat "$HOME/attempts")" -eq 1 ] || exit 88 ;;
+                esac
             fi
             [ -z "$(ls -A "$TMPDIR")" ] || exit 87
             test "$(ls -A "$HOME/.local/bin")" = ai.exe || exit 89
@@ -371,6 +392,9 @@ TEST_WORKFLOW="$REPO_ROOT/.github/workflows/test.yml"
         [ "$status" -eq 0 ]
         [[ "$output" == *PASS:staged-download* ]]
         [[ "$output" != *UNEXPECTED:* ]]
+        case "$result" in
+            tls-generic|tls-stdout|tls-stale) [[ "$output" == *"SSL connect error: unsupported protocol"* ]] ;;
+        esac
     done
 }
 

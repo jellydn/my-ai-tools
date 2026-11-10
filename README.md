@@ -152,9 +152,13 @@ release is staged beside the destination, checked against the release's SHA-256 
 the existing binary. A missing Windows architecture asset is reported, not substituted with another build.
 
 Shared installer downloads make at most three GET attempts for curl connection/partial-transfer/timeout/
-empty-response/receive errors (7, 18, 28, 52, 56), with 1-second then 2-second waits. Each attempt has a
-15-second connection limit and 120-second transfer limit. HTTP errors and TLS certificate failures are not
-retried. Partial files are restarted, not appended; checksum verification still applies. Downloaded scripts
+empty-response/receive errors (7, 18, 28, 52, 56), with 1-second then 2-second waits. Curl 35 retries only
+when that attempt's stderr matches `connection (was )?reset`, ignoring case. Generic TLS handshake errors,
+HTTP errors, and TLS certificate failures do not retry. Earlier attempts and stdout cannot enable a retry.
+Each attempt has a 15-second connection limit and 120-second transfer limit. Persistent TLS resets stop
+after three attempts; retries do not identify the cause or repair certificate, protocol, or proxy problems.
+TLS verification remains enabled on every attempt.
+Partial files are restarted, not appended; checksum verification still applies. Downloaded scripts
 and npm installs are never automatically replayed. This can recover a transient interruption, not repair
 a persistent network problem. Unix/WSL AI Launcher installation still uses the upstream installer.
 
