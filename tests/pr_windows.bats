@@ -237,9 +237,10 @@ TEST_WORKFLOW="$REPO_ROOT/.github/workflows/test.yml"
             main
         ' _ "$REPO_ROOT" "$failure"
         [ "$status" -eq 0 ]
-        [[ "$output" == *"Skipping OpenCode 2"*"continuing with remaining tools"* ]]
+        [[ "$output" == *"Skipping opencode"*"continuing with remaining tools"* ]]
         [[ "$output" == *"INSTALLED:codex"* ]]
-        [[ "$output" == *"Setup complete"* ]]
+        [[ "$output" == *"Setup complete with optional components skipped"* ]]
+        [[ "$output" == *"Failed/skipped optional components: opencode"* ]]
         [[ "$output" != *"OpenCode 2 installed"* ]]
         if [ "$failure" = network ]; then
             [[ "$output" == *ECONNRESET* ]]
@@ -252,18 +253,87 @@ TEST_WORKFLOW="$REPO_ROOT/.github/workflows/test.yml"
 }
 
 @test "failures in other required installers still stop setup" {
-    run bash -c '
+    for component in qmd claude amp codex ctx plannotator prerequisite integration; do
+        run bash -c '
+            source "$1/cli.sh"
+            YES_TO_ALL=true DRY_RUN=false MIGRATE_GEMINI=false WITH_INTEGRATIONS=true
+            preflight_check() { :; }; check_prerequisites() { :; }; backup_configs() { :; }
+            install_integration_dependencies() { :; }
+            fail_component() { return 1; }
+            remaining_tool() { echo UNEXPECTED:remaining; }
+            INSTALL_SEQUENCE=("$2:fail_component" pi:remaining_tool)
+            case "$2" in
+                prerequisite) check_prerequisites() { return 1; }; INSTALL_SEQUENCE=(pi:remaining_tool) ;;
+                integration) install_integration_dependencies() { return 1; }; INSTALL_SEQUENCE=() ;;
+            esac
+            main
+        ' _ "$REPO_ROOT" "$component"
+        [ "$status" -ne 0 ]
+        [[ "$output" != *UNEXPECTED:* ]]
+        [[ "$output" != *"Setup complete"* ]]
+    done
+}
+
+@test "AI Launcher never reports success after download, installer, or health failure" {
+    for failure in download installer health empty success; do
+        run env PATH="/usr/bin:/bin" bash -c '
+            export HOME="$2/User With Spaces"
+            source "$1/cli.sh"
+            YES_TO_ALL=true DRY_RUN=false FAILURE="$3"
+            mkdir -p "$HOME/.local/bin"
+            ai() {
+                [ "$FAILURE" != health ] || return 1
+                [ "$FAILURE" = empty ] || echo ai-test-version
+                return 0
+            }
+            curl() {
+                [ "$FAILURE" != download ] || { echo "curl: (56) connection reset" >&2; return 56; }
+                while [ "$#" -gt 0 ]; do
+                    if [ "$1" = -o ]; then shift; target="$1"; fi
+                    shift
+                done
+                if [ "$FAILURE" = installer ]; then
+                    printf "#!/bin/sh\nexit 56\n" > "$target"
+                else
+                    printf "#!/bin/sh\nexit 0\n" > "$target"
+                fi
+            }
+            install_ai_switcher
+        ' _ "$REPO_ROOT" "$BATS_TEST_TMPDIR/$failure" "$failure"
+        if [ "$failure" = success ]; then
+            [ "$status" -eq 0 ]
+            [[ "$output" == *"AI Launcher installed"* ]]
+        else
+            [ "$status" -ne 0 ]
+            [[ "$output" != *"AI Launcher installed/upgraded"* ]]
+            [[ "$output" != *"AI Launcher installed"* ]]
+        fi
+    done
+}
+
+@test "optional Pi and launcher failures continue setup and appear in the final summary" {
+    run env PATH="/usr/bin:/bin" bash -c '
         source "$1/cli.sh"
-        YES_TO_ALL=true DRY_RUN=false MIGRATE_GEMINI=false WITH_INTEGRATIONS=false
-        preflight_check() { :; }; check_prerequisites() { :; }
-        INSTALL_SEQUENCE=(claude:install_claude_code codex:install_codex)
-        install_claude_code() { return 1; }
-        install_codex() { echo UNEXPECTED:codex; }
+        IS_WINDOWS=true YES_TO_ALL=true DRY_RUN=false MIGRATE_GEMINI=false WITH_INTEGRATIONS=true
+        preflight_check() { :; }; check_prerequisites() { :; }; backup_configs() { :; }
+        INSTALL_SEQUENCE=(ai-switcher:install_ai_switcher pi:install_pi codex:install_codex)
+        execute_installer() { return 56; }
+        node() { :; }
+        npm() { echo "ECONNRESET; EPERM cleanup warning" >&2; return 1; }
+        install_codex() { echo INSTALLED:codex; }
+        install_integration_dependencies() { echo REQUIRED:dependencies; }
+        copy_configurations() {
+            tool_allowed pi && { echo UNEXPECTED:pi-config; return 1; }
+            echo COPIED:remaining-config
+        }
+        enable_plugins() { echo ENABLED:remaining-plugins; }
         main
     ' _ "$REPO_ROOT"
-    [ "$status" -ne 0 ]
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"INSTALLED:codex"*"COPIED:remaining-config"*"ENABLED:remaining-plugins"* ]]
+    [[ "$output" == *"Failed/skipped optional components: ai-switcher pi"* ]]
     [[ "$output" != *UNEXPECTED:* ]]
-    [[ "$output" != *"Setup complete"* ]]
+    [[ "$output" != *"Core agents, shared skills, and selected MCP/plugin configurations installed."* ]]
 }
 
 @test "OpenCode requires a working v2 after npm success, not a broken shim or v1" {

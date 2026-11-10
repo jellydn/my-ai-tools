@@ -475,11 +475,15 @@ install_ccs() {
 
 install_ai_switcher() {
 	_run_ai_switcher_install() {
-		if command -v ai &>/dev/null; then
-			log_info "Upgrading AI Launcher from existing installation..."
+		execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "AI Launcher" || return 1
+		[ "$DRY_RUN" != true ] || return 0
+		ensure_dir_on_path "${AI_INSTALL_DIR:-$HOME/.local/bin}"
+		hash -r 2>/dev/null || true
+		local version
+		if ! version=$(ai --version) || [ -z "$version" ]; then
+			log_error "AI Launcher installation completed but ai --version failed"
+			return 1
 		fi
-		execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "AI Launcher"
-		log_success "AI Launcher installed/upgraded"
 	}
 	run_installer "AI Launcher" "_run_ai_switcher_install" "false" "ai --version"
 }

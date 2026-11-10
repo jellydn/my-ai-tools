@@ -29,11 +29,15 @@ TOOL_ALLOWLIST_YES=(
 	plannotator
 )
 WITH_INTEGRATIONS=true
+FAILED_OPTIONAL_TOOLS=()
 
 tool_allowed() {
 	local name="$1"
-	[ "$YES_TO_ALL" != true ] && return 0
 	local t
+	for t in "${FAILED_OPTIONAL_TOOLS[@]}"; do
+		[ "$t" != "$name" ] || return 1
+	done
+	[ "$YES_TO_ALL" != true ] && return 0
 	for t in "${TOOL_ALLOWLIST_YES[@]}"; do
 		[ "$t" = "$name" ] && return 0
 	done
@@ -86,6 +90,7 @@ INSTALL_SEQUENCE=(
 
 run_install_sequence() {
 	local entry key installer
+	FAILED_OPTIONAL_TOOLS=()
 	for entry in "${INSTALL_SEQUENCE[@]}"; do
 		key="${entry%%:*}"
 		installer="${entry#*:}"
@@ -100,12 +105,17 @@ run_install_sequence() {
 			# -y installs the ctx binary only. History import stays opt-in.
 			if [ "$YES_TO_ALL" = true ] && [ "$key" = "ctx" ]; then
 				CTX_INSTALL_NO_SETUP=1 "$installer"
-			elif [ "$key" = "opencode" ]; then
-				if ! "$installer"; then
-					log_warning "Skipping OpenCode 2 after installation or verification failed; continuing with remaining tools."
-				fi
 			else
-				"$installer"
+				case "$key" in
+				# Core agents and prerequisites for enabled integrations stay fatal.
+				qmd | claude | amp | codex | ctx | plannotator) "$installer" ;;
+				*)
+					if ! "$installer"; then
+						FAILED_OPTIONAL_TOOLS+=("$key")
+						log_warning "Skipping $key after installation or verification failed; continuing with remaining tools."
+					fi
+					;;
+				esac
 			fi
 		else
 			log_info "Skipping $key installer (not in -y allowlist)"
@@ -2983,6 +2993,12 @@ main() {
 		log_info "Opt in with --with-integrations; add tools with --with-tools=fx,cursor (or other catalog names)."
 	fi
 
+	if [ "${#FAILED_OPTIONAL_TOOLS[@]}" -gt 0 ]; then
+		log_warning "Setup complete with optional components skipped."
+		log_warning "Failed/skipped optional components: ${FAILED_OPTIONAL_TOOLS[*]}"
+		log_info "Their configurations were skipped. Review errors above and rerun setup to retry."
+		return 0
+	fi
 	log_success "Setup complete!"
 	if [ "$YES_TO_ALL" = true ] && [ "$WITH_INTEGRATIONS" != true ]; then
 		log_info "Default CLIs installed. No bundled integrations were enabled."

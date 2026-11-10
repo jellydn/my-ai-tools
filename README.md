@@ -138,9 +138,16 @@ or approve scripts for other packages. Installation still fails if the final `cl
 If OpenCode postinstall reports `ECONNRESET`, its platform download failed; the log alone does not identify
 the network cause. Check registry connectivity and your network/proxy policy, then retry
 `npm install -g @opencode/cli --include=optional --ignore-scripts=false`, verify `opencode --version`, and rerun
-setup. If OpenCode 2 installation or verification fails, setup warns, skips that component, and continues
-installing the remaining tools. An OpenCode-only failure does not make the whole setup fail; other required
-tool failures still stop setup with a nonzero exit code.
+setup. Optional catalog tools, including OpenCode 2, AI Launcher (`ai-switcher`), and Pi, warn and continue
+after installation or verification fails. Setup lists failed/skipped optional components at the end and
+skips their configurations for that run. Rerun setup to retry them. Claude, Amp, Codex, prerequisite checks,
+and required integration dependencies (including qmd, ctx, and Plannotator) still fail setup with a nonzero
+exit code. Optional failure does not mean that tool was installed successfully.
+
+AI Launcher reports success only after its installer succeeds and `ai --version` returns nonempty output
+successfully. Download and installer errors are propagated, not replaced with an installed/upgraded message.
+Connection resets are not repaired by these changes. Pi's `EPERM` cleanup warnings alone do not establish
+their cause; review npm's error log before changing permissions or removing files.
 
 Optional qmd requires Node.js >=22 on native Windows. Its installer prioritizes the real `node.exe` directory
 and npm's global prefix in the same Git Bash session, ahead of stale Bun launchers or extensionless Node copies

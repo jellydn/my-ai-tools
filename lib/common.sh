@@ -322,6 +322,7 @@ download_and_verify_file() {
 	log_info "Downloading $description..."
 	if ! execute_quoted curl -fsSL "$url" -o "$temp_file" 2>/dev/null; then
 		log_error "Failed to download $description"
+		execute_quoted rm -f "$temp_file"
 		return 1
 	fi
 
@@ -374,14 +375,17 @@ execute_installer() {
 	export TMPDIR="$tmp_dir"
 
 	local temp_script
-	temp_script=$(download_and_verify_file "$url" "$expected_sha256" "$description")
+	temp_script=$(download_and_verify_file "$url" "$expected_sha256" "$description") || return 1
 	if [ -z "$temp_script" ]; then
 		return 1
 	fi
 
-	execute_quoted chmod +x "$temp_script"
-	"$temp_script" "$@"
-	local result=$?
+	local result=0
+	if execute_quoted chmod +x "$temp_script"; then
+		"$temp_script" "$@" || result=$?
+	else
+		result=1
+	fi
 	execute_quoted rm -f "$temp_script"
 	return $result
 }
