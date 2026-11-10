@@ -145,9 +145,52 @@ and required integration dependencies (including qmd, ctx, and Plannotator) stil
 exit code. Optional failure does not mean that tool was installed successfully.
 
 AI Launcher reports success only after its installer succeeds and `ai --version` returns nonempty output
-successfully. Download and installer errors are propagated, not replaced with an installed/upgraded message.
-Connection resets are not repaired by these changes. Pi's `EPERM` cleanup warnings alone do not establish
-their cause; review npm's error log before changing permissions or removing files.
+successfully. On native Windows, setup downloads the official release directly instead of executing the
+upstream installer, which has no download retries and writes directly to the installed binary. The new
+release is staged beside the destination, checked against the release's SHA-256 checksum, and run with
+`--version` before it replaces `ai.exe`. Failed downloads, checksum checks, or staged health checks preserve
+the existing binary. A missing Windows architecture asset is reported, not substituted with another build.
+
+Shared installer downloads make at most three GET attempts for curl connection/partial-transfer/timeout/
+empty-response/receive errors (7, 18, 28, 52, 56), with 1-second then 2-second waits. Each attempt has a
+15-second connection limit and 120-second transfer limit. HTTP errors and TLS certificate failures are not
+retried. Partial files are restarted, not appended; checksum verification still applies. Downloaded scripts
+and npm installs are never automatically replayed. This can recover a transient interruption, not repair
+a persistent network problem. Unix/WSL AI Launcher installation still uses the upstream installer.
+
+#### Windows recovery: Pi and persistent download resets
+
+npm already retries eligible registry reads (default `fetch-retries=2`, delays of 10 to 60 seconds, and a
+5-minute per-request timeout). Local settings can differ. Setup does not add an outer Pi install retry or
+change user/global npm settings. Check the configured registry and effective retry count first:
+
+```powershell copy Copy Registry Checks
+node --version
+npm --version
+npm config get registry
+npm config get fetch-retries
+npm ping
+```
+
+`npm ping` tests registry metadata access only, not every package tarball or GitHub release download.
+Pi's `EPERM` cleanup warnings do not establish why Windows refused a removal. Save the npm debug log,
+close any Pi process you started, and use Resource Monitor or Process Explorer to check the exact failing
+path for an open handle. Check that directory's permissions if no handle is found. Do not stop all Node
+processes, run blanket deletion/cache cleanup, disable TLS checks, or use administrator mode as a workaround.
+After network access and any confirmed file-access problem are resolved, retry once from PowerShell:
+
+```powershell copy Copy Pi Recovery
+npm install -g @earendil-works/pi-coding-agent --loglevel=http --timing
+pi --version
+```
+
+Run the health check even if npm reports success. If failures persist, share the **redacted npm debug log**
+with failed URL host/path, HTTP status or socket error, attempt counts, timestamps, and Node/npm versions.
+For AI Launcher, include Git Bash's `curl --version` and a redacted verbose trace of the failing release
+asset GET, including redirects and response headers. Say whether a proxy/VPN is in use and whether another
+approved network reproduces it. Remove tokens, cookies, proxy credentials, and signed URL query strings.
+For `EPERM`, include the exact affected path, the confirmed handle/permission findings, and whether the error
+also occurs during the isolated Pi retry. These are needed to separate local file access from network resets.
 
 Optional qmd requires Node.js >=22 on native Windows. Its installer prioritizes the real `node.exe` directory
 and npm's global prefix in the same Git Bash session, ahead of stale Bun launchers or extensionless Node copies

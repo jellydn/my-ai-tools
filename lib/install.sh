@@ -8,6 +8,7 @@
 
 # Prerequisites (runtimes, formatters, MCP server binaries) live in their own module.
 source "$(dirname "${BASH_SOURCE[0]}")/install-deps.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/install-launcher.sh"
 
 # ─── Shared helpers ────────────────────────────────────────────────
 
@@ -473,21 +474,6 @@ install_ccs() {
 		"ccs --version"
 }
 
-install_ai_switcher() {
-	_run_ai_switcher_install() {
-		execute_installer "https://raw.githubusercontent.com/jellydn/ai-launcher/main/install.sh" "" "AI Launcher" || return 1
-		[ "$DRY_RUN" != true ] || return 0
-		ensure_dir_on_path "${AI_INSTALL_DIR:-$HOME/.local/bin}"
-		hash -r 2>/dev/null || true
-		local version
-		if ! version=$(ai --version) || [ -z "$version" ]; then
-			log_error "AI Launcher installation completed but ai --version failed"
-			return 1
-		fi
-	}
-	run_installer "AI Launcher" "_run_ai_switcher_install" "false" "ai --version"
-}
-
 install_codex() {
 	install_npm_tool "OpenAI Codex CLI" "codex" "@openai/codex" \
 		"npm install -g @openai/codex"
@@ -614,8 +600,12 @@ install_reasonix() {
 }
 
 install_pi() {
-	install_npm_tool "Pi" "pi" "@earendil-works/pi-coding-agent" \
-		"npm install -g @earendil-works/pi-coding-agent"
+	if ! install_npm_tool "Pi" "pi" "@earendil-works/pi-coding-agent" \
+		"npm install -g @earendil-works/pi-coding-agent"; then
+		log_info "For ECONNRESET, npm already retries eligible registry downloads; do not loop the whole install."
+		log_info "For EPERM cleanup warnings, inspect the exact path and active processes; see Windows recovery in README.md."
+		return 1
+	fi
 }
 install_omp() {
 	install_npm_tool "Oh My Pi" "omp" "@oh-my-pi/pi-coding-agent" \

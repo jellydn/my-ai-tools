@@ -320,11 +320,28 @@ download_and_verify_file() {
 	temp_file="${tmpdir}/download-$(date +%s)-$$"
 
 	log_info "Downloading $description..."
-	if ! execute_quoted curl -fsSL "$url" -o "$temp_file" 2>/dev/null; then
-		log_error "Failed to download $description"
+	local attempt=1 download_status
+	while true; do
+		if execute_quoted curl -fsSL --connect-timeout 15 --max-time 120 "$url" -o "$temp_file"; then
+			break
+		else
+			download_status=$?
+		fi
+		# Retry only read-only transfers, never the downloaded installer itself.
+		case "$download_status" in
+		7 | 18 | 28 | 52 | 56)
+			if [ "$attempt" -lt 3 ]; then
+				log_warning "$description download failed (curl $download_status); retrying ($attempt/2)"
+				sleep "$attempt"
+				attempt=$((attempt + 1))
+				continue
+			fi
+			;;
+		esac
+		log_error "Failed to download $description (curl $download_status, $attempt attempt(s))"
 		execute_quoted rm -f "$temp_file"
 		return 1
-	fi
+	done
 
 	if [ -n "$expected_sha256" ]; then
 		local actual_sha256

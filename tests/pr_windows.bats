@@ -279,7 +279,7 @@ TEST_WORKFLOW="$REPO_ROOT/.github/workflows/test.yml"
         run env PATH="/usr/bin:/bin" bash -c '
             export HOME="$2/User With Spaces"
             source "$1/cli.sh"
-            YES_TO_ALL=true DRY_RUN=false FAILURE="$3"
+            IS_WINDOWS=false YES_TO_ALL=true DRY_RUN=false FAILURE="$3"
             mkdir -p "$HOME/.local/bin"
             ai() {
                 [ "$FAILURE" != health ] || return 1
@@ -311,13 +311,112 @@ TEST_WORKFLOW="$REPO_ROOT/.github/workflows/test.yml"
     done
 }
 
+@test "Windows launcher retries reset downloads, preserves the old binary on failure, and never reruns a script" {
+    for result in recovered exhausted checksum health http tls; do
+        run env PATH="/usr/bin:/bin" bash -c '
+            export HOME="$2/User With Spaces" TMPDIR="$2/Temp With Spaces"
+            source "$1/cli.sh"
+            IS_WINDOWS=true YES_TO_ALL=true DRY_RUN=false RESULT="$3"
+            mkdir -p "$HOME/.local/bin" "$TMPDIR"
+            printf "#!/bin/sh\necho old-launcher\n" > "$HOME/.local/bin/ai.exe"
+            chmod +x "$HOME/.local/bin/ai.exe"
+            ai() { "$HOME/.local/bin/ai.exe" "$@"; }
+            cp "$HOME/.local/bin/ai.exe" "$HOME/original"
+            printf "#!/bin/sh\necho new-launcher\n" > "$HOME/release"
+            [ "$RESULT" != health ] || printf "#!/bin/sh\nexit 1\n" > "$HOME/release"
+            fixture_sha=$(sha256sum "$HOME/release"); fixture_sha="${fixture_sha%% *}"
+            [ "$RESULT" != checksum ] || fixture_sha=$(printf wrong | sha256sum | cut -d" " -f1)
+            uname() { [ "$1" != -m ] || { echo x86_64; return; }; builtin command uname "$@"; }
+            sleep() { :; }
+            curl() {
+                target="" url=""
+                while [ "$#" -gt 0 ]; do
+                    case "$1" in
+                        -o) shift; target="$1" ;;
+                        https:*) url="$1" ;;
+                    esac
+                    shift
+                done
+                case "$url" in
+                    */releases/latest)
+                        printf "{\"assets\":[{\"name\":\"ai-windows-x64.exe\",\"browser_download_url\":\"https://github.com/fixture/ai.exe\"},{\"name\":\"checksums.txt\",\"browser_download_url\":\"https://github.com/fixture/checksums.txt\"}]}" > "$target" ;;
+                    */checksums.txt) printf "%s  ai-windows-x64.exe\n" "$fixture_sha" > "$target" ;;
+                    */ai.exe)
+                        count=0; [ ! -e "$HOME/attempts" ] || read -r count < "$HOME/attempts"
+                        count=$((count + 1)); echo "$count" > "$HOME/attempts"
+                        [ "$RESULT" != http ] || return 22
+                        [ "$RESULT" != tls ] || return 60
+                        if [ "$RESULT" = exhausted ] || { [ "$RESULT" = recovered ] && [ "$count" -eq 1 ]; }; then
+                            echo partial > "$target"; return 56
+                        fi
+                        cp "$HOME/release" "$target" ;;
+                    *) echo UNEXPECTED:script >&2; return 99 ;;
+                esac
+            }
+            result=0; install_ai_switcher || result=$?
+            if [ "$RESULT" = recovered ]; then
+                [ "$result" -eq 0 ] || exit 81
+                [ "$(cat "$HOME/attempts")" -eq 2 ] || exit 82
+                cmp "$HOME/release" "$HOME/.local/bin/ai.exe" || exit 83
+            else
+                [ "$result" -ne 0 ] || exit 84
+                cmp "$HOME/original" "$HOME/.local/bin/ai.exe" || exit 85
+                [ "$RESULT" != exhausted ] || [ "$(cat "$HOME/attempts")" -eq 3 ] || exit 86
+                case "$RESULT" in http|tls) [ "$(cat "$HOME/attempts")" -eq 1 ] || exit 88 ;; esac
+            fi
+            [ -z "$(ls -A "$TMPDIR")" ] || exit 87
+            test "$(ls -A "$HOME/.local/bin")" = ai.exe || exit 89
+            echo PASS:staged-download
+        ' _ "$REPO_ROOT" "$BATS_TEST_TMPDIR/$result" "$result"
+        [ "$status" -eq 0 ]
+        [[ "$output" == *PASS:staged-download* ]]
+        [[ "$output" != *UNEXPECTED:* ]]
+    done
+}
+
+@test "Windows launcher dry-run makes no downloads or staging directories" {
+    run bash -c '
+        export HOME="$2"
+        source "$1/cli.sh"
+        IS_WINDOWS=true YES_TO_ALL=true DRY_RUN=true
+        curl() { echo UNEXPECTED:curl; return 99; }
+        install_ai_switcher
+        test ! -e "$HOME/.local/bin"
+    ' _ "$REPO_ROOT" "$BATS_TEST_TMPDIR/home"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"[DRY RUN]"* ]]
+    [[ "$output" != *UNEXPECTED:* ]]
+}
+
+@test "Pi failure offers targeted recovery without replaying npm install or cleanup" {
+    run env PATH="/usr/bin:/bin" bash -c '
+        source "$1/cli.sh"
+        IS_WINDOWS=true YES_TO_ALL=true DRY_RUN=false
+        node() { :; }
+        count_file="$2"
+        npm() {
+            [ "$1" = install ] || { echo UNEXPECTED:config-or-cleanup; return 99; }
+            echo attempt >> "$count_file"
+            echo "ECONNRESET; EPERM cleanup warning" >&2
+            return 1
+        }
+        result=0; install_pi || result=$?
+        [ "$result" -ne 0 ] || exit 81
+        [ "$(wc -l < "$count_file")" -eq 1 ] || exit 82
+    ' _ "$REPO_ROOT" "$BATS_TEST_TMPDIR/attempts"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"npm already retries eligible registry downloads"* ]]
+    [[ "$output" == *"EPERM"*"README"* ]]
+    [[ "$output" != *UNEXPECTED:* ]]
+}
+
 @test "optional Pi and launcher failures continue setup and appear in the final summary" {
     run env PATH="/usr/bin:/bin" bash -c '
         source "$1/cli.sh"
         IS_WINDOWS=true YES_TO_ALL=true DRY_RUN=false MIGRATE_GEMINI=false WITH_INTEGRATIONS=true
         preflight_check() { :; }; check_prerequisites() { :; }; backup_configs() { :; }
         INSTALL_SEQUENCE=(ai-switcher:install_ai_switcher pi:install_pi codex:install_codex)
-        execute_installer() { return 56; }
+        install_ai_launcher_windows() { return 56; }
         node() { :; }
         npm() { echo "ECONNRESET; EPERM cleanup warning" >&2; return 1; }
         install_codex() { echo INSTALLED:codex; }
