@@ -132,7 +132,7 @@ status_line = [
   "pull-request-number",
   "fast-mode",
 ]
-theme = "kanagawa"
+theme = "cobalt"
 status_line_use_colors = true
 
 [tui.model_availability_nux]

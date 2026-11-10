@@ -44,27 +44,27 @@
 			"args": []
 		}
 	},
-	"amp.terminal.theme": "kanagawa",
+	"amp.terminal.theme": "cobalt",
 	"amp.terminal.customThemes": {
-		"kanagawa": {
-			"background": "#1F1F28",
-			"foreground": "#DCD7BA",
-			"black": "#090618",
-			"red": "#C34043",
-			"green": "#76946A",
-			"yellow": "#C0A36E",
-			"blue": "#7E9CD8",
-			"magenta": "#957FB8",
-			"cyan": "#6A9589",
-			"white": "#C8C093",
-			"brightBlack": "#727169",
-			"brightRed": "#E82424",
-			"brightGreen": "#98BB6C",
-			"brightYellow": "#E6C384",
-			"brightBlue": "#7FB4CA",
-			"brightMagenta": "#938AA9",
-			"brightCyan": "#7AA89F",
-			"brightWhite": "#DCD7BA"
+		"cobalt": {
+			"background": "#193549",
+			"foreground": "#E1EFFF",
+			"black": "#122738",
+			"red": "#FF628C",
+			"green": "#3AD900",
+			"yellow": "#FFC600",
+			"blue": "#0088FF",
+			"magenta": "#CF7DFF",
+			"cyan": "#00E5FF",
+			"white": "#E1EFFF",
+			"brightBlack": "#5C7685",
+			"brightRed": "#FF0088",
+			"brightGreen": "#2AFFDF",
+			"brightYellow": "#FFC600",
+			"brightBlue": "#5DA9FF",
+			"brightMagenta": "#FF9D00",
+			"brightCyan": "#80FCFF",
+			"brightWhite": "#FFFFFF"
 		}
 	},
 	"amp.gauge": "cost"

@@ -44,7 +44,7 @@
   ],
   "permissionLevel": "high",
   "quietStartup": true,
-  "theme": "kanagawa",
+  "theme": "cobalt",
   "treeFilterMode": "default",
   "terminal": {
     "showTerminalProgress": true

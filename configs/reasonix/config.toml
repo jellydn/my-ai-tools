@@ -10,7 +10,7 @@ credentials_store = "auto"   # legacy compatibility; provider keys are saved in 
 
 [ui]
 theme = "auto"   # auto|dark|light; CLI colors only; REASONIX_THEME can override per run
-# theme_style = "graphite"   # graphite|aurora|slate|carbon|nocturne|amber and legacy aliases
+theme_style = "cobalt"   # graphite|aurora|slate|carbon|nocturne|amber|cobalt and legacy aliases; custom themes load from themes/<id>/theme.json
 shortcut_layout = "desktop"   # classic|desktop; compatibility setting; Shift+Tab toggles Plan, Ctrl+Y toggles YOLO
 # cursor_shape = "bar"   # block|underline|bar; text input cursor shape
 show_reasoning = true   # CLI: show thinking text by default; false = collapsed (toggle with Ctrl+O)
@@ -21,7 +21,7 @@ show_turn_usage = true   # CLI/TUI: show per-request token and cost receipts in 
 layout_style = "workbench"   # desktop layout: classic|workbench|creation
 theme = "auto"   # desktop only: auto|dark|light
 terminal_theme = "auto"   # integrated terminal: auto|dark|light; auto follows the desktop app
-# theme_style = "graphite"   # graphite|aurora|slate|carbon|nocturne|amber and legacy aliases
+theme_style = "cobalt"   # graphite|aurora|slate|carbon|nocturne|amber|cobalt and legacy aliases; custom themes load from themes/<id>/theme.json
 external_opener = "zed"   # desktop Open control: installed application id
 close_behavior = "background"   # desktop: quit|background when the window close button is clicked
 status_bar_style = "text"   # desktop: icon|text metric labels in the bottom status bar
