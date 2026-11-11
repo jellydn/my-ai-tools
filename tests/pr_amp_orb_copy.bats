@@ -89,6 +89,21 @@ setup() {
 	cmp -s "$canary" "$BATS_TEST_TMPDIR/expected-canary"
 }
 
+@test "copy_amp_configs does not install the dispatcher into a destination directory" {
+	# A real directory at the destination path cannot be replaced by the
+	# rename: mv would move the staged file into it and leave the path a
+	# directory, which Amp cannot execute.
+	local dest="$HOME/.config/amp/orb-dispatch.sh"
+	mkdir -p "$dest"
+
+	run copy_amp_configs
+	[ "$status" -eq 0 ]
+
+	[ -d "$dest" ]
+	# The staged file must not be left inside the directory.
+	[ -z "$(ls -A "$dest")" ]
+}
+
 @test "copy_amp_configs keeps the installed dispatcher when the copy fails" {
 	local dest="$HOME/.config/amp/orb-dispatch.sh"
 	printf 'previous dispatcher\n' > "$dest"

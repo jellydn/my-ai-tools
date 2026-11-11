@@ -1310,7 +1310,13 @@ copy_amp_configs() {
 				if [ -L "$amp_dispatch" ] && [ -d "$amp_dispatch" ]; then
 					execute_quoted rm -f "$amp_dispatch"
 				fi
-				if ! execute_quoted mv -f "$amp_dispatch_stage" "$amp_dispatch"; then
+				# A real directory cannot be replaced by the rename: mv would move
+				# the staged file into it and leave the dispatcher path a
+				# directory, which Amp cannot execute.
+				if [ -d "$amp_dispatch" ]; then
+					log_warning "The orb dispatcher path is a directory - keeping the installed one"
+					execute_quoted rm -f "$amp_dispatch_stage"
+				elif ! execute_quoted mv -f "$amp_dispatch_stage" "$amp_dispatch"; then
 					log_warning "Failed to install the orb dispatcher - keeping the installed one"
 					execute_quoted rm -f "$amp_dispatch_stage"
 				fi
