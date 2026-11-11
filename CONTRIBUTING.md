@@ -134,6 +134,10 @@ JavaScript dependencies from `bun.lock`, prepares `.venv` from
 reuse installed packages and dependency caches. Python requirements use the
 repository's version ranges; they are not locked.
 
+Setup logs each phase's duration separately from total elapsed time. For slow
+startup, check `~/.cache/amp/logs/setup.log` to separate system-package downloads,
+JavaScript installation, Python installation, and workspace builds.
+
 `.agents/resume` checks readiness without installing anything. To repair missing
 dependencies, run `.agents/setup`. Use `.venv/bin/python -m pytest document_qa/tests`
 for Python tests and `bun run`, `bun test`, or `bats` for the other checks.
