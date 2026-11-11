@@ -90,24 +90,64 @@ setup() {
 }
 
 @test "copy_amp_configs keeps the installed dispatcher when the copy fails" {
-	if [ "$(id -u)" -eq 0 ]; then
-		skip "an unreadable source needs a non-root user"
-	fi
-
 	local dest="$HOME/.config/amp/orb-dispatch.sh"
 	printf 'previous dispatcher\n' > "$dest"
 	chmod +x "$dest"
 
-	# An unreadable source fails the copy. The staged copy keeps the
-	# installed dispatcher, so a failed install cannot leave the provider
-	# without a script.
-	chmod 000 "$FAKE_CHECKOUT/configs/amp/orb-dispatch.sh"
-	run copy_amp_configs
-	chmod 644 "$FAKE_CHECKOUT/configs/amp/orb-dispatch.sh"
+	# Fail the staged copy by injecting a cp that refuses the stage path.
+	# The injection keeps the case independent of the user permissions, so
+	# it also runs as root.
+	local fake_bin="$BATS_TEST_TMPDIR/fake-bin"
+	mkdir -p "$fake_bin"
+	cat >"$fake_bin/cp" <<'SHIM'
+#!/usr/bin/env bash
+for arg in "$@"; do
+	case "$arg" in
+	*/.orb-dispatch.sh.??????) exit 1 ;;
+	esac
+done
+exec "$REAL_CP" "$@"
+SHIM
+	chmod +x "$fake_bin/cp"
+
+	# The staged copy keeps the installed dispatcher, so a failed install
+	# cannot leave the provider without a script.
+	REAL_CP="$(command -v cp)" PATH="$fake_bin:$PATH" run copy_amp_configs
 
 	[ "$status" -eq 0 ]
 	[ -f "$dest" ]
 	[ ! -L "$dest" ]
 	[ -x "$dest" ]
 	[ "$(cat "$dest")" = "previous dispatcher" ]
+	# The other copies still go through, so the shim delegated correctly
+	# and the failure came from the staged copy alone.
+	[ -f "$HOME/.config/amp/settings.json" ]
+}
+
+@test "copy_amp_configs installs an executable dispatcher under a restrictive umask" {
+	# mktemp creates the stage file with mode 0600 and the copy keeps that
+	# mode, so the owner execute bit has to be set explicitly.
+	local dest="$HOME/.config/amp/orb-dispatch.sh"
+	local previous_umask
+	previous_umask="$(umask)"
+	umask 0177
+	run copy_amp_configs
+	umask "$previous_umask"
+
+	[ "$status" -eq 0 ]
+	[ -f "$dest" ]
+	[ -x "$dest" ]
+}
+
+@test "copy_amp_configs dry-run plan shows the dispatcher paths" {
+	export DRY_RUN=true
+	run copy_amp_configs
+	[ "$status" -eq 0 ]
+
+	# The plan must name the source and the destination, not empty paths.
+	[[ "$output" == *"$FAKE_CHECKOUT/configs/amp/orb-dispatch.sh"* ]]
+	[[ "$output" == *"$HOME/.config/amp/orb-dispatch.sh"* ]]
+
+	# A dry run must not install anything.
+	[ ! -e "$HOME/.config/amp/orb-dispatch.sh" ]
 }

@@ -1288,23 +1288,36 @@ copy_amp_configs() {
 		# of aborting the install under set -e. The rename replaces a
 		# destination link instead of writing through it.
 		local amp_dispatch="$HOME/.config/amp/orb-dispatch.sh"
-		local amp_dispatch_stage
-		if ! amp_dispatch_stage="$(execute_quoted mktemp "$HOME/.config/amp/.orb-dispatch.sh.XXXXXX")"; then
+		local amp_dispatch_template="$HOME/.config/amp/.orb-dispatch.sh.XXXXXX"
+		local amp_dispatch_stage=""
+		if [ "$DRY_RUN" = true ]; then
+			# execute_quoted only logs under --dry-run, so mktemp never runs
+			# and the captured stage path would be empty. Use the template so
+			# the plan still names the staged file and the destination.
+			amp_dispatch_stage="$amp_dispatch_template"
+			execute_quoted mktemp "$amp_dispatch_template"
+		elif ! amp_dispatch_stage="$(execute_quoted mktemp "$amp_dispatch_template")"; then
 			log_warning "Failed to stage the orb dispatcher - keeping the installed one"
-		elif execute_quoted cp "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" "$amp_dispatch_stage" &&
-			execute_quoted chmod +x "$amp_dispatch_stage"; then
-			# A link to a directory would make the rename move the staged file
-			# into it instead of replacing the path.
-			if [ -L "$amp_dispatch" ] && [ -d "$amp_dispatch" ]; then
-				execute_quoted rm -f "$amp_dispatch"
-			fi
-			if ! execute_quoted mv -f "$amp_dispatch_stage" "$amp_dispatch"; then
+		fi
+
+		if [ -n "$amp_dispatch_stage" ]; then
+			# chmod u+x sets the owner execute bit explicitly: chmod +x adds
+			# no execute bit at all under a restrictive umask such as 0177.
+			if execute_quoted cp "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" "$amp_dispatch_stage" &&
+				execute_quoted chmod u+x "$amp_dispatch_stage"; then
+				# A link to a directory would make the rename move the staged file
+				# into it instead of replacing the path.
+				if [ -L "$amp_dispatch" ] && [ -d "$amp_dispatch" ]; then
+					execute_quoted rm -f "$amp_dispatch"
+				fi
+				if ! execute_quoted mv -f "$amp_dispatch_stage" "$amp_dispatch"; then
+					log_warning "Failed to install the orb dispatcher - keeping the installed one"
+					execute_quoted rm -f "$amp_dispatch_stage"
+				fi
+			else
 				log_warning "Failed to install the orb dispatcher - keeping the installed one"
 				execute_quoted rm -f "$amp_dispatch_stage"
 			fi
-		else
-			log_warning "Failed to install the orb dispatcher - keeping the installed one"
-			execute_quoted rm -f "$amp_dispatch_stage"
 		fi
 	fi
 
