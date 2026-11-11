@@ -255,7 +255,20 @@ teardown() {
 # Amp orb export
 # ---------------------------------------------------------------------------
 
-@test "generate_amp_configs exports an executable orb dispatch script" {
+@test "generate_amp_configs keeps the tracked orb dispatch script" {
+    mkdir -p "$HOME/.config/amp" "$SCRIPT_DIR/configs/amp"
+    printf 'installed copy\n' > "$HOME/.config/amp/orb-dispatch.sh"
+    printf 'tracked script\n' > "$SCRIPT_DIR/configs/amp/orb-dispatch.sh"
+
+    run generate_amp_configs
+
+    [ "$status" -eq 0 ]
+    # The dispatcher is tracked source, not user configuration: the installed
+    # copy must not overwrite it.
+    [ "$(cat "$SCRIPT_DIR/configs/amp/orb-dispatch.sh")" = "tracked script" ]
+}
+
+@test "generate_amp_configs restores a missing orb dispatch script" {
     mkdir -p "$HOME/.config/amp"
     printf 'echo dispatch\n' > "$HOME/.config/amp/orb-dispatch.sh"
 

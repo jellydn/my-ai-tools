@@ -278,68 +278,21 @@ generate_muse_configs() {
 	log_success "Muse Code configs generated"
 }
 
-# Print the path with symlinks resolved. Return 1 when the path is missing.
-physical_path() {
-	local path="$1"
-	local dir target
-	local hops=0
-
-	while [ -L "$path" ]; do
-		hops=$((hops + 1))
-		[ "$hops" -le 8 ] || return 1
-		dir="$(cd "$(dirname "$path")" && pwd)" || return 1
-		target="$(readlink "$path")" || return 1
-		case "$target" in
-		/*) path="$target" ;;
-		*) path="$dir/$target" ;;
-		esac
-	done
-
-	[ -e "$path" ] || return 1
-	dir="$(cd "$(dirname "$path")" && pwd)" || return 1
-	printf '%s/%s\n' "$dir" "$(basename "$path")"
-}
-
-# Copy an installed file into the repo. Print "copied" or "skipped".
-# cli.sh installs orb-dispatch.sh as a symlink to the repo file. Copying that
-# link onto itself fails, so a source that already is the destination is skipped.
-copy_repo_file() {
-	local src="$1"
-	local dest="$2"
-	local src_real dest_real
-
-	if [ ! -e "$src" ] && [ ! -L "$src" ]; then
-		log_info "Skipped (not found): $src"
-		printf 'skipped\n'
-		return 0
-	fi
-
-	src_real="$(physical_path "$src")" || {
-		log_warning "Skipped (unresolved): $src"
-		printf 'skipped\n'
-		return 0
-	}
-
-	if [ -e "$dest" ] || [ -L "$dest" ]; then
-		dest_real="$(physical_path "$dest")" || dest_real=""
-		if [ -n "$dest_real" ] && [ "$src_real" = "$dest_real" ]; then
-			log_info "Skipped (already the repo file): $src"
-			printf 'skipped\n'
-			return 0
-		fi
-	fi
-
-	copy_single "$src" "$dest"
-	printf 'copied\n'
-}
-
+# The dispatcher is tracked source, not user configuration: cli.sh installs it
+# from this repository, so the tracked file stays the source of truth. Exporting
+# the installed copy would let a stale install revert an upstream dispatcher fix
+# in the working tree. Restore the tracked file only when it is missing.
 copy_amp_orb_dispatch() {
 	local dest="$SCRIPT_DIR/configs/amp/orb-dispatch.sh"
-	local action
 
-	action="$(copy_repo_file "$HOME/.config/amp/orb-dispatch.sh" "$dest")"
+	if [ -e "$dest" ]; then
+		log_info "Skipped (tracked file kept): $dest"
+		return 0
+	fi
+
+	copy_single "$HOME/.config/amp/orb-dispatch.sh" "$dest"
 	# The provider runs this file. A home copy may not keep the executable bit.
-	if [ "$action" = "copied" ]; then
+	if [ -f "$dest" ]; then
 		execute_quoted chmod +x "$dest"
 	fi
 }
@@ -381,7 +334,8 @@ generate_amp_configs() {
 		safe_copy_dir "$HOME/.config/amp/lib" "$SCRIPT_DIR/configs/amp/lib"
 	fi
 
-	# The dispatch script is linked into ~/.config/amp by cli.sh, outside settings and plugins.
+	# The dispatch script is installed into ~/.config/amp by cli.sh, outside
+	# settings and plugins.
 	copy_amp_orb_dispatch
 
 	log_success "Amp configs generated"

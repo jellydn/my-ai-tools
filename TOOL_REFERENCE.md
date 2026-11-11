@@ -1231,7 +1231,7 @@ curl -fsSL https://ampcode.com/install.sh | bash
 
 ### Configuration
 
-Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/`. `./cli.sh` links [`configs/amp/orb-dispatch.sh`](configs/amp/orb-dispatch.sh) to `~/.config/amp/orb-dispatch.sh`.
+Copy [`configs/amp/settings.json`](configs/amp/settings.json) to `~/.config/amp/`. `./cli.sh` copies [`configs/amp/orb-dispatch.sh`](configs/amp/orb-dispatch.sh) to `~/.config/amp/orb-dispatch.sh` as a real executable file, so the copy survives removal of the checkout.
 
 For self-hosted smolvm orbs, follow the [setup and operations runbook](docs/amp-orbs.md). No skill or fish function is required.
 
