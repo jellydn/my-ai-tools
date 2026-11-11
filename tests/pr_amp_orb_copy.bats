@@ -67,6 +67,28 @@ setup() {
 	cmp -s "$canary" "$BATS_TEST_TMPDIR/expected-canary"
 }
 
+@test "copy_amp_configs does not write through a stage-path symlink" {
+	# The staged copy must land in an exclusive mktemp file, never through a
+	# leftover link at a fixed stage name: a link there must not redirect the
+	# copy or end up installed in place of the dispatcher.
+	local stage_link="$HOME/.config/amp/.orb-dispatch.sh.tmp"
+	local canary="$BATS_TEST_TMPDIR/canary.sh"
+	printf '#!/bin/sh\necho canary\n' > "$canary"
+	chmod +x "$canary"
+	ln -s "$canary" "$stage_link"
+
+	run copy_amp_configs
+	[ "$status" -eq 0 ]
+
+	local dest="$HOME/.config/amp/orb-dispatch.sh"
+	[ -f "$dest" ]
+	[ ! -L "$dest" ]
+	[ -x "$dest" ]
+	# The link target must be untouched: the copy must not follow the stage link.
+	printf '#!/bin/sh\necho canary\n' > "$BATS_TEST_TMPDIR/expected-canary"
+	cmp -s "$canary" "$BATS_TEST_TMPDIR/expected-canary"
+}
+
 @test "copy_amp_configs keeps the installed dispatcher when the copy fails" {
 	if [ "$(id -u)" -eq 0 ]; then
 		skip "an unreadable source needs a non-root user"

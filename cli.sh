@@ -1279,23 +1279,31 @@ copy_amp_configs() {
 	execute_quoted mkdir -p "$HOME/.config/amp"
 	execute_quoted cp "$SCRIPT_DIR/configs/amp/settings.json" "$HOME/.config/amp/"
 	if [ -f "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" ]; then
-		# Copy a real file, not a link: install.sh removes its temporary
+		# Install a real file, not a link: install.sh removes its temporary
 		# checkout after install, so a link would go dangling. Stage the copy
-		# next to the destination and rename it into place, so the swap is
-		# atomic and a failed copy keeps the installed dispatcher. The rename
-		# replaces a destination link instead of writing through it.
+		# with mktemp, which creates the stage file exclusively: a leftover
+		# link at a fixed name could redirect the copy or the rename. Keep
+		# the stage next to the destination so the rename below is atomic,
+		# and on any failure warn and keep the installed dispatcher instead
+		# of aborting the install under set -e. The rename replaces a
+		# destination link instead of writing through it.
 		local amp_dispatch="$HOME/.config/amp/orb-dispatch.sh"
-		local amp_dispatch_stage="$HOME/.config/amp/.orb-dispatch.sh.tmp"
-		if execute_quoted cp "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" "$amp_dispatch_stage"; then
-			execute_quoted chmod +x "$amp_dispatch_stage"
+		local amp_dispatch_stage
+		if ! amp_dispatch_stage="$(execute_quoted mktemp "$HOME/.config/amp/.orb-dispatch.sh.XXXXXX")"; then
+			log_warning "Failed to stage the orb dispatcher - keeping the installed one"
+		elif execute_quoted cp "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" "$amp_dispatch_stage" &&
+			execute_quoted chmod +x "$amp_dispatch_stage"; then
 			# A link to a directory would make the rename move the staged file
 			# into it instead of replacing the path.
 			if [ -L "$amp_dispatch" ] && [ -d "$amp_dispatch" ]; then
 				execute_quoted rm -f "$amp_dispatch"
 			fi
-			execute_quoted mv -f "$amp_dispatch_stage" "$amp_dispatch"
+			if ! execute_quoted mv -f "$amp_dispatch_stage" "$amp_dispatch"; then
+				log_warning "Failed to install the orb dispatcher - keeping the installed one"
+				execute_quoted rm -f "$amp_dispatch_stage"
+			fi
 		else
-			log_warning "Failed to copy the orb dispatcher - keeping the installed one"
+			log_warning "Failed to install the orb dispatcher - keeping the installed one"
 			execute_quoted rm -f "$amp_dispatch_stage"
 		fi
 	fi
