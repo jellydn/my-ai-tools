@@ -86,6 +86,8 @@ INSTALL_SEQUENCE=(
 	"mimo:install_mimo"
 	"open_code_review:install_open_code_review"
 	"plannotator:install_plannotator_if_needed"
+	# OpenMausBot is a desktop app; opt in with --with-tools=openmausbot.
+	"openmausbot:install_openmausbot"
 )
 
 run_install_sequence() {
@@ -442,6 +444,17 @@ backup_configs() {
 		copy_config_dir "$HOME/.ctx" "$BACKUP_DIR" "ctx"
 		copy_config_dir "${XDG_CONFIG_HOME:-$HOME/.config}/hunk" "$BACKUP_DIR" "hunk"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
+		if tool_allowed "openmausbot"; then
+			# OpenMausBot state contains credentials and transcripts; back up
+			# only the portable files the installer may overwrite.
+			copy_config_file "$HOME/.openmausbot/bots.json" "$BACKUP_DIR/openmausbot" || true
+			copy_config_file "$HOME/.openmausbot/default-bot.json" "$BACKUP_DIR/openmausbot" || true
+			for _omb_soul in "$HOME/.openmausbot/bots"/*/SOUL.md; do
+				if [ -f "$_omb_soul" ]; then
+					copy_config_file "$_omb_soul" "$BACKUP_DIR/openmausbot/bots/$(basename "$(dirname "$_omb_soul")")" || true
+				fi
+			done
+		fi
 
 		log_success "Backup completed: $BACKUP_DIR"
 	fi
@@ -578,6 +591,47 @@ copy_mimo_configs() {
 	fi
 
 	log_success "MiMo-Code configs copied"
+}
+
+copy_openmausbot_configs() {
+	local omb_status
+	omb_status=$(detect_tool --detailed "openmausbot" "$HOME/.openmausbot") || omb_status="missing"
+	if [ "$omb_status" = "missing" ]; then
+		log_info "OpenMausBot not detected - skipping config installation"
+		return 0
+	fi
+
+	log_info "Detected OpenMausBot (via $omb_status)"
+	if [ ! -f "$SCRIPT_DIR/configs/openmausbot/bots.json" ]; then
+		log_info "No managed OpenMausBot roster in repo - running OPENMAUSBOT_EXPORT=1 ./generate.sh will create it"
+		return 0
+	fi
+
+	if ! copy_config_file "$SCRIPT_DIR/configs/openmausbot/bots.json" "$HOME/.openmausbot/"; then
+		log_error "Failed to copy OpenMausBot roster"
+		return 1
+	fi
+	if ! copy_config_file "$SCRIPT_DIR/configs/openmausbot/default-bot.json" "$HOME/.openmausbot/"; then
+		log_error "Failed to copy OpenMausBot default bot mapping"
+		return 1
+	fi
+
+	# Per-bot souls. The app reads bots.json for the roster; each bot dir may
+	# also carry a SOUL.md persona. Destination state (config.json with
+	# credentials, providers/, transcripts, SQLite stores) is never touched.
+	local soul bot_id bot_dir
+	for soul in "$SCRIPT_DIR/configs/openmausbot/bots"/*/SOUL.md; do
+		if [ -f "$soul" ]; then
+			bot_id=$(basename "$(dirname "$soul")")
+			bot_dir="$HOME/.openmausbot/bots/$bot_id"
+			if ! copy_config_file "$soul" "$bot_dir/"; then
+				log_error "Failed to copy OpenMausBot soul for $bot_id"
+				return 1
+			fi
+		fi
+	done
+
+	log_success "OpenMausBot configs copied"
 }
 
 copy_configurations() {
@@ -744,6 +798,11 @@ copy_configurations() {
 		copy_mimo_configs
 	else
 		log_info "Skipping mimo config install (not in -y allowlist)"
+	fi
+	if tool_allowed "openmausbot"; then
+		copy_openmausbot_configs
+	else
+		log_info "Skipping openmausbot config install (not in -y allowlist)"
 	fi
 	copy_best_practices
 }

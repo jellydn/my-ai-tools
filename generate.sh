@@ -1018,6 +1018,44 @@ generate_delta_configs() {
 	log_success "Delta configs generated"
 }
 
+generate_openmausbot_configs() {
+	# Strict opt-in: ~/.openmausbot is live application state (credentials,
+	# transcripts, databases). Only an explicit OPENMAUSBOT_EXPORT=1 exports
+	# the portable roster. See configs/openmausbot/README.md for what is
+	# included and excluded, and the Desktop app's encrypted Export for full
+	# recovery.
+	if [ "${OPENMAUSBOT_EXPORT:-0}" != "1" ]; then
+		log_info "Skipping OpenMausBot export (opt-in; set OPENMAUSBOT_EXPORT=1)"
+		return 0
+	fi
+
+	log_info "Generating OpenMausBot configs..."
+
+	if [ ! -d "$HOME/.openmausbot" ]; then
+		log_warning "OpenMausBot config directory not found: $HOME/.openmausbot"
+		return 0
+	fi
+
+	execute "mkdir -p \"$SCRIPT_DIR/configs/openmausbot/bots\""
+
+	copy_single "$HOME/.openmausbot/bots.json" "$SCRIPT_DIR/configs/openmausbot/bots.json"
+	copy_single "$HOME/.openmausbot/default-bot.json" "$SCRIPT_DIR/configs/openmausbot/default-bot.json"
+
+	local soul bot_id bot_dir
+	for soul in "$HOME/.openmausbot/bots"/*/SOUL.md; do
+		if [ -f "$soul" ]; then
+			bot_id=$(basename "$(dirname "$soul")")
+			bot_dir="$SCRIPT_DIR/configs/openmausbot/bots/$bot_id"
+			execute "mkdir -p \"$bot_dir\""
+			copy_single "$soul" "$bot_dir/SOUL.md"
+		fi
+	done
+
+	log_warning "Transcripts, attachments, credentials, and databases are not exported"
+	log_warning "Full recovery: Settings → Backups → Export full backup (encrypted .ombbackup)"
+	log_success "OpenMausBot configs generated"
+}
+
 generate_codiff_configs() {
 	log_info "Generating Codiff configs..."
 
@@ -1301,6 +1339,9 @@ main() {
 	echo
 
 	generate_codiff_configs
+	echo
+
+	generate_openmausbot_configs
 	echo
 
 	generate_devin_configs
