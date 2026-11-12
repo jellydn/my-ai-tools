@@ -232,6 +232,13 @@ detect_tool() {
 	return 1
 }
 
+# Resolve the OpenMausBot data directory.
+# Upstream uses OMB_DATA_DIR when set, otherwise ~/.openmausbot. The headless
+# CLI on PATH is independent of this directory, so the two are never conflated.
+openmausbot_data_dir() {
+	printf '%s\n' "${OMB_DATA_DIR:-$HOME/.openmausbot}"
+}
+
 # Get a safe temporary file path with unique name
 # Usage: make_temp_file "prefix" "extension"
 make_temp_file() {

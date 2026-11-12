@@ -445,15 +445,13 @@ backup_configs() {
 		copy_config_dir "${XDG_CONFIG_HOME:-$HOME/.config}/hunk" "$BACKUP_DIR" "hunk"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 		if tool_allowed "openmausbot"; then
-			# OpenMausBot state contains credentials and transcripts; back up
-			# only the portable files the installer may overwrite.
-			copy_config_file "$HOME/.openmausbot/bots.json" "$BACKUP_DIR/openmausbot" || true
-			copy_config_file "$HOME/.openmausbot/default-bot.json" "$BACKUP_DIR/openmausbot" || true
-			for _omb_soul in "$HOME/.openmausbot/bots"/*/SOUL.md; do
-				if [ -f "$_omb_soul" ]; then
-					copy_config_file "$_omb_soul" "$BACKUP_DIR/openmausbot/bots/$(basename "$(dirname "$_omb_soul")")" || true
-				fi
-			done
+			# Only the import snapshot is installer-owned. The app's live
+			# registry and runtime state are left alone - the app has its own
+			# encrypted backup for those.
+			local omb_dir
+			omb_dir=$(openmausbot_data_dir)
+			copy_config_file "$omb_dir/import/bots.json" "$BACKUP_DIR/openmausbot" || true
+			copy_config_file "$omb_dir/import/default-bot.json" "$BACKUP_DIR/openmausbot" || true
 		fi
 
 		log_success "Backup completed: $BACKUP_DIR"
@@ -594,44 +592,53 @@ copy_mimo_configs() {
 }
 
 copy_openmausbot_configs() {
-	local omb_status
-	omb_status=$(detect_tool --detailed "openmausbot" "$HOME/.openmausbot") || omb_status="missing"
-	if [ "$omb_status" = "missing" ]; then
+	local omb_dir
+	omb_dir=$(openmausbot_data_dir)
+
+	# The app owns its data directory. The headless CLI on PATH says nothing
+	# about it, so only the directory counts as "app detected".
+	if [ ! -d "$omb_dir" ]; then
 		log_info "OpenMausBot not detected - skipping config installation"
 		return 0
 	fi
+	log_info "Detected OpenMausBot data directory: $omb_dir"
 
-	log_info "Detected OpenMausBot (via $omb_status)"
 	if [ ! -f "$SCRIPT_DIR/configs/openmausbot/bots.json" ]; then
 		log_info "No managed OpenMausBot roster in repo - running OPENMAUSBOT_EXPORT=1 ./generate.sh will create it"
 		return 0
 	fi
 
-	if ! copy_config_file "$SCRIPT_DIR/configs/openmausbot/bots.json" "$HOME/.openmausbot/"; then
-		log_error "Failed to copy OpenMausBot roster"
-		return 1
-	fi
-	if ! copy_config_file "$SCRIPT_DIR/configs/openmausbot/default-bot.json" "$HOME/.openmausbot/"; then
-		log_error "Failed to copy OpenMausBot default bot mapping"
-		return 1
-	fi
+	# bots.json and default-bot.json are live app state: the server rewrites
+	# them on every roster change. The repo snapshot is therefore written to
+	# an import directory the app does not own, so applying it stays a
+	# deliberate user action and the live registry is never replaced.
+	local dest="$omb_dir/import"
+	execute_quoted mkdir -p "$dest" || return 0
+	execute_quoted chmod 700 "$dest" || true
 
-	# Per-bot souls. The app reads bots.json for the roster; each bot dir may
-	# also carry a SOUL.md persona. Destination state (config.json with
-	# credentials, providers/, transcripts, SQLite stores) is never touched.
-	local soul bot_id bot_dir
-	for soul in "$SCRIPT_DIR/configs/openmausbot/bots"/*/SOUL.md; do
-		if [ -f "$soul" ]; then
-			bot_id=$(basename "$(dirname "$soul")")
-			bot_dir="$HOME/.openmausbot/bots/$bot_id"
-			if ! copy_config_file "$soul" "$bot_dir/"; then
-				log_error "Failed to copy OpenMausBot soul for $bot_id"
-				return 1
-			fi
+	local file src copied=0
+	for file in bots.json default-bot.json; do
+		src="$SCRIPT_DIR/configs/openmausbot/$file"
+		if [ ! -f "$src" ]; then
+			log_warning "Managed OpenMausBot file missing from repo, skipping: $file"
+			continue
 		fi
+		if ! copy_config_file "$src" "$dest/"; then
+			log_warning "Failed to copy OpenMausBot $file, skipping"
+			continue
+		fi
+		# The app keeps its registries owner-only (0600). A git checkout is
+		# always world-readable, so restore the mode after copying.
+		execute_quoted chmod 600 "$dest/$file" || true
+		copied=$((copied + 1))
 	done
 
-	log_success "OpenMausBot configs copied"
+	if [ "$copied" -eq 0 ]; then
+		log_warning "No OpenMausBot configs installed"
+		return 0
+	fi
+
+	log_success "OpenMausBot configs copied to $dest"
 }
 
 copy_configurations() {
@@ -800,7 +807,7 @@ copy_configurations() {
 		log_info "Skipping mimo config install (not in -y allowlist)"
 	fi
 	if tool_allowed "openmausbot"; then
-		copy_openmausbot_configs
+		copy_openmausbot_configs || log_warning "Skipping OpenMausBot config install"
 	else
 		log_info "Skipping openmausbot config install (not in -y allowlist)"
 	fi

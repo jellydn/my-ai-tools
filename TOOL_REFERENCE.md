@@ -3315,17 +3315,18 @@ open https://github.com/milind-soni/OpenMausBot/releases/latest
 | Windows x64           | [`OpenMausBot-setup.exe`](https://github.com/milind-soni/OpenMausBot/releases/latest/download/OpenMausBot-setup.exe)   |
 | Ubuntu 24.04 x64      | [`OpenMausBot-amd64.deb`](https://github.com/milind-soni/OpenMausBot/releases/latest/download/OpenMausBot-amd64.deb) · [`OpenMausBot.AppImage`](https://github.com/milind-soni/OpenMausBot/releases/latest/download/OpenMausBot.AppImage) |
 
-OpenMausBot needs at least one agent CLI (`claude`, `codex`, or `grok`) installed and signed in; install any of them through this repo's own installer first. `install_openmausbot` skips straight to the app when `~/.openmausbot` already exists, and otherwise installs the npm CLI and prints the desktop download link.
+OpenMausBot needs at least one agent CLI (`claude`, `codex`, or `grok`) installed and signed in; install any of them through this repo's own installer first. `install_openmausbot` installs the headless npm CLI when it is not already on PATH — independently of whether the desktop app is installed — and prints the desktop download link.
 
 ### Configuration
 
-Managed configs live in [`configs/openmausbot/`](configs/openmausbot/). Application state lives in `~/.openmausbot/`:
+Managed configs live in [`configs/openmausbot/`](configs/openmausbot/). Application state lives in the OpenMausBot data directory (`$OMB_DATA_DIR`, or `~/.openmausbot/` by default):
 
 | Config             | Path                          | Managed by this repo              |
 | ------------------ | ----------------------------- | --------------------------------- |
-| Bot roster         | `~/.openmausbot/bots.json`    | Yes (`configs/openmausbot/bots.json`) |
-| Default bot        | `~/.openmausbot/default-bot.json` | Yes (`configs/openmausbot/default-bot.json`) |
-| Bot personas       | `~/.openmausbot/bots/<id>/SOUL.md` | Yes (`configs/openmausbot/bots/<id>/SOUL.md`) |
+| Bot roster         | `~/.openmausbot/import/bots.json` | Yes (`configs/openmausbot/bots.json`) |
+| Default bot        | `~/.openmausbot/import/default-bot.json` | Yes (`configs/openmausbot/default-bot.json`) |
+| Live bot registry  | `~/.openmausbot/bots.json`    | Never — the app rewrites it on every roster change |
+| Bot personas       | `~/.openmausbot/bots/<id>/SOUL.md` | Never — derived mirror of the roster |
 | Credentials        | `~/.openmausbot/config.json`, `~/.openmausbot/providers/` | Never — plaintext API keys and sign-in state stay local |
 | Transcripts & data | `messages.db`, `runtime.db`, `events/`, `native/`, `attachments/`, `bots/<id>/history.ndjson` | Never — live runtime state |
 
@@ -3335,13 +3336,15 @@ Export is a strict opt-in so a plain `generate.sh` never reads live private stat
 OPENMAUSBOT_EXPORT=1 ./generate.sh
 ```
 
+The exported roster carries personas, absolute project paths, and account email addresses, so it is **gitignored** — this repository is public and the snapshot must never be committed.
+
 Install is off the default `-y` allowlist; opt in explicitly:
 
 ```bash
 ./cli.sh --with-tools=openmausbot
 ```
 
-The installer copies only the managed roster files above into `~/.openmausbot/` (backing up an existing file as `.bak` first) and never modifies credentials, transcripts, or databases already there.
+The installer copies the managed roster files into `~/.openmausbot/import/` (owner-only, `0600`) when the app data directory exists. The live registry, credentials, transcripts, and databases are never modified or removed — apply the snapshot from the app when you want it.
 
 ### Full recovery
 
