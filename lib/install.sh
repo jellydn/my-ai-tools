@@ -411,7 +411,7 @@ install_open_cursor() {
 install_amp() {
 	_run_amp_install() {
 		AMP_INSTALLED=false
-		local amp_home="${AMP_HOME:-$HOME/.amp}" selected version powershell
+		local amp_home="${AMP_HOME:-$HOME/.amp}" selected version powershell windows_home
 		local status_file="${MY_AI_TOOLS_AMP_STATUS_FILE:-}"
 		if [ "${IS_WINDOWS:-false}" = true ]; then
 			amp_home=$(cygpath -u "${AMP_HOME:-${USERPROFILE:-$HOME}/.amp}") || return 1
@@ -422,7 +422,7 @@ install_amp() {
 		fi
 		local bin_dir="$amp_home/bin"
 		selected=$(command -v amp 2>/dev/null || true)
-		if [ -n "$selected" ] && [ "$selected" != "$bin_dir/amp" ] && [ "$selected" != "$bin_dir/amp.exe" ]; then
+		if [ -n "$selected" ] && [ ! "$selected" -ef "$bin_dir/amp" ] && [ ! "$selected" -ef "$bin_dir/amp.exe" ]; then
 			log_warning "Amp command $selected takes priority over $bin_dir/amp; it may be a stale npm command."
 			log_info "Put the official Amp bin directory before npm in PATH. No existing installation will be removed."
 		fi
@@ -454,7 +454,8 @@ install_amp() {
 				log_error "PowerShell is required for the official Amp Windows installer"
 				return 1
 			}
-			execute_quoted "$powershell" -NoProfile -Command \
+			windows_home=$(cygpath -w "$amp_home") || return 1
+			AMP_HOME="$windows_home" execute_quoted "$powershell" -NoProfile -Command \
 				'& { $ErrorActionPreference = "Stop"; Invoke-RestMethod https://ampcode.com/install.ps1 | Invoke-Expression }' || return 1
 		else
 			execute_installer "https://ampcode.com/install.sh" "" "Amp" || return 1
