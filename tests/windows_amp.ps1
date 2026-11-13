@@ -14,6 +14,8 @@ foreach ($definition in $ast.FindAll({ param($node)
 
 $originalPath = $env:Path
 $originalAmpHome = $env:AMP_HOME
+$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+$machinePath = [Environment]::GetEnvironmentVariable('Path', 'Machine')
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('Amp regression ' + [IO.Path]::GetRandomFileName())
 $script:messages = @()
 function Write-Host {
@@ -47,21 +49,28 @@ public class AmpInstallerFixture {
         'throw "The stale npm shim must never run"' | Set-Content $shim -Encoding ASCII
         $env:Path = "$npm;$bin;$originalPath"
         $script:messages = @()
-        Assert-True (-not (Test-AmpCommand)) "Shadowing amp.$extension must not report success"
-        $text = $script:messages -join "`n"
-        Assert-True ($text.Contains($shim)) 'Diagnostic must name the command taking priority'
-        Assert-True ($text.Contains('Get-Command amp -All')) 'Diagnostic must show command discovery'
-        Assert-True ($text.Contains('No installation was removed')) 'Diagnostic must explain safe recovery'
+        Assert-True (Test-AmpCommand) "Official Amp must be promoted ahead of amp.$extension"
+        Assert-True ((Get-Command amp).Source -ieq $exe) 'PowerShell must now select the official binary'
+        Assert-True (($env:Path -split ';')[0] -ieq $bin) 'The official directory must be first in this process'
+        Assert-True (($env:Path -split ';') -contains $npm) 'npm must remain available for other tools'
+        Assert-True ((amp version) -eq 'fixture-version') 'The selected command must return the official version'
         Assert-True (Test-Path $shim) 'The existing installation must not be removed'
         Remove-Item $shim
     }
+    Assert-True ([Environment]::GetEnvironmentVariable('Path', 'User') -ceq $userPath) 'User PATH must not change'
+    Assert-True ([Environment]::GetEnvironmentVariable('Path', 'Machine') -ceq $machinePath) 'Machine PATH must not change'
+    Set-Alias -Name amp -Value Write-Output -Scope Script
+    $script:messages = @()
+    Assert-True (-not (Test-AmpCommand)) 'A higher-priority alias still needs manual review'
+    Assert-True (($script:messages -join "`n").Contains('Get-Command amp -All')) 'Alias diagnostic must show command discovery'
+    Remove-Item Alias:amp
     $env:Path = "$bin;$originalPath"
     $env:AMP_FIXTURE_FAIL = '1'
     Assert-True (-not (Test-AmpCommand)) 'Nonzero amp version must fail verification'
     Remove-Item Env:AMP_FIXTURE_FAIL
     Remove-Item $exe
     Assert-True (-not (Test-AmpCommand)) 'Missing official binary must fail verification'
-    [Console]::WriteLine('PASS: official Amp, npm ps1/cmd shadowing, failing version, missing binary')
+    [Console]::WriteLine('PASS: official Amp, npm ps1/cmd PATH promotion, persistent PATH unchanged, alias detection, failing version, missing binary')
 }
 finally {
     $env:Path = $originalPath

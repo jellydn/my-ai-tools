@@ -273,7 +273,7 @@ function Test-AmpCommand {
         Write-Err "Could not verify official Amp at ${ampExe}: $_"
         return $false
     }
-    Update-ProcessPath
+    Update-ProcessPath -Prepend @((Split-Path $ampExe -Parent))
     $selected = Get-Command amp -ErrorAction SilentlyContinue
     if (-not $selected -or $selected.Source -ine $ampExe) {
         Write-Warn "Official Amp works at $ampExe, but PowerShell does not select it."
