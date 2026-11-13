@@ -50,3 +50,9 @@ fi
 - Comments explain why, not what
 - Run typecheck, lint and biome on js/ts file changes after finish.
 - Prefer to use Bun to run scripts if possible, otherwise use tsx to run ts files.
+
+## Experiment Workspaces
+
+- Use the [`try` CLI](https://github.com/tobi/try) to create and enter isolated experiment directories and Git worktrees.
+- Prefer `try . [name]` for a worktree from the current repository, `try clone <url> [name]` for an external repository, and `try new <name>` for a fresh experiment.
+- Keep experiments in `try`-managed directories instead of ad hoc `/tmp` folders; fall back to `git worktree` only when `try` is unavailable or unsuitable.

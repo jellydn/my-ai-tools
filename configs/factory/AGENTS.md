@@ -55,3 +55,9 @@ tmux capture-pane -p -t "$SESSION" -S -20  # check output
 - Break complex tasks into smaller, manageable steps.
 - Test your changes before reporting completion.
 - Document any assumptions or trade-offs made during implementation.
+
+## Experiment Workspaces
+
+- Use the [`try` CLI](https://github.com/tobi/try) to create and enter isolated experiment directories and Git worktrees.
+- Prefer `try . [name]` for a worktree from the current repository, `try clone <url> [name]` for an external repository, and `try new <name>` for a fresh experiment.
+- Keep experiments in `try`-managed directories instead of ad hoc `/tmp` folders; fall back to `git worktree` only when `try` is unavailable or unsuitable.

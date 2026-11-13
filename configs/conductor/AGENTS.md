@@ -39,3 +39,9 @@ If yes:
 - Local overrides: `.conductor/settings.local.toml`
 
 See the full [Conductor docs](https://www.conductor.build/docs) for details.
+
+## Experiment Workspaces
+
+- Use the [`try` CLI](https://github.com/tobi/try) to create and enter isolated experiment directories and Git worktrees.
+- Prefer `try . [name]` for a worktree from the current repository, `try clone <url> [name]` for an external repository, and `try new <name>` for a fresh experiment.
+- Keep experiments in `try`-managed directories instead of ad hoc `/tmp` folders; fall back to `git worktree` only when `try` is unavailable or unsuitable.
