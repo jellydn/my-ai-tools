@@ -85,7 +85,8 @@ finding another command on PATH is not enough, including an npm shim under a cus
 Symlinks to the official binary are recognised and do not trigger an npm warning.
 `AMP_HOME` may be a Windows path or a Git Bash path; setup converts it for each side, so the
 official installer and the verification always use the same directory.
-The official bin directory is moved to the front of PATH for the current Bash process when needed.
+The official bin directory is moved to the front of PATH for the current Bash and PowerShell processes when needed.
+This does not change persistent User or Machine PATH settings.
 The PowerShell wrapper checks Amp only if it was accepted in setup; declining Amp leaves other tool installs unaffected.
 
 The one-line command and `-y` / `--yes` use these default categories:
@@ -140,9 +141,10 @@ with `--ignore-scripts`: native binaries can remain uninstalled.
 #### Windows recovery: Amp command priority
 
 If `amp` reports an incompatible npm build, or PowerShell blocks `AppData\Roaming\npm\amp.ps1`,
-check command selection before changing anything. A successful official install does not mean the current
-PowerShell session selects that binary. The wrapper reports this conflict as a warning and does not fail
-the rest of the setup; only a missing or broken official binary fails the run.
+check command selection before changing anything. The wrapper verifies the official binary, puts its directory
+first in the current PowerShell process PATH, and checks command selection again. A shadowing alias, function,
+or a PATH entry that a new terminal would pick first is reported as a warning and does not fail the rest of
+the setup; only a missing or broken official binary fails the run.
 
 ```powershell
 Get-Command amp -All

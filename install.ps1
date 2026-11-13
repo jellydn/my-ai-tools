@@ -309,8 +309,7 @@ function Test-AmpCommand {
         Write-Err "Could not verify official Amp at ${ampExe}: $_"
         return $false
     }
-
-    # This session: prefer the official binary over a stale shim on PATH.
+# This session: prefer the official binary over a stale shim on PATH.
     $ampBin = Split-Path $ampExe -Parent
     Update-ProcessPath -Prepend @($ampBin)
     $selected = Get-Command amp -ErrorAction SilentlyContinue
@@ -320,7 +319,8 @@ function Test-AmpCommand {
         $sessionConflict = $true
     }
     elseif ($selected.Source -ine $ampExe) {
-        Write-Warn "This session selects $($selected.Source) ($($selected.CommandType)) instead of $ampExe."
+        $command = if ($selected.CommandType -eq 'Alias') { "alias $($selected.Name)" } else { "$($selected.Source) ($($selected.CommandType))" }
+        Write-Warn "This session selects $command instead of $ampExe."
         $sessionConflict = $true
     }
 

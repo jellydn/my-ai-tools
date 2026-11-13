@@ -14,6 +14,8 @@ foreach ($definition in $ast.FindAll({ param($node)
 
 $originalPath = $env:Path
 $originalAmpHome = $env:AMP_HOME
+$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+$machinePath = [Environment]::GetEnvironmentVariable('Path', 'Machine')
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('Amp regression ' + [IO.Path]::GetRandomFileName())
 $script:messages = @()
 $script:persistentEntries = @()
@@ -53,8 +55,13 @@ public class AmpInstallerFixture {
         $env:Path = "$npm;$bin;$originalPath"
         $script:persistentEntries = @($npm, $bin)
         $script:messages = @()
+# The official binary is promoted ahead of the stale shim.
+        Assert-True (Test-AmpCommand) "Official Amp must be promoted ahead of amp.$extension"
+        Assert-True ((Get-Command amp).Source -ieq $exe) 'PowerShell must now select the official binary'
+        Assert-True (($env:Path -split ';')[0] -ieq $bin) 'The official directory must be first in this process'
+        Assert-True (($env:Path -split ';') -contains $npm) 'npm must remain available for other tools'
+        Assert-True ((amp version) -eq 'fixture-version') 'The selected command must return the official version'
         # A priority conflict is a warning, not a failed setup.
-        Assert-True (Test-AmpCommand) "Shadowing amp.$extension must not fail the setup"
         $text = $script:messages -join "`n"
         Assert-True ($text.Contains($shim)) 'Diagnostic must name the command taking priority'
         Assert-True ($text.Contains('Get-Command amp -All')) 'Diagnostic must show command discovery'
@@ -62,7 +69,14 @@ public class AmpInstallerFixture {
         Assert-True (Test-Path $shim) 'The existing installation must not be removed'
         Remove-Item $shim
     }
-    # A new terminal that keeps the official binary first reports no conflict.
+    Assert-True ([Environment]::GetEnvironmentVariable('Path', 'User') -ceq $userPath) 'User PATH must not change'
+    Assert-True ([Environment]::GetEnvironmentVariable('Path', 'Machine') -ceq $machinePath) 'Machine PATH must not change'
+    # An alias needs manual review, but it does not fail the rest of the setup.
+    Set-Alias -Name amp -Value Write-Output -Scope Script
+    $script:messages = @()
+    Assert-True (Test-AmpCommand) 'A higher-priority alias must not fail the setup'
+    Assert-True (($script:messages -join "`n").Contains('Get-Command amp -All')) 'Alias diagnostic must show command discovery'
+    Remove-Item Alias:amp
     $env:Path = "$bin;$originalPath"
     $script:persistentEntries = @($bin)
     $script:messages = @()
@@ -73,7 +87,7 @@ public class AmpInstallerFixture {
     Remove-Item Env:AMP_FIXTURE_FAIL
     Remove-Item $exe
     Assert-True (-not (Test-AmpCommand)) 'Missing official binary must fail verification'
-    [Console]::WriteLine('PASS: official Amp, npm ps1/cmd shadowing, failing version, missing binary')
+    [Console]::WriteLine('PASS: official Amp, npm ps1/cmd PATH promotion, persistent PATH unchanged, alias detection, failing version, missing binary')
 }
 finally {
     $env:Path = $originalPath
