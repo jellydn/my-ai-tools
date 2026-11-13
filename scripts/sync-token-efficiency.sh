@@ -20,14 +20,12 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CHECK_ONLY=false
 [ "${1:-}" = "--check" ] && CHECK_ONLY=true
 
-# Emit the profile ($2) with the section headed by the first line of the
-# canonical file ($1) replaced by that file, appending the section when the
-# profile does not have it yet.
+# Emit the profile ($3) with the heading ($2) replaced by the canonical file
+# ($1), appending the section when the profile does not have it yet.
 render_profile() {
-	awk -v canonical="$1" '
+	awk -v canonical="$1" -v heading="$2" '
 		BEGIN {
 			while ((getline line < canonical) > 0) {
-				if (heading == "") heading = line
 				section = section line "\n"
 			}
 			sub(/\n+$/, "\n", section)
@@ -39,7 +37,7 @@ render_profile() {
 		}
 		{ print }
 		END { if (!found) { print ""; printf "%s", section } }
-	' "$2"
+	' "$3"
 }
 
 managed_profiles() {
@@ -48,27 +46,32 @@ managed_profiles() {
 
 stale=()
 
-# sync_section <canonical> <profile>...
+# sync_section <canonical> <heading> <profile>...
 sync_section() {
-	local canonical="$REPO_ROOT/$1" profile
-	shift
+	local canonical="$REPO_ROOT/$1" heading="$2" profile first_line
+	shift 2
 	if [ ! -f "$canonical" ]; then
 		echo "missing canonical section: $canonical" >&2
 		exit 1
 	fi
+	IFS= read -r first_line <"$canonical"
+	if [ "$first_line" != "$heading" ]; then
+		echo "canonical section must start with $heading: $canonical" >&2
+		exit 1
+	fi
 	for profile in "$@"; do
-		if ! render_profile "$canonical" "$profile" | diff -q - "$profile" >/dev/null 2>&1; then
+		if ! render_profile "$canonical" "$heading" "$profile" | diff -q - "$profile" >/dev/null 2>&1; then
 			stale+=("${profile#"$REPO_ROOT"/} (${canonical#"$REPO_ROOT"/})")
 			[ "$CHECK_ONLY" = true ] && continue
-			render_profile "$canonical" "$profile" >"$profile.tmp" && mv "$profile.tmp" "$profile"
+			render_profile "$canonical" "$heading" "$profile" >"$profile.tmp" && mv "$profile.tmp" "$profile"
 		fi
 	done
 }
 
 profiles=()
 while IFS= read -r profile; do profiles+=("$profile"); done < <(managed_profiles)
-sync_section configs/token-efficiency.md "${profiles[@]}"
-sync_section configs/experiment-workspaces.md "${profiles[@]}" \
+sync_section configs/token-efficiency.md "## Token Efficiency" "${profiles[@]}"
+sync_section configs/experiment-workspaces.md "## Experiment Workspaces" "${profiles[@]}" \
 	"$REPO_ROOT/configs/claude/CLAUDE.md" "$REPO_ROOT/AGENTS.md" "$REPO_ROOT/GEMINI.md"
 
 if [ ${#stale[@]} -eq 0 ]; then

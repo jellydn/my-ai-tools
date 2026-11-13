@@ -363,7 +363,9 @@ Edit [`configs/token-efficiency.md`](configs/token-efficiency.md) or
 The script syncs both sections across the managed profiles. Experiment Workspaces also covers the Claude Code
 profile and the root `AGENTS.md` and `GEMINI.md`. Do not edit these generated sections in individual profiles;
 the CI check rejects drift from the canonical files. The workspace guideline uses `try` when available, but
-the installer does not install it.
+the installer does not install it. It requires shell integration; fresh experiments use an interactive selector,
+with fallbacks for agent shells without a terminal. `generate.sh` restores the canonical sections after export,
+so an older home-directory profile cannot remove them.
 
 ## 🎨 GitHub Coding Taste Generator
 
