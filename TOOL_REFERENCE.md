@@ -1241,6 +1241,7 @@ amp version
 
 The default binary is `$env:USERPROFILE\.amp\bin\amp.exe`; `AMP_HOME` overrides the `.amp` directory
 and may be a Windows path or a Git Bash path, because setup converts it for each side.
+Use a Windows path for `AMP_HOME` in PowerShell. Git Bash paths are converted for the official Windows installer.
 If PowerShell selects an old npm `amp.ps1` or `amp.cmd`, put the official bin directory before npm in PATH.
 Do not weaken execution policy to run the stale shim. See [Windows Amp recovery](README.md#windows-recovery-amp-command-priority)
 for session-only PATH guidance. Setup does not remove existing installations. See [official CLI guidance](https://ampcode.com/docs/cli).

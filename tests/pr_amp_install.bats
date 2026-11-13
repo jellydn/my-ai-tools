@@ -31,7 +31,7 @@ amp_install() {
         if [ "${CUSTOM_PREFIX:-false}" = true ]; then
             export PATH="$HOME/custom-prefix/bin:/usr/bin:/bin"
         fi
-        if [ "${LOCAL_LINK:-false}" = true ]; then
+        if [ "${OFFICIAL_SYMLINK:-false}" = true ]; then
             export PATH="$HOME/.local/bin:/usr/bin:/bin"
         fi
         unset AMP_HOME USERPROFILE
@@ -42,8 +42,9 @@ amp_install() {
             echo "$1" >> "$AMP_TEST_LOG"
             [ "${FAIL_INSTALL:-false}" != true ] || return 1
             [ "${NO_BINARY:-false}" != true ] || return 0
-            local bin_dir="${AMP_HOME:-$HOME/.amp}/bin"
-            bin_dir=$(cygpath -u "$bin_dir")
+            local install_home="${AMP_HOME:-$HOME/.amp}"
+            if [ "$IS_WINDOWS" = true ]; then install_home=$(cygpath -u "$install_home"); fi
+            local bin_dir="$install_home/bin"
             mkdir -p "$bin_dir"
             printf "#!/bin/sh\n[ \"\$1\" = version ] || exit 7\necho fixture-version\nexit %s\n" "${BINARY_EXIT:-0}" > "$bin_dir/amp"
             chmod +x "$bin_dir/amp"
@@ -51,28 +52,19 @@ amp_install() {
         powershell.exe() {
             printf "%s\n" "$*" >> "$AMP_TEST_LOG"
             printf "AMP_HOME=%s\n" "${AMP_HOME:-}" >> "$AMP_TEST_LOG"
+            if [ "${CUSTOM_HOME:-false}" = true ]; then
+                [[ "$AMP_HOME" == C:\\* ]] || return 22
+            fi
             execute_installer https://ampcode.com/install.ps1
         }
         cygpath() {
-            local flag="${1:-}" path="${2:-}"
-            case "$flag" in
-            -w)
-                case "$path" in
-                /*) printf "C:%s\n" "${path//\//\\}" ;;
-                *) printf "%s\n" "$path" ;;
-                esac
-                ;;
-            -u)
-                case "$path" in
-                C:*)
-                    local stripped="${path#C:}"
-                    printf "/%s\n" "${stripped//\\//}"
-                    ;;
-                *) printf "%s\n" "$path" ;;
-                esac
-                ;;
-            *) printf "%s\n" "$path" ;;
-            esac
+            local value="${@: -1}"
+            if [ "$1" = -w ]; then
+                printf "C:%s\n" "${value//\//\\}"
+            else
+                value="${value#C:}"
+                printf "%s\n" "${value//\\//}"
+            fi
         }
         install_amp
         result=$?
@@ -151,6 +143,20 @@ amp_install() {
     [[ "$output" == *"AMP_INSTALLED=true"* ]]
 }
 
+@test "Amp recognises the official Unix symlink without a stale npm warning" {
+    printf '#!/bin/sh\necho official-version\n' > "$AMP_TEST_HOME/.amp/bin/amp"
+    chmod +x "$AMP_TEST_HOME/.amp/bin/amp"
+    mkdir -p "$AMP_TEST_HOME/.local/bin"
+    ln -s ../../.amp/bin/amp "$AMP_TEST_HOME/.local/bin/amp"
+    export OFFICIAL_SYMLINK=true
+    run amp_install false
+    [ "$status" -eq 0 ]
+    [ ! -e "$AMP_TEST_LOG" ]
+    [[ "$output" == *"official-version"* ]]
+    [[ "$output" != *"stale npm"* ]]
+    [[ "$output" != *"takes priority"* ]]
+}
+
 @test "Amp fails when the installer succeeds but amp version fails" {
     export BINARY_EXIT=8
     run amp_install false
@@ -161,6 +167,14 @@ amp_install() {
 @test "Amp supports AMP_HOME with spaces" {
     export CUSTOM_HOME=true
     run amp_install false
+    [ "$status" -eq 0 ]
+    [ -x "$AMP_TEST_HOME/custom amp/bin/amp" ]
+    [[ "$output" == *"AMP_INSTALLED=true"* ]]
+}
+
+@test "Amp converts Git Bash AMP_HOME for the PowerShell installer" {
+    export CUSTOM_HOME=true
+    run amp_install true
     [ "$status" -eq 0 ]
     [ -x "$AMP_TEST_HOME/custom amp/bin/amp" ]
     [[ "$output" == *"AMP_INSTALLED=true"* ]]
@@ -187,20 +201,6 @@ amp_install() {
     run amp_install false
     [ "$status" -eq 0 ]
     [ "$(head -n 1 "$MY_AI_TOOLS_AMP_STATUS_FILE")" = selected ]
-}
-
-@test "Amp accepts the official installer's own symlink as the official install" {
-    mkdir -p "$AMP_TEST_HOME/.local/bin"
-    printf '#!/bin/sh\necho official-version\n' > "$AMP_TEST_HOME/.amp/bin/amp"
-    chmod +x "$AMP_TEST_HOME/.amp/bin/amp"
-    ln -s "$AMP_TEST_HOME/.amp/bin/amp" "$AMP_TEST_HOME/.local/bin/amp"
-    export LOCAL_LINK=true
-    run amp_install false
-    [ "$status" -eq 0 ]
-    [ ! -e "$AMP_TEST_LOG" ]
-    [[ "$output" != *"takes priority"* ]]
-    [[ "$output" == *"official-version"* ]]
-    [[ "$output" == *"AMP_INSTALLED=true"* ]]
 }
 
 @test "Amp decline leaves PowerShell participation unset" {
