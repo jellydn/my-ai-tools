@@ -73,6 +73,75 @@ ensure_dir_on_path() {
 	fi
 }
 
+# Resolve a path to its real target, following symlinks.
+# Uses realpath or readlink -f when available and falls back to the physical
+# directory, so it also works on macOS and in the test fixtures.
+resolve_path_target() {
+	local target="${1:-}" dir base link attempt=0
+	[ -n "$target" ] || return 1
+	if command -v realpath >/dev/null 2>&1; then
+		realpath "$target" 2>/dev/null && return 0
+	fi
+	if readlink -f "$target" 2>/dev/null; then
+		return 0
+	fi
+	# Resolve the last symlink by hand when the platform has neither helper.
+	dir=$(cd "$(dirname "$target")" 2>/dev/null && pwd -P) || return 1
+	base=$(basename "$target")
+	while [ -L "$dir/$base" ] && [ "$attempt" -lt 10 ]; do
+		link=$(readlink "$dir/$base" 2>/dev/null) || break
+		attempt=$((attempt + 1))
+		case "$link" in
+		/*)
+			dir=$(cd "$(dirname "$link")" 2>/dev/null && pwd -P) || return 1
+			base=$(basename "$link")
+			;;
+		*)
+			base="$link"
+			;;
+		esac
+	done
+	printf '%s\n' "$dir/$base"
+}
+
+# Warn when another amp command takes priority over the official installation.
+# The official installer links the binary into ~/.local/bin, so the resolved
+# target decides whether a command is the official one.
+warn_on_amp_command_conflict() {
+	local bin_dir="${1:-}" selected="${2:-}" selected_target official_target official_dir candidate
+	[ -n "$selected" ] || return 0
+	selected_target=$(resolve_path_target "$selected" 2>/dev/null) || selected_target="$selected"
+	official_target=""
+	for candidate in "$bin_dir/amp" "$bin_dir/amp.exe"; do
+		[ -e "$candidate" ] || continue
+		official_target=$(resolve_path_target "$candidate" 2>/dev/null) || official_target="$candidate"
+		break
+	done
+	official_dir=$(resolve_path_target "$bin_dir" 2>/dev/null) || official_dir="$bin_dir"
+	case "$selected_target" in
+	"$official_target" | "$official_dir"/*) return 0 ;;
+	esac
+	log_warning "Amp command $selected takes priority over the official Amp binary ($selected_target); it may be a stale npm command."
+	log_info "Put the official Amp bin directory before npm in PATH. No existing installation will be removed."
+}
+
+# Run a command with AMP_HOME set to a Windows path, then restore the old value.
+# The official Windows installer needs a drive-letter path, while Git Bash
+# exports a POSIX path for the same directory.
+with_windows_amp_home() {
+	local windows_home="${1:-}" previous="${AMP_HOME:-}"
+	shift
+	export AMP_HOME="$windows_home"
+	execute_quoted "$@"
+	local status=$?
+	if [ -z "$previous" ]; then
+		unset AMP_HOME
+	else
+		export AMP_HOME="$previous"
+	fi
+	return "$status"
+}
+
 # Shared prerequisite for Plannotator hooks, inbox MCP servers, and plugins.
 # Fail before copying enabled integrations if the binary cannot be installed.
 install_plannotator_if_needed() {

@@ -16,6 +16,9 @@ $originalPath = $env:Path
 $originalAmpHome = $env:AMP_HOME
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('Amp regression ' + [IO.Path]::GetRandomFileName())
 $script:messages = @()
+$script:persistentEntries = @()
+# The persistent PATH is a registry value, so the fixture controls it.
+function Get-PersistentPathEntries { return $script:persistentEntries }
 function Write-Host {
     param($Object, $ForegroundColor)
     $script:messages += [string]$Object
@@ -41,13 +44,17 @@ public class AmpInstallerFixture {
 }
 '@
     $env:Path = "$bin;$originalPath"
+    $script:persistentEntries = @($bin)
     Assert-True (Test-AmpCommand) 'Official binary must pass version verification'
     foreach ($extension in @('ps1', 'cmd')) {
         $shim = Join-Path $npm "amp.$extension"
         'throw "The stale npm shim must never run"' | Set-Content $shim -Encoding ASCII
+        # The session PATH and the persistent PATH still have the stale shim first.
         $env:Path = "$npm;$bin;$originalPath"
+        $script:persistentEntries = @($npm, $bin)
         $script:messages = @()
-        Assert-True (-not (Test-AmpCommand)) "Shadowing amp.$extension must not report success"
+        # A priority conflict is a warning, not a failed setup.
+        Assert-True (Test-AmpCommand) "Shadowing amp.$extension must not fail the setup"
         $text = $script:messages -join "`n"
         Assert-True ($text.Contains($shim)) 'Diagnostic must name the command taking priority'
         Assert-True ($text.Contains('Get-Command amp -All')) 'Diagnostic must show command discovery'
@@ -55,7 +62,12 @@ public class AmpInstallerFixture {
         Assert-True (Test-Path $shim) 'The existing installation must not be removed'
         Remove-Item $shim
     }
+    # A new terminal that keeps the official binary first reports no conflict.
     $env:Path = "$bin;$originalPath"
+    $script:persistentEntries = @($bin)
+    $script:messages = @()
+    Assert-True (Test-AmpCommand) 'The official binary must verify without a conflict'
+    Assert-True (-not (($script:messages -join "`n").Contains('A new terminal will select'))) 'No conflict must be reported'
     $env:AMP_FIXTURE_FAIL = '1'
     Assert-True (-not (Test-AmpCommand)) 'Nonzero amp version must fail verification'
     Remove-Item Env:AMP_FIXTURE_FAIL

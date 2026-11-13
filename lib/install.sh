@@ -411,21 +411,19 @@ install_open_cursor() {
 install_amp() {
 	_run_amp_install() {
 		AMP_INSTALLED=false
-		local amp_home="${AMP_HOME:-$HOME/.amp}" selected version powershell
+		local amp_home="${AMP_HOME:-$HOME/.amp}" selected version powershell amp_home_win=""
 		local status_file="${MY_AI_TOOLS_AMP_STATUS_FILE:-}"
 		if [ "${IS_WINDOWS:-false}" = true ]; then
-			amp_home=$(cygpath -u "${AMP_HOME:-${USERPROFILE:-$HOME}/.amp}") || return 1
-			[ -z "$status_file" ] || status_file=$(cygpath -u "$status_file") || return 1
+			amp_home=$(to_unix_path "${AMP_HOME:-${USERPROFILE:-$HOME}/.amp}") || return 1
+			amp_home_win=$(to_windows_path "$amp_home")
+			[ -z "$status_file" ] || status_file=$(to_unix_path "$status_file") || return 1
 		fi
 		if [ -n "$status_file" ]; then
-			printf '%s\n' selected | execute_quoted tee "$status_file" >/dev/null || return 1
+			printf 'selected\n%s\n' "${amp_home_win:-$amp_home}" | execute_quoted tee "$status_file" >/dev/null || return 1
 		fi
 		local bin_dir="$amp_home/bin"
 		selected=$(command -v amp 2>/dev/null || true)
-		if [ -n "$selected" ] && [ "$selected" != "$bin_dir/amp" ] && [ "$selected" != "$bin_dir/amp.exe" ]; then
-			log_warning "Amp command $selected takes priority over $bin_dir/amp; it may be a stale npm command."
-			log_info "Put the official Amp bin directory before npm in PATH. No existing installation will be removed."
-		fi
+		warn_on_amp_command_conflict "$bin_dir" "$selected"
 
 		# Prefer the official location in this process, even when it was already on PATH.
 		if [ -x "$bin_dir/amp" ] || [ -x "$bin_dir/amp.exe" ]; then
@@ -454,7 +452,7 @@ install_amp() {
 				log_error "PowerShell is required for the official Amp Windows installer"
 				return 1
 			}
-			execute_quoted "$powershell" -NoProfile -Command \
+			with_windows_amp_home "$amp_home_win" "$powershell" -NoProfile -Command \
 				'& { $ErrorActionPreference = "Stop"; Invoke-RestMethod https://ampcode.com/install.ps1 | Invoke-Expression }' || return 1
 		else
 			execute_installer "https://ampcode.com/install.sh" "" "Amp" || return 1

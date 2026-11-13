@@ -47,7 +47,7 @@ try {
         $bin = Join-Path $env:AMP_HOME 'bin'
         New-Item -ItemType Directory -Path $bin -Force | Out-Null
         New-Item -ItemType File -Path (Join-Path $bin 'amp.exe') | Out-Null
-        # Either a failing version or a higher-priority command would fail this check.
+        # The check must not run at all when Amp was declined, whatever it reports.
         function Test-AmpCommand { return $false }
     }
     $Yes = $Case -eq 'selected-missing'

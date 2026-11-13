@@ -8,6 +8,17 @@ setup() {
     export AMP_TEST_LOG="$BATS_TEST_TMPDIR/install.log"
 }
 
+# GNU util-linux and BSD script(1) take the command differently.
+run_pty_script() {
+    local script_file="$1"
+    if script --version </dev/null 2>&1 | grep -q "util-linux"; then
+        printf 'n\n' | script -q -e -c "bash \"$script_file\"" /dev/null
+        return $?
+    fi
+    # BSD script(1) has no -c/-e and does not return the child exit status.
+    printf 'n\n' | script -q /dev/null bash "$script_file" || true
+}
+
 amp_install() {
     bash -c '
         source "$1/lib/common.sh"
@@ -20,6 +31,9 @@ amp_install() {
         if [ "${CUSTOM_PREFIX:-false}" = true ]; then
             export PATH="$HOME/custom-prefix/bin:/usr/bin:/bin"
         fi
+        if [ "${LOCAL_LINK:-false}" = true ]; then
+            export PATH="$HOME/.local/bin:/usr/bin:/bin"
+        fi
         unset AMP_HOME USERPROFILE
         if [ "${CUSTOM_HOME:-false}" = true ]; then
             export AMP_HOME="$HOME/custom amp"
@@ -29,15 +43,37 @@ amp_install() {
             [ "${FAIL_INSTALL:-false}" != true ] || return 1
             [ "${NO_BINARY:-false}" != true ] || return 0
             local bin_dir="${AMP_HOME:-$HOME/.amp}/bin"
+            bin_dir=$(cygpath -u "$bin_dir")
             mkdir -p "$bin_dir"
             printf "#!/bin/sh\n[ \"\$1\" = version ] || exit 7\necho fixture-version\nexit %s\n" "${BINARY_EXIT:-0}" > "$bin_dir/amp"
             chmod +x "$bin_dir/amp"
         }
         powershell.exe() {
             printf "%s\n" "$*" >> "$AMP_TEST_LOG"
+            printf "AMP_HOME=%s\n" "${AMP_HOME:-}" >> "$AMP_TEST_LOG"
             execute_installer https://ampcode.com/install.ps1
         }
-        cygpath() { printf "%s\n" "${@: -1}"; }
+        cygpath() {
+            local flag="${1:-}" path="${2:-}"
+            case "$flag" in
+            -w)
+                case "$path" in
+                /*) printf "C:%s\n" "${path//\//\\}" ;;
+                *) printf "%s\n" "$path" ;;
+                esac
+                ;;
+            -u)
+                case "$path" in
+                C:*)
+                    local stripped="${path#C:}"
+                    printf "/%s\n" "${stripped//\\//}"
+                    ;;
+                *) printf "%s\n" "$path" ;;
+                esac
+                ;;
+            *) printf "%s\n" "$path" ;;
+            esac
+        }
         install_amp
         result=$?
         echo "AMP_INSTALLED=$AMP_INSTALLED"
@@ -63,6 +99,14 @@ amp_install() {
     [[ "$output" == *"-NoProfile -Command"*"https://ampcode.com/install.ps1"* ]]
     [[ "$output" != *"install.sh"* ]]
     [[ "$output" != *"Bypass"* ]]
+}
+
+@test "Amp passes a Windows AMP_HOME to the official Windows installer" {
+    run amp_install true
+    [ "$status" -eq 0 ]
+    run cat "$AMP_TEST_LOG"
+    [[ "$output" == *"AMP_HOME=C:"* ]]
+    [[ "$output" == *"AMP_HOME=C:"*".amp"* ]]
 }
 
 @test "Amp does not accept a working npm shim as the official install" {
@@ -142,7 +186,21 @@ amp_install() {
     export MY_AI_TOOLS_AMP_STATUS_FILE="$BATS_TEST_TMPDIR/amp-selection"
     run amp_install false
     [ "$status" -eq 0 ]
-    [ "$(cat "$MY_AI_TOOLS_AMP_STATUS_FILE")" = selected ]
+    [ "$(head -n 1 "$MY_AI_TOOLS_AMP_STATUS_FILE")" = selected ]
+}
+
+@test "Amp accepts the official installer's own symlink as the official install" {
+    mkdir -p "$AMP_TEST_HOME/.local/bin"
+    printf '#!/bin/sh\necho official-version\n' > "$AMP_TEST_HOME/.amp/bin/amp"
+    chmod +x "$AMP_TEST_HOME/.amp/bin/amp"
+    ln -s "$AMP_TEST_HOME/.amp/bin/amp" "$AMP_TEST_HOME/.local/bin/amp"
+    export LOCAL_LINK=true
+    run amp_install false
+    [ "$status" -eq 0 ]
+    [ ! -e "$AMP_TEST_LOG" ]
+    [[ "$output" != *"takes priority"* ]]
+    [[ "$output" == *"official-version"* ]]
+    [[ "$output" == *"AMP_INSTALLED=true"* ]]
 }
 
 @test "Amp decline leaves PowerShell participation unset" {
@@ -155,7 +213,7 @@ source "$REPO_ROOT/lib/install.sh"
 export DRY_RUN=false YES_TO_ALL=false AMP_INSTALLED=false
 install_amp
 BASH
-    run bash -c 'printf "n\n" | script -q -e -c "bash \"$1\"" /dev/null' _ "$BATS_TEST_TMPDIR/decline.sh"
+    run run_pty_script "$BATS_TEST_TMPDIR/decline.sh"
     [ "$status" -eq 0 ]
     [[ "$output" == *"Skipping Amp installation"* ]]
     [ ! -s "$MY_AI_TOOLS_AMP_STATUS_FILE" ]
