@@ -255,6 +255,40 @@ function Test-NonInteractiveInstall {
     return $isInputRedirected -or [string]::IsNullOrEmpty($PSCommandPath)
 }
 
+# Git Bash cannot check which command the parent PowerShell will select.
+function Test-AmpCommand {
+    $ampHome = if ($env:AMP_HOME) { $env:AMP_HOME } else { Join-Path $env:USERPROFILE '.amp' }
+    $ampExe = Join-Path $ampHome 'bin\amp.exe'
+    if (-not (Test-Path $ampExe -PathType Leaf)) {
+        Write-Err "Official Amp binary not found at $ampExe. See https://ampcode.com/docs/cli"
+        return $false
+    }
+    try {
+        $version = & $ampExe version 2>&1
+        if ($LASTEXITCODE -ne 0 -or -not ($version -join '').Trim()) {
+            throw 'amp version did not succeed with version output'
+        }
+    }
+    catch {
+        Write-Err "Could not verify official Amp at ${ampExe}: $_"
+        return $false
+    }
+    Update-ProcessPath
+    $selected = Get-Command amp -ErrorAction SilentlyContinue
+    if (-not $selected -or $selected.Source -ine $ampExe) {
+        Write-Warn "Official Amp works at $ampExe, but PowerShell does not select it."
+        if ($selected) { Write-Warn "Command taking priority: $($selected.Source) ($($selected.CommandType))" }
+        Write-Info 'Inspect all commands with: Get-Command amp -All'
+        Write-Info "Run the binary directly: & '$($ampExe.Replace("'", "''"))' version"
+        Write-Info 'For this session, put the official bin directory first in $env:Path, ahead of AppData\Roaming\npm.'
+        Write-Info 'For future sessions, use Windows Environment Variables to place the official bin directory before npm, then reopen PowerShell.'
+        Write-Info 'An alias or function must be reviewed separately. No installation was removed and no execution policy was changed.'
+        return $false
+    }
+    Write-Success "Amp verified in PowerShell: $($version -join ' ')"
+    return $true
+}
+
 # Main installation function
 function Start-Installation {
     # Build argument array for cli.sh
@@ -289,6 +323,9 @@ function Start-Installation {
     $sourceDir = $null
     $tempDir = $null
     $exitCode = 1
+    $ampSelected = $false
+    $ampStatusFile = $null
+    $previousAmpStatusFile = $env:MY_AI_TOOLS_AMP_STATUS_FILE
 
     if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot "cli.sh"))) {
         $sourceDir = $PSScriptRoot
@@ -305,6 +342,11 @@ function Start-Installation {
     }
 
     try {
+        # A child shell cannot update this process's environment or report a declined prompt.
+        if (-not $DryRun -and -not $Rollback) {
+            $ampStatusFile = [IO.Path]::GetTempFileName()
+            $env:MY_AI_TOOLS_AMP_STATUS_FILE = $ampStatusFile
+        }
         if ($tempDir) {
             Write-Info "Cloning repository to temporary directory..."
             & git clone --depth 1 https://github.com/jellydn/my-ai-tools.git $sourceDir
@@ -334,6 +376,9 @@ function Start-Installation {
                 & $bashPath --noprofile --norc "cli.sh" @arguments
             }
             $exitCode = $LASTEXITCODE
+            if ($ampStatusFile) {
+                $ampSelected = 'selected' -eq (Get-Content $ampStatusFile -TotalCount 1)
+            }
         }
         finally {
             Pop-Location
@@ -343,6 +388,14 @@ function Start-Installation {
         if ($tempDir -and (Test-Path $tempDir)) {
             Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
         }
+        if ($ampStatusFile) {
+            Remove-Item $ampStatusFile -Force -ErrorAction SilentlyContinue
+            $env:MY_AI_TOOLS_AMP_STATUS_FILE = $previousAmpStatusFile
+        }
+    }
+
+    if ($exitCode -eq 0 -and $ampSelected -and -not (Test-AmpCommand)) {
+        $exitCode = 1
     }
 
     if ($exitCode -eq 0) {

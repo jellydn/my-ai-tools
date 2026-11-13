@@ -3,20 +3,68 @@
 # PostToolUse hooks, and the standalone MCP server binaries.
 #
 # Sourced by lib/install.sh, which owns the shared helpers used here
-# (_verify_package_manager, resolve_installer_checksum,
-# handle_tool_installation) — do not source this file on its own.
+# (resolve_installer_checksum, handle_tool_installation) — do not source this file on its own.
 #
 # Requires: lib/common.sh (for log_*, execute_*, prompt_yn, execute_installer)
 # Requires: YES_TO_ALL, DRY_RUN, IS_WINDOWS, AMP_INSTALLED (set in cli.sh)
 
+# Use npm on native Windows to avoid the Bash-installed Bun lifecycle launcher.
+# Unix-like systems keep the existing Bun preference.
+# Outputs: package manager command or empty if none found
+_detect_package_manager() {
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		if command -v node &>/dev/null && command -v npm &>/dev/null; then
+			echo "npm"
+		fi
+	elif command -v bun &>/dev/null; then
+		echo "bun"
+	elif command -v npm &>/dev/null; then
+		echo "npm"
+	else
+		echo ""
+	fi
+}
+
+# Verify and get a working package manager with fallback
+# Outputs: package manager command or empty if none available
+_verify_package_manager() {
+	local tool_name="${1:-tool}"
+	local pkg_manager
+	pkg_manager=$(_detect_package_manager)
+
+	[ -z "$pkg_manager" ] && return 1
+	command -v "$pkg_manager" &>/dev/null && {
+		echo "$pkg_manager"
+		return 0
+	}
+
+	log_warning "$pkg_manager was detected but is not available in current shell PATH"
+
+	if [ "$pkg_manager" = "bun" ] && command -v npm &>/dev/null; then
+		log_info "Falling back to npm for $tool_name installation"
+		echo "npm"
+		return 0
+	fi
+
+	if [ "${IS_WINDOWS:-false}" != true ] && [ "$pkg_manager" = "npm" ] && command -v bun &>/dev/null; then
+		log_info "Falling back to bun for $tool_name installation"
+		echo "bun"
+		return 0
+	fi
+
+	return 1
+}
+
 # Prepend a directory to PATH for the current session if it isn't already present.
-# Windows must also promote existing entries ahead of stale Bun/copied shims.
+# Windows always promotes existing entries; callers can request this on Unix too.
 ensure_dir_on_path() {
 	local dir="${1:-}"
 	[ -n "$dir" ] || return 0
-	if [ "${IS_WINDOWS:-false}" = true ]; then
+	if [ "${IS_WINDOWS:-false}" = true ] || [ "${2:-}" = prepend ]; then
 		local remaining=":$PATH:"
-		remaining="${remaining//":$dir:"/:}"
+		while [[ "$remaining" == *":$dir:"* ]]; do
+			remaining="${remaining//":$dir:"/:}"
+		done
 		remaining="${remaining#:}"
 		PATH="${remaining%:}"
 	fi

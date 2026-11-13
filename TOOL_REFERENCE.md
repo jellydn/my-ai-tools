@@ -1226,8 +1226,23 @@ AI coding assistant by Modular. [Homepage](https://ampcode.com)
 ### Installation
 
 ```bash
+# macOS, Linux, and WSL
 curl -fsSL https://ampcode.com/install.sh | bash
-````
+```
+
+For native Windows, use the official PowerShell installer, not an npm package:
+
+```powershell
+Invoke-RestMethod https://ampcode.com/install.ps1 | Invoke-Expression
+& "$env:USERPROFILE\.amp\bin\amp.exe" version
+Get-Command amp -All
+amp version
+```
+
+The default binary is `$env:USERPROFILE\.amp\bin\amp.exe`; `AMP_HOME` overrides the `.amp` directory.
+If PowerShell selects an old npm `amp.ps1` or `amp.cmd`, put the official bin directory before npm in PATH.
+Do not weaken execution policy to run the stale shim. See [Windows Amp recovery](README.md#windows-recovery-amp-command-priority)
+for session-only PATH guidance. Setup does not remove existing installations. See [official CLI guidance](https://ampcode.com/docs/cli).
 
 ### Configuration
 

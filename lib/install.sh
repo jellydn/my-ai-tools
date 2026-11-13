@@ -12,53 +12,6 @@ source "$(dirname "${BASH_SOURCE[0]}")/install-launcher.sh"
 
 # ─── Shared helpers ────────────────────────────────────────────────
 
-# Use npm on native Windows to avoid the Bash-installed Bun lifecycle launcher.
-# Unix-like systems keep the existing Bun preference.
-# Outputs: package manager command or empty if none found
-_detect_package_manager() {
-	if [ "${IS_WINDOWS:-false}" = true ]; then
-		if command -v node &>/dev/null && command -v npm &>/dev/null; then
-			echo "npm"
-		fi
-	elif command -v bun &>/dev/null; then
-		echo "bun"
-	elif command -v npm &>/dev/null; then
-		echo "npm"
-	else
-		echo ""
-	fi
-}
-
-# Verify and get a working package manager with fallback
-# Outputs: package manager command or empty if none available
-_verify_package_manager() {
-	local tool_name="${1:-tool}"
-	local pkg_manager
-	pkg_manager=$(_detect_package_manager)
-
-	[ -z "$pkg_manager" ] && return 1
-	command -v "$pkg_manager" &>/dev/null && {
-		echo "$pkg_manager"
-		return 0
-	}
-
-	log_warning "$pkg_manager was detected but is not available in current shell PATH"
-
-	if [ "$pkg_manager" = "bun" ] && command -v npm &>/dev/null; then
-		log_info "Falling back to npm for $tool_name installation"
-		echo "npm"
-		return 0
-	fi
-
-	if [ "${IS_WINDOWS:-false}" != true ] && [ "$pkg_manager" = "npm" ] && command -v bun &>/dev/null; then
-		log_info "Falling back to bun for $tool_name installation"
-		echo "bun"
-		return 0
-	fi
-
-	return 1
-}
-
 # Resolve installer checksum URL for trusted installations
 # Usage: resolve_installer_checksum "installer_name"
 resolve_installer_checksum() {
@@ -457,15 +410,68 @@ install_open_cursor() {
 
 install_amp() {
 	_run_amp_install() {
-		if command -v amp &>/dev/null; then
-			log_warning "Amp is already installed"
+		AMP_INSTALLED=false
+		local amp_home="${AMP_HOME:-$HOME/.amp}" selected version powershell
+		local status_file="${MY_AI_TOOLS_AMP_STATUS_FILE:-}"
+		if [ "${IS_WINDOWS:-false}" = true ]; then
+			amp_home=$(cygpath -u "${AMP_HOME:-${USERPROFILE:-$HOME}/.amp}") || return 1
+			[ -z "$status_file" ] || status_file=$(cygpath -u "$status_file") || return 1
+		fi
+		if [ -n "$status_file" ]; then
+			printf '%s\n' selected | execute_quoted tee "$status_file" >/dev/null || return 1
+		fi
+		local bin_dir="$amp_home/bin"
+		selected=$(command -v amp 2>/dev/null || true)
+		if [ -n "$selected" ] && [ "$selected" != "$bin_dir/amp" ] && [ "$selected" != "$bin_dir/amp.exe" ]; then
+			log_warning "Amp command $selected takes priority over $bin_dir/amp; it may be a stale npm command."
+			log_info "Put the official Amp bin directory before npm in PATH. No existing installation will be removed."
+		fi
+
+		# Prefer the official location in this process, even when it was already on PATH.
+		if [ -x "$bin_dir/amp" ] || [ -x "$bin_dir/amp.exe" ]; then
+			ensure_dir_on_path "$bin_dir" prepend
+			hash -r
+		fi
+		selected=$(command -v amp 2>/dev/null || true)
+		if { [ "$selected" = "$bin_dir/amp" ] || [ "$selected" = "$bin_dir/amp.exe" ]; } &&
+			version=$(amp version 2>/dev/null) && [ -n "$version" ]; then
+			AMP_INSTALLED=true
+			log_success "Amp is available ($version)"
+			return 0
+		fi
+
+		if [ "${DRY_RUN:-false}" = true ]; then
+			if [ "${IS_WINDOWS:-false}" = true ]; then
+				log_info "[DRY RUN] Would execute official Amp installer: https://ampcode.com/install.ps1"
+			else
+				log_info "[DRY RUN] Would execute official Amp installer: https://ampcode.com/install.sh"
+			fi
+			return 0
+		fi
+
+		if [ "${IS_WINDOWS:-false}" = true ]; then
+			powershell=$(command -v powershell.exe || command -v pwsh.exe || command -v pwsh) || {
+				log_error "PowerShell is required for the official Amp Windows installer"
+				return 1
+			}
+			execute_quoted "$powershell" -NoProfile -Command \
+				'& { $ErrorActionPreference = "Stop"; Invoke-RestMethod https://ampcode.com/install.ps1 | Invoke-Expression }' || return 1
 		else
-			execute_installer "https://ampcode.com/install.sh" "" "Amp"
+			execute_installer "https://ampcode.com/install.sh" "" "Amp" || return 1
+		fi
+		ensure_dir_on_path "$bin_dir" prepend
+		hash -r
+		selected=$(command -v amp 2>/dev/null || true)
+		if { [ "$selected" != "$bin_dir/amp" ] && [ "$selected" != "$bin_dir/amp.exe" ]; } ||
+			! version=$(amp version 2>/dev/null) || [ -z "$version" ]; then
+			log_error "Amp installation could not be verified with amp version. Check command resolution and PATH."
+			return 1
 		fi
 		AMP_INSTALLED=true
-		log_success "Amp installed"
+		log_success "Amp is available ($version)"
 	}
-	run_installer "Amp" "_run_amp_install" "command -v amp" ""
+	# The body must validate the command, not just its presence on PATH.
+	run_installer "Amp" "_run_amp_install" "false" ""
 }
 
 install_ccs() {

@@ -77,7 +77,13 @@ installation and passed to Git Bash in the same process; no separate prerequisit
 is needed after a successful install. The wrapper skips Git Bash login profiles so an older shell PATH cannot
 hide these tools. Approve only the package installer's elevation prompt; the wrapper does not relaunch the full
 configuration installer as administrator. If approval is denied, setup stops and can be rerun safely.
-Native Windows uses Node/npm, not Bun, for package installation; Linux, macOS, and WSL keep Bun-first behavior.
+Native Windows uses Node/npm, not Bun, for npm package installation; Linux, macOS, and WSL keep Bun-first behavior.
+Amp is not installed through npm. Setup uses the [official Amp installers](https://ampcode.com/docs/cli):
+`install.ps1` on native Windows (including Git Bash), and `install.sh` on macOS, Linux, and WSL.
+Setup checks `amp version` and only reuses the binary in `AMP_HOME/bin` (default: `~/.amp/bin`);
+finding another command on PATH is not enough, including an npm shim under a custom prefix.
+The official bin directory is moved to the front of PATH for the current Bash process when needed.
+The PowerShell wrapper checks Amp only if it was accepted in setup; declining Amp leaves other tool installs unaffected.
 
 The one-line command and `-y` / `--yes` use these default categories:
 
@@ -127,6 +133,32 @@ cannot be found, close all terminal windows and reopen PowerShell. If `winget` i
 [`jq`](https://jqlang.org/download/), and [Node.js LTS with npm](https://nodejs.org/) manually. In Git setup,
 select **Git from the command line and also from 3rd-party software**. Do not bypass package lifecycle errors
 with `--ignore-scripts`: native binaries can remain uninstalled.
+
+#### Windows recovery: Amp command priority
+
+If `amp` reports an incompatible npm build, or PowerShell blocks `AppData\Roaming\npm\amp.ps1`,
+check command selection before changing anything. A successful official install does not mean the current
+PowerShell session selects that binary. The wrapper reports this conflict as a failure, even if the binary works.
+
+```powershell
+Get-Command amp -All
+$ampHome = if ($env:AMP_HOME) { $env:AMP_HOME } else { Join-Path $env:USERPROFILE '.amp' }
+$ampBin = Join-Path $ampHome 'bin'
+& (Join-Path $ampBin 'amp.exe') version
+# Current session only: prefer the official binary, without removing npm or other tools.
+$env:Path = "$ampBin;$env:Path"
+Get-Command amp -All
+amp version
+```
+
+For future sessions, open Windows **Environment Variables** and place the official Amp bin directory before
+`AppData\Roaming\npm` in PATH, then close and reopen PowerShell. Do not replace the full PATH or remove npm's
+directory: other tools can need it. Review any `amp` alias or function separately; PATH does not override those.
+If the official binary is missing, install it with
+`Invoke-RestMethod https://ampcode.com/install.ps1 | Invoke-Expression`, then repeat the checks above.
+Do not reinstall `@ampcode/cli` through npm or lower execution policy to run its stale shim. Setup does not
+uninstall existing copies, delete shims, or change execution policy. A direct binary version failure needs
+investigation; changing PATH alone cannot repair an incompatible binary.
 
 Claude is skipped only when `claude --version` succeeds with nonempty output. A broken shim (including a
 missing native binary) is repaired even with `--yes`, then checked again. npm installs for Claude and OpenCode
