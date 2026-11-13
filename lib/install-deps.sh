@@ -114,15 +114,13 @@ warn_on_amp_command_conflict() {
 	official_target=""
 	for candidate in "$bin_dir/amp" "$bin_dir/amp.exe"; do
 		[ -e "$candidate" ] || continue
-		official_target=$(resolve_path_target "$candidate" 2>/dev/null) || official_target="$candidate"
-		break
+		# The same file through another path is the official installation too.
+		[ "$selected" -ef "$candidate" ] && return 0
+		if [ -z "$official_target" ]; then
+			official_target=$(resolve_path_target "$candidate" 2>/dev/null) || official_target="$candidate"
+		fi
 	done
 	official_dir=$(resolve_path_target "$bin_dir" 2>/dev/null) || official_dir="$bin_dir"
-	# The same file through another path is the official installation too.
-	for candidate in "$bin_dir/amp" "$bin_dir/amp.exe"; do
-		[ -e "$candidate" ] || continue
-		[ "$selected" -ef "$candidate" ] && return 0
-	done
 	case "$selected_target" in
 	"$official_target" | "$official_dir"/*) return 0 ;;
 	esac
