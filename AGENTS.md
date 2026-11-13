@@ -86,7 +86,7 @@ On the cloud VM `bats` is preinstalled — run `bats tests/` directly.
 - MCP servers come from the central registry `configs/mcp-registry.json`. Prefer it over the legacy fallback.
 - Configs are validated with `jq` before install; failures warn but don't block (unless you decline the prompt).
 - `safe_copy_dir()` (lib/common.sh) auto-excludes `node_modules`, `cache`, `*.sqlite`, etc.
-- The `## Token Efficiency` section in `configs/**/AGENTS.md` and `configs/**/GEMINI.md` is generated from `configs/token-efficiency.md`. Edit the canonical file and run `./scripts/sync-token-efficiency.sh` — the profiles stay standalone on purpose, since eager `@file.md` imports cost tokens every session.
+- The `## Token Efficiency` section in `configs/**/AGENTS.md` and `configs/**/GEMINI.md` is generated from `configs/token-efficiency.md`, and the `## Experiment Workspaces` section in those profiles, `configs/claude/CLAUDE.md`, and the root `AGENTS.md`/`GEMINI.md` is generated from `configs/experiment-workspaces.md`. Edit the canonical file and run `./scripts/sync-token-efficiency.sh` — the profiles stay standalone on purpose, since eager `@file.md` imports cost tokens every session.
 - Backups go to `$HOME/ai-tools-backup-{timestamp}`; last 5 are kept.
 - Gemini CLI is deprecated for Google One/unpaid tiers (June 18, 2026 cutoff). Migrate to Antigravity CLI.
 
@@ -97,6 +97,8 @@ On the cloud VM `bats` is preinstalled — run `bats tests/` directly.
 
 ## Experiment Workspaces
 
-- Use the [`try` CLI](https://github.com/tobi/try) to create and enter isolated experiment directories and Git worktrees.
-- Prefer `try . [name]` for a worktree from the current repository, `try clone <url> [name]` for an external repository, and `try new <name>` for a fresh experiment.
-- Keep experiments in `try`-managed directories instead of ad hoc `/tmp` folders; fall back to `git worktree` only when `try` is unavailable or unsuitable.
+- When the [`try` CLI](https://github.com/tobi/try) is available, use it to create isolated experiment directories and Git worktrees. my-ai-tools does not install it.
+- Prefer `try . <name>` for a worktree from the current repository, `try clone <url> [name]` for an external repository, and `try new <name>` for a fresh experiment.
+- `try` creates `$TRY_PATH/YYYY-MM-DD-<name>` (default `TRY_PATH`: `~/src/tries`) and changes directory only in the invoking shell. Use the printed path in later commands.
+- `try .` worktrees and `try clone` of a pull request URL start on a detached HEAD. Run `git switch -c <branch>` in the experiment directory before you commit.
+- Keep experiments in `try`-managed directories instead of ad hoc `/tmp` folders. Fall back to `git worktree add -b <branch> <path>` only when `try` is unavailable or unsuitable.
