@@ -41,7 +41,9 @@ The patch makes two changes:
 - `service/install-macos.sh` reads `AMP_ORB_PROVIDER_TOKEN`. When it is set, the installer
   sets the generated launchd plist to mode 600 and adds the token to the service environment.
   It sends the `PlistBuddy` command on stdin, so the token never appears in `ps`, and it
-  refuses a token with characters other than letters, digits, `_`, and `-`.
+  refuses a token with characters other than letters, digits, `_`, and `-`. The refusal comes
+  before the installer writes the launch agent, so a refused token leaves the previous
+  installation untouched.
 - `service/com.elianiva.amp-orb-provider.plist` sets `AMP_ORBS_DEFAULT_TYPE` to `small`.
 
 ## Build the small template
@@ -134,16 +136,19 @@ extended ACL. The backup also contains credentials. Delete it after you make sur
 providers work.
 
 `amp orb provider create` does not print the token; it only saves it in the slot. The script
-writes the token file before it changes the slot:
+writes the token file before it changes the slot, so the slot holds the earlier provider's
+token after every outcome:
 
-- If the script stops with an error, the new token is still in the slot. Fix the cause and
-  run only the `python3` step again. Do not run `cp` again, because the backup must keep the
-  earlier token.
+- If the `python3` step stops with an error, the new token is still in the slot. Fix the cause
+  and run only the `python3` step again. Do not run `cp` again, because the backup must keep
+  the earlier token.
 - If it prints `no new provider token found`, the create command saved no new token, and the
   slot holds the earlier token again. Read the create command's output before you try again.
-- If it prints `amp orb provider create failed`, the create command failed. The token file
-  still holds the token that the failed command saved, but the provider does not exist yet.
-  Create the provider again before you install the service.
+- If it prints `amp orb provider create failed`, the create command failed. The slot holds the
+  earlier token again, and the token file holds the new token only if the command stored it
+  before it failed. Read the create command's output, fix the cause, then run the create
+  command and the `python3` step again. Do not run `cp` again, and do not install the service
+  until the provider exists.
 
 ## Install the service
 

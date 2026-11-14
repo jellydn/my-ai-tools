@@ -12,13 +12,13 @@ index bc9d08d..cab1001 100644
  		<string>amd64</string>
  		<key>AMP_ORBS_TTL</key>
 diff --git a/service/install-macos.sh b/service/install-macos.sh
-index 1c7e2d4..8386c93 100755
+index 1c7e2d4..0d6dcba 100755
 --- a/service/install-macos.sh
 +++ b/service/install-macos.sh
-@@ -21,6 +21,19 @@ sed \
- 	-e "s|__HOME__|$HOME|g" \
- 	-e "s|__PATH__|/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.amp/bin|g" \
- 	"$SOURCE" >"$TARGET"
+@@ -14,6 +14,16 @@ if [[ -z "$AMP_BIN" ]]; then
+ 	exit 1
+ fi
+
 +# A dedicated token keeps this provider off the single token slot that
 +# `amp orb provider create` shares with other providers on this Mac.
 +if [[ -n "${AMP_ORB_PROVIDER_TOKEN:-}" ]]; then
@@ -27,11 +27,21 @@ index 1c7e2d4..8386c93 100755
 +		echo "AMP_ORB_PROVIDER_TOKEN has unexpected characters" >&2
 +		exit 1
 +	fi
++fi
++
+ mkdir -p "$HOME/Library/LaunchAgents" "$ROOT/logs"
+ sed \
+ 	-e "s|__AMP_BIN__|$AMP_BIN|g" \
+@@ -21,6 +31,12 @@ sed \
+ 	-e "s|__HOME__|$HOME|g" \
+ 	-e "s|__PATH__|/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.amp/bin|g" \
+ 	"$SOURCE" >"$TARGET"
++if [[ -n "${AMP_ORB_PROVIDER_TOKEN:-}" ]]; then
 +	chmod 600 "$TARGET"
 +	# printf is a shell builtin, so the token never appears in a process's arguments.
 +	printf 'Add :EnvironmentVariables:AMP_ORB_PROVIDER_TOKEN string %s\nSave\nExit\n' \
 +		"$AMP_ORB_PROVIDER_TOKEN" | /usr/libexec/PlistBuddy "$TARGET" >/dev/null
 +fi
  plutil -lint "$TARGET" >/dev/null
- 
+
  launchctl bootout "$DOMAIN/$LABEL" 2>/dev/null || true
