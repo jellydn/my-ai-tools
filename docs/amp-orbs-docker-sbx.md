@@ -74,7 +74,7 @@ The user runs these commands in a private terminal. Agents must not run them, re
 ```bash
 umask 077
 S="$HOME/.local/share/amp/secrets.json"
-cp -p "$S" "$S.bak-before-docker-sbx"
+cp "$S" "$S.bak-before-docker-sbx"
 chmod 600 "$S.bak-before-docker-sbx"
 amp orb provider create docker-sbx
 mkdir -p "$HOME/.config/amp-orbs"
@@ -88,12 +88,20 @@ with open(secrets_path) as f:
 with open(backup_path) as f:
     backup = json.load(f)
 token = secrets.get(key, "")
+
+
+def write_private(path, text):
+    # Set mode 600 before any secret is written, also when the file already exists.
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    os.fchmod(fd, 0o600)
+    with os.fdopen(fd, "w") as f:
+        f.write(text)
+
+
 found = token.startswith("aop_live_") and token != backup.get(key)
 if found:
     # If this write fails, the script stops here and the new token stays in the slot.
-    with open(token_path, "w") as f:
-        f.write(token)
-    os.chmod(token_path, 0o600)
+    write_private(token_path, token)
 
 # Give the saved slot back to the earlier provider. Keep the refreshed login values.
 if key in backup:
@@ -101,9 +109,7 @@ if key in backup:
 else:
     secrets.pop(key, None)
 tmp_path = secrets_path + ".tmp"
-with open(tmp_path, "w") as f:
-    json.dump(secrets, f, indent=2)
-os.chmod(tmp_path, 0o600)
+write_private(tmp_path, json.dumps(secrets, indent=2))
 os.replace(tmp_path, secrets_path)
 
 if not found:
