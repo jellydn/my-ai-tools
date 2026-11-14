@@ -1018,6 +1018,58 @@ generate_delta_configs() {
 	log_success "Delta configs generated"
 }
 
+generate_openmausbot_configs() {
+	# Strict opt-in: the OpenMausBot data directory is live application state
+	# (credentials, transcripts, databases). Only an explicit
+	# OPENMAUSBOT_EXPORT=1 exports the portable roster. See
+	# configs/openmausbot/README.md for what is included and excluded, and the
+	# Desktop app's encrypted Export for full recovery.
+	if [ "${OPENMAUSBOT_EXPORT:-0}" != "1" ]; then
+		log_info "Skipping OpenMausBot export (opt-in; set OPENMAUSBOT_EXPORT=1)"
+		return 0
+	fi
+
+	log_info "Generating OpenMausBot configs..."
+
+	local omb_dir dest file
+	omb_dir=$(openmausbot_data_dir)
+	dest="$SCRIPT_DIR/configs/openmausbot"
+
+	if [ ! -d "$omb_dir" ]; then
+		log_warning "OpenMausBot data directory not found: $omb_dir"
+		return 0
+	fi
+
+	execute_quoted mkdir -p "$dest"
+
+	# bots.json carries the roster, the personas, and each bot's project
+	# paths; default-bot.json is the account email ledger. Both are personal
+	# data, so the exported snapshot stays local (gitignored) and is never
+	# committed.
+	for file in bots.json default-bot.json; do
+		if [ -f "$omb_dir/$file" ]; then
+			copy_single "$omb_dir/$file" "$dest/$file"
+		else
+			# Prune a snapshot the app no longer has instead of leaving the
+			# previous export in place.
+			execute_quoted rm -f "$dest/$file"
+			log_warning "Skipped (not found): $omb_dir/$file"
+		fi
+	done
+
+	# Per-bot SOUL.md mirrors are derived state the app regenerates on every
+	# save, so they are not exported. Remove any left by an earlier export.
+	if [ -d "$dest/bots" ]; then
+		execute_quoted rm -rf "$dest/bots"
+	fi
+
+	log_warning "The exported roster holds personas, project paths, and account emails"
+	log_warning "It is gitignored and must never be committed to this public repository"
+	log_warning "Transcripts, attachments, credentials, and databases are not exported"
+	log_warning "Full recovery: Settings → Backups → Export full backup (encrypted .ombbackup)"
+	log_success "OpenMausBot configs generated"
+}
+
 generate_codiff_configs() {
 	log_info "Generating Codiff configs..."
 
@@ -1301,6 +1353,9 @@ main() {
 	echo
 
 	generate_codiff_configs
+	echo
+
+	generate_openmausbot_configs
 	echo
 
 	generate_devin_configs

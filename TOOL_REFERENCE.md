@@ -3311,6 +3311,71 @@ See the full [Codiff docs](https://github.com/nkzw-tech/codiff#readme) for detai
 
 ---
 
+## 🦊 OpenMausBot (Optional)
+
+OpenMausBot is an open-source Grok Bot alternative: a chat app where every bot in the sidebar is a real agent (Claude, Codex, or Grok CLI) running locally under the hood, with its own personality, model, computer, and connected apps. [Source](https://github.com/milind-soni/OpenMausBot) | [Website](https://www.openmausbot.com)
+
+<details>
+<summary><strong>Installation &amp; Configuration</strong></summary>
+
+### Installation
+
+The chat app ships as a released desktop build. The headless server/CLI (`openmausbot serve`, `openmausbot team apply`, `openmausbot run`) installs from npm.
+
+```bash
+# Headless CLI (server scripting, team apply, headless runs)
+npm install -g openmausbot
+
+# Desktop chat app: download the build for your OS
+open https://github.com/milind-soni/OpenMausBot/releases/latest
+```
+
+| Platform              | Package                                                                                                              |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| macOS (Apple silicon) | [`OpenMausBot.dmg`](https://github.com/milind-soni/OpenMausBot/releases/latest/download/OpenMausBot.dmg)               |
+| macOS (Intel)         | [`OpenMausBot-intel.dmg`](https://github.com/milind-soni/OpenMausBot/releases/latest/download/OpenMausBot-intel.dmg)   |
+| Windows x64           | [`OpenMausBot-setup.exe`](https://github.com/milind-soni/OpenMausBot/releases/latest/download/OpenMausBot-setup.exe)   |
+| Ubuntu 24.04 x64      | [`OpenMausBot-amd64.deb`](https://github.com/milind-soni/OpenMausBot/releases/latest/download/OpenMausBot-amd64.deb) · [`OpenMausBot.AppImage`](https://github.com/milind-soni/OpenMausBot/releases/latest/download/OpenMausBot.AppImage) |
+
+OpenMausBot needs at least one agent CLI (`claude`, `codex`, or `grok`) installed and signed in; install any of them through this repo's own installer first. `install_openmausbot` installs the headless npm CLI when it is not already on PATH — independently of whether the desktop app is installed — and prints the desktop download link.
+
+### Configuration
+
+Managed configs live in [`configs/openmausbot/`](configs/openmausbot/). Application state lives in the OpenMausBot data directory (`$OMB_DATA_DIR`, or `~/.openmausbot/` by default):
+
+| Config             | Path                          | Managed by this repo              |
+| ------------------ | ----------------------------- | --------------------------------- |
+| Bot roster         | `~/.openmausbot/import/bots.json` | Yes (`configs/openmausbot/bots.json`) |
+| Default bot        | `~/.openmausbot/import/default-bot.json` | Yes (`configs/openmausbot/default-bot.json`) |
+| Live bot registry  | `~/.openmausbot/bots.json`    | Never — the app rewrites it on every roster change |
+| Bot personas       | `~/.openmausbot/bots/<id>/SOUL.md` | Never — derived mirror of the roster |
+| Credentials        | `~/.openmausbot/config.json`, `~/.openmausbot/providers/` | Never — plaintext API keys and sign-in state stay local |
+| Transcripts & data | `messages.db`, `runtime.db`, `events/`, `native/`, `attachments/`, `bots/<id>/history.ndjson` | Never — live runtime state |
+
+Export is a strict opt-in so a plain `generate.sh` never reads live private state:
+
+```bash
+OPENMAUSBOT_EXPORT=1 ./generate.sh
+```
+
+The exported roster carries personas, absolute project paths, and account email addresses, so it is **gitignored** — this repository is public and the snapshot must never be committed.
+
+Install is off the default `-y` allowlist; opt in explicitly:
+
+```bash
+./cli.sh --with-tools=openmausbot
+```
+
+The installer copies the managed roster files into `~/.openmausbot/import/` (owner-only, `0600`) when the app data directory exists. The live registry, credentials, transcripts, and databases are never modified or removed — apply the snapshot from the app when you want it.
+
+### Full recovery
+
+The repo integration is a portable roster snapshot, not a full backup. For complete recovery use the app itself: **Settings → Backups → Export full backup** writes an encrypted, password-protected `.ombbackup` containing bots, threads, attachments, memory, and routines. See the [upstream data and backups guide](https://github.com/milind-soni/OpenMausBot/blob/main/apps/docs/content/docs/self-hosting/data-and-backups.mdx).
+
+</details>
+
+---
+
 ## 🖥️ Devin CLI (Optional)
 
 [Devin CLI](https://devin.ai) is Cognition AI's coding agent for terminal and cloud workflows.

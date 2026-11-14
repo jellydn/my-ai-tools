@@ -58,5 +58,8 @@ configs/amp/skills/ralph/archive
 configs/ccs/cliproxy/cliproxy
 configs/ccs/cliproxy/auth
 configs/cline/providers.json
+# OpenMausBot roster export: personas, project paths, and account emails
+configs/openmausbot/*.json
+configs/openmausbot/bots/
 /.pi-subagents/artifacts
 /.pi
