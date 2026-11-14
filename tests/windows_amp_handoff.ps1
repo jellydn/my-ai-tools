@@ -63,7 +63,9 @@ try {
         New-Item -ItemType Directory -Path $bin -Force | Out-Null
         $exe = Join-Path $bin 'amp.exe'
         if ($env:OS -eq 'Windows_NT') {
-            Add-Type -OutputAssembly $exe -OutputType ConsoleApplication -TypeDefinition @'
+            # Add-Type in Windows PowerShell treats brackets in OutputAssembly as wildcards.
+            $compiledExe = Join-Path $fixture 'amp-fixture.exe'
+            Add-Type -OutputAssembly $compiledExe -OutputType ConsoleApplication -TypeDefinition @'
 using System;
 public class AmpHandoffFixture {
     public static int Main(string[] args) {
@@ -73,6 +75,7 @@ public class AmpHandoffFixture {
     }
 }
 '@
+            [IO.File]::Move($compiledExe, $exe)
         }
         else {
             [IO.File]::WriteAllText($exe, "#!/bin/sh`necho handoff-fixture-version`n")
