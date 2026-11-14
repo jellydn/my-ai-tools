@@ -74,8 +74,11 @@ Without the steps below, the next restart of the smolvm controller would connect
 <code>secrets.json</code> or the token file, or ask the user to paste the token.</p>
 <pre><code class="language-bash">umask 077
 S=&quot;$HOME/.local/share/amp/secrets.json&quot;
-cp &quot;$S&quot; &quot;$S.bak-before-docker-sbx&quot;
+# Make the backup owner-only before it holds credentials: remove any ACL, then copy into it.
+touch &quot;$S.bak-before-docker-sbx&quot;
+chmod -N &quot;$S.bak-before-docker-sbx&quot;
 chmod 600 &quot;$S.bak-before-docker-sbx&quot;
+cp &quot;$S&quot; &quot;$S.bak-before-docker-sbx&quot;
 amp orb provider create docker-sbx
 mkdir -p &quot;$HOME/.config/amp-orbs&quot;
 python3 -I - &quot;$S&quot; &quot;$S.bak-before-docker-sbx&quot; &quot;$HOME/.config/amp-orbs/docker-sbx.token&quot; &lt;&lt;&#39;PY&#39;

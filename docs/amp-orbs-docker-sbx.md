@@ -74,8 +74,11 @@ The user runs these commands in a private terminal. Agents must not run them, re
 ```bash
 umask 077
 S="$HOME/.local/share/amp/secrets.json"
-cp "$S" "$S.bak-before-docker-sbx"
+# Make the backup owner-only before it holds credentials: remove any ACL, then copy into it.
+touch "$S.bak-before-docker-sbx"
+chmod -N "$S.bak-before-docker-sbx"
 chmod 600 "$S.bak-before-docker-sbx"
+cp "$S" "$S.bak-before-docker-sbx"
 amp orb provider create docker-sbx
 mkdir -p "$HOME/.config/amp-orbs"
 python3 -I - "$S" "$S.bak-before-docker-sbx" "$HOME/.config/amp-orbs/docker-sbx.token" <<'PY'
