@@ -163,22 +163,25 @@ without `--orb-size` started a `medium` sandbox (4 vCPU / 8 GiB).
 ```bash
 amp -ox 'Run nproc and free -m in the orb shell. Report their output, then reply SMALL_OK.' \
   --orb-provider docker-sbx --orb-size small
+```
+
+The reply must show `nproc` 2 and a `free -m` total of about 3938 MiB. After `amp -ox`
+prints `SMALL_OK`, check the sandbox. `inspect` must show `cpus` 2 and `memory_mib` 4096:
+
+```bash
 sbx --cloud ls
 sbx --cloud inspect amp-<thread-id> --format json
 ```
 
-The expected results are `cpus` 2 and `memory_mib` 4096 in `inspect`, `nproc` 2, and a
-`free -m` total of about 3938 MiB in the orb.
+In the tested setup, `amp -ox` waited for the reply and then archived the thread. The archive
+sends the `pause` job, and the dispatcher stops the sandbox with its disk intact. Look for the
+pause in `logs/provider.err.log`. If no pause appears within a few minutes, the thread is not
+archived: run `amp threads archive <thread-id>` and wait for the pause.
 
-Run the `sbx` commands after `amp -ox` prints `SMALL_OK`. In the tested setup, `amp -ox`
-waited for the reply and then archived the thread. The archive sends the `pause` job, and
-the dispatcher stops the sandbox with its disk intact. If the thread is not archived, archive
-it yourself. Wait until `logs/provider.err.log` shows the pause, then unarchive the thread,
-because `amp threads continue` refuses an archived thread. The next message sends `spawn`,
-and the dispatcher resumes the stopped sandbox:
+`amp threads continue` refuses an archived thread, so unarchive it first. The next message
+sends `spawn`, and the dispatcher resumes the stopped sandbox:
 
 ```bash
-amp threads archive <thread-id>   # only if the thread is not archived
 amp threads archive --unarchive <thread-id>
 amp threads continue <thread-id> -ox 'Report the orb shell output again.'
 ```

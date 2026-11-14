@@ -152,19 +152,19 @@ without <code>--orb-size</code> started a <code>medium</code> sandbox (4 vCPU / 
 <h2>Test a thread</h2>
 <pre><code class="language-bash">amp -ox &#39;Run nproc and free -m in the orb shell. Report their output, then reply SMALL_OK.&#39; \
   --orb-provider docker-sbx --orb-size small
-sbx --cloud ls
+</code></pre>
+<p>The reply must show <code>nproc</code> 2 and a <code>free -m</code> total of about 3938 MiB. After <code>amp -ox</code>
+prints <code>SMALL_OK</code>, check the sandbox. <code>inspect</code> must show <code>cpus</code> 2 and <code>memory_mib</code> 4096:</p>
+<pre><code class="language-bash">sbx --cloud ls
 sbx --cloud inspect amp-&lt;thread-id&gt; --format json
 </code></pre>
-<p>The expected results are <code>cpus</code> 2 and <code>memory_mib</code> 4096 in <code>inspect</code>, <code>nproc</code> 2, and a
-<code>free -m</code> total of about 3938 MiB in the orb.</p>
-<p>Run the <code>sbx</code> commands after <code>amp -ox</code> prints <code>SMALL_OK</code>. In the tested setup, <code>amp -ox</code>
-waited for the reply and then archived the thread. The archive sends the <code>pause</code> job, and
-the dispatcher stops the sandbox with its disk intact. If the thread is not archived, archive
-it yourself. Wait until <code>logs/provider.err.log</code> shows the pause, then unarchive the thread,
-because <code>amp threads continue</code> refuses an archived thread. The next message sends <code>spawn</code>,
-and the dispatcher resumes the stopped sandbox:</p>
-<pre><code class="language-bash">amp threads archive &lt;thread-id&gt;   # only if the thread is not archived
-amp threads archive --unarchive &lt;thread-id&gt;
+<p>In the tested setup, <code>amp -ox</code> waited for the reply and then archived the thread. The archive
+sends the <code>pause</code> job, and the dispatcher stops the sandbox with its disk intact. Look for the
+pause in <code>logs/provider.err.log</code>. If no pause appears within a few minutes, the thread is not
+archived: run <code>amp threads archive &lt;thread-id&gt;</code> and wait for the pause.</p>
+<p><code>amp threads continue</code> refuses an archived thread, so unarchive it first. The next message
+sends <code>spawn</code>, and the dispatcher resumes the stopped sandbox:</p>
+<pre><code class="language-bash">amp threads archive --unarchive &lt;thread-id&gt;
 amp threads continue &lt;thread-id&gt; -ox &#39;Report the orb shell output again.&#39;
 </code></pre>
 <p>Delete the test sandbox and its state mapping with the dispatcher:</p>
