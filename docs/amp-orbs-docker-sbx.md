@@ -75,6 +75,7 @@ The user runs these commands in a private terminal. Agents must not run them, re
 umask 077
 S="$HOME/.local/share/amp/secrets.json"
 cp -p "$S" "$S.bak-before-docker-sbx"
+chmod 600 "$S.bak-before-docker-sbx"
 amp orb provider create docker-sbx
 mkdir -p "$HOME/.config/amp-orbs"
 python3 -I - "$S" "$S.bak-before-docker-sbx" "$HOME/.config/amp-orbs/docker-sbx.token" <<'PY'
