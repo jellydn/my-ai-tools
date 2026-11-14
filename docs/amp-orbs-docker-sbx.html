@@ -134,26 +134,24 @@ PY
 slot has the earlier token again. The token folder is owner-only (mode 700) and carries no
 extended ACL. The backup also contains credentials. Delete it after you make sure that both
 providers work.</p>
-<p><code>amp orb provider create</code> does not print the token; it only saves it in the slot. The script
-writes the token file before it changes the slot, so the slot holds the earlier provider&#39;s
-token again unless the <code>python3</code> step itself fails:</p>
-<ul>
-<li>If the <code>python3</code> step stops with an error, the new token is still in the slot. Fix the cause
-and run only the <code>python3</code> step again. Do not run <code>cp</code> again, because the backup must keep
-the earlier token.</li>
-<li>If it prints <code>no new provider token found</code>, the create command saved no new token, so the
-token file is still absent and the slot holds the earlier token again. Read the create
-command&#39;s output, fix the cause, then create the provider again and run only the <code>python3</code>
-step, so the token file holds the new token and the slot holds the earlier token again.
-Do not run <code>cp</code> again.</li>
-<li>If it prints <code>amp orb provider create failed</code> and not <code>no new provider token found</code>, the
-create command failed after it stored the token. The token file holds that token, and the
-slot holds the earlier token again. Read the create command&#39;s output, fix the cause, then
-create the provider again and run only the <code>python3</code> step, so the token file holds the
-token Amp knows. Do not run <code>cp</code> again. Check <strong>Amp Settings → Orbs</strong> first: when
-<code>docker-sbx</code> is listed, the provider exists, so keep the token file and do not create the
-provider again.</li>
-</ul>
+<p><code>amp orb provider create</code> does not print the token; it only saves it in the slot. The block
+exits 0 only when the create command succeeded and the <code>python3</code> step saved the token. Its
+messages do not tell you reliably which state it stopped in, so after any error, do not
+install the service yet. Recover from the state instead:</p>
+<ol>
+<li>Fix the cause that the output shows.</li>
+<li>In the same shell, run the <code>mkdir</code> and <code>python3</code> lines of the block again, without <code>touch</code>,
+<code>cp</code>, or <code>amp orb provider create</code>. This is safe in every state. If the slot holds a new
+token, the step saves it to the token file and puts the earlier token back. If not, it puts
+the earlier token back, leaves the token file as it is, and prints
+<code>no new provider token found</code>. Never run <code>cp</code> again, because the backup must keep the
+earlier token.</li>
+<li>Check that <code>~/.config/amp-orbs/docker-sbx.token</code> is not empty (<code>test -s</code>) and that
+<code>docker-sbx</code> is listed in <strong>Amp Settings → Orbs</strong>. When both are true, continue.</li>
+<li>When the provider is not listed, run <code>amp orb provider create docker-sbx</code>, then step 2
+again. When it is listed but the token file is empty or missing, the token is lost: delete
+<code>docker-sbx</code> in Amp Settings, create it again, and run step 2.</li>
+</ol>
 <h2>Install the service</h2>
 <pre><code class="language-bash">cd &quot;$HOME/Development/amp-orbs&quot;
 AMP_ORB_PROVIDER_TOKEN=&quot;$(cat &quot;$HOME/.config/amp-orbs/docker-sbx.token&quot;)&quot; ./service/install.sh 2&gt;&amp;1 |

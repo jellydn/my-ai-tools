@@ -135,25 +135,23 @@ slot has the earlier token again. The token folder is owner-only (mode 700) and 
 extended ACL. The backup also contains credentials. Delete it after you make sure that both
 providers work.
 
-`amp orb provider create` does not print the token; it only saves it in the slot. The script
-writes the token file before it changes the slot, so the slot holds the earlier provider's
-token again unless the `python3` step itself fails:
+`amp orb provider create` does not print the token; it only saves it in the slot. The block
+exits 0 only when the create command succeeded and the `python3` step saved the token. Its
+messages do not tell you reliably which state it stopped in, so after any error, do not
+install the service yet. Recover from the state instead:
 
-- If the `python3` step stops with an error, the new token is still in the slot. Fix the cause
-  and run only the `python3` step again. Do not run `cp` again, because the backup must keep
-  the earlier token.
-- If it prints `no new provider token found`, the create command saved no new token, so the
-  token file is still absent and the slot holds the earlier token again. Read the create
-  command's output, fix the cause, then create the provider again and run only the `python3`
-  step, so the token file holds the new token and the slot holds the earlier token again.
-  Do not run `cp` again.
-- If it prints `amp orb provider create failed` and not `no new provider token found`, the
-  create command failed after it stored the token. The token file holds that token, and the
-  slot holds the earlier token again. Read the create command's output, fix the cause, then
-  create the provider again and run only the `python3` step, so the token file holds the
-  token Amp knows. Do not run `cp` again. Check **Amp Settings → Orbs** first: when
-  `docker-sbx` is listed, the provider exists, so keep the token file and do not create the
-  provider again.
+1. Fix the cause that the output shows.
+2. In the same shell, run the `mkdir` and `python3` lines of the block again, without `touch`,
+   `cp`, or `amp orb provider create`. This is safe in every state. If the slot holds a new
+   token, the step saves it to the token file and puts the earlier token back. If not, it puts
+   the earlier token back, leaves the token file as it is, and prints
+   `no new provider token found`. Never run `cp` again, because the backup must keep the
+   earlier token.
+3. Check that `~/.config/amp-orbs/docker-sbx.token` is not empty (`test -s`) and that
+   `docker-sbx` is listed in **Amp Settings → Orbs**. When both are true, continue.
+4. When the provider is not listed, run `amp orb provider create docker-sbx`, then step 2
+   again. When it is listed but the token file is empty or missing, the token is lost: delete
+   `docker-sbx` in Amp Settings, create it again, and run step 2.
 
 ## Install the service
 
