@@ -144,11 +144,13 @@ token after every outcome:
   the earlier token.
 - If it prints `no new provider token found`, the create command saved no new token, and the
   slot holds the earlier token again. Read the create command's output before you try again.
-- If it prints `amp orb provider create failed`, the create command failed. The slot holds the
-  earlier token again, and the token file holds the new token only if the command stored it
-  before it failed. Read the create command's output, fix the cause, then run the create
-  command and the `python3` step again. Do not run `cp` again, and do not install the service
-  until the provider exists.
+- If it prints `amp orb provider create failed` and not `no new provider token found`, the
+  create command failed after it stored the token. The token file holds that token, and the
+  slot holds the earlier token again. Read the create command's output, fix the cause, then
+  create the provider again and run only the `python3` step, so the token file holds the
+  token Amp knows. Do not run `cp` again. Check **Amp Settings → Orbs** first: when
+  `docker-sbx` is listed, the provider exists, so keep the token file and do not create the
+  provider again.
 
 ## Install the service
 
@@ -181,8 +183,8 @@ without `--orb-size` started a `medium` sandbox (4 vCPU / 8 GiB).
 Add `--stream-json`, so the command stays attached until the turn ends:
 
 ```bash
-amp -ox --stream-json 'Run nproc and free -m in the orb shell. Report their output, then reply SMALL_OK.' \
-  --orb-provider docker-sbx --orb-size small
+amp -ox 'Run nproc and free -m in the orb shell. Report their output, then reply SMALL_OK.' \
+  --orb-provider docker-sbx --orb-size small --stream-json
 ```
 
 The first stream message carries the thread id. The reply must show `nproc` 2 and a `free -m`
@@ -210,10 +212,11 @@ The stop can take as long as the dispatcher's own budget (`PAUSE_WAIT` 150 s, `J
 280 s), so allow five minutes before you treat a missing line as a failure. If no pause
 appears, run `amp threads archive <thread-id>` to send one.
 
-Then send a message. It sends `spawn`, and the dispatcher resumes the stopped sandbox:
+Then send a message. It sends `spawn`, and the dispatcher resumes the stopped sandbox. Add
+`--stream-json`, so the reply arrives in the stream:
 
 ```bash
-amp threads continue <thread-id> -ox 'Report the orb shell output again.'
+amp threads continue <thread-id> -ox 'Report the orb shell output again.' --stream-json
 ```
 
 If the command fails with "This thread is archived", run
