@@ -83,10 +83,13 @@ Amp is not installed through npm. Setup uses the [official Amp installers](https
 Setup checks `amp version` and only reuses the binary in `AMP_HOME/bin` (default: `~/.amp/bin`);
 finding another command on PATH is not enough, including an npm shim under a custom prefix.
 Symlinks to the official binary are recognised and do not trigger an npm warning.
+A Bash `amp()` function produces a warning; setup verifies the official binary directly without removing or unsetting the function.
 `AMP_HOME` may be a Windows path or a Git Bash path; setup converts it for each side, so the
 official installer and the verification always use the same directory.
-The official bin directory is moved to the front of PATH for the current Bash and PowerShell processes when needed.
-This does not change persistent User or Machine PATH settings.
+Our wrapper promotes the official bin directory in the current Bash and PowerShell processes only.
+The official Windows `install.ps1` adds `AMP_HOME\bin` (default: `.amp\bin`) to the saved User PATH when absent;
+it does not reorder an existing entry. The official Unix `install.sh` can add `~/.local/bin` to a shell profile
+when needed. These official-installer changes persist across sessions; the wrapper's promotion does not.
 The PowerShell wrapper checks Amp only if it was accepted in setup; declining Amp leaves other tool installs unaffected.
 
 The one-line command and `-y` / `--yes` use these default categories:

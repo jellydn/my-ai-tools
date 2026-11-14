@@ -112,6 +112,11 @@ resolve_path_target() {
 warn_on_amp_command_conflict() {
 	local bin_dir="${1:-}" selected="${2:-}" selected_target official_target official_location candidate
 	[ -n "$selected" ] || return 0
+	if declare -F amp >/dev/null; then
+		log_warning "Shell function amp shadows the official Amp binary ($bin_dir/amp)."
+		log_info "Review the function or invoke the official binary directly. No function was removed or unset."
+		return 0
+	fi
 	selected_target=$(resolve_path_target "$selected" 2>/dev/null) || selected_target="$selected"
 	official_target=""
 	official_location=""

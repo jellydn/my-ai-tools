@@ -72,6 +72,7 @@ amp_install() {
         install_amp
         result=$?
         echo "AMP_INSTALLED=$AMP_INSTALLED"
+        if declare -F amp >/dev/null; then echo "FUNCTION_AFTER=$(amp version)"; fi
         exit "$result"
     ' _ "$REPO_ROOT" "$1" "${2:-false}"
 }
@@ -84,6 +85,27 @@ amp_install() {
     [[ "$output" == *"AMP_INSTALLED=true"* ]]
     [[ "$output" == *"npm"* ]]
     [ "$(cat "$AMP_TEST_LOG")" = 'https://ampcode.com/install.sh' ]
+}
+
+@test "Amp verifies the official binary while preserving a shadowing shell function" {
+    amp() { printf 'shadow-function-version\n'; }
+    export -f amp
+    for attempt in 1 2; do
+        run amp_install false
+        [ "$status" -eq 0 ]
+        [[ "$output" == *"Shell function amp shadows the official Amp binary"* ]]
+        [[ "$output" != *"may be a stale npm command"* ]]
+        [[ "$output" == *"Amp is available (fixture-version)"* ]]
+        [[ "$output" == *"FUNCTION_AFTER=shadow-function-version"* ]]
+        [[ "$output" == *"AMP_INSTALLED=true"* ]]
+    done
+    [ "$(wc -l < "$AMP_TEST_LOG")" -eq 1 ]
+    rm "$AMP_TEST_HOME/.amp/bin/amp"
+    export BINARY_EXIT=9
+    run amp_install false
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"AMP_INSTALLED=false"* ]]
+    [[ "$output" == *"FUNCTION_AFTER=shadow-function-version"* ]]
 }
 
 @test "Amp native Windows uses PowerShell without execution policy bypass" {
@@ -277,6 +299,14 @@ BASH
     run pwsh -NoProfile -File "$REPO_ROOT/tests/windows_amp_handoff.ps1" -Case selected-missing
     [ "$status" -eq 1 ]
     [[ "$output" == *"Official Amp binary not found"* ]]
+}
+
+@test "PowerShell verifies an official binary under Amp[stable] literally" {
+    command -v pwsh >/dev/null || skip "PowerShell is required (also tested in Windows CI)"
+    run pwsh -NoProfile -File "$REPO_ROOT/tests/windows_amp_handoff.ps1" -Case selected-literal
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Amp verified in PowerShell: handoff-fixture-version"* ]]
+    [[ "$output" == *"Installation completed successfully"* ]]
 }
 
 @test "PowerShell preserves a Unicode AMP_HOME marker with an ANSI content default" {

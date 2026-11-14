@@ -301,7 +301,7 @@ function ConvertTo-WindowsPath {
 function Test-AmpCommand {
     $ampHome = if ($env:AMP_HOME) { ConvertTo-WindowsPath $env:AMP_HOME } else { Join-Path $env:USERPROFILE '.amp' }
     $ampExe = Join-Path $ampHome 'bin\amp.exe'
-    if (-not (Test-Path $ampExe -PathType Leaf)) {
+    if (-not (Test-Path -LiteralPath $ampExe -PathType Leaf)) {
         Write-Err "Official Amp binary not found at $ampExe. See https://ampcode.com/docs/cli"
         return $false
     }

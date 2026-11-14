@@ -1234,7 +1234,8 @@ For native Windows, use the official PowerShell installer, not an npm package:
 
 ```powershell
 Invoke-RestMethod https://ampcode.com/install.ps1 | Invoke-Expression
-& "$env:USERPROFILE\.amp\bin\amp.exe" version
+$ampHome = if ($env:AMP_HOME) { $env:AMP_HOME } else { Join-Path $env:USERPROFILE '.amp' }
+& (Join-Path $ampHome 'bin\amp.exe') version
 Get-Command amp -All
 amp version
 ```
@@ -1243,7 +1244,9 @@ The default binary is `$env:USERPROFILE\.amp\bin\amp.exe`; `AMP_HOME` overrides 
 and may be a Windows path or a Git Bash path, because setup converts it for each side.
 Use a Windows path for `AMP_HOME` in PowerShell. Git Bash paths are converted for the official Windows installer.
 Setup puts the verified official bin directory before npm in the current PowerShell process PATH, then checks command selection.
-It leaves persistent User and Machine PATH settings unchanged. If a separate session still selects an old npm `amp.ps1` or `amp.cmd`, put the official bin directory before npm in that session's PATH.
+This wrapper promotion is session-only. The official Windows `install.ps1` adds `AMP_HOME\bin` (default: `.amp\bin`) to the saved User PATH when absent, but does not reorder an existing entry. The official Unix `install.sh` can add `~/.local/bin` to the user's shell profile when needed.
+If a separate session still selects an old npm `amp.ps1` or `amp.cmd`, put the official bin directory before npm in that session's PATH.
+A Bash `amp()` function is reported as shadowing; setup verifies the official binary directly and leaves the function unchanged.
 Do not weaken execution policy to run the stale shim. See [Windows Amp recovery](README.md#windows-recovery-amp-command-priority)
 for session-only PATH guidance. Setup does not remove existing installations. See [official CLI guidance](https://ampcode.com/docs/cli).
 

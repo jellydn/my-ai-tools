@@ -430,9 +430,7 @@ install_amp() {
 			ensure_dir_on_path "$bin_dir" prepend
 			hash -r
 		fi
-		selected=$(command -v amp 2>/dev/null || true)
-		if { [ "$selected" = "$bin_dir/amp" ] || [ "$selected" = "$bin_dir/amp.exe" ]; } &&
-			version=$(amp version 2>/dev/null) && [ -n "$version" ]; then
+		if version=$("$bin_dir/amp" version 2>/dev/null || "$bin_dir/amp.exe" version 2>/dev/null) && [ -n "$version" ]; then
 			AMP_INSTALLED=true
 			log_success "Amp is available ($version)"
 			return 0
@@ -459,10 +457,8 @@ install_amp() {
 		fi
 		ensure_dir_on_path "$bin_dir" prepend
 		hash -r
-		selected=$(command -v amp 2>/dev/null || true)
-		if { [ "$selected" != "$bin_dir/amp" ] && [ "$selected" != "$bin_dir/amp.exe" ]; } ||
-			! version=$(amp version 2>/dev/null) || [ -z "$version" ]; then
-			log_error "Amp installation could not be verified with amp version. Check command resolution and PATH."
+		if ! version=$("$bin_dir/amp" version 2>/dev/null || "$bin_dir/amp.exe" version 2>/dev/null) || [ -z "$version" ]; then
+			log_error "Amp installation could not be verified with amp version at $bin_dir."
 			return 1
 		fi
 		AMP_INSTALLED=true

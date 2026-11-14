@@ -1,11 +1,11 @@
 #Requires -Version 5.1
 # Test the wrapper's Amp participation check without installing software.
-param([ValidateSet('', 'selected-missing', 'selected-unicode', 'selected-stale-drive', 'declined-broken', 'declined-shadowed')][string]$Case = '')
+param([ValidateSet('', 'selected-missing', 'selected-unicode', 'selected-literal', 'selected-stale-drive', 'declined-broken', 'declined-shadowed')][string]$Case = '')
 
 $ErrorActionPreference = 'Stop'
 if (-not $Case) {
     $powershell = [Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
-    foreach ($scenario in @('selected-missing', 'selected-unicode', 'selected-stale-drive', 'declined-broken', 'declined-shadowed')) {
+    foreach ($scenario in @('selected-missing', 'selected-unicode', 'selected-literal', 'selected-stale-drive', 'declined-broken', 'declined-shadowed')) {
         $output = & $powershell -NoProfile -File $PSCommandPath -Case $scenario 2>&1
         $result = $LASTEXITCODE
         $expected = if ($scenario -eq 'selected-missing') { 1 } else { 0 }
@@ -38,7 +38,7 @@ function Invoke-FixtureBash {
     if ($Case -eq 'selected-missing' -and $env:MY_AI_TOOLS_AMP_STATUS_FILE) {
         'selected' | Set-Content $env:MY_AI_TOOLS_AMP_STATUS_FILE -Encoding ASCII
     }
-    if ($Case -in @('selected-unicode', 'selected-stale-drive')) {
+    if ($Case -in @('selected-unicode', 'selected-literal', 'selected-stale-drive')) {
         [IO.File]::WriteAllText($env:MY_AI_TOOLS_AMP_STATUS_FILE,
             "selected`n$expectedAmpHome`n", (New-Object Text.UTF8Encoding($false)))
     }
@@ -47,6 +47,7 @@ function Invoke-FixtureBash {
 try {
     New-Item -ItemType Directory -Path $fixture | Out-Null
     $env:AMP_HOME = Join-Path $fixture 'official amp'
+    if ($Case -eq 'selected-literal') { $env:AMP_HOME = Join-Path $fixture 'Amp[stable]' }
     $expectedAmpHome = $env:AMP_HOME
     if ($Case -eq 'selected-unicode') {
         $expectedAmpHome = Join-Path $fixture ('Jos' + [char]0x00E9 + ' official amp')
@@ -57,7 +58,7 @@ try {
             return $true
         }
     }
-    elseif ($Case -eq 'selected-stale-drive') {
+    elseif ($Case -in @('selected-literal', 'selected-stale-drive')) {
         $bin = Join-Path $env:AMP_HOME 'bin'
         New-Item -ItemType Directory -Path $bin -Force | Out-Null
         $exe = Join-Path $bin 'amp.exe'
