@@ -72,12 +72,13 @@ The user runs these commands in a private terminal. Agents must not run them, re
 umask 077
 S="$HOME/.local/share/amp/secrets.json"
 B="$S.bak-before-docker-sbx"
-# Make the backup owner-only before it holds credentials. Stop at the first failure.
-touch "$B" && chmod -N "$B" && chmod 600 "$B" && cp "$S" "$B" &&
-  amp orb provider create docker-sbx &&
+# Make the backup owner-only before it holds credentials. Stop if this fails.
+# After a good backup, always run the restore, even if create fails.
+touch "$B" && chmod -N "$B" && chmod 600 "$B" && cp "$S" "$B" && {
+  amp orb provider create docker-sbx
   mkdir -p "$HOME/.config/amp-orbs" &&
-  python3 -I - "$S" "$B" "$HOME/.config/amp-orbs/docker-sbx.token" <<'PY'
-import json, os, sys
+    python3 -I - "$S" "$B" "$HOME/.config/amp-orbs/docker-sbx.token" <<'PY'
+import json, os, subprocess, sys
 
 secrets_path, backup_path, token_path = sys.argv[1:]
 key = "orb-provider-token@https://ampcode.com/"
@@ -89,9 +90,11 @@ token = secrets.get(key, "")
 
 
 def write_private(path, text):
-    # Set mode 600 before any secret is written, also when the file already exists.
+    # Make the file owner-only before any secret is written: mode 600, also for an
+    # existing file, and no ACL inherited from the folder.
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     os.fchmod(fd, 0o600)
+    subprocess.run(["chmod", "-N", path], check=True)
     with os.fdopen(fd, "w") as f:
         f.write(text)
 
@@ -113,6 +116,7 @@ os.replace(tmp_path, secrets_path)
 if not found:
     sys.exit("no new provider token found; the saved slot holds the earlier token again")
 PY
+}
 ```
 
 The new token is now in `~/.config/amp-orbs/docker-sbx.token` (mode 600), and the saved
