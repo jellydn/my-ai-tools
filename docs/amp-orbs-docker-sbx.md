@@ -77,9 +77,9 @@ S="$HOME/.local/share/amp/secrets.json"
 B="$S.bak-before-docker-sbx"
 # Make the backup owner-only before it holds credentials. Stop at the first failure.
 touch "$B" && chmod -N "$B" && chmod 600 "$B" && cp "$S" "$B" &&
-  amp orb provider create docker-sbx
-mkdir -p "$HOME/.config/amp-orbs"
-python3 -I - "$S" "$B" "$HOME/.config/amp-orbs/docker-sbx.token" <<'PY'
+  amp orb provider create docker-sbx &&
+  mkdir -p "$HOME/.config/amp-orbs" &&
+  python3 -I - "$S" "$B" "$HOME/.config/amp-orbs/docker-sbx.token" <<'PY'
 import json, os, sys
 
 secrets_path, backup_path, token_path = sys.argv[1:]
