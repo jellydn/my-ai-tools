@@ -164,23 +164,47 @@ without `--orb-size` started a `medium` sandbox (4 vCPU / 8 GiB).
 
 ## Test a thread
 
+Add `--stream-json`, so the command stays attached until the turn ends:
+
 ```bash
-amp -ox 'Run nproc and free -m in the orb shell. Report their output, then reply SMALL_OK.' \
+amp -ox --stream-json 'Run nproc and free -m in the orb shell. Report their output, then reply SMALL_OK.' \
   --orb-provider docker-sbx --orb-size small
 ```
 
-The reply must show `nproc` 2 and a `free -m` total of about 3938 MiB. After `amp -ox`
-prints `SMALL_OK`, check the sandbox. `inspect` must show `cpus` 2 and `memory_mib` 4096:
+The first stream message carries the thread id. The reply must show `nproc` 2 and a `free -m`
+total of about 3938 MiB. Check the sandbox after the final result message contains
+`SMALL_OK`:
 
 ```bash
 sbx --cloud ls
 sbx --cloud inspect amp-<thread-id> --format json
 ```
 
-In the tested setup, `amp -ox` waited for the reply and then archived the thread. The archive
-sends the `pause` job, and the dispatcher stops the sandbox with its disk intact. Look for the
-pause in `logs/provider.err.log`. If no pause appears within a few minutes, the thread is not
-archived: run `amp threads archive <thread-id>` and wait for the pause.
+`inspect` must show `cpus` 2 and `memory_mib` 4096.
+
+`-ox --stream-json` archives the thread when the turn finishes, and Amp sends the `pause` job
+for it. The dispatcher stops the sandbox and keeps its disk. Wait for the job to finish, not
+only for the pause line, because the next job fails while the pause still holds the orb's
+lock:
+
+```bash
+grep 'pause amp-<thread-id>' logs/provider.err.log
+grep 'sandbox stopped; disk and memory preserved' logs/provider.err.log
+```
+
+The stop can take as long as the dispatcher's own budget (`PAUSE_WAIT` 150 s, `JOB_BUDGET`
+280 s), so allow five minutes before you treat a missing line as a failure.
+
+Amp sends `pause` when the thread goes idle, when it is archived, and when it saves a project
+snapshot, and the dispatcher logs all three the same way. Read the archive state from Amp
+instead of from the log:
+
+```bash
+amp threads search "id:<thread-id> archived:true"
+```
+
+The command prints the thread while it is archived. When it prints nothing, the thread is not
+archived, so run `amp threads archive <thread-id>` and wait for the pause to finish.
 
 `amp threads continue` refuses an archived thread, so unarchive it first. The next message
 sends `spawn`, and the dispatcher resumes the stopped sandbox:
