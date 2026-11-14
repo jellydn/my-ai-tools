@@ -136,7 +136,7 @@ extended ACL. The backup also contains credentials. Delete it after you make sur
 providers work.</p>
 <p><code>amp orb provider create</code> does not print the token; it only saves it in the slot. The script
 writes the token file before it changes the slot, so the slot holds the earlier provider&#39;s
-token after every outcome:</p>
+token again unless the <code>python3</code> step itself fails:</p>
 <ul>
 <li>If the <code>python3</code> step stops with an error, the new token is still in the slot. Fix the cause
 and run only the <code>python3</code> step again. Do not run <code>cp</code> again, because the backup must keep

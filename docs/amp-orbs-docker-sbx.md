@@ -137,7 +137,7 @@ providers work.
 
 `amp orb provider create` does not print the token; it only saves it in the slot. The script
 writes the token file before it changes the slot, so the slot holds the earlier provider's
-token after every outcome:
+token again unless the `python3` step itself fails:
 
 - If the `python3` step stops with an error, the new token is still in the slot. Fix the cause
   and run only the `python3` step again. Do not run `cp` again, because the backup must keep
