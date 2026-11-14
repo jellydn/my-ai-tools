@@ -273,9 +273,15 @@ function Get-AmpCommandInPath {
     param([string[]]$Entries)
 
     foreach ($entry in @($Entries)) {
-        foreach ($pattern in @('amp.ps1', 'amp.cmd', 'amp.bat', 'amp.exe')) {
-            $candidate = Join-Path $entry $pattern
-            if (Test-Path $candidate -PathType Leaf) { return $candidate }
+        try {
+            foreach ($pattern in @('amp.ps1', 'amp.cmd', 'amp.bat', 'amp.exe')) {
+                $candidate = Join-Path $entry $pattern -ErrorAction Stop
+                if (Test-Path -LiteralPath $candidate -PathType Leaf -ErrorAction Stop) { return $candidate }
+            }
+        }
+        catch {
+            # Persistent PATH may contain disconnected drives or inaccessible directories.
+            continue
         }
     }
     return $null
@@ -439,10 +445,10 @@ function Start-Installation {
             }
             $exitCode = $LASTEXITCODE
             if ($ampStatusFile) {
-                $ampSelected = 'selected' -eq (Get-Content $ampStatusFile -TotalCount 1)
+                $ampSelected = 'selected' -eq (Get-Content $ampStatusFile -Encoding UTF8 -TotalCount 1)
                 if ($ampSelected) {
                     # The Bash side reports the directory it verified, so both sides agree.
-                    $ampHome = @(Get-Content $ampStatusFile)[1]
+                    $ampHome = @(Get-Content $ampStatusFile -Encoding UTF8)[1]
                     if ($ampHome) { $env:AMP_HOME = $ampHome }
                 }
             }

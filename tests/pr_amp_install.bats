@@ -34,6 +34,9 @@ amp_install() {
         if [ "${OFFICIAL_SYMLINK:-false}" = true ]; then
             export PATH="$HOME/.local/bin:/usr/bin:/bin"
         fi
+        if [ "${NESTED_PREFIX:-false}" = true ]; then
+            export PATH="$HOME/.amp/bin/npm/bin:/usr/bin:/bin"
+        fi
         unset AMP_HOME USERPROFILE
         if [ "${CUSTOM_HOME:-false}" = true ]; then
             export AMP_HOME="$HOME/custom amp"
@@ -120,6 +123,18 @@ amp_install() {
     [[ "$output" == *"AMP_INSTALLED=false"* ]]
 }
 
+@test "Amp warns about a descendant npm shim before installing the official binary" {
+    mkdir -p "$AMP_TEST_HOME/.amp/bin/npm/bin"
+    printf '#!/bin/sh\necho nested-npm-version\n' > "$AMP_TEST_HOME/.amp/bin/npm/bin/amp"
+    chmod +x "$AMP_TEST_HOME/.amp/bin/npm/bin/amp"
+    export NESTED_PREFIX=true
+    run amp_install false
+    [ "$status" -eq 0 ]
+    [ -s "$AMP_TEST_LOG" ]
+    [[ "$output" == *"Amp command $AMP_TEST_HOME/.amp/bin/npm/bin/amp takes priority"* ]]
+    [[ "$output" == *"AMP_INSTALLED=true"* ]]
+}
+
 @test "Amp reuses a working official binary and warns about PATH shadowing" {
     printf '#!/bin/sh\necho fixture-version\nexit 0\n' > "$AMP_TEST_HOME/.amp/bin/amp"
     printf '#!/bin/sh\nexit 9\n' > "$AMP_TEST_HOME/stale/npm/amp"
@@ -129,6 +144,17 @@ amp_install() {
     [ ! -e "$AMP_TEST_LOG" ]
     [[ "$output" == *"takes priority"* ]]
     [[ "$output" == *"AMP_INSTALLED=true"* ]]
+}
+
+@test "Amp labels official and stale paths separately for fresh and reused installs" {
+    printf '#!/bin/sh\necho stale-npm-version\n' > "$AMP_TEST_HOME/stale/npm/amp"
+    chmod +x "$AMP_TEST_HOME/stale/npm/amp"
+    for attempt in 1 2; do
+        run amp_install false
+        [ "$status" -eq 0 ]
+        [[ "$output" == *"Amp command $AMP_TEST_HOME/stale/npm/amp takes priority"* ]]
+        [[ "$output" == *"official Amp binary ($AMP_TEST_HOME/.amp/bin/amp)"* ]]
+    done
 }
 
 @test "Amp promotes an existing official PATH entry ahead of a stale command on Unix" {
@@ -235,6 +261,22 @@ BASH
     run pwsh -NoProfile -File "$REPO_ROOT/tests/windows_amp_handoff.ps1" -Case selected-missing
     [ "$status" -eq 1 ]
     [[ "$output" == *"Official Amp binary not found"* ]]
+}
+
+@test "PowerShell preserves a Unicode AMP_HOME marker with an ANSI content default" {
+    command -v pwsh >/dev/null || skip "PowerShell is required (also tested in Windows CI)"
+    run pwsh -NoProfile -File "$REPO_ROOT/tests/windows_amp_handoff.ps1" -Case selected-unicode
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Installation completed successfully"* ]]
+}
+
+@test "PowerShell skips an unavailable persistent PATH drive and finds official Amp" {
+    command -v pwsh >/dev/null || skip "PowerShell is required (also tested in Windows CI)"
+    run pwsh -NoProfile -File "$REPO_ROOT/tests/windows_amp_handoff.ps1" -Case selected-stale-drive
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Amp verified in PowerShell: handoff-fixture-version"* ]]
+    [[ "$output" != *"not on the persistent PATH"* ]]
+    [[ "$output" == *"Installation completed successfully"* ]]
 }
 
 @test "PowerShell does not fail other setup when Amp was declined" {

@@ -108,7 +108,7 @@ resolve_path_target() {
 # The official installer links the binary into ~/.local/bin, so the resolved
 # target decides whether a command is the official one.
 warn_on_amp_command_conflict() {
-	local bin_dir="${1:-}" selected="${2:-}" selected_target official_target official_dir candidate
+	local bin_dir="${1:-}" selected="${2:-}" selected_target official_target candidate
 	[ -n "$selected" ] || return 0
 	selected_target=$(resolve_path_target "$selected" 2>/dev/null) || selected_target="$selected"
 	official_target=""
@@ -120,11 +120,8 @@ warn_on_amp_command_conflict() {
 			official_target=$(resolve_path_target "$candidate" 2>/dev/null) || official_target="$candidate"
 		fi
 	done
-	official_dir=$(resolve_path_target "$bin_dir" 2>/dev/null) || official_dir="$bin_dir"
-	case "$selected_target" in
-	"$official_target" | "$official_dir"/*) return 0 ;;
-	esac
-	log_warning "Amp command $selected takes priority over the official Amp binary ($selected_target); it may be a stale npm command."
+	[ "$selected_target" != "$official_target" ] || return 0
+	log_warning "Amp command $selected takes priority over the official Amp binary (${official_target:-$bin_dir/amp}); it may be a stale npm command."
 	log_info "Put the official Amp bin directory before npm in PATH. No existing installation will be removed."
 }
 
