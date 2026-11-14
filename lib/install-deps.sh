@@ -106,22 +106,26 @@ resolve_path_target() {
 
 # Warn when another amp command takes priority over the official installation.
 # The official installer links the binary into ~/.local/bin, so the resolved
-# target decides whether a command is the official one.
+# target decides whether a command is the official one. The warning names the
+# official location the way PATH needs it, so a symlinked parent directory does
+# not change the message.
 warn_on_amp_command_conflict() {
-	local bin_dir="${1:-}" selected="${2:-}" selected_target official_target candidate
+	local bin_dir="${1:-}" selected="${2:-}" selected_target official_target official_location candidate
 	[ -n "$selected" ] || return 0
 	selected_target=$(resolve_path_target "$selected" 2>/dev/null) || selected_target="$selected"
 	official_target=""
+	official_location=""
 	for candidate in "$bin_dir/amp" "$bin_dir/amp.exe"; do
 		[ -e "$candidate" ] || continue
 		# The same file through another path is the official installation too.
 		[ "$selected" -ef "$candidate" ] && return 0
 		if [ -z "$official_target" ]; then
 			official_target=$(resolve_path_target "$candidate" 2>/dev/null) || official_target="$candidate"
+			official_location="$candidate"
 		fi
 	done
 	[ "$selected_target" != "$official_target" ] || return 0
-	log_warning "Amp command $selected takes priority over the official Amp binary (${official_target:-$bin_dir/amp}); it may be a stale npm command."
+	log_warning "Amp command $selected takes priority over the official Amp binary (${official_location:-$bin_dir/amp}); it may be a stale npm command."
 	log_info "Put the official Amp bin directory before npm in PATH. No existing installation will be removed."
 }
 

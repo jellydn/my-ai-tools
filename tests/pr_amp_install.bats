@@ -157,6 +157,22 @@ amp_install() {
     done
 }
 
+@test "Amp names the official install location when the home sits behind a symlink" {
+    local real_home="$BATS_TEST_TMPDIR/real-home"
+    local link_home="$BATS_TEST_TMPDIR/link-home"
+    mkdir -p "$real_home/.amp/bin" "$real_home/stale/npm"
+    ln -s "$real_home" "$link_home"
+    export AMP_TEST_HOME="$link_home"
+    printf '#!/bin/sh\necho stale-npm-version\n' > "$link_home/stale/npm/amp"
+    chmod +x "$link_home/stale/npm/amp"
+    for attempt in 1 2; do
+        run amp_install false
+        [ "$status" -eq 0 ]
+        [[ "$output" == *"Amp command $link_home/stale/npm/amp takes priority"* ]]
+        [[ "$output" == *"official Amp binary ($link_home/.amp/bin/amp)"* ]]
+    done
+}
+
 @test "Amp promotes an existing official PATH entry ahead of a stale command on Unix" {
     printf '#!/bin/sh\necho official-version\n' > "$AMP_TEST_HOME/.amp/bin/amp"
     printf '#!/bin/sh\nexit 9\n' > "$AMP_TEST_HOME/stale/npm/amp"
