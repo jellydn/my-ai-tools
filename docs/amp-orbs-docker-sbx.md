@@ -173,14 +173,16 @@ without `--orb-size` started a `medium` sandbox (4 vCPU / 8 GiB).
 
 ## Test a thread
 
+Add `--stream-json`, so the command stays attached until the turn ends:
+
 ```bash
-amp -ox 'Run nproc and free -m in the orb shell. Report their output, then reply SMALL_OK.' \
+amp -ox --stream-json 'Run nproc and free -m in the orb shell. Report their output, then reply SMALL_OK.' \
   --orb-provider docker-sbx --orb-size small
 ```
 
-In the tested setup, `amp -ox` waited for the turn, printed the reply, and then archived the
-thread. The reply must show `nproc` 2 and a `free -m` total of about 3938 MiB. After it prints
-`SMALL_OK`, check the sandbox:
+The first stream message carries the thread id. The reply must show `nproc` 2 and a `free -m`
+total of about 3938 MiB. After the final result message contains `SMALL_OK`, check the
+sandbox:
 
 ```bash
 sbx --cloud ls
@@ -189,10 +191,11 @@ sbx --cloud inspect amp-<thread-id> --format json
 
 `inspect` must show `cpus` 2 and `memory_mib` 4096.
 
-Amp sends the `pause` job when it archives a thread and also when a thread is idle. Either
-pause stops the sandbox with its disk intact, so either one tests a resume. Wait until the
-pause job has finished, because a spawn waits only 30 seconds (`LOCK_WAIT`) for the orb's
-lock and fails while the pause holds it:
+`-ox --stream-json` archives the thread when the turn finishes, and Amp sends the `pause` job
+when it archives a thread and also when a thread is idle. Either pause stops the sandbox
+with its disk intact, so either one tests a resume. Wait until the pause job has finished,
+because a spawn waits only 30 seconds (`LOCK_WAIT`) for the orb's lock and fails while the
+pause holds it:
 
 ```bash
 grep 'pause amp-<thread-id>: finished' logs/provider.err.log
