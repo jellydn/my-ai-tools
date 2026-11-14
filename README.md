@@ -83,7 +83,7 @@ Amp is not installed through npm. Setup uses the [official Amp installers](https
 Setup checks `amp version` and only reuses the binary in `AMP_HOME/bin` (default: `~/.amp/bin`);
 finding another command on PATH is not enough, including an npm shim under a custom prefix.
 Symlinks to the official binary are recognised and do not trigger an npm warning.
-A Bash `amp()` function produces a warning; setup verifies the official binary directly without removing or unsetting the function.
+An exported Bash `amp()` function produces a warning; setup verifies the official binary directly without removing or unsetting the function.
 `AMP_HOME` may be a Windows path or a Git Bash path; setup converts it for each side, so the
 official installer and the verification always use the same directory.
 Our wrapper promotes the official bin directory in the current Bash and PowerShell processes only.
@@ -168,6 +168,8 @@ If the official binary is missing, install it with
 Do not reinstall `@ampcode/cli` through npm or lower execution policy to run its stale shim. Setup does not
 uninstall existing copies, delete shims, or change execution policy. A direct binary version failure needs
 investigation; changing PATH alone cannot repair an incompatible binary.
+In Bash or Git Bash, run `type amp` in your own shell to check for a function. Unexported functions from
+shell profiles are not visible to the child Bash process running setup.
 
 Claude is skipped only when `claude --version` succeeds with nonempty output. A broken shim (including a
 missing native binary) is repaired even with `--yes`, then checked again. npm installs for Claude and OpenCode

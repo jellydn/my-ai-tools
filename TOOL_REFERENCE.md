@@ -1246,7 +1246,8 @@ Use a Windows path for `AMP_HOME` in PowerShell. Git Bash paths are converted fo
 Setup puts the verified official bin directory before npm in the current PowerShell process PATH, then checks command selection.
 This wrapper promotion is session-only. The official Windows `install.ps1` adds `AMP_HOME\bin` (default: `.amp\bin`) to the saved User PATH when absent, but does not reorder an existing entry. The official Unix `install.sh` can add `~/.local/bin` to the user's shell profile when needed.
 If a separate session still selects an old npm `amp.ps1` or `amp.cmd`, put the official bin directory before npm in that session's PATH.
-A Bash `amp()` function is reported as shadowing; setup verifies the official binary directly and leaves the function unchanged.
+An exported Bash `amp()` function is reported as shadowing; setup verifies the official binary directly and leaves the function unchanged.
+Use `type amp` in your own Bash shell to check for unexported profile functions, which the child setup process cannot see.
 Do not weaken execution policy to run the stale shim. See [Windows Amp recovery](README.md#windows-recovery-amp-command-priority)
 for session-only PATH guidance. Setup does not remove existing installations. See [official CLI guidance](https://ampcode.com/docs/cli).
 
