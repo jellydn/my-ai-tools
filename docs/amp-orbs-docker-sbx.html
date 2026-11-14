@@ -44,13 +44,11 @@ Use the tested commit:</p>
 <pre><code class="language-bash">git clone https://github.com/elianiva/amp-orbs &quot;$HOME/Development/amp-orbs&quot;
 cd &quot;$HOME/Development/amp-orbs&quot;
 git switch -c docker-sbx 91793a15b71a2ab759d1a9cb91f92965e2e3ff1a
-curl -fsSL -o amp-orbs-91793a1.patch \
-  https://raw.githubusercontent.com/jellydn/my-ai-tools/main/configs/amp/docker-sbx/amp-orbs-91793a1.patch
-git apply amp-orbs-91793a1.patch
+curl -fsSL https://raw.githubusercontent.com/jellydn/my-ai-tools/main/configs/amp/docker-sbx/amp-orbs-91793a1.patch |
+  git apply
 </code></pre>
-<p>The patch is <code>configs/amp/docker-sbx/amp-orbs-91793a1.patch</code> in this repository, so the raw URL
-tracks <code>main</code> and serves the file once this guide is merged. A reader who already has a
-checkout of this repository can apply the file from disk instead of downloading it.</p>
+<p>With a checkout of this repository, you can also run <code>git apply</code> on
+<code>configs/amp/docker-sbx/amp-orbs-91793a1.patch</code> from disk.</p>
 <p>The patch makes two changes:</p>
 <ul>
 <li><code>service/install-macos.sh</code> reads <code>AMP_ORB_PROVIDER_TOKEN</code>. When it is set, the installer
@@ -90,45 +88,39 @@ with open(backup_path) as f:
     backup = json.load(f)
 token = secrets.get(key, &quot;&quot;)
 found = token.startswith(&quot;aop_live_&quot;) and token != backup.get(key)
-try:
-    if found:
-        with open(token_path, &quot;w&quot;) as f:
-            f.write(token)
-        os.chmod(token_path, 0o600)
-finally:
-    # Give the saved slot back to the earlier provider. Keep the refreshed login values.
-    # This runs on every path, so the slot never keeps the docker-sbx token.
-    if key in backup:
-        secrets[key] = backup[key]
-    else:
-        secrets.pop(key, None)
-    tmp_path = secrets_path + &quot;.tmp&quot;
-    with open(tmp_path, &quot;w&quot;) as f:
-        json.dump(secrets, f, indent=2)
-    os.chmod(tmp_path, 0o600)
-    os.replace(tmp_path, secrets_path)
+if found:
+    # If this write fails, the script stops here and the new token stays in the slot.
+    with open(token_path, &quot;w&quot;) as f:
+        f.write(token)
+    os.chmod(token_path, 0o600)
+
+# Give the saved slot back to the earlier provider. Keep the refreshed login values.
+if key in backup:
+    secrets[key] = backup[key]
+else:
+    secrets.pop(key, None)
+tmp_path = secrets_path + &quot;.tmp&quot;
+with open(tmp_path, &quot;w&quot;) as f:
+    json.dump(secrets, f, indent=2)
+os.chmod(tmp_path, 0o600)
+os.replace(tmp_path, secrets_path)
 
 if not found:
-    sys.exit(
-        &quot;no new provider token found; the saved slot holds the earlier token again. &quot;
-        &quot;If `amp orb provider create` printed a token, copy it into &quot; + token_path
-        + &quot; by hand, because the command shows it only once.&quot;
-    )
+    sys.exit(&quot;no new provider token found; the saved slot holds the earlier token again&quot;)
 PY
 </code></pre>
 <p>The new token is now in <code>~/.config/amp-orbs/docker-sbx.token</code> (mode 600), and the saved
 slot has the earlier token again. The backup also contains credentials. Delete it after you
 make sure that both providers work.</p>
-<p>If the script exits with <code>no new provider token found</code>, the saved slot holds the earlier
-provider&#39;s token again, so the other provider keeps working. The <code>docker-sbx</code> token is not
-in the slot either: <code>amp orb provider create</code> shows it once, and the script only copies it
-when it finds it. When the command printed a token, copy it into the token file by hand:</p>
-<pre><code class="language-bash">umask 077
-printf &#39;%s&#39; &#39;aop_live_&lt;the token the command printed&gt;&#39; &gt; &quot;$HOME/.config/amp-orbs/docker-sbx.token&quot;
-chmod 600 &quot;$HOME/.config/amp-orbs/docker-sbx.token&quot;
-</code></pre>
-<p>When the command printed nothing, it did not create the provider. Run it again and repeat
-the steps above.</p>
+<p><code>amp orb provider create</code> does not print the token; it only saves it in the slot. The script
+writes the token file before it changes the slot:</p>
+<ul>
+<li>If the script stops with an error, the new token is still in the slot. Fix the cause and
+run only the <code>python3</code> step again. Do not run <code>cp</code> again, because the backup must keep the
+earlier token.</li>
+<li>If it prints <code>no new provider token found</code>, the create command saved no new token, and the
+slot holds the earlier token again. Read the create command&#39;s output before you try again.</li>
+</ul>
 <h2>Install the service</h2>
 <pre><code class="language-bash">cd &quot;$HOME/Development/amp-orbs&quot;
 AMP_ORB_PROVIDER_TOKEN=&quot;$(cat &quot;$HOME/.config/amp-orbs/docker-sbx.token&quot;)&quot; ./service/install.sh 2&gt;&amp;1 |
@@ -153,20 +145,15 @@ without <code>--orb-size</code> started a <code>medium</code> sandbox (4 vCPU / 
 sbx --cloud ls
 sbx --cloud inspect amp-&lt;thread-id&gt; --format json
 </code></pre>
-<p><code>amp -ox</code> prints the thread URL and returns before the turn runs, so the sandbox is still
-starting when the command exits. Wait for it to appear in <code>sbx --cloud ls</code> before you read
-its values.</p>
 <p>The expected results are <code>cpus</code> 2 and <code>memory_mib</code> 4096 in <code>inspect</code>, <code>nproc</code> 2, and a
 <code>free -m</code> total of about 3938 MiB in the orb.</p>
-<p><code>amp -ox</code> leaves the thread unarchived, so the orb keeps running. Archiving the thread is
-what makes Amp send the <code>pause</code> job, and unarchiving it and sending a message sends
-<code>spawn</code> again. That is the pause and resume path:</p>
-<pre><code class="language-bash">amp threads archive &lt;thread-id&gt;
-amp threads archive --unarchive &lt;thread-id&gt;
+<p><code>amp -x</code> waits for the reply, then archives the thread. The archive sends the <code>pause</code> job,
+and the dispatcher stops the sandbox with its disk intact. <code>amp threads continue</code> refuses an
+archived thread, so unarchive it to test a resume. The next message sends <code>spawn</code>, and the
+dispatcher resumes the stopped sandbox:</p>
+<pre><code class="language-bash">amp threads archive --unarchive &lt;thread-id&gt;
 amp threads continue &lt;thread-id&gt; -ox &#39;Report the orb shell output again.&#39;
 </code></pre>
-<p>The archive sends <code>pause</code>, and the dispatcher stops the sandbox with its disk intact. The
-next message sends <code>spawn</code>, and the dispatcher resumes the stopped sandbox.</p>
 <p>Delete the test sandbox and its state mapping with the dispatcher:</p>
 <pre><code class="language-bash">ORB_OPERATION=delete ORB_ID=amp-&lt;thread-id&gt; ./dispatch.py
 </code></pre>

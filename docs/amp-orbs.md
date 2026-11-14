@@ -33,9 +33,9 @@ in a private terminal. It prints a token once and saves it for the controller.
 Agents must not run this command, capture its output, read credential files, or ask
 the user to paste the token. Ask only whether provider creation succeeded.
 
-Amp saves one provider token per account, in `~/.local/share/amp/secrets.json`. Creating
-a second provider replaces the token of the first one, so the controller of the provider
-that was set up earlier reconnects with the new token after a restart. See
+Amp keeps one saved provider token, in `~/.local/share/amp/secrets.json`. Creating a
+second provider replaces it, so the controller of the earlier provider connects with the
+new token after its next restart. See
 [Amp orbs on Docker Sandboxes Cloud](amp-orbs-docker-sbx.md) for the shared-slot caveat
 and the steps that put the earlier token back.
 
