@@ -76,7 +76,8 @@ B="$S.bak-before-docker-sbx"
 # After a good backup, always run the restore, even if create fails.
 touch "$B" && chmod -N "$B" && chmod 600 "$B" && cp "$S" "$B" && {
   amp orb provider create docker-sbx
-  mkdir -p "$HOME/.config/amp-orbs" &&
+  mkdir -p "$HOME/.config/amp-orbs" && chmod 700 "$HOME/.config/amp-orbs" &&
+    chmod -N "$HOME/.config/amp-orbs" &&
     python3 -I - "$S" "$B" "$HOME/.config/amp-orbs/docker-sbx.token" <<'PY'
 import json, os, subprocess, sys
 
@@ -94,7 +95,7 @@ def write_private(path, text):
     # existing file, and no ACL inherited from the folder.
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     os.fchmod(fd, 0o600)
-    subprocess.run(["chmod", "-N", path], check=True)
+    subprocess.run(["/bin/chmod", "-N", path], check=True)
     with os.fdopen(fd, "w") as f:
         f.write(text)
 
@@ -120,8 +121,9 @@ PY
 ```
 
 The new token is now in `~/.config/amp-orbs/docker-sbx.token` (mode 600), and the saved
-slot has the earlier token again. The backup also contains credentials. Delete it after you
-make sure that both providers work.
+slot has the earlier token again. The token folder is owner-only (mode 700) and carries no
+extended ACL. The backup also contains credentials. Delete it after you make sure that both
+providers work.
 
 `amp orb provider create` does not print the token; it only saves it in the slot. The script
 writes the token file before it changes the slot:
