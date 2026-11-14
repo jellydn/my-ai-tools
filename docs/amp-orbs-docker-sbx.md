@@ -40,6 +40,8 @@ The patch makes two changes:
 
 - `service/install-macos.sh` reads `AMP_ORB_PROVIDER_TOKEN`. When it is set, the installer
   sets the generated launchd plist to mode 600 and adds the token to the service environment.
+  It sends the `PlistBuddy` command on stdin, so the token never appears in `ps`, and it
+  refuses a token with characters other than letters, digits, `_`, and `-`.
 - `service/com.elianiva.amp-orb-provider.plist` sets `AMP_ORBS_DEFAULT_TYPE` to `small`.
 
 ## Build the small template
@@ -199,6 +201,4 @@ ORB_OPERATION=delete ORB_ID=amp-<thread-id> ./dispatch.py
 ## Caveats
 
 - Keep exactly one controller for each provider token.
-- The patched installer passes the token to `PlistBuddy` as an argument. Other local users can
-  see it in `ps` while `PlistBuddy` runs.
 - Only `melon-orb-base-x86_64-v3-small` exists. If Amp sends another type, the spawn fails.

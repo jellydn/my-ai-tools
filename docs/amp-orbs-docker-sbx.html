@@ -50,7 +50,9 @@ curl -fsSL https://raw.githubusercontent.com/jellydn/my-ai-tools/main/configs/am
 <p>The patch makes two changes:</p>
 <ul>
 <li><code>service/install-macos.sh</code> reads <code>AMP_ORB_PROVIDER_TOKEN</code>. When it is set, the installer
-sets the generated launchd plist to mode 600 and adds the token to the service environment.</li>
+sets the generated launchd plist to mode 600 and adds the token to the service environment.
+It sends the <code>PlistBuddy</code> command on stdin, so the token never appears in <code>ps</code>, and it
+refuses a token with characters other than letters, digits, <code>_</code>, and <code>-</code>.</li>
 <li><code>service/com.elianiva.amp-orb-provider.plist</code> sets <code>AMP_ORBS_DEFAULT_TYPE</code> to <code>small</code>.</li>
 </ul>
 <h2>Build the small template</h2>
@@ -176,8 +178,6 @@ amp threads continue &lt;thread-id&gt; -ox &#39;Report the orb shell output agai
 <h2>Caveats</h2>
 <ul>
 <li>Keep exactly one controller for each provider token.</li>
-<li>The patched installer passes the token to <code>PlistBuddy</code> as an argument. Other local users can
-see it in <code>ps</code> while <code>PlistBuddy</code> runs.</li>
 <li>Only <code>melon-orb-base-x86_64-v3-small</code> exists. If Amp sends another type, the spawn fails.</li>
 </ul>
 </article></main></div></body></html>
