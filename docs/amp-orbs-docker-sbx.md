@@ -74,14 +74,12 @@ The user runs these commands in a private terminal. Agents must not run them, re
 ```bash
 umask 077
 S="$HOME/.local/share/amp/secrets.json"
-# Make the backup owner-only before it holds credentials: remove any ACL, then copy into it.
-touch "$S.bak-before-docker-sbx"
-chmod -N "$S.bak-before-docker-sbx"
-chmod 600 "$S.bak-before-docker-sbx"
-cp "$S" "$S.bak-before-docker-sbx"
-amp orb provider create docker-sbx
+B="$S.bak-before-docker-sbx"
+# Make the backup owner-only before it holds credentials. Stop at the first failure.
+touch "$B" && chmod -N "$B" && chmod 600 "$B" && cp "$S" "$B" &&
+  amp orb provider create docker-sbx
 mkdir -p "$HOME/.config/amp-orbs"
-python3 -I - "$S" "$S.bak-before-docker-sbx" "$HOME/.config/amp-orbs/docker-sbx.token" <<'PY'
+python3 -I - "$S" "$B" "$HOME/.config/amp-orbs/docker-sbx.token" <<'PY'
 import json, os, sys
 
 secrets_path, backup_path, token_path = sys.argv[1:]
