@@ -79,6 +79,7 @@ B=&quot;$S.bak-before-docker-sbx&quot;
 # After a good backup, always run the restore, even if create fails.
 touch &quot;$B&quot; &amp;&amp; chmod -N &quot;$B&quot; &amp;&amp; chmod 600 &quot;$B&quot; &amp;&amp; cp &quot;$S&quot; &quot;$B&quot; &amp;&amp; {
   amp orb provider create docker-sbx
+  created=$?
   mkdir -p &quot;$HOME/.config/amp-orbs&quot; &amp;&amp; chmod 700 &quot;$HOME/.config/amp-orbs&quot; &amp;&amp;
     chmod -N &quot;$HOME/.config/amp-orbs&quot; &amp;&amp;
     python3 -I - &quot;$S&quot; &quot;$B&quot; &quot;$HOME/.config/amp-orbs/docker-sbx.token&quot; &lt;&lt;&#39;PY&#39;
@@ -120,6 +121,11 @@ os.replace(tmp_path, secrets_path)
 if not found:
     sys.exit(&quot;no new provider token found; the saved slot holds the earlier token again&quot;)
 PY
+  split=$?
+  if [ &quot;$created&quot; -ne 0 ]; then
+    echo &quot;amp orb provider create failed (exit $created); do not install the service yet&quot; &gt;&amp;2
+  fi
+  [ &quot;$created&quot; -eq 0 ] &amp;&amp; [ &quot;$split&quot; -eq 0 ]
 }
 </code></pre>
 <p>The new token is now in <code>~/.config/amp-orbs/docker-sbx.token</code> (mode 600), and the saved

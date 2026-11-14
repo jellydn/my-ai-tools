@@ -78,6 +78,7 @@ B="$S.bak-before-docker-sbx"
 # After a good backup, always run the restore, even if create fails.
 touch "$B" && chmod -N "$B" && chmod 600 "$B" && cp "$S" "$B" && {
   amp orb provider create docker-sbx
+  created=$?
   mkdir -p "$HOME/.config/amp-orbs" && chmod 700 "$HOME/.config/amp-orbs" &&
     chmod -N "$HOME/.config/amp-orbs" &&
     python3 -I - "$S" "$B" "$HOME/.config/amp-orbs/docker-sbx.token" <<'PY'
@@ -119,6 +120,11 @@ os.replace(tmp_path, secrets_path)
 if not found:
     sys.exit("no new provider token found; the saved slot holds the earlier token again")
 PY
+  split=$?
+  if [ "$created" -ne 0 ]; then
+    echo "amp orb provider create failed (exit $created); do not install the service yet" >&2
+  fi
+  [ "$created" -eq 0 ] && [ "$split" -eq 0 ]
 }
 ```
 
