@@ -29,7 +29,7 @@ not user configuration, so the export keeps the tracked copy and restores it
 only when the tracked file is missing.
 
 If a provider is not configured, the user runs `amp orb provider create itman-vm`
-in a private terminal. It prints a token once and saves it for the controller.
+in a private terminal. It saves the provider token with the Amp credentials for the controller.
 Agents must not run this command, capture its output, read credential files, or ask
 the user to paste the token. Ask only whether provider creation succeeded.
 

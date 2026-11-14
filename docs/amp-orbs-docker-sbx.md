@@ -36,9 +36,6 @@ curl -fsSL https://raw.githubusercontent.com/jellydn/my-ai-tools/main/configs/am
   git apply
 ```
 
-With a checkout of this repository, you can also run `git apply` on
-`configs/amp/docker-sbx/amp-orbs-91793a1.patch` from disk.
-
 The patch makes two changes:
 
 - `service/install-macos.sh` reads `AMP_ORB_PROVIDER_TOKEN`. When it is set, the installer
@@ -169,12 +166,15 @@ sbx --cloud inspect amp-<thread-id> --format json
 The expected results are `cpus` 2 and `memory_mib` 4096 in `inspect`, `nproc` 2, and a
 `free -m` total of about 3938 MiB in the orb.
 
-`amp -x` waits for the reply, then archives the thread. The archive sends the `pause` job,
-and the dispatcher stops the sandbox with its disk intact. `amp threads continue` refuses an
-archived thread, so unarchive it to test a resume. The next message sends `spawn`, and the
-dispatcher resumes the stopped sandbox:
+Run the `sbx` commands after `amp -ox` prints `SMALL_OK`. In the tested setup, `amp -ox`
+waited for the reply and then archived the thread. The archive sends the `pause` job, and
+the dispatcher stops the sandbox with its disk intact. If the thread is not archived, archive
+it yourself. Wait until `logs/provider.err.log` shows the pause, then unarchive the thread,
+because `amp threads continue` refuses an archived thread. The next message sends `spawn`,
+and the dispatcher resumes the stopped sandbox:
 
 ```bash
+amp threads archive <thread-id>   # only if the thread is not archived
 amp threads archive --unarchive <thread-id>
 amp threads continue <thread-id> -ox 'Report the orb shell output again.'
 ```

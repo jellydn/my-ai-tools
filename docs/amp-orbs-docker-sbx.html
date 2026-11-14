@@ -47,8 +47,6 @@ git switch -c docker-sbx 91793a15b71a2ab759d1a9cb91f92965e2e3ff1a
 curl -fsSL https://raw.githubusercontent.com/jellydn/my-ai-tools/main/configs/amp/docker-sbx/amp-orbs-91793a1.patch |
   git apply
 </code></pre>
-<p>With a checkout of this repository, you can also run <code>git apply</code> on
-<code>configs/amp/docker-sbx/amp-orbs-91793a1.patch</code> from disk.</p>
 <p>The patch makes two changes:</p>
 <ul>
 <li><code>service/install-macos.sh</code> reads <code>AMP_ORB_PROVIDER_TOKEN</code>. When it is set, the installer
@@ -155,11 +153,14 @@ sbx --cloud inspect amp-&lt;thread-id&gt; --format json
 </code></pre>
 <p>The expected results are <code>cpus</code> 2 and <code>memory_mib</code> 4096 in <code>inspect</code>, <code>nproc</code> 2, and a
 <code>free -m</code> total of about 3938 MiB in the orb.</p>
-<p><code>amp -x</code> waits for the reply, then archives the thread. The archive sends the <code>pause</code> job,
-and the dispatcher stops the sandbox with its disk intact. <code>amp threads continue</code> refuses an
-archived thread, so unarchive it to test a resume. The next message sends <code>spawn</code>, and the
-dispatcher resumes the stopped sandbox:</p>
-<pre><code class="language-bash">amp threads archive --unarchive &lt;thread-id&gt;
+<p>Run the <code>sbx</code> commands after <code>amp -ox</code> prints <code>SMALL_OK</code>. In the tested setup, <code>amp -ox</code>
+waited for the reply and then archived the thread. The archive sends the <code>pause</code> job, and
+the dispatcher stops the sandbox with its disk intact. If the thread is not archived, archive
+it yourself. Wait until <code>logs/provider.err.log</code> shows the pause, then unarchive the thread,
+because <code>amp threads continue</code> refuses an archived thread. The next message sends <code>spawn</code>,
+and the dispatcher resumes the stopped sandbox:</p>
+<pre><code class="language-bash">amp threads archive &lt;thread-id&gt;   # only if the thread is not archived
+amp threads archive --unarchive &lt;thread-id&gt;
 amp threads continue &lt;thread-id&gt; -ox &#39;Report the orb shell output again.&#39;
 </code></pre>
 <p>Delete the test sandbox and its state mapping with the dispatcher:</p>
