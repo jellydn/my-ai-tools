@@ -1,0 +1,30 @@
+diff --git a/service/com.elianiva.amp-orb-provider.plist b/service/com.elianiva.amp-orb-provider.plist
+index bc9d08d..cab1001 100644
+--- a/service/com.elianiva.amp-orb-provider.plist
++++ b/service/com.elianiva.amp-orb-provider.plist
+@@ -32,7 +32,7 @@
+ 		<key>AMP_ORBS_BASE_TEMPLATE_XL</key>
+ 		<string>melon-orb-base-x86_64-v3-xl</string>
+ 		<key>AMP_ORBS_DEFAULT_TYPE</key>
+-		<string>medium</string>
++		<string>small</string>
+ 		<key>AMP_ORBS_TEMPLATE_ARCH</key>
+ 		<string>amd64</string>
+ 		<key>AMP_ORBS_TTL</key>
+diff --git a/service/install-macos.sh b/service/install-macos.sh
+index 1c7e2d4..490db5b 100755
+--- a/service/install-macos.sh
++++ b/service/install-macos.sh
+@@ -21,6 +21,12 @@ sed \
+ 	-e "s|__HOME__|$HOME|g" \
+ 	-e "s|__PATH__|/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.amp/bin|g" \
+ 	"$SOURCE" >"$TARGET"
++# A dedicated token keeps this provider off the single token slot that
++# `amp orb provider create` shares with other providers on this Mac.
++if [[ -n "${AMP_ORB_PROVIDER_TOKEN:-}" ]]; then
++	chmod 600 "$TARGET"
++	/usr/libexec/PlistBuddy -c "Add :EnvironmentVariables:AMP_ORB_PROVIDER_TOKEN string $AMP_ORB_PROVIDER_TOKEN" "$TARGET"
++fi
+ plutil -lint "$TARGET" >/dev/null
+ 
+ launchctl bootout "$DOMAIN/$LABEL" 2>/dev/null || true

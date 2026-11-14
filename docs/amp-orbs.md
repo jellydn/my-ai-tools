@@ -2,6 +2,7 @@
 
 The [dispatcher](../configs/amp/orb-dispatch.sh) runs one smolvm machine per orb.
 No Amp skill or shell function is required. See the [Amp dispatch contract](https://ampcode.com/docs/orbs/self-hosted#dispatch-contract).
+For cloud sandboxes instead of local VMs, see [Amp orbs on Docker Sandboxes Cloud](amp-orbs-docker-sbx.md).
 
 ## Set up the Mac
 
