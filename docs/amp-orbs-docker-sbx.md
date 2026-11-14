@@ -177,18 +177,20 @@ sbx --cloud ls
 sbx --cloud inspect amp-<thread-id> --format json
 ```
 
-In the tested setup, `amp -ox` waited for the reply and then archived the thread. The archive
-sends the `pause` job, and the dispatcher stops the sandbox with its disk intact. Look for the
-pause in `logs/provider.err.log`. If no pause appears within a few minutes, the thread is not
-archived: run `amp threads archive <thread-id>` and wait for the pause.
+In the tested setup, `amp -ox` waited for the reply, printed it, and then archived the
+thread. Amp sends the `pause` job when it archives a thread and also when a thread is idle.
+Either pause stops the sandbox with its disk intact, so either one tests a resume.
 
-`amp threads continue` refuses an archived thread, so unarchive it first. The next message
-sends `spawn`, and the dispatcher resumes the stopped sandbox:
+Wait for a `pause <orb-id>` entry in `logs/provider.err.log`. If none appears within a few
+minutes, run `amp threads archive <thread-id>` to send one. Then send a message. It sends
+`spawn`, and the dispatcher resumes the stopped sandbox:
 
 ```bash
-amp threads archive --unarchive <thread-id>
 amp threads continue <thread-id> -ox 'Report the orb shell output again.'
 ```
+
+If the command fails with "This thread is archived", run
+`amp threads archive --unarchive <thread-id>` and send the message again.
 
 Delete the test sandbox and its state mapping with the dispatcher:
 

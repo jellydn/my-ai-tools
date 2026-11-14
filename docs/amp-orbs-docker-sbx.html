@@ -162,15 +162,16 @@ prints <code>SMALL_OK</code>, check the sandbox. <code>inspect</code> must show 
 <pre><code class="language-bash">sbx --cloud ls
 sbx --cloud inspect amp-&lt;thread-id&gt; --format json
 </code></pre>
-<p>In the tested setup, <code>amp -ox</code> waited for the reply and then archived the thread. The archive
-sends the <code>pause</code> job, and the dispatcher stops the sandbox with its disk intact. Look for the
-pause in <code>logs/provider.err.log</code>. If no pause appears within a few minutes, the thread is not
-archived: run <code>amp threads archive &lt;thread-id&gt;</code> and wait for the pause.</p>
-<p><code>amp threads continue</code> refuses an archived thread, so unarchive it first. The next message
-sends <code>spawn</code>, and the dispatcher resumes the stopped sandbox:</p>
-<pre><code class="language-bash">amp threads archive --unarchive &lt;thread-id&gt;
-amp threads continue &lt;thread-id&gt; -ox &#39;Report the orb shell output again.&#39;
+<p>In the tested setup, <code>amp -ox</code> waited for the reply, printed it, and then archived the
+thread. Amp sends the <code>pause</code> job when it archives a thread and also when a thread is idle.
+Either pause stops the sandbox with its disk intact, so either one tests a resume.</p>
+<p>Wait for a <code>pause &lt;orb-id&gt;</code> entry in <code>logs/provider.err.log</code>. If none appears within a few
+minutes, run <code>amp threads archive &lt;thread-id&gt;</code> to send one. Then send a message. It sends
+<code>spawn</code>, and the dispatcher resumes the stopped sandbox:</p>
+<pre><code class="language-bash">amp threads continue &lt;thread-id&gt; -ox &#39;Report the orb shell output again.&#39;
 </code></pre>
+<p>If the command fails with &quot;This thread is archived&quot;, run
+<code>amp threads archive --unarchive &lt;thread-id&gt;</code> and send the message again.</p>
 <p>Delete the test sandbox and its state mapping with the dispatcher:</p>
 <pre><code class="language-bash">ORB_OPERATION=delete ORB_ID=amp-&lt;thread-id&gt; ./dispatch.py
 </code></pre>
