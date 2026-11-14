@@ -139,13 +139,15 @@ exits 0 only when the create command succeeded and the <code>python3</code> step
 messages do not tell you reliably which state it stopped in, so after any error, do not
 install the service yet. Recover from the state instead:</p>
 <ol>
-<li>Fix the cause that the output shows.</li>
+<li>Fix the cause that the output shows. If the error came from <code>touch</code>, <code>chmod</code>, or <code>cp</code>, the
+backup step failed, so <code>amp orb provider create</code> did not run and the slot is unchanged.
+Run the whole block again and stop here.</li>
 <li>In the same shell, run the <code>mkdir</code> and <code>python3</code> lines of the block again, without <code>touch</code>,
 <code>cp</code>, or <code>amp orb provider create</code>. This is safe in every state. If the slot holds a new
 token, the step saves it to the token file and puts the earlier token back. If not, it puts
 the earlier token back, leaves the token file as it is, and prints
-<code>no new provider token found</code>. Never run <code>cp</code> again, because the backup must keep the
-earlier token.</li>
+<code>no new provider token found</code>. Once the create command has run, never run <code>cp</code> again,
+because the backup must keep the earlier token.</li>
 <li>Check that <code>~/.config/amp-orbs/docker-sbx.token</code> is not empty (<code>test -s</code>) and that
 <code>docker-sbx</code> is listed in <strong>Amp Settings → Orbs</strong>. When both are true, continue.</li>
 <li>When the provider is not listed, run <code>amp orb provider create docker-sbx</code>, then step 2
