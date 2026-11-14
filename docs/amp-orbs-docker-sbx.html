@@ -79,7 +79,7 @@ S=&quot;$HOME/.local/share/amp/secrets.json&quot;
 B=&quot;$S.bak-before-docker-sbx&quot;
 # Make the backup owner-only before it holds credentials. Stop if this fails.
 # After a good backup, always run the restore, even if create fails.
-touch &quot;$B&quot; &amp;&amp; chmod -N &quot;$B&quot; &amp;&amp; chmod 600 &quot;$B&quot; &amp;&amp; cp &quot;$S&quot; &quot;$B&quot; &amp;&amp; {
+touch &quot;$B&quot; &amp;&amp; chmod -N &quot;$B&quot; &amp;&amp; chmod 600 &quot;$B&quot; &amp;&amp; cp &quot;$S&quot; &quot;$B&quot; &amp;&amp; echo &quot;backup saved&quot; &amp;&amp; {
   amp orb provider create docker-sbx
   created=$?
   mkdir -p &quot;$HOME/.config/amp-orbs&quot; &amp;&amp; chmod 700 &quot;$HOME/.config/amp-orbs&quot; &amp;&amp;
@@ -139,9 +139,10 @@ exits 0 only when the create command succeeded and the <code>python3</code> step
 messages do not tell you reliably which state it stopped in, so after any error, do not
 install the service yet. Recover from the state instead:</p>
 <ol>
-<li>Fix the cause that the output shows. If the error came from <code>touch</code>, <code>chmod</code>, or <code>cp</code>, the
+<li>Fix the cause that the output shows. If the output does not contain <code>backup saved</code>, the
 backup step failed, so <code>amp orb provider create</code> did not run and the slot is unchanged.
-Run the whole block again and stop here.</li>
+Run the whole block again and stop here. If it contains <code>backup saved</code>, continue with
+step 2, even when the error came from a <code>chmod</code>.</li>
 <li>In the same shell, run the <code>mkdir</code> and <code>python3</code> lines of the block again, without <code>touch</code>,
 <code>cp</code>, or <code>amp orb provider create</code>. This is safe in every state. If the slot holds a new
 token, the step saves it to the token file and puts the earlier token back. If not, it puts
