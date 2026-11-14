@@ -77,7 +77,20 @@ installation and passed to Git Bash in the same process; no separate prerequisit
 is needed after a successful install. The wrapper skips Git Bash login profiles so an older shell PATH cannot
 hide these tools. Approve only the package installer's elevation prompt; the wrapper does not relaunch the full
 configuration installer as administrator. If approval is denied, setup stops and can be rerun safely.
-Native Windows uses Node/npm, not Bun, for package installation; Linux, macOS, and WSL keep Bun-first behavior.
+Native Windows uses Node/npm, not Bun, for npm package installation; Linux, macOS, and WSL keep Bun-first behavior.
+Amp is not installed through npm. Setup uses the [official Amp installers](https://ampcode.com/docs/cli):
+`install.ps1` on native Windows (including Git Bash), and `install.sh` on macOS, Linux, and WSL.
+Setup checks `amp version` and only reuses the binary in `AMP_HOME/bin` (default: `~/.amp/bin`);
+finding another command on PATH is not enough, including an npm shim under a custom prefix.
+Symlinks to the official binary are recognised and do not trigger an npm warning.
+An exported Bash `amp()` function produces a warning; setup verifies the official binary directly without removing or unsetting the function.
+`AMP_HOME` may be a Windows path or a Git Bash path; setup converts it for each side, so the
+official installer and the verification always use the same directory.
+Our wrapper promotes the official bin directory in the current Bash and PowerShell processes only.
+The official Windows `install.ps1` adds `AMP_HOME\bin` (default: `.amp\bin`) to the saved User PATH when absent;
+it does not reorder an existing entry. The official Unix `install.sh` can add `~/.local/bin` to a shell profile
+when needed. These official-installer changes persist across sessions; the wrapper's promotion does not.
+The PowerShell wrapper checks Amp only if it was accepted in setup; declining Amp leaves other tool installs unaffected.
 
 The one-line command and `-y` / `--yes` use these default categories:
 
@@ -127,6 +140,36 @@ cannot be found, close all terminal windows and reopen PowerShell. If `winget` i
 [`jq`](https://jqlang.org/download/), and [Node.js LTS with npm](https://nodejs.org/) manually. In Git setup,
 select **Git from the command line and also from 3rd-party software**. Do not bypass package lifecycle errors
 with `--ignore-scripts`: native binaries can remain uninstalled.
+
+#### Windows recovery: Amp command priority
+
+If `amp` reports an incompatible npm build, or PowerShell blocks `AppData\Roaming\npm\amp.ps1`,
+check command selection before changing anything. The wrapper verifies the official binary, puts its directory
+first in the current PowerShell process PATH, and checks command selection again. A shadowing alias, function,
+or a PATH entry that a new terminal would pick first is reported as a warning and does not fail the rest of
+the setup; only a missing or broken official binary fails the run.
+
+```powershell
+Get-Command amp -All
+$ampHome = if ($env:AMP_HOME) { $env:AMP_HOME } else { Join-Path $env:USERPROFILE '.amp' }
+$ampBin = Join-Path $ampHome 'bin'
+& (Join-Path $ampBin 'amp.exe') version
+# Current session only: prefer the official binary, without removing npm or other tools.
+$env:Path = "$ampBin;$env:Path"
+Get-Command amp -All
+amp version
+```
+
+For future sessions, open Windows **Environment Variables** and place the official Amp bin directory before
+`AppData\Roaming\npm` in PATH, then close and reopen PowerShell. Do not replace the full PATH or remove npm's
+directory: other tools can need it. Review any `amp` alias or function separately; PATH does not override those.
+If the official binary is missing, install it with
+`Invoke-RestMethod https://ampcode.com/install.ps1 | Invoke-Expression`, then repeat the checks above.
+Do not reinstall `@ampcode/cli` through npm or lower execution policy to run its stale shim. Setup does not
+uninstall existing copies, delete shims, or change execution policy. A direct binary version failure needs
+investigation; changing PATH alone cannot repair an incompatible binary.
+In Bash or Git Bash, run `type amp` in your own shell to check for a function. Unexported functions from
+shell profiles are not visible to the child Bash process running setup.
 
 Claude is skipped only when `claude --version` succeeds with nonempty output. A broken shim (including a
 missing native binary) is repaired even with `--yes`, then checked again. npm installs for Claude and OpenCode
