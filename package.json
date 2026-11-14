@@ -35,7 +35,7 @@
 		"hono": "^4.6.3",
 		"openai": "^7.0.0",
 		"tsx": "^4.23.0",
-		"web-tree-sitter": "0.27.1",
+		"web-tree-sitter": "0.27.2",
 		"yaml": "^2.9.0",
 		"zod": "^4.0.0"
 	},
