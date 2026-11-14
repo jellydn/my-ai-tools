@@ -142,8 +142,11 @@ token again unless the `python3` step itself fails:
 - If the `python3` step stops with an error, the new token is still in the slot. Fix the cause
   and run only the `python3` step again. Do not run `cp` again, because the backup must keep
   the earlier token.
-- If it prints `no new provider token found`, the create command saved no new token, and the
-  slot holds the earlier token again. Read the create command's output before you try again.
+- If it prints `no new provider token found`, the create command saved no new token, so the
+  token file is still absent and the slot holds the earlier token again. Read the create
+  command's output, fix the cause, then create the provider again and run only the `python3`
+  step, so the token file holds the new token and the slot holds the earlier token again.
+  Do not run `cp` again.
 - If it prints `amp orb provider create failed` and not `no new provider token found`, the
   create command failed after it stored the token. The token file holds that token, and the
   slot holds the earlier token again. Read the create command's output, fix the cause, then
