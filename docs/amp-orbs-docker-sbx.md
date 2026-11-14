@@ -141,6 +141,9 @@ writes the token file before it changes the slot:
   earlier token.
 - If it prints `no new provider token found`, the create command saved no new token, and the
   slot holds the earlier token again. Read the create command's output before you try again.
+- If it prints `amp orb provider create failed`, the create command failed. The token file
+  still holds the token that the failed command saved, but the provider does not exist yet.
+  Create the provider again before you install the service.
 
 ## Install the service
 

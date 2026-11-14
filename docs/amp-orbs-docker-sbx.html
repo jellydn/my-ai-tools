@@ -140,6 +140,9 @@ run only the <code>python3</code> step again. Do not run <code>cp</code> again, 
 earlier token.</li>
 <li>If it prints <code>no new provider token found</code>, the create command saved no new token, and the
 slot holds the earlier token again. Read the create command&#39;s output before you try again.</li>
+<li>If it prints <code>amp orb provider create failed</code>, the create command failed. The token file
+still holds the token that the failed command saved, but the provider does not exist yet.
+Create the provider again before you install the service.</li>
 </ul>
 <h2>Install the service</h2>
 <pre><code class="language-bash">cd &quot;$HOME/Development/amp-orbs&quot;
