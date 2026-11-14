@@ -165,27 +165,21 @@ total of about 3938 MiB. Check the sandbox after the final result message contai
 sbx --cloud inspect amp-&lt;thread-id&gt; --format json
 </code></pre>
 <p><code>inspect</code> must show <code>cpus</code> 2 and <code>memory_mib</code> 4096.</p>
-<p><code>-ox --stream-json</code> archives the thread when the turn finishes, and Amp sends the <code>pause</code> job
-for it. The dispatcher stops the sandbox and keeps its disk. Wait for the job to finish, not
-only for the pause line, because the next job fails while the pause still holds the orb&#39;s
-lock:</p>
+<p>Amp sends the <code>pause</code> job when it archives a thread and also when a thread is idle. Either
+pause stops the sandbox with its disk intact, so either one tests a resume. Wait for the
+<code>pause &lt;orb-id&gt;</code> entry in <code>logs/provider.err.log</code> and for the line that marks the end of the
+job, because the next job fails while the pause still holds the orb&#39;s lock:</p>
 <pre><code class="language-bash">grep &#39;pause amp-&lt;thread-id&gt;&#39; logs/provider.err.log
 grep &#39;sandbox stopped; disk and memory preserved&#39; logs/provider.err.log
 </code></pre>
 <p>The stop can take as long as the dispatcher&#39;s own budget (<code>PAUSE_WAIT</code> 150 s, <code>JOB_BUDGET</code>
-280 s), so allow five minutes before you treat a missing line as a failure.</p>
-<p>Amp sends <code>pause</code> when the thread goes idle, when it is archived, and when it saves a project
-snapshot, and the dispatcher logs all three the same way. Read the archive state from Amp
-instead of from the log:</p>
-<pre><code class="language-bash">amp threads search &quot;id:&lt;thread-id&gt; archived:true&quot;
+280 s), so allow five minutes before you treat a missing line as a failure. If no pause
+appears, run <code>amp threads archive &lt;thread-id&gt;</code> to send one.</p>
+<p>Then send a message. It sends <code>spawn</code>, and the dispatcher resumes the stopped sandbox:</p>
+<pre><code class="language-bash">amp threads continue &lt;thread-id&gt; -ox &#39;Report the orb shell output again.&#39;
 </code></pre>
-<p>The command prints the thread while it is archived. When it prints nothing, the thread is not
-archived, so run <code>amp threads archive &lt;thread-id&gt;</code> and wait for the pause to finish.</p>
-<p><code>amp threads continue</code> refuses an archived thread, so unarchive it first. The next message
-sends <code>spawn</code>, and the dispatcher resumes the stopped sandbox:</p>
-<pre><code class="language-bash">amp threads archive --unarchive &lt;thread-id&gt;
-amp threads continue &lt;thread-id&gt; -ox &#39;Report the orb shell output again.&#39;
-</code></pre>
+<p>If the command fails with &quot;This thread is archived&quot;, run
+<code>amp threads archive --unarchive &lt;thread-id&gt;</code> and send the message again.</p>
 <p>Delete the test sandbox and its state mapping with the dispatcher:</p>
 <pre><code class="language-bash">ORB_OPERATION=delete ORB_ID=amp-&lt;thread-id&gt; ./dispatch.py
 </code></pre>

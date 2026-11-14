@@ -182,10 +182,10 @@ sbx --cloud inspect amp-<thread-id> --format json
 
 `inspect` must show `cpus` 2 and `memory_mib` 4096.
 
-`-ox --stream-json` archives the thread when the turn finishes, and Amp sends the `pause` job
-for it. The dispatcher stops the sandbox and keeps its disk. Wait for the job to finish, not
-only for the pause line, because the next job fails while the pause still holds the orb's
-lock:
+Amp sends the `pause` job when it archives a thread and also when a thread is idle. Either
+pause stops the sandbox with its disk intact, so either one tests a resume. Wait for the
+`pause <orb-id>` entry in `logs/provider.err.log` and for the line that marks the end of the
+job, because the next job fails while the pause still holds the orb's lock:
 
 ```bash
 grep 'pause amp-<thread-id>' logs/provider.err.log
@@ -193,26 +193,17 @@ grep 'sandbox stopped; disk and memory preserved' logs/provider.err.log
 ```
 
 The stop can take as long as the dispatcher's own budget (`PAUSE_WAIT` 150 s, `JOB_BUDGET`
-280 s), so allow five minutes before you treat a missing line as a failure.
+280 s), so allow five minutes before you treat a missing line as a failure. If no pause
+appears, run `amp threads archive <thread-id>` to send one.
 
-Amp sends `pause` when the thread goes idle, when it is archived, and when it saves a project
-snapshot, and the dispatcher logs all three the same way. Read the archive state from Amp
-instead of from the log:
-
-```bash
-amp threads search "id:<thread-id> archived:true"
-```
-
-The command prints the thread while it is archived. When it prints nothing, the thread is not
-archived, so run `amp threads archive <thread-id>` and wait for the pause to finish.
-
-`amp threads continue` refuses an archived thread, so unarchive it first. The next message
-sends `spawn`, and the dispatcher resumes the stopped sandbox:
+Then send a message. It sends `spawn`, and the dispatcher resumes the stopped sandbox:
 
 ```bash
-amp threads archive --unarchive <thread-id>
 amp threads continue <thread-id> -ox 'Report the orb shell output again.'
 ```
+
+If the command fails with "This thread is archived", run
+`amp threads archive --unarchive <thread-id>` and send the message again.
 
 Delete the test sandbox and its state mapping with the dispatcher:
 
