@@ -10,8 +10,8 @@ integration deliberately treats it as such.
 
 ## What is managed
 
-Only the small, portable, non-secret files the app reads as its roster appear in this directory after
-`generate.sh` runs with the opt-in export enabled:
+Only the small, portable roster files appear in this directory, and only after `generate.sh` runs with
+the opt-in export enabled:
 
 | File               | Contents                                                 |
 | ------------------ | -------------------------------------------------------- |
@@ -44,26 +44,30 @@ as a local snapshot for your own machines, not a shared artifact.
 
 ## Install
 
-OpenMausBot is off the default `-y` allowlist. Opt in explicitly:
+OpenMausBot is off the default `-y` allowlist. An interactive run asks before it installs each optional
+tool, so answer yes for OpenMausBot:
 
 ```bash
 ./cli.sh --with-tools=openmausbot
 ```
 
-The installer installs the headless `openmausbot` CLI when it is not on PATH, and copies the managed
-roster files into `~/.openmausbot/import/` when the app data directory exists. The two are checked
-independently: the CLI on PATH does not mean the app is installed, and the data directory does not
-mean the CLI is installed.
+For an unattended run, add `-y`. Note that `-y` also installs the default allowlisted tools:
 
-`bots.json` and `default-bot.json` are **app-owned** — the server rewrites them on every roster
-change. The repository snapshot is therefore written to `~/.openmausbot/import/` (owner-only,
-`0600`) and the live registry is never replaced; apply the snapshot from the app when you want it.
-Destination state under the data directory (credentials, transcripts, databases) is never modified or
-removed.
+```bash
+./cli.sh -y --with-tools=openmausbot
+```
 
-## Full recovery
+The installer installs the headless `openmausbot` CLI when it is not on PATH. The npm package requires
+Node.js 24 or newer, so the installer stops with an error on an older Node.js. It prints the download
+link for the desktop app and never writes to the app data directory.
 
-The app's own backup is the complete recovery path: **Settings → Backups → Export full backup** produces
-an encrypted, password-protected `.ombbackup` with bots, threads, attachments, memory, and routines.
-Use that for backups you need to restore; the roster files here are a local snapshot, not a
-substitute.
+## Restore
+
+The exported roster is a reference snapshot: the app does not read it, and the installer does not apply
+it. The app reads its live registry only from `bots.json` in the data directory and rewrites that file on
+every roster change.
+
+To back up and restore everything (bots, threads, attachments, memory, and routines), use the app:
+**Settings → Import & export → Export full backup** writes an encrypted, password-protected
+`.ombbackup` file, and **Settings → Import & export → Import backup** restores it. See the
+[upstream data and backups guide](https://github.com/milind-soni/OpenMausBot/blob/main/apps/docs/content/docs/self-hosting/data-and-backups.mdx).

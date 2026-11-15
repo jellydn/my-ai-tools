@@ -9,6 +9,11 @@ LIB_INSTALL="$REPO_ROOT/lib/install.sh"
 LIB_OPENMAUSBOT="$REPO_ROOT/lib/install-openmausbot.sh"
 README="$REPO_ROOT/TOOL_REFERENCE.md"
 
+setup() {
+	# A developer's real OMB_DATA_DIR must never leak into the fixtures.
+	unset OMB_DATA_DIR
+}
+
 @test "OpenMausBot scaffold exists and does not ship private state" {
 	[ -f "$REPO_ROOT/configs/openmausbot/README.md" ]
 	# Credentials, transcripts, and databases must never be committed, even
@@ -90,200 +95,36 @@ README="$REPO_ROOT/TOOL_REFERENCE.md"
 	[ "$(grep -c '^ATTEMPT:openmausbot$' <<<"$output")" -eq 1 ]
 }
 
-@test "copy_openmausbot_configs honours OMB_DATA_DIR" {
+@test "install_openmausbot refuses Node.js older than 24 and reports the failure" {
 	run bash -c '
-		set -e
-		home=$(mktemp -d)
-		repo=$(mktemp -d)
-		trap '\''rm -rf "$home" "$repo"'\'' EXIT
-		export HOME="$home" OMB_DATA_DIR="$home/custom-omb" DRY_RUN=false YES_TO_ALL=false VERBOSE=false
-		mkdir -p "$home/custom-omb" "$repo/configs/openmausbot"
-		printf '\''[{"id":"x"}]\n'\'' >"$repo/configs/openmausbot/bots.json"
-		printf '\''{"v":1,"places":{}}\n'\'' >"$repo/configs/openmausbot/default-bot.json"
-
-		source "$1"
-		SCRIPT_DIR="$repo"
-		copy_openmausbot_configs
-		cmp "$repo/configs/openmausbot/bots.json" "$home/custom-omb/import/bots.json"
-	' _ "$CLI_SH"
-	[ "$status" -eq 0 ]
+		bin=$(mktemp -d)
+		trap '\''rm -rf "$bin"'\'' EXIT
+		printf "#!/bin/sh\necho 22\n" >"$bin/node"
+		chmod +x "$bin/node"
+		PATH="$bin:/usr/bin:/bin"
+		source "$1/cli.sh"
+		install_npm_tool() { echo NPM_INSTALL_ATTEMPTED; }
+		install_openmausbot
+	' _ "$REPO_ROOT"
+	[ "$status" -ne 0 ]
+	[[ "$output" == *"requires Node.js 24 or newer"* ]]
+	[[ "$output" != *"NPM_INSTALL_ATTEMPTED"* ]]
 }
 
-@test "copy_openmausbot_configs skips when the app data directory is missing" {
+@test "install_openmausbot returns the npm install failure" {
 	run bash -c '
-		set -e
-		home=$(mktemp -d)
-		trap '\''rm -rf "$home"'\'' EXIT
-		mkdir -p "$home/bin"
-		printf '\''#!/bin/sh\nexit 0\n'\'' >"$home/bin/openmausbot"
-		chmod +x "$home/bin/openmausbot"
-		export HOME="$home" PATH="$home/bin:$PATH" DRY_RUN=false YES_TO_ALL=false VERBOSE=false
-		source "$1"
-		copy_openmausbot_configs
-		[ ! -d "$home/.openmausbot" ]
-	' _ "$CLI_SH"
-	[ "$status" -eq 0 ]
-	[[ "$output" == *"OpenMausBot not detected"* ]]
-}
-
-@test "copy_openmausbot_configs is dry-run safe and writes nothing" {
-	run bash -c '
-		set -e
-		home=$(mktemp -d)
-		repo=$(mktemp -d)
-		trap '\''rm -rf "$home" "$repo"'\'' EXIT
-		mkdir -p "$home/.openmausbot" "$repo/configs/openmausbot"
-		printf '\''[{"id":"x"}]\n'\'' >"$repo/configs/openmausbot/bots.json"
-		printf '\''{"v":1,"places":{}}\n'\'' >"$repo/configs/openmausbot/default-bot.json"
-		export HOME="$home" DRY_RUN=true YES_TO_ALL=false VERBOSE=false
-		source "$1"
-		SCRIPT_DIR="$repo"
-		copy_openmausbot_configs
-		[ -z "$(find "$home/.openmausbot" -mindepth 1)" ]
-	' _ "$CLI_SH"
-	[ "$status" -eq 0 ]
-}
-
-@test "copy_openmausbot_configs installs the roster into the app-unowned import directory" {
-	run bash -c '
-		set -e
-		home=$(mktemp -d)
-		repo=$(mktemp -d)
-		trap '\''rm -rf "$home" "$repo"'\'' EXIT
-		export HOME="$home" DRY_RUN=false YES_TO_ALL=false VERBOSE=false
-		mkdir -p "$home/.openmausbot" "$repo/configs/openmausbot"
-		printf '\''[{"id":"11111111-1111-1111-1111-111111111111","name":"Fixture Bot","soul":"Be helpful."}]\n'\'' >"$repo/configs/openmausbot/bots.json"
-		printf '\''{"v":1,"places":{}}\n'\'' >"$repo/configs/openmausbot/default-bot.json"
-
-		source "$1"
-		SCRIPT_DIR="$repo"
-		copy_openmausbot_configs
-		cmp "$repo/configs/openmausbot/bots.json" "$home/.openmausbot/import/bots.json"
-		cmp "$repo/configs/openmausbot/default-bot.json" "$home/.openmausbot/import/default-bot.json"
-	' _ "$CLI_SH"
-	[ "$status" -eq 0 ]
-	[[ "$output" == *"OpenMausBot configs copied"* ]]
-}
-
-@test "copy_openmausbot_configs never replaces the app-owned live registry" {
-	run bash -c '
-		set -e
-		home=$(mktemp -d)
-		repo=$(mktemp -d)
-		trap '\''rm -rf "$home" "$repo"'\'' EXIT
-		export HOME="$home" DRY_RUN=false YES_TO_ALL=false VERBOSE=false
-		mkdir -p "$home/.openmausbot" "$repo/configs/openmausbot"
-		printf '\''[{"id":"live-bot"}]\n'\'' >"$home/.openmausbot/bots.json"
-		printf '\''{"v":1,"places":{"live@example.com":"live-bot"}}\n'\'' >"$home/.openmausbot/default-bot.json"
-		printf '\''[{"id":"repo-bot"}]\n'\'' >"$repo/configs/openmausbot/bots.json"
-		printf '\''{"v":1,"places":{}}\n'\'' >"$repo/configs/openmausbot/default-bot.json"
-
-		source "$1"
-		SCRIPT_DIR="$repo"
-		copy_openmausbot_configs
-		grep -q "live-bot" "$home/.openmausbot/bots.json"
-		grep -q "live@example.com" "$home/.openmausbot/default-bot.json"
-	' _ "$CLI_SH"
-	[ "$status" -eq 0 ]
-}
-
-@test "copy_openmausbot_configs installs owner-only files and directories" {
-	run bash -c '
-		set -e
-		home=$(mktemp -d)
-		repo=$(mktemp -d)
-		trap '\''rm -rf "$home" "$repo"'\'' EXIT
-		export HOME="$home" DRY_RUN=false YES_TO_ALL=false VERBOSE=false
-		mkdir -p "$home/.openmausbot" "$repo/configs/openmausbot"
-		printf '\''[{"id":"x"}]\n'\'' >"$repo/configs/openmausbot/bots.json"
-		printf '\''{"v":1,"places":{}}\n'\'' >"$repo/configs/openmausbot/default-bot.json"
-
-		source "$1"
-		SCRIPT_DIR="$repo"
-		copy_openmausbot_configs
-		[ "$(stat -c %a "$home/.openmausbot/import")" = "700" ]
-		[ "$(stat -c %a "$home/.openmausbot/import/bots.json")" = "600" ]
-		[ "$(stat -c %a "$home/.openmausbot/import/default-bot.json")" = "600" ]
-	' _ "$CLI_SH"
-	[ "$status" -eq 0 ]
-}
-
-@test "copy_openmausbot_configs preserves existing credentials and runtime state" {
-	run bash -c '
-		set -e
-		home=$(mktemp -d)
-		repo=$(mktemp -d)
-		trap '\''rm -rf "$home" "$repo"'\'' EXIT
-		export HOME="$home" DRY_RUN=false YES_TO_ALL=false VERBOSE=false
-		mkdir -p "$home/.openmausbot/bots/22222222-2222-2222-2222-222222222222" \
-			"$repo/configs/openmausbot"
-		printf '\''{"secret":"do-not-touch"}\n'\'' >"$home/.openmausbot/config.json"
-		printf '\''private transcript\n'\'' >"$home/.openmausbot/bots/22222222-2222-2222-2222-222222222222/history.ndjson"
-		printf '\''[{"id":"22222222-2222-2222-2222-222222222222"}]\n'\'' >"$repo/configs/openmausbot/bots.json"
-		printf '\''{"v":1,"places":{}}\n'\'' >"$repo/configs/openmausbot/default-bot.json"
-
-		source "$1"
-		SCRIPT_DIR="$repo"
-		copy_openmausbot_configs
-		grep -q "do-not-touch" "$home/.openmausbot/config.json"
-		grep -q "private transcript" "$home/.openmausbot/bots/22222222-2222-2222-2222-222222222222/history.ndjson"
-	' _ "$CLI_SH"
-	[ "$status" -eq 0 ]
-}
-
-@test "copy_openmausbot_configs warns instead of failing when a managed file cannot be copied" {
-	run bash -c '
-		home=$(mktemp -d)
-		repo=$(mktemp -d)
-		trap '\''rm -rf "$home" "$repo"'\'' EXIT
-		mkdir -p "$home/.openmausbot" "$repo/configs/openmausbot"
-		printf '\''[{"id":"x"}]\n'\'' >"$repo/configs/openmausbot/bots.json"
-		printf '\''{"v":1,"places":{}}\n'\'' >"$repo/configs/openmausbot/default-bot.json"
-		export HOME="$home" DRY_RUN=false YES_TO_ALL=false VERBOSE=false
-		source "$1"
-		SCRIPT_DIR="$repo"
-		copy_config_file() { return 1; }
-		copy_openmausbot_configs
-		echo REACHED_END
-		' _ "$CLI_SH"
-	[ "$status" -eq 0 ]
-	[[ "$output" == *"Failed to copy OpenMausBot bots.json, skipping"* ]]
-	[[ "$output" == *"REACHED_END"* ]]
-}
-
-@test "a missing managed file does not abort the installer run" {
-	run bash -c '
-		home=$(mktemp -d)
-		repo=$(mktemp -d)
-		trap '\''rm -rf "$home" "$repo"'\'' EXIT
-		mkdir -p "$home/.openmausbot" "$repo/configs/openmausbot"
-		printf '\''[{"id":"x"}]\n'\'' >"$repo/configs/openmausbot/bots.json"
-		export HOME="$home" DRY_RUN=false YES_TO_ALL=false VERBOSE=false
-		source "$1"
-		SCRIPT_DIR="$repo"
-		copy_openmausbot_configs
-		echo REACHED_END
-		' _ "$CLI_SH"
-	[ "$status" -eq 0 ]
-	[[ "$output" == *"Managed OpenMausBot file missing from repo, skipping: default-bot.json"* ]]
-	[[ "$output" == *"REACHED_END"* ]]
-}
-
-@test "copy_openmausbot_configs skips when the repo has no managed roster yet" {
-	run bash -c '
-		set -e
-		home=$(mktemp -d)
-		repo=$(mktemp -d)
-		trap '\''rm -rf "$home" "$repo"'\'' EXIT
-		mkdir -p "$home/.openmausbot" "$repo/configs/openmausbot"
-		export HOME="$home" DRY_RUN=false YES_TO_ALL=false VERBOSE=false
-		source "$1"
-		SCRIPT_DIR="$repo"
-		copy_openmausbot_configs
-		[ -z "$(find "$home/.openmausbot" -mindepth 1)" ]
-	' _ "$CLI_SH"
-	[ "$status" -eq 0 ]
-	[[ "$output" == *"No managed OpenMausBot roster in repo"* ]]
+		bin=$(mktemp -d)
+		trap '\''rm -rf "$bin"'\'' EXIT
+		printf "#!/bin/sh\necho 24\n" >"$bin/node"
+		chmod +x "$bin/node"
+		PATH="$bin:/usr/bin:/bin"
+		source "$1/cli.sh"
+		install_npm_tool() { return 1; }
+		# run_install_sequence calls installers as a condition, where set -e
+		# does not apply, so the status must come from the return value.
+		if install_openmausbot; then exit 0; else exit 1; fi
+	' _ "$REPO_ROOT"
+	[ "$status" -ne 0 ]
 }
 
 @test "generate_openmausbot_configs requires explicit opt-in and never auto-exports" {
@@ -398,53 +239,14 @@ README="$REPO_ROOT/TOOL_REFERENCE.md"
 	[ "$status" -ne 0 ]
 }
 
-@test "backup_configs gates OpenMausBot on explicit selection" {
-	# Default -y run: the OpenMausBot import snapshot is not backed up.
-	run bash -c '
-		set -e
-		home=$(mktemp -d)
-		trap '\''rm -rf "$home"'\'' EXIT
-		mkdir -p "$home/.openmausbot/import"
-		printf '\''[{"id":"x"}]\n'\'' >"$home/.openmausbot/import/bots.json"
-		export HOME="$home" DRY_RUN=false YES_TO_ALL=true VERBOSE=false
-		source "$1"
-		BACKUP=true
-		PROMPT_BACKUP=false
-		BACKUP_DIR="$home/backup"
-		backup_configs >/dev/null
-		[ ! -e "$BACKUP_DIR/openmausbot" ]
-	' _ "$CLI_SH"
-	[ "$status" -eq 0 ]
-
-	# Explicit opt-in: the installer-owned import snapshot is backed up.
-	run bash -c '
-		set -e
-		home=$(mktemp -d)
-		trap '\''rm -rf "$home"'\'' EXIT
-		mkdir -p "$home/.openmausbot/import"
-		printf '\''[{"id":"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"}]\n'\'' >"$home/.openmausbot/import/bots.json"
-		export HOME="$home" DRY_RUN=false YES_TO_ALL=true VERBOSE=false
-		source "$1"
-		TOOL_ALLOWLIST_YES+=(openmausbot)
-		BACKUP=true
-		PROMPT_BACKUP=false
-		BACKUP_DIR="$home/backup"
-		backup_configs >/dev/null
-		cmp "$home/.openmausbot/import/bots.json" "$BACKUP_DIR/openmausbot/bots.json"
-	' _ "$CLI_SH"
-	[ "$status" -eq 0 ]
-}
-
 @test "README documents OpenMausBot support" {
 	run grep -F '## 🦊 OpenMausBot (Optional)' "$README"
 	[ "$status" -eq 0 ]
 	run grep -F 'OPENMAUSBOT_EXPORT=1 ./generate.sh' "$README"
 	[ "$status" -eq 0 ]
-	run grep -F 'Settings → Backups → Export full backup' "$README"
+	run grep -F 'Settings → Import & export → Export full backup' "$README"
 	[ "$status" -eq 0 ]
 	run grep -F 'https://github.com/milind-soni/OpenMausBot/releases/latest' "$README"
-	[ "$status" -eq 0 ]
-	run grep -F '~/.openmausbot/import/' "$README"
 	[ "$status" -eq 0 ]
 	run grep -F 'OpenMausBot' "$REPO_ROOT/README.md"
 	[ "$status" -eq 0 ]

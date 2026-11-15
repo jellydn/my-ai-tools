@@ -1023,7 +1023,7 @@ generate_openmausbot_configs() {
 	# (credentials, transcripts, databases). Only an explicit
 	# OPENMAUSBOT_EXPORT=1 exports the portable roster. See
 	# configs/openmausbot/README.md for what is included and excluded, and the
-	# Desktop app's encrypted Export for full recovery.
+	# app's encrypted full backup for recovery.
 	if [ "${OPENMAUSBOT_EXPORT:-0}" != "1" ]; then
 		log_info "Skipping OpenMausBot export (opt-in; set OPENMAUSBOT_EXPORT=1)"
 		return 0
@@ -1032,7 +1032,7 @@ generate_openmausbot_configs() {
 	log_info "Generating OpenMausBot configs..."
 
 	local omb_dir dest file
-	omb_dir=$(openmausbot_data_dir)
+	omb_dir="${OMB_DATA_DIR:-$HOME/.openmausbot}"
 	dest="$SCRIPT_DIR/configs/openmausbot"
 
 	if [ ! -d "$omb_dir" ]; then
@@ -1066,7 +1066,7 @@ generate_openmausbot_configs() {
 	log_warning "The exported roster holds personas, project paths, and account emails"
 	log_warning "It is gitignored and must never be committed to this public repository"
 	log_warning "Transcripts, attachments, credentials, and databases are not exported"
-	log_warning "Full recovery: Settings → Backups → Export full backup (encrypted .ombbackup)"
+	log_warning "Full recovery: Settings → Import & export → Export full backup (encrypted .ombbackup)"
 	log_success "OpenMausBot configs generated"
 }
 

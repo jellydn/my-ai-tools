@@ -3315,7 +3315,7 @@ open https://github.com/milind-soni/OpenMausBot/releases/latest
 | Windows x64           | [`OpenMausBot-setup.exe`](https://github.com/milind-soni/OpenMausBot/releases/latest/download/OpenMausBot-setup.exe)   |
 | Ubuntu 24.04 x64      | [`OpenMausBot-amd64.deb`](https://github.com/milind-soni/OpenMausBot/releases/latest/download/OpenMausBot-amd64.deb) · [`OpenMausBot.AppImage`](https://github.com/milind-soni/OpenMausBot/releases/latest/download/OpenMausBot.AppImage) |
 
-OpenMausBot needs at least one agent CLI (`claude`, `codex`, or `grok`) installed and signed in; install any of them through this repo's own installer first. `install_openmausbot` installs the headless npm CLI when it is not already on PATH — independently of whether the desktop app is installed — and prints the desktop download link.
+OpenMausBot needs at least one agent CLI (`claude`, `codex`, or `grok`) installed and signed in; install any of them through this repo's own installer first. `install_openmausbot` installs the headless npm CLI (Node.js 24+) when it is not already on PATH and prints the desktop download link.
 
 ### Configuration
 
@@ -3323,9 +3323,8 @@ Managed configs live in [`configs/openmausbot/`](configs/openmausbot/). Applicat
 
 | Config             | Path                          | Managed by this repo              |
 | ------------------ | ----------------------------- | --------------------------------- |
-| Bot roster         | `~/.openmausbot/import/bots.json` | Yes (`configs/openmausbot/bots.json`) |
-| Default bot        | `~/.openmausbot/import/default-bot.json` | Yes (`configs/openmausbot/default-bot.json`) |
-| Live bot registry  | `~/.openmausbot/bots.json`    | Never — the app rewrites it on every roster change |
+| Bot roster         | `~/.openmausbot/bots.json`    | Export only (`configs/openmausbot/bots.json`, gitignored); never written back |
+| Default bot        | `~/.openmausbot/default-bot.json` | Export only (`configs/openmausbot/default-bot.json`, gitignored); never written back |
 | Bot personas       | `~/.openmausbot/bots/<id>/SOUL.md` | Never — derived mirror of the roster |
 | Credentials        | `~/.openmausbot/config.json`, `~/.openmausbot/providers/` | Never — plaintext API keys and sign-in state stay local |
 | Transcripts & data | `messages.db`, `runtime.db`, `events/`, `native/`, `attachments/`, `bots/<id>/history.ndjson` | Never — live runtime state |
@@ -3338,17 +3337,18 @@ OPENMAUSBOT_EXPORT=1 ./generate.sh
 
 The exported roster carries personas, absolute project paths, and account email addresses, so it is **gitignored** — this repository is public and the snapshot must never be committed.
 
-Install is off the default `-y` allowlist; opt in explicitly:
+Install is off the default `-y` allowlist. An interactive run asks before it installs each optional tool, so answer yes for OpenMausBot. For an unattended run, add `-y`, which also installs the default allowlisted tools:
 
 ```bash
-./cli.sh --with-tools=openmausbot
+./cli.sh --with-tools=openmausbot      # interactive: prompts for each optional tool
+./cli.sh -y --with-tools=openmausbot   # unattended
 ```
 
-The installer copies the managed roster files into `~/.openmausbot/import/` (owner-only, `0600`) when the app data directory exists. The live registry, credentials, transcripts, and databases are never modified or removed — apply the snapshot from the app when you want it.
+The installer installs the headless CLI only. It requires Node.js 24 or newer and never writes to the app data directory. The exported roster is a reference snapshot: the app does not read it back.
 
 ### Full recovery
 
-The repo integration is a portable roster snapshot, not a full backup. For complete recovery use the app itself: **Settings → Backups → Export full backup** writes an encrypted, password-protected `.ombbackup` containing bots, threads, attachments, memory, and routines. See the [upstream data and backups guide](https://github.com/milind-soni/OpenMausBot/blob/main/apps/docs/content/docs/self-hosting/data-and-backups.mdx).
+The repo integration is a portable roster snapshot, not a full backup. For complete recovery use the app itself: **Settings → Import & export → Export full backup** writes an encrypted, password-protected `.ombbackup` containing bots, threads, attachments, memory, and routines, and **Settings → Import & export → Import backup** restores it. See the [upstream data and backups guide](https://github.com/milind-soni/OpenMausBot/blob/main/apps/docs/content/docs/self-hosting/data-and-backups.mdx).
 
 </details>
 
