@@ -1222,7 +1222,9 @@ sanitize_absolute_paths() {
 			const files = fs.readdirSync(dir);
 			for (const file of files) {
 				const fullPath = path.join(dir, file);
-				const stat = fs.statSync(fullPath);
+				// lstat: a symlink is neither a directory nor a file here, so the
+				// walk never follows one out of configs/ into live app data.
+				const stat = fs.lstatSync(fullPath);
 				if (stat.isDirectory()) {
 					walk(fullPath);
 				} else if (stat.isFile()) {
