@@ -1218,7 +1218,12 @@ sanitize_absolute_paths() {
 		const home = process.env.HOME;
 		if (!home) process.exit(0);
 
-		const repoRoot = fs.realpathSync(process.argv[process.argv.length - 2]);
+		let repoRoot;
+		try {
+			repoRoot = fs.realpathSync(process.argv[process.argv.length - 2]);
+		} catch (e) {
+			process.exit(0);
+		}
 		const visited = new Set();
 
 		function isInside(root, target) {
@@ -1239,6 +1244,9 @@ sanitize_absolute_paths() {
 
 		function walk(dir) {
 			const realDir = fs.realpathSync(dir);
+			// Never walk out of the repository: a symlinked root or directory
+			// would otherwise pull live app data into the sanitized tree.
+			if (!isInside(repoRoot, realDir)) return;
 			if (visited.has(realDir)) return;
 			visited.add(realDir);
 			const files = fs.readdirSync(dir);
