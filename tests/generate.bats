@@ -268,6 +268,22 @@ teardown() {
     grep -F '"cwd":"$HOME/project"' "$SCRIPT_DIR/configs/regular.json"
 }
 
+@test "sanitize_absolute_paths sanitizes symlink targets inside the repository" {
+    mkdir -p "$SCRIPT_DIR/configs" "$SCRIPT_DIR/shared-file" "$SCRIPT_DIR/shared-dir"
+    printf '{"cwd":"%s/project"}\n' "$HOME" > "$SCRIPT_DIR/shared-file/config.json"
+    printf '{"cwd":"%s/project"}\n' "$HOME" > "$SCRIPT_DIR/shared-dir/nested.json"
+    ln -s "$SCRIPT_DIR/shared-file/config.json" "$SCRIPT_DIR/configs/linked.json"
+    ln -s "$SCRIPT_DIR/shared-dir" "$SCRIPT_DIR/configs/dirlink"
+
+    run sanitize_absolute_paths
+    [ "$status" -eq 0 ]
+
+    # A link to a file inside the repo is followed and its target sanitized.
+    grep -F '"cwd":"$HOME/project"' "$SCRIPT_DIR/shared-file/config.json"
+    # A link to a directory inside the repo is walked and its files sanitized.
+    grep -F '"cwd":"$HOME/project"' "$SCRIPT_DIR/shared-dir/nested.json"
+}
+
 # ---------------------------------------------------------------------------
 # Amp orb export
 # ---------------------------------------------------------------------------
