@@ -109,6 +109,14 @@ jobs:
         shell: powershell
         run: .\tests\windows_installer.ps1
 
+      - name: Test Amp command resolution
+        shell: powershell
+        run: .\tests\windows_amp.ps1
+
+      - name: Test Amp selection handoff
+        shell: powershell
+        run: .\tests\windows_amp_handoff.ps1
+
       - name: Test real Git Bash prerequisite handoff
         shell: powershell
         run: .\tests\windows_bash_handoff.ps1

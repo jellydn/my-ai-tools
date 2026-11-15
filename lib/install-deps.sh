@@ -3,26 +3,152 @@
 # PostToolUse hooks, and the standalone MCP server binaries.
 #
 # Sourced by lib/install.sh, which owns the shared helpers used here
-# (_verify_package_manager, resolve_installer_checksum,
-# handle_tool_installation) — do not source this file on its own.
+# (resolve_installer_checksum, handle_tool_installation) — do not source this file on its own.
 #
 # Requires: lib/common.sh (for log_*, execute_*, prompt_yn, execute_installer)
 # Requires: YES_TO_ALL, DRY_RUN, IS_WINDOWS, AMP_INSTALLED (set in cli.sh)
 
+# Use npm on native Windows to avoid the Bash-installed Bun lifecycle launcher.
+# Unix-like systems keep the existing Bun preference.
+# Outputs: package manager command or empty if none found
+_detect_package_manager() {
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		if command -v node &>/dev/null && command -v npm &>/dev/null; then
+			echo "npm"
+		fi
+	elif command -v bun &>/dev/null; then
+		echo "bun"
+	elif command -v npm &>/dev/null; then
+		echo "npm"
+	else
+		echo ""
+	fi
+}
+
+# Verify and get a working package manager with fallback
+# Outputs: package manager command or empty if none available
+_verify_package_manager() {
+	local tool_name="${1:-tool}"
+	local pkg_manager
+	pkg_manager=$(_detect_package_manager)
+
+	[ -z "$pkg_manager" ] && return 1
+	command -v "$pkg_manager" &>/dev/null && {
+		echo "$pkg_manager"
+		return 0
+	}
+
+	log_warning "$pkg_manager was detected but is not available in current shell PATH"
+
+	if [ "$pkg_manager" = "bun" ] && command -v npm &>/dev/null; then
+		log_info "Falling back to npm for $tool_name installation"
+		echo "npm"
+		return 0
+	fi
+
+	if [ "${IS_WINDOWS:-false}" != true ] && [ "$pkg_manager" = "npm" ] && command -v bun &>/dev/null; then
+		log_info "Falling back to bun for $tool_name installation"
+		echo "bun"
+		return 0
+	fi
+
+	return 1
+}
+
 # Prepend a directory to PATH for the current session if it isn't already present.
-# Windows must also promote existing entries ahead of stale Bun/copied shims.
+# Windows always promotes existing entries; callers can request this on Unix too.
 ensure_dir_on_path() {
 	local dir="${1:-}"
 	[ -n "$dir" ] || return 0
-	if [ "${IS_WINDOWS:-false}" = true ]; then
+	if [ "${IS_WINDOWS:-false}" = true ] || [ "${2:-}" = prepend ]; then
 		local remaining=":$PATH:"
-		remaining="${remaining//":$dir:"/:}"
+		while [[ "$remaining" == *":$dir:"* ]]; do
+			remaining="${remaining//":$dir:"/:}"
+		done
 		remaining="${remaining#:}"
 		PATH="${remaining%:}"
 	fi
 	if case ":$PATH:" in *":$dir:"*) false ;; *) true ;; esac then
 		export PATH="$dir:$PATH"
 	fi
+}
+
+# Resolve a path to its real target, following symlinks.
+# Uses realpath or readlink -f when available and falls back to the physical
+# directory, so it also works on macOS and in the test fixtures.
+resolve_path_target() {
+	local target="${1:-}" dir base link attempt=0
+	[ -n "$target" ] || return 1
+	if command -v realpath >/dev/null 2>&1; then
+		realpath "$target" 2>/dev/null && return 0
+	fi
+	if readlink -f "$target" 2>/dev/null; then
+		return 0
+	fi
+	# Resolve the last symlink by hand when the platform has neither helper.
+	dir=$(cd "$(dirname "$target")" 2>/dev/null && pwd -P) || return 1
+	base=$(basename "$target")
+	while [ -L "$dir/$base" ] && [ "$attempt" -lt 10 ]; do
+		link=$(readlink "$dir/$base" 2>/dev/null) || break
+		attempt=$((attempt + 1))
+		case "$link" in
+		/*)
+			dir=$(cd "$(dirname "$link")" 2>/dev/null && pwd -P) || return 1
+			base=$(basename "$link")
+			;;
+		*)
+			base="$link"
+			;;
+		esac
+	done
+	printf '%s\n' "$dir/$base"
+}
+
+# Warn when another amp command takes priority over the official installation.
+# The official installer links the binary into ~/.local/bin, so the resolved
+# target decides whether a command is the official one. The warning names the
+# official location the way PATH needs it, so a symlinked parent directory does
+# not change the message.
+warn_on_amp_command_conflict() {
+	local bin_dir="${1:-}" selected="${2:-}" selected_target official_target official_location candidate
+	[ -n "$selected" ] || return 0
+	if declare -F amp >/dev/null; then
+		log_warning "Shell function amp shadows the official Amp binary ($bin_dir/amp)."
+		log_info "Review the function or invoke the official binary directly. No function was removed or unset."
+		return 0
+	fi
+	selected_target=$(resolve_path_target "$selected" 2>/dev/null) || selected_target="$selected"
+	official_target=""
+	official_location=""
+	for candidate in "$bin_dir/amp" "$bin_dir/amp.exe"; do
+		[ -e "$candidate" ] || continue
+		# The same file through another path is the official installation too.
+		[ "$selected" -ef "$candidate" ] && return 0
+		if [ -z "$official_target" ]; then
+			official_target=$(resolve_path_target "$candidate" 2>/dev/null) || official_target="$candidate"
+			official_location="$candidate"
+		fi
+	done
+	[ "$selected_target" != "$official_target" ] || return 0
+	log_warning "Amp command $selected takes priority over the official Amp binary (${official_location:-$bin_dir/amp}); it may be a stale npm command."
+	log_info "Put the official Amp bin directory before npm in PATH. No existing installation will be removed."
+}
+
+# Run a command with AMP_HOME set to a Windows path, then restore the old value.
+# The official Windows installer needs a drive-letter path, while Git Bash
+# exports a POSIX path for the same directory.
+with_windows_amp_home() {
+	local windows_home="${1:-}" previous="${AMP_HOME:-}"
+	shift
+	export AMP_HOME="$windows_home"
+	execute_quoted "$@"
+	local status=$?
+	if [ -z "$previous" ]; then
+		unset AMP_HOME
+	else
+		export AMP_HOME="$previous"
+	fi
+	return "$status"
 }
 
 # Shared prerequisite for Plannotator hooks, inbox MCP servers, and plugins.

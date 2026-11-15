@@ -255,6 +255,108 @@ function Test-NonInteractiveInstall {
     return $isInputRedirected -or [string]::IsNullOrEmpty($PSCommandPath)
 }
 
+# The PATH a new terminal uses: the Machine value followed by the User value.
+function Get-PersistentPathEntries {
+    $entries = @()
+    foreach ($source in @([Environment]::GetEnvironmentVariable("Path", "Machine"),
+            [Environment]::GetEnvironmentVariable("Path", "User"))) {
+        foreach ($entry in ($source -split ';')) {
+            $entry = [Environment]::ExpandEnvironmentVariables($entry).Trim().Trim('"')
+            if ($entry -and $entries -notcontains $entry) { $entries += $entry }
+        }
+    }
+    return $entries
+}
+
+# The first amp command a shell finds in the given PATH entries.
+function Get-AmpCommandInPath {
+    param([string[]]$Entries)
+
+    foreach ($entry in @($Entries)) {
+        try {
+            foreach ($pattern in @('amp.ps1', 'amp.cmd', 'amp.bat', 'amp.exe')) {
+                $candidate = Join-Path $entry $pattern -ErrorAction Stop
+                if (Test-Path -LiteralPath $candidate -PathType Leaf -ErrorAction Stop) { return $candidate }
+            }
+        }
+        catch {
+            # Persistent PATH may contain disconnected drives or inaccessible directories.
+            continue
+        }
+    }
+    return $null
+}
+
+# Git Bash exports a POSIX path; Windows tooling needs a drive-letter path.
+function ConvertTo-WindowsPath {
+    param([string]$Path)
+
+    if ($Path -match '^/([A-Za-z])/(.*)$') {
+        return "$($Matches[1]):\$($Matches[2] -replace '/', '\')"
+    }
+    return $Path
+}
+
+# Git Bash cannot check which command the parent PowerShell will select.
+function Test-AmpCommand {
+    $ampHome = if ($env:AMP_HOME) { ConvertTo-WindowsPath $env:AMP_HOME } else { Join-Path $env:USERPROFILE '.amp' }
+    $ampExe = Join-Path $ampHome 'bin\amp.exe'
+    if (-not (Test-Path -LiteralPath $ampExe -PathType Leaf)) {
+        Write-Err "Official Amp binary not found at $ampExe. See https://ampcode.com/docs/cli"
+        return $false
+    }
+    try {
+        $version = & $ampExe version 2>&1
+        if ($LASTEXITCODE -ne 0 -or -not ($version -join '').Trim()) {
+            throw 'amp version did not succeed with version output'
+        }
+    }
+    catch {
+        Write-Err "Could not verify official Amp at ${ampExe}: $_"
+        return $false
+    }
+# This session: prefer the official binary over a stale shim on PATH.
+    $ampBin = Split-Path $ampExe -Parent
+    Update-ProcessPath -Prepend @($ampBin)
+    $selected = Get-Command amp -ErrorAction SilentlyContinue
+    $sessionConflict = $false
+    if (-not $selected) {
+        Write-Warn "PowerShell does not find an amp command, although the official binary works at $ampExe."
+        $sessionConflict = $true
+    }
+    elseif ($selected.Source -ine $ampExe) {
+        $command = if ($selected.CommandType -eq 'Alias') { "alias $($selected.Name)" } else { "$($selected.Source) ($($selected.CommandType))" }
+        Write-Warn "This session selects $command instead of $ampExe."
+        $sessionConflict = $true
+    }
+
+    # A new terminal composes PATH from the Machine and User values, not from this session.
+    $future = Get-AmpCommandInPath -Entries (Get-PersistentPathEntries)
+    $futureConflict = $false
+    if ($future -and ($future -ine $ampExe)) {
+        Write-Warn "A new terminal will select $future before the official Amp binary."
+        $futureConflict = $true
+    }
+    elseif (-not $future) {
+        Write-Warn "The official Amp bin directory is not on the persistent PATH, so a new terminal will not find amp."
+        $futureConflict = $true
+    }
+
+    if ($sessionConflict) {
+        Write-Info 'An alias or function must be reviewed separately.'
+    }
+    if ($sessionConflict -or $futureConflict) {
+        Write-Info 'Inspect all commands with: Get-Command amp -All'
+        Write-Info "Run the binary directly: & '$($ampExe.Replace("'", "''"))' version"
+        Write-Info 'No installation was removed and no execution policy was changed.'
+    }
+    if ($futureConflict) {
+        Write-Info 'For future sessions, use Windows Environment Variables to place the official bin directory before npm, then reopen PowerShell.'
+    }
+    Write-Success "Amp verified in PowerShell: $($version -join ' ')"
+    return $true
+}
+
 # Main installation function
 function Start-Installation {
     # Build argument array for cli.sh
@@ -289,6 +391,9 @@ function Start-Installation {
     $sourceDir = $null
     $tempDir = $null
     $exitCode = 1
+    $ampSelected = $false
+    $ampStatusFile = $null
+    $previousAmpStatusFile = $env:MY_AI_TOOLS_AMP_STATUS_FILE
 
     if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot "cli.sh"))) {
         $sourceDir = $PSScriptRoot
@@ -305,6 +410,11 @@ function Start-Installation {
     }
 
     try {
+        # A child shell cannot update this process's environment or report a declined prompt.
+        if (-not $DryRun -and -not $Rollback) {
+            $ampStatusFile = [IO.Path]::GetTempFileName()
+            $env:MY_AI_TOOLS_AMP_STATUS_FILE = $ampStatusFile
+        }
         if ($tempDir) {
             Write-Info "Cloning repository to temporary directory..."
             & git clone --depth 1 https://github.com/jellydn/my-ai-tools.git $sourceDir
@@ -334,6 +444,14 @@ function Start-Installation {
                 & $bashPath --noprofile --norc "cli.sh" @arguments
             }
             $exitCode = $LASTEXITCODE
+            if ($ampStatusFile) {
+                $ampSelected = 'selected' -eq (Get-Content $ampStatusFile -Encoding UTF8 -TotalCount 1)
+                if ($ampSelected) {
+                    # The Bash side reports the directory it verified, so both sides agree.
+                    $ampHome = @(Get-Content $ampStatusFile -Encoding UTF8)[1]
+                    if ($ampHome) { $env:AMP_HOME = $ampHome }
+                }
+            }
         }
         finally {
             Pop-Location
@@ -343,6 +461,14 @@ function Start-Installation {
         if ($tempDir -and (Test-Path $tempDir)) {
             Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
         }
+        if ($ampStatusFile) {
+            Remove-Item $ampStatusFile -Force -ErrorAction SilentlyContinue
+            $env:MY_AI_TOOLS_AMP_STATUS_FILE = $previousAmpStatusFile
+        }
+    }
+
+    if ($exitCode -eq 0 -and $ampSelected -and -not (Test-AmpCommand)) {
+        $exitCode = 1
     }
 
     if ($exitCode -eq 0) {

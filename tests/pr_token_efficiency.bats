@@ -7,7 +7,7 @@ CLI_SH="$REPO_ROOT/cli.sh"
 GENERATE_SH="$REPO_ROOT/generate.sh"
 SYNC_SH="$REPO_ROOT/scripts/sync-token-efficiency.sh"
 
-@test "managed global instruction profiles share the canonical Token Efficiency section" {
+@test "managed instruction profiles share the canonical Token Efficiency and Experiment Workspaces sections" {
 	run bash "$SYNC_SH" --check
 	[ "$status" -eq 0 ]
 }

@@ -304,3 +304,31 @@ teardown() {
 
     export DRY_RUN=false
 }
+
+@test "export restores canonical guidance from older home profiles without changing dry-run output files" {
+    mkdir -p "$SCRIPT_DIR/scripts" "$SCRIPT_DIR/configs/claude" "$SCRIPT_DIR/configs/deepseek-harness" "$HOME/.dsh"
+    cp "$REPO_ROOT/scripts/sync-token-efficiency.sh" "$SCRIPT_DIR/scripts/"
+    cp "$REPO_ROOT/configs/token-efficiency.md" "$REPO_ROOT/configs/experiment-workspaces.md" "$SCRIPT_DIR/configs/"
+    printf '# Repository\n' > "$SCRIPT_DIR/AGENTS.md"
+    printf '# Gemini\n' > "$SCRIPT_DIR/GEMINI.md"
+    printf '# Claude\n' > "$SCRIPT_DIR/configs/claude/CLAUDE.md"
+    printf '# Existing repo profile\n' > "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
+    printf '# Exported profile\n\nKeep this custom rule.\n' > "$HOME/.dsh/AGENTS.md"
+    export DSH_HOME="$HOME/.dsh"
+
+    export DRY_RUN=true
+    run main
+    [ "$status" -eq 0 ]
+    [ "$(cat "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md")" = '# Existing repo profile' ]
+    [ "$(cat "$SCRIPT_DIR/AGENTS.md")" = '# Repository' ]
+
+    export DRY_RUN=false
+    run main
+    [ "$status" -eq 0 ]
+    grep -q '^# Exported profile$' "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
+    grep -q '^Keep this custom rule\.$' "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
+    grep -q '^## Experiment Workspaces$' "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
+    grep -q '^## Token Efficiency$' "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
+    run bash "$SCRIPT_DIR/scripts/sync-token-efficiency.sh" --check
+    [ "$status" -eq 0 ]
+}

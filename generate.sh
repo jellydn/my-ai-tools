@@ -1318,6 +1318,10 @@ main() {
 	sanitize_absolute_paths
 	echo
 
+	# Restore canonical guidance after exports from older home-directory profiles.
+	execute_quoted bash "$SCRIPT_DIR/scripts/sync-token-efficiency.sh"
+	echo
+
 	log_success "Config generation complete!"
 	echo
 	echo "Review changes with: git diff"
