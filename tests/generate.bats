@@ -251,6 +251,30 @@ teardown() {
     [ "$status" -ne 0 ]
 }
 
+@test "sanitize_absolute_paths does not follow symlinks into live data" {
+    local live="$HOME/.openmausbot"
+    mkdir -p "$live" "$SCRIPT_DIR/configs"
+    printf '{"cwd":"%s/project"}\n' "$HOME" > "$live/bots.json"
+    ln -s "$live" "$SCRIPT_DIR/configs/openmausbot"
+    ln -s "$live/bots.json" "$SCRIPT_DIR/configs/linked.json"
+    printf '{"cwd":"%s/project"}\n' "$HOME" > "$SCRIPT_DIR/configs/regular.json"
+
+    run sanitize_absolute_paths
+    [ "$status" -eq 0 ]
+
+    # Live data reached through a directory or file symlink stays untouched.
+    [ "$(cat "$live/bots.json")" = "{\"cwd\":\"$HOME/project\"}" ]
+    # A regular exported file is still sanitized.
+    grep -F '"cwd":"$HOME/project"' "$SCRIPT_DIR/configs/regular.json"
+
+    # The configs root must not bypass the same symlink policy.
+    mv "$SCRIPT_DIR/configs" "$SCRIPT_DIR/exported-configs"
+    ln -s "$live" "$SCRIPT_DIR/configs"
+    run sanitize_absolute_paths
+    [ "$status" -eq 0 ]
+    [ "$(cat "$live/bots.json")" = "{\"cwd\":\"$HOME/project\"}" ]
+}
+
 # ---------------------------------------------------------------------------
 # Amp orb export
 # ---------------------------------------------------------------------------
