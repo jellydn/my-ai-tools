@@ -1218,47 +1218,14 @@ sanitize_absolute_paths() {
 		const home = process.env.HOME;
 		if (!home) process.exit(0);
 
-		let repoRoot;
-		try {
-			repoRoot = fs.realpathSync(process.argv[process.argv.length - 2]);
-		} catch (e) {
-			process.exit(0);
-		}
-		const visited = new Set();
-
-		function isInside(root, target) {
-			const rel = path.relative(root, target);
-			return rel !== "" && !rel.startsWith("..") && !path.isAbsolute(rel);
-		}
-
-		// A symlink is followed only when its target stays inside the
-		// repository; links pointing at live app data are left alone.
-		function resolveLink(fullPath) {
-			try {
-				const resolved = fs.realpathSync(fullPath);
-				return isInside(repoRoot, resolved) ? resolved : null;
-			} catch (e) {
-				return null;
-			}
-		}
-
 		function walk(dir) {
-			const realDir = fs.realpathSync(dir);
-			// Never walk out of the repository: a symlinked root or directory
-			// would otherwise pull live app data into the sanitized tree.
-			if (!isInside(repoRoot, realDir)) return;
-			if (visited.has(realDir)) return;
-			visited.add(realDir);
+			if (fs.lstatSync(dir).isSymbolicLink()) return;
 			const files = fs.readdirSync(dir);
 			for (const file of files) {
 				const fullPath = path.join(dir, file);
-				// lstat first: a symlink is not followed implicitly, it is
-				// only followed when resolveLink() keeps it in the repo.
-				let stat = fs.lstatSync(fullPath);
-				if (stat.isSymbolicLink()) {
-					if (!resolveLink(fullPath)) continue;
-					stat = fs.statSync(fullPath);
-				}
+				// lstat: a symlink is neither a directory nor a file here, so the
+				// walk never follows one out of configs/ into live app data.
+				const stat = fs.lstatSync(fullPath);
 				if (stat.isDirectory()) {
 					walk(fullPath);
 				} else if (stat.isFile()) {
@@ -1303,7 +1270,7 @@ sanitize_absolute_paths() {
 			}
 		}
 		walk(process.argv[process.argv.length - 1]);
-	' "$SCRIPT_DIR" "$target_dir"
+	' "$target_dir"
 }
 
 main() {
