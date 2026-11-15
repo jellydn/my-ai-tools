@@ -266,6 +266,13 @@ teardown() {
     [ "$(cat "$live/bots.json")" = "{\"cwd\":\"$HOME/project\"}" ]
     # A regular exported file is still sanitized.
     grep -F '"cwd":"$HOME/project"' "$SCRIPT_DIR/configs/regular.json"
+
+    # The configs root must not bypass the same symlink policy.
+    mv "$SCRIPT_DIR/configs" "$SCRIPT_DIR/exported-configs"
+    ln -s "$live" "$SCRIPT_DIR/configs"
+    run sanitize_absolute_paths
+    [ "$status" -eq 0 ]
+    [ "$(cat "$live/bots.json")" = "{\"cwd\":\"$HOME/project\"}" ]
 }
 
 # ---------------------------------------------------------------------------

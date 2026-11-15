@@ -1219,6 +1219,7 @@ sanitize_absolute_paths() {
 		if (!home) process.exit(0);
 
 		function walk(dir) {
+			if (fs.lstatSync(dir).isSymbolicLink()) return;
 			const files = fs.readdirSync(dir);
 			for (const file of files) {
 				const fullPath = path.join(dir, file);
