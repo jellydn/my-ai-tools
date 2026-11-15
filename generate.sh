@@ -1021,7 +1021,7 @@ generate_delta_configs() {
 generate_openmausbot_configs() {
 	# Strict opt-in: the OpenMausBot data directory is live application state
 	# (credentials, transcripts, databases). Only an explicit
-	# OPENMAUSBOT_EXPORT=1 exports the portable roster. See
+	# OPENMAUSBOT_EXPORT=1 copies the registry files. See
 	# configs/openmausbot/README.md for what is included and excluded, and the
 	# app's encrypted full backup for recovery.
 	if [ "${OPENMAUSBOT_EXPORT:-0}" != "1" ]; then
@@ -1059,7 +1059,7 @@ generate_openmausbot_configs() {
 	execute_quoted mkdir -p "$dest"
 
 	# bots.json carries the roster, the personas, and each bot's project
-	# paths; default-bot.json is the account email ledger. Both are personal
+	# paths; default-bot.json maps account emails to default bots. Both are personal
 	# data, so the exported snapshot stays local (gitignored) and is never
 	# committed.
 	for file in bots.json default-bot.json; do

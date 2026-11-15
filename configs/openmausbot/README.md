@@ -10,13 +10,13 @@ integration deliberately treats it as such.
 
 ## What is managed
 
-Only the small, portable roster files appear in this directory, and only after `generate.sh` runs with
-the opt-in export enabled:
+Two copies of the app's live registry files appear in this directory, and only after `generate.sh` runs
+with the opt-in export enabled:
 
 | File               | Contents                                                 |
 | ------------------ | -------------------------------------------------------- |
-| `bots.json`        | Bot roster (id, name, description, soul, model selection) |
-| `default-bot.json` | Default bot mapping (the account email ledger)           |
+| `bots.json`        | The full bot registry: every bot's name, soul, and model, plus its task threads, project paths (`cwd`), session resume cursors, and approval grants |
+| `default-bot.json` | Each person's default bot, keyed by account email (`""` for a local install) |
 
 `bots/<bot-id>/SOUL.md` is deliberately **not** managed: upstream treats it as a mirror of the
 `soul` field in `bots.json` and regenerates it on every save, so a repository copy could only ever
@@ -63,8 +63,10 @@ link for the desktop app and never writes to the app data directory.
 
 ## Restore
 
-The exported roster is a reference snapshot: the app does not read it, and the installer does not apply
-it. The app reads its live registry only from `bots.json` in the data directory and rewrites that file on
+The export is a copy of live registry state, not a transferable roster: the app does not read it, and
+the installer does not apply it. The task threads it lists point at conversations in `messages.db` and
+`runtime.db`, which are not exported, and its project paths belong to this machine. Copied onto another
+machine, it gives bots with empty conversations and wrong paths. The app reads its live registry only from `bots.json` in the data directory and rewrites that file on
 every roster change.
 
 To back up and restore everything (bots, threads, attachments, memory, and routines), use the app:

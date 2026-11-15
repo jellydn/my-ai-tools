@@ -33,6 +33,5 @@ install_openmausbot() {
 	fi
 
 	install_npm_tool "OpenMausBot CLI" "openmausbot" "openmausbot" \
-		"npm install -g openmausbot" \
-		"openmausbot --help 2>/dev/null | head -1 || true"
+		"npm install -g openmausbot"
 }

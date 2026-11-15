@@ -3323,7 +3323,7 @@ Managed configs live in [`configs/openmausbot/`](configs/openmausbot/). Applicat
 
 | Config             | Path                          | Managed by this repo              |
 | ------------------ | ----------------------------- | --------------------------------- |
-| Bot roster         | `~/.openmausbot/bots.json`    | Export only (`configs/openmausbot/bots.json`, gitignored); never written back |
+| Bot registry       | `~/.openmausbot/bots.json`    | Export only (`configs/openmausbot/bots.json`, gitignored); never written back |
 | Default bot        | `~/.openmausbot/default-bot.json` | Export only (`configs/openmausbot/default-bot.json`, gitignored); never written back |
 | Bot personas       | `~/.openmausbot/bots/<id>/SOUL.md` | Never — derived mirror of the roster |
 | Credentials        | `~/.openmausbot/config.json`, `~/.openmausbot/providers/` | Never — plaintext API keys and sign-in state stay local |
@@ -3344,11 +3344,11 @@ Install is off the default `-y` allowlist. An interactive run asks before it ins
 ./cli.sh -y --with-tools=openmausbot   # unattended
 ```
 
-The installer installs the headless CLI only. It requires Node.js 24 or newer and never writes to the app data directory. The exported roster is a reference snapshot: the app does not read it back.
+The installer installs the headless CLI only. It requires Node.js 24 or newer and never writes to the app data directory. The export is a copy of live registry state (including task threads, project paths, and session cursors), not a transferable roster: the app does not read it back, and its conversations stay in `messages.db` / `runtime.db`, which are not exported.
 
 ### Full recovery
 
-The repo integration is a portable roster snapshot, not a full backup. For complete recovery use the app itself: **Settings → Import & export → Export full backup** writes an encrypted, password-protected `.ombbackup` containing bots, threads, attachments, memory, and routines, and **Settings → Import & export → Import backup** restores it. See the [upstream data and backups guide](https://github.com/milind-soni/OpenMausBot/blob/main/apps/docs/content/docs/self-hosting/data-and-backups.mdx).
+The repo export is a local copy of the registry files, not a full backup. For complete recovery use the app itself: **Settings → Import & export → Export full backup** writes an encrypted, password-protected `.ombbackup` containing bots, threads, attachments, memory, and routines, and **Settings → Import & export → Import backup** restores it. See the [upstream data and backups guide](https://github.com/milind-soni/OpenMausBot/blob/main/apps/docs/content/docs/self-hosting/data-and-backups.mdx).
 
 </details>
 
