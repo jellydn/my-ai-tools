@@ -9,6 +9,7 @@
 # Prerequisites (runtimes, formatters, MCP server binaries) live in their own module.
 source "$(dirname "${BASH_SOURCE[0]}")/install-deps.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/install-launcher.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/install-openmausbot.sh"
 
 # ─── Shared helpers ────────────────────────────────────────────────
 

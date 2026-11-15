@@ -86,6 +86,8 @@ INSTALL_SEQUENCE=(
 	"mimo:install_mimo"
 	"open_code_review:install_open_code_review"
 	"plannotator:install_plannotator_if_needed"
+	# OpenMausBot is a desktop app; opt in with --with-tools=openmausbot.
+	"openmausbot:install_openmausbot"
 )
 
 run_install_sequence() {
