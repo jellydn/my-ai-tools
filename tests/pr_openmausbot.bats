@@ -227,6 +227,29 @@ setup() {
 	[ "$status" -eq 0 ]
 }
 
+@test "generate_openmausbot_configs refuses a data directory inside the export directory" {
+	run bash -c '
+		set -e
+		repo=$(mktemp -d)
+		link=$(mktemp -d)
+		trap '\''rm -rf "$repo" "$link"'\'' EXIT
+		live="$repo/configs/openmausbot"
+		mkdir -p "$live/bots/live-bot"
+		printf '\''[{"id":"live-bot"}]\n'\'' >"$live/bots.json"
+		printf '\''history\n'\'' >"$live/bots/live-bot/history.ndjson"
+		ln -s "$live" "$link/omb"
+		export DRY_RUN=false OPENMAUSBOT_EXPORT=1
+		source "$1/generate.sh"
+		SCRIPT_DIR="$repo"
+		for dir in "$live" "$link/omb"; do
+			OMB_DATA_DIR="$dir" generate_openmausbot_configs
+			[ -f "$live/bots/live-bot/history.ndjson" ]
+		done
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 0 ]
+	[ "$(grep -c "must not be inside" <<<"$output")" -eq 2 ]
+}
+
 @test "the exported roster is gitignored" {
 	run git -C "$REPO_ROOT" check-ignore -q configs/openmausbot/bots.json
 	[ "$status" -eq 0 ]

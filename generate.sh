@@ -1040,6 +1040,18 @@ generate_openmausbot_configs() {
 		return 0
 	fi
 
+	# The export prunes files under $dest, so a data directory inside it
+	# (directly or through a symlink) would lose live app state.
+	local omb_real dest_real
+	omb_real=$(cd "$omb_dir" && pwd -P)
+	dest_real="$(cd "$SCRIPT_DIR" && pwd -P)/configs/openmausbot"
+	case "$omb_real/" in
+	"$dest_real/"*)
+		log_error "OMB_DATA_DIR must not be inside $dest - skipping OpenMausBot export"
+		return 0
+		;;
+	esac
+
 	execute_quoted mkdir -p "$dest"
 
 	# bots.json carries the roster, the personas, and each bot's project
