@@ -248,6 +248,25 @@ setup() {
 	' _ "$REPO_ROOT"
 	[ "$status" -eq 0 ]
 	[ "$(grep -c "must not be inside" <<<"$output")" -eq 2 ]
+
+	# The export directory itself may be a symlink to the data directory.
+	run bash -c '
+		set -e
+		repo=$(mktemp -d)
+		target=$(mktemp -d)
+		trap '\''rm -rf "$repo" "$target"'\'' EXIT
+		mkdir -p "$repo/configs" "$target/bots/live-bot"
+		ln -s "$target" "$repo/configs/openmausbot"
+		printf '\''[{"id":"live-bot"}]\n'\'' >"$target/bots.json"
+		printf '\''history\n'\'' >"$target/bots/live-bot/history.ndjson"
+		export DRY_RUN=false OPENMAUSBOT_EXPORT=1 OMB_DATA_DIR="$target"
+		source "$1/generate.sh"
+		SCRIPT_DIR="$repo"
+		generate_openmausbot_configs
+		[ -f "$target/bots/live-bot/history.ndjson" ]
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 0 ]
+	[[ "$output" == *"must not be inside"* ]]
 }
 
 @test "the exported roster is gitignored" {

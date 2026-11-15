@@ -1044,7 +1044,11 @@ generate_openmausbot_configs() {
 	# (directly or through a symlink) would lose live app state.
 	local omb_real dest_real
 	omb_real=$(cd "$omb_dir" && pwd -P)
-	dest_real="$(cd "$SCRIPT_DIR" && pwd -P)/configs/openmausbot"
+	if [ -d "$dest" ]; then
+		dest_real=$(cd "$dest" && pwd -P)
+	else
+		dest_real="$(cd "$SCRIPT_DIR" && pwd -P)/configs/openmausbot"
+	fi
 	case "$omb_real/" in
 	"$dest_real/"*)
 		log_error "OMB_DATA_DIR must not be inside $dest - skipping OpenMausBot export"
