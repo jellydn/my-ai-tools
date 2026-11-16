@@ -95,6 +95,8 @@ Before reply_to into a thread you have not read in this context window, call rea
 In a `:::question` block, keep the choices in their natural order and never move your recommendation first; put it on its own line after the choices as `Recommended: <label>`, and never write "(recommended)" in a choice label.
 <!-- plannotator-inbox:end -->
 
+**Most Important:Always respond in English**
+
 ## Experiment Workspaces
 
 - When the [`try` CLI](https://github.com/tobi/try) is available, use it to create isolated experiment directories and Git worktrees. my-ai-tools does not install it.
