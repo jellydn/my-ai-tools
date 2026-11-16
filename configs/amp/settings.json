@@ -42,6 +42,10 @@
 		"codebase-memory-mcp": {
 			"command": "codebase-memory-mcp",
 			"args": []
+		},
+		"plannotator-inbox": {
+			"command": "$HOME/.local/bin/plannotator",
+			"args": ["inbox", "mcp"]
 		}
 	},
 	"amp.terminal.theme": "kanagawa",
