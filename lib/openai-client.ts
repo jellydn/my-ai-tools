@@ -14,7 +14,7 @@ export const DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small";
  * Default embedding model for OpenRouter keys: OpenRouter-compatible and free
  * (https://openrouter.ai/models?fmt=cards&output_modalities=embeddings).
  */
-export const DEFAULT_OPENROUTER_EMBEDDING_MODEL = "nvidia/llama-nemotron-embed-vl-1b-v2:free";
+export const DEFAULT_OPENROUTER_EMBEDDING_MODEL = "nvidia/nemotron-3-embed-1b:free";
 
 export function isOpenRouterKey(apiKey: string): boolean {
 	return apiKey.startsWith("sk-or-v1-");

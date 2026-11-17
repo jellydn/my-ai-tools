@@ -31,7 +31,12 @@ README="$REPO_ROOT/TOOL_REFERENCE.md"
 	[ "$status" -eq 0 ]
 	run grep -F 'serverName: context7' "$CONFIG_DIR/cordis.patch.yml"
 	[ "$status" -eq 0 ]
-	run grep -F 'args: ["mcp", "serve"]' "$CONFIG_DIR/cordis.patch.yml"
+	run awk '
+		/id: mcp-ctx$/ { in_block = 1; next }
+		in_block && /^[[:space:]]*-[[:space:]]*id:/ { in_block = 0 }
+		in_block && /args: \[[[:space:]]*"mcp",[[:space:]]*"serve"[[:space:]]*\]/ { found = 1 }
+		END { exit found ? 0 : 1 }
+	' "$CONFIG_DIR/cordis.patch.yml"
 	[ "$status" -eq 0 ]
 }
 

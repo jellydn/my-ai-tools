@@ -22,7 +22,7 @@
    OPENAI_BASE_URL=https://openrouter.ai/api/v1
    OPENAI_API_KEY=sk-or-v1-your-key-here
    OPENAI_MODEL=openrouter/free
-   OPENAI_EMBEDDING_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free
+   OPENAI_EMBEDDING_MODEL=nvidia/nemotron-3-embed-1b:free
    ```
 
 3. Load env and run (Bun):
@@ -64,7 +64,7 @@ Browse [OpenRouter models](https://openrouter.ai/models) or the curated **[Free 
 |------|----------|-----------------|-------|
 | API base | `OPENAI_BASE_URL` | `https://openrouter.ai/api/v1` | Required for OpenRouter |
 | Key | `OPENAI_API_KEY` | `sk-or-v1-...` | From [OpenRouter keys](https://openrouter.ai/settings/keys) |
-| Embeddings | `OPENAI_EMBEDDING_MODEL` | `nvidia/llama-nemotron-embed-vl-1b-v2:free` | [Llama Nemotron Embed VL 1B V2](https://openrouter.ai/collections/free-models) — text + image document embedding; works for text-only chunk strings |
+| Embeddings | `OPENAI_EMBEDDING_MODEL` | `nvidia/nemotron-3-embed-1b:free` | [NVIDIA Nemotron 3 Embed 1B](https://openrouter.ai/collections/free-models) — text embedding optimized for RAG and code retrieval; matches the `document_qa` tool's default |
 | Analysis | `OPENAI_MODEL` | `openrouter/free` | [OpenRouter free router](https://openrouter.ai/openrouter/free) — picks an available free model per request |
 
 Example `.env` (copy-paste):
@@ -73,7 +73,7 @@ Example `.env` (copy-paste):
 OPENAI_BASE_URL=https://openrouter.ai/api/v1
 OPENAI_API_KEY=sk-or-v1-...
 OPENAI_MODEL=openrouter/free
-OPENAI_EMBEDDING_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free
+OPENAI_EMBEDDING_MODEL=nvidia/nemotron-3-embed-1b:free
 ```
 
 ### If `openrouter/free` or embeddings fail
@@ -85,7 +85,7 @@ Try a **fixed free chat model** from the [free collection](https://openrouter.ai
 - `openai/gpt-oss-20b:free` — structured outputs / function calling
 - Poolside **Laguna** variants (`poolside/...:free`) — agentic coding (check exact model id on OpenRouter)
 
-Keep **`OPENAI_EMBEDDING_MODEL`** on an embedding-specific free model (e.g. `nvidia/llama-nemotron-embed-vl-1b-v2:free`). Do not point embeddings at chat-only models.
+Keep **`OPENAI_EMBEDDING_MODEL`** on an embedding-specific free model (e.g. `nvidia/nemotron-3-embed-1b:free`). Do not point embeddings at chat-only models.
 
 ### Free tier caveats
 

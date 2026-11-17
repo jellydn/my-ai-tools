@@ -89,7 +89,7 @@ jobs:
             "OPENAI_API_KEY=$(encode "$EFFECTIVE_OPENAI_API_KEY")" \
             "OPENAI_BASE_URL=$(encode "https://openrouter.ai/api/v1")" \
             "OPENAI_MODEL=$(encode "openrouter/free")" \
-            "OPENAI_EMBEDDING_MODEL=$(encode "nvidia/llama-nemotron-embed-vl-1b-v2:free")" >/dev/null
+            "OPENAI_EMBEDDING_MODEL=$(encode "nvidia/nemotron-3-embed-1b:free")" >/dev/null
 
       - name: Deploy to Dokku
         uses: dokku/github-action@master

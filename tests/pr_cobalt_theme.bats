@@ -27,12 +27,10 @@ ROOT="$REPO_ROOT/configs"
 	[ "$status" -eq 0 ]
 }
 
-@test "amp keeps the default theme and stages cobalt as an option" {
+@test "amp selects the cobalt terminal theme" {
 	run jq -r '."amp.terminal.theme"' "$ROOT/amp/settings.json"
-	[ "$output" = "kanagawa" ]
+	[ "$output" = "cobalt" ]
 	run jq -r '."amp.terminal.customThemes" | has("cobalt")' "$ROOT/amp/settings.json"
-	[ "$output" = "true" ]
-	run jq -r '."amp.terminal.customThemes" | has("kanagawa")' "$ROOT/amp/settings.json"
 	[ "$output" = "true" ]
 }
 
@@ -46,9 +44,16 @@ ROOT="$REPO_ROOT/configs"
 	[ "$output" = "#193549" ]
 }
 
-@test "reasonix config keeps theme_style disabled (staged only)" {
-	run grep -F 'theme_style = "cobalt"' "$ROOT/reasonix/config.toml"
-	[ "$status" -eq 1 ]
+@test "reasonix config selects cobalt in ui and desktop theme_style" {
+	run awk '
+		/^\[ui\]/ { in_ui = 1; next }
+		/^\[desktop\]/ { in_ui = 0; in_desktop = 1; next }
+		/^\[/ { in_ui = 0; in_desktop = 0; next }
+		in_ui && /theme_style[[:space:]]*=[[:space:]]*"cobalt"/ { ui_cobalt = 1 }
+		in_desktop && /theme_style[[:space:]]*=[[:space:]]*"cobalt"/ { desktop_cobalt = 1 }
+		END { exit (ui_cobalt && desktop_cobalt) ? 0 : 1 }
+	' "$ROOT/reasonix/config.toml"
+	[ "$status" -eq 0 ]
 }
 
 @test "hunk config selects the cobalt custom theme" {
