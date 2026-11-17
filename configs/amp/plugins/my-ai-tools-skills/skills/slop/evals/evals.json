@@ -1,0 +1,29 @@
+{
+  "skill": "slop",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Remove the AI-generated code slop from this diff and keep only the necessary changes.",
+      "should_trigger": true,
+      "expected_behavior": "Cleans up unnecessary clutter and preserves substance."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Tighten this patch so the review focuses on the meaningful changes.",
+      "should_trigger": true,
+      "expected_behavior": "Reduces unnecessary verbosity and mechanical noise."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Refactor this code for performance.",
+      "should_trigger": false,
+      "expected_behavior": "This is a general refactor request, not slop removal."
+    },
+    {
+      "id": "case-4",
+      "prompt": "The branch contains a lot of filler comments and noisy helpers; strip the slop without changing behavior.",
+      "should_trigger": true,
+      "expected_behavior": "Removes superficial clutter while preserving functionality."
+    }
+  ]
+}

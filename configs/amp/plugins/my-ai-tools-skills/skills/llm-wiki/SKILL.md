@@ -12,6 +12,18 @@ metadata:
 
 # LLM Wiki
 
+## What
+
+- Build a persistent compounding wiki from raw sources using the LLM Wiki pattern
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Build and maintain a persistent, compounding knowledge wiki from raw sources.
 
 Based on [Karpathy's LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f): the LLM incrementally integrates each new source into a structured wiki of markdown files — updating entity pages, flagging contradictions, strengthening cross-references. Synthesis is compiled once and kept current, not re-derived on every query.

@@ -1,0 +1,29 @@
+{
+  "skill": "pr-review",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Apply the requested PR review changes and make the branch ready for another review pass.",
+      "should_trigger": true,
+      "expected_behavior": "Implements reviewer feedback directly in the branch."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Fix the comments from the PR review one by one and keep the changes minimal.",
+      "should_trigger": true,
+      "expected_behavior": "Addresses review comments with targeted edits."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Review the PR comments and summarize them.",
+      "should_trigger": false,
+      "expected_behavior": "This is a review-summary request, not a fix-up request."
+    },
+    {
+      "id": "case-4",
+      "prompt": "The reviewer flagged a bug in the edge case handling; patch it without widening scope.",
+      "should_trigger": true,
+      "expected_behavior": "Makes the requested fix while avoiding unrelated changes."
+    }
+  ]
+}

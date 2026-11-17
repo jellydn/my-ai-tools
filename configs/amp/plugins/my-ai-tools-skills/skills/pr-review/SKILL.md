@@ -12,6 +12,18 @@ metadata:
 
 # Fix PR Review Comments
 
+## What
+
+- Fix PR review comments by implementing requested changes
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Fix PR review comments by implementing the requested changes.
 
 ## Usage

@@ -15,6 +15,18 @@ metadata:
 
 # Portless - Named .localhost URLs
 
+## What
+
+- Replace port numbers with stable named .localhost URLs for local development
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Replace port numbers with stable, named `.localhost` URLs for local development. For humans and agents.
 
 > **Note:** The portless CLI enables HTTPS on port 443 by default (`https://myapp.localhost`). Pass `--no-tls` to `portless proxy start`, or set `PORTLESS_HTTPS=0`, for plain HTTP. Keep HTTPS when the app needs OAuth, secure cookies, or HTTP/2.

@@ -1,0 +1,29 @@
+{
+  "skill": "spec-interview",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Ask targeted questions to clarify the requirements before we implement anything.",
+      "should_trigger": true,
+      "expected_behavior": "Produces a focused spec interview that uncovers missing details."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Interview me about the feature so the spec is precise enough to build.",
+      "should_trigger": true,
+      "expected_behavior": "Surfaces assumptions and unclear areas with good questions."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Start coding now.",
+      "should_trigger": false,
+      "expected_behavior": "This is an implementation request, not a clarification interview."
+    },
+    {
+      "id": "case-4",
+      "prompt": "The request is vague and could mean two different workflows; ask the minimum set of questions needed to pin it down.",
+      "should_trigger": true,
+      "expected_behavior": "Uses targeted clarification to remove ambiguity."
+    }
+  ]
+}

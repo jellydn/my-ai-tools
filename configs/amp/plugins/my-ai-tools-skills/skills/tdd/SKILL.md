@@ -12,6 +12,18 @@ metadata:
 
 # Test-Driven Development (TDD)
 
+## What
+
+- Guide through the Red-Green-Refactor cycle for test-driven development
+
+## Why
+
+- This skill gives you a repeatable way to handle the task instead of improvising each time.
+
+## How
+
+- Follow the sections below for the concrete steps, commands, checks, and guardrails.
+
 Guides you through the complete TDD workflow with Red-Green-Refactor cycle.
 
 ## Usage
