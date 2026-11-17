@@ -39,7 +39,7 @@
 <pre><code class="language-bash">OPENAI_BASE_URL=https://openrouter.ai/api/v1
 OPENAI_API_KEY=sk-or-v1-your-key-here
 OPENAI_MODEL=openrouter/free
-OPENAI_EMBEDDING_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free
+OPENAI_EMBEDDING_MODEL=nvidia/nemotron-3-embed-1b:free
 </code></pre>
 </li>
 <li><p>Load env and run (Bun):</p>
@@ -120,8 +120,8 @@ bun run code-taste export --format markdown
 <tr>
 <td>Embeddings</td>
 <td><code>OPENAI_EMBEDDING_MODEL</code></td>
-<td><code>nvidia/llama-nemotron-embed-vl-1b-v2:free</code></td>
-<td><a href="https://openrouter.ai/collections/free-models">Llama Nemotron Embed VL 1B V2</a> — text + image document embedding; works for text-only chunk strings</td>
+<td><code>nvidia/nemotron-3-embed-1b:free</code></td>
+<td><a href="https://openrouter.ai/collections/free-models">NVIDIA Nemotron 3 Embed 1B</a> — free text embedding optimized for RAG and code retrieval</td>
 </tr>
 <tr>
 <td>Analysis</td>
@@ -134,7 +134,7 @@ bun run code-taste export --format markdown
 <pre><code class="language-bash">OPENAI_BASE_URL=https://openrouter.ai/api/v1
 OPENAI_API_KEY=sk-or-v1-...
 OPENAI_MODEL=openrouter/free
-OPENAI_EMBEDDING_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free
+OPENAI_EMBEDDING_MODEL=nvidia/nemotron-3-embed-1b:free
 </code></pre>
 <h3>If <code>openrouter/free</code> or embeddings fail</h3>
 <p>Try a <strong>fixed free chat model</strong> from the <a href="https://openrouter.ai/collections/free-models">free collection</a> that supports tool calling / structured or JSON-style output, for example:</p>
@@ -144,7 +144,7 @@ OPENAI_EMBEDDING_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free
 <li><code>openai/gpt-oss-20b:free</code> — structured outputs / function calling</li>
 <li>Poolside <strong>Laguna</strong> variants (<code>poolside/...:free</code>) — agentic coding (check exact model id on OpenRouter)</li>
 </ul>
-<p>Keep <strong><code>OPENAI_EMBEDDING_MODEL</code></strong> on an embedding-specific free model (e.g. <code>nvidia/llama-nemotron-embed-vl-1b-v2:free</code>). Do not point embeddings at chat-only models.</p>
+<p>Keep <strong><code>OPENAI_EMBEDDING_MODEL</code></strong> on an embedding-specific free model (e.g. <code>nvidia/nemotron-3-embed-1b:free</code>). Do not point embeddings at chat-only models.</p>
 <h3>Free tier caveats</h3>
 <ul>
 <li>OpenRouter <a href="https://openrouter.ai/collections/free-models">documents free inference</a> as capacity they support but do not guarantee forever.</li>
