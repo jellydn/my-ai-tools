@@ -3407,6 +3407,8 @@ pine init
 pine check
 ```
 
+To include PINE in a non-interactive my-ai-tools setup, use `./cli.sh --yes --with-tools=pine`. PINE is not installed by default.
+
 Start PINE in the current project directory:
 
 ```bash

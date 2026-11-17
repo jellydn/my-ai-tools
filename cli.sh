@@ -23,7 +23,6 @@ TOOL_ALLOWLIST_YES=(
 	ai-switcher
 	codex
 	pi
-	pine
 	ctx
 	grok
 	open_code_review

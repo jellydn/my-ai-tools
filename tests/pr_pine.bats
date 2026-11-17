@@ -60,6 +60,31 @@ PY
     [ "$status" -eq 0 ]
 }
 
+@test "PINE remains optional in yes mode and installs when explicitly selected" {
+    run bash -c '
+        source "$1/cli.sh"
+        YES_TO_ALL=true
+        for entry in "${INSTALL_SEQUENCE[@]}"; do
+            eval "${entry#*:}() { echo ATTEMPT:${entry%%:*}; }"
+        done
+        run_install_sequence
+    ' _ "$REPO_ROOT"
+    [ "$status" -eq 0 ]
+    [[ "$output" != *ATTEMPT:pine* ]]
+
+    run bash -c '
+        source "$1/cli.sh"
+        YES_TO_ALL=true
+        TOOL_ALLOWLIST_YES+=(pine)
+        for entry in "${INSTALL_SEQUENCE[@]}"; do
+            eval "${entry#*:}() { echo ATTEMPT:${entry%%:*}; }"
+        done
+        run_install_sequence
+    ' _ "$REPO_ROOT"
+    [ "$status" -eq 0 ]
+    [ "$(grep -c "^ATTEMPT:pine$" <<<"$output")" -eq 1 ]
+}
+
 @test "PINE config files are valid JSON" {
     run python3 - "$PINE_CONFIG" "$PINE_AGENT" <<'PY'
 import json
