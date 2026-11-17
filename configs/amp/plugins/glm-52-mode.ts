@@ -137,6 +137,8 @@ const SMART_TOOL_NAMES = [
 	"librarian",
 	"view_media",
 	"painter",
+	"read_mcp_resource",
+	"mcp__*",
 ] as const;
 
 export default function (amp: PluginAPI) {
@@ -147,7 +149,7 @@ export default function (amp: PluginAPI) {
 
 	const agent = amp.experimental.createAgent({
 		name: "glm-5.2",
-		model: "amp/glm-5.2",
+		model: "zhipuai/glm-5.2",
 		instructions: GLM_52_AGENT_PROMPT,
 		tools: SMART_TOOL_NAMES,
 		reasoningEffort: "max",

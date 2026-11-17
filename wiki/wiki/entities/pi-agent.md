@@ -39,7 +39,7 @@ Pi uses `~/.pi/agent/settings.json` for global settings. The repo stores configs
 
 ## Packages (19 total)
 
-Pi uses a package-based extension system. Installed packages include: pi-extension, pi-autoresearch, pi-fff, pi-mcp-adapter, pi-simplify, pi-manage-todo-list, pi-btw, pi-code-previews, pi-codex-goal, pi-dynamic-workflows, pi-commandcode-provider, pi-footer, pi-tps-meter, rpiv-advisor, pi-cursor-sdk, pi-web-access, pi-clinepass-provider, rpiv-ask-user-question, pi-antigravity-oauth.
+Pi uses a package-based extension system. MCP is built into Pi core (`builtin:mcp` with codemode) — no adapter package needed. Installed packages include: pi-extension, pi-autoresearch, pi-fff, pi-simplify, pi-manage-todo-list, pi-btw, pi-code-previews, pi-codex-goal, pi-dynamic-workflows, pi-commandcode-provider, pi-footer, pi-tps-meter, rpiv-advisor, pi-cursor-sdk, pi-web-access, pi-clinepass-provider, rpiv-ask-user-question, pi-antigravity-oauth.
 
 ## MCP Servers
 

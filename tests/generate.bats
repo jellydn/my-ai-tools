@@ -196,3 +196,163 @@ teardown() {
 
     export DRY_RUN=false
 }
+
+# ---------------------------------------------------------------------------
+# OpenCode export – V1 and V2 directory compatibility
+# ---------------------------------------------------------------------------
+
+@test "OpenCode exports both directory layouts with plural definitions taking precedence" {
+    local config_dir="$HOME/.config/opencode"
+    mkdir -p "$config_dir"/{agent,agents,command,commands/ai}
+    printf 'legacy agent\n' > "$config_dir/agent/reviewer.md"
+    printf 'v2 agent\n' > "$config_dir/agents/reviewer.md"
+    printf 'legacy only\n' > "$config_dir/agent/legacy.md"
+    printf 'legacy command\n' > "$config_dir/command/review.md"
+    printf 'v2 command\n' > "$config_dir/commands/review.md"
+    printf 'v2 only\n' > "$config_dir/commands/custom.md"
+    printf 'hidden v1\n' > "$config_dir/command/.legacy-hidden.md"
+    printf 'hidden v2\n' > "$config_dir/commands/.hidden.md"
+    printf 'generated\n' > "$config_dir/commands/ai/generated.md"
+    printf 'machine-local\n' > "$config_dir/cli.json"
+
+    run generate_opencode_configs
+
+    [ "$status" -eq 0 ]
+    [ "$(cat "$SCRIPT_DIR/configs/opencode/agent/reviewer.md")" = "v2 agent" ]
+    [ "$(cat "$SCRIPT_DIR/configs/opencode/agent/legacy.md")" = "legacy only" ]
+    [ "$(cat "$SCRIPT_DIR/configs/opencode/command/review.md")" = "v2 command" ]
+    [ "$(cat "$SCRIPT_DIR/configs/opencode/command/custom.md")" = "v2 only" ]
+    [ "$(cat "$SCRIPT_DIR/configs/opencode/command/.legacy-hidden.md")" = "hidden v1" ]
+    [ "$(cat "$SCRIPT_DIR/configs/opencode/command/.hidden.md")" = "hidden v2" ]
+    [ ! -e "$SCRIPT_DIR/configs/opencode/command/ai" ]
+    [ ! -e "$SCRIPT_DIR/configs/opencode/cli.json" ]
+}
+
+# ---------------------------------------------------------------------------
+# sanitize_absolute_paths – regression guard for the single→double quote fix
+# ---------------------------------------------------------------------------
+
+@test "sanitize_absolute_paths converts single-quoted \$HOME paths to double-quoted" {
+    # The regex must match plain '$HOME/...' (not '\$HOME'), so a single-quoted
+    # value becomes double-quoted after sanitization. The old '\\$' pattern
+    # matched a literal backslash before $ and silently no-op'd this case.
+    mkdir -p "$SCRIPT_DIR/configs"
+    local file="$SCRIPT_DIR/configs/test-sanitize.toml"
+    printf 'path = \x27$HOME/foo/bar\x27\n' > "$file"
+
+    run sanitize_absolute_paths
+    [ "$status" -eq 0 ]
+
+    # Positive: single quotes rewritten to double quotes around $HOME.
+    run grep -F 'path = "$HOME/foo/bar"' "$file"
+    [ "$status" -eq 0 ]
+    # Negative: the original single-quoted form must be gone.
+    run grep -F "'\$HOME/foo/bar'" "$file"
+    [ "$status" -ne 0 ]
+}
+
+@test "sanitize_absolute_paths does not follow symlinks into live data" {
+    local live="$HOME/.openmausbot"
+    mkdir -p "$live" "$SCRIPT_DIR/configs"
+    printf '{"cwd":"%s/project"}\n' "$HOME" > "$live/bots.json"
+    ln -s "$live" "$SCRIPT_DIR/configs/openmausbot"
+    ln -s "$live/bots.json" "$SCRIPT_DIR/configs/linked.json"
+    printf '{"cwd":"%s/project"}\n' "$HOME" > "$SCRIPT_DIR/configs/regular.json"
+
+    run sanitize_absolute_paths
+    [ "$status" -eq 0 ]
+
+    # Live data reached through a directory or file symlink stays untouched.
+    [ "$(cat "$live/bots.json")" = "{\"cwd\":\"$HOME/project\"}" ]
+    # A regular exported file is still sanitized.
+    grep -F '"cwd":"$HOME/project"' "$SCRIPT_DIR/configs/regular.json"
+
+    # The configs root must not bypass the same symlink policy.
+    mv "$SCRIPT_DIR/configs" "$SCRIPT_DIR/exported-configs"
+    ln -s "$live" "$SCRIPT_DIR/configs"
+    run sanitize_absolute_paths
+    [ "$status" -eq 0 ]
+    [ "$(cat "$live/bots.json")" = "{\"cwd\":\"$HOME/project\"}" ]
+}
+
+# ---------------------------------------------------------------------------
+# Amp orb export
+# ---------------------------------------------------------------------------
+
+@test "generate_amp_configs keeps the tracked orb dispatch script" {
+    mkdir -p "$HOME/.config/amp" "$SCRIPT_DIR/configs/amp"
+    printf 'installed copy\n' > "$HOME/.config/amp/orb-dispatch.sh"
+    printf 'tracked script\n' > "$SCRIPT_DIR/configs/amp/orb-dispatch.sh"
+
+    run generate_amp_configs
+
+    [ "$status" -eq 0 ]
+    # The dispatcher is tracked source, not user configuration: the installed
+    # copy must not overwrite it.
+    [ "$(cat "$SCRIPT_DIR/configs/amp/orb-dispatch.sh")" = "tracked script" ]
+}
+
+@test "generate_amp_configs restores a missing orb dispatch script" {
+    mkdir -p "$HOME/.config/amp"
+    printf 'echo dispatch\n' > "$HOME/.config/amp/orb-dispatch.sh"
+
+    run generate_amp_configs
+
+    [ "$status" -eq 0 ]
+    [ "$(cat "$SCRIPT_DIR/configs/amp/orb-dispatch.sh")" = "echo dispatch" ]
+    [ -x "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" ]
+}
+
+@test "generate_amp_configs leaves a repo-linked orb dispatch script unchanged" {
+    mkdir -p "$HOME/.config/amp" "$SCRIPT_DIR/configs/amp"
+    printf 'repo script\n' > "$SCRIPT_DIR/configs/amp/orb-dispatch.sh"
+    chmod +x "$SCRIPT_DIR/configs/amp/orb-dispatch.sh"
+    ln -s "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" "$HOME/.config/amp/orb-dispatch.sh"
+
+    run generate_amp_configs
+
+    [ "$status" -eq 0 ]
+    [ ! -L "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" ]
+    [ "$(cat "$SCRIPT_DIR/configs/amp/orb-dispatch.sh")" = "repo script" ]
+}
+
+@test "generate_amp_configs dry-run does not write the orb script" {
+    export DRY_RUN=true
+    mkdir -p "$HOME/.config/amp"
+    printf 'echo dispatch\n' > "$HOME/.config/amp/orb-dispatch.sh"
+
+    run generate_amp_configs
+
+    [ "$status" -eq 0 ]
+    [ ! -e "$SCRIPT_DIR/configs/amp/orb-dispatch.sh" ]
+
+    export DRY_RUN=false
+}
+
+@test "export restores canonical guidance from older home profiles without changing dry-run output files" {
+    mkdir -p "$SCRIPT_DIR/scripts" "$SCRIPT_DIR/configs/claude" "$SCRIPT_DIR/configs/deepseek-harness" "$HOME/.dsh"
+    cp "$REPO_ROOT/scripts/sync-token-efficiency.sh" "$SCRIPT_DIR/scripts/"
+    cp "$REPO_ROOT/configs/token-efficiency.md" "$REPO_ROOT/configs/experiment-workspaces.md" "$SCRIPT_DIR/configs/"
+    printf '# Repository\n' > "$SCRIPT_DIR/AGENTS.md"
+    printf '# Gemini\n' > "$SCRIPT_DIR/GEMINI.md"
+    printf '# Claude\n' > "$SCRIPT_DIR/configs/claude/CLAUDE.md"
+    printf '# Existing repo profile\n' > "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
+    printf '# Exported profile\n\nKeep this custom rule.\n' > "$HOME/.dsh/AGENTS.md"
+    export DSH_HOME="$HOME/.dsh"
+
+    export DRY_RUN=true
+    run main
+    [ "$status" -eq 0 ]
+    [ "$(cat "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md")" = '# Existing repo profile' ]
+    [ "$(cat "$SCRIPT_DIR/AGENTS.md")" = '# Repository' ]
+
+    export DRY_RUN=false
+    run main
+    [ "$status" -eq 0 ]
+    grep -q '^# Exported profile$' "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
+    grep -q '^Keep this custom rule\.$' "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
+    grep -q '^## Experiment Workspaces$' "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
+    grep -q '^## Token Efficiency$' "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
+    run bash "$SCRIPT_DIR/scripts/sync-token-efficiency.sh" --check
+    [ "$status" -eq 0 ]
+}

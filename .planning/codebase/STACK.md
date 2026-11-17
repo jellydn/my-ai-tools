@@ -1,86 +1,93 @@
-# Tech Stack
+# Technology Stack
 
-**Analysis Date:** 2026-07-10
-
----
+**Analysis Date:** 2026-08-04
 
 ## Languages
 
-| Language | Role |
-|----------|------|
-| **Bash 3.0+** | Primary — all scripts, orchestration, config management |
-| **JSON** | Configuration format for MCP servers, settings, agent configs |
-| **TOML** | Configuration format for CLI tools (Codex, Kimi Code, Grok, Conductor, ctx) |
-| **Markdown** | Documentation, agent/skill definitions, wiki entries |
-| **YAML** | CI/CD workflows, pre-commit hooks |
+**Primary:**
+- **TypeScript** — HTTP server, repository indexing/retrieval, GitHub bot, Amp plugins, and tests in `server.ts`, `lib/`, `src/`, `scripts/`, and `configs/amp/`.
+- **Bash** — configuration installation/export and dependency bootstrap in `cli.sh`, `generate.sh`, `install.sh`, `lib/`, and `tests/*.bats`.
 
-No TypeScript, JavaScript, Python, or compiled code in this repo. It's a pure shell-script monorepo.
+**Secondary:**
+- **Python** — local document Q&A service in `document_qa/` (FastAPI, Streamlit, FAISS-related code).
+- **JavaScript** — browser client and standalone skill scripts in `public/browser-chat.js` and `skills/*/scripts/`.
+- **JSON, JSONC, TOML, YAML, Markdown** — native configuration, workflows, agent instructions, and documentation throughout `configs/`, `.github/`, `skills/`, `docs/`, and `wiki/`.
+
+## Runtime
+
+**Environment:**
+- **Bun 1.x** — preferred TypeScript runtime, package runner, test runner, and production container runtime (`Dockerfile`, `package.json`).
+- **Node.js >=18** — declared compatibility in `package.json`; `tsx` remains available for Node-oriented scripts and local tooling.
+- **Python** — required for the optional `document_qa/` application; versions and dependencies are declared in `document_qa/requirements.txt`.
+- **Bash** — required for installer and configuration-sync workflows; entry points re-exec under Bash via `lib/require_bash.sh`.
+
+**Package Manager:**
+- **Bun** — primary lockfile is `bun.lock`; `package.json` scripts use `bun test` and Bun’s TypeScript execution.
+- **npm-compatible metadata** — `package-lock.json` is also committed for dependency/security tooling and compatibility.
+- **pip** — Python dependencies are isolated in `document_qa/requirements.txt`.
+
+## Frameworks
+
+**Core:**
+- **Hono** `^4.6.3` with `@hono/node-server` `^2.0.8` — API server and middleware in `server.ts` and `src/github-bot/app.ts`.
+- **FastAPI** — local document-Q&A HTTP API in `document_qa/api.py`.
+- **Streamlit** — local document-Q&A UI in `document_qa/streamlit_app.py`.
+
+**AI and retrieval:**
+- **OpenAI SDK** `^6.0.0` — OpenAI-compatible chat and embedding calls through `lib/openai-client.ts` and `lib/retriever.ts`.
+- **Hugging Face Transformers** `^4.2.0` and **onnxruntime-node** `^1.27.0` — browser/local embedding generation in `scripts/index-browser.ts` and related retrieval code.
+- **Zod** `^4.0.0` — runtime validation for server payloads and GitHub bot configuration/results.
+- **YAML** `^2.9.0` — parsing `.github/my-ai-bot.yml` in `src/github-bot/config.ts`.
+
+**Testing:**
+- **Bun test** — TypeScript unit/integration tests in `tests/*.test.ts` and `src/**/*.test.ts`.
+- **BATS** — shell/configuration functional tests in `tests/*.bats`.
+- **Python test suite** — document-QA tests in `document_qa/tests/`.
+
+**Build/Dev:**
+- **Biome** `^2.5.3` — formatting and checks, configured by `biome.json`.
+- **TypeScript** `^7.0.0` — type checking through `package.json`’s `typecheck` script.
+- **pre-commit** — whitespace, YAML, large-file, and oxfmt hooks in `.pre-commit-config.yaml`.
+- **Docker BuildKit** — multi-stage image build in `Dockerfile`; build-time indexing receives an `OPENAI_API_KEY` secret.
+
+## Key Dependencies
+
+**Critical:**
+- `hono`, `@hono/node-server` — production API serving.
+- `openai`, `zod`, `yaml` — chat/retrieval and GitHub bot configuration/validation.
+- `@huggingface/transformers`, `onnxruntime-node` — browser index generation and local embedding support.
+
+**Infrastructure:**
+- `bun-types` — Bun TypeScript declarations.
+- `@biomejs/biome` — formatting/check tooling.
+- Python packages in `document_qa/requirements.txt` — local document ingestion, embeddings, FAISS retrieval, FastAPI, and Streamlit.
+
+## Configuration
+
+**Environment:**
+- Runtime values are supplied through `.env.example`, process environment, GitHub Actions secrets, or Dokku config.
+- Core AI variables: `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`, and `OPENAI_EMBEDDING_MODEL`.
+- GitHub bot variables: `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY`, `GITHUB_APP_WEBHOOK_SECRET`, `GITHUB_BOT_LOGIN`, `BOT_DATA_DIR`, `BOT_WORKSPACE_ROOT`, and worker/security controls documented in `.env.example` and `src/github-bot/config.ts`.
+
+**Build:**
+- `package.json`, `bun.lock`, and `package-lock.json` — dependencies and scripts.
+- `tsconfig.json` — TypeScript project configuration.
+- `biome.json` — formatting/check configuration.
+- `Dockerfile` — production image and build-time repository indexing.
+- `.github/workflows/*.yml` — tests, GitHub Pages, and Dokku deployments.
+
+## Platform Requirements
+
+**Development:**
+- Bun, Bash, Git, `jq`, and BATS for the primary project workflows.
+- Python and dependencies from `document_qa/requirements.txt` only when using the local document-QA application.
+- Docker is useful for validating the production image.
+
+**Production:**
+- Docker-compatible host running Bun image layers.
+- Dokku app `ai-tools` on the configured Docklight host, or an equivalent Docker deployment.
+- OpenRouter-compatible key and configured BuildKit secret when build-time indexing is enabled.
 
 ---
 
-## Runtime & Environment
-
-| Dependency | Version/Constraint | Purpose |
-|------------|-------------------|---------|
-| **Bash** | 3.0+ | Script interpreter (process substitution, arrays, `${var//pat/repl}`) |
-| **Git** | Any | Version control, commit hooks, clone operations |
-| **jq** | Any | JSON parsing and merging in `cli.sh` and `generate.sh` |
-| **Bun** | Preferred | Package/script runner (fallback: npm/npx) |
-| **bats-core** | Any | Test framework (`brew install bats-core`) |
-| **rsync** | Optional | Preferred copy mechanism in `safe_copy_dir()` |
-
----
-
-## Development Tooling
-
-| Tool | Config File | Purpose |
-|------|------------|---------|
-| **Biome** (`@biomejs/biome`) | `biome.json` | JS/JSON/TS formatting (tabs, 120 line width, double quotes) |
-| **pre-commit** | `.pre-commit-config.yaml` | Git hooks: trailing-whitespace, end-of-file-fixer, check-yaml, oxfmt |
-| **Renovate** | `renovate.json` | Automated dependency updates (`config:recommended`) |
-| **EditorConfig** | `.editorconfig` | Cross-editor formatting (tabs for .sh/.json/.md, spaces for .yaml) |
-| **microsandbox** (`msb`) | — | Ephemeral Linux VMs for safe testing (avoids macOS `getcwd` issues) |
-
----
-
-## Script Libraries
-
-| File | Lines | Purpose |
-|------|-------|---------|
-| `lib/require_bash.sh` | 32 | POSIX-compatible re-exec guard — sourced **first** in every entry script |
-| `lib/common.sh` | 866 | Shared utilities: logging, dry-run wrappers, path helpers, validation, retry |
-| `lib/install.sh` | 1,102 | Tool-specific installers for 20+ external CLIs |
-
----
-
-## Entry Points
-
-| File | Lines | Purpose |
-|------|-------|---------|
-| `cli.sh` | 2,574 | Install configs from repo → `$HOME` (primary workflow) |
-| `generate.sh` | 961 | Export configs from `$HOME` → repo (reverse workflow) |
-| `install.sh` | — | Quick-start installer (bootstraps tool detection + cli.sh invocation) |
-
----
-
-## CI/CD
-
-| File | Trigger | Purpose |
-|------|---------|---------|
-| `.github/workflows/test.yml` | Push/PR | Syntax validation (`bash -n`), BATS tests, biome check |
-| `.github/workflows/deploy-pages.yml` | Push to main | GitHub Pages deployment (wiki/docs) |
-
----
-
-## Configuration Paradigm
-
-The repo is a **configuration source of truth** — it manages config files for 14+ AI coding tools. The paradigm is bidirectional:
-
-```
-cli.sh     → copies configs from repo → $HOME (install)
-generate.sh ← copies configs from $HOME → repo (export, for contributing back)
-```
-
-Configs are tool-specific directories under `configs/<tool>/` with formats matching each tool's native expectations (JSON settings, TOML config, Markdown agents, etc.).
-
-_Last updated: 2026-07-10_
+*Stack analysis: 2026-08-04*

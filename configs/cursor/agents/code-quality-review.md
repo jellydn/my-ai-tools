@@ -1,6 +1,6 @@
 ---
 name: code-quality-review
-description: Code quality audit (maintainability, structure, 1k-line rule, spaghetti, code-judo). Invoked via Task after a parent gathers diff and file contents. Loads the rubric from the `code-quality-review` skill in the cursor-team-kit plugin.
+description: Audit a supplied diff for structural maintainability and unnecessary complexity.
 ---
 
 # Code Quality Review

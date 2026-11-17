@@ -56,7 +56,30 @@ Guides you through the complete TDD workflow with Red-Green-Refactor cycle.
 - Clean code - Refactor regularly to maintain quality
 - One concept per test - Keep tests focused and atomic
 - AAA Pattern - Structure tests as Arrange, Act, Assert
-- Black-box testing - Test only public methods and behavior, not implementation details
+- **Black-box testing** - Test only public methods and behavior, not implementation details
+- **Test at an agreed seam** - Before writing a test, identify the public interface that exposes the behavior and prefer the highest existing seam
+- **Independent expectations** - Expected values come from a literal, worked example, or spec; do not recompute them with the same algorithm as the implementation
+- **Vertical slices** - Write one meaningful test, implement the minimum, then repeat; avoid writing an entire imagined test suite before learning from the first cycle
+
+### Anti-Patterns
+
+- **Implementation-coupled tests** mock private collaborators or inspect internal state. They fail during harmless refactors and provide weak behavioral confidence.
+- **Tautological tests** derive the expected value with the same logic as the code under test, so both can be wrong together.
+- **Horizontal slicing** writes all tests first and all implementation later. Prefer tracer-bullet slices that exercise one user-visible behavior at a time.
+- **Unconfirmed seams** test a low-level helper only because it is easy to reach. If the behavior matters at a higher interface, test there instead or document why the lower seam is the correct one.
+
+Before the first Red phase, discover the repository's test runner and command from its manifest, task runner, docs, or CI. Do not assume TypeScript, Vitest, npm, or pnpm. Record the exact command used for the red failure and why it failed; a syntax/import error is not a valid Red state.
+
+### Check that tests can detect mistakes
+
+For risky behavior, name a plausible wrong implementation and choose an input whose expected result differs from it.
+A test that still passes when the relevant result or side effect is removed does not protect that behavior. Strengthen
+the observable assertion, not checks of private calls. If no honest automated test is practical, record the missing seam
+and use a repeatable manual check; do not claim automated regression coverage.
+
+If the project already uses mutation testing, run it on the affected scope when useful. Inspect uncovered paths and
+surviving mutations against the contract. Add a test for a meaningful missed behavior; do not chase equivalent mutations
+or a perfect score, install a new tool by default, or delete code solely because coverage did not exercise it.
 
 ## Process
 
@@ -116,3 +139,8 @@ describe("functionName", () => {
 - Run tests: `npm test` or `pnpm test`
 - Watch mode: `npm test --watch`
 - With coverage: `npm test --coverage`
+
+## Attribution
+
+Test-strength guidance is adapted from Robert C. Martin's
+[`ub-mode` — TDD, Test Behavior, and Mutator](https://github.com/unclebob/ub-mode/blob/3da62bf3fcfd2034de41f30d920d2739e566171f/SKILL.md).

@@ -1,18 +1,55 @@
 #!/usr/bin/env bats
-# Tests for README.md documentation consistency
+# Tests for detailed tool-reference documentation consistency
 
 load helpers
 
-README_FILE="$REPO_ROOT/README.md"
+README_FILE="$REPO_ROOT/TOOL_REFERENCE.md"
+PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
 
-@test "README.md references commandcode as Pi default provider" {
+@test "README.md Pi defaults match configs/pi/settings.json" {
+    require_jq
+    local provider model
+    provider=$(jq -r '.defaultProvider' "$PI_SETTINGS")
+    model=$(jq -r '.defaultModel' "$PI_SETTINGS")
+
+    run grep -F "**Default Provider**: \`$provider\`" "$README_FILE"
+    [ "$status" -eq 0 ]
+
+    run grep -F "**Default Model**: \`$model\`" "$README_FILE"
+    [ "$status" -eq 0 ]
+}
+
+@test "README.md still references commandcode provider for Pi" {
     run grep -F "commandcode" "$README_FILE"
     [ "$status" -eq 0 ]
 }
 
-@test "README.md mentions deepseek/deepseek-v4-pro as Pi default model" {
-    run grep -F "deepseek/deepseek-v4-pro" "$README_FILE"
+@test "README.md still mentions meta/muse-spark-1.3-contributor among Pi models" {
+    run grep -F "meta/muse-spark-1.3-contributor" "$README_FILE"
     [ "$status" -eq 0 ]
+}
+
+@test "README.md Pi overview lists current packages" {
+    run grep -F "pi-qwencloud-provider" "$README_FILE"
+    [ "$status" -eq 0 ]
+    run grep -F "pi-cursor-sdk" "$README_FILE"
+    [ "$status" -eq 0 ]
+    run grep -F "dynamic-workflows" "$README_FILE"
+    [ "$status" -eq 1 ]
+    run grep -F "pi-xai-oauth" "$README_FILE"
+    [ "$status" -eq 1 ]
+}
+
+@test "README.md Auto-Install note is outside the bash fence" {
+    run bash -c '
+        awk "
+            /^```bash$/ { in_bash=1; next }
+            /^```$/ { in_bash=0; next }
+            in_bash && /Auto-Install/ { found=1 }
+            END { exit found ? 0 : 1 }
+        " "$1"
+    ' _ "$README_FILE"
+    [ "$status" -eq 1 ]
 }
 
 @test "README.md Pi section heading contains Antigravity Rotator" {

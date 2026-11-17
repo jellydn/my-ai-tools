@@ -315,8 +315,6 @@ Report findings as:
 ```
 ````
 
-````
-
 ## 🎓 Best Practices
 
 ### 1. Single Responsibility
@@ -327,7 +325,7 @@ Each agent should have a clear, focused purpose:
 ```yaml
 name: typescript-type-checker
 description: Validates TypeScript type safety
-````
+```
 
 ❌ **Bad:**
 

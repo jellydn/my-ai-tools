@@ -1,5 +1,5 @@
-import type { PluginAPI } from "@ampcode/plugin";
 import { readFileSync, statSync } from "fs";
+import type { PluginAPI } from "@ampcode/plugin";
 
 // Managed by Orca. Do not edit; changes may be overwritten.
 type HookCoords = { port?: string; token?: string; env?: string; version?: string };
@@ -43,8 +43,7 @@ function readEndpointFile(): HookCoords | null {
 }
 
 function resolveHookCoords(): HookCoords {
-	// Why: Amp sessions can outlive an Orca restart; the endpoint file is
-	// rewritten on each start, so read it per event before falling back to env.
+	// Re-read endpoints per event because Amp sessions can outlive an Orca restart.
 	const fileEnv = readEndpointFile() ?? {};
 	return {
 		port: fileEnv.port || process.env.ORCA_AGENT_HOOK_PORT,
@@ -100,6 +99,7 @@ async function post(hookEventName: string, payload: Record<string, unknown>): Pr
 			},
 			body: JSON.stringify({
 				paneKey,
+				launchToken: process.env.ORCA_AGENT_LAUNCH_TOKEN || "",
 				tabId: process.env.ORCA_TAB_ID || "",
 				worktreeId: process.env.ORCA_WORKTREE_ID || "",
 				env: coords.env,
@@ -109,7 +109,7 @@ async function post(hookEventName: string, payload: Record<string, unknown>): Pr
 			}),
 		});
 	} catch {
-		// Why: Orca status reporting must never affect the Amp run.
+		// Status reporting must never affect the Amp run.
 	} finally {
 		clearTimeout(timeout);
 	}
@@ -137,8 +137,7 @@ async function drainPostQueue(): Promise<void> {
 	}
 }
 function enqueuePost(hookEventName: string, payload: Record<string, unknown>): void {
-	// Why: keep hook callbacks non-blocking without retaining unbounded
-	// payload closures when Orca is down and each POST waits for timeout.
+	// Bound queued payloads while a disconnected Orca makes each POST time out.
 	if (postQueue.length >= MAX_PENDING_POSTS) {
 		postQueue.shift();
 	}

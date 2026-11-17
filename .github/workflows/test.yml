@@ -6,13 +6,31 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
+  packages:
+    name: Workspace package tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "26"
+          cache: npm
+      - run: npm ci
+      - run: npm run build:packages
+      - run: npm run test:packages
+
   bats:
     name: Config Validation Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Install bats
         run: sudo apt-get update && sudo apt-get install -y bats
@@ -22,3 +40,95 @@ jobs:
 
       - name: Run config validation tests
         run: bats tests/pr_*.bats tests/generate.bats tests/sh_reexec.bats
+
+  rag:
+    name: RAG Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Test retrieval and public corpus boundaries
+        run: bun run test:rag
+
+  code-taste:
+    name: Code Taste Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Biome check (code-taste)
+        run: bunx biome check lib/code-taste lib/vector-similarity.ts lib/retriever.ts scripts/code-taste.ts tests/code-taste.test.ts tests/retriever.test.ts
+
+      - name: Run code taste tests
+        run: bun test tests/code-taste.test.ts tests/retriever.test.ts
+
+  windows-installer:
+    name: Windows PowerShell Installer
+    runs-on: windows-2025
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Parse installer
+        shell: powershell
+        run: |
+          $tokens = $null
+          $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path .\install.ps1),
+            [ref]$tokens,
+            [ref]$errors
+          )
+          if ($errors.Count -gt 0) {
+            $errors | Format-List
+            exit 1
+          }
+
+      - name: Test Windows prerequisite recovery
+        shell: powershell
+        run: .\tests\windows_installer.ps1
+
+      - name: Test Amp command resolution
+        shell: powershell
+        run: .\tests\windows_amp.ps1
+
+      - name: Test Amp selection handoff
+        shell: powershell
+        run: .\tests\windows_amp_handoff.ps1
+
+      - name: Test real Git Bash prerequisite handoff
+        shell: powershell
+        run: .\tests\windows_bash_handoff.ps1
+
+      - name: Run native Windows dry-run
+        shell: powershell
+        run: .\install.ps1 -DryRun -Yes
+
+      - name: Install StyLua without compiling Rust
+        shell: bash
+        run: |
+          source lib/common.sh
+          source lib/install.sh
+          install_stylua_if_needed
+          stylua --version

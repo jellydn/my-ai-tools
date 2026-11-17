@@ -1,26 +1,15 @@
 ---
-description: Review recently modified code from three perspectives (Code Reuse, Code Quality, Efficiency) and apply all findings
+description: Simplify recently modified code without changing behavior
 ---
 
-Review the recently modified code ($ARGUMENTS or `git diff --name-only` if no argument is given) from three distinct perspectives, then apply all actionable findings.
+Simplify `$ARGUMENTS`, or the files from `git diff --name-only` when no scope is given. Preserve behavior and public APIs.
 
-## 📋 Three Review Perspectives
+Review the full scope before editing:
 
-### 📋 Code Reuse
+- **Reuse:** remove duplication and use existing canonical helpers.
+- **Quality:** improve unclear names, deep nesting, mixed responsibilities, and inconsistent local style.
+- **Efficiency:** remove N+1 work, redundant loops, repeated expensive operations, and unused computation.
 
-Look for logic duplicated across two or more places, redundant patterns, or helper functions that already exist but were re-implemented.
+Apply only clear improvements. Do not change useful business or architecture comments, established shared abstractions, standard error handling, or public API boundaries.
 
-### 📋 Code Quality
-
-Look for readability problems, confusing names, deeply nested blocks, long functions, and style inconsistencies.
-
-### 📋 Efficiency
-
-Look for performance bottlenecks, N+1 queries, redundant loops, and unnecessary computation.
-
-## 📋 Process
-
-1. Identify target files from $ARGUMENTS or `git diff --name-only`
-2. Apply all three lenses before editing
-3. Apply fixes surgically, preserving functionality
-4. Verify the code still builds
+Finish when all actionable findings are applied and the relevant build, tests, and checks pass.

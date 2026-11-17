@@ -5,6 +5,8 @@
 Code is communication between humans. Design for change, not perfection. Optimize for readability and simplicity.
 
 See @~/.ai-tools/fable-guide.md for working with next-generation AI models.
+For non-trivial AI-assisted implementation, architecture, security, or operational work, read
+@~/.agents/skills/accountable-engineering/SKILL.md and follow its accountable workflow.
 
 ## AI Tool Session Management
 
@@ -75,6 +77,22 @@ Make big changes through small, safe steps. Code is communication between humans
 **Optimize for readability**: Clear code is maintainable code. Choose boring solutions that are easy to understand.
 
 **Self-documenting**: Meaningful names and clear structure beat comments. Comments explain why, not what.
+
+**Resolve material ambiguity**: Inspect repository evidence first. Ask only when different interpretations would change
+behavior, scope, interfaces, security, or other important outcomes.
+
+**Keep changes focused**: Change only what the task requires. Before completion, inspect the diff and account for every
+hunk as either required work or cleanup made necessary by that work. Remove unrelated formatting, renaming, refactoring,
+and commentary changes.
+
+**Make progress checkable**: For each significant plan step, name the test, command, observable behavior, or diff property
+that proves it is complete. Scale the evidence to the risk; not every change needs a new test.
+
+**Name meaningful values**: Extract recurring values and values defined by protocols or business rules into descriptive
+constants or enums. Keep obvious one-off values inline when a name would add noise.
+
+**Protect boundaries**: Follow the repository's existing architecture and keep low-level mechanics behind the module that
+owns them. Treat public API and visibility changes as design decisions; make them only when the task requires them.
 
 **Test for confidence**: Write tests that enable change, not tests that constrain it.
 
@@ -185,6 +203,7 @@ Based on Kent C. Dodds' testing philosophy:
 - Test behavior, not implementation details
 - Focus on user-facing functionality
 - Prefer integration tests over isolated unit tests
+- For a reproducible bug, add a regression test and observe it fail before the fix when practical
 
 #### 🏗️ Test Structure
 

@@ -17,6 +17,10 @@
 			"command": "fff-mcp",
 			"args": []
 		},
+		"logpilot": {
+			"command": "logpilot",
+			"args": ["mcp-server"]
+		},
 		"react-grab-mcp": {
 			"command": "npx",
 			"args": ["-y", "@react-grab/mcp", "--stdio"]

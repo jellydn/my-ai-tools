@@ -1,45 +1,83 @@
 {
-	"mcpServers": {
-		"context7": {
-			"command": "npx",
-			"args": ["-y", "@upstash/context7-mcp@latest"]
-		},
-		"sequential-thinking": {
-			"command": "npx",
-			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-		},
-		"qmd": {
-			"command": "qmd",
-			"args": ["mcp"]
-		},
-		"fff": {
-			"type": "stdio",
-			"command": "fff-mcp",
-			"args": []
-		},
-		"react-grab-mcp": {
-			"command": "npx",
-			"args": ["-y", "@react-grab/mcp", "--stdio"]
-		},
-		"logpilot": {
-			"command": "logpilot",
-			"args": ["mcp-server"]
-		},
-		"agentmemory": {
-			"command": "npx",
-			"args": ["-y", "@agentmemory/mcp"]
-		},
-		"sem": {
-			"command": "sem-mcp",
-			"args": []
-		},
-		"ctx": {
-			"command": "ctx",
-			"args": ["mcp", "serve"]
-		},
-		"codebase-memory-mcp": {
-			"command": "codebase-memory-mcp",
-			"args": []
-		}
-	}
+  "devin": {},
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"$HOME/.config/devin/herdr-agent-state.sh\" session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  },
+  "notify": "smart",
+  "respect_gitignore": true,
+  "shell": {
+    "setup_complete": true
+  },
+  "show_path": true,
+  "skip_home_directory_warning": true,
+  "skip_workspace_trust": true,
+  "theme_auto_detect": "always",
+  "theme_mode": "dark",
+  "unicode_mode": "auto",
+  "version": 1
 }

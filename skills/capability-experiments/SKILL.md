@@ -1,6 +1,6 @@
 ---
 name: "capability-experiments"
-description: "Experiment with model capabilities — HTML reports, embedded questionnaires, proactive research, multi-step reasoning"
+description: "Build an interactive report or experiment when the user asks to explore model capabilities."
 license: "MIT"
 compatibility: "cline, claude, opencode, amp, codex, gemini, cursor, pi"
 hint: "Use for rich outputs, interactive forms, or exploring what next-gen models can do"

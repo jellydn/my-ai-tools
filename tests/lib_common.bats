@@ -30,6 +30,31 @@ setup() {
     [[ "$output" == *"[DRY RUN]"* ]]
 }
 
+@test "safe_copy_dir skips an unreadable file with errexit enabled" {
+    local source_dir="$BATS_TEST_TMPDIR/source"
+    local dest_dir="$BATS_TEST_TMPDIR/dest"
+    mkdir -p "$source_dir"
+    printf 'blocked\n' > "$source_dir/a-blocked.txt"
+    printf 'copied\n' > "$source_dir/z-copied.txt"
+
+    run bash -c '
+        set -e
+        source "$1"
+        DRY_RUN=false
+        rsync() { return 1; }
+        cp() {
+            case "$1" in
+                *a-blocked.txt) return 1 ;;
+            esac
+            command cp "$@"
+        }
+        safe_copy_dir "$2" "$3"
+        test -f "$3/z-copied.txt"
+    ' _ "$BATS_TEST_DIRNAME/../lib/common.sh" "$source_dir" "$dest_dir"
+
+    [ "$status" -eq 0 ]
+}
+
 @test "validate_json returns 0 for valid JSON" {
     if ! command -v jq &>/dev/null; then
         skip "jq not installed"
@@ -133,11 +158,11 @@ setup() {
 }
 
 @test "validate_yaml fails on invalid yaml with spaces in path" {
-    if ! command -v python3 &>/dev/null && ! command -v yq &>/dev/null && ! command -v ruby &>/dev/null; then
+    if ! python3 -c 'import yaml' &>/dev/null && ! command -v yq &>/dev/null && ! command -v ruby &>/dev/null; then
         skip "no YAML validator available"
     fi
 
-    local yaml_file="/tmp/my ai tools invalid.yaml"
+    local yaml_file="$BATS_TEST_TMPDIR/my ai tools invalid.yaml"
     printf 'key: [1, 2\n' > "$yaml_file"
 
     run validate_yaml "$yaml_file"
@@ -170,12 +195,15 @@ EOF
 }
 
 @test "validate_config_with_schema fails when schema mismatches" {
+    if ! command -v jq &>/dev/null; then
+        skip "jq not installed"
+    fi
     if ! command -v python3 &>/dev/null || ! python3 -c "import jsonschema" &>/dev/null; then
         skip "python jsonschema not available"
     fi
 
-    local schema_file="/tmp/my-ai-tools-schema.json"
-    local data_file="/tmp/my-ai-tools-data.json"
+    local schema_file="$BATS_TEST_TMPDIR/schema.json"
+    local data_file="$BATS_TEST_TMPDIR/data.json"
 
     cat > "$schema_file" <<'EOF'
 {"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","required":["name"],"properties":{"name":{"type":"string"}}}
@@ -183,13 +211,20 @@ EOF
 
     local schema_url="file://$schema_file"
     cat > "$data_file" <<EOF
-{"$schema":"$schema_url","name": 123}
+{"\$schema":"$schema_url","name": 123}
 EOF
 
     run validate_config_with_schema "$data_file"
-    [ "$status" -ne 0 ]
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"Schema validation failed"* ]]
 
-    rm -f "$schema_file" "$data_file"
+    cat > "$data_file" <<EOF
+{"\$schema":"$schema_url","name": "valid"}
+EOF
+
+    run validate_config_with_schema "$data_file"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Schema validation passed"* ]]
 }
 
 @test "run_parallel handles empty command list" {
@@ -202,4 +237,105 @@ EOF
     [ "$status" -eq 0 ]
     [[ "$output" == *"one"* ]]
     [[ "$output" == *"two"* ]]
+}
+
+@test "get_reasonix_dir returns non-empty path" {
+    run get_reasonix_dir
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+}
+
+@test "validate_config validates TOML file" {
+    if ! command -v python3 &>/dev/null && ! command -v taplo &>/dev/null; then
+        skip "no TOML validator available"
+    fi
+
+    local toml_file="/tmp/my-ai-tools-valid-$$.toml"
+    printf 'key = "value"\n' > "$toml_file"
+
+    run validate_config "$toml_file"
+    [ "$status" -eq 0 ]
+
+    rm -f "$toml_file"
+}
+
+@test "validate_toml returns 0 for valid TOML" {
+    if ! command -v python3 &>/dev/null && ! command -v taplo &>/dev/null; then
+        skip "no TOML validator available"
+    fi
+
+    local toml_file="/tmp/my-ai-tools-valid-toml-$$.toml"
+    printf 'key = "value"\n[section]\nnum = 42\n' > "$toml_file"
+
+    run validate_toml "$toml_file"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"TOML validated"* ]]
+
+    rm -f "$toml_file"
+}
+
+@test "validate_toml returns 1 for invalid TOML" {
+    if ! command -v python3 &>/dev/null && ! command -v taplo &>/dev/null; then
+        skip "no TOML validator available"
+    fi
+
+    local toml_file="/tmp/my-ai-tools-invalid-toml-$$.toml"
+    printf 'key = = 1\n' > "$toml_file"
+
+    run validate_toml "$toml_file"
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"Invalid TOML"* ]]
+
+    rm -f "$toml_file"
+}
+
+@test "validate_toml returns 1 for missing file" {
+    run validate_toml "/tmp/my-ai-tools-missing-toml-$$.toml"
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"File not found"* ]]
+}
+
+@test "validate_toml skips when no TOML validator is available" {
+    local fake_bin_dir="/tmp/my-ai-tools-fake-bin-toml-$$"
+
+    mkdir -p "$fake_bin_dir"
+    cat > "$fake_bin_dir/python3" <<'EOF'
+#!/bin/sh
+exit 1
+EOF
+    chmod +x "$fake_bin_dir/python3"
+
+    local toml_file="/tmp/my-ai-tools-skip-toml-$$.toml"
+    printf 'key = "value"\n' > "$toml_file"
+
+    # Stubbed python3 (import fails) and no taplo on a restricted PATH -> should skip
+    run bash -c 'source "$0/../lib/common.sh"; PATH="$1"; validate_toml "$2"' "$BATS_TEST_DIRNAME" "$fake_bin_dir" "$toml_file"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"No TOML validator available"* ]]
+
+    rm -f "$fake_bin_dir/python3" "$toml_file"
+    rmdir "$fake_bin_dir"
+}
+
+@test "run_installer omits an empty version in the already-installed message" {
+    run bash -ec '
+        source "$1/lib/common.sh"
+        YES_TO_ALL=true
+        DRY_RUN=false
+        run_installer "Demo Tool" "true" "true" "false"
+    ' _ "$BATS_TEST_DIRNAME/.."
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Demo Tool is already installed"* ]]
+    [[ "$output" != *"already installed ()"* ]]
+}
+
+@test "run_installer includes the version when it is available" {
+    run bash -c '
+        source "$1/lib/common.sh"
+        YES_TO_ALL=true
+        DRY_RUN=false
+        run_installer "Demo Tool" "true" "true" "echo 1.2.3"
+    ' _ "$BATS_TEST_DIRNAME/.."
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Demo Tool is already installed (1.2.3)"* ]]
 }

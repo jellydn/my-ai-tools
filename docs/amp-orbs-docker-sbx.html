@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Amp orbs on Docker Sandboxes Cloud — my-ai-tools documentation"><title>Amp orbs on Docker Sandboxes Cloud · my-ai-tools</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="../">my-ai-tools</a><a class="back" href="./">Documentation index</a></div></header>
+<div class="layout"><nav class="sidebar" aria-label="Documentation"><h2>Docs</h2>
+<a href="30-day-applied-ai-learnings.html">30-Day Applied AI Learning Sprint</a>
+<a href="agent-teams-examples.html">Agent Teams Usage Examples</a>
+<a href="ai-applied-genai-cheat-sheet.html">Applied AI &amp; GenAI Cheat Sheet</a>
+<a href="amp-orbs-docker-sbx.html">Amp orbs on Docker Sandboxes Cloud</a>
+<a href="amp-orbs.html">Self-hosted Amp orbs with smolvm</a>
+<a href="claude-code-teams.html">🤝 Claude Code Teams</a>
+<a href="code-taste-openrouter.html">Code taste with OpenRouter</a>
+<a href="dokku-deploy.html">Dokku deploy (GitHub Actions)</a>
+<a href="fable-quick-start.html">Fable Guide Quick Start</a>
+<a href="fusion-orchestration.html">⚡ Fusion Orchestration Guide</a>
+<a href="learning-stories.html">My AI Coding Tools Learning Notes</a>
+<a href="linux-omarchy-setup.html">Selective Setup on Omarchy (Linux, Hyprland)</a>
+<a href="my-ai-bot-architecture.html">my-ai-bot architecture</a>
+<a href="my-ai-bot.html">my-ai-bot</a>
+<a href="qmd-knowledge-management.html">qmd Knowledge Management System</a>
+<a href="rag-architecture.html">Repository RAG architecture</a>
+<a href="rag-retrieval-quality.html">Day 11: retrieval quality</a>
+<a href="skill-upstreams.html">Skill upstream maintenance</a>
+</nav><main><article>
+<h1>Amp orbs on Docker Sandboxes Cloud</h1>
+<p>The <code>docker-sbx</code> provider runs each Amp orb as a Docker Sandboxes Cloud sandbox (<code>sbx --cloud</code>).
+The controller is a launchd service on the Mac. It runs the dispatcher from
+<a href="https://github.com/elianiva/amp-orbs">elianiva/amp-orbs</a> at commit <code>91793a1</code>, with the
+<a href="../configs/amp/docker-sbx/amp-orbs-91793a1.patch">macOS patch</a> from this repository.
+It can run next to the <a href="amp-orbs.html">smolvm provider</a> on the same Mac.</p>
+<p>This setup offers one orb type: <code>small</code> (2 vCPU / 4 GiB).</p>
+<h2>Install sbx and sign in</h2>
+<p>You need a Docker account with the Docker Sandboxes Cloud entitlement.</p>
+<pre><code class="language-bash">brew trust docker/tap
+brew install docker/tap/sbx
+sbx login
+sbx --cloud diagnose
+</code></pre>
+<p><code>sbx login</code> opens the browser. To use a personal access token instead, run
+<code>sbx login --username &lt;docker-id&gt; --password-stdin</code> and send the token on stdin.
+Continue only when <code>diagnose</code> passes all checks. The tested version is sbx v0.53.0.</p>
+<h2>Get the provider source</h2>
+<p>Upstream <code>main</code> has moved to a published-image design that this patch does not support.
+Use the tested commit:</p>
+<pre><code class="language-bash">git clone https://github.com/elianiva/amp-orbs &quot;$HOME/Development/amp-orbs&quot;
+cd &quot;$HOME/Development/amp-orbs&quot;
+git switch -c docker-sbx 91793a15b71a2ab759d1a9cb91f92965e2e3ff1a
+curl -fsSL https://raw.githubusercontent.com/jellydn/my-ai-tools/main/configs/amp/docker-sbx/amp-orbs-91793a1.patch |
+  git apply
+</code></pre>
+<p>The patch makes two changes:</p>
+<ul>
+<li><code>service/install-macos.sh</code> reads <code>AMP_ORB_PROVIDER_TOKEN</code>. When it is set, the installer
+sets the generated launchd plist to mode 600 and adds the token to the service environment.
+It sends the <code>PlistBuddy</code> command on stdin, so the token never appears in <code>ps</code>, and it
+refuses a token with characters other than letters, digits, <code>_</code>, and <code>-</code>. The refusal comes
+before the installer writes the launch agent, so a refused token leaves the previous
+installation untouched.</li>
+<li><code>service/com.elianiva.amp-orb-provider.plist</code> sets <code>AMP_ORBS_DEFAULT_TYPE</code> to <code>small</code>.</li>
+</ul>
+<h2>Build the small template</h2>
+<p>Build only the <code>small</code> template in the <code>sbx</code> account:</p>
+<pre><code class="language-bash">BUILDER=amp-orb-builder-small CPUS=2 MEMORY=4g \
+  ./base/build-template.sh melon-orb-base-x86_64-v3-small
+sbx --cloud template inspect melon-orb-base-x86_64-v3-small --format json
+</code></pre>
+<p>The template must show amd64, 2 CPUs, and 4096 MiB. The other upstream templates are not
+built. Do not add other orb types unless you build their templates first.</p>
+<h2>Create the provider token</h2>
+<p>Do this once for each Amp account. If <code>docker-sbx</code> already exists, keep its token file and
+do not create the provider again.</p>
+<p>Amp keeps one saved provider token, in <code>~/.local/share/amp/secrets.json</code> under
+<code>orb-provider-token@https://ampcode.com/</code>. <code>amp orb provider create</code> replaces that value.
+Without the steps below, the next restart of the smolvm controller would connect with the
+<code>docker-sbx</code> token. The command can also refresh the Amp login values in the same file.</p>
+<p>The user runs these commands in a private terminal. Agents must not run them, read
+<code>secrets.json</code> or the token file, or ask the user to paste the token.</p>
+<pre><code class="language-bash">umask 077
+S=&quot;$HOME/.local/share/amp/secrets.json&quot;
+B=&quot;$S.bak-before-docker-sbx&quot;
+# Make the backup owner-only before it holds credentials. Stop if this fails.
+# After a good backup, always run the restore, even if create fails.
+touch &quot;$B&quot; &amp;&amp; chmod -N &quot;$B&quot; &amp;&amp; chmod 600 &quot;$B&quot; &amp;&amp; cp &quot;$S&quot; &quot;$B&quot; &amp;&amp; echo &quot;backup saved&quot; &amp;&amp; {
+  amp orb provider create docker-sbx
+  created=$?
+  mkdir -p &quot;$HOME/.config/amp-orbs&quot; &amp;&amp; chmod 700 &quot;$HOME/.config/amp-orbs&quot; &amp;&amp;
+    chmod -N &quot;$HOME/.config/amp-orbs&quot; &amp;&amp;
+    python3 -I - &quot;$S&quot; &quot;$B&quot; &quot;$HOME/.config/amp-orbs/docker-sbx.token&quot; &lt;&lt;&#39;PY&#39;
+import json, os, subprocess, sys
+
+secrets_path, backup_path, token_path = sys.argv[1:]
+key = &quot;orb-provider-token@https://ampcode.com/&quot;
+with open(secrets_path) as f:
+    secrets = json.load(f)
+with open(backup_path) as f:
+    backup = json.load(f)
+token = secrets.get(key, &quot;&quot;)
+
+
+def write_private(path, text):
+    # Make the file owner-only before any secret is written: mode 600, also for an
+    # existing file, and no ACL inherited from the folder.
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    os.fchmod(fd, 0o600)
+    subprocess.run([&quot;/bin/chmod&quot;, &quot;-N&quot;, path], check=True)
+    with os.fdopen(fd, &quot;w&quot;) as f:
+        f.write(text)
+
+
+found = token.startswith(&quot;aop_live_&quot;) and token != backup.get(key)
+if found:
+    # If this write fails, the script stops here and the new token stays in the slot.
+    write_private(token_path, token)
+
+# Give the saved slot back to the earlier provider. Keep the refreshed login values.
+if key in backup:
+    secrets[key] = backup[key]
+else:
+    secrets.pop(key, None)
+tmp_path = secrets_path + &quot;.tmp&quot;
+write_private(tmp_path, json.dumps(secrets, indent=2))
+os.replace(tmp_path, secrets_path)
+
+if not found:
+    sys.exit(&quot;no new provider token found; the saved slot holds the earlier token again&quot;)
+PY
+  split=$?
+  if [ &quot;$created&quot; -ne 0 ]; then
+    echo &quot;amp orb provider create failed (exit $created); do not install the service yet&quot; &gt;&amp;2
+  fi
+  [ &quot;$created&quot; -eq 0 ] &amp;&amp; [ &quot;$split&quot; -eq 0 ]
+}
+</code></pre>
+<p>The new token is now in <code>~/.config/amp-orbs/docker-sbx.token</code> (mode 600), and the saved
+slot has the earlier token again. The token folder is owner-only (mode 700) and carries no
+extended ACL. The backup also contains credentials. Delete it after you make sure that both
+providers work.</p>
+<p><code>amp orb provider create</code> does not print the token; it only saves it in the slot. The block
+exits 0 only when the create command succeeded and the <code>python3</code> step saved the token. Its
+messages do not tell you reliably which state it stopped in, so after any error, do not
+install the service yet. Recover from the state instead:</p>
+<ol>
+<li>Fix the cause that the output shows. If the output does not contain <code>backup saved</code>, the
+backup step failed, so <code>amp orb provider create</code> did not run and the slot is unchanged.
+Run the whole block again and stop here. If it contains <code>backup saved</code>, continue with
+step 2, even when the error came from a <code>chmod</code>.</li>
+<li>In the same shell, run the <code>mkdir</code> and <code>python3</code> lines of the block again, without <code>touch</code>,
+<code>cp</code>, or <code>amp orb provider create</code>. This is safe in every state. If the slot holds a new
+token, the step saves it to the token file and puts the earlier token back. If not, it puts
+the earlier token back, leaves the token file as it is, and prints
+<code>no new provider token found</code>. Once the create command has run, never run <code>cp</code> again,
+because the backup must keep the earlier token.</li>
+<li>Check that <code>~/.config/amp-orbs/docker-sbx.token</code> is not empty (<code>test -s</code>) and that
+<code>docker-sbx</code> is listed in <strong>Amp Settings → Orbs</strong>. When both are true, continue.</li>
+<li>When the provider is not listed, run <code>amp orb provider create docker-sbx</code>, then step 2
+again. When it is listed but the token file is empty or missing, the token is lost: delete
+<code>docker-sbx</code> in Amp Settings, create it again, and run step 2.</li>
+</ol>
+<h2>Install the service</h2>
+<pre><code class="language-bash">cd &quot;$HOME/Development/amp-orbs&quot;
+AMP_ORB_PROVIDER_TOKEN=&quot;$(cat &quot;$HOME/.config/amp-orbs/docker-sbx.token&quot;)&quot; ./service/install.sh 2&gt;&amp;1 |
+  sed -E &#39;s/aop_live_[A-Za-z0-9_-]+/aop_live_&lt;redacted&gt;/g&#39;
+</code></pre>
+<p>The installer writes <code>~/Library/LaunchAgents/com.elianiva.amp-orb-provider.plist</code> and starts
+the <code>com.elianiva.amp-orb-provider</code> service. The plist contains the token, so it is mode 600.
+The installer prints <code>launchctl print</code> output, which can include the service environment.
+Keep the <code>sed</code> filter on every install.</p>
+<p>Use the same command to reinstall after a change. Logs are in <code>logs/provider.err.log</code>.
+Never commit or share the token file, the generated plist, or unfiltered <code>launchctl print</code>
+output.</p>
+<h2>Set the orb type in Amp Settings</h2>
+<p>The CLI cannot set orb types. In <strong>Amp Settings → Orbs → docker-sbx → Edit</strong>, add only
+<code>small</code> under <strong>Orb types</strong> and make it the default.</p>
+<p>Amp sends the selected type to the dispatcher, so <code>AMP_ORBS_DEFAULT_TYPE</code> is only a fallback.
+Before this setting existed, <code>--orb-size small</code> failed with &quot;Unknown orb type&quot;, and a thread
+without <code>--orb-size</code> started a <code>medium</code> sandbox (4 vCPU / 8 GiB).</p>
+<h2>Test a thread</h2>
+<p>Add <code>--stream-json</code>, so the command stays attached until the turn ends:</p>
+<pre><code class="language-bash">amp -ox &#39;Run nproc and free -m in the orb shell. Report their output, then reply SMALL_OK.&#39; \
+  --orb-provider docker-sbx --orb-size small --stream-json
+</code></pre>
+<p>The first stream message carries the thread id. The reply must show <code>nproc</code> 2 and a <code>free -m</code>
+total of about 3938 MiB. After the final result message contains <code>SMALL_OK</code>, check the
+sandbox:</p>
+<pre><code class="language-bash">sbx --cloud ls
+sbx --cloud inspect amp-&lt;thread-id&gt; --format json
+</code></pre>
+<p><code>inspect</code> must show <code>cpus</code> 2 and <code>memory_mib</code> 4096.</p>
+<p><code>-ox --stream-json</code> archives the thread when the turn finishes, and Amp sends the <code>pause</code> job
+when it archives a thread and also when a thread is idle. Either pause stops the sandbox
+with its disk intact, so either one tests a resume. Wait until the pause job has finished,
+because a spawn waits only 30 seconds (<code>LOCK_WAIT</code>) for the orb&#39;s lock and fails while the
+pause holds it:</p>
+<pre><code class="language-bash">grep &#39;pause amp-&lt;thread-id&gt;: finished&#39; logs/provider.err.log
+</code></pre>
+<p>The stop can take as long as the dispatcher&#39;s own budget (<code>PAUSE_WAIT</code> 150 s, <code>JOB_BUDGET</code>
+280 s), so allow five minutes before you treat a missing line as a failure. If no pause
+appears, run <code>amp threads archive &lt;thread-id&gt;</code> to send one.</p>
+<p>Then send a message. It sends <code>spawn</code>, and the dispatcher resumes the stopped sandbox. Add
+<code>--stream-json</code>, so the reply arrives in the stream:</p>
+<pre><code class="language-bash">amp threads continue &lt;thread-id&gt; -ox &#39;Report the orb shell output again.&#39; --stream-json
+</code></pre>
+<p>If the command fails with &quot;This thread is archived&quot;, run
+<code>amp threads archive --unarchive &lt;thread-id&gt;</code> and send the message again.</p>
+<p>Delete the test sandbox and its state mapping with the dispatcher:</p>
+<pre><code class="language-bash">ORB_OPERATION=delete ORB_ID=amp-&lt;thread-id&gt; ./dispatch.py
+</code></pre>
+<p><code>sbx --cloud rm --force</code> removes the sandbox but leaves its file in <code>state/orbs/</code>.</p>
+<h2>Caveats</h2>
+<ul>
+<li>Keep exactly one controller for each provider token.</li>
+<li>Only <code>melon-orb-base-x86_64-v3-small</code> exists. If Amp sends another type, the spawn fails.</li>
+</ul>
+</article></main></div></body></html>

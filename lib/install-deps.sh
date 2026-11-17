@@ -1,0 +1,820 @@
+#!/bin/bash
+# Prerequisite installers for my-ai-tools: language runtimes, formatters used by
+# PostToolUse hooks, and the standalone MCP server binaries.
+#
+# Sourced by lib/install.sh, which owns the shared helpers used here
+# (resolve_installer_checksum, handle_tool_installation) — do not source this file on its own.
+#
+# Requires: lib/common.sh (for log_*, execute_*, prompt_yn, execute_installer)
+# Requires: YES_TO_ALL, DRY_RUN, IS_WINDOWS, AMP_INSTALLED (set in cli.sh)
+
+# Use npm on native Windows to avoid the Bash-installed Bun lifecycle launcher.
+# Unix-like systems keep the existing Bun preference.
+# Outputs: package manager command or empty if none found
+_detect_package_manager() {
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		if command -v node &>/dev/null && command -v npm &>/dev/null; then
+			echo "npm"
+		fi
+	elif command -v bun &>/dev/null; then
+		echo "bun"
+	elif command -v npm &>/dev/null; then
+		echo "npm"
+	else
+		echo ""
+	fi
+}
+
+# Verify and get a working package manager with fallback
+# Outputs: package manager command or empty if none available
+_verify_package_manager() {
+	local tool_name="${1:-tool}"
+	local pkg_manager
+	pkg_manager=$(_detect_package_manager)
+
+	[ -z "$pkg_manager" ] && return 1
+	command -v "$pkg_manager" &>/dev/null && {
+		echo "$pkg_manager"
+		return 0
+	}
+
+	log_warning "$pkg_manager was detected but is not available in current shell PATH"
+
+	if [ "$pkg_manager" = "bun" ] && command -v npm &>/dev/null; then
+		log_info "Falling back to npm for $tool_name installation"
+		echo "npm"
+		return 0
+	fi
+
+	if [ "${IS_WINDOWS:-false}" != true ] && [ "$pkg_manager" = "npm" ] && command -v bun &>/dev/null; then
+		log_info "Falling back to bun for $tool_name installation"
+		echo "bun"
+		return 0
+	fi
+
+	return 1
+}
+
+# Prepend a directory to PATH for the current session if it isn't already present.
+# Windows always promotes existing entries; callers can request this on Unix too.
+ensure_dir_on_path() {
+	local dir="${1:-}"
+	[ -n "$dir" ] || return 0
+	if [ "${IS_WINDOWS:-false}" = true ] || [ "${2:-}" = prepend ]; then
+		local remaining=":$PATH:"
+		while [[ "$remaining" == *":$dir:"* ]]; do
+			remaining="${remaining//":$dir:"/:}"
+		done
+		remaining="${remaining#:}"
+		PATH="${remaining%:}"
+	fi
+	if case ":$PATH:" in *":$dir:"*) false ;; *) true ;; esac then
+		export PATH="$dir:$PATH"
+	fi
+}
+
+# Resolve a path to its real target, following symlinks.
+# Uses realpath or readlink -f when available and falls back to the physical
+# directory, so it also works on macOS and in the test fixtures.
+resolve_path_target() {
+	local target="${1:-}" dir base link attempt=0
+	[ -n "$target" ] || return 1
+	if command -v realpath >/dev/null 2>&1; then
+		realpath "$target" 2>/dev/null && return 0
+	fi
+	if readlink -f "$target" 2>/dev/null; then
+		return 0
+	fi
+	# Resolve the last symlink by hand when the platform has neither helper.
+	dir=$(cd "$(dirname "$target")" 2>/dev/null && pwd -P) || return 1
+	base=$(basename "$target")
+	while [ -L "$dir/$base" ] && [ "$attempt" -lt 10 ]; do
+		link=$(readlink "$dir/$base" 2>/dev/null) || break
+		attempt=$((attempt + 1))
+		case "$link" in
+		/*)
+			dir=$(cd "$(dirname "$link")" 2>/dev/null && pwd -P) || return 1
+			base=$(basename "$link")
+			;;
+		*)
+			base="$link"
+			;;
+		esac
+	done
+	printf '%s\n' "$dir/$base"
+}
+
+# Warn when another amp command takes priority over the official installation.
+# The official installer links the binary into ~/.local/bin, so the resolved
+# target decides whether a command is the official one. The warning names the
+# official location the way PATH needs it, so a symlinked parent directory does
+# not change the message.
+warn_on_amp_command_conflict() {
+	local bin_dir="${1:-}" selected="${2:-}" selected_target official_target official_location candidate
+	[ -n "$selected" ] || return 0
+	if declare -F amp >/dev/null; then
+		log_warning "Shell function amp shadows the official Amp binary ($bin_dir/amp)."
+		log_info "Review the function or invoke the official binary directly. No function was removed or unset."
+		return 0
+	fi
+	selected_target=$(resolve_path_target "$selected" 2>/dev/null) || selected_target="$selected"
+	official_target=""
+	official_location=""
+	for candidate in "$bin_dir/amp" "$bin_dir/amp.exe"; do
+		[ -e "$candidate" ] || continue
+		# The same file through another path is the official installation too.
+		[ "$selected" -ef "$candidate" ] && return 0
+		if [ -z "$official_target" ]; then
+			official_target=$(resolve_path_target "$candidate" 2>/dev/null) || official_target="$candidate"
+			official_location="$candidate"
+		fi
+	done
+	[ "$selected_target" != "$official_target" ] || return 0
+	log_warning "Amp command $selected takes priority over the official Amp binary (${official_location:-$bin_dir/amp}); it may be a stale npm command."
+	log_info "Put the official Amp bin directory before npm in PATH. No existing installation will be removed."
+}
+
+# Run a command with AMP_HOME set to a Windows path, then restore the old value.
+# The official Windows installer needs a drive-letter path, while Git Bash
+# exports a POSIX path for the same directory.
+with_windows_amp_home() {
+	local windows_home="${1:-}" previous="${AMP_HOME:-}"
+	shift
+	export AMP_HOME="$windows_home"
+	execute_quoted "$@"
+	local status=$?
+	if [ -z "$previous" ]; then
+		unset AMP_HOME
+	else
+		export AMP_HOME="$previous"
+	fi
+	return "$status"
+}
+
+# Shared prerequisite for Plannotator hooks, inbox MCP servers, and plugins.
+# Fail before copying enabled integrations if the binary cannot be installed.
+install_plannotator_if_needed() {
+	local windows_dir=""
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		windows_dir=$(cygpath -u "${LOCALAPPDATA:-$HOME/AppData/Local}/plannotator")
+		ensure_dir_on_path "$windows_dir"
+	fi
+	if command -v plannotator &>/dev/null && {
+		[ "${IS_WINDOWS:-false}" != true ] || plannotator --version >/dev/null 2>&1
+	}; then
+		return 0
+	fi
+	log_info "Installing Plannotator CLI..."
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		# Direct binary install avoids upstream PowerShell's $Minimal/$minimal
+		# collision (PowerShell variable names are case-insensitive).
+		local version="v0.28.23" arch checksum
+		case "${PROCESSOR_ARCHITEW6432:-${PROCESSOR_ARCHITECTURE:-}}" in
+		ARM64) arch=arm64; checksum="c18c5c217a0acb9b4fe6d76dffd29e3e02241714b6927bb4118a2c01b62f93b7" ;;
+		AMD64) arch=x64; checksum="78c5f322bb208822782e9e2d8bb47cefb18de4fa7adaf57c4add256ee97ec740" ;;
+		*)
+			log_error "Unsupported Windows architecture for Plannotator"
+			log_info "See https://github.com/backnotprop/plannotator/releases for supported Windows binaries."
+			return 1
+			;;
+		esac
+		local url="https://github.com/backnotprop/plannotator/releases/download/$version/plannotator-win32-$arch.exe"
+		log_info "Windows fallback: download $url, verify SHA-256 $checksum, and place it at $windows_dir/plannotator.exe."
+		if [ "$DRY_RUN" = true ]; then
+			log_info "[DRY RUN] Would install verified Plannotator $version ($arch) binary only"
+			return 0
+		fi
+		local binary
+		binary=$(download_and_verify_file "$url" "$checksum" "Plannotator Windows binary") || return 1
+		if ! execute_quoted mkdir -p "$windows_dir" || ! execute_quoted mv "$binary" "$windows_dir/plannotator.exe"; then
+			execute_quoted rm -f "$binary"
+			return 1
+		fi
+	else
+		local checksum
+		checksum=$(resolve_installer_checksum "plannotator")
+		if ! execute_installer "https://plannotator.ai/install.sh" "$checksum" "Plannotator CLI"; then
+			log_error "Plannotator installation failed; enabled integrations require the CLI"
+			return 1
+		fi
+	fi
+	[ "$DRY_RUN" = true ] && return 0
+	if [ "${IS_WINDOWS:-false}" != true ]; then ensure_dir_on_path "$HOME/.local/bin"; fi
+	if ! command -v plannotator &>/dev/null; then
+		log_error "Plannotator installer completed but the CLI was not found"
+		return 1
+	fi
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		plannotator --version || return 1
+	fi
+}
+
+# Native Windows uses npx so package lifecycle scripts have a real Node runtime.
+_detect_script_runner() {
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		if command -v node &>/dev/null && command -v npx &>/dev/null; then
+			echo "npx"
+		fi
+	elif command -v bunx &>/dev/null; then
+		echo "bunx"
+	elif command -v npx &>/dev/null; then
+		echo "npx"
+	else
+		echo ""
+	fi
+}
+
+# npm puts Windows command shims in the prefix itself, not prefix/bin.
+_npm_global_bin() {
+	local prefix
+	prefix=$(npm prefix -g 2>/dev/null) || return 1
+	if [ "${IS_WINDOWS:-false}" = true ]; then
+		cygpath -u "$prefix"
+	else
+		printf '%s/bin\n' "$prefix"
+	fi
+}
+
+# ─── Bun installation ──────────────────────────────────────────────
+
+install_bun_now() {
+	log_info "Installing Bun..."
+
+	local bun_checksum
+	bun_checksum=$(resolve_installer_checksum "bun")
+	if execute_installer "https://bun.sh/install" "$bun_checksum" "Bun"; then
+		if [ "$DRY_RUN" = true ]; then
+			return 0
+		fi
+
+		# Source shell profiles to get Bun environment
+		[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc" 2>/dev/null || true
+		[ -f "$HOME/.zshrc" ] && source "$HOME/.zshrc" 2>/dev/null || true
+
+		# Fallback to default Bun location
+		if [ -z "$BUN_INSTALL" ]; then
+			export BUN_INSTALL="$HOME/.bun"
+		fi
+		ensure_dir_on_path "$BUN_INSTALL/bin"
+
+		if command -v bun &>/dev/null; then
+			BUN_VERSION=$(bun --version)
+			log_success "Bun installed successfully ($BUN_VERSION)"
+		else
+			log_error "Bun installation completed but 'bun' command not found in PATH"
+			exit 1
+		fi
+	else
+		log_error "Failed to install Bun"
+		exit 1
+	fi
+}
+
+handle_optional_bun_installation() {
+	if command -v bun &>/dev/null; then
+		return 0
+	fi
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-installing Bun (--yes flag)..."
+		install_bun_now
+	elif [ -t 0 ]; then
+		if prompt_yn "Bun is not installed. Install it now"; then
+			install_bun_now
+		else
+			log_warning "Continuing with Node.js only. Some scripts prefer Bun."
+		fi
+	else
+		log_warning "Bun is not installed. Continuing with Node.js only."
+	fi
+}
+
+handle_bun_installation() {
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-installing Bun (--yes flag)..."
+		install_bun_now
+	elif [ -t 0 ]; then
+		if prompt_yn "Would you like to install Bun now"; then
+			install_bun_now
+		else
+			log_error "Please install Bun or Node.js first."
+			exit 1
+		fi
+	else
+		log_error "Please install Bun or Node.js first."
+		exit 1
+	fi
+}
+
+# Link a binary into $HOME/.local/bin so GUI-spawned tools (opencode,
+# Claude Code) find it without the login-shell PATH.
+_link_binary_on_local_bin() {
+	local src_bin="$1"
+	local link_name="$2"
+	# Git Bash can copy instead of symlink; npm shims then resolve the wrong node_modules.
+	[ "${IS_WINDOWS:-false}" = true ] && return 0
+	if [ -z "$src_bin" ] || [ ! -e "$src_bin" ]; then
+		return 0
+	fi
+	ensure_dir_on_path "$HOME/.local/bin"
+	execute_quoted mkdir -p "$HOME/.local/bin"
+	local dest_bin="$HOME/.local/bin/$link_name"
+	if [ "$src_bin" != "$dest_bin" ] && { [ ! -e "$dest_bin" ] || [ -L "$dest_bin" ]; }; then
+		execute_quoted ln -sf "$src_bin" "$HOME/.local/bin/$link_name"
+	fi
+}
+
+# ─── qmd installation ──────────────────────────────────────────────
+
+install_qmd_now() {
+	if [ "${IS_WINDOWS:-false}" = true ] && command -v npm &>/dev/null; then
+		# A copied extensionless node runs in Bash, but Windows cannot spawn it.
+		local node_exe
+		node_exe=$(command -v node.exe 2>/dev/null) && ensure_dir_on_path "$(dirname "$node_exe")"
+		ensure_dir_on_path "$(_npm_global_bin)"
+	fi
+	local qmd_version
+	if command -v qmd &>/dev/null && qmd_version=$(qmd --version 2>/dev/null || {
+		[ "${IS_WINDOWS:-false}" != true ] && echo "version unknown"
+	}); then
+		_link_binary_on_local_bin "$(command -v qmd)" "qmd"
+		_link_binary_on_local_bin "$(command -v node 2>/dev/null)" "node"
+		log_success "qmd already installed ($qmd_version)"
+		return 0
+	fi
+
+	# Keep the Bun preference on Unix; native Windows uses Node/npm.
+	if [ "${IS_WINDOWS:-false}" != true ] && ! command -v bun &>/dev/null; then
+		log_info "qmd works best with Bun. Installing Bun first..."
+		handle_bun_installation
+	fi
+
+	local pkg_manager
+	pkg_manager=$(_verify_package_manager "qmd")
+
+	if [ -z "$pkg_manager" ]; then
+		log_error "No package manager found. Install Bun or Node.js/npm to install qmd."
+		return 1
+	fi
+
+	log_info "Installing qmd CLI via $pkg_manager..."
+	if execute "$pkg_manager install -g @tobilu/qmd"; then
+		if [ "$pkg_manager" = npm ]; then
+			ensure_dir_on_path "$(_npm_global_bin)"
+		elif [ "$pkg_manager" = bun ]; then
+			ensure_dir_on_path "$(bun pm bin -g 2>/dev/null)"
+		fi
+		_link_binary_on_local_bin "$(command -v qmd 2>/dev/null)" "qmd"
+		_link_binary_on_local_bin "$(command -v node 2>/dev/null)" "node"
+		if [ "${IS_WINDOWS:-false}" = true ] && [ "$DRY_RUN" != true ]; then
+			if ! qmd_version=$(qmd --version 2>&1); then
+				log_error "qmd installation completed but qmd --version failed: $qmd_version"
+				log_info "Check command -v qmd, npm prefix -g, Node.js >=22, and the npm lifecycle/build errors above."
+				return 1
+			fi
+		else
+			qmd_version=$(qmd --version 2>/dev/null || echo "version unknown")
+		fi
+		log_success "qmd installed successfully ($qmd_version)"
+		return 0
+	fi
+
+	log_error "Failed to install qmd"
+	return 1
+}
+
+handle_qmd_installation_if_needed() {
+	local check_cmd="command -v qmd"
+	if [ "${IS_WINDOWS:-false}" = true ]; then check_cmd="qmd --version"; fi
+	handle_tool_installation "qmd" "install_qmd_now" "$check_cmd" "qmd" "Knowledge features"
+}
+
+# ─── fff-mcp installation ──────────────────────────────────────────
+
+install_fff_mcp_now() {
+	if command -v fff-mcp &>/dev/null; then
+		log_success "fff-mcp already installed"
+		return 0
+	fi
+
+	log_info "Installing fff-mcp via official installer..."
+	if execute_installer "https://dmtrkovalenko.dev/install-fff-mcp.sh" "" "fff-mcp"; then
+		ensure_dir_on_path "$HOME/.local/bin"
+		log_success "fff-mcp installed successfully"
+		return 0
+	fi
+
+	log_error "Failed to install fff-mcp"
+	log_info "You can install it manually: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
+	return 1
+}
+
+handle_fff_mcp_installation_if_needed() {
+	handle_tool_installation "fff-mcp" "install_fff_mcp_now" "command -v fff-mcp" "fff-mcp" "Fast file search MCP"
+}
+
+# ─── logpilot installation ─────────────────────────────────────────
+
+install_logpilot_now() {
+	if command -v logpilot &>/dev/null; then
+		log_success "logpilot already installed"
+		return 0
+	fi
+
+	if ! command -v cargo &>/dev/null; then
+		log_info "cargo not found. Installing Rust for logpilot..."
+		install_rust_if_needed || {
+			log_error "Cannot install logpilot without Rust/cargo"
+			log_info "Install Rust first: https://rustup.rs/, then run: cargo install logpilot"
+			return 1
+		}
+	fi
+
+	log_info "Installing logpilot via cargo..."
+	if execute "cargo install logpilot"; then
+		ensure_dir_on_path "$(cargo_bin_dir)"
+		log_success "logpilot installed successfully"
+		return 0
+	fi
+
+	log_error "Failed to install logpilot"
+	log_info "You can install it manually: cargo install logpilot"
+	return 1
+}
+
+handle_logpilot_installation_if_needed() {
+	handle_tool_installation "logpilot" "install_logpilot_now" "command -v logpilot" "logpilot" "Log monitoring MCP"
+}
+
+# ─── sem installation ──────────────────────────────────────────────
+
+install_sem_now() {
+	if command -v sem &>/dev/null && command -v sem-mcp &>/dev/null; then
+		log_success "sem and sem-mcp already installed"
+		return 0
+	fi
+
+	# Install sem CLI via official installer with checksum verification
+	if ! command -v sem &>/dev/null; then
+		log_info "Installing sem via official installer..."
+		local sem_checksum
+		sem_checksum=$(resolve_installer_checksum "sem")
+		if execute_installer "https://raw.githubusercontent.com/Ataraxy-Labs/sem/main/install.sh" "$sem_checksum" "sem CLI"; then
+			log_success "sem installed successfully"
+		else
+			log_error "Failed to install sem"
+			log_info "You can install manually: curl -fsSL https://raw.githubusercontent.com/Ataraxy-Labs/sem/main/install.sh | sh"
+			return 1
+		fi
+	fi
+
+	# Install sem-mcp via cargo
+	if ! command -v sem-mcp &>/dev/null; then
+		if ! command -v cargo &>/dev/null; then
+			log_info "cargo not found. Installing Rust for sem-mcp..."
+			install_rust_if_needed || {
+				log_error "Cannot install sem-mcp without Rust/cargo"
+				log_info "Install Rust first: https://rustup.rs/, then run: cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp"
+				return 1
+			}
+		fi
+
+		log_info "Installing sem-mcp via cargo..."
+		if execute "cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp"; then
+			ensure_dir_on_path "$(cargo_bin_dir)"
+			log_success "sem-mcp installed successfully"
+		else
+			log_error "Failed to install sem-mcp"
+			log_info "You can install manually: cargo install --git https://github.com/Ataraxy-Labs/sem sem-mcp"
+			return 1
+		fi
+	fi
+}
+
+handle_sem_installation_if_needed() {
+	handle_tool_installation "sem" "install_sem_now" "command -v sem-mcp" "sem" "Semantic version control MCP"
+}
+
+# ─── codebase-memory-mcp installation ──────────────────────────────
+
+install_codebase_memory_mcp_now() {
+	if command -v codebase-memory-mcp &>/dev/null; then
+		log_success "codebase-memory-mcp already installed ($(codebase-memory-mcp --version 2>/dev/null | head -n 1 || echo unknown))"
+		return 0
+	fi
+
+	local pkg_manager
+	pkg_manager=$(_verify_package_manager "codebase-memory-mcp")
+	if [ -z "$pkg_manager" ]; then
+		log_error "No package manager found. Install Bun or Node.js/npm to install codebase-memory-mcp."
+		return 1
+	fi
+
+	log_info "Installing codebase-memory-mcp via $pkg_manager..."
+	if execute "$pkg_manager install -g codebase-memory-mcp"; then
+		if [ "$pkg_manager" = npm ]; then
+			ensure_dir_on_path "$(_npm_global_bin)"
+		elif [ "$pkg_manager" = bun ]; then
+			ensure_dir_on_path "$(bun pm bin -g 2>/dev/null)"
+		fi
+		log_success "codebase-memory-mcp installed"
+		return 0
+	fi
+
+	log_error "Failed to install codebase-memory-mcp"
+	log_info "You can install it manually: npm install -g codebase-memory-mcp"
+	return 1
+}
+
+handle_codebase_memory_mcp_installation_if_needed() {
+	handle_tool_installation "codebase-memory-mcp" "install_codebase_memory_mcp_now" "command -v codebase-memory-mcp" "codebase-memory-mcp" "Code intelligence MCP"
+}
+
+# ─── Global tooling (jq, biome, gofmt, ruff, rustfmt, shfmt, stylua, backlog) ──
+
+install_global_tools() {
+	log_info "Checking global tools for PostToolUse hooks..."
+
+	install_jq_if_needed
+	install_biome_if_needed
+	check_gofmt
+	install_ruff_if_needed
+	install_rustfmt_if_needed
+	install_shfmt_if_needed
+	install_stylua_if_needed
+	install_backlog_if_needed
+
+	log_success "Global tools check complete"
+}
+
+install_jq_if_needed() {
+	if command -v jq &>/dev/null; then
+		log_success "jq found"
+		return 0
+	fi
+
+	log_warning "jq not found. Installing jq..."
+	local jq_installed=false
+
+	if [ "$IS_WINDOWS" = true ]; then
+		if command -v choco &>/dev/null; then
+			execute "choco install jq -y" && jq_installed=true
+		elif command -v winget &>/dev/null; then
+			execute "winget install -e --id jqlang.jq --accept-package-agreements --accept-source-agreements" && jq_installed=true
+		fi
+
+		if [ "$jq_installed" = true ]; then
+			local jq_path=""
+			if [ -f "$LOCALAPPDATA/Microsoft/WinGet/Packages/jqlang.jq_Microsoft.Winget.Source_8wekyb3d8bbwe/jq.exe" ]; then
+				jq_path="$LOCALAPPDATA/Microsoft/WinGet/Packages/jqlang.jq_Microsoft.Winget.Source_8wekyb3d8bbwe"
+			elif [ -f "$PROGRAMFILES/jq/jq.exe" ]; then
+				jq_path="$PROGRAMFILES/jq"
+			elif [ -f "$PROGRAMFILES/WinGet/Links/jq.exe" ]; then
+				jq_path="$PROGRAMFILES/WinGet/Links"
+			fi
+
+			if [ -n "$jq_path" ]; then
+				ensure_dir_on_path "$jq_path"
+				log_info "Added jq to PATH: $jq_path"
+			fi
+
+			if ! command -v jq &>/dev/null; then
+				log_warning "jq installed but not found in PATH. Please restart your terminal."
+				jq_installed=false
+			fi
+		fi
+	else
+		if command -v brew &>/dev/null; then
+			execute "brew install jq" && jq_installed=true
+		elif command -v apt-get &>/dev/null; then
+			if ([ "$YES_TO_ALL" = true ] && sudo -n true 2>/dev/null) || ([ "$YES_TO_ALL" = false ] && [ -t 0 ]); then
+				execute "sudo apt-get install -y jq" && jq_installed=true
+			else
+				log_warning "Cannot install jq non-interactively (requires sudo with password)"
+			fi
+		fi
+	fi
+
+	if [ "$jq_installed" = false ]; then
+		log_warning "Please install jq manually: https://jqlang.github.io/jq/download/"
+		if [ "$IS_WINDOWS" = true ]; then
+			log_info "Windows installation options:"
+			log_info "  - winget: winget install -e --id jqlang.jq"
+			log_info "  - chocolatey: choco install jq"
+			log_info "  - Scoop: scoop install jq"
+			log_info "  - GitHub: https://github.com/jqlang/jq/releases"
+		fi
+	fi
+}
+
+install_biome_if_needed() {
+	if command -v biome &>/dev/null; then
+		log_success "biome found"
+		return 0
+	fi
+
+	local pkg_manager
+	pkg_manager=$(_verify_package_manager "biome")
+
+	if [ -z "$pkg_manager" ]; then
+		log_warning "biome not found. No package manager available to install. Install Bun or Node.js/npm."
+		return 1
+	fi
+
+	log_warning "biome not found. Installing biome globally with $pkg_manager..."
+	if execute "$pkg_manager install -g @biomejs/biome"; then
+		log_success "biome installed"
+	else
+		log_warning "Failed to install biome"
+	fi
+}
+
+check_gofmt() {
+	if command -v gofmt &>/dev/null; then
+		log_success "gofmt found"
+		return 0
+	fi
+
+	log_warning "gofmt not found. Installing Go..."
+	if command -v mise &>/dev/null; then
+		if execute "mise use -g go@latest"; then
+			if [ "$DRY_RUN" = true ]; then
+				return 0
+			elif command -v gofmt &>/dev/null; then
+				log_success "Go installed"
+				return 0
+			fi
+			log_warning "gofmt is not available in PATH after mise installation; falling back to manual install"
+		else
+			log_warning "mise could not install Go; falling back to manual install"
+		fi
+	fi
+
+	if [ "$IS_WINDOWS" = true ]; then
+		if command -v choco &>/dev/null; then
+			log_info "Install Go with: choco install golang -y"
+		elif command -v winget &>/dev/null; then
+			log_info "Install Go with: winget install GoLang.Go"
+		else
+			log_info "Please install Go manually: https://golang.org/dl/"
+		fi
+	else
+		if command -v brew &>/dev/null; then
+			log_info "Install Go with: brew install go"
+		elif command -v apt-get &>/dev/null; then
+			log_info "Install Go with: sudo apt-get install -y golang"
+		else
+			log_info "Please install Go manually: https://golang.org/dl/"
+		fi
+	fi
+}
+
+install_ruff_if_needed() {
+	if command -v ruff &>/dev/null; then
+		log_success "ruff found"
+		return 0
+	fi
+
+	log_warning "ruff not found. Installing ruff..."
+	if command -v mise &>/dev/null; then
+		execute "mise use -g ruff@latest"
+	elif command -v pipx &>/dev/null; then
+		execute "pipx install ruff"
+	elif command -v pip3 &>/dev/null; then
+		execute "pip3 install ruff"
+	elif command -v pip &>/dev/null; then
+		execute "pip install ruff"
+	else
+		log_warning "No Python package manager found. Install ruff manually: https://docs.astral.sh/ruff/installation/"
+	fi
+}
+
+# Cargo's binary directory, honouring a custom CARGO_HOME.
+cargo_bin_dir() {
+	echo "${CARGO_HOME:-$HOME/.cargo}/bin"
+}
+
+# Ensure cargo (Rust) is available in PATH, installing Rust if necessary.
+# Called by install_logpilot_now, install_sem_now, and install_rustfmt_if_needed.
+install_rust_if_needed() {
+	if command -v cargo &>/dev/null; then
+		return 0
+	fi
+
+	local cargo_bin
+	cargo_bin="$(cargo_bin_dir)"
+
+	if [ -x "$cargo_bin/cargo" ]; then
+		ensure_dir_on_path "$cargo_bin"
+		command -v cargo &>/dev/null && return 0
+	fi
+
+	log_warning "cargo not found. Installing Rust..."
+	if command -v mise &>/dev/null; then
+		execute "mise use -g rust@latest"
+	elif command -v brew &>/dev/null; then
+		execute "brew install rust"
+	else
+		local rust_checksum
+		rust_checksum=$(resolve_installer_checksum "rust")
+		execute_installer "https://sh.rustup.rs" "$rust_checksum" "Rust" "-y"
+	fi
+
+	if [ "$DRY_RUN" = true ]; then
+		return 0
+	fi
+
+	if [ -x "$cargo_bin/cargo" ]; then
+		ensure_dir_on_path "$cargo_bin"
+	fi
+
+	if command -v cargo &>/dev/null; then
+		log_success "Rust/cargo installed successfully"
+		return 0
+	fi
+
+	log_error "Failed to install Rust/cargo"
+	log_info "Install manually: https://rustup.rs/"
+	return 1
+}
+
+install_rustfmt_if_needed() {
+	if command -v rustfmt &>/dev/null; then
+		log_success "rustfmt found"
+		return 0
+	fi
+
+	install_rust_if_needed || return 1
+
+	if command -v rustfmt &>/dev/null; then
+		log_success "rustfmt available"
+	else
+		log_warning "Rust installed but rustfmt not found"
+	fi
+}
+
+install_shfmt_if_needed() {
+	if command -v shfmt &>/dev/null; then
+		log_success "shfmt found"
+		return 0
+	fi
+
+	log_warning "shfmt not found. Installing shfmt..."
+	if command -v mise &>/dev/null; then
+		execute "mise use -g shfmt@latest"
+	elif command -v brew &>/dev/null; then
+		execute "brew install shfmt"
+	elif command -v go &>/dev/null; then
+		execute "go install mvdan.cc/sh/v3/cmd/shfmt@latest"
+	else
+		log_warning "No package manager found for shfmt. Install manually: https://github.com/mvdan/sh"
+	fi
+}
+
+install_stylua_if_needed() {
+	if command -v stylua &>/dev/null; then
+		log_success "stylua found"
+		return 0
+	fi
+
+	log_warning "stylua not found. Installing stylua..."
+	if [ "$IS_WINDOWS" = true ]; then
+		local pkg_manager
+		pkg_manager=$(_verify_package_manager "stylua")
+		if [ -n "$pkg_manager" ]; then
+			execute "$pkg_manager install -g @johnnymorganz/stylua-bin"
+		else
+			log_warning "Bun or npm is required to install stylua on Windows."
+		fi
+	elif command -v mise &>/dev/null; then
+		execute "mise use -g stylua@latest"
+	elif command -v brew &>/dev/null; then
+		execute "brew install stylua"
+	elif command -v cargo &>/dev/null; then
+		execute "cargo install stylua"
+	else
+		log_warning "No package manager found for stylua. Install manually: https://github.com/JohnnyMorganz/StyLua"
+	fi
+}
+
+install_backlog_if_needed() {
+	if [ "$AMP_INSTALLED" = false ]; then
+		return 0
+	fi
+
+	if command -v backlog &>/dev/null; then
+		log_success "backlog.md found"
+		return 0
+	fi
+
+	local pkg_manager
+	pkg_manager=$(_verify_package_manager "backlog.md")
+
+	if [ -z "$pkg_manager" ]; then
+		log_warning "backlog.md not found. No package manager available. Install Bun or Node.js/npm."
+		return 1
+	fi
+
+	log_info "Installing backlog.md for Amp integration with $pkg_manager..."
+	execute "$pkg_manager install -g backlog.md"
+}

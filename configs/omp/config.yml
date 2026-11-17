@@ -1,0 +1,47 @@
+modelRoles:
+  default: google-antigravity/gemini-3.6-flash:high
+  smol: deepseek/deepseek-v4-flash
+  advisor: openai-codex/gpt-5.6-terra
+  plan: cursor/default
+symbolPreset: nerd
+theme:
+  dark: dark-rose-pine
+  light: light
+setupVersion: 1
+statusLine:
+  transparent: true
+  preset: compact
+  separator: pipe
+  sessionAccent: true
+  compactThinkingLevel: false
+terminal:
+  showProgress: true
+tui:
+  textSizing: false
+  codexResetFireworks: false
+  tight: true
+display:
+  showTokenUsage: true
+  cacheMissMarker: true
+task:
+  showResolvedModelBadge: true
+  prewalk: true
+omitThinking: true
+personality: pragmatic
+advisor:
+  enabled: true
+  subagents: true
+readLineNumbers: true
+read:
+  renderMarkdown: true
+  toolResultPreview: true
+checkpoint:
+  enabled: true
+github:
+  enabled: true
+security:
+  enabled: true
+plan:
+  defaultOnStartup: true
+secrets:
+  enabled: true

@@ -1,0 +1,158 @@
+name: Dokku Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    concurrency: deploy-group
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # Dokku rejects shallow pushes ("shallow update not allowed").
+          fetch-depth: 0
+
+      - name: Validate required secrets
+        env:
+          DOKKU_SSH_PRIVATE_KEY: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          missing=0
+
+          if [ -z "$DOKKU_SSH_PRIVATE_KEY" ]; then
+            echo "::error::GitHub secret DOKKU_SSH_PRIVATE_KEY is not set. Add the private key whose public half is registered on the Dokku host (dokku ssh-keys:list)."
+            missing=1
+          fi
+
+          EFFECTIVE_OPENAI_API_KEY="${OPENROUTER_API_KEY:-$OPENAI_API_KEY}"
+          EFFECTIVE_OPENAI_API_KEY="$(printf '%s' "$EFFECTIVE_OPENAI_API_KEY" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+          if [ -z "$EFFECTIVE_OPENAI_API_KEY" ]; then
+            echo "::error::Set GitHub secret OPENROUTER_API_KEY (recommended) or OPENAI_API_KEY to your OpenRouter key (sk-or-v1-...)."
+            missing=1
+          elif ! printf '%s' "$EFFECTIVE_OPENAI_API_KEY" | grep -q '^sk-or-v1-'; then
+            echo "::error::The configured OpenRouter secret must start with sk-or-v1-. Dokku build uses OpenRouter via OPENAI_BASE_URL — an OpenAI sk-proj- key will fail with 401 during image build."
+            missing=1
+          fi
+
+          exit "$missing"
+
+      - name: Sync OpenRouter API key to Dokku
+        env:
+          DOKKU_SSH_PRIVATE_KEY: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DOKKU_HOST: docklight.itman.fyi
+          DOKKU_APP: ai-tools
+        run: |
+          EFFECTIVE_OPENAI_API_KEY="${OPENROUTER_API_KEY:-$OPENAI_API_KEY}"
+          EFFECTIVE_OPENAI_API_KEY="$(printf '%s' "$EFFECTIVE_OPENAI_API_KEY" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          install -m 600 /dev/null ~/.ssh/dokku_deploy
+          printf '%s\n' "$DOKKU_SSH_PRIVATE_KEY" > ~/.ssh/dokku_deploy
+          # Normalize Windows/CRLF and ensure trailing newline for OpenSSH
+          tr -d '\r' < ~/.ssh/dokku_deploy > ~/.ssh/dokku_deploy.tmp
+          mv ~/.ssh/dokku_deploy.tmp ~/.ssh/dokku_deploy
+          chmod 600 ~/.ssh/dokku_deploy
+          if [[ "$(tail -c1 ~/.ssh/dokku_deploy | wc -l)" -eq 0 ]]; then
+            printf '\n' >> ~/.ssh/dokku_deploy
+          fi
+
+          # Identify the CI key without printing private or public key material.
+          ssh-keygen -y -P '' -f ~/.ssh/dokku_deploy | ssh-keygen -lf -
+          ssh-keyscan -H "$DOKKU_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          SSH=(ssh -i ~/.ssh/dokku_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes "dokku@$DOKKU_HOST")
+          "${SSH[@]}" ps:report "$DOKKU_APP"
+
+          # If the build below fails, Dokku keeps the previously-deployed image
+          # and index, so the model name must stay aligned with that old image.
+          # Capture the currently stored value so the rollback step can restore
+          # it on failure. config:export succeeds (exit 0) even when the key is
+          # unset, which keeps "genuinely unset" apart from "failed to read":
+          # only a real SSH/Dokku failure makes it exit non-zero, and set -e
+          # then aborts before any change. An empty value means it was unset.
+          CONFIG_DUMP="$("${SSH[@]}" config:export "$DOKKU_APP" --format shell 2>/dev/null)"
+          PREV_MODEL="$(printf '%s\n' "$CONFIG_DUMP" | sed -n "s/.*OPENAI_EMBEDDING_MODEL='\([^']*\)'.*/\1/p" | head -1)"
+
+          # BuildKit secret + runtime both read app config. Re-set the full
+          # OpenAI-compatible config on every deploy so host-side drift (e.g. a
+          # missing OPENAI_BASE_URL sending the sk-or-v1- key to api.openai.com
+          # with a 401) can't break the image build.
+          # Dokku --encoded base64-decodes each value before storing, so the
+          # key never appears raw in SSH_ORIGINAL_COMMAND (not shell-escaped).
+          # GNU base64 -w 0 is available on ubuntu-latest.
+          encode() {
+            printf '%s' "$1" | base64 -w 0
+          }
+          # Keep the app first for ACL plugins that inspect positional arguments.
+          # Dokku may print decoded config values; suppress successful stdout.
+          "${SSH[@]}" config:set "$DOKKU_APP" --encoded --no-restart \
+            "OPENAI_API_KEY=$(encode "$EFFECTIVE_OPENAI_API_KEY")" \
+            "OPENAI_BASE_URL=$(encode "https://openrouter.ai/api/v1")" \
+            "OPENAI_MODEL=$(encode "openrouter/free")" \
+            "OPENAI_EMBEDDING_MODEL=$(encode "nvidia/nemotron-3-embed-1b:free")" >/dev/null
+
+          # Persist the previous value only after config:set succeeds. The
+          # rollback step keys off this marker, so a failure that occurs before
+          # the app config is actually changed leaves no marker and nothing to
+          # restore (prevents deleting the live setting on an unrelated failure).
+          printf '%s' "$PREV_MODEL" > "${RUNNER_TEMP:-/tmp}/previous_embedding_model"
+
+      - name: Deploy to Dokku
+        uses: dokku/github-action@master
+        with:
+          git_remote_url: ssh://dokku@docklight.itman.fyi:22/ai-tools
+          ssh_private_key: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
+          branch: main
+
+      # The sync step stores the NEW OPENAI_EMBEDDING_MODEL before the build.
+      # If that build fails, Dokku keeps the old image and its old index; a
+      # later restart would then read the new model, retriever.ts would reject
+      # the stale index (model mismatch), and retrieval would break. Restore the
+      # stored value so the old image stays consistent until a successful deploy.
+      - name: Restore previous embedding model on deploy failure
+        if: failure()
+        env:
+          DOKKU_SSH_PRIVATE_KEY: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
+          DOKKU_HOST: docklight.itman.fyi
+          DOKKU_APP: ai-tools
+        run: |
+          # Only the sync step writes this marker, and only after it has changed
+          # the app config. If the config was never touched (an earlier step
+          # failed), there is nothing to restore and we must not act on the live
+          # app, so exit without connecting.
+          if [ ! -f "${RUNNER_TEMP:-/tmp}/previous_embedding_model" ]; then
+            echo "Embedding-model config was not changed; skipping rollback."
+            exit 0
+          fi
+          PREV_MODEL="$(cat "${RUNNER_TEMP:-/tmp}/previous_embedding_model" 2>/dev/null || true)"
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          install -m 600 /dev/null ~/.ssh/dokku_deploy
+          printf '%s\n' "$DOKKU_SSH_PRIVATE_KEY" > ~/.ssh/dokku_deploy
+          tr -d '\r' < ~/.ssh/dokku_deploy > ~/.ssh/dokku_deploy.tmp
+          mv ~/.ssh/dokku_deploy.tmp ~/.ssh/dokku_deploy
+          chmod 600 ~/.ssh/dokku_deploy
+          if [[ "$(tail -c1 ~/.ssh/dokku_deploy | wc -l)" -eq 0 ]]; then
+            printf '\n' >> ~/.ssh/dokku_deploy
+          fi
+          ssh-keyscan -H "$DOKKU_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          SSH=(ssh -i ~/.ssh/dokku_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes "dokku@$DOKKU_HOST")
+          if [ -n "$PREV_MODEL" ]; then
+            encode() { printf '%s' "$1" | base64 -w 0; }
+            "${SSH[@]}" config:set "$DOKKU_APP" --encoded --no-restart \
+              "OPENAI_EMBEDDING_MODEL=$(encode "$PREV_MODEL")" >/dev/null
+          else
+            "${SSH[@]}" config:unset "$DOKKU_APP" --no-restart OPENAI_EMBEDDING_MODEL >/dev/null 2>&1 || true
+          fi

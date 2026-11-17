@@ -179,6 +179,43 @@ A feature-rich plugin for OpenCode with multi-model orchestration, background ag
 
 ---
 
+## Addy Osmani — Accountable Engineering with AI
+
+**Video:** [The Future of Software Engineering with AI](https://www.youtube.com/watch?v=2fyPnxKu8ZM)
+
+Addy Osmani (Chrome, DevTools, Core Web Vitals, AI developer experience) argues AI will not eliminate software engineering — it changes what valuable engineering looks like.
+
+### Key Takeaways
+
+- **AI expands the software market** — when building got easier historically, more people built more software; expect expansion, not just job reduction.
+- **Accountability shifts** — AI generates code; humans remain responsible for correctness, security, maintainability, and fitness for users.
+- **Avoid cognitive surrender** — you do not need every line inspected, but you must understand major architectural, security, and business decisions.
+- **Mutual amplification** — agents record decisions and lessons; developers review and internalize them. The goal is a better feedback loop, not only faster output.
+- **Management is technical again** — AI lowers the barrier to building; senior leaders are coding weekend projects again.
+- **Memory debugging lags** — profiling and tracing improved; memory management tooling has not advanced as much.
+- **Broaden beyond coding** — product thinking, UX, evangelism, go-to-market, and customer understanding increasingly matter.
+
+### Practical Workflow (Captured as a Skill)
+
+The [`accountable-engineering` skill](../skills/accountable-engineering/SKILL.md) turns these lessons into one
+authoritative eight-step workflow with explicit completion criteria from definition through operational ownership.
+
+### Senior AI Engineer Profile
+
+Own complete outcomes, not just AI features:
+
+| Dimension | What it means |
+| --------- | ------------- |
+| Technical depth | RAG, agents, evaluation, deployment, observability |
+| AI leverage | Use coding agents; verify their work |
+| Product sense | Know who benefits and what success means |
+| Operational ownership | Reliability, cost, security, monitoring |
+| Communication | Explain trade-offs to any audience |
+
+The valuable engineer is an **accountable system builder**, not merely a fast coder.
+
+---
+
 ## Worth Learning From
 
 These tools aren't for me daily, but are valuable references for understanding AI-assisted workflows:

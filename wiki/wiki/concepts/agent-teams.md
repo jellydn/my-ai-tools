@@ -32,8 +32,10 @@ Coordinator Agent (feature-team-coordinator)
 - **Claude Code** — `feature-team-coordinator` agent with `Task` tool for spawning subagents
 - **Conductor** — Orchestrates parallel agents in isolated workspaces
 - **Orca** — Per-workspace environments with agent hooks
+- **Fusion Mode (Amp, OpenCode, Pi, Codex)** — `orchestrating-fusion` pattern coordinating a read-only Lead agent (planning, review) and an Executor agent (implementation, tests)
 
 ## Related Pages
 
 - [[subagent-infrastructure]] — Standardized agents across 12 tools
+- [Fusion Orchestration Guide](../../../docs/fusion-orchestration.md) — Detailed guide on Lead/Executor orchestration
 - [[sources/readme]] — Primary documentation source

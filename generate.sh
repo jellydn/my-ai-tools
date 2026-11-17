@@ -20,9 +20,13 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 			DRY_RUN=true
 			shift
 			;;
+		-h | --help)
+			echo "Usage: $0 [--dry-run] [-h|--help]"
+			exit 0
+			;;
 		*)
 			echo "Unknown option: $arg"
-			echo "Usage: $0 [--dry-run]"
+			echo "Usage: $0 [--dry-run] [-h|--help]"
 			exit 1
 			;;
 		esac
@@ -201,16 +205,20 @@ generate_opencode_configs() {
 
 	execute "mkdir -p $SCRIPT_DIR/configs/opencode"
 	copy_single "$HOME/.config/opencode/opencode.json" "$SCRIPT_DIR/configs/opencode/opencode.json"
+	copy_single "$HOME/.config/opencode/AGENTS.md" "$SCRIPT_DIR/configs/opencode/AGENTS.md"
 
 	# Copy skills with filtering
 	copy_skills_with_filter "$HOME/.config/opencode/skills" "$SCRIPT_DIR/configs/opencode/skills" "OpenCode"
 
-	# Copy agent and configs directories
-	for subdir in agent configs; do
+	# Keep one repo layout; V2 plural definitions override matching legacy files.
+	local subdir dest_subdir
+	for subdir in agent agents configs; do
+		dest_subdir="$subdir"
+		[ "$subdir" = "agents" ] && dest_subdir="agent"
 		if [ -d "$HOME/.config/opencode/$subdir" ]; then
-			execute "mkdir -p $SCRIPT_DIR/configs/opencode/$subdir"
+			execute_quoted mkdir -p "$SCRIPT_DIR/configs/opencode/$dest_subdir"
 			if [ -n "$(ls -A "$HOME/.config/opencode/$subdir" 2>/dev/null)" ]; then
-				if execute "cp -r '$HOME/.config/opencode/$subdir'/* '$SCRIPT_DIR/configs/opencode/$subdir'/ 2>/dev/null"; then
+				if execute_quoted cp -r "$HOME/.config/opencode/$subdir/". "$SCRIPT_DIR/configs/opencode/$dest_subdir/"; then
 					log_success "Copied $subdir directory"
 				fi
 			fi
@@ -218,22 +226,75 @@ generate_opencode_configs() {
 	done
 
 	# Copy commands (skip ai/ folder which is generated from local skills)
-	if [ -d "$HOME/.config/opencode/command" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/opencode/command"
-		if [ -n "$(ls -A "$HOME/.config/opencode/command" 2>/dev/null)" ]; then
-			for item in "$HOME/.config/opencode/command"/*; do
-				local item_name
-				item_name=$(basename "$item")
-				if [ "$item_name" = "ai" ]; then
-					log_info "Skipping ai/ command folder (generated from local skills)"
-				elif execute "cp -r '$item' '$SCRIPT_DIR/configs/opencode/command'/ 2>/dev/null"; then
-					log_success "Copied command: $item_name"
-				fi
-			done
+	local item item_name
+	for subdir in command commands; do
+		if [ ! -d "$HOME/.config/opencode/$subdir" ]; then
+			continue
 		fi
-	fi
+		execute_quoted mkdir -p "$SCRIPT_DIR/configs/opencode/command"
+		# Include hidden definitions, but never "." or ".."; an unmatched glob
+		# stays literal and is skipped by the -e guard below.
+		for item in "$HOME/.config/opencode/$subdir"/* "$HOME/.config/opencode/$subdir"/.[!.]* "$HOME/.config/opencode/$subdir"/..?*; do
+			[ -e "$item" ] || continue
+			item_name=$(basename "$item")
+			if [ "$item_name" = "ai" ]; then
+				log_info "Skipping ai/ command folder (generated from local skills)"
+			elif execute_quoted cp -r "$item" "$SCRIPT_DIR/configs/opencode/command/"; then
+				log_success "Copied command: $item_name"
+			fi
+		done
+	done
 
 	log_success "OpenCode configs generated"
+}
+
+generate_fx_configs() {
+	log_info "Generating fx configs..."
+
+	if [ ! -d "$HOME/.fx" ]; then
+		log_warning "fx config directory not found: $HOME/.fx"
+		return 0
+	fi
+	if [ ! -f "$HOME/.fx/AGENTS.md" ]; then
+		log_warning "fx config not found: $HOME/.fx/AGENTS.md"
+		return 0
+	fi
+
+	execute_quoted mkdir -p "$SCRIPT_DIR/configs/fx"
+	copy_single "$HOME/.fx/AGENTS.md" "$SCRIPT_DIR/configs/fx/AGENTS.md"
+	log_success "fx configs generated"
+}
+
+generate_muse_configs() {
+	log_info "Generating Muse Code configs..."
+
+	if [ ! -f "$HOME/.config/muse/settings.json" ]; then
+		log_warning "Muse Code config not found: $HOME/.config/muse/settings.json"
+		return 0
+	fi
+
+	execute_quoted mkdir -p "$SCRIPT_DIR/configs/muse"
+	copy_single "$HOME/.config/muse/settings.json" "$SCRIPT_DIR/configs/muse/settings.json"
+	log_success "Muse Code configs generated"
+}
+
+# The dispatcher is tracked source, not user configuration: cli.sh installs it
+# from this repository, so the tracked file stays the source of truth. Exporting
+# the installed copy would let a stale install revert an upstream dispatcher fix
+# in the working tree. Restore the tracked file only when it is missing.
+copy_amp_orb_dispatch() {
+	local dest="$SCRIPT_DIR/configs/amp/orb-dispatch.sh"
+
+	if [ -e "$dest" ]; then
+		log_info "Skipped (tracked file kept): $dest"
+		return 0
+	fi
+
+	copy_single "$HOME/.config/amp/orb-dispatch.sh" "$dest"
+	# The provider runs this file. A home copy may not keep the executable bit.
+	if [ -f "$dest" ]; then
+		execute_quoted chmod +x "$dest"
+	fi
 }
 
 generate_amp_configs() {
@@ -261,6 +322,22 @@ generate_amp_configs() {
 		safe_copy_dir "$HOME/.config/amp/plugins" "$SCRIPT_DIR/configs/amp/plugins"
 	fi
 
+	# Migration: remove stale helper that was relocated from plugins/ to lib/.
+	# If a previous install left fusion-watchdog.ts in the user's plugins dir,
+	# safe_copy_dir would recreate it in the repo — remove it after copying.
+	if [ -f "$SCRIPT_DIR/configs/amp/plugins/fusion-watchdog.ts" ]; then
+		rm -f "$SCRIPT_DIR/configs/amp/plugins/fusion-watchdog.ts"
+	fi
+
+	# Copy shared library modules
+	if [ -d "$HOME/.config/amp/lib" ]; then
+		safe_copy_dir "$HOME/.config/amp/lib" "$SCRIPT_DIR/configs/amp/lib"
+	fi
+
+	# The dispatch script is installed into ~/.config/amp by cli.sh, outside
+	# settings and plugins.
+	copy_amp_orb_dispatch
+
 	log_success "Amp configs generated"
 }
 
@@ -276,6 +353,7 @@ generate_codex_configs() {
 	copy_single "$HOME/.codex/AGENTS.md" "$SCRIPT_DIR/configs/codex/AGENTS.md"
 	copy_single "$HOME/.codex/config.json" "$SCRIPT_DIR/configs/codex/config.json"
 	copy_single "$HOME/.codex/config.toml" "$SCRIPT_DIR/configs/codex/config.toml"
+	copy_single "$HOME/.codex/1m.config.toml" "$SCRIPT_DIR/configs/codex/1m.config.toml"
 
 	# Export agents
 	if [ -d "$HOME/.codex/agents" ]; then
@@ -384,6 +462,31 @@ generate_kilo_configs() {
 	fi
 }
 
+generate_reasonix_configs() {
+	log_info "Generating Reasonix configs..."
+	local reasonix_dir
+	reasonix_dir=$(get_reasonix_dir)
+
+	if [ -d "$reasonix_dir" ]; then
+		execute_quoted mkdir -p "$SCRIPT_DIR/configs/reasonix"
+		copy_single "$reasonix_dir/config.toml" "$SCRIPT_DIR/configs/reasonix/config.toml"
+		copy_single "$reasonix_dir/AGENTS.md" "$SCRIPT_DIR/configs/reasonix/AGENTS.md"
+		if [ -f "$reasonix_dir/statusline.sh" ]; then
+			copy_single "$reasonix_dir/statusline.sh" "$SCRIPT_DIR/configs/reasonix/statusline.sh"
+		fi
+		if [ -d "$reasonix_dir/hooks" ]; then
+			copy_directory "$reasonix_dir/hooks" "$SCRIPT_DIR/configs/reasonix/hooks"
+		fi
+		if [ -d "$reasonix_dir/themes" ]; then
+			copy_directory "$reasonix_dir/themes" "$SCRIPT_DIR/configs/reasonix/themes"
+			log_success "Reasonix themes generated"
+		fi
+		log_success "Reasonix configs generated"
+	else
+		log_warning "Reasonix config directory not found: $reasonix_dir"
+	fi
+}
+
 generate_pi_configs() {
 	log_info "Generating Pi configs..."
 
@@ -408,6 +511,18 @@ generate_pi_configs() {
 		log_warning "Pi MCP config not found: $HOME/.pi/agent/mcp.json"
 	fi
 
+	if [ -f "$HOME/.pi/agent/config.yml" ]; then
+		copy_single "$HOME/.pi/agent/config.yml" "$SCRIPT_DIR/configs/pi/config.yml"
+	fi
+
+	if [ -f "$HOME/.pi/agent/config.yaml" ]; then
+		copy_single "$HOME/.pi/agent/config.yaml" "$SCRIPT_DIR/configs/pi/config.yaml"
+	fi
+
+	if [ -f "$HOME/.pi/agent/config.json" ]; then
+		copy_single "$HOME/.pi/agent/config.json" "$SCRIPT_DIR/configs/pi/config.json"
+	fi
+
 	# Export agents
 	if [ -d "$HOME/.pi/agent/agents" ]; then
 		execute "mkdir -p $SCRIPT_DIR/configs/pi/agents"
@@ -416,6 +531,78 @@ generate_pi_configs() {
 				log_success "Pi agents exported"
 			fi
 		fi
+	fi
+}
+generate_omp_configs() {
+	log_info "Generating Oh My Pi (omp) configs..."
+
+	if [ ! -d "$HOME/.omp" ]; then
+		log_warning "Oh My Pi (omp) config directory not found: $HOME/.omp"
+		return 0
+	fi
+
+	local omp_exported=false
+	execute_quoted mkdir -p "$SCRIPT_DIR/configs/omp"
+
+	if [ -f "$HOME/.omp/agent/config.yml" ]; then
+		copy_single "$HOME/.omp/agent/config.yml" "$SCRIPT_DIR/configs/omp/config.yml" && omp_exported=true
+	elif [ -f "$HOME/.omp/config.yml" ]; then
+		copy_single "$HOME/.omp/config.yml" "$SCRIPT_DIR/configs/omp/config.yml" && omp_exported=true
+	elif [ -f "$HOME/.omp/agent/config.yaml" ]; then
+		copy_single "$HOME/.omp/agent/config.yaml" "$SCRIPT_DIR/configs/omp/config.yaml" && omp_exported=true
+	elif [ -f "$HOME/.omp/config.yaml" ]; then
+		copy_single "$HOME/.omp/config.yaml" "$SCRIPT_DIR/configs/omp/config.yaml" && omp_exported=true
+	elif [ -f "$HOME/.omp/agent/config.json" ]; then
+		copy_single "$HOME/.omp/agent/config.json" "$SCRIPT_DIR/configs/omp/config.json" && omp_exported=true
+	elif [ -f "$HOME/.omp/config.json" ]; then
+		copy_single "$HOME/.omp/config.json" "$SCRIPT_DIR/configs/omp/config.json" && omp_exported=true
+	fi
+
+	if [ -f "$HOME/.omp/agent/AGENTS.md" ]; then
+		copy_single "$HOME/.omp/agent/AGENTS.md" "$SCRIPT_DIR/configs/omp/AGENTS.md" && omp_exported=true
+	elif [ -f "$HOME/.omp/AGENTS.md" ]; then
+		copy_single "$HOME/.omp/AGENTS.md" "$SCRIPT_DIR/configs/omp/AGENTS.md" && omp_exported=true
+	fi
+
+	if [ -f "$HOME/.omp/agent/models.json" ]; then
+		copy_single "$HOME/.omp/agent/models.json" "$SCRIPT_DIR/configs/omp/models.json" && omp_exported=true
+	elif [ -f "$HOME/.omp/models.json" ]; then
+		copy_single "$HOME/.omp/models.json" "$SCRIPT_DIR/configs/omp/models.json" && omp_exported=true
+	fi
+
+	if [ -d "$HOME/.omp/agent/themes" ]; then
+		copy_directory "$HOME/.omp/agent/themes" "$SCRIPT_DIR/configs/omp/themes" && omp_exported=true
+		log_success "Oh My Pi (omp) themes generated"
+	elif [ -d "$HOME/.omp/themes" ]; then
+		copy_directory "$HOME/.omp/themes" "$SCRIPT_DIR/configs/omp/themes" && omp_exported=true
+		log_success "Oh My Pi (omp) themes generated"
+	else
+		log_warning "Oh My Pi (omp) themes directory not found: $HOME/.omp/agent/themes"
+	fi
+
+	if [ -f "$HOME/.omp/agent/mcp.json" ]; then
+		copy_single "$HOME/.omp/agent/mcp.json" "$SCRIPT_DIR/configs/omp/mcp.json" && omp_exported=true
+	elif [ -f "$HOME/.omp/mcp.json" ]; then
+		copy_single "$HOME/.omp/mcp.json" "$SCRIPT_DIR/configs/omp/mcp.json" && omp_exported=true
+	else
+		log_warning "Oh My Pi (omp) MCP config not found: $HOME/.omp/agent/mcp.json"
+	fi
+
+	for src_dir in "$HOME/.omp/agent/agents" "$HOME/.omp/agents"; do
+		if [ -d "$src_dir" ] && [ -n "$(ls -A "$src_dir" 2>/dev/null)" ]; then
+			execute_quoted mkdir -p "$SCRIPT_DIR/configs/omp/agents"
+			if copy_directory "$src_dir" "$SCRIPT_DIR/configs/omp/agents"; then
+				log_success "Oh My Pi (omp) agents exported"
+				omp_exported=true
+			fi
+			break
+		fi
+	done
+
+	if [ "$omp_exported" = true ]; then
+		log_success "Oh My Pi (omp) configs generated"
+	else
+		log_warning "No Oh My Pi (omp) configs found to export"
 	fi
 }
 
@@ -716,6 +903,27 @@ generate_ctx_configs() {
 	log_success "ctx configs generated"
 }
 
+generate_hunk_configs() {
+	log_info "Generating Hunk configs..."
+	local hunk_dir="${XDG_CONFIG_HOME:-$HOME/.config}/hunk"
+
+	if [ ! -d "$hunk_dir" ]; then
+		log_warning "Hunk config directory not found: $hunk_dir"
+		return 0
+	fi
+
+	if [ ! -f "$hunk_dir/config.toml" ]; then
+		log_warning "Hunk config not found: $hunk_dir/config.toml"
+		return 0
+	fi
+
+	execute "mkdir -p \"$SCRIPT_DIR/configs/hunk\""
+
+	copy_single "$hunk_dir/config.toml" "$SCRIPT_DIR/configs/hunk/config.toml"
+
+	log_success "Hunk configs generated"
+}
+
 generate_qodercli_configs() {
 	log_info "Generating Qoder CLI configs..."
 
@@ -731,6 +939,24 @@ generate_qodercli_configs() {
 	copy_single "$HOME/.qoder/settings.json" "$SCRIPT_DIR/configs/qodercli/settings.json"
 
 	log_success "Qoder CLI configs generated"
+}
+
+generate_deepseek_harness_configs() {
+	log_info "Generating DeepSeek Harness configs..."
+	local dsh_home="${DSH_HOME:-$HOME/.dsh}"
+
+	if [ ! -d "$dsh_home" ]; then
+		log_warning "DeepSeek Harness config directory not found: $dsh_home"
+		return 0
+	fi
+
+	execute_quoted mkdir -p "$SCRIPT_DIR/configs/deepseek-harness"
+
+	copy_single "$dsh_home/AGENTS.md" "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
+	copy_single "$dsh_home/settings.yaml" "$SCRIPT_DIR/configs/deepseek-harness/settings.yaml"
+	copy_single "$dsh_home/cordis.patch.yml" "$SCRIPT_DIR/configs/deepseek-harness/cordis.patch.yml"
+
+	log_success "DeepSeek Harness configs generated"
 }
 
 generate_kiro_configs() {
@@ -769,6 +995,95 @@ generate_kiro_configs() {
 	fi
 
 	log_success "Kiro CLI configs generated"
+}
+
+generate_delta_configs() {
+	log_info "Generating Delta configs..."
+
+	local delta_settings_dir
+	delta_settings_dir=$(get_delta_settings_dir)
+	local delta_settings_file="$delta_settings_dir/settings.json"
+	local delta_rules_file="$HOME/.config/delta/AGENTS.md"
+	if [ ! -f "$delta_settings_file" ] || [ ! -f "$delta_rules_file" ]; then
+		log_warning "Delta managed config files not found"
+		[ -f "$delta_settings_file" ] || log_warning "Missing: $delta_settings_file"
+		[ -f "$delta_rules_file" ] || log_warning "Missing: $delta_rules_file"
+		return 0
+	fi
+
+	execute "mkdir -p \"$SCRIPT_DIR/configs/delta\""
+	copy_single "$delta_settings_file" "$SCRIPT_DIR/configs/delta/settings.json"
+	copy_single "$delta_rules_file" "$SCRIPT_DIR/configs/delta/AGENTS.md"
+
+	log_success "Delta configs generated"
+}
+
+generate_openmausbot_configs() {
+	# Strict opt-in: the OpenMausBot data directory is live application state
+	# (credentials, transcripts, databases). Only an explicit
+	# OPENMAUSBOT_EXPORT=1 copies the registry files. See
+	# configs/openmausbot/README.md for what is included and excluded, and the
+	# app's encrypted full backup for recovery.
+	if [ "${OPENMAUSBOT_EXPORT:-0}" != "1" ]; then
+		log_info "Skipping OpenMausBot export (opt-in; set OPENMAUSBOT_EXPORT=1)"
+		return 0
+	fi
+
+	log_info "Generating OpenMausBot configs..."
+
+	local omb_dir dest file
+	omb_dir="${OMB_DATA_DIR:-$HOME/.openmausbot}"
+	dest="$SCRIPT_DIR/configs/openmausbot"
+
+	if [ ! -d "$omb_dir" ]; then
+		log_warning "OpenMausBot data directory not found: $omb_dir"
+		return 0
+	fi
+
+	# The export prunes files under $dest, so a data directory inside it
+	# (directly or through a symlink) would lose live app state.
+	local omb_real dest_real
+	omb_real=$(cd "$omb_dir" && pwd -P)
+	if [ -d "$dest" ]; then
+		dest_real=$(cd "$dest" && pwd -P)
+	else
+		dest_real="$(cd "$SCRIPT_DIR" && pwd -P)/configs/openmausbot"
+	fi
+	case "$omb_real/" in
+	"$dest_real/"*)
+		log_error "OMB_DATA_DIR must not be inside $dest - skipping OpenMausBot export"
+		return 0
+		;;
+	esac
+
+	execute_quoted mkdir -p "$dest"
+
+	# bots.json carries the roster, the personas, and each bot's project
+	# paths; default-bot.json maps account emails to default bots. Both are personal
+	# data, so the exported snapshot stays local (gitignored) and is never
+	# committed.
+	for file in bots.json default-bot.json; do
+		if [ -f "$omb_dir/$file" ]; then
+			copy_single "$omb_dir/$file" "$dest/$file"
+		else
+			# Prune a snapshot the app no longer has instead of leaving the
+			# previous export in place.
+			execute_quoted rm -f "$dest/$file"
+			log_warning "Skipped (not found): $omb_dir/$file"
+		fi
+	done
+
+	# Per-bot SOUL.md mirrors are derived state the app regenerates on every
+	# save, so they are not exported. Remove any left by an earlier export.
+	if [ -d "$dest/bots" ]; then
+		execute_quoted rm -rf "$dest/bots"
+	fi
+
+	log_warning "The exported roster holds personas, project paths, and account emails"
+	log_warning "It is gitignored and must never be committed to this public repository"
+	log_warning "Transcripts, attachments, credentials, and databases are not exported"
+	log_warning "Full recovery: Settings → Import & export → Export full backup (encrypted .ombbackup)"
+	log_success "OpenMausBot configs generated"
 }
 
 generate_codiff_configs() {
@@ -886,6 +1201,78 @@ generate_ai_launcher_configs() {
 	fi
 }
 
+sanitize_absolute_paths() {
+	if [ "$DRY_RUN" = true ]; then
+		return 0
+	fi
+
+	log_info "Sanitizing absolute paths in exported configs..."
+	local target_dir="$SCRIPT_DIR/configs"
+	if [ ! -d "$target_dir" ]; then
+		return 0
+	fi
+
+	node -e '
+		const fs = require("fs");
+		const path = require("path");
+		const home = process.env.HOME;
+		if (!home) process.exit(0);
+
+		function walk(dir) {
+			if (fs.lstatSync(dir).isSymbolicLink()) return;
+			const files = fs.readdirSync(dir);
+			for (const file of files) {
+				const fullPath = path.join(dir, file);
+				// lstat: a symlink is neither a directory nor a file here, so the
+				// walk never follows one out of configs/ into live app data.
+				const stat = fs.lstatSync(fullPath);
+				if (stat.isDirectory()) {
+					walk(fullPath);
+				} else if (stat.isFile()) {
+					const ext = path.extname(file).toLowerCase();
+					if ([".json", ".toml", ".jsonc", ".yaml", ".yml"].includes(ext)) {
+						try {
+							let content = fs.readFileSync(fullPath, "utf8");
+							let modified = false;
+							if (content.includes(home)) {
+								content = content.split(home).join("$HOME");
+								modified = true;
+							}
+							if ((ext === ".json" || ext === ".jsonc" || ext === ".toml") && content.includes("\x27$HOME")) {
+								content = content.replace(/\x27\$HOME\/([^\x27]*)\x27/g, `"$HOME/$1"`);
+								modified = true;
+							}
+							if (modified) {
+								fs.writeFileSync(fullPath, content, "utf8");
+								console.log("Sanitized: " + path.relative(process.cwd(), fullPath));
+							}
+							if (ext === ".json" || ext === ".jsonc") {
+								let parsed;
+								try {
+									const jsonText = content.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "$1");
+									parsed = JSON.parse(jsonText);
+								} catch (e) {}
+								if (parsed) {
+									const relativePath = path.relative(process.cwd(), fullPath);
+									const isMcpFile = file.includes("mcp") ||
+										(file === "config.json" && relativePath.includes("configs/devin/")) ||
+										(file === "settings.json" && (relativePath.includes("configs/kiro/") || relativePath.includes("configs/qodercli/")));
+									if (isMcpFile && (!parsed.mcpServers || typeof parsed.mcpServers !== "object")) {
+										console.warn("\x1b[33mWarning: " + relativePath + " is missing a valid \"mcpServers\" object!\x1b[0m");
+									}
+								}
+							}
+						} catch (e) {
+							console.error("Failed to sanitize " + fullPath + ": " + e.message);
+						}
+					}
+				}
+			}
+		}
+		walk(process.argv[process.argv.length - 1]);
+	' "$target_dir"
+}
+
 main() {
 	echo "╔══════════════════════════════════════════════════════════╗"
 	echo "║         Config Generator                                 ║"
@@ -907,6 +1294,12 @@ main() {
 	generate_opencode_configs
 	echo
 
+	generate_fx_configs
+	echo
+
+	generate_muse_configs
+	echo
+
 	generate_amp_configs
 	echo
 
@@ -925,7 +1318,12 @@ main() {
 	generate_kilo_configs
 	echo
 
+	generate_reasonix_configs
+	echo
+
 	generate_pi_configs
+	echo
+	generate_omp_configs
 	echo
 
 	generate_commandcode_configs
@@ -958,13 +1356,25 @@ main() {
 	generate_ctx_configs
 	echo
 
+	generate_hunk_configs
+	echo
+
 	generate_qodercli_configs
+	echo
+
+	generate_deepseek_harness_configs
 	echo
 
 	generate_kiro_configs
 	echo
 
+	generate_delta_configs
+	echo
+
 	generate_codiff_configs
+	echo
+
+	generate_openmausbot_configs
 	echo
 
 	generate_devin_configs
@@ -977,6 +1387,13 @@ main() {
 	echo
 
 	generate_ai_launcher_configs
+	echo
+
+	sanitize_absolute_paths
+	echo
+
+	# Restore canonical guidance after exports from older home-directory profiles.
+	execute_quoted bash "$SCRIPT_DIR/scripts/sync-token-efficiency.sh"
 	echo
 
 	log_success "Config generation complete!"

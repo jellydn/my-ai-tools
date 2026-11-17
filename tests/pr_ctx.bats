@@ -7,7 +7,7 @@ REPO_ROOT="$BATS_TEST_DIRNAME/.."
 LIB_INSTALL="$REPO_ROOT/lib/install.sh"
 CLI_SH="$REPO_ROOT/cli.sh"
 GENERATE_SH="$REPO_ROOT/generate.sh"
-README="$REPO_ROOT/README.md"
+README="$REPO_ROOT/TOOL_REFERENCE.md"
 
 @test "configs/ctx/config.toml exists" {
 	[ -f "$REPO_ROOT/configs/ctx/config.toml" ]
@@ -32,7 +32,7 @@ README="$REPO_ROOT/README.md"
 }
 
 @test "cli.sh main() installs ctx" {
-	run grep -E '^[[:space:]]*install_ctx' "$CLI_SH"
+	run grep -F '"ctx:install_ctx"' "$CLI_SH"
 	[ "$status" -eq 0 ]
 	[ -n "$output" ]
 }
@@ -190,4 +190,68 @@ README="$REPO_ROOT/README.md"
 @test "ctx MCP server in grok config.toml" {
 	run grep -c '\[mcp_servers.ctx\]' "$REPO_ROOT/configs/grok/config.toml"
 	[ "$status" -eq 0 ]
+}
+
+@test "ctx keeps a verified install when optional setup fails but rejects binary installation failures" {
+	cat > "$BATS_TEST_TMPDIR/ctx-fixture" <<'EOF'
+#!/usr/bin/env bash
+if [ "$1" = --version ]; then
+    [ "$MODE" != binary-fails ] || exit 1
+    echo "ctx 2.2.8"
+elif [ "$1" = setup ]; then
+    if [ "$MODE" = setup-fails ] || [ "$MODE" = setup-skipped ]; then
+        echo "all_provider_terminal_coverage_unavailable: use an exact --path" >&2
+        exit 1
+    fi
+    if [ "$MODE" = no-daemon ]; then
+        [ "$2" = --no-daemon ] || exit 1
+    fi
+    echo "Index ready"
+fi
+EOF
+	for mode in ready setup-fails setup-skipped no-daemon binary-fails install-fails; do
+		run env PATH="/usr/bin:/bin" MODE="$mode" bash -c '
+			export HOME="$2/$MODE" DRY_RUN=false YES_TO_ALL=true
+			[ "$MODE" != setup-skipped ] || export CTX_INSTALL_NO_SETUP=1
+			[ "$MODE" != no-daemon ] || export CTX_INSTALL_NO_DAEMON=1
+			source "$1/lib/common.sh"
+			source "$1/lib/install.sh"
+			IS_WINDOWS=true
+			fixture="$2/ctx-fixture"
+			powershell.exe() { :; }
+			cygpath() { printf "%s\n" "$2"; }
+			execute() {
+				if [[ "$1" == powershell.exe* ]]; then
+					# Model upstream side effects unless the binary-only switches are passed.
+					[[ "$1" == *-NoSetup* && "$1" == *-NoSkill* && "$1" == *-NoModifyPath* ]] || return 97
+					[ "$MODE" != install-fails ] || return 1
+					mkdir -p "$HOME/.local/bin"
+					cp "$fixture" "$HOME/.local/bin/ctx"
+					chmod +x "$HOME/.local/bin/ctx"
+					# Simulate the upstream installer bundling a fatal initial setup unless opted out.
+					[ "${CTX_INSTALL_NO_SETUP:-0}" = 1 ] || "$HOME/.local/bin/ctx" setup
+				else
+					eval "$1"
+				fi
+			}
+			install_ctx
+		' _ "$REPO_ROOT" "$BATS_TEST_TMPDIR"
+		if [[ "$mode" == *-fails && "$mode" != setup-fails ]]; then
+			[ "$status" -ne 0 ]
+			[[ "$output" != *"ctx installed"* ]]
+		else
+			[ "$status" -eq 0 ]
+			[[ "$output" == *"ctx installed"* ]]
+			if [ "$mode" = setup-fails ]; then
+				[[ "$output" == *"all_provider_terminal_coverage_unavailable"* ]]
+				[[ "$output" == *"optional history setup failed"* ]]
+				[[ "$output" == *"Retry: ctx setup"* ]]
+				[[ "$output" == *"ctx import --provider pi --path"* ]]
+			elif [ "$mode" = setup-skipped ]; then
+				[[ "$output" != *"all_provider_terminal_coverage_unavailable"* ]]
+			else
+				[[ "$output" == *"Index ready"* ]]
+			fi
+		fi
+	done
 }

@@ -1,0 +1,55 @@
+{
+	"schemaVersion": 2,
+	"id": "cobalt",
+	"name": "Cobalt",
+	"author": "wesbos (Cobalt2) / my-ai-tools",
+	"description": "Cobalt2 palette from wesbos/cobalt2 — dark blue with electric cyan, bold yellow, and pink accents.",
+	"license": "MIT",
+	"baseStyle": "graphite",
+	"tokens": {
+		"light": {
+			"bg": "#E8F1F8",
+			"bgSoft": "#DCE8F1",
+			"bgElev": "#D3E2ED",
+			"panel": "#E8F1F8",
+			"sidebar": "#DCE8F1",
+			"chat": "#E8F1F8",
+			"workspace": "#E8F1F8",
+			"workspaceFiles": "#DCE8F1",
+			"border": "#B8CDDC",
+			"borderSoft": "#D3E2ED",
+			"fg": "#122738",
+			"fgDim": "#3E5E77",
+			"fgFaint": "#5C7685",
+			"accent": "#0088FF",
+			"accentFg": "#E8F1F8",
+			"ok": "#3D8B2F",
+			"warn": "#C3723D",
+			"err": "#C84E53"
+		},
+		"dark": {
+			"bg": "#193549",
+			"bgSoft": "#1F4662",
+			"bgElev": "#234E6D",
+			"panel": "#193549",
+			"sidebar": "#122738",
+			"chat": "#193549",
+			"workspace": "#193549",
+			"workspaceFiles": "#122738",
+			"border": "#234E6D",
+			"borderSoft": "#1F4662",
+			"fg": "#E1EFFF",
+			"fgDim": "#608BA8",
+			"fgFaint": "#5C7685",
+			"accent": "#00E5FF",
+			"accentFg": "#122738",
+			"ok": "#3AD900",
+			"warn": "#FF9D00",
+			"err": "#FF628C"
+		}
+	},
+	"recipes": {
+		"density": "comfortable",
+		"corners": "round"
+	}
+}

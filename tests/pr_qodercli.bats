@@ -7,7 +7,7 @@ REPO_ROOT="$BATS_TEST_DIRNAME/.."
 LIB_INSTALL="$REPO_ROOT/lib/install.sh"
 CLI_SH="$REPO_ROOT/cli.sh"
 GENERATE_SH="$REPO_ROOT/generate.sh"
-README="$REPO_ROOT/README.md"
+README="$REPO_ROOT/TOOL_REFERENCE.md"
 
 @test "configs/qodercli/AGENTS.md exists" {
     [ -f "$REPO_ROOT/configs/qodercli/AGENTS.md" ]
@@ -27,6 +27,13 @@ README="$REPO_ROOT/README.md"
 @test "configs/qodercli/settings.json mcpServers includes context7" {
     require_jq
     run jq -e '.mcpServers.context7.command == "npx"' "$REPO_ROOT/configs/qodercli/settings.json"
+    [ "$status" -eq 0 ]
+    [ "$output" = "true" ]
+}
+
+@test "configs/qodercli/settings.json guards the optional session hook" {
+    require_jq
+    run jq -e '.hooks.SessionStart[0].hooks[0].command | startswith("if [ -f ")' "$REPO_ROOT/configs/qodercli/settings.json"
     [ "$status" -eq 0 ]
     [ "$output" = "true" ]
 }
@@ -62,7 +69,7 @@ README="$REPO_ROOT/README.md"
 }
 
 @test "cli.sh main() installs qodercli" {
-    run grep -E '^\s*install_qodercli\b' "$CLI_SH"
+    run grep -F '"qodercli:install_qodercli"' "$CLI_SH"
     [ "$status" -eq 0 ]
     [ -n "$output" ]
 }

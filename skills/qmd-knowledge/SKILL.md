@@ -46,7 +46,7 @@ This skill provides a unified knowledge management system. You install the skill
 
 ```
 # The qmd-knowledge skill (installed to your AI tool's skills directory)
-# Location varies by tool: ~/.config/opencode/skill/, ~/.claude/skills/, or ~/.config/amp/skills/
+# Location varies by tool: $HOME/.config/opencode/skills/, $HOME/.claude/skills/, or $HOME/.config/amp/skills/
 ├── SKILL.md              # This file - the skill definition
 ├── scripts/              # Executable scripts
 │   └── record.sh         # Record learnings/issues/notes
@@ -138,9 +138,9 @@ command -v git || echo "Install git for automatic project name detection"
 
    ```bash
    # The skill is installed to your AI tool's skills directory:
-   # - OpenCode: ~/.config/opencode/skill/qmd-knowledge/
-   # - Claude Code: ~/.claude/skills/qmd-knowledge/
-   # - Amp: ~/.config/amp/skills/qmd-knowledge/
+   # - OpenCode: $HOME/.config/opencode/skills/qmd-knowledge/
+   # - Claude Code: $HOME/.claude/skills/qmd-knowledge/
+   # - Amp: $HOME/.config/amp/skills/qmd-knowledge/
    ```
 
 3. **Configure MCP server** (see installation docs for Claude/OpenCode/Amp)
