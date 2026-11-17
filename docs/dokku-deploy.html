@@ -56,7 +56,7 @@ dokku builder:set ai-tools selected dockerfile
 dokku config:set --no-restart ai-tools \
   OPENAI_BASE_URL=https://openrouter.ai/api/v1 \
   OPENAI_MODEL=openrouter/free \
-  OPENAI_EMBEDDING_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free \
+  OPENAI_EMBEDDING_MODEL=nvidia/nemotron-3-embed-1b:free \
   PORT=3000
 dokku docker-options:add ai-tools build &#39;--secret id=OPENAI_API_KEY,env=OPENAI_API_KEY&#39;
 </code></pre>
@@ -78,10 +78,10 @@ dokku docker-options:add ai-tools build &#39;--secret id=OPENAI_API_KEY,env=OPEN
 <ul>
 <li><code>OPENAI_BASE_URL</code> = <code>https://openrouter.ai/api/v1</code></li>
 <li><code>OPENAI_MODEL</code> = <code>openrouter/free</code></li>
-<li><code>OPENAI_EMBEDDING_MODEL</code> = <code>nvidia/llama-nemotron-embed-vl-1b-v2:free</code></li>
+<li><code>OPENAI_EMBEDDING_MODEL</code> = <code>nvidia/nemotron-3-embed-1b:free</code></li>
 </ul>
 <p>The Dockerfile indexes the repo at build time using a BuildKit secret <code>OPENAI_API_KEY</code>. Dokku passes that secret from app config via <code>docker-options</code> (<code>--secret id=OPENAI_API_KEY,env=OPENAI_API_KEY</code>). The deploy workflow re-syncs the <strong>full</strong> config above (key, base URL, models) into Dokku before <code>git push</code>, so host-side drift cannot break the build — a bare <code>OPENAI_API_KEY</code> alone used to fail with <code>401 invalid_api_key</code> because the OpenAI SDK defaulted to <code>api.openai.com</code>, which rejects <code>sk-or-v1-...</code> keys.</p>
-<p>The code is defensive too: <a href="../lib/openai-client.ts"><code>lib/openai-client.ts</code></a> detects <code>sk-or-v1-...</code> keys and automatically targets <code>https://openrouter.ai/api/v1</code> when <code>OPENAI_BASE_URL</code> is unset, and picks a matching embedding default — OpenRouter&#39;s free <code>nvidia/llama-nemotron-embed-vl-1b-v2:free</code> for OpenRouter keys, OpenAI&#39;s <code>text-embedding-3-small</code> otherwise (indexed at build and queried at runtime with the same default).</p>
+<p>The code is defensive too: <a href="../lib/openai-client.ts"><code>lib/openai-client.ts</code></a> detects <code>sk-or-v1-...</code> keys and automatically targets <code>https://openrouter.ai/api/v1</code> when <code>OPENAI_BASE_URL</code> is unset, and picks a matching embedding default — OpenRouter&#39;s free <code>nvidia/nemotron-3-embed-1b:free</code> for OpenRouter keys, OpenAI&#39;s <code>text-embedding-3-small</code> otherwise (indexed at build and queried at runtime with the same default).</p>
 <h2>Local deploy (optional)</h2>
 <p>With SSH access as <code>dokku@docklight.itman.fyi</code>:</p>
 <pre><code class="language-bash">export OPENAI_API_KEY=&quot;sk-or-v1-...&quot;
