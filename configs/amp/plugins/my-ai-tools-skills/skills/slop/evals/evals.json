@@ -1,0 +1,29 @@
+{
+  "skill": "slop",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Remove the AI-generated code slop from this diff and keep only the necessary changes.",
+      "should_trigger": true,
+      "expected_behavior": "Cleans up unnecessary clutter and preserves substance."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Tighten this patch so the review focuses on the meaningful changes.",
+      "should_trigger": true,
+      "expected_behavior": "Reduces unnecessary verbosity and mechanical noise."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Refactor this code for performance.",
+      "should_trigger": false,
+      "expected_behavior": "This is a general refactor request, not slop removal."
+    },
+    {
+      "id": "case-4",
+      "prompt": "Remove AI-generated clutter from this diff without changing behavior. This public function accepts untrusted JSON input, so its empty-input guard is necessary. Remove the redundant comment but preserve the guard and return behavior.\n```diff\n+function firstItem(items: unknown) {\n+  // Return undefined when items is not an array or has no elements.\n+  if (!Array.isArray(items) || items.length === 0) return undefined;\n+  return items[0];\n+}\n```",
+      "should_trigger": true,
+      "expected_behavior": "Removes the redundant comment while leaving the Array.isArray and empty-array guard unchanged. Preserves undefined for null, non-array, or empty-array input and the first item for a non-empty array."
+    }
+  ]
+}

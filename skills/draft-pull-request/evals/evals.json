@@ -1,0 +1,29 @@
+{
+  "skill": "draft-pull-request",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Create a draft pull request for the current branch with a What / Why / How description.",
+      "should_trigger": true,
+      "expected_behavior": "Creates a draft PR using the structured template."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Open a draft PR and derive the title from the branch if I do not provide one.",
+      "should_trigger": true,
+      "expected_behavior": "Follows the draft PR workflow and chooses an appropriate title."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Can you review this branch before I open a PR?",
+      "should_trigger": false,
+      "expected_behavior": "This is a review request, not PR creation."
+    },
+    {
+      "id": "case-4",
+      "prompt": "Make a draft PR even though I only gave you a short title and no body.",
+      "should_trigger": true,
+      "expected_behavior": "Creates the PR and fills in the description from branch and diff context."
+    }
+  ]
+}

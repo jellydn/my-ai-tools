@@ -1,0 +1,29 @@
+{
+  "skill": "handoffs",
+  "cases": [
+    {
+      "id": "case-1",
+      "prompt": "Create a handoff plan so another session can continue the work safely.",
+      "should_trigger": true,
+      "expected_behavior": "Produces a clear continuation plan with next steps and context."
+    },
+    {
+      "id": "case-2",
+      "prompt": "Write a handoff for the unfinished refactor, including files touched and open questions.",
+      "should_trigger": true,
+      "expected_behavior": "Captures the work state and transfer details."
+    },
+    {
+      "id": "case-3",
+      "prompt": "Implement the feature now.",
+      "should_trigger": false,
+      "expected_behavior": "This is an implementation request, not a handoff."
+    },
+    {
+      "id": "case-4",
+      "prompt": "I need to stop after step two; leave a handoff for the next session.",
+      "should_trigger": true,
+      "expected_behavior": "Documents the current state and the exact next actions."
+    }
+  ]
+}
