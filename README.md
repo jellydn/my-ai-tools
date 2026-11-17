@@ -306,7 +306,7 @@ The repository currently contains configuration or integration support for:
 
 | Category | Tools |
 | --- | --- |
-| Primary assistants | Claude Code, OpenCode, Amp, Codex, Cursor, Pi, Oh My Pi, Antigravity, Kilo, Kimi Code, Muse Code |
+| Primary assistants | Claude Code, OpenCode, Amp, Codex, Cursor, Pi, Oh My Pi, Antigravity, Kilo, Kimi Code, Muse Code, PINE |
 | Additional CLIs | CommandCode, GitHub Copilot CLI, Gemini CLI, Grok CLI, MiMo-Code, Qoder CLI, DeepSeek Harness, Kiro CLI, Devin CLI, Factory Droid, Cline, Reasonix |
 | Workflow and desktop tools | Conductor, Delta, Codiff, OpenMausBot, Hunk, ctx, herdr, Orca, AI Launcher, CCS, fx, Open Code Review, ghui |
 
