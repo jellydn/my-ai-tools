@@ -1731,7 +1731,7 @@ agy
 
 Key defaults from [`configs/antigravity-cli/settings.json`](configs/antigravity-cli/settings.json):
 
-- **Default model**: `Gemini 3.6 Flash (High)`
+- **Default model**: `GPT-OSS 120B (Medium)`
 - **Tool permission**: `proceed-in-sandbox`
 - **Allowlist additions**: codebase-memory MCP tools (`search_graph`, `list_projects`, `get_code_snippet`, `trace_path`, `search_code`), GitHub PR lookup, `bun test`, `qmd`, `git worktree`
 - **Deny list**: `git reset --hard`, `git push --force`, `rm -rf`
