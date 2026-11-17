@@ -64,7 +64,7 @@ Browse [OpenRouter models](https://openrouter.ai/models) or the curated **[Free 
 |------|----------|-----------------|-------|
 | API base | `OPENAI_BASE_URL` | `https://openrouter.ai/api/v1` | Required for OpenRouter |
 | Key | `OPENAI_API_KEY` | `sk-or-v1-...` | From [OpenRouter keys](https://openrouter.ai/settings/keys) |
-| Embeddings | `OPENAI_EMBEDDING_MODEL` | `nvidia/nemotron-3-embed-1b:free` | [NVIDIA Nemotron 3 Embed 1B](https://openrouter.ai/collections/free-models) — text embedding optimized for RAG and code retrieval; matches the `document_qa` tool's default |
+| Embeddings | `OPENAI_EMBEDDING_MODEL` | `nvidia/nemotron-3-embed-1b:free` | [NVIDIA Nemotron 3 Embed 1B](https://openrouter.ai/collections/free-models) — free text embedding optimized for RAG and code retrieval |
 | Analysis | `OPENAI_MODEL` | `openrouter/free` | [OpenRouter free router](https://openrouter.ai/openrouter/free) — picks an available free model per request |
 
 Example `.env` (copy-paste):
