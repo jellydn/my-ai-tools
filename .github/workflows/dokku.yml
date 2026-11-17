@@ -76,10 +76,12 @@ jobs:
           # If the build below fails, Dokku keeps the previously-deployed image
           # and index, so the model name must stay aligned with that old image.
           # Capture the currently stored value so the rollback step can restore
-          # it on failure; an empty value means the setting was unset. A read
-          # failure must NOT be mistaken for "unset" (rollback would then delete
-          # a real setting), so set -e aborts here before any config changes.
-          PREV_MODEL="$("${SSH[@]}" config:get "$DOKKU_APP" OPENAI_EMBEDDING_MODEL 2>/dev/null)"
+          # it on failure. config:export succeeds (exit 0) even when the key is
+          # unset, which keeps "genuinely unset" apart from "failed to read":
+          # only a real SSH/Dokku failure makes it exit non-zero, and set -e
+          # then aborts before any change. An empty value means it was unset.
+          CONFIG_DUMP="$("${SSH[@]}" config:export "$DOKKU_APP" --format shell 2>/dev/null)"
+          PREV_MODEL="$(printf '%s\n' "$CONFIG_DUMP" | sed -n "s/.*OPENAI_EMBEDDING_MODEL='\([^']*\)'.*/\1/p" | head -1)"
 
           # BuildKit secret + runtime both read app config. Re-set the full
           # OpenAI-compatible config on every deploy so host-side drift (e.g. a
