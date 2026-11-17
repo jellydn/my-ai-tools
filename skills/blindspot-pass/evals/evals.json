@@ -9,7 +9,7 @@
     },
     {
       "id": "case-2",
-      "prompt": "What should I check before shipping this feature so I do not miss anything obvious?",
+      "prompt": "Before I start implementing this feature in an unfamiliar subsystem, what hidden assumptions and risks should I check?",
       "should_trigger": true,
       "expected_behavior": "Produces a risk-oriented blindspot pass focused on unknown unknowns and hidden assumptions."
     },

@@ -15,9 +15,9 @@
     },
     {
       "id": "case-3",
-      "prompt": "Search the docs for the answer.",
+      "prompt": "Search the official PostgreSQL documentation website for the syntax of CREATE INDEX.",
       "should_trigger": false,
-      "expected_behavior": "This is search, not knowledge capture."
+      "expected_behavior": "Searches external vendor documentation without invoking qmd-knowledge; this is not a request to record or retrieve project knowledge."
     },
     {
       "id": "case-4",

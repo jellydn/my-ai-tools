@@ -21,9 +21,9 @@
     },
     {
       "id": "case-4",
-      "prompt": "The branch contains a lot of filler comments and noisy helpers; strip the slop without changing behavior.",
+      "prompt": "Remove AI-generated clutter from this diff without changing behavior. This public function accepts untrusted JSON input, so its empty-input guard is necessary. Remove the redundant comment but preserve the guard and return behavior.\n```diff\n+function firstItem(items: unknown) {\n+  // Return undefined when items is not an array or has no elements.\n+  if (!Array.isArray(items) || items.length === 0) return undefined;\n+  return items[0];\n+}\n```",
       "should_trigger": true,
-      "expected_behavior": "Removes superficial clutter while preserving functionality."
+      "expected_behavior": "Removes the redundant comment while leaving the Array.isArray and empty-array guard unchanged. Preserves undefined for null, non-array, or empty-array input and the first item for a non-empty array."
     }
   ]
 }

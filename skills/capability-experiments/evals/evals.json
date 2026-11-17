@@ -5,7 +5,7 @@
       "id": "case-1",
       "prompt": "Design an experiment to test whether the model can follow multi-step reasoning instructions and summarize the result in an HTML report.",
       "should_trigger": true,
-      "expected_behavior": "Produces an experiment plan and report structure for measuring capability."
+      "expected_behavior": "Produces an HTML report containing the experiment design and a summary of observed results. If missing inputs prevent execution or completion, explicitly identifies those inputs and the unrun work instead of presenting a report outline or invented results as a completed experiment."
     },
     {
       "id": "case-2",
@@ -21,9 +21,9 @@
     },
     {
       "id": "case-4",
-      "prompt": "Create a multi-step experiment that asks the model to search first, then reason, then report failures.",
+      "prompt": "Compare these model instruction-following results: prompt style A passed 3 of 5 cases and style B passed 4 of 5. HTML cannot render in this client; provide the experiment summary in plaintext instead.",
       "should_trigger": true,
-      "expected_behavior": "Exercises staged evaluation and records where the model succeeds or fails."
+      "expected_behavior": "Falls back to plaintext while preserving both observed pass counts, the comparison, and the limitation that five cases per style do not establish general robustness. Does not require HTML rendering or invent additional runs."
     }
   ]
 }
