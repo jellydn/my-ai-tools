@@ -73,6 +73,13 @@ jobs:
           SSH=(ssh -i ~/.ssh/dokku_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes "dokku@$DOKKU_HOST")
           "${SSH[@]}" ps:report "$DOKKU_APP"
 
+          # If the build below fails, Dokku keeps the previously-deployed image
+          # and index, so the model name must stay aligned with that old image.
+          # Capture the currently stored value so the rollback step can restore
+          # it on failure; store an empty file when the setting was unset.
+          PREV_MODEL="$("${SSH[@]}" config:get "$DOKKU_APP" OPENAI_EMBEDDING_MODEL 2>/dev/null || true)"
+          printf '%s' "$PREV_MODEL" > "${RUNNER_TEMP:-/tmp}/previous_embedding_model"
+
           # BuildKit secret + runtime both read app config. Re-set the full
           # OpenAI-compatible config on every deploy so host-side drift (e.g. a
           # missing OPENAI_BASE_URL sending the sk-or-v1- key to api.openai.com
@@ -97,3 +104,38 @@ jobs:
           git_remote_url: ssh://dokku@docklight.itman.fyi:22/ai-tools
           ssh_private_key: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
           branch: main
+
+      # The sync step stores the NEW OPENAI_EMBEDDING_MODEL before the build.
+      # If that build fails, Dokku keeps the old image and its old index; a
+      # later restart would then read the new model, retriever.ts would reject
+      # the stale index (model mismatch), and retrieval would break. Restore the
+      # stored value so the old image stays consistent until a successful deploy.
+      - name: Restore previous embedding model on deploy failure
+        if: failure()
+        env:
+          DOKKU_SSH_PRIVATE_KEY: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
+          DOKKU_HOST: docklight.itman.fyi
+          DOKKU_APP: ai-tools
+        run: |
+          PREV_MODEL="$(cat "${RUNNER_TEMP:-/tmp}/previous_embedding_model" 2>/dev/null || true)"
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          install -m 600 /dev/null ~/.ssh/dokku_deploy
+          printf '%s\n' "$DOKKU_SSH_PRIVATE_KEY" > ~/.ssh/dokku_deploy
+          tr -d '\r' < ~/.ssh/dokku_deploy > ~/.ssh/dokku_deploy.tmp
+          mv ~/.ssh/dokku_deploy.tmp ~/.ssh/dokku_deploy
+          chmod 600 ~/.ssh/dokku_deploy
+          if [[ "$(tail -c1 ~/.ssh/dokku_deploy | wc -l)" -eq 0 ]]; then
+            printf '\n' >> ~/.ssh/dokku_deploy
+          fi
+          ssh-keyscan -H "$DOKKU_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          SSH=(ssh -i ~/.ssh/dokku_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes "dokku@$DOKKU_HOST")
+          if [ -n "$PREV_MODEL" ]; then
+            encode() { printf '%s' "$1" | base64 -w 0; }
+            "${SSH[@]}" config:set "$DOKKU_APP" --encoded --no-restart \
+              "OPENAI_EMBEDDING_MODEL=$(encode "$PREV_MODEL")" >/dev/null
+          else
+            "${SSH[@]}" config:unset "$DOKKU_APP" --no-restart OPENAI_EMBEDDING_MODEL >/dev/null 2>&1 || true
+          fi

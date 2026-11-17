@@ -46,7 +46,7 @@ ROOT="$REPO_ROOT/configs"
 
 @test "reasonix config selects cobalt in ui and desktop theme_style" {
 	run awk '
-		/^\[ui\]/ { in_ui = 1; next }
+		/^\[ui\]/ { in_ui = 1; in_desktop = 0; next }
 		/^\[desktop\]/ { in_ui = 0; in_desktop = 1; next }
 		/^\[/ { in_ui = 0; in_desktop = 0; next }
 		# Match only uncommented assignments (a "# theme_style" comment must not count).

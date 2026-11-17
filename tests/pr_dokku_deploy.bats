@@ -25,6 +25,7 @@ load helpers
 			printf "%s\n" "$*" >>"$CALL_LOG"
 			case "$*" in
 			*"ps:report ai-tools") echo app-state ;;
+			*"config:get ai-tools OPENAI_EMBEDDING_MODEL") echo "nvidia/previous-model" ;;
 			*"config:set ai-tools --encoded --no-restart "*) echo sensitive-server-output ;;
 			*) return 21 ;;
 			esac
@@ -37,8 +38,9 @@ load helpers
 			body { sub(/^          /, ""); sub(/\r$/, ""); print }
 		'\'' "$1/.github/workflows/dokku.yml" >"$HOME/sync.sh"
 		bash -e -o pipefail "$HOME/sync.sh"
-		[ "$(wc -l <"$CALL_LOG")" -eq 2 ]
+		[ "$(wc -l <"$CALL_LOG")" -eq 3 ]
 		head -1 "$CALL_LOG" | grep -F "ps:report ai-tools"
+		sed -n 2p "$CALL_LOG" | grep -F "config:get ai-tools OPENAI_EMBEDDING_MODEL"
 		tail -1 "$CALL_LOG" | grep -F "config:set ai-tools --encoded --no-restart"
 		tail -1 "$CALL_LOG" | grep -F "OPENAI_API_KEY=$(printf sk-or-v1-fixture | base64 -w 0)"
 	' _ "$REPO_ROOT"

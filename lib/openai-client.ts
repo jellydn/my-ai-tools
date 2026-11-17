@@ -13,6 +13,11 @@ export const DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small";
 /**
  * Default embedding model for OpenRouter keys: OpenRouter-compatible and free
  * (https://openrouter.ai/models?fmt=cards&output_modalities=embeddings).
+ *
+ * NOTE: changing this default requires rebuilding any index built with a prior
+ * default. lib/retriever.ts validates that index.model matches the configured
+ * model and throws on mismatch, so local users must run `npm run index` after
+ * switching embedding models.
  */
 export const DEFAULT_OPENROUTER_EMBEDDING_MODEL = "nvidia/nemotron-3-embed-1b:free";
 
