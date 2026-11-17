@@ -50,3 +50,55 @@ load helpers
 	[[ "$output" != *"fixture-public-key"* ]]
 	[[ "$output" != *"sensitive-server-output"* ]]
 }
+
+@test "Dokku rollback restores the model only when the sync changed config" {
+	run bash -c '
+		set -e
+		export HOME="$(mktemp -d)"
+		trap '"'"'rm -rf "$HOME"'"'"' EXIT
+		export DOKKU_SSH_PRIVATE_KEY=$'"'"'fixture\r\nkey'"'"'
+		export DOKKU_HOST=example.invalid DOKKU_APP=ai-tools
+		export RUNNER_TEMP="$HOME/rt"
+		export CALL_LOG="$HOME/calls"
+		rm -rf "$RUNNER_TEMP"; mkdir -p "$RUNNER_TEMP"
+		ssh-keygen() {
+			if [ "$1" = -y ]; then
+				[ "$(cat "$HOME/.ssh/dokku_deploy")" = $'"'"'fixture\nkey'"'"' ] || return 19
+				echo fixture-public-key
+			else
+				[ "$*" = "-lf -" ] && [ "$(cat)" = fixture-public-key ] || return 20
+				echo "256 SHA256:fixture (ED25519)"
+			fi
+		}
+		ssh-keyscan() { echo fixture-known-host; }
+		ssh() { printf "%s\n" "$*" >>"$CALL_LOG"; return 0; }
+		export -f ssh-keygen ssh-keyscan ssh
+		awk '\''
+			/- name: Restore previous embedding model on deploy failure/ { step=1; next }
+			step && /        run: \|/ { body=1; next }
+			body { sub(/^          /, ""); sub(/\r$/, ""); print }
+		'\'' "$1/.github/workflows/dokku.yml" >"$HOME/restore.sh"
+
+		# Case 1: no marker (config was never changed) -> rollback is a no-op.
+		: > "$CALL_LOG"
+		set +e
+		bash -e -o pipefail "$HOME/restore.sh"; s1=$?
+		set -e
+		[ "$s1" -eq 0 ] || return 30
+		[ ! -s "$CALL_LOG" ] || return 31
+
+		# Case 2: marker holds a previous model -> restore it via encoded config:set.
+		: > "$CALL_LOG"
+		printf "%s" "nvidia/previous-model" > "$RUNNER_TEMP/previous_embedding_model"
+		bash -e -o pipefail "$HOME/restore.sh"
+		grep -F "config:set ai-tools --encoded --no-restart" "$CALL_LOG" >/dev/null || return 32
+		grep -F "OPENAI_EMBEDDING_MODEL=$(printf nvidia/previous-model | base64 -w 0)" "$CALL_LOG" >/dev/null || return 33
+
+		# Case 3: empty marker (previously unset) -> unset the model.
+		: > "$CALL_LOG"
+		: > "$RUNNER_TEMP/previous_embedding_model"
+		bash -e -o pipefail "$HOME/restore.sh"
+		grep -F "config:unset ai-tools --no-restart OPENAI_EMBEDDING_MODEL" "$CALL_LOG" >/dev/null || return 34
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 0 ]
+}

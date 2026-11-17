@@ -76,9 +76,8 @@ jobs:
           # If the build below fails, Dokku keeps the previously-deployed image
           # and index, so the model name must stay aligned with that old image.
           # Capture the currently stored value so the rollback step can restore
-          # it on failure; store an empty file when the setting was unset.
+          # it on failure; an empty value means the setting was unset.
           PREV_MODEL="$("${SSH[@]}" config:get "$DOKKU_APP" OPENAI_EMBEDDING_MODEL 2>/dev/null || true)"
-          printf '%s' "$PREV_MODEL" > "${RUNNER_TEMP:-/tmp}/previous_embedding_model"
 
           # BuildKit secret + runtime both read app config. Re-set the full
           # OpenAI-compatible config on every deploy so host-side drift (e.g. a
@@ -97,6 +96,12 @@ jobs:
             "OPENAI_BASE_URL=$(encode "https://openrouter.ai/api/v1")" \
             "OPENAI_MODEL=$(encode "openrouter/free")" \
             "OPENAI_EMBEDDING_MODEL=$(encode "nvidia/nemotron-3-embed-1b:free")" >/dev/null
+
+          # Persist the previous value only after config:set succeeds. The
+          # rollback step keys off this marker, so a failure that occurs before
+          # the app config is actually changed leaves no marker and nothing to
+          # restore (prevents deleting the live setting on an unrelated failure).
+          printf '%s' "$PREV_MODEL" > "${RUNNER_TEMP:-/tmp}/previous_embedding_model"
 
       - name: Deploy to Dokku
         uses: dokku/github-action@master
@@ -117,6 +122,14 @@ jobs:
           DOKKU_HOST: docklight.itman.fyi
           DOKKU_APP: ai-tools
         run: |
+          # Only the sync step writes this marker, and only after it has changed
+          # the app config. If the config was never touched (an earlier step
+          # failed), there is nothing to restore and we must not act on the live
+          # app, so exit without connecting.
+          if [ ! -f "${RUNNER_TEMP:-/tmp}/previous_embedding_model" ]; then
+            echo "Embedding-model config was not changed; skipping rollback."
+            exit 0
+          fi
           PREV_MODEL="$(cat "${RUNNER_TEMP:-/tmp}/previous_embedding_model" 2>/dev/null || true)"
 
           mkdir -p ~/.ssh
