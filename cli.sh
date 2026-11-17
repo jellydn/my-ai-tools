@@ -23,6 +23,7 @@ TOOL_ALLOWLIST_YES=(
 	ai-switcher
 	codex
 	pi
+	pine
 	ctx
 	grok
 	open_code_review
@@ -66,6 +67,7 @@ INSTALL_SEQUENCE=(
 	"kilo:install_kilo"
 	"reasonix:install_reasonix"
 	"pi:install_pi"
+	"pine:install_pine"
 	"omp:install_omp"
 	"commandcode:install_commandcode"
 	"copilot:install_copilot"
@@ -442,6 +444,7 @@ backup_configs() {
 		copy_config_dir "$HOME/.codiff" "$BACKUP_DIR" "codiff"
 		copy_config_dir "$HOME/.config/devin" "$BACKUP_DIR" "devin"
 		copy_config_dir "$HOME/.ctx" "$BACKUP_DIR" "ctx"
+		copy_config_dir "$HOME/.pine" "$BACKUP_DIR" "pine"
 		copy_config_dir "${XDG_CONFIG_HOME:-$HOME/.config}/hunk" "$BACKUP_DIR" "hunk"
 		copy_config_file "$HOME/.config/ai-launcher/config.json" "$BACKUP_DIR/ai-launcher" || true
 
@@ -652,6 +655,11 @@ copy_configurations() {
 	else
 		log_info "Skipping pi config install (not in -y allowlist)"
 	fi
+	if tool_allowed "pine"; then
+		copy_pine_configs
+	else
+		log_info "Skipping pine config install (not in -y allowlist)"
+	fi
 	if tool_allowed "omp"; then
 		copy_omp_configs
 	else
@@ -799,6 +807,18 @@ validate_all_configs() {
 				log_error "OpenCode config failed validation"
 				config_validation_failed=true
 			fi
+		fi
+	fi
+
+	# Validate PINE config
+	if tool_allowed "pine"; then
+		if ! validate_config "$SCRIPT_DIR/configs/pine/pine.json"; then
+			log_error "PINE pine.json failed validation"
+			config_validation_failed=true
+		fi
+		if ! validate_config "$SCRIPT_DIR/configs/pine/agents/main/agent.json"; then
+			log_error "PINE agent.json failed validation"
+			config_validation_failed=true
 		fi
 	fi
 
@@ -2195,6 +2215,56 @@ copy_codiff_configs() {
 	fi
 
 	log_success "Codiff configs copied"
+}
+
+copy_pine_configs() {
+	local pine_home="$HOME/.pine"
+	if [ ! -d "$pine_home" ] && ! command -v pine >/dev/null 2>&1; then
+		log_info "PINE home and CLI not detected - skipping PINE config installation"
+		return 0
+	fi
+
+	log_info "Configuring PINE with shared skills and MCP servers"
+	execute_quoted mkdir -p "$pine_home/agents/main"
+	copy_config_file "$SCRIPT_DIR/configs/pine/AGENTS.md" "$pine_home/" || true
+	copy_config_file "$SCRIPT_DIR/configs/pine/TOOLS.md" "$pine_home/" || true
+	copy_config_file "$SCRIPT_DIR/configs/pine/USER.md" "$pine_home/" || true
+
+	# Merge managed defaults without discarding user settings.
+	if [ -f "$pine_home/pine.json" ] && command -v jq >/dev/null 2>&1; then
+		local merged="$pine_home/pine.json.my-ai-tools.tmp"
+		if jq -s '.[0] as $managed | .[1] as $user |
+			($managed * $user) |
+			.mcp = (($managed.mcp // {}) * ($user.mcp // {})) |
+			.skills = (((($managed.skills // []) + ($user.skills // [])) | unique))' \
+			"$SCRIPT_DIR/configs/pine/pine.json" "$pine_home/pine.json" >"$merged"; then
+			execute_quoted cp "$pine_home/pine.json" "$pine_home/pine.json.bak"
+			execute_quoted mv "$merged" "$pine_home/pine.json"
+		else
+			rm -f "$merged"
+			log_warning "Could not merge PINE pine.json; existing file unchanged"
+		fi
+	elif [ ! -f "$pine_home/pine.json" ]; then
+		copy_config_file "$SCRIPT_DIR/configs/pine/pine.json" "$pine_home/" || true
+	else
+		log_warning "jq is unavailable; existing PINE pine.json unchanged"
+	fi
+
+	if [ -f "$pine_home/agents/main/agent.json" ] && command -v jq >/dev/null 2>&1; then
+		local merged_agent="$pine_home/agents/main/agent.json.my-ai-tools.tmp"
+		if jq -s '.[0] * .[1]' \
+			"$SCRIPT_DIR/configs/pine/agents/main/agent.json" "$pine_home/agents/main/agent.json" >"$merged_agent"; then
+			execute_quoted cp "$pine_home/agents/main/agent.json" "$pine_home/agents/main/agent.json.bak"
+			execute_quoted mv "$merged_agent" "$pine_home/agents/main/agent.json"
+		else
+			rm -f "$merged_agent"
+			log_warning "Could not merge PINE main agent config; existing file unchanged"
+		fi
+	elif [ ! -f "$pine_home/agents/main/agent.json" ]; then
+		copy_config_file "$SCRIPT_DIR/configs/pine/agents/main/agent.json" "$pine_home/agents/main/" || true
+	fi
+
+	log_success "PINE configs copied with shared skills and MCP servers"
 }
 
 copy_devin_configs() {

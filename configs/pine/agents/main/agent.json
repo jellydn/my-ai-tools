@@ -1,0 +1,6 @@
+{
+	"description": "Main coding agent for planning, researching, and working in repositories",
+	"tools": ["read", "bash", "edit", "write", "grep", "find", "ls"],
+	"globalMcp": true,
+	"subagents": { "maxParallel": 4, "mcp": true }
+}

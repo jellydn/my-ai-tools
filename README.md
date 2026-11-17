@@ -333,6 +333,10 @@ The installer manages these common resources where the target tool supports them
 The MCP registry includes integrations such as Context7, sequential thinking, qmd, codebase memory, agent memory,
 fff, React Grab, logpilot, sem, and ctx. Installation depends on each server's runtime and credentials.
 
+PINE uses its native `~/.pine` home. When PINE is installed, the setup script backs up that home and merges the shared
+MCP registry, universal `~/.agents/skills`, and global guidance into PINE's own configuration without replacing user
+settings.
+
 For explicit cross-project user preferences, [user-memory MCP](packages/user-memory-mcp/README.md) provides
 five preference tools backed by local files. It is **optional**: the installer does not install or configure it.
 The existing qmd, codebase-memory-mcp, and agentmemory integrations remain unchanged. Follow the package guide

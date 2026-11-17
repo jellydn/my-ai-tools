@@ -3413,9 +3413,13 @@ Start PINE in the current project directory:
 pine .
 ```
 
-Use `pine start` to run the daemon without the terminal UI so agents can continue reacting to events. PINE owns its
-configuration and data under `~/.pine`; this repository does not manage a PINE configuration or add it to the shared
-installer. See the [PINE README](https://github.com/pmndre/pine) and [documentation index](https://github.com/pmndre/pine/blob/next/docs/SKILL.md)
+When PINE is installed, the setup script also backs up `~/.pine` and configures its native home with the shared
+`~/.agents/skills` directory, the repository's global agent guidance, and the same MCP server set used by the other
+coding agents. Existing `pine.json` and `agents/main/agent.json` values are preserved and merged; managed values get a
+`.bak` copy before replacement. The PINE CLI remains the owner of its configuration and data under `~/.pine`.
+
+Use `pine start` to run the daemon without the terminal UI so agents can continue reacting to events. See the
+[PINE README](https://github.com/pmndre/pine) and [documentation index](https://github.com/pmndre/pine/blob/next/docs/SKILL.md)
 for event sources, models, security, Docker, and service setup.
 
 ---
