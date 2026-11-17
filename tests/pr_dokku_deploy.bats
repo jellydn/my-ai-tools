@@ -102,3 +102,42 @@ load helpers
 	' _ "$REPO_ROOT"
 	[ "$status" -eq 0 ]
 }
+
+@test "Dokku sync aborts without changing config when reading the model fails" {
+	run bash -c '
+		set -e
+		export HOME="$(mktemp -d)"
+		trap '"'"'rm -rf "$HOME"'"'"' EXIT
+		export DOKKU_SSH_PRIVATE_KEY=$'"'"'fixture\r\nkey'"'"'
+		export OPENROUTER_API_KEY=" sk-or-v1-fixture " OPENAI_API_KEY=""
+		export DOKKU_HOST=example.invalid DOKKU_APP=ai-tools
+		export RUNNER_TEMP="$HOME/rt"
+		export CALL_LOG="$HOME/calls"
+		rm -rf "$RUNNER_TEMP"; mkdir -p "$RUNNER_TEMP"
+		ssh-keygen() {
+			if [ "$1" = -y ]; then echo fixture-public-key; else echo "256 SHA256:fixture (ED25519)"; fi
+		}
+		ssh-keyscan() { echo fixture-known-host; }
+		ssh() {
+			printf "%s\n" "$*" >>"$CALL_LOG"
+			case "$*" in
+			*"config:get ai-tools OPENAI_EMBEDDING_MODEL"*) return 30 ;;
+			*) return 0 ;;
+			esac
+		}
+		export -f ssh-keygen ssh-keyscan ssh
+		awk '\''
+			/- name: Sync OpenRouter API key to Dokku/ { step=1; next }
+			step && /        run: \|/ { body=1; next }
+			body && /      - name:/ { exit }
+			body { sub(/^          /, ""); sub(/\r$/, ""); print }
+		'\'' "$1/.github/workflows/dokku.yml" >"$HOME/sync.sh"
+		set +e
+		bash -e -o pipefail "$HOME/sync.sh"; rc=$?
+		set -e
+		[ "$rc" -ne 0 ] || return 40
+		grep -F "config:set ai-tools" "$CALL_LOG" >/dev/null && return 41 || true
+		[ ! -e "$RUNNER_TEMP/previous_embedding_model" ] || return 42
+	' _ "$REPO_ROOT"
+	[ "$status" -eq 0 ]
+}
