@@ -11,18 +11,6 @@ metadata:
 
 # Code Quality Review
 
-## What
-
-- Run an extremely strict maintainability and structural code quality review — flags abstraction issues, spaghetti growth, and boundary leaks
-
-## Why
-
-- This skill gives you a repeatable way to handle the task instead of improvising each time.
-
-## How
-
-- Follow the sections below for the concrete steps, commands, checks, and guardrails.
-
 Review the current branch diff for structural quality. Preserve behavior, but actively look for a simpler design that
 deletes concepts, branches, wrappers, or layers instead of moving complexity around.
 
