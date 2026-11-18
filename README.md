@@ -253,7 +253,16 @@ The direct method avoids an upstream PowerShell `$Minimal`/`$minimal` variable c
 the release URL, expected hash, and destination for manual recovery. In a separate terminal, add that directory
 and npm's global prefix to your user PATH, or use full executable paths. Unix/WSL installation paths are unchanged.
 
-#### Plannotator Inbox CLI
+#### Plannotator installation and Inbox CLI
+
+On macOS, Linux, and WSL, install Plannotator with the official installer:
+
+```bash
+curl -fsSL https://plannotator.ai/install.sh | bash
+```
+
+The default my-ai-tools installation runs this same installer on Unix-like systems. On native Windows,
+it uses the pinned official v0.29.0 binary fallback documented above instead of executing a remote PowerShell script.
 
 After installation, use the `plannotator inbox` command to open and manage the local Inbox:
 
