@@ -119,6 +119,16 @@
     ],
     "PreToolUse": [
       {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/protect-ai-tools.sh\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "WebSearch",
         "hooks": [
           {
