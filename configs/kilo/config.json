@@ -20,7 +20,7 @@
 		},
 		"sequential-thinking": {
 			"type": "local",
-			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+			"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking@2026.7.4"],
 			"enabled": true
 		},
 		"react-grab-mcp": {

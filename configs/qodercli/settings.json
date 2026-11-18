@@ -78,7 +78,7 @@
     "sequential-thinking": {
       "args": [
         "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
+        "@modelcontextprotocol/server-sequential-thinking@2026.7.4"
       ],
       "command": "npx"
     }
