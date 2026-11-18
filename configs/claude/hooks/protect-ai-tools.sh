@@ -9,16 +9,23 @@
 # its own rules.
 #
 # Read-only inspection (cat, ls, grep, jq, ...) stays allowed - workflows
-# such as the retro skill read the managed memory stores. A shell command
-# that touches a managed path must be recognisably read-only in EVERY
-# segment: anything else fails closed with a denial. A writer in a later
-# segment (after ; & | or a newline), a writer inside a command substitution
-# ($(...) or `...`) or a process substitution, a redirect onto the managed
-# path, and a diff --output/-o flag are all denials; uniq and sdiff are not
-# on the allowlist because they can write an output-file operand, and sort
-# (-o), sed (-i and its w command), yq (-i) and delegates like env and
-# command stay off it too, because a first word alone does not prove a
-# command is read-only. The file-tool denial is the reliable layer.
+# such as the retro skill read the managed memory stores. Every segment of
+# a shell command (split at ; & | and newline, quote- and escape-aware, so
+# \" does not end a string and an escaped separator stays literal) that
+# names a managed path must be recognisably read-only; a segment that names
+# no managed path is not this guard's business, but an unallowlisted first
+# word plus any reference to the managed layer still fails closed. A writer
+# inside a command substitution ($(...) or `...`) or a process substitution
+# (<( ) or >( )) is a denial - including inside a segment the opt-out
+# exempts, because the substitution runs before the override could apply -
+# as are a redirect onto the managed path and a diff --output/-o flag.
+# Quoted data is not code: grep '$(foo)' file stays a read. The allowlist
+# matches read-only PowerShell cmdlets case-insensitively; Bash matching
+# stays case-sensitive. uniq and sdiff are not on the allowlist because
+# they can write an output-file operand, and sort (-o), sed (-i and its w
+# command), yq (-i) and delegates like env and command stay off it too,
+# because a first word alone does not prove a command is read-only. The
+# file-tool denial is the reliable layer.
 #
 # Override for one shell command: begin the command with the exact token
 # AI_TOOLS_EDIT_OK=1 (`AI_TOOLS_EDIT_OK=1 <command>`), or, in PowerShell,
@@ -47,6 +54,9 @@ NL=$'\n'
 # One literal backslash, spelled in octal so the quoting pattern does
 # not trip the SC1003 info check.
 bs=$'\134'
+# One literal backtick, spelled in octal for the same reason: the
+# PowerShell escape character.
+bt=$'\140'
 
 tool_name=$(printf '%s' "$input" | jq -r '.tool_name // empty')
 
@@ -69,20 +79,33 @@ esac
 
 [ -n "$target" ] || exit 0
 
-# Normalize both sides to forward slashes, collapse doubled separators, and
-# resolve . and .. path components textually: on Windows, Claude Code
-# delivers file-tool paths with native backslashes even though hooks run
-# under Git Bash, so escaped separators can arrive doubled, and HOME may be
-# a drive-letter path (C:/Users/x) or an MSYS one (/c/Users/x) - both
-# spellings of home are accepted as prefixes. The dot collapse closes the
-# bypass $HOME/x/../.ai-tools/..., where the managed path hides behind a
-# parent component a textual prefix match cannot see through.
+# The shell's escape character: backslash in Bash, backtick in PowerShell.
+esc=$bs
+case "$tool_name" in
+PowerShell) esc=$bt ;;
+esac
+
+# Collapse doubled separators and resolve . and .. path components
+# textually: the dot collapse closes the bypass $HOME/x/../.ai-tools/...,
+# where the managed path hides behind a parent component a textual prefix
+# match cannot see through. One pass can expose work for another (the empty
+# component in //../ hides from the .. rule until // is collapsed), so
+# squeeze iterates until the text stops changing.
 squeeze() {
-	printf '%s' "$1" | sed -E \
-		-e ':dot' -e 's|/[.]/|/|g' -e 't dot' \
-		-e ':up' -e 's|/[^/][^/]*/[.][.]/|/|g' -e 't up' \
-		-e 's|/[.]$|/|' -e 's|/[.][.]$|/|' \
-		-e 's|/{2,}|/|g' -e 's|/$||'
+	local s="$1" t
+	# One pass can expose work for another: the empty component in
+	# //../ hides from the .. rule until // is collapsed, so iterate
+	# until the text stops changing.
+	while :; do
+		t=$(printf '%s' "$s" | sed -E \
+			-e ':dot' -e 's|/[.]/|/|g' -e 't dot' \
+			-e ':up' -e 's|/[^/][^/]*/[.][.]/|/|g' -e 't up' \
+			-e 's|/[.]$|/|' -e 's|/[.][.]$|/|' \
+			-e 's|/{2,}|/|g' -e 's|/$||')
+		[ "$t" = "$s" ] && break
+		s=$t
+	done
+	printf '%s' "$s"
 }
 home=$(squeeze "${HOME:-$(cd ~ && pwd)}")
 userprofile=$(squeeze "${USERPROFILE:-${userprofile:-}}")
@@ -111,21 +134,103 @@ case "$home" in
 	;;
 esac
 
-target=${target//"$bs"//}
+# PowerShell commands and file-tool paths carry native backslash
+# separators; Bash commands keep theirs, because backslash is the Bash
+# escape character and the escape-aware splitting below must see it.
+case "$tool_name" in
+Bash) ;;
+*) target=${target//"$bs"//} ;;
+esac
 target=$(squeeze "$target")
 
-# Quote removal for shell commands: path DETECTION runs on the command with
-# quotes stripped, so a quoted managed path cannot slip past the match.
-# Classification splits segments first - quote-aware, because the shell
-# treats a separator inside quotes as a literal character - and strips
-# quotes per segment, so a quoted separator no longer fakes a boundary.
-matchtext="$target"
+# Quote-aware quote removal for DETECTION: quotes are dropped and escapes
+# honoured, like split_segments below, so a quoted or escaped managed path
+# cannot slip past the match. Inside single quotes, which are literal in
+# both shells, a command substitution, backtick or process substitution is
+# data, not code (grep '$(foo)' file is a literal pattern), so its marker
+# is blanked out; inside double quotes the markers stay, because the shell
+# expands them there.
+# shellcheck disable=SC2016  # the literal $( and backtick probes are matched on purpose
+squash_quotes() {
+	local s="$1" esc="$2" out="" q="" c i
+	for ((i = 0; i < ${#s}; i++)); do
+		c=${s:i:1}
+		if [ -n "$q" ]; then
+			if [ "$q" = "'" ]; then
+				if [ "$c" = "'" ]; then
+					q=""
+				elif [ "$c" = '$' ]; then
+					case "${s:i:2}" in
+					'$(')
+						i=$((i + 1))
+						out+=' '
+						;;
+					*) out+=$c ;;
+					esac
+				elif [ "$c" = '`' ]; then
+					out+=' '
+				elif [ "$c" = '<' ] || [ "$c" = '>' ]; then
+					case "${s:i:2}" in
+					'<('* | '>('*)
+						i=$((i + 1))
+						out+='  '
+						;;
+					*) out+=$c ;;
+					esac
+				else
+					out+=$c
+				fi
+			elif [ "$c" = "$esc" ]; then
+				if [ "$esc" = "$bs" ]; then
+					# In Bash double quotes a backslash escapes only
+					# $, `, ", \ and newline; before anything else it
+					# stays a literal backslash, which keeps a Windows
+					# path spelled inside quotes intact for matching.
+					nxt=${s:$((i + 1)):1}
+					case "$nxt" in
+					'$' | "$bt" | '"' | "$bs" | "$NL")
+						i=$((i + 1))
+						out+=$nxt
+						;;
+					*) out+=$c ;;
+					esac
+				else
+					# The PowerShell backtick escapes any character.
+					i=$((i + 1))
+					out+=${s:i:1}
+				fi
+			elif [ "$c" = '"' ]; then
+				q=""
+			else
+				out+=$c
+			fi
+		elif [ "$c" = "$esc" ]; then
+			i=$((i + 1))
+			out+=${s:i:1}
+		elif [ "$c" = "'" ]; then
+			q="'"
+		elif [ "$c" = '"' ]; then
+			q='"'
+		else
+			out+=$c
+		fi
+	done
+	printf '%s' "$out"
+}
+
+# Quote removal for shell commands: path DETECTION runs on the command
+# with backslashes turned into slashes first (the Windows path spelling),
+# then quotes dropped and escapes honoured, so a quoted or escaped
+# managed path cannot slip past the match, while quoted substitution
+# data is not mistaken for executable code. Segmentation below runs on
+# the raw text, so Bash escapes keep their meaning there.
+matchtext=${target//"$bs"//}
 case "$tool_name" in
-Bash | PowerShell)
-	matchtext=${matchtext//\"/}
-	matchtext=${matchtext//\'/}
-	;;
+Bash | PowerShell) matchtext=$(squash_quotes "$matchtext" "$esc") ;;
 esac
+# The conversion above can create doubled separators from the doubled
+# backslash spelling Windows clients send; squeeze them here too.
+matchtext=$(squeeze "$matchtext")
 
 # Escape a literal path for an extended regular expression.
 esc_re() {
@@ -150,11 +255,13 @@ path_mentioned() {
 }
 
 # The settings*.json family for the shell path: settings.json,
-# settings.local.json, settings.backup.json and any other snapshot sitting
-# directly in .claude - but not a nested path such as
-# .claude/settings-cache/report.json.
+# settings.local.json, settings.backup.json and any other snapshot whose
+# whole basename matches settings*.json, sitting directly in .claude - not
+# a nested path such as .claude/settings-cache/report.json, and not a
+# different file whose name merely extends the family, such as
+# settings.backup.json.bak or settings.jsonx.
 settings_regex() {
-	printf '%s/[.]claude/settings[^/]*[.]json' "$(esc_re "$1")"
+	printf '%s/[.]claude/settings[^/]*[.]json([^/.[:alnum:]_-]|$)' "$(esc_re "$1")"
 }
 settings_mentioned() {
 	local p="$1"
@@ -167,12 +274,17 @@ settings_mentioned() {
 
 # True when a command segment names the protected path $2: as a literal
 # substring for a plain path, by (optionally case-insensitive) regex for the
-# re:/rei: settings entries.
+# re:/rei: settings entries. A plain path that starts with the literal
+# $env: prefix is a PowerShell environment spelling, which is
+# case-insensitive ($env:UserProfile and $env:USERPROFILE name one
+# variable), so it matches case-insensitively too.
+# shellcheck disable=SC2016  # the literal $env: prefix is matched on purpose
 entry_present() {
 	local seg="$1" entry="$2"
 	case "$entry" in
 	rei:*) printf '%s' "$seg" | grep -Eiq -- "${entry#rei:}" ;;
 	re:*) printf '%s' "$seg" | grep -Eq -- "${entry#re:}" ;;
+	'$env:'*) printf '%s' "$seg" | grep -Eiq -- "$(esc_re "$entry")" ;;
 	*)
 		case "$seg" in
 		*"$entry"*) return 0 ;;
@@ -186,7 +298,10 @@ entry_present() {
 # &>> >| <>, with optional whitespace and quotes between the operator and
 # the path. No boundary is required before the operator: `echo x> path` is
 # a valid redirect. A `>` inside a quoted string can therefore cause a
-# false denial, which errs on the safe side.
+# false denial, which errs on the safe side. Entries that start with the
+# literal $env: prefix are PowerShell environment spellings and match
+# case-insensitively, like the plain-path presence check.
+# shellcheck disable=SC2016  # the literal $env: prefix is matched on purpose
 redirects_to() {
 	local seg="$1" entry="$2" pat
 	case "$entry" in
@@ -198,6 +313,10 @@ redirects_to() {
 		pat="${entry#re:}"
 		printf '%s' "$seg" | grep -Eq -- "((&|[0-9]+)?>{1,2}|<>)[|]?[[:space:]\"]*$pat([[:space:]\"'/.]|$)"
 		;;
+	'$env:'*)
+		pat=$(esc_re "$entry")
+		printf '%s' "$seg" | grep -Eiq -- "((&|[0-9]+)?>{1,2}|<>)[|]?[[:space:]\"]*$pat([[:space:]\"'/.]|$)"
+		;;
 	*)
 		pat=$(esc_re "$entry")
 		printf '%s' "$seg" | grep -Eq -- "((&|[0-9]+)?>{1,2}|<>)[|]?[[:space:]\"]*$pat([[:space:]\"'/.]|$)"
@@ -205,22 +324,80 @@ redirects_to() {
 	esac
 }
 
-# Split a shell command into segments at ; & | and newline, quote-aware: a
-# separator inside single or double quotes is a literal character, exactly
-# as the shell will treat it. Quotes themselves are dropped; an unterminated
-# quote ends the last segment.
+# Split a shell command into segments at ; & | and newline, quote- and
+# escape-aware: a separator inside single or double quotes is a literal
+# character, exactly as the shell will treat it, and the escape character
+# (backslash in Bash, backtick in PowerShell) makes the next character
+# literal too, so \" does not close a double-quoted string and an escaped
+# separator is not a boundary. Quotes themselves are dropped. Inside
+# single quotes, which are literal in both shells, a command substitution,
+# backtick or process substitution is data, not code, so its marker is
+# blanked out; inside double quotes the markers stay, because the shell
+# expands them there. An unterminated quote ends the last segment.
+# shellcheck disable=SC2016  # the literal $( and backtick probes are matched on purpose
 split_segments() {
-	local s="$1" out="" q="" c i
+	local s="$1" esc="$2" out="" q="" c i
 	for ((i = 0; i < ${#s}; i++)); do
 		c=${s:i:1}
 		if [ -n "$q" ]; then
-			if [ "$c" = "$q" ]; then
+			if [ "$q" = "'" ]; then
+				if [ "$c" = "'" ]; then
+					q=""
+				elif [ "$c" = '$' ]; then
+					case "${s:i:2}" in
+					'$(')
+						i=$((i + 1))
+						out+=' '
+						;;
+					*) out+=$c ;;
+					esac
+				elif [ "$c" = '`' ]; then
+					out+=' '
+				elif [ "$c" = '<' ] || [ "$c" = '>' ]; then
+					case "${s:i:2}" in
+					'<('* | '>('*)
+						i=$((i + 1))
+						out+='  '
+						;;
+					*) out+=$c ;;
+					esac
+				else
+					out+=$c
+				fi
+			elif [ "$c" = "$esc" ]; then
+				if [ "$esc" = "$bs" ]; then
+					# In Bash double quotes a backslash escapes only
+					# $, `, ", \ and newline; before anything else it
+					# stays a literal backslash, which keeps a Windows
+					# path spelled inside quotes intact for matching.
+					nxt=${s:$((i + 1)):1}
+					case "$nxt" in
+					'$' | "$bt" | '"' | "$bs" | "$NL")
+						i=$((i + 1))
+						out+=$nxt
+						;;
+					*) out+=$c ;;
+					esac
+				else
+					# The PowerShell backtick escapes any character.
+					i=$((i + 1))
+					out+=${s:i:1}
+				fi
+			elif [ "$c" = '"' ]; then
 				q=""
 			else
 				out+=$c
 			fi
-		elif [ "$c" = "'" ] || [ "$c" = '"' ]; then
-			q=$c
+		elif [ "$c" = "$esc" ]; then
+			# Outside quotes an escape protects the next character
+			# too: it cannot open a quote and cannot act as a
+			# separator (echo foo\;bar is one command).
+			i=$((i + 1))
+			out+=${s:i:1}
+		elif [ "$c" = "'" ]; then
+			q="'"
+		elif [ "$c" = '"' ]; then
+			q='"'
 		elif [ "$c" = ';' ] || [ "$c" = '&' ] || [ "$c" = '|' ] || [ "$c" = "$NL" ]; then
 			printf '%s' "$out$NL"
 			out=""
@@ -232,29 +409,62 @@ split_segments() {
 	return 0
 }
 
-# True when this segment, on its own, requires a denial: it names one of the
-# mentioned protected paths and is not recognisably read-only.
-segment_denies() {
-	local seg="$1" mentions="$2" entry word
-	# A command substitution, backtick or process substitution cannot be
-	# classified: a writer can hide inside it ($(touch ...), cat $(rm ...),
-	# `rm ...`). If the segment also names a managed path, fail closed -
-	# even when the substitution sits inside double quotes, where the shell
-	# would expand it.
-	# shellcheck disable=SC2016  # the literal $( and backtick probes are matched on purpose
+# True when the segment hides a command the hook cannot classify: a command
+# substitution, a backtick or a process substitution (<( ... ) or
+# >( ... )). A writer hides inside them ($(touch ...), `rm ...`,
+# echo >(touch ...)), so a segment that has one and also names a managed
+# path fails closed - even when the substitution sits inside double quotes,
+# where the shell would expand it, and even inside a segment the
+# AI_TOOLS_EDIT_OK override exempts, because the substitution runs before
+# the override could apply.
+# shellcheck disable=SC2016  # the literal $(, backtick and <( probes are matched on purpose
+substitution_denies() {
+	local seg="$1" mentions="$2" entry
 	case "$seg" in
-	*'$('* | *'`'* | *'<('*)
+	*'$('* | *'`'* | *'<('* | *'>('*)
 		while IFS= read -r entry; do
 			[ -n "$entry" ] || continue
 			if entry_present "$seg" "$entry"; then return 0; fi
 		done <<<"$mentions"
 		;;
 	esac
+	return 1
+}
+
+# True when this segment, on its own, requires a denial. A segment that
+# names a managed path must be recognisably read-only; a segment that names
+# no managed path is not this guard's business. An unallowlisted first word
+# plus any reference to the managed layer (a path fragment such as
+# .ai-tools or .claude without a full prefix) still fails closed, so a
+# partial reference cannot smuggle a writer through.
+segment_denies() {
+	local seg="$1" mentions="$2" shell="${3:-Bash}" entry word scoped=0
+	# The Windows path spelling of the same segment: Bash keeps its
+	# backslashes as escape characters in $seg, but a quoted backslash
+	# path on Git Bash still names the managed file, so every path check
+	# below accepts both spellings.
+	local segc
+	segc=$(squeeze "${seg//"$bs"//}")
+	if substitution_denies "$seg$segc" "$mentions"; then return 0; fi
 	# Redirection onto a managed path denies, whatever the first word is.
 	while IFS= read -r entry; do
 		[ -n "$entry" ] || continue
-		if redirects_to "$seg" "$entry"; then return 0; fi
+		if redirects_to "$seg" "$entry" || redirects_to "$segc" "$entry"; then return 0; fi
 	done <<<"$mentions"
+	# Does this segment name a managed path at all?
+	while IFS= read -r entry; do
+		[ -n "$entry" ] || continue
+		if entry_present "$seg" "$entry" || entry_present "$segc" "$entry"; then
+			scoped=1
+			break
+		fi
+	done <<<"$mentions"
+	case "$seg" in
+	*ai-tools* | *'.claude'*) scoped=1 ;;
+	esac
+	if [ "$scoped" -eq 0 ]; then
+		return 1
+	fi
 	# Junk from splitting redirect decorations (2>&1 becomes a segment `1`,
 	# &>file a segment `>file`): a first token made only of redirect
 	# characters is not a command. Its target was already checked above.
@@ -291,26 +501,32 @@ segment_denies() {
 		while IFS= read -r entry; do
 			[ -n "$entry" ] || continue
 			if printf '%s' "$seg" | grep -Eq -- '(^|[[:space:]])(-o([[:space:]]|$)|--output=?)' &&
-				entry_present "$seg" "$entry"; then
+				{ entry_present "$seg" "$entry" || entry_present "$segc" "$entry"; }; then
 				return 0
 			fi
 		done <<<"$mentions"
 	fi
-	# Every first word must be on the read-only allowlist; anything
+	# The first word must be on the read-only allowlist; anything
 	# unrecognised fails closed, which is what catches the writers (rm, tee,
-	# sed -i, python -c, ...) without a per-writer list.
+	# sed -i, python -c, ...) without a per-writer list. PowerShell cmdlet
+	# names are case-insensitive ($env:name, Get-Content and get-content
+	# name one command); Bash matching stays case-sensitive.
+	if [ "$shell" = PowerShell ]; then
+		word=$(printf '%s' "$word" | tr '[:upper:]' '[:lower:]')
+	fi
 	case "$word" in
-	cat | less | more | head | tail | grep | egrep | fgrep | rg | ripgrep | jq | ls | stat | file | wc | diff | cmp | md5sum | shasum | sha1sum | sha256sum | md5 | cksum | basename | dirname | realpath | readlink | tree | bat | du | df | type | which | printenv | pwd | echo | printf | test | seq | date | true | false | Get-Content | Get-Item | Get-ChildItem | Test-Path | Measure-Object | Select-String) return 1 ;;
+	cat | less | more | head | tail | grep | egrep | fgrep | rg | ripgrep | jq | ls | stat | file | wc | diff | cmp | md5sum | shasum | sha1sum | sha256sum | md5 | cksum | basename | dirname | realpath | readlink | tree | bat | du | df | type | which | printenv | pwd | echo | printf | test | seq | date | true | false | Get-Content | Get-Item | Get-ChildItem | Test-Path | Measure-Object | Select-String | get-content | get-item | get-childitem | test-path | measure-object | select-string) return 1 ;;
 	*) return 0 ;;
 	esac
 }
 
 # True when the shell command needs a denial. Splits the command into
-# segments and requires every segment to be recognisably read-only, with the
-# one-command override honoured for the segment it introduces only.
+# segments and requires every segment that names a managed path to be
+# recognisably read-only, with the one-command override honoured for the
+# segment it introduces only.
 classify_shell() {
-	local raw="$1" mentions="$2" segs seg first=1 opted=0 val
-	segs=$(split_segments "$raw")
+	local raw="$1" mentions="$2" shell="$3" esc="$4" segs seg first=1 opted=0 val
+	segs=$(split_segments "$raw" "$esc")
 	while IFS= read -r seg; do
 		[ -n "$seg" ] || continue
 		seg=${seg#"${seg%%[![:space:]]*}"}
@@ -318,7 +534,13 @@ classify_shell() {
 			first=0
 			case "$seg" in
 			# The Bash one-command override: the token begins the command.
-			AI_TOOLS_EDIT_OK=1 | AI_TOOLS_EDIT_OK=1[[:space:]]*) continue ;;
+			# The override exempts the segment from the read-only checks
+			# below, but anything inside a substitution still runs before
+			# the override could apply, so that stays checked.
+			AI_TOOLS_EDIT_OK=1 | AI_TOOLS_EDIT_OK=1[[:space:]]*)
+				if substitution_denies "$seg" "$mentions"; then return 0; fi
+				continue
+				;;
 			esac
 			# The PowerShell one-command override: the assignment is the
 			# first statement and opts out the statement that follows it.
@@ -332,9 +554,12 @@ classify_shell() {
 		fi
 		if [ "$opted" -eq 1 ]; then
 			opted=0
+			# The opted-out statement keeps its substitution denial:
+			# the substitution runs before the override could apply.
+			if substitution_denies "$seg" "$mentions"; then return 0; fi
 			continue
 		fi
-		if segment_denies "$seg" "$mentions"; then return 0; fi
+		if segment_denies "$seg" "$mentions" "$shell"; then return 0; fi
 	done <<<"$segs"
 	return 1
 }
@@ -407,7 +632,7 @@ for prefix in "$home" "$alt_home" "$userprofile" '~' '$HOME' '$env:USERPROFILE';
 	fi
 done
 
-if [ -n "$mentions" ] && classify_shell "$target" "$mentions"; then
+if [ -n "$mentions" ] && classify_shell "$target" "$mentions" "$tool_name" "$esc"; then
 	deny "$DENY_REASON"
 fi
 

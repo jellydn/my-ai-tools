@@ -100,8 +100,29 @@ run_hook() {
 	echo "$output" | grep -q '"permissionDecision": "deny"'
 }
 
-@test "denies a Windows backslash Bash redirect into managed hooks" {
-	HOME="C:/Users/reviewer" run run_hook '{"tool_name":"Bash","tool_input":{"command":"echo x > C:\\\\Users\\\\reviewer\\\\.claude\\\\hooks\\\\guard.ts"}}'
+# In Bash the backslashes of an unquoted C:\Users... word are escape
+# characters: Bash consumes them, so the real target is not the managed
+# file. Quoted, the backslashes stay and the path is real on Git Bash
+# (the JSON here delivers the doubled-separator form Claude Code sends),
+# so the quoted forms are the denial cases.
+@test "denies a quoted Windows backslash Bash redirect into managed hooks" {
+	HOME="C:/Users/reviewer" run run_hook "$(jq -n --arg c 'echo x > "C:\\Users\\reviewer\\.claude\\hooks\\guard.ts"' '{tool_name:"Bash",tool_input:{command:$c}}')"
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "denies a single-backslash quoted Windows path in Bash" {
+	HOME="C:/Users/reviewer" run run_hook "$(jq -n --arg c 'echo x > "C:\Users\reviewer\.claude\hooks\guard.ts"' '{tool_name:"Bash",tool_input:{command:$c}}')"
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "allows an unquoted Windows backslash path in Bash" {
+	HOME="C:/Users/reviewer" run run_hook "$(jq -n --arg c 'echo x > C:\Users\reviewer\.claude\hooks\guard.ts' '{tool_name:"Bash",tool_input:{command:$c}}')"
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
+}
+
+@test "denies an unquoted doubled-backslash Windows path in Bash" {
+	HOME="C:/Users/reviewer" run run_hook "$(jq -n --arg c 'echo x > C:\\Users\\reviewer\\.claude\\hooks\\guard.ts' '{tool_name:"Bash",tool_input:{command:$c}}')"
 	echo "$output" | grep -q '"permissionDecision": "deny"'
 }
 
@@ -148,8 +169,8 @@ python3 -c pass ~/.ai-tools/MEMORY.md" '{tool_name:"Bash",tool_input:{command:$c
 	echo "$output" | grep -q '"permissionDecision": "deny"'
 }
 
-@test "denies a PowerShell-style env path into managed settings" {
-	HOME="C:/Users/reviewer" run run_hook '{"tool_name":"Bash","tool_input":{"command":"echo x > $env:USERPROFILE\\.claude\\settings.json"}}'
+@test "denies a PowerShell env path into managed settings" {
+	HOME="C:/Users/reviewer" run run_hook "$(jq -n --arg c 'echo x > $env:USERPROFILE\.claude\settings.json' '{tool_name:"PowerShell",tool_input:{command:$c}}')"
 	echo "$output" | grep -q '"permissionDecision": "deny"'
 }
 
@@ -241,4 +262,112 @@ python3 -c pass ~/.ai-tools/MEMORY.md" '{tool_name:"Bash",tool_input:{command:$c
 	run run_hook '{"tool_name":"Grep","tool_input":{"pattern":"ai-tools"}}'
 	[ "$status" -eq 0 ]
 	[ -z "$output" ]
+}
+
+# Escape handling, per-segment scoping and case-insensitive PowerShell
+# matching: regression cases for the quoted-path and env-home bypasses.
+
+@test "denies a writer hidden behind an escaped quote" {
+	bs=$(awk 'BEGIN{printf "%c", 92}')
+	payload=$(jq -n --arg c "echo \"a${bs}\"b\"; rm ~/.ai-tools/MEMORY.md" '{tool_name:"Bash",tool_input:{command:$c}}')
+	run run_hook "$payload"
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "allows an escaped quote that keeps a semicolon inside one argument" {
+	bs=$(awk 'BEGIN{printf "%c", 92}')
+	payload=$(jq -n --arg c "echo \"a${bs}\"; rm $FAKE_HOME/.ai-tools/MEMORY.md\"" '{tool_name:"Bash",tool_input:{command:$c}}')
+	run run_hook "$payload"
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
+}
+
+@test "allows a backtick-escaped separator inside a PowerShell string" {
+	bt=$(awk 'BEGIN{printf "%c", 96}')
+	payload=$(jq -n --arg c "echo \"a${bt}\"; b; rm $FAKE_HOME/.ai-tools/MEMORY.md\"" '{tool_name:"PowerShell",tool_input:{command:$c}}')
+	run run_hook "$payload"
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
+}
+
+@test "denies a PowerShell redirect through a lowercase env home" {
+	HOME="C:/Users/reviewer" run run_hook '{"tool_name":"PowerShell","tool_input":{"command":"echo x > $env:userprofile/.ai-tools/MEMORY.md"}}'
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "allows a PowerShell read through a lowercase env home" {
+	HOME="C:/Users/reviewer" run run_hook '{"tool_name":"PowerShell","tool_input":{"command":"Get-Content $env:userprofile/.ai-tools/MEMORY.md"}}'
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
+}
+
+@test "allows a PowerShell cmdlet written in any casing" {
+	while IFS= read -r cmd; do
+		run run_hook '{"tool_name":"PowerShell","tool_input":{"command":"'"$cmd"' $env:USERPROFILE/.ai-tools/MEMORY.md"}}'
+		[ "$status" -eq 0 ]
+		[ -z "$output" ]
+	done < <(printf '%s\n' 'get-content' 'GET-CONTENT' 'Get-content' 'get-childitem')
+}
+
+@test "denies an uppercased Bash command that is not a real command" {
+	run run_hook '{"tool_name":"Bash","tool_input":{"command":"GET-CONTENT ~/.ai-tools/MEMORY.md"}}'
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "allows a file whose name merely extends the settings family" {
+	run run_hook '{"tool_name":"Bash","tool_input":{"command":"echo x > '"$FAKE_HOME"'/.claude/settings.backup.json.bak"}}'
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
+}
+
+@test "allows a settings-named file that does not end in .json" {
+	run run_hook '{"tool_name":"Bash","tool_input":{"command":"echo x > '"$FAKE_HOME"'/.claude/settings.jsonx"}}'
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
+}
+
+@test "denies a substitution inside the opted-out segment" {
+	payload=$(jq -n --arg c 'AI_TOOLS_EDIT_OK=1 true "$(rm ~/.ai-tools/MEMORY.md)"' '{tool_name:"Bash",tool_input:{command:$c}}')
+	run run_hook "$payload"
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "allows the opt-out without a substitution on the opted-out segment" {
+	run run_hook '{"tool_name":"Bash","tool_input":{"command":"AI_TOOLS_EDIT_OK=1 echo note > ~/.ai-tools/MEMORY.md"}}'
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
+}
+
+@test "denies a writer inside an output process substitution" {
+	run run_hook '{"tool_name":"Bash","tool_input":{"command":"echo >(touch ~/.ai-tools/probe)"}}'
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "allows a single-quoted substitution as a literal argument" {
+	payload=$(jq -n --arg c 'grep '\''$(foo)'\'' ~/.ai-tools/MEMORY.md' '{tool_name:"Bash",tool_input:{command:$c}}')
+	run run_hook "$payload"
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
+}
+
+@test "allows a writer on a segment that names no managed path" {
+	run run_hook '{"tool_name":"Bash","tool_input":{"command":"grep rm ~/.ai-tools/MEMORY.md; touch /tmp/example"}}'
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
+}
+
+@test "denies an unallowlisted segment that references the managed layer" {
+	payload=$(jq -n --arg c 'cat ~/.ai-tools/MEMORY.md; python3 -c '\''import os; os.remove(os.environ["HOME"]+"/.ai-tools/MEMORY.md")'\''' '{tool_name:"Bash",tool_input:{command:$c}}')
+	run run_hook "$payload"
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "denies a file-tool write through a doubled-separator dot-dot path" {
+	run run_hook '{"tool_name":"Write","tool_input":{"file_path":"'"$FAKE_HOME"'/project//../.ai-tools/MEMORY.md","content":"x"}}'
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "denies a shell redirect through a doubled-separator dot-dot path" {
+	run run_hook '{"tool_name":"Bash","tool_input":{"command":"echo x > '"$FAKE_HOME"'/project//../.ai-tools/MEMORY.md"}}'
+	echo "$output" | grep -q '"permissionDecision": "deny"'
 }
