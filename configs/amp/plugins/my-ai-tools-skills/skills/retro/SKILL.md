@@ -109,7 +109,11 @@ A retrospective that only looks at one session forgets on the next one. Also min
    project goes as a patch-ready diff against that project's own repository,
    so it lands where the gap lives; only shared, cross-project changes go to
    the my-ai-tools repository, one commit per theme, so they land through the
-   repository's PR flow and reach every machine through the installer. Run
+   repository's PR flow and reach every machine through the installer. A
+   change to a shared skill must also update its Amp plugin mirror copy
+   (`configs/amp/plugins/my-ai-tools-skills/skills/<name>/`), so the
+   installed plugin and the skills source stay identical; verify with
+   `diff -qr` before pushing. Run
    `./scripts/sync-token-efficiency.sh` after editing canonical sections, and
    `./scripts/sync-token-efficiency.sh --check` before pushing.
 

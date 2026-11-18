@@ -30,6 +30,12 @@
 			"prompt": "We're at 85% of the weekly budget and it's Wednesday. What do I do?",
 			"should_trigger": true,
 			"expected_behavior": "States the projection with the elapsed-time and spending assumptions behind it, or asks for the missing information instead of inventing it, then recommends concrete, actionable levers: cheaper tier for mechanical work, batched shell tool calls; a longer cache TTL only when the harness supports that control."
+		},
+		{
+			"id": "case-5",
+			"prompt": "We're at 60% of the weekly budget, but one harness's usage report is unavailable.",
+			"should_trigger": true,
+			"expected_behavior": "Treats the observed spend as a lower bound because one harness is unknown: reports the per-harness breakdown with the unknown harness listed, states the coverage gap, does not pick a nudge band or publish a projection from incomplete spend, and still recommends the applicable levers."
 		}
 	]
 }

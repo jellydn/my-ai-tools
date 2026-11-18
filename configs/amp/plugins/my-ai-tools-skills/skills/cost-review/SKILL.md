@@ -63,6 +63,13 @@ Then:
 cost = sessions x turns-per-session x requests-per-turn x tokens-per-request x price-per-token
 ```
 
+Compute each derived factor as a ratio of the period's totals — turns
+divided by sessions, requests divided by turns, tokens divided by requests,
+spend divided by tokens — never as an average of per-unit values. Ratios of
+totals cancel across the product, so the factors multiply back to each
+period's total cost exactly, which is what lets the walk reconcile; an
+average of per-unit values does not.
+
 For each term, compute this period and last period, then attribute the cost
 delta with **sequential substitution**: hold every term but one at its
 previous value, recompute the total, and give that term the difference. Walk
@@ -96,6 +103,10 @@ Two situations suspend the walk:
   percentage change and the per-term split are undefined. Report the spend
   as new activity with its absolute amount, and mark the percentage and the
   per-term split as unavailable.
+- **The current period has no usage yet.** With zero current usage there is
+  nothing to attribute and no factors to compute; a negative spend against
+  zero usage (a refund) behaves the same. Report the spend and the gap, and
+  mark the percentage and the per-term split as unavailable.
 - **A factor cannot be observed, or the two periods are not comparable.**
   Exact reconciliation is required only when both periods have complete,
   comparable cost data. Otherwise report the observed total change, list
@@ -106,16 +117,23 @@ Two situations suspend the walk:
 
 1. **Decomposition table** — one row per term: value now, value last period,
    attributed delta, and the source file or command behind it.
-2. **Attribution sentence** — e.g. "the +38% came from turns/session (+41%,
+2. **Per-harness spend breakdown** — one line per harness: its amount and
+   the source behind it. A harness whose total cannot be observed is listed
+   as `unknown`, never omitted.
+3. **Attribution sentence** — e.g. "the +38% came from turns/session (+41%,
    longer coordinator sessions), partly offset by price/token (-9%, cheaper
    model mix on mechanical work)".
-3. **Cost per unit** — cost per merged PR, per review, or per landed task if
+4. **Cost per unit** — cost per merged PR, per review, or per landed task if
    the data supports it. Pair it with a quality signal when one exists
    (revert rate, review findings) so cheap is not confused with good.
-4. **Spend nudges** — if a weekly budget is set (`AI_WEEKLY_BUDGET_USD`), pick
+5. **Spend nudges** — if a weekly budget is set (`AI_WEEKLY_BUDGET_USD`), pick
    the band from the share of the budget actually spent so far, and report the
    projected week-end spend alongside it, with the elapsed-time and spending
-   assumptions the projection rests on. The bands do not overlap:
+   assumptions the projection rests on. When any harness's spend is
+   `unknown`, the observed total is only a lower bound: state the coverage
+   gap, and do not pick a band or publish a projection from it — except
+   when the known spend already exceeds the budget, which still establishes
+   the pause band. The bands do not overlap:
    - under 50% spent: quiet.
    - 50% up to but not including 80% spent: one line in the reply naming the
      projection.
