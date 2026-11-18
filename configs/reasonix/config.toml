@@ -281,7 +281,7 @@ args    = ["-y", "@upstash/context7-mcp@latest"]
 [[plugins]]
 name    = "sequential-thinking"
 command = "npx"
-args    = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+args    = ["-y", "@modelcontextprotocol/server-sequential-thinking@2026.7.4"]
 
 [[plugins]]
 name    = "qmd"
