@@ -17,7 +17,7 @@ metadata:
 
 Attribute AI coding spend instead of summing it. A total answers nothing; a
 per-term decomposition answers "what changed". Follow the Uber software-factory
-method: decompose cost into six terms and attribute the week-over-week change
+method: decompose cost into five terms and attribute the week-over-week change
 term by term, with no unexplained residual.
 
 ## When to Use
@@ -71,10 +71,12 @@ period's total cost exactly, which is what lets the walk reconcile; an
 average of per-unit values does not.
 
 For each term, compute this period and last period, then attribute the cost
-delta with **sequential substitution**: hold every term but one at its
-previous value, recompute the total, and give that term the difference. Walk
-the terms in a fixed order — sessions, turns per session, requests per turn,
-tokens per request, price per token — and state the order in the report,
+delta with **sequential substitution**: walk the terms in a fixed order —
+sessions, turns per session, requests per turn, tokens per request, price
+per token — and for each term recompute the total with that term at its
+current value, earlier terms at their already-updated values, and later
+terms at their previous values; give that term the difference from the
+previous step. State the order in the report,
 because it affects the allocation when several terms move together.
 
 The walk is required, not cosmetic: cost is a product, so the terms'
