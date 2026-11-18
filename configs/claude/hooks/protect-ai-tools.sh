@@ -134,7 +134,10 @@ bash_write_intent() {
 	esc=$(printf '%s' "$p" | sed -e 's/[][\\.^$*+?(){}|]/\\&/g')
 	# Redirection whose target is the managed path: > >> 2> 2>> &> &>> >| <>,
 	# with optional whitespace and quotes between the operator and the path.
-	if printf '%s' "$matchtext" | grep -Eq -- "(^|[[:space:];&(])((&|[0-9]+)?>{1,2}|<>)[|]?[[:space:]\"']*${esc}([[:space:]\"'/.]|$)"; then
+	# No boundary is required before the operator: `echo x> path` is a valid
+	# redirect. A `>` inside a quoted string can therefore cause a false
+	# denial, which errs on the safe side.
+	if printf '%s' "$matchtext" | grep -Eq -- "((&|[0-9]+)?>{1,2}|<>)[|]?[[:space:]\"']*${esc}([[:space:]\"'/.]|$)"; then
 		return 0
 	fi
 	# Commands that create, modify, move, link or remove their target.
@@ -171,7 +174,11 @@ readonly_command() {
 		done
 		case $word in
 		'') continue ;;
-		cat | less | more | head | tail | grep | egrep | fgrep | rg | ripgrep | jq | yq | ls | stat | file | wc | diff | cmp | sdiff | sort | uniq | md5sum | shasum | sha1sum | sha256sum | md5 | cksum | basename | dirname | realpath | readlink | tree | bat | du | df | type | which | command | env | printenv | pwd | echo | printf | test | seq | date | true | false | sed | Get-Content | Get-Item | Get-ChildItem | Test-Path | Measure-Object | Select-String) ;;
+		# Allowlisted names write nothing themselves and delegate to
+		# nothing: sort (-o), sed (w command), yq (-i) and delegates like
+		# env/command are deliberately absent, because a first word alone
+		# does not prove a command is read-only.
+		cat | less | more | head | tail | grep | egrep | fgrep | rg | ripgrep | jq | ls | stat | file | wc | diff | cmp | sdiff | uniq | md5sum | shasum | sha1sum | sha256sum | md5 | cksum | basename | dirname | realpath | readlink | tree | bat | du | df | type | which | printenv | pwd | echo | printf | test | seq | date | true | false | Get-Content | Get-Item | Get-ChildItem | Test-Path | Measure-Object | Select-String) ;;
 		*) return 1 ;;
 		esac
 	done

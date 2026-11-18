@@ -111,6 +111,21 @@ run_hook() {
 	echo "$output" | grep -q '"permissionDecision": "deny"'
 }
 
+@test "denies a redirect with no whitespace before the operator" {
+	run run_hook '{"tool_name":"Bash","tool_input":{"command":"echo x> ~/.claude/hooks/guard.sh"}}'
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "denies write-capable arguments to allowlisted-looking commands" {
+	while IFS= read -r cmd; do
+		run run_hook '{"tool_name":"Bash","tool_input":{"command":"'"$cmd"'"}}'
+		echo "$output" | grep -q '"permissionDecision": "deny"'
+	done < <(printf '%s\n' \
+		'sort -o ~/.ai-tools/MEMORY.md /tmp/notes' \
+		'sed w ~/.claude/hooks/guard.sh /tmp/notes' \
+		'env python3 -c pass ~/.ai-tools/MEMORY.md')
+}
+
 @test "denies a file-tool write to a managed settings snapshot" {
 	run run_hook '{"tool_name":"Write","tool_input":{"file_path":"'"$FAKE_HOME"'/.claude/settings.backup.json"}}'
 	echo "$output" | grep -q '"permissionDecision": "deny"'
