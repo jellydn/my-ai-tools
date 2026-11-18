@@ -98,6 +98,17 @@ Identify information the agent needed but could not access: logs, service status
 
 When an installed or existing skill repeatedly needs correction, compare the same input across the old and revised versions. Treat the difference as evidence of skill drift: the user's standard moved, the skill was underspecified, or the rule was too literal. Record the smallest durable change and its verification result.
 
+### Memory-store learning loop
+
+A retrospective that only looks at one session forgets on the next one. Also mine the durable stores, so repeated lessons become repository changes instead of re-learned memories:
+
+1. Read the memory layer the session used, per `~/.ai-tools/MEMORY.md`: `qmd` collections for project learnings (`qmd search`), `agentmemory` for session findings (`memory_recall`), and `~/.ai-tools/MEMORY.md` / `agent-memory.md` themselves.
+2. Cluster the entries by theme. A theme with three or more independent entries is a pattern, not a note.
+3. For each pattern, propose the smallest durable home: a deterministic check or hook, a line in the canonical section (`configs/token-efficiency.md`, `configs/experiment-workspaces.md`), or a skill change.
+4. Deliver the proposals as patch-ready diffs against the my-ai-tools repository, one commit per theme, so they land through the repository's own PR flow and reach every machine through the installer. Run `./scripts/sync-token-efficiency.sh` after editing canonical sections, and `./scripts/sync-token-efficiency.sh --check` before pushing.
+
+This keeps the loop human-approved (the Output rules still apply) but gives it a destination: memory stores hold observations, the repository holds rules.
+
 ## Output
 
 Present the result in this order:
