@@ -1,22 +1,33 @@
 #!/usr/bin/env bash
 # PreToolUse guard: refuse agent edits to the my-ai-tools managed layer.
 #
-# Protected: ~/.ai-tools/** (guidelines, memory stores), ~/.claude/settings*.json
-# and ~/.claude/hooks/** (the hook layer itself). Agents propose changes in the
-# my-ai-tools repository and reinstall; hand-editing installed files silently
-# drifts the fleet. This is the "agents loosened 7 of 58 CI checks" guard:
-# the agent must not weaken its own rules.
+# Protected: ~/.ai-tools/** (guidelines, memory stores), every
+# ~/.claude/settings*.json snapshot and ~/.claude/hooks/** (the hook layer
+# itself). Agents propose changes in the my-ai-tools repository and
+# reinstall; hand-editing installed files silently drifts the fleet. This is
+# the "agents loosened 7 of 58 CI checks" guard: the agent must not weaken
+# its own rules.
 #
-# Read-only inspection (cat, ls, grep, jq, ...) stays allowed — workflows such
-# as the retro skill read the managed memory stores. A shell command that
-# touches a managed path must be recognisably read-only: anything else fails
-# closed with a denial, including writers inside one interpreter (an inline
-# python -c with open(..., 'w')). The file-tool denial is the reliable layer.
+# Read-only inspection (cat, ls, grep, jq, ...) stays allowed - workflows
+# such as the retro skill read the managed memory stores. A shell command
+# that touches a managed path must be recognisably read-only in EVERY
+# segment: anything else fails closed with a denial. A writer in a later
+# segment (after ; & | or a newline), a writer inside a command substitution
+# ($(...) or `...`) or a process substitution, a redirect onto the managed
+# path, and a diff --output/-o flag are all denials; uniq and sdiff are not
+# on the allowlist because they can write an output-file operand, and sort
+# (-o), sed (-i and its w command), yq (-i) and delegates like env and
+# command stay off it too, because a first word alone does not prove a
+# command is read-only. The file-tool denial is the reliable layer.
 #
-# Override for a single shell command: BEGIN the command with the exact token
-# AI_TOOLS_EDIT_OK=1 (`AI_TOOLS_EDIT_OK=1 <command>`). Merely containing the
-# token does not opt out. Exporting AI_TOOLS_EDIT_OK=1 for the session also
-# allows file-tool edits.
+# Override for one shell command: begin the command with the exact token
+# AI_TOOLS_EDIT_OK=1 (`AI_TOOLS_EDIT_OK=1 <command>`), or, in PowerShell,
+# make the assignment $env:AI_TOOLS_EDIT_OK = '1' the first statement. The
+# override covers the command it introduces only: `AI_TOOLS_EDIT_OK=1 true;
+# <writer>` checks <writer> like any other command, and in PowerShell every
+# statement after the assignment is checked too. Merely containing the token
+# does not opt out. Exporting AI_TOOLS_EDIT_OK=1 for the session also allows
+# file-tool edits.
 #
 # Reads one Claude Code hook-event JSON object on stdin; emits a deny
 # decision on stdout. Fails open when jq is missing (the installer
@@ -32,6 +43,11 @@ if [ "${AI_TOOLS_EDIT_OK:-}" = "1" ]; then
 	exit 0
 fi
 
+NL=$'\n'
+# One literal backslash, spelled in octal so the quoting pattern does
+# not trip the SC1003 info check.
+bs=$'\134'
+
 tool_name=$(printf '%s' "$input" | jq -r '.tool_name // empty')
 
 target=""
@@ -45,12 +61,6 @@ NotebookEdit)
 	;;
 Bash | PowerShell)
 	target=$(printf '%s' "$input" | jq -r '.tool_input.command // empty')
-	# An explicit opt-out is honoured only as the command's first token;
-	# the token appearing elsewhere (in a comment, an argument, a message)
-	# is not an opt-out.
-	case "$target" in
-	AI_TOOLS_EDIT_OK=1 | AI_TOOLS_EDIT_OK=1[[:space:]]*) exit 0 ;;
-	esac
 	;;
 *)
 	exit 0
@@ -59,26 +69,31 @@ esac
 
 [ -n "$target" ] || exit 0
 
-# Normalize both sides to forward slashes and collapse doubled separators: on
-# Windows, Claude Code delivers file-tool paths with native backslashes even
-# though hooks run under Git Bash, so escaped separators can arrive doubled,
-# and HOME may be a drive-letter path (C:/Users/x) or an MSYS one (/c/Users/x)
-# — both spellings of home are accepted as prefixes.
+# Normalize both sides to forward slashes, collapse doubled separators, and
+# resolve . and .. path components textually: on Windows, Claude Code
+# delivers file-tool paths with native backslashes even though hooks run
+# under Git Bash, so escaped separators can arrive doubled, and HOME may be
+# a drive-letter path (C:/Users/x) or an MSYS one (/c/Users/x) - both
+# spellings of home are accepted as prefixes. The dot collapse closes the
+# bypass $HOME/x/../.ai-tools/..., where the managed path hides behind a
+# parent component a textual prefix match cannot see through.
 squeeze() {
-	printf '%s' "$1" | sed -e 's|/\{2,\}|/|g' -e 's|/$||'
+	printf '%s' "$1" | sed -E \
+		-e ':dot' -e 's|/[.]/|/|g' -e 't dot' \
+		-e ':up' -e 's|/[^/][^/]*/[.][.]/|/|g' -e 't up' \
+		-e 's|/[.]$|/|' -e 's|/[.][.]$|/|' \
+		-e 's|/{2,}|/|g' -e 's|/$||'
 }
-# One literal backslash, spelled in octal so the quoting pattern does
-# not trip the SC1003 info check.
-bs=$'\134'
 home=$(squeeze "${HOME:-$(cd ~ && pwd)}")
 userprofile=$(squeeze "${USERPROFILE:-${userprofile:-}}")
 home=${home//"$bs"//}
 userprofile=${userprofile//"$bs"//}
 
-# Additional home spellings for prefix matching: the MSYS form of a
-# drive-letter home, and the PowerShell env forms — literal, because the hook
-# sees PowerShell text before the shell expands it, and as an environment
-# variable for the Windows-native case.
+# Additional home spelling for prefix matching: the MSYS form of a
+# drive-letter home. The PowerShell env form stays literal, because the hook
+# sees PowerShell text before the shell expands it; it is matched
+# case-insensitively, because PowerShell environment-variable names are
+# case-insensitive ($env:UserProfile and $env:USERPROFILE name one variable).
 alt_home=""
 case "$home" in
 [A-Za-z]:/*)
@@ -89,7 +104,7 @@ case "$home" in
 /[A-Za-z]/*)
 	drive=${home#/}
 	drive=${drive%%/*}
-	# Strip the leading /<drive>/ — '${home#?/}' matches nothing here,
+	# Strip the leading /<drive>/ - '${home#?/}' matches nothing here,
 	# because its first pattern char would have to be the leading slash
 	# followed by another slash, which an MSYS home never has.
 	alt_home="$(printf '%s' "$drive" | tr '[:lower:]' '[:upper:]'):/${home#/[A-Za-z]/}"
@@ -99,9 +114,11 @@ esac
 target=${target//"$bs"//}
 target=$(squeeze "$target")
 
-# Quote removal for shell commands: a quoted managed path must not slip past
-# the match, so matching runs on the command with quotes stripped. Path
-# semantics are unchanged for the read/write intent patterns below.
+# Quote removal for shell commands: path DETECTION runs on the command with
+# quotes stripped, so a quoted managed path cannot slip past the match.
+# Classification splits segments first - quote-aware, because the shell
+# treats a separator inside quotes as a literal character - and strips
+# quotes per segment, so a quoted separator no longer fakes a boundary.
 matchtext="$target"
 case "$tool_name" in
 Bash | PowerShell)
@@ -110,81 +127,216 @@ Bash | PowerShell)
 	;;
 esac
 
-# The hook sees commands before the shell expands them, so the managed paths
-# must match in every form the agent can write them in. File-tool paths are
-# whole values; a shell command may contain the path anywhere.
-# shellcheck disable=SC2016  # '$HOME' is matched literally on purpose
-is_protected() {
+# Escape a literal path for an extended regular expression.
+esc_re() {
+	printf '%s' "$1" | sed -e 's/[][\\.^$*+?(){}|]/\\&/g'
+}
+
+# Detection: does the (quote-stripped) shell command name this protected
+# path? The PowerShell env spelling is matched case-insensitively.
+path_mentioned() {
 	local p="$1"
-	case "$tool_name" in
-	Bash | PowerShell)
-		case "$matchtext" in *"$p"*) return 0 ;; esac
+	# shellcheck disable=SC2016  # the literal $env: prefix is matched on purpose
+	case "$p" in
+	'$env:'*)
+		printf '%s' "$matchtext" | grep -Eiq -- "$(esc_re "$p")"
+		return
 		;;
-	*)
-		case "$target" in "$p" | "$p"/*) return 0 ;; esac
-		;;
+	esac
+	case "$matchtext" in
+	*"$p"*) return 0 ;;
 	esac
 	return 1
 }
 
-# True when the command writes to the managed path $1 (which the caller has
-# already established appears in the command).
-bash_write_intent() {
-	local p="$1" esc cmd
-	esc=$(printf '%s' "$p" | sed -e 's/[][\\.^$*+?(){}|]/\\&/g')
-	# Redirection whose target is the managed path: > >> 2> 2>> &> &>> >| <>,
-	# with optional whitespace and quotes between the operator and the path.
-	# No boundary is required before the operator: `echo x> path` is a valid
-	# redirect. A `>` inside a quoted string can therefore cause a false
-	# denial, which errs on the safe side.
-	if printf '%s' "$matchtext" | grep -Eq -- "((&|[0-9]+)?>{1,2}|<>)[|]?[[:space:]\"']*${esc}([[:space:]\"'/.]|$)"; then
-		return 0
-	fi
-	# Commands that create, modify, move, link or remove their target.
-	for cmd in rm mv cp tee touch truncate chmod chown ln rsync install dd; do
-		if printf '%s' "$matchtext" | grep -Eq -- "(^|[;&|[:space:]])${cmd}[[:space:]]" &&
-			printf '%s' "$matchtext" | grep -Eq -- "${esc}"; then
-			return 0
-		fi
-	done
-	# In-place editors: sed -i, perl -i/-pi.
-	if printf '%s' "$matchtext" | grep -Eq -- "(^|[;&|[:space:]])(sed|perl)[[:space:]][^;&|]*-[a-zA-Z]*i" &&
-		printf '%s' "$matchtext" | grep -Eq -- "${esc}"; then
-		return 0
-	fi
-	return 1
+# The settings*.json family for the shell path: settings.json,
+# settings.local.json, settings.backup.json and any other snapshot sitting
+# directly in .claude - but not a nested path such as
+# .claude/settings-cache/report.json.
+settings_regex() {
+	printf '%s/[.]claude/settings[^/]*[.]json' "$(esc_re "$1")"
+}
+settings_mentioned() {
+	local p="$1"
+	# shellcheck disable=SC2016  # the literal $env: prefix is matched on purpose
+	case "$p" in
+	'$env:'*) printf '%s' "$matchtext" | grep -Eiq -- "$(settings_regex "$p")" ;;
+	*) printf '%s' "$matchtext" | grep -Eq -- "$(settings_regex "$p")" ;;
+	esac
 }
 
-# True when every command segment's first word is a read-only command. A
-# managed path may appear only under such a command; anything unrecognised
-# fails closed (the caller denies). Leading environment assignments are
-# skipped, so `FOO=1 grep x <managed>` classifies as read-only.
-readonly_command() {
-	local rest="$1" seg word nl=$'\n'
-	while [ -n "$rest" ]; do
-		# A newline separates commands just like ; & | do; without it a
-		# multi-line command would be judged by its first word only.
-		seg="${rest%%[;&|"$nl"]*}"
-		rest="${rest#"$seg"}"
-		rest="${rest#[;&|"$nl"]}"
-		seg=${seg#"${seg%%[![:space:]]*}"}
-		word=${seg%%[[:space:]]*}
-		while case $word in [A-Za-z_]*=*) true ;; *) false ;; esac do
+# True when a command segment names the protected path $2: as a literal
+# substring for a plain path, by (optionally case-insensitive) regex for the
+# re:/rei: settings entries.
+entry_present() {
+	local seg="$1" entry="$2"
+	case "$entry" in
+	rei:*) printf '%s' "$seg" | grep -Eiq -- "${entry#rei:}" ;;
+	re:*) printf '%s' "$seg" | grep -Eq -- "${entry#re:}" ;;
+	*)
+		case "$seg" in
+		*"$entry"*) return 0 ;;
+		esac
+		return 1
+		;;
+	esac
+}
+
+# True when the segment redirects onto the protected path: > >> 2> 2>> &>
+# &>> >| <>, with optional whitespace and quotes between the operator and
+# the path. No boundary is required before the operator: `echo x> path` is
+# a valid redirect. A `>` inside a quoted string can therefore cause a
+# false denial, which errs on the safe side.
+redirects_to() {
+	local seg="$1" entry="$2" pat
+	case "$entry" in
+	rei:*)
+		pat="${entry#rei:}"
+		printf '%s' "$seg" | grep -Eiq -- "((&|[0-9]+)?>{1,2}|<>)[|]?[[:space:]\"]*$pat([[:space:]\"'/.]|$)"
+		;;
+	re:*)
+		pat="${entry#re:}"
+		printf '%s' "$seg" | grep -Eq -- "((&|[0-9]+)?>{1,2}|<>)[|]?[[:space:]\"]*$pat([[:space:]\"'/.]|$)"
+		;;
+	*)
+		pat=$(esc_re "$entry")
+		printf '%s' "$seg" | grep -Eq -- "((&|[0-9]+)?>{1,2}|<>)[|]?[[:space:]\"]*$pat([[:space:]\"'/.]|$)"
+		;;
+	esac
+}
+
+# Split a shell command into segments at ; & | and newline, quote-aware: a
+# separator inside single or double quotes is a literal character, exactly
+# as the shell will treat it. Quotes themselves are dropped; an unterminated
+# quote ends the last segment.
+split_segments() {
+	local s="$1" out="" q="" c i
+	for ((i = 0; i < ${#s}; i++)); do
+		c=${s:i:1}
+		if [ -n "$q" ]; then
+			if [ "$c" = "$q" ]; then
+				q=""
+			else
+				out+=$c
+			fi
+		elif [ "$c" = "'" ] || [ "$c" = '"' ]; then
+			q=$c
+		elif [ "$c" = ';' ] || [ "$c" = '&' ] || [ "$c" = '|' ] || [ "$c" = "$NL" ]; then
+			printf '%s' "$out$NL"
+			out=""
+		else
+			out+=$c
+		fi
+	done
+	[ -n "$out" ] && printf '%s' "$out$NL"
+	return 0
+}
+
+# True when this segment, on its own, requires a denial: it names one of the
+# mentioned protected paths and is not recognisably read-only.
+segment_denies() {
+	local seg="$1" mentions="$2" entry word
+	# A command substitution, backtick or process substitution cannot be
+	# classified: a writer can hide inside it ($(touch ...), cat $(rm ...),
+	# `rm ...`). If the segment also names a managed path, fail closed -
+	# even when the substitution sits inside double quotes, where the shell
+	# would expand it.
+	# shellcheck disable=SC2016  # the literal $( and backtick probes are matched on purpose
+	case "$seg" in
+	*'$('* | *'`'* | *'<('*)
+		while IFS= read -r entry; do
+			[ -n "$entry" ] || continue
+			if entry_present "$seg" "$entry"; then return 0; fi
+		done <<<"$mentions"
+		;;
+	esac
+	# Redirection onto a managed path denies, whatever the first word is.
+	while IFS= read -r entry; do
+		[ -n "$entry" ] || continue
+		if redirects_to "$seg" "$entry"; then return 0; fi
+	done <<<"$mentions"
+	# Junk from splitting redirect decorations (2>&1 becomes a segment `1`,
+	# &>file a segment `>file`): a first token made only of redirect
+	# characters is not a command. Its target was already checked above.
+	word=${seg%%[[:space:]]*}
+	if printf '%s' "$word" | grep -Eq '^[&0-9<>]+$'; then
+		case "$word" in
+		*['<>']*)
+			# A redirect operator consumes the token after it as its target.
 			seg=${seg#"$word"}
 			seg=${seg#"${seg%%[![:space:]]*}"}
 			word=${seg%%[[:space:]]*}
-		done
-		case $word in
-		'') continue ;;
-		# Allowlisted names write nothing themselves and delegate to
-		# nothing: sort (-o), sed (w command), yq (-i) and delegates like
-		# env/command are deliberately absent, because a first word alone
-		# does not prove a command is read-only.
-		cat | less | more | head | tail | grep | egrep | fgrep | rg | ripgrep | jq | ls | stat | file | wc | diff | cmp | sdiff | uniq | md5sum | shasum | sha1sum | sha256sum | md5 | cksum | basename | dirname | realpath | readlink | tree | bat | du | df | type | which | printenv | pwd | echo | printf | test | seq | date | true | false | Get-Content | Get-Item | Get-ChildItem | Test-Path | Measure-Object | Select-String) ;;
-		*) return 1 ;;
+			seg=${seg#"$word"}
+			seg=${seg#"${seg%%[![:space:]]*}"}
+			;;
+		*)
+			seg=${seg#"$word"}
+			seg=${seg#"${seg%%[![:space:]]*}"}
+			;;
 		esac
+	fi
+	# Leading environment assignments are skipped, so
+	# `FOO=1 grep x <managed>` classifies as read-only.
+	word=${seg%%[[:space:]]*}
+	while case $word in [A-Za-z_][A-Za-z_0-9]*=*) true ;; *) false ;; esac do
+		seg=${seg#"$word"}
+		seg=${seg#"${seg%%[![:space:]]*}"}
+		word=${seg%%[[:space:]]*}
 	done
-	return 0
+	case "$word" in
+	'') return 1 ;;
+	esac
+	# diff writes a file with --output=FILE or -o FILE.
+	if [ "$word" = diff ]; then
+		while IFS= read -r entry; do
+			[ -n "$entry" ] || continue
+			if printf '%s' "$seg" | grep -Eq -- '(^|[[:space:]])(-o([[:space:]]|$)|--output=?)' &&
+				entry_present "$seg" "$entry"; then
+				return 0
+			fi
+		done <<<"$mentions"
+	fi
+	# Every first word must be on the read-only allowlist; anything
+	# unrecognised fails closed, which is what catches the writers (rm, tee,
+	# sed -i, python -c, ...) without a per-writer list.
+	case "$word" in
+	cat | less | more | head | tail | grep | egrep | fgrep | rg | ripgrep | jq | ls | stat | file | wc | diff | cmp | md5sum | shasum | sha1sum | sha256sum | md5 | cksum | basename | dirname | realpath | readlink | tree | bat | du | df | type | which | printenv | pwd | echo | printf | test | seq | date | true | false | Get-Content | Get-Item | Get-ChildItem | Test-Path | Measure-Object | Select-String) return 1 ;;
+	*) return 0 ;;
+	esac
+}
+
+# True when the shell command needs a denial. Splits the command into
+# segments and requires every segment to be recognisably read-only, with the
+# one-command override honoured for the segment it introduces only.
+classify_shell() {
+	local raw="$1" mentions="$2" segs seg first=1 opted=0 val
+	segs=$(split_segments "$raw")
+	while IFS= read -r seg; do
+		[ -n "$seg" ] || continue
+		seg=${seg#"${seg%%[![:space:]]*}"}
+		if [ "$first" -eq 1 ]; then
+			first=0
+			case "$seg" in
+			# The Bash one-command override: the token begins the command.
+			AI_TOOLS_EDIT_OK=1 | AI_TOOLS_EDIT_OK=1[[:space:]]*) continue ;;
+			esac
+			# The PowerShell one-command override: the assignment is the
+			# first statement and opts out the statement that follows it.
+			if printf '%s' "$seg" | grep -Eiq '^[$]env:AI_TOOLS_EDIT_OK[[:space:]]*='; then
+				val=$(printf '%s' "${seg#*=}" | tr -cd '0-9')
+				if [ "$val" = 1 ]; then
+					opted=1
+					continue
+				fi
+			fi
+		fi
+		if [ "$opted" -eq 1 ]; then
+			opted=0
+			continue
+		fi
+		if segment_denies "$seg" "$mentions"; then return 0; fi
+	done <<<"$segs"
+	return 1
 }
 
 deny() {
@@ -200,52 +352,63 @@ deny() {
 	exit 0
 }
 
-DENY_REASON="$target is part of the my-ai-tools managed layer. Edit the my-ai-tools repository instead and reinstall (./cli.sh), or prefix a shell command with AI_TOOLS_EDIT_OK=1 for this one change."
+DENY_REASON="$target is part of the my-ai-tools managed layer. Edit the my-ai-tools repository instead and reinstall (./cli.sh). For one shell command, begin it with AI_TOOLS_EDIT_OK=1 (Bash) or make the assignment \$env:AI_TOOLS_EDIT_OK = '1' the first statement (PowerShell). Exporting AI_TOOLS_EDIT_OK=1 for the session also allows file-tool edits."
 
-mentioned=0
-# shellcheck disable=SC2016  # '$HOME' is matched literally on purpose
-for prefix in "$home" "$alt_home" "$userprofile" '~' '$HOME' '$env:USERPROFILE' '$env:userprofile'; do
+# shellcheck disable=SC2016  # '$HOME' and the env spellings are matched literally on purpose
+for prefix in "$home" "$alt_home" "$userprofile" '~' '$HOME' '$env:USERPROFILE'; do
 	[ -n "$prefix" ] || continue
-	for path in \
-		"$prefix/.ai-tools" \
-		"$prefix/.claude/settings.json" \
-		"$prefix/.claude/settings.local.json" \
-		"$prefix/.claude/hooks"; do
-		if is_protected "$path"; then
-			case "$tool_name" in
-			Bash | PowerShell)
-				mentioned=1
-				if bash_write_intent "$path"; then
-					deny "$DENY_REASON"
-				fi
-				;;
-			*)
-				deny "$DENY_REASON"
-				;;
-			esac
-		fi
-	done
-	# File tools: cover the whole settings*.json family (snapshots such as
-	# settings.backup.json) inside the protected .claude directory.
 	case "$tool_name" in
 	Bash | PowerShell) ;;
 	*)
-		# shellcheck disable=SC2254  # quoted prefix, glob on the filename
+		# File tools: whole-value match. The plain paths must be the target
+		# itself or sit directly under it; the settings*.json family uses
+		# the same rule as the shell regex below - any snapshot directly
+		# inside .claude, but not a nested path such as
+		# .claude/settings-cache/report.json.
+		for path in "$prefix/.ai-tools" "$prefix/.claude/hooks"; do
+			case "$target" in
+			"$path" | "$path"/*) deny "$DENY_REASON" ;;
+			esac
+		done
 		case "$target" in
-		"$prefix"/.claude/settings*.json) deny "$DENY_REASON" ;;
+		"$prefix"/.claude/settings*)
+			rest=${target#"$prefix"/.claude/settings}
+			case "$rest" in
+			*/*) ;;
+			*.json) deny "$DENY_REASON" ;;
+			esac
+			;;
 		esac
 		;;
 	esac
 done
 
-# Fail closed: a shell command that mentions a managed path but is not
-# recognisably read-only is denied even when no specific write form matched.
 case "$tool_name" in
-Bash | PowerShell)
-	if [ "$mentioned" = 1 ] && ! readonly_command "$matchtext"; then
-		deny "$DENY_REASON"
-	fi
-	;;
+Bash | PowerShell) ;;
+*) exit 0 ;;
 esac
+
+# Shell commands: collect the protected paths the command names, then
+# require every segment to be recognisably read-only.
+mentions=""
+# shellcheck disable=SC2016  # '$HOME' and the env spelling are matched literally on purpose
+for prefix in "$home" "$alt_home" "$userprofile" '~' '$HOME' '$env:USERPROFILE'; do
+	[ -n "$prefix" ] || continue
+	for path in "$prefix/.ai-tools" "$prefix/.claude/hooks"; do
+		if path_mentioned "$path"; then
+			mentions+="$path"$NL
+		fi
+	done
+	if settings_mentioned "$prefix"; then
+		case "$prefix" in
+		'$env:'*) mentions+="rei:$(settings_regex "$prefix")"$NL ;;
+		*) mentions+="re:$(settings_regex "$prefix")"$NL ;;
+		esac
+	fi
+done
+
+if [ -n "$mentions" ] && classify_shell "$target" "$mentions"; then
+	deny "$DENY_REASON"
+fi
 
 exit 0

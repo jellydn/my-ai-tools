@@ -55,9 +55,18 @@ run_hook() {
 
 @test "denies Bash writers that modify, remove or copy onto managed paths" {
 	while IFS= read -r cmd; do
-		run run_hook '{"tool_name":"Bash","tool_input":{"command":"'"$cmd"' '"$FAKE_HOME"'/.ai-tools/MEMORY.md"}}'
+		run run_hook '{"tool_name":"Bash","tool_input":{"command":"'"$cmd"'"}}'
+		[ "$status" -eq 0 ]
 		echo "$output" | grep -q '"permissionDecision": "deny"'
-	done < <(printf '%s\n' 'rm' 'mv other.md' 'cp other.md' 'tee' 'touch' 'truncate -s0' 'chmod +x' 'dd of=')
+	done < <(printf '%s\n' \
+		"rm $FAKE_HOME/.ai-tools/MEMORY.md" \
+		"mv other.md $FAKE_HOME/.ai-tools/MEMORY.md" \
+		"cp other.md $FAKE_HOME/.ai-tools/MEMORY.md" \
+		"tee $FAKE_HOME/.ai-tools/MEMORY.md" \
+		"touch $FAKE_HOME/.ai-tools/MEMORY.md" \
+		"truncate -s0 $FAKE_HOME/.ai-tools/MEMORY.md" \
+		"chmod +x $FAKE_HOME/.ai-tools/MEMORY.md" \
+		"dd of=$FAKE_HOME/.ai-tools/MEMORY.md if=/dev/null")
 }
 
 @test "allows read-only inspection of managed files without the override" {
@@ -72,6 +81,7 @@ run_hook() {
 
 @test "allows piping a managed file to a write elsewhere" {
 	run run_hook '{"tool_name":"Bash","tool_input":{"command":"cat ~/.ai-tools/MEMORY.md > /tmp/copy.md"}}'
+	[ "$status" -eq 0 ]
 	[ -z "$output" ]
 }
 
@@ -141,6 +151,78 @@ python3 -c pass ~/.ai-tools/MEMORY.md" '{tool_name:"Bash",tool_input:{command:$c
 @test "denies a PowerShell-style env path into managed settings" {
 	HOME="C:/Users/reviewer" run run_hook '{"tool_name":"Bash","tool_input":{"command":"echo x > $env:USERPROFILE\\.claude\\settings.json"}}'
 	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "denies the command after the AI_TOOLS_EDIT_OK=1 segment" {
+	run run_hook '{"tool_name":"Bash","tool_input":{"command":"AI_TOOLS_EDIT_OK=1 true; rm ~/.ai-tools/MEMORY.md"}}'
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "denies a writer inside a command substitution" {
+	payload=$(jq -n --arg c 'echo "$(touch ~/.ai-tools/probe)"' '{tool_name:"Bash",tool_input:{command:$c}}')
+	run run_hook "$payload"
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "denies uniq writing onto a managed path" {
+	run run_hook '{"tool_name":"Bash","tool_input":{"command":"uniq /tmp/notes '"$FAKE_HOME"'/.ai-tools/MEMORY.md"}}'
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "denies diff --output onto a managed path" {
+	run run_hook '{"tool_name":"Bash","tool_input":{"command":"diff --output='"$FAKE_HOME"'/.ai-tools/MEMORY.md /tmp/a /tmp/b"}}'
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "denies a file-tool write through a dot-dot path" {
+	run run_hook '{"tool_name":"Write","tool_input":{"file_path":"'"$FAKE_HOME"'/project/../.ai-tools/MEMORY.md","content":"x"}}'
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "denies a shell redirect to a managed settings snapshot" {
+	run run_hook '{"tool_name":"Bash","tool_input":{"command":"echo x > '"$FAKE_HOME"'/.claude/settings.backup.json"}}'
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "allows a nested path under a settings-named directory" {
+	run run_hook '{"tool_name":"Write","tool_input":{"file_path":"'"$FAKE_HOME"'/.claude/settings-cache/report.json"}}'
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
+}
+
+@test "denies a PowerShell write with a differently cased env home" {
+	run run_hook '{"tool_name":"PowerShell","tool_input":{"command":"Set-Content $env:UserProfile/.ai-tools/MEMORY.md x"}}'
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "allows the PowerShell first-statement opt-out" {
+	HOME="C:/Users/reviewer" run run_hook '{"tool_name":"PowerShell","tool_input":{"command":"$env:AI_TOOLS_EDIT_OK = 1; Remove-Item $env:UserProfile/.ai-tools/MEMORY.md"}}'
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
+}
+
+@test "denies the PowerShell writer after the opted-out statement" {
+	HOME="C:/Users/reviewer" run run_hook '{"tool_name":"PowerShell","tool_input":{"command":"$env:AI_TOOLS_EDIT_OK = 1; Get-Content $env:UserProfile/.ai-tools/MEMORY.md; Remove-Item $env:UserProfile/.ai-tools/MEMORY.md"}}'
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
+@test "allows a quoted separator that is not a command boundary" {
+	payload=$(jq -n --arg c "grep \"a;b\" $FAKE_HOME/.ai-tools/MEMORY.md" '{tool_name:"Bash",tool_input:{command:$c}}')
+	run run_hook "$payload"
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
+}
+
+@test "allows grep with rm as an argument" {
+	run run_hook '{"tool_name":"Bash","tool_input":{"command":"grep rm ~/.ai-tools/MEMORY.md"}}'
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
+}
+
+@test "allows 2>&1 in a read-only pipeline" {
+	run run_hook '{"tool_name":"Bash","tool_input":{"command":"grep -c lesson ~/.ai-tools/MEMORY.md 2>&1 | wc -l"}}'
+	[ "$status" -eq 0 ]
+	[ -z "$output" ]
 }
 
 @test "allows writes outside the managed layer" {
