@@ -246,7 +246,7 @@ still run unless strict policy is enabled. The installer does not change npm scr
 build errors and approve only required packages if your policy requires it; do not enable all scripts globally.
 On Windows ARM64, qmd keyword indexing/search works, but sqlite-vec currently warns that vector search is unsupported.
 
-Optional Plannotator installs only the official v0.28.23 Windows release binary (x64 or ARM64), with a pinned
+Optional Plannotator installs only the official v0.29.0 Windows release binary (x64 or ARM64), with a pinned
 SHA-256 hash. It uses `%LOCALAPPDATA%\plannotator` and updates only the current Git Bash PATH. No remote
 PowerShell script, policy bypass, persistent PATH change, sidecar, skill, or agent-settings edit is used.
 The direct method avoids an upstream PowerShell `$Minimal`/`$minimal` variable collision. Failure output gives

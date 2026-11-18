@@ -168,10 +168,10 @@ install_plannotator_if_needed() {
 	if [ "${IS_WINDOWS:-false}" = true ]; then
 		# Direct binary install avoids upstream PowerShell's $Minimal/$minimal
 		# collision (PowerShell variable names are case-insensitive).
-		local version="v0.28.23" arch checksum
+		local version="v0.29.0" arch checksum
 		case "${PROCESSOR_ARCHITEW6432:-${PROCESSOR_ARCHITECTURE:-}}" in
-		ARM64) arch=arm64; checksum="c18c5c217a0acb9b4fe6d76dffd29e3e02241714b6927bb4118a2c01b62f93b7" ;;
-		AMD64) arch=x64; checksum="78c5f322bb208822782e9e2d8bb47cefb18de4fa7adaf57c4add256ee97ec740" ;;
+		ARM64) arch=arm64; checksum="bc5fca812e9479d30863b2f00704f2e05ac0921fb2b7b0bf3e54f046d99576c4" ;;
+		AMD64) arch=x64; checksum="da1366fc3aa77910a2fff4c7be69bd81169b97b766801a353d5d5ec0bc27718a" ;;
 		*)
 			log_error "Unsupported Windows architecture for Plannotator"
 			log_info "See https://github.com/backnotprop/plannotator/releases for supported Windows binaries."
