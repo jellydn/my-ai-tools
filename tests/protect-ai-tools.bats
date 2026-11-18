@@ -126,6 +126,13 @@ run_hook() {
 		'env python3 -c pass ~/.ai-tools/MEMORY.md')
 }
 
+@test "denies a writer on a later line of a multi-line command" {
+	payload=$(jq -n --arg c "cat ~/.ai-tools/MEMORY.md
+python3 -c pass ~/.ai-tools/MEMORY.md" '{tool_name:"Bash",tool_input:{command:$c}}')
+	run run_hook "$payload"
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
 @test "denies a file-tool write to a managed settings snapshot" {
 	run run_hook '{"tool_name":"Write","tool_input":{"file_path":"'"$FAKE_HOME"'/.claude/settings.backup.json"}}'
 	echo "$output" | grep -q '"permissionDecision": "deny"'

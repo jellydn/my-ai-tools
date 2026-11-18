@@ -160,11 +160,13 @@ bash_write_intent() {
 # fails closed (the caller denies). Leading environment assignments are
 # skipped, so `FOO=1 grep x <managed>` classifies as read-only.
 readonly_command() {
-	local rest="$1" seg word
+	local rest="$1" seg word nl=$'\n'
 	while [ -n "$rest" ]; do
-		seg="${rest%%[;&|]*}"
+		# A newline separates commands just like ; & | do; without it a
+		# multi-line command would be judged by its first word only.
+		seg="${rest%%[;&|"$nl"]*}"
 		rest="${rest#"$seg"}"
-		rest="${rest#[;&|]}"
+		rest="${rest#[;&|"$nl"]}"
 		seg=${seg#"${seg%%[![:space:]]*}"}
 		word=${seg%%[[:space:]]*}
 		while case $word in [A-Za-z_]*=*) true ;; *) false ;; esac do
