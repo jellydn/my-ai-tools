@@ -14,6 +14,7 @@ const SKILLS = [
 	"codemap",
 	"commit-atomic",
 	"context-discovery",
+	"cost-review",
 	"diagnosing-bugs",
 	"doc-search",
 	"docs-update",
