@@ -253,6 +253,34 @@ The direct method avoids an upstream PowerShell `$Minimal`/`$minimal` variable c
 the release URL, expected hash, and destination for manual recovery. In a separate terminal, add that directory
 and npm's global prefix to your user PATH, or use full executable paths. Unix/WSL installation paths are unchanged.
 
+#### Plannotator Inbox CLI
+
+After installation, use the `plannotator inbox` command to open and manage the local Inbox:
+
+```bash
+# Start the Inbox and open it in your browser
+plannotator inbox
+
+# Open the running Inbox and print its URL without blocking
+plannotator inbox --open
+
+# Start it in the background and print the URL without opening a browser
+plannotator inbox --background
+
+# Check whether it is running, including its URL and data directory
+plannotator inbox status
+
+# Run the stdio MCP server for an agent that has no native Inbox integration
+plannotator inbox mcp
+```
+
+The installer configures `plannotator inbox mcp` for supported MCP clients. For agents with a native
+Inbox integration, use the agent's `plannotator_inbox` tool when available. The Inbox tool is enabled for
+new sessions after the Inbox has been started once; restart the agent to load it in an existing session.
+
+Use `plannotator inbox stop` only when you want to stop the shared Inbox, because other agent sessions use
+the same process. Run `plannotator inbox --help` for the complete CLI reference.
+
 If the wrapper says all prerequisites are met but Bash then reports missing Node/npm, check that the downloaded
 `install.ps1` includes `Find-Node` and the `OpenJS.NodeJS.LTS` installation step. A stale web deployment can serve
 an older wrapper while cloning the latest Bash installer. Maintainers must check the **Dokku Deploy** workflow
