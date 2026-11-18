@@ -5,7 +5,13 @@
 			"id": "case-1",
 			"prompt": "Why did my AI spend jump this week?",
 			"should_trigger": true,
-			"expected_behavior": "Gathers local usage data, runs the six-term decomposition, attributes the change term by term with sources, and reports a residual of zero or an explicit data problem."
+			"expected_behavior": "Gathers local usage data, runs the five-term decomposition with sequential-substitution attribution, reconciles exactly to the observed change when both periods have complete comparable data, and reports the stated term order with sources."
+		},
+		{
+			"id": "case-2b",
+			"prompt": "Sessions doubled and turns per session also doubled, but your per-term percentages don't add up to the cost change.",
+			"should_trigger": true,
+			"expected_behavior": "Explains that a multiplicative model needs sequential substitution: the interaction term is attributed during the walk, so the amounts reconcile exactly; naive percentage deltas per term leave a residual."
 		},
 		{
 			"id": "case-2",
@@ -23,7 +29,7 @@
 			"id": "case-4",
 			"prompt": "We're at 85% of the weekly budget and it's Wednesday. What do I do?",
 			"should_trigger": true,
-			"expected_behavior": "Names the projection, then recommends concrete levers: cheaper tier for mechanical work, batched shell tool calls, longer cache TTL for long-lived sessions."
+			"expected_behavior": "States the projection with the elapsed-time and spending assumptions behind it, or asks for the missing information instead of inventing it, then recommends concrete, actionable levers: cheaper tier for mechanical work, batched shell tool calls; a longer cache TTL only when the harness supports that control."
 		}
 	]
 }

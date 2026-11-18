@@ -105,7 +105,13 @@ A retrospective that only looks at one session forgets on the next one. Also min
 1. Read the memory layer the session used, per `~/.ai-tools/MEMORY.md`: `qmd` collections for project learnings (`qmd search`), `agentmemory` for session findings (`memory_recall`), and `~/.ai-tools/MEMORY.md` / `agent-memory.md` themselves.
 2. Cluster the entries by theme. A theme with three or more independent entries is a pattern, not a note.
 3. For each pattern, propose the smallest durable home: a deterministic check or hook, a line in the canonical section (`configs/token-efficiency.md`, `configs/experiment-workspaces.md`), or a skill change.
-4. Deliver the proposals as patch-ready diffs against the my-ai-tools repository, one commit per theme, so they land through the repository's own PR flow and reach every machine through the installer. Run `./scripts/sync-token-efficiency.sh` after editing canonical sections, and `./scripts/sync-token-efficiency.sh --check` before pushing.
+4. Deliver each proposal where it belongs. A fix that is specific to one
+   project goes as a patch-ready diff against that project's own repository,
+   so it lands where the gap lives; only shared, cross-project changes go to
+   the my-ai-tools repository, one commit per theme, so they land through the
+   repository's PR flow and reach every machine through the installer. Run
+   `./scripts/sync-token-efficiency.sh` after editing canonical sections, and
+   `./scripts/sync-token-efficiency.sh --check` before pushing.
 
 This keeps the loop human-approved (the Output rules still apply) but gives it a destination: memory stores hold observations, the repository holds rules.
 
