@@ -1,0 +1,41 @@
+{
+	"skill": "cost-review",
+	"cases": [
+		{
+			"id": "case-1",
+			"prompt": "Why did my AI spend jump this week?",
+			"should_trigger": true,
+			"expected_behavior": "Gathers local usage data, runs the five-term decomposition with sequential-substitution attribution, reconciles exactly to the observed change when both periods have complete comparable data, and reports the stated term order with sources."
+		},
+		{
+			"id": "case-2b",
+			"prompt": "Sessions doubled and turns per session also doubled, but your per-term percentages don't add up to the cost change.",
+			"should_trigger": true,
+			"expected_behavior": "Explains that a multiplicative model needs sequential substitution: the interaction term is attributed during the walk, so the amounts reconcile exactly; naive percentage deltas per term leave a residual."
+		},
+		{
+			"id": "case-2",
+			"prompt": "How much are we spending on AI tools, and is it worth it?",
+			"should_trigger": true,
+			"expected_behavior": "Reports spend per harness with sources, and cost per unit of work (session, task, or PR) paired with a quality signal where data exists."
+		},
+		{
+			"id": "case-3",
+			"prompt": "Refactor the auth module to use the new session helper.",
+			"should_trigger": false,
+			"expected_behavior": "This is an implementation request, not a cost question."
+		},
+		{
+			"id": "case-4",
+			"prompt": "We're at 85% of the weekly budget and it's Wednesday. What do I do?",
+			"should_trigger": true,
+			"expected_behavior": "States the projection with the elapsed-time and spending assumptions behind it, or asks for the missing information instead of inventing it, then recommends concrete, actionable levers: cheaper tier for mechanical work, batched shell tool calls; a longer cache TTL only when the harness supports that control."
+		},
+		{
+			"id": "case-5",
+			"prompt": "We're at 60% of the weekly budget, but one harness's usage report is unavailable.",
+			"should_trigger": true,
+			"expected_behavior": "Treats the observed spend as a lower bound because one harness is unknown: reports the per-harness breakdown with the unknown harness listed, states the coverage gap, does not pick a nudge band or publish a projection from incomplete spend, and still recommends the applicable levers."
+		}
+	]
+}
