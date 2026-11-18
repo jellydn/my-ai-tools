@@ -85,6 +85,11 @@ run_hook() {
 	echo "$output" | grep -q '"permissionDecision": "deny"'
 }
 
+@test "denies a native Windows write path against an MSYS HOME" {
+	HOME="/c/Users/reviewer" run run_hook '{"tool_name":"Write","tool_input":{"file_path":"C:\\\\Users\\\\reviewer\\\\.ai-tools\\\\MEMORY.md","content":"x"}}'
+	echo "$output" | grep -q '"permissionDecision": "deny"'
+}
+
 @test "denies a Windows backslash Bash redirect into managed hooks" {
 	HOME="C:/Users/reviewer" run run_hook '{"tool_name":"Bash","tool_input":{"command":"echo x > C:\\\\Users\\\\reviewer\\\\.claude\\\\hooks\\\\guard.ts"}}'
 	echo "$output" | grep -q '"permissionDecision": "deny"'

@@ -89,7 +89,10 @@ case "$home" in
 /[A-Za-z]/*)
 	drive=${home#/}
 	drive=${drive%%/*}
-	alt_home="$(printf '%s' "$drive" | tr '[:lower:]' '[:upper:]'):/${home#?/}"
+	# Strip the leading /<drive>/ — '${home#?/}' matches nothing here,
+	# because its first pattern char would have to be the leading slash
+	# followed by another slash, which an MSYS home never has.
+	alt_home="$(printf '%s' "$drive" | tr '[:lower:]' '[:upper:]'):/${home#/[A-Za-z]/}"
 	;;
 esac
 
