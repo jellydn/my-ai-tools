@@ -432,16 +432,18 @@ conventions.
 
 ### Update shared agent guidelines
 
-Edit [`configs/token-efficiency.md`](configs/token-efficiency.md) or
-[`configs/experiment-workspaces.md`](configs/experiment-workspaces.md), then run:
+Edit [`configs/token-efficiency.md`](configs/token-efficiency.md),
+[`configs/experiment-workspaces.md`](configs/experiment-workspaces.md), or
+[`configs/test-writing-guidance.md`](configs/test-writing-guidance.md), then run:
 
 ```bash
 ./scripts/sync-token-efficiency.sh
 ./scripts/sync-token-efficiency.sh --check
 ```
 
-The script syncs both sections across the managed profiles. Experiment Workspaces also covers the Claude Code
-profile and the root `AGENTS.md` and `GEMINI.md`. Do not edit these generated sections in individual profiles;
+The script syncs these sections across the managed profiles. Experiment Workspaces also covers the Claude Code
+profile and the root `AGENTS.md` and `GEMINI.md`; Test-writing guidance also covers the Claude Code profile and
+the root `AGENTS.md`. Do not edit these generated sections in individual profiles;
 the CI check rejects drift from the canonical files. The workspace guideline uses `try` when available, but
 the installer does not install it. It requires shell integration; fresh experiments use an interactive selector,
 with fallbacks for agent shells without a terminal. `generate.sh` restores the canonical sections after export,

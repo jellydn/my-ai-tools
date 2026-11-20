@@ -4,6 +4,8 @@
 #     configs/**/AGENTS.md and configs/**/GEMINI.md
 #   - "## Experiment Workspaces" from configs/experiment-workspaces.md in those
 #     profiles, configs/claude/CLAUDE.md, and the repository AGENTS.md/GEMINI.md
+#   - "## Test-writing guidance" from configs/test-writing-guidance.md in those
+#     profiles, configs/claude/CLAUDE.md, and the repository AGENTS.md
 #
 # These profiles are deliberately standalone — eager `@file.md` imports cost
 # tokens in every session — so the sections are duplicated on purpose and
@@ -73,6 +75,8 @@ while IFS= read -r profile; do profiles+=("$profile"); done < <(managed_profiles
 sync_section configs/token-efficiency.md "## Token Efficiency" "${profiles[@]}"
 sync_section configs/experiment-workspaces.md "## Experiment Workspaces" "${profiles[@]}" \
 	"$REPO_ROOT/configs/claude/CLAUDE.md" "$REPO_ROOT/AGENTS.md" "$REPO_ROOT/GEMINI.md"
+sync_section configs/test-writing-guidance.md "## Test-writing guidance" "${profiles[@]}" \
+	"$REPO_ROOT/configs/claude/CLAUDE.md" "$REPO_ROOT/AGENTS.md"
 
 if [ ${#stale[@]} -eq 0 ]; then
 	echo "Shared sections are in sync across managed profiles"

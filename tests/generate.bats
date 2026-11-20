@@ -332,7 +332,8 @@ teardown() {
 @test "export restores canonical guidance from older home profiles without changing dry-run output files" {
     mkdir -p "$SCRIPT_DIR/scripts" "$SCRIPT_DIR/configs/claude" "$SCRIPT_DIR/configs/deepseek-harness" "$HOME/.dsh"
     cp "$REPO_ROOT/scripts/sync-token-efficiency.sh" "$SCRIPT_DIR/scripts/"
-    cp "$REPO_ROOT/configs/token-efficiency.md" "$REPO_ROOT/configs/experiment-workspaces.md" "$SCRIPT_DIR/configs/"
+    cp "$REPO_ROOT/configs/token-efficiency.md" "$REPO_ROOT/configs/experiment-workspaces.md" \
+        "$REPO_ROOT/configs/test-writing-guidance.md" "$SCRIPT_DIR/configs/"
     printf '# Repository\n' > "$SCRIPT_DIR/AGENTS.md"
     printf '# Gemini\n' > "$SCRIPT_DIR/GEMINI.md"
     printf '# Claude\n' > "$SCRIPT_DIR/configs/claude/CLAUDE.md"
@@ -353,6 +354,7 @@ teardown() {
     grep -q '^Keep this custom rule\.$' "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
     grep -q '^## Experiment Workspaces$' "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
     grep -q '^## Token Efficiency$' "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
+    grep -q '^## Test-writing guidance$' "$SCRIPT_DIR/configs/deepseek-harness/AGENTS.md"
     run bash "$SCRIPT_DIR/scripts/sync-token-efficiency.sh" --check
     [ "$status" -eq 0 ]
 }

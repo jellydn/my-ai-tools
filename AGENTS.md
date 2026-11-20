@@ -50,10 +50,6 @@ Never run `./cli.sh` without `--dry-run` first. Config validation runs automatic
 - `pre-commit run --all-files` runs: trailing-whitespace, end-of-file-fixer, check-yaml, check-added-large-files, oxfmt.
 - `lib/` modules must stay **under 1000 lines** — `tests/pr_install_deps.bats` enforces it.
 
-### Test-writing guidance
-
-- Do not write tests for functions or code with cognitive complexity less than or equal to 5, unless they contain regular expressions. Measure it with [`github.com/moznion/cccc`](https://github.com/moznion/cccc) in the languages it supports. cccc does not analyze shell or Bats; for that code, estimate it by hand (+1 for each `if`, `case`, loop, and `&&`/`||` sequence, plus 1 for each nesting level), and write the test when unsure.
-
 ### macOS host: run bats via microsandbox
 
 macOS `getcwd`/directory issues can break `bats` on the host. Use a read-only sandbox:
@@ -64,6 +60,10 @@ msb run -m 512M -v "$(pwd):/project:ro" ubuntu -- \
 ```
 
 On the cloud VM `bats` is preinstalled — run `bats tests/` directly.
+
+## Test-writing guidance
+
+- Do not write tests for functions or code with cognitive complexity less than or equal to 5, unless they contain regular expressions. Measure it with [`github.com/moznion/cccc`](https://github.com/moznion/cccc) in the languages it supports. cccc does not analyze shell or Bats; for that code, estimate it by hand (+1 for each `if`, `case`, loop, and `&&`/`||` sequence, plus 1 for each nesting level), and write the test when unsure.
 
 ## Shell Script Conventions (enforced in cli.sh, generate.sh, lib/)
 
@@ -90,7 +90,7 @@ On the cloud VM `bats` is preinstalled — run `bats tests/` directly.
 - MCP servers come from the central registry `configs/mcp-registry.json`. Prefer it over the legacy fallback.
 - Configs are validated with `jq` before install; failures warn but don't block (unless you decline the prompt).
 - `safe_copy_dir()` (lib/common.sh) auto-excludes `node_modules`, `cache`, `*.sqlite`, etc.
-- The `## Token Efficiency` section in `configs/**/AGENTS.md` and `configs/**/GEMINI.md` is generated from `configs/token-efficiency.md`, and the `## Experiment Workspaces` section in those profiles, `configs/claude/CLAUDE.md`, and the root `AGENTS.md`/`GEMINI.md` is generated from `configs/experiment-workspaces.md`. Edit the canonical file and run `./scripts/sync-token-efficiency.sh` — the profiles stay standalone on purpose, since eager `@file.md` imports cost tokens every session.
+- The `## Token Efficiency` section in `configs/**/AGENTS.md` and `configs/**/GEMINI.md` is generated from `configs/token-efficiency.md`, and the `## Experiment Workspaces` section in those profiles, `configs/claude/CLAUDE.md`, and the root `AGENTS.md`/`GEMINI.md` is generated from `configs/experiment-workspaces.md`. The `## Test-writing guidance` section in those profiles, `configs/claude/CLAUDE.md`, and the root `AGENTS.md` is generated from `configs/test-writing-guidance.md`. Edit the canonical file and run `./scripts/sync-token-efficiency.sh` — the profiles stay standalone on purpose, since eager `@file.md` imports cost tokens every session.
 - Backups go to `$HOME/ai-tools-backup-{timestamp}`; last 5 are kept.
 - Gemini CLI is deprecated for Google One/unpaid tiers (June 18, 2026 cutoff). Migrate to Antigravity CLI.
 

@@ -60,3 +60,7 @@ ALWAYS prefer MCP graph tools over grep/glob/file-search for code discovery.
 - Worktrees and fresh experiments use date-prefixed names under `$TRY_PATH` (default: `~/src/tries`). A clone with a custom name uses that name without a date prefix; an unnamed clone uses `YYYY-MM-DD-<user>-<repo>`. Use the printed path in later commands; directory changes apply only to the invoking shell.
 - `try .` worktrees and `try clone` of a pull request URL start on a detached HEAD. Run `git switch -c <branch>` in the experiment directory before you commit.
 - Keep experiments under the tries directory instead of ad hoc `/tmp` folders. When `try` is unavailable or unsuitable, use `git worktree add -b <branch> <path>` for a repository with a commit, `git clone <url> <path>` for an external repository, or `mkdir` for a fresh experiment.
+
+## Test-writing guidance
+
+- Do not write tests for functions or code with cognitive complexity less than or equal to 5, unless they contain regular expressions. Measure it with [`github.com/moznion/cccc`](https://github.com/moznion/cccc) in the languages it supports. cccc does not analyze shell or Bats; for that code, estimate it by hand (+1 for each `if`, `case`, loop, and `&&`/`||` sequence, plus 1 for each nesting level), and write the test when unsure.
