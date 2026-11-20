@@ -50,6 +50,10 @@ Never run `./cli.sh` without `--dry-run` first. Config validation runs automatic
 - `pre-commit run --all-files` runs: trailing-whitespace, end-of-file-fixer, check-yaml, check-added-large-files, oxfmt.
 - `lib/` modules must stay **under 1000 lines** — `tests/pr_install_deps.bats` enforces it.
 
+### Test-writing guidance
+
+- Do not write tests for functions or code with cccc cognitive complexity less than or equal to 5, unless they contain regular expressions. Use [`github.com/moznion/cccc`](https://github.com/moznion/cccc) to measure cognitive complexity when deciding whether this rule applies.
+
 ### macOS host: run bats via microsandbox
 
 macOS `getcwd`/directory issues can break `bats` on the host. Use a read-only sandbox:
