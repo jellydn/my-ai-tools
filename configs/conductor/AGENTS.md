@@ -1,5 +1,9 @@
 # 🤖 Conductor Agent Guidelines
 
+## Test-writing guidance
+
+- Do not write tests for functions or code with cccc cognitive complexity less than or equal to 5, unless they contain regular expressions. Use [`github.com/moznion/cccc`](https://github.com/moznion/cccc) to measure cognitive complexity.
+
 ## Communication
 
 Use ASD-STE100 Simplified Technical English. Read a relevant `CONTEXT.md` when it governs terms or behavior you change.

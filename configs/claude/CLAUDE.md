@@ -1,5 +1,9 @@
 # Claude Code Guidelines
 
+## Test-writing guidance
+
+- Do not write tests for functions or code with cccc cognitive complexity less than or equal to 5, unless they contain regular expressions. Use [`github.com/moznion/cccc`](https://github.com/moznion/cccc) to measure cognitive complexity.
+
 Use judgment. These instructions define outcomes, not a mandatory workflow.
 
 ## Task Completion
