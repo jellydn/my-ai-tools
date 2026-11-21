@@ -608,6 +608,11 @@ install_pi() {
 		return 1
 	fi
 }
+install_pine() {
+	install_npm_tool "PINE" "pine" "@pmndre/pine" \
+		"npm install -g @pmndre/pine"
+}
+
 install_omp() {
 	install_npm_tool "Oh My Pi" "omp" "@oh-my-pi/pi-coding-agent" \
 		"npm install -g @oh-my-pi/pi-coding-agent"

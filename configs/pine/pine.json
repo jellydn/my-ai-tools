@@ -1,0 +1,80 @@
+{
+	"main": "main",
+	"defaults": {
+		"model": "dev/claude-haiku",
+		"thinking": "off"
+	},
+	"limits": {
+		"maxConcurrentRuns": 2
+	},
+	"mcp": {
+		"web": {
+			"pine": "web",
+			"description": "Search the web and read pages",
+			"options": { "braveApiKey": "${BRAVE_API_KEY:-}" }
+		},
+		"browser": {
+			"pine": "browser",
+			"description": "A real browser for pages that need JavaScript, clicks or forms",
+			"options": { "headed": false }
+		},
+		"computer": {
+			"pine": "computer",
+			"description": "Operate apps on macOS"
+		},
+		"context7": {
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@latest"],
+			"description": "Documentation lookup for libraries and frameworks"
+		},
+		"sequential-thinking": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+			"description": "Multi-step reasoning and problem solving"
+		},
+		"qmd": {
+			"command": "qmd",
+			"args": ["mcp"],
+			"description": "Knowledge management with qmd"
+		},
+		"codebase-memory-mcp": {
+			"command": "codebase-memory-mcp",
+			"args": [],
+			"description": "Code intelligence and structural search for large codebases"
+		},
+		"fff": {
+			"command": "fff-mcp",
+			"args": [],
+			"description": "Fast file search with frecency ranking"
+		},
+		"react-grab-mcp": {
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"],
+			"description": "React component capture and inspection"
+		},
+		"logpilot": {
+			"command": "logpilot",
+			"args": ["mcp-server"],
+			"description": "AI-powered log analysis and tmux session monitoring"
+		},
+		"agentmemory": {
+			"command": "npx",
+			"args": ["-y", "@agentmemory/mcp"],
+			"description": "Persistent memory for AI coding agents"
+		},
+		"sem": {
+			"command": "sem-mcp",
+			"args": [],
+			"description": "Semantic version control and impact analysis"
+		},
+		"ctx": {
+			"command": "ctx",
+			"args": ["mcp", "serve"],
+			"description": "Local agent-history search across coding sessions"
+		}
+	},
+	"skills": ["~/.agents/skills"],
+	"sources": {},
+	"routes": [],
+	"schedules": []
+}

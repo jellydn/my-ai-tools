@@ -343,7 +343,7 @@ The repository currently contains configuration or integration support for:
 
 | Category | Tools |
 | --- | --- |
-| Primary assistants | Claude Code, OpenCode, Amp, Codex, Cursor, Pi, Oh My Pi, Antigravity, Kilo, Kimi Code, Muse Code |
+| Primary assistants | Claude Code, OpenCode, Amp, Codex, Cursor, Pi, Oh My Pi, Antigravity, Kilo, Kimi Code, Muse Code, PINE |
 | Additional CLIs | CommandCode, GitHub Copilot CLI, Gemini CLI, Grok CLI, MiMo-Code, Qoder CLI, DeepSeek Harness, Kiro CLI, Devin CLI, Factory Droid, Cline, Reasonix |
 | Workflow and desktop tools | Conductor, Delta, Codiff, OpenMausBot, Hunk, ctx, herdr, Orca, AI Launcher, CCS, fx, Open Code Review, ghui |
 
@@ -369,6 +369,10 @@ The installer manages these common resources where the target tool supports them
 
 The MCP registry includes integrations such as Context7, sequential thinking, qmd, codebase memory, agent memory,
 fff, React Grab, logpilot, sem, and ctx. Installation depends on each server's runtime and credentials.
+
+PINE uses its native `~/.pine` home. When PINE is installed, the setup script backs up that home and merges the shared
+MCP registry, universal `~/.agents/skills`, and global guidance into PINE's own configuration without replacing user
+settings.
 
 For explicit cross-project user preferences, [user-memory MCP](packages/user-memory-mcp/README.md) provides
 five preference tools backed by local files. It is **optional**: the installer does not install or configure it.

@@ -8,7 +8,7 @@ workflow.
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, fx, Muse Code, Amp, CCS, Devin, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, DeepSeek Harness, Kiro CLI, Delta, Hunk, Codiff, ctx, Open Code Review, Reasonix, and more
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, fx, Muse Code, Amp, CCS, Devin, PINE, Kimi Code, Gemini, Antigravity, Grok, MiMo-Code, Qoder CLI, DeepSeek Harness, Kiro CLI, Delta, Hunk, Codiff, ctx, Open Code Review, Reasonix, and more
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd, codebase-memory-mcp, agentmemory, sem, ctx
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -3388,6 +3388,41 @@ devin -- "check out this code and suggest a feasible, helpful feature"
 Run `./cli.sh` to install [`configs/devin/config.json`](configs/devin/config.json), shared agent guidance, and MCP
 server settings under `~/.config/devin/`. See the [Devin documentation](https://docs.devin.ai) for authentication and
 usage details.
+
+---
+
+## 🌲 PINE (Optional)
+
+[PINE](https://github.com/pmndre/pine) is an event-driven, multi-agent coding harness with a terminal UI, built-in
+coding tools, web browsing, MCP and skills support, schedules, and agent delegation. The latest upstream release is
+**v0.39.0**. It runs on macOS and Linux and requires Node.js 24 or newer.
+
+### Installation
+
+Install the official npm package:
+
+```bash
+npm install -g @pmndre/pine
+pine init
+pine check
+```
+
+To include PINE in a non-interactive my-ai-tools setup, use `./cli.sh --yes --with-tools=pine`. PINE is not installed by default.
+
+Start PINE in the current project directory:
+
+```bash
+pine .
+```
+
+When PINE is installed, the setup script also backs up `~/.pine` and configures its native home with the shared
+`~/.agents/skills` directory, the repository's global agent guidance, and the same MCP server set used by the other
+coding agents. Existing `pine.json` and `agents/main/agent.json` values are preserved and merged; managed values get a
+`.bak` copy before replacement. The PINE CLI remains the owner of its configuration and data under `~/.pine`.
+
+Use `pine start` to run the daemon without the terminal UI so agents can continue reacting to events. See the
+[PINE README](https://github.com/pmndre/pine) and [documentation index](https://github.com/pmndre/pine/blob/next/docs/SKILL.md)
+for event sources, models, security, Docker, and service setup.
 
 ---
 
