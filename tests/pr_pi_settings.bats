@@ -11,18 +11,18 @@ PI_SETTINGS="$REPO_ROOT/configs/pi/settings.json"
     [ "$status" -eq 0 ]
 }
 
-@test "configs/pi/settings.json defaultModel is ~deepseek/deepseek-v4-flash-latest" {
+@test "configs/pi/settings.json defaultModel is deepseek-v4.1-flash" {
     require_jq
     run jq -r '.defaultModel' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "~deepseek/deepseek-v4-flash-latest" ]
+    [ "$output" = "deepseek-v4.1-flash" ]
 }
 
-@test "configs/pi/settings.json defaultProvider is openrouter" {
+@test "configs/pi/settings.json defaultProvider is opencode-go" {
     require_jq
     run jq -r '.defaultProvider' "$PI_SETTINGS"
     [ "$status" -eq 0 ]
-    [ "$output" = "openrouter" ]
+    [ "$output" = "opencode-go" ]
 }
 
 @test "configs/pi/settings.json enables OmniRoute paid/free/premium models" {

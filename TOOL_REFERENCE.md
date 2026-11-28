@@ -1864,12 +1864,12 @@ Located in [`configs/pi/`](configs/pi/):
 - [`settings.json`](configs/pi/settings.json) - Global settings with package registrations
 - [`models.json`](configs/pi/models.json) - Provider and model definitions (google-antigravity, ollama)
 
-The installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `openrouter` as the default provider with `~deepseek/deepseek-v4-flash-latest` as the default model (OmniRoute `paid`/`free`/`premium` remain available in `enabledModels`). You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
+The installer copies the repo-managed files `configs/pi/settings.json` and `configs/pi/models.json` to `~/.pi/agent/settings.json` and `~/.pi/agent/models.json` respectively. The default settings configure `opencode-go` as the default provider with `deepseek-v4.1-flash` as the default model (OmniRoute `paid`/`free`/`premium` remain available in `enabledModels`). You can inspect or edit them at `~/.pi/agent/settings.json` after installation.
 
 **Key Settings:**
 
-- **Default Model**: `~deepseek/deepseek-v4-flash-latest`
-- **Default Provider**: `openrouter`
+- **Default Model**: `deepseek-v4.1-flash`
+- **Default Provider**: `opencode-go`
 - **Default Thinking Level**: `high`
 - **Theme**: `cobalt` (custom theme in `~/.pi/agent/themes/`)
 - **Permission Level**: `high`
@@ -1957,11 +1957,12 @@ Pi is configured with multi-provider model access (`settings.json` `enabledModel
 
 | Provider           | Models                                                                                                                                             |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| commandcode        | `deepseek/deepseek-v4.1-flash` (default), `meta/muse-spark-1.3-contributor`                                                                       |
+| commandcode        | `deepseek/deepseek-v4.1-flash`, `meta/muse-spark-1.3-contributor`                                                                                 |
 | cursor             | `auto`, `composer-2-5`, `grok-4.5`                                                                                                                 |
 | openai-codex       | `gpt-5.4-mini`, `gpt-5.5`, `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra`                                                                          |
 | google-antigravity | `gemini-3.5-flash`, `gemini-3-pro`, `claude-opus-4-6`                                                                                              |
 | omniroute          | `paid`, `free`, `premium`                                                                                                                         |
+| opencode-go        | `hy4-flash-free`, `beam-free`, `hy4-preview`, `glm-5.3-flash`, `deepseek-v4.1-flash` (default), `muse-spark-1.3-contributor`                      |
 | openrouter         | `openrouter/free`, `deepseek/deepseek-v4-flash-0731`, `~deepseek/deepseek-v4-flash-latest`                                                      |
 | xai                | `grok-4.6`, `grok-4.5`                                                                                                                             |
 
