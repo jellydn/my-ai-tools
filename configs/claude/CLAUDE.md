@@ -32,7 +32,7 @@ Use judgment. These instructions define outcomes, not a mandatory workflow.
 
 For familiar, focused work, proceed with existing patterns. For unfamiliar or complex work:
 
-1. Identify unknowns with `/blindspots` or the `blindspot-pass` skill.
+1. Identify unknowns with the `blindspot-pass` skill (`/blindspot-pass`).
 2. Use `context-discovery`, graph, git history, and documentation tools only as the task requires.
 3. Use `/interview-me` when an unanswered question would materially change the solution.
 4. Propose phased plans only for large or risky changes.
@@ -41,7 +41,7 @@ Apply reasoning to new situations (context over constraints).
 
 ## Tools for Discovery
 
-- `/blindspots [task]` - Find unknown unknowns before starting
+- `/blindspot-pass [task]` - Find unknown unknowns before starting
 - `/interview-me [feature]` - Clarify spec gaps with targeted questions
 - `/map-from [reference]` - Learn from example code
 - Context discovery (`context-discovery` skill) - Proactive MCP tool usage

@@ -89,7 +89,7 @@ Use HTML/CSS to visualize decision processes:
   <div class="branch">
     <div class="node">Familiar code?</div>
     <div class="yes">→ Standard pattern</div>
-    <div class="no">→ /blindspots first</div>
+    <div class="no">→ /blindspot-pass first</div>
   </div>
 </div>
 <style>

@@ -144,6 +144,6 @@ git diff HEAD --name-only  # Unstaged changes
 
 ## Integration with Other Skills
 
-- Use before `/blindspots` to gather initial context
+- Use before `/blindspot-pass` to gather initial context
 - Use during `context-discovery` for deep git history analysis
 - Log surprising git history findings in `implementation-logger`

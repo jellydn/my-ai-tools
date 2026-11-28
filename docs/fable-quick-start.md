@@ -19,7 +19,7 @@ Give it code execution → It writes a script and solves it instantly.
 ### 1. Before Coding: Find Unknowns
 
 ```
-/blindspots Add webhook support for integrations
+/blindspot-pass Add webhook support for integrations
 ```
 
 Agent will:
@@ -124,7 +124,7 @@ Why? Second version explains **why**, enabling judgment in new situations.
 ### 2. Tools Over Instructions
 
 **Bad** ❌: "Here are 10 steps to implement auth"
-**Good** ✅: "Here's the auth pattern. Run /blindspots to find gotchas, then /interview-me for requirements"
+**Good** ✅: "Here's the auth pattern. Run /blindspot-pass to find gotchas, then /interview-me for requirements"
 
 Give capabilities, not recipes.
 
@@ -146,13 +146,13 @@ Example: "Make this deck professional, animated, content-rich, done in 1 hour" i
 
 ## When to Use Each Tool
 
-### `/blindspots` - Always Use For:
+### `/blindspot-pass` - Always Use For:
 - Unfamiliar codebases
 - Critical infrastructure
 - Complex integrations
 - High-stakes features
 
-### `/blindspots` - Skip For:
+### `/blindspot-pass` - Skip For:
 - Trivial changes
 - Docs updates
 - Well-known patterns
@@ -209,7 +209,7 @@ Agent: "Turns out we need idempotency keys..."
 
 **With Discovery**:
 ```
-User: /blindspots Add Stripe payment integration
+User: /blindspot-pass Add Stripe payment integration
 
 Agent:
 - Found existing PayPal integration (better pattern)
@@ -256,7 +256,7 @@ Skills are referenced by agents automatically:
 
 ## Quick Tips
 
-1. **Start with /blindspots**: Especially on unfamiliar code
+1. **Start with /blindspot-pass**: Especially on unfamiliar code
 2. **Log as you go**: Don't wait until end to record decisions
 3. **Quiz yourself**: Verify understanding before PR
 4. **Extract learnings**: Use `~/.ai-tools/implementation-notes.md` and `~/.ai-tools/MEMORY.md` to route learnings to the right store
@@ -268,7 +268,7 @@ Skills are referenced by agents automatically:
 "I know what needs to be done, let's just code"
 → Hits unknowns mid-implementation, rewrites
 
-**Fix**: 5 minutes of /blindspots saves hours
+**Fix**: 5 minutes of /blindspot-pass saves hours
 
 ### Mistake 2: Over-Prompting
 "Here are 50 examples of how to..."
@@ -314,7 +314,7 @@ Try this on your next task:
 
 1. **Describe task**: "Add [feature] to [module]"
 
-2. **Run**: `/blindspots Add [feature] to [module]`
+2. **Run**: `/blindspot-pass Add [feature] to [module]`
    - Read the findings
    - Note the questions
 

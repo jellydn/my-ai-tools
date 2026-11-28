@@ -15,7 +15,7 @@ Based on Thariq Shihipar's "Field Guide to Fable" talk (AI Engineer 2026), adds 
 - `.planning/fable-improvements.md` - Implementation roadmap
 
 **New Commands** (Claude):
-- `/blindspots [task]` - Run blind spot analysis
+- `/blindspot-pass [task]` - Run blind spot analysis
 - `/interview-me [feature]` - Generate spec clarification questions
 
 **Updated Files**:

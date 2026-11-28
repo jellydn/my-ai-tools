@@ -119,7 +119,7 @@ Where to look depends on what you need:
 
 ## Integration with Other Skills
 
-- Use after `/blindspots` to investigate surfaced unknowns
+- Use after `/blindspot-pass` to investigate surfaced unknowns
 - Use before `implementation-logger` to establish baseline understanding
 - Results from context discovery feed into implementation decisions
 - Document surprising finds in implementation log

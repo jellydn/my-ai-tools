@@ -32,7 +32,7 @@ Give it code execution → It writes a script and solves it instantly.</p>
 <p><strong>This is capability overhang</strong>: Tools unlock latent intelligence.</p>
 <h2>Your New Workflow</h2>
 <h3>1. Before Coding: Find Unknowns</h3>
-<pre><code>/blindspots Add webhook support for integrations
+<pre><code>/blindspot-pass Add webhook support for integrations
 </code></pre>
 <p>Agent will:</p>
 <ul>
@@ -113,7 +113,7 @@ Running tests before commits prevents broken builds; our CI enforces this.
 <p>Why? Second version explains <strong>why</strong>, enabling judgment in new situations.</p>
 <h3>2. Tools Over Instructions</h3>
 <p><strong>Bad</strong> ❌: &quot;Here are 10 steps to implement auth&quot;
-<strong>Good</strong> ✅: &quot;Here&#39;s the auth pattern. Run /blindspots to find gotchas, then /interview-me for requirements&quot;</p>
+<strong>Good</strong> ✅: &quot;Here&#39;s the auth pattern. Run /blindspot-pass to find gotchas, then /interview-me for requirements&quot;</p>
 <p>Give capabilities, not recipes.</p>
 <h3>3. Examples Constrain</h3>
 <p>Advanced models are <strong>more imaginative than examples</strong>. Too many examples create a ceiling.</p>
@@ -125,14 +125,14 @@ Running tests before commits prevents broken builds; our CI enforces this.
 <p>Don&#39;t make tradeoffs in your head. Force reality to show you the constraint.</p>
 <p>Example: &quot;Make this deck professional, animated, content-rich, done in 1 hour&quot; is now reasonable.</p>
 <h2>When to Use Each Tool</h2>
-<h3><code>/blindspots</code> - Always Use For:</h3>
+<h3><code>/blindspot-pass</code> - Always Use For:</h3>
 <ul>
 <li>Unfamiliar codebases</li>
 <li>Critical infrastructure</li>
 <li>Complex integrations</li>
 <li>High-stakes features</li>
 </ul>
-<h3><code>/blindspots</code> - Skip For:</h3>
+<h3><code>/blindspot-pass</code> - Skip For:</h3>
 <ul>
 <li>Trivial changes</li>
 <li>Docs updates</li>
@@ -190,7 +190,7 @@ Agent: &quot;Turns out we need idempotency keys...&quot;
 </code></pre>
 <p><strong>Total</strong>: 6+ hours, multiple false starts</p>
 <p><strong>With Discovery</strong>:</p>
-<pre><code>User: /blindspots Add Stripe payment integration
+<pre><code>User: /blindspot-pass Add Stripe payment integration
 
 Agent:
 - Found existing PayPal integration (better pattern)
@@ -232,7 +232,7 @@ git pull
 </ul>
 <h2>Quick Tips</h2>
 <ol>
-<li><strong>Start with /blindspots</strong>: Especially on unfamiliar code</li>
+<li><strong>Start with /blindspot-pass</strong>: Especially on unfamiliar code</li>
 <li><strong>Log as you go</strong>: Don&#39;t wait until end to record decisions</li>
 <li><strong>Quiz yourself</strong>: Verify understanding before PR</li>
 <li><strong>Extract learnings</strong>: Use <code>~/.ai-tools/implementation-notes.md</code> and <code>~/.ai-tools/MEMORY.md</code> to route learnings to the right store</li>
@@ -242,7 +242,7 @@ git pull
 <h3>Mistake 1: Skipping Discovery</h3>
 <p>&quot;I know what needs to be done, let&#39;s just code&quot;
 → Hits unknowns mid-implementation, rewrites</p>
-<p><strong>Fix</strong>: 5 minutes of /blindspots saves hours</p>
+<p><strong>Fix</strong>: 5 minutes of /blindspot-pass saves hours</p>
 <h3>Mistake 2: Over-Prompting</h3>
 <p>&quot;Here are 50 examples of how to...&quot;
 → Constrains agent&#39;s creativity</p>
@@ -278,7 +278,7 @@ git pull
 <ol>
 <li><p><strong>Describe task</strong>: &quot;Add [feature] to [module]&quot;</p>
 </li>
-<li><p><strong>Run</strong>: <code>/blindspots Add [feature] to [module]</code></p>
+<li><p><strong>Run</strong>: <code>/blindspot-pass Add [feature] to [module]</code></p>
 <ul>
 <li>Read the findings</li>
 <li>Note the questions</li>

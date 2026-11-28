@@ -39,5 +39,5 @@ The agent will:
 
 ## See Also
 
-- `/blindspots` - Identify unknown unknowns before starting
+- `/blindspot-pass` - Identify unknown unknowns before starting
 - Skill documentation: `skills/spec-interview/SKILL.md`
